@@ -2284,14 +2284,14 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
   enum GlobalSymbol map_do = kMapDo;
   if (Predicate(ctx, kMapP, value)) {
     // Fast path for an existing map of the right type.
-    struct MapArg src = ExtractMap(ctx, value);
-    if (src.type == NULL) return NULL;
-    if (src.type == field) {
+    struct MapArg map = ExtractMap(ctx, value);
+    if (map.type == NULL) return NULL;
+    if (map.type == field) {
       // The map in ‘value’ might live in another arena, so we must fuse the
       // arenas here.
-      if (!FuseArenas(ctx, arena, src.arena.ptr)) return NULL;
+      if (!FuseArenas(ctx, arena, map.arena.ptr)) return NULL;
       // The types are the same, so we can reuse the value as is.
-      return src.value;
+      return map.value;
     }
     // The types are not the same, so we have to convert the entries.  We could
     // special-case this here, but the generic code below works just fine for
