@@ -26,6 +26,7 @@ The `depset` uses preorder traversal: entries for libraries closer to the root o
 The `depset` elements are structures with the following fields:
 
 - `for_actions` is a string specifying the load directory to use for actions, relative to the execution root.
+
 - `for_runfiles` is a string specifying the load directory to use at runtime, relative to the runfiles root.
 
 This mechanism is currently incompatible with manifest-based runfiles.""",
