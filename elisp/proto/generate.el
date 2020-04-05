@@ -1,4 +1,4 @@
-;;; write-proto.el --- aaa                           -*- lexical-binding: t; -*-
+;;; generate.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
 
 ;; Copyright 2021, 2022 Google LLC
 ;;
