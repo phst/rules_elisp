@@ -365,7 +365,7 @@ If FILENAME doesn’t start with \"/bazel-runfile:\", return it
 unchanged."
   (pcase-exhaustive filename
     ((and (pred stringp) (rx bos "/bazel-runfile:" (let name (* anything)) eos))
-     (elisp/runfiles/rlocation nil name))
+     (elisp/runfiles/rlocation name))
     (other other)))
 
 
