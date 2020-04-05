@@ -103,6 +103,81 @@ def _elisp_library_impl(ctx):
         ),
     ]
 
+def _elisp_proto_aspect_impl(target, ctx):
+    info = target[ProtoInfo]
+    deps = depset(transitive = [
+        depset(dep[EmacsLispInfo].source_files)
+        for dep in ctx.rule.attr.deps
+    ])
+    src = ctx.actions.declare_file(ctx.label.name + ".el")
+    ctx.actions.run(
+        outputs = [src],
+        inputs = [info.direct_descriptor_set],
+        executable = ctx.executable._generate,
+        arguments = [
+            info.direct_descriptor_set.path,
+            src.path,
+            "//{}:{}".format(ctx.label.package, ctx.label.name),
+            _elisp_proto_feature(src),
+        ] + [_elisp_proto_feature(d) for d in deps.to_list()],
+        mnemonic = "GenElispProto",
+        progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
+    )
+    result = _compile(
+        ctx = ctx,
+        srcs = [src],
+        deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
+        load_path = [],
+        data = None,
+        fatal_warnings = True,
+    )
+    return [
+        coverage_common.instrumented_files_info(
+            ctx,
+            source_attributes = ["srcs"],
+            dependency_attributes = ["deps"],
+            extensions = ["el"],
+        ),
+        EmacsLispInfo(
+            source_files = [src],
+            compiled_files = result.outs,
+            load_path = result.load_path,
+            data_files = ctx.rule.files.data,
+            transitive_source_files = result.transitive_srcs,
+            transitive_compiled_files = result.transitive_outs,
+            transitive_load_path = result.transitive_load_path,
+        ),
+    ]
+
+def _elisp_proto_feature(file):
+    stem, ext = paths.split_extension(file.short_path)
+    if ext != ".el":
+        fail("invalid extension {}".format(ext))
+    if stem.startswith("../"):
+        stem = stem[3:]
+        ws, sep, stem = stem.partition("/")
+        if not ws or not sep:
+            fail("invalid name {}", file.short_path)
+    return stem
+
+def _elisp_proto_library_impl(ctx):
+    """Rule implementation for the “elisp_proto_library” rule."""
+    deps = ctx.attr.deps
+    if len(deps) != 1:
+        fail("exactly one proto_library in ‘deps’ required, got {}".format(len(deps)))
+    dep = deps[0]
+
+    # All work is done by the ‘elisp_proto_aspect’ aspect.
+    info = dep[EmacsLispInfo]
+    return [
+        DefaultInfo(files = depset(info.source_files)),
+        EmacsLispInfo(
+            transitive_source_files = info.transitive_source_files,
+            transitive_compiled_files = info.transitive_compiled_files,
+            transitive_load_path = info.transitive_load_path,
+        ),
+    ]
+
 def _elisp_binary_impl(ctx):
     """Rule implementation for the “elisp_binary” rules."""
     args = []
@@ -337,6 +412,58 @@ e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
+)
+
+# The protocol buffer aspect is private for now.
+_elisp_proto_aspect = aspect(
+    doc = "An aspect to generate protocol buffer libraries for Emacs Lisp.",
+    attr_aspects = ["deps"],
+    attrs = {
+        "_compile": attr.label(
+            default = "//elisp:compile.elc",
+            allow_single_file = [".elc"],
+        ),
+        "_generate": attr.label(
+            default = "//elisp/proto:generate",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_protobuf_lib": attr.label(
+            default = "//elisp/proto",
+            providers = [EmacsLispInfo],
+        ),
+    },
+    required_providers = [ProtoInfo],
+    provides = [EmacsLispInfo],
+    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    implementation = _elisp_proto_aspect_impl,
+)
+
+elisp_proto_library = rule(
+    attrs = {
+        "deps": attr.label_list(
+            doc = "List of exactly one `proto_library` rule.",
+            mandatory = True,
+            allow_empty = False,
+            providers = [ProtoInfo],
+            aspects = [_elisp_proto_aspect],
+        ),
+    },
+    doc = r"""Generates Emacs bindings for a protocol buffer library.
+By convention, for a `proto_library` rule named
+<code><var>prefix</var>\_proto</code> there should be a corresponding
+`elisp_proto_library` rule named <code><var>prefix</var>\_elisp\_proto</code>.
+Other `elisp_library`, `elisp_binary`, and `elisp_test` rules can then depend
+on this rule.  This rule generates and byte-compiles Emacs Lisp representations
+of the protocol buffer definitions listed in the `deps` attribute and all their
+direct and indirect dependencies.  The feature symbol for `require` is
+<code><var>package</var>/<var>name</var></code>, where
+<code>//<var>package</var>:<var>name</var></code> is the label of the
+corresponding `proto_library` rule.""",
+    provides = [EmacsLispInfo],
+    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    incompatible_use_toolchain_transition = True,
+    implementation = _elisp_proto_library_impl,
 )
 
 elisp_binary = rule(

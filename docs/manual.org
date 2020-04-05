@@ -21,6 +21,9 @@
 #+TEXINFO_DIR_TITLE: rules_elisp: (rules_elisp)
 #+TEXINFO_DIR_DESC: Compilation and testing support for Emacs Lisp in Bazel
 
+#+MACRO: code @@texinfo:@code{@@$1@@texinfo:}@@
+#+MACRO: var @@texinfo:@var{@@$1@@texinfo:}@@
+
 * Introduction
 
 This repository provides a Bazel integration for Emacs Lisp; see
@@ -93,6 +96,512 @@ class ~elisp/runfiles/runfiles~.
 #+FINDEX: elisp/runfiles/file-handler
 The library also provides a file name handler for runfiles,
 ~elisp/runfiles/file-handler~.  It uses the prefix =/bazel-runfile:=.
+
+* Protocol buffers
+#+CINDEX: Protocol buffers
+
+By defining ~elisp_proto_library~ rules, you can use protocol buffers in Emacs
+Lisp; see [[https://developers.google.com/protocol-buffers]].  To make a
+protocol buffer definition available to Emacs Lisp, you first need a
+~proto_library~ rule; see
+[[https://bazel.build/reference/be/protocol-buffer#proto_library]].  You can
+either use an existing ~proto_library~ rule or add your own.  Then, add an
+~elisp_proto_library~ rule that references the ~proto_library~ rule.  Normally,
+the name of the ~proto_library~ rule ends in =_proto=, and the name of the
+corresponding ~elisp_proto_library~ rule has the same prefix and ends in
+=_elisp_proto=.  For example:
+
+#+BEGIN_SRC bazel-build
+proto_library(
+    name = "my_proto",
+    srcs = ["my.proto"],
+)
+elisp_proto_library(
+    name = "my_elisp_proto",
+    deps = [":my_proto"],
+)
+#+END_SRC
+
+#+TEXINFO: @noindent
+You can then use the ~elisp_proto_library~ rule in the same way as a normal
+~elisp_library~ rule, i.e., depend on it in other ~elisp_library~,
+~elisp_binary~, or ~elisp_test~ rules.  The name of the Emacs Lisp feature for
+the library consists of the package containing the ~proto_library~ rule and its
+name within the package, joined with a slash character (=/=).  For example, if
+the above BUILD file is in a package named =mypackage=, you would load the
+protocol buffer library using ~(require 'mypackage/my_proto)~.
+
+Emacs Lisp protocol buffer bindings contain Emacs Lisp equivalents for all
+message and enumeration types defined in the underlying protocol buffer
+definition files.  Because Emacs Lisp doesn’t have namespaces, the names of all
+defined entities are the full names of the corresponding protocol buffer
+descriptors, including the protocol buffer package name (which is often
+different from the Bazel package name), but with dots (=.=) replaced with
+slashes (=/=), because dots are special characters in Emacs Lisp; see
+[[info:elisp#Symbol Type]].  For example, the Lisp name of the protocol buffer
+message type ~google.protobuf.Duration~ is ~google/protobuf/Duration~, and the
+Lisp name of the protocol buffer enumeration value
+~google.protobuf.FieldDescriptorProto.TYPE_BOOL~ is
+~google/protobuf/FieldDescriptorProto/TYPE_BOOL~.
+
+When accessing protocol buffer message fields, Emacs translates field values to
+and from Lisp data types; see [[info:elisp#Programming Types]].  For scalar
+types, the translation uses appropriate matching types, i.e., numbers and
+strings.  Boolean values are translated to either ~nil~ or ~t~.  The ~bytes~
+type is represented using unibyte strings; see [[info:elisp#Text
+Representations]].  Accessing string and byte fields always creates copies; this
+means that changing the return value using ~aset~ will not modify the original
+protocol buffer message.
+
+The situation is a bit more complex for submessage fields, repeated fields, and
+map fields.  Emacs represents values of these fields using specialized types.
+For submessage fields, these types are again generated protocol buffer message
+types.  For repeated and map fields, Emacs uses the types ~elisp/proto/array~
+and ~elisp/proto/map~, respectively.  Message, array, and map objects can be
+mutable or immutable; attempting to modify an immutable object signals an error.
+The Lisp representations of these types are opaque structure-like types.  Their
+implementation is maintained internally, and you shouldn’t try to access or
+modify it directly.  Rather, the Emacs Lisp library ~elisp/proto/proto~ contains
+the following facilities to use and manipulate these types.
+
+#+ATTR_TEXINFO: :options Type elisp/proto/message
+#+BEGIN_deftp
+#+CINDEX: protocol buffer message
+The base type for all message types.  This is an abstract type; you can’t
+instantiate it directly.
+#+END_deftp
+
+#+ATTR_TEXINFO: :options elisp/proto/message-p object
+#+BEGIN_defun
+This predicate returns whether the given object is a protocol buffer message
+object.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/message-mutable-p object
+#+BEGIN_defun
+This predicate returns whether the given protocol buffer message object is
+mutable.
+#+END_defun
+
+#+ATTR_TEXINFO: :options Type elisp/proto/array
+#+BEGIN_deftp
+#+CINDEX: protocol buffer array
+A type that represents repeated protocol buffer message fields.  You can’t
+instantiate this type directly; instead, you obtain instances of this type by
+accessing repeated message fields.
+
+Protocol buffer arrays are generalized sequences.  This means you can use the
+functions from the ~seq.el~ library with them.  See [[info:elisp#Sequence
+Functions]].
+#+END_deftp
+
+#+ATTR_TEXINFO: :options elisp/proto/array-p object
+#+BEGIN_defun
+This predicate returns whether the given object is a protocol buffer array
+object.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/array-mutable-p object
+#+BEGIN_defun
+This predicate returns whether the given protocol buffer array is mutable.
+#+END_defun
+
+#+ATTR_TEXINFO: :options Type elisp/proto/map
+#+BEGIN_deftp
+#+CINDEX: protocol buffer map
+A type that represents protocol buffer map fields.  You can’t instantiate this
+type directly; instead, you obtain instances of this type by accessing repeated
+message fields.  See
+https://developers.google.com/protocol-buffers/docs/proto3#maps.
+
+Starting with Emacs 27, protocol buffer maps are generalized maps.  This means
+you can use the functions from the ~map.el~ library with them.  See the comments
+in ~map.el~ for details.  If you want to support Emacs 26 as well, you should
+use the specialized map functions instead.  See [[*Specialized array and map
+functions]].
+#+END_deftp
+
+#+ATTR_TEXINFO: :options elisp/proto/map-p object
+#+BEGIN_defun
+This predicate returns whether the given object is a protocol buffer map object.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/map-mutable-p object
+#+BEGIN_defun
+This predicate returns whether the given protocol buffer map is mutable.
+#+END_defun
+
+It should be noted that protocol buffer arrays and maps are not “full” types.
+You can’t use them as replacement types for vectors or hash tables because
+there’s no way to create objects of these types from scratch.  You can only
+obtain new objects by accessing protocol buffer message fields.  This is also
+the reason why these types don’t provide implementations of ~seq-into~,
+~seq-concatenate~ or ~map-into~ that would return new protocol buffer arrays and
+maps.
+
+Another important difference between these types and the standard Emacs Lisp
+types is that protocol buffer arrays and maps are strongly-typed: all their
+elements have the same type, which is determined when creating the object.  For
+example, you can’t add a string value to a protocol buffer array holding
+integers.
+
+The Lisp representation of protocol buffer enumerations are plain Lisp
+constants.  See [[info:elisp#Defining Variables]].  Their values are just the
+integral values of the corresponding enumerators.
+
+Whenever Emacs needs to convert a Lisp value to a protocol buffer field value,
+an array element, or a map key or value, it accepts values that are compatible
+with the destination type.  For example, you can use an integer to set a
+floating-point protocol buffer message field.  Setting a Boolean field accepts
+any non-~nil~ value as ~true~.  Setting a repeated field accepts lists, vectors,
+and any other generalized sequence type.  Setting a map field accepts
+hash-tables, association lists, and any other generalized map type.
+
+#+ATTR_TEXINFO: :options elisp/proto/make type [fields...]
+#+BEGIN_defun
+This function creates and initializes a new protocol buffer message object.  The
+{{{var(type)}}} must be a symbol denoting an existing protocol buffer message
+type, using the conventions described above (i.e., periods replaced with
+slashes).  Before calling this function for a given type, you have to ~require~
+the generated library that defines the type, otherwise the function will fail.
+The {{{var(fields)}}} are keyword-value pairs of the form
+{{{code(:{{{var(field)}}} {{{var(value)}}})}}} that are used to initialize the
+fields.  If a field isn’t mentioned in {{{var(fields)}}}, it’s not set in the
+resulting message.  For example, the following code creates a new protocol
+buffer message object of type ~google.protobuf.Duration~:
+
+#+BEGIN_SRC emacs-lisp
+(require 'elisp/proto/proto)
+(require 'duration_proto)
+(elisp/proto/make 'google/protobuf/Duration :seconds 3600)
+#+END_SRC
+
+#+TEXINFO: @noindent
+The ~nanos~ field remains uninitialized.
+#+END_defun
+
+For every protocol buffer message type, the generated library will also contain
+a function {{{code({{{var(type)}}}-new)}}} that you can use as a shorthand for
+~elisp/proto/make~.  For example, you could also write the above example as
+
+#+BEGIN_SRC emacs-lisp
+(require 'duration_proto)
+(google/protobuf/Duration-new :seconds 3600)
+#+END_SRC
+
+To check whether an object is a protocol buffer message object of a given type,
+the generated libraries contain predicate functions like
+{{{code({{{var(type)}}}-p)}}}.  For example, to test whether an object is a
+duration protocol buffer message, you can write
+
+#+BEGIN_SRC emacs-lisp
+(require 'duration_proto)
+(google/protobuf/Duration-p object)
+#+END_SRC
+
+You can also use the Common Lisp type predicates like ~cl-typep~ or
+~cl-check-type~ with protocol buffer message objects.  See
+[[info:cl#Type Predicates]].
+
+** Accessing protocol buffer message fields
+:PROPERTIES:
+:ALT_TITLE: Protocol buffer fields
+:END:
+
+The functions described in this section retrieve and manipulate message fields.
+They all accept a message object as first argument and a field name as second
+argument.  The field name is a plain symbol denoting the unqualified field name.
+
+#+ATTR_TEXINFO: :options elisp/proto/has-field message field
+#+BEGIN_defun
+This function returns whether the given field is present in the message object.
+If the field doesn’t have a notion of presence (e.g. it’s a repeated field), an
+error is signaled.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/field message field
+#+BEGIN_defun
+This function returns the value of the given field within the message object.
+If the field isn’t set in the message, then the return value depends on the type
+of the field.  If the field is scalar, its default value is returned.  If the
+field is a submessage, repeated, or map field, ~nil~ is returned.  For
+non-scalar fields, the return value is immutable, i.e., trying to change it will
+signal an error.
+
+If the field is a string or byte array field, the return value is a
+newly-allocated string.  This implies that it’s often a good idea to bind the
+return value to a local variable instead of retrieving the value many times.
+#+END_defun
+
+#+ATTR_TEXINFO: :options {pcase pattern} elisp/proto type [fields...]
+#+BEGIN_deffn
+As a more compact alternative to type predicates and field access using
+~elisp/proto/field~, you can use ~elisp/proto~ patterns in ~pcase~ form.  See
+[[info:elisp#Pattern-Matching Conditional]].  The ~elisp/proto~ form takes an
+unquoted protocol buffer type and a list of fields.  For example, the following
+form extracts the fields of a duration message:
+
+#+BEGIN_SRC emacs-lisp
+(pcase message
+  ((elisp/proto google/protobuf/Duration seconds nanos)
+   (message "Duration with %d seconds and %d nanoseconds"
+            seconds nanos))
+  (_ (message "Some other thing")))
+#+END_SRC
+
+Instead of specifying plain field names, you can also specify
+{{{code(({{{var(field)}}} {{{var(pattern)}}}))}}} pairs.  These match the field
+value against {{{var(pattern)}}}, which is again a ~pcase~ pattern.  For
+example, the following code tests whether a duration is strictly positive:
+
+#+BEGIN_SRC emacs-lisp
+(pcase message
+  ((or (elisp/proto google/protobuf/Duration
+                    (seconds (and (pred cl-plusp) seconds))
+                    nanos)
+       (elisp/proto google/protobuf/Duration
+                    (seconds (and 0 seconds))
+                    (nanos (and (pred cl-plusp) nanos))))
+   (message "Duration with %d seconds and %d nanoseconds is positive"
+            seconds nanos)))
+#+END_SRC
+
+#+TEXINFO: @noindent
+A {{{var(field)}}} construct that is a plain symbol is thus the same as
+{{{code(({{{var(field)}}} {{{var(field)}}}))}}}.
+#+END_deffn
+
+#+ATTR_TEXINFO: :options elisp/proto/set-field message field value
+#+BEGIN_defun
+This function sets the field to a new value.  It signals an error if the message
+object is immutable, or if the new value isn’t compatible with the field type.
+#+END_defun
+
+** Parsing and serializing protocol buffer messages
+:PROPERTIES:
+:ALT_TITLE: Protocol buffer serialization
+:END:
+
+The primary purpose of protocol buffers is data serialization.  The Emacs Lisp
+protocol buffer bindings support all three major forms of protocol buffer
+serialization: binary, JSON, and text.  However, currently the textual protocol
+buffer representation can only be generated, not parsed.  Since none of the
+serialized forms are self-describing, you have to explicitly pass the desired
+message type to the parsing functions.
+
+You can customize the behavior of the parsing and serialization functions to
+some extend with optional keyword arguments.  These are the most common keyword
+arguments:
+
+- ~:allow-partial~ :: This keyword argument affects how missing required fields
+  are handled: by default, they cause an error to be signaled, but if the
+  keyword argument is non-~nil~, they are silently ignored, and the result might
+  not be fully initialized.
+- ~:discard-unknown~ :: This keyword argument affects how unknown fields are
+  handled: by default, they cause an error to be signaled, but if the keyword
+  argument is non-~nil~, they are silently ignored.
+- ~:deterministic~ :: If this keyword argument is non-~nil~, serialization
+  functions attempt to produce slightly more deterministic output; however, this
+  attempt is best-effort, since protocol buffer serialization is not guaranteed
+  to be deterministic.
+
+#+TEXINFO: @noindent
+Other keyword arguments are described in the main body of the function
+definitions below.
+
+#+ATTR_TEXINFO: :options elisp/proto/parse type serialized [:allow-partial]
+#+BEGIN_defun
+This function parses a protocol buffer message from its binary serialization
+form.  The {{{var(serialized)}}} argument must be a unibyte string containing
+the binary serialization of a protocol buffer message of type {{{var(type)}}}.
+The {{{var(type)}}} is again a symbol denoting a protocol buffer message type.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/parse-json type serialized [:discard-unknown]
+#+BEGIN_defun
+This function is like ~elisp/proto/parse~, but it expects the JSON serialization
+instead of the binary serialization.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/serialize message [:allow-partial :discard-unknown :deterministic]
+#+BEGIN_defun
+This function is the inverse of ~elisp/proto/parse~, producing the binary
+serialization of the {{{var(message)}}} as a unibyte string.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/serialize-text message [:compact :discard-unknown :deterministic]
+#+BEGIN_defun
+This function is the inverse of ~elisp/proto/parse~, producing the binary
+serialization of the {{{var(message)}}} as a unibyte string.  If the
+~:compact~ keyword argument is non-~nil~, the output is a bit more compact, with
+less vertical whitespace; however, you shouldn’t rely on any specific output
+format in any case.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/serialize-json message [:emit-defaults :proto-names]
+#+BEGIN_defun
+This function is the inverse of ~elisp/proto/parse-json~, producing the JSON
+serialization of the {{{var(message)}}} as a string.  If the ~:emit-defaults~
+keyword argument is non-~nil~, the result will also include fields whose value
+equals their default value; normally such fields are left out.  The
+~:proto-names~ keyword argument determines the naming style for field names: by
+default, camel-case versions of the names are used, but if the keyword argument
+is non-~nil~, the names from the protocol buffer definition are used verbatim.
+#+END_defun
+
+You can print a human-readable representation of protocol buffer messages,
+arrays, and maps using the functions ~cl-prin1~, ~cl-prin1-to-string~, or
+~cl-print-to-string-with-limit~.  However, these objects don’t have a read
+syntax; see [[info:elisp#Printed Representation]].  Using plain Emacs functions
+like ~print~ will result in a representation that’s not very human-readable; see
+[[info:elisp#Read and Print]].
+
+** Well-known protocol buffer types
+
+The Emacs Lisp protocol buffer bindings contain some dedicated support for a few
+well-known message types.  These are predefined types which are used frequently;
+see
+[[https://developers.google.com/protocol-buffers/docs/reference/google.protobuf]].
+
+#+ATTR_TEXINFO: :options elisp/proto/timestamp message
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/duration message
+These functions convert protocol buffer messages of type
+~google.protobuf.Timestamp~ and ~google.protobuf.Duration~ to Lisp timestamps.
+See [[info:elisp#Time of Day]], for the definition of a Lisp timestamp.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/make-timestamp time
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/make-duration time
+These functions perform the opposite conversion, creating
+~google.protobuf.Timestamp~ and ~google.protobuf.Duration~ messages from Lisp
+time values.  See [[info:elisp#Time of Day]], for the definition of a Lisp time
+value.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/set-timestamp message time
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/set-duration message time
+These functions are similar, but they change message objects in place instead of
+creating new ones.  The {{{var(message)}}} arguments must be mutable.  As an
+alternative to calling these functions directly, you can also use
+~elisp/proto/timestamp~ and ~elisp/proto/duration~ as generalized variables; see
+[[info:elisp#Generalized Variables]].
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/pack-any message
+#+BEGIN_defun
+This function returns a new protocol buffer message of type
+~google.protobuf.Any~ that wraps the given {{{var(message)}}}.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/unpack-any message
+#+BEGIN_defun
+This function unpacks the given protocol buffer message of type
+~google.protobuf.Any~.  The return type depends on the ~type_url~ field.  Even
+though this allows you to handle message types dynamically, you still need to
+load the generated bindings for the dynamic type for unpacking to work.
+#+END_defun
+
+** Specialized array and map functions
+:PROPERTIES:
+:ALT_TITLE: Protocol buffer array and map functions
+:END:
+
+This section describes a few additional functions that deal with arrays and
+maps.
+
+#+ATTR_TEXINFO: :options elisp/proto/array-length array
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/map-length map
+These functions return the number of elements in the given array or map.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/do-array function array
+#+BEGIN_defun
+This function calls {{{var(function)}}} for each element in {{{var(array)}}} in
+ascending order.  {{{var(function)}}} has to accept a single argument.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/do-map function map
+#+BEGIN_defun
+This function calls {{{var(function)}}} for each entry in {{{var(map)}}}.
+{{{var(function)}}} has to accept two arguments, the key and the value.  The
+iteration order is arbitrary.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/append-array array value
+#+BEGIN_defun
+This function adds {{{var(value)}}} as a new element to the end of
+{{{var(array)}}}.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/extend-array dest source
+#+BEGIN_defun
+This function appends all elements in the {{{var(source)}}} sequence to the end
+of {{{var(dest)}}}.  The {{{var(source)}}} must be a generalized sequence.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/update-map dest source
+#+BEGIN_defun
+This function inserts all entries in the {{{var(source)}}} map into
+{{{var(map)}}}.  The {{{var(source)}}} must be a generalized map.  If a given
+key already exists, the corresponding value is overwritten.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/copy-array array
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/copy-map map
+These functions return a shallow copy of the given array or map.  The returned
+copy is mutable, but its elements might still be immutable.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/clear-array array
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/clear-map map
+These functions remove all elements from the given array or map.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/replace-array dest source
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/replace-map dest source
+These functions first remove all elements from {{{var(dest)}}} and then add
+elements from {{{var(source)}}}.  After the operation finishes successfully,
+{{{var(dest)}}} will have the same number of elements as {{{var(source)}}}.
+Elements in {{{var(source)}}} are converted to the element type of
+{{{var(dest)}}} as necessary.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/array-pop array index
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/map-pop map key
+These functions remove the element with the given index or key and return its
+value.  In the case of an array, elements are shifted left to fill the hole.
+#+END_defun
+
+The following functions work on ranges in an array.  A range is defined by a
+start index and an end index; the start index is included in the range, but the
+end index is not.  If either index is negative, it’s treated as counting from
+the end; this facilitates things like addressing the last five elements of an
+array.  If the end index is left out or ~nil~, the length of the array is used
+instead; this means that passing only a start index addresses the entire
+remaining subarray starting at that index.  These are exactly the same
+conventions that the functions ~substring~ and ~seq-subseq~ use.  See
+[[info:elisp#Creating Strings]], and see [[info:elisp#Sequence Functions]].
+
+#+ATTR_TEXINFO: :options elisp/proto/subarray array from [to]
+#+BEGIN_defun
+This function returns a shallow copy of the subsequence of {{{var(array)}}}
+delineated by {{{var(from)}}} and {{{var(to)}}}.
+#+END_defun
+
+#+ATTR_TEXINFO: :options elisp/proto/array-delete array from [to]
+#+BEGIN_defun
+This function removes the range delineated by {{{var(from)}}} and {{{var(to)}}}
+from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
+#+END_defun
+
 
 * Symbols defined in =//elisp:defs.bzl=
 :PROPERTIES:
