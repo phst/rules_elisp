@@ -100,7 +100,7 @@ elisp_toolchain = rule(
     attrs = {
         "emacs": attr.label(
             doc = "An executable file that behaves like the Emacs binary.",
-            default = "//emacs:emacs",
+            mandatory = True,
             executable = True,
             cfg = "target",
         ),
