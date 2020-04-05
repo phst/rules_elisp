@@ -25,13 +25,13 @@ toolchain_type(
 toolchain(
     name = "hermetic_toolchain",
     toolchain = ":hermetic",
-    toolchain_type = "//elisp:toolchain_type",
+    toolchain_type = ":toolchain_type",
 )
 
 toolchain(
     name = "local_toolchain",
     toolchain = ":local",
-    toolchain_type = "//elisp:toolchain_type",
+    toolchain_type = ":toolchain_type",
 )
 
 elisp_toolchain(
