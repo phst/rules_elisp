@@ -28,9 +28,21 @@ toolchain(
     toolchain_type = "//elisp:toolchain_type",
 )
 
+toolchain(
+    name = "local_toolchain",
+    toolchain = ":local",
+    toolchain_type = "//elisp:toolchain_type",
+)
+
 elisp_toolchain(
     name = "hermetic",
     emacs = "//emacs",
+)
+
+elisp_toolchain(
+    name = "local",
+    emacs = ":local_emacs",
+    use_default_shell_env = True,
 )
 
 filegroup(
@@ -49,6 +61,11 @@ filegroup(
     name = "test_template",
     srcs = ["test.template"],
     visibility = ["//visibility:public"],
+)
+
+sh_binary(
+    name = "local_emacs",
+    srcs = ["local_emacs.sh"],
 )
 
 stardoc(

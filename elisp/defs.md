@@ -78,7 +78,7 @@ The generated test binary loads all source files and executes all tests using `e
 ## elisp_toolchain
 
 <pre>
-elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>)
+elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>, <a href="#elisp_toolchain-use_default_shell_env">use_default_shell_env</a>)
 </pre>
 
 Toolchain rule for Emacs Lisp.
@@ -90,6 +90,7 @@ Toolchain rule for Emacs Lisp.
 | :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | emacs |  An executable file that behaves like the Emacs binary.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | optional | //emacs:emacs |
+| use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
 
 
 <a name="#EmacsLispInfo"></a>

@@ -40,4 +40,4 @@ def rules_elisp_dependencies():
 
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
-    native.register_toolchains("//elisp:hermetic_toolchain")
+    native.register_toolchains("//elisp:all")

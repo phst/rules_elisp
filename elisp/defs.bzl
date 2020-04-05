@@ -33,7 +33,10 @@ The `depset` elements are structures with the following fields:
 
 def _toolchain(ctx):
     """Rule implementation for the “elisp_toolchain” toolchain rule."""
-    return platform_common.ToolchainInfo(emacs = ctx.attr.emacs)
+    return platform_common.ToolchainInfo(
+        emacs = ctx.attr.emacs,
+        use_default_shell_env = ctx.attr.use_default_shell_env,
+    )
 
 def _library(ctx):
     """Rule implementation for the “elisp_library” rule."""
@@ -100,6 +103,10 @@ elisp_toolchain = rule(
             default = "//emacs:emacs",
             executable = True,
             cfg = "target",
+        ),
+        "use_default_shell_env": attr.bool(
+            doc = "Whether actions should inherit the external shell environment.",
+            default = False,
         ),
     },
     doc = """Toolchain rule for Emacs Lisp.""",
@@ -279,7 +286,8 @@ def _compile(ctx, srcs, deps, load_path):
         transitive = [dep[DefaultInfo].default_runfiles.files for dep in ctx.attr.deps],
     )
 
-    emacs = ctx.toolchains["//elisp:toolchain_type"].emacs
+    toolchain = ctx.toolchains["//elisp:toolchain_type"]
+    emacs = toolchain.emacs
 
     # We compile only one file per Emacs process.  This might seem wasteful,
     # but since compilation can execute arbitrary code, it ensures that
@@ -309,6 +317,7 @@ def _compile(ctx, srcs, deps, load_path):
             ],
             mnemonic = "ElispCompile",
             progress_message = "Compiling Emacs Lisp library {}".format(out.short_path),
+            use_default_shell_env = toolchain.use_default_shell_env,
         )
         outs.append(out)
 
