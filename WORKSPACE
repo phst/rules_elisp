@@ -124,6 +124,19 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
+    name = "upb",
+    sha256 = "21275f871ff76b8a11a2eff845b35b2f95cf77f400afbf5a781ebf80dfe8d00e",
+    strip_prefix = "upb-7497539732cf82724c85ae1a190f47d2baf0a243/",
+    urls = [
+        "https://github.com/protocolbuffers/upb/archive/7497539732cf82724c85ae1a190f47d2baf0a243.zip",  # 2022-03-07
+    ],
+)
+
+load("@upb//bazel:workspace_deps.bzl", "upb_deps")
+
+upb_deps()
+
+http_archive(
     name = "com_grail_bazel_compdb",
     build_file = "@//:compdb.BUILD",
     sha256 = "32483ad5aef7496bf338454d851fb63f7a7c72c6b62c40fd74af4f5a5c3749a4",
