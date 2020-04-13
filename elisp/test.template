@@ -19,8 +19,8 @@ int main(int argc, char** argv, char** envp) {
       .exec_binary(R"**([[emacs]])**",
                    R"**([[runfiles.elc]])**",
                    {[[directory]]},
-                   {[[load]]},
-                   {"--funcall=ert-run-tests-batch-and-exit"});
+                   {[[load]], "phst_rules_elisp/elisp/ert/runner.elc"},
+                   {"--funcall=elisp/ert/run-batch-and-exit"});
 }
 
 // Local Variables:

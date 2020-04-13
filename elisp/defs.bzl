@@ -86,7 +86,7 @@ def _binary(ctx):
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
     bin_runfiles = ctx.runfiles(
-        files = [emacs.files_to_run.executable, ctx.file._runfiles_lib],
+        files = [emacs.files_to_run.executable, ctx.file._runfiles_lib] + getattr(ctx.files, "_default_libs", []),
         transitive_files = depset(transitive = [result.transitive_outs, result.runfiles.files]),
     )
     emacs_runfiles = emacs.default_runfiles
@@ -221,6 +221,11 @@ elisp_test = rule(
             default = "//elisp/runfiles",
             allow_single_file = [".elc"],
         ),
+        _default_libs = attr.label_list(
+            default = ["//elisp/ert:runner"],
+            allow_files = [".elc"],
+            allow_empty = False,
+        ),
         _template = attr.label(
             default = "//elisp:test_template",
             allow_single_file = [".template"],
@@ -236,7 +241,10 @@ elisp_test = rule(
     ),
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert_test`.
-The generated test binary loads all source files and executes all tests using `ert-run-tests-batch-and-exit`.""",
+The generated test binary loads all source files and executes all tests like `ert-run-tests-batch-and-exit`.
+You can restrict the tests to be run using the `--test_filter` option.  If set, the value of
+`--test_filter` must be a Lisp expression usable as an
+[ERT test selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).""",
     fragments = ["cpp"],
     test = True,
     toolchains = [
