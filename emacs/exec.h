@@ -35,7 +35,7 @@ class executor {
   [[noreturn]] void exec_emacs(const char* install_rel);
 
   [[noreturn]] void exec_binary(
-      const char* wrapper, const char* runfiles_elc,
+      const char* wrapper,
       const std::vector<std::filesystem::path>& load_path,
       const std::vector<std::filesystem::path>& load_files,
       const std::vector<std::string>& suffix_args);

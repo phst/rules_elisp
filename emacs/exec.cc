@@ -138,12 +138,14 @@ executor::executor(for_test, int argc, const char* const* argv,
 }
 
 [[noreturn]] void executor::exec_binary(
-    const char* const wrapper, const char* const runfiles_elc,
+    const char* const wrapper,
     const std::vector<std::filesystem::path>& load_path,
     const std::vector<std::filesystem::path>& load_files,
     const std::vector<std::string>& suffix_args) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args{"--quick", "--batch"};
+  constexpr const char* const runfiles_elc =
+      "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
   for (const auto& dir : load_path) {
     try {

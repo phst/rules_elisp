@@ -17,7 +17,6 @@
 int main(int argc, char** argv, char** envp) {
   phst_rules_elisp::executor(phst_rules_elisp::for_test(), argc, argv, envp)
       .exec_binary(R"**([[emacs]])**",
-                   R"**([[runfiles.elc]])**",
                    {[[directory]]},
                    {[[load]], "phst_rules_elisp/elisp/ert/runner.elc"},
                    {"--funcall=elisp/ert/run-batch-and-exit"});

@@ -80,13 +80,12 @@ def _binary(ctx):
                 'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
                 for src in result.outs
             ]),
-            "[[runfiles.elc]]": check_relative_filename(paths.join(ctx.workspace_name, ctx.file._runfiles_lib.short_path)),
         },
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
     bin_runfiles = ctx.runfiles(
-        files = [emacs.files_to_run.executable, ctx.file._runfiles_lib] + getattr(ctx.files, "_default_libs", []),
+        files = [emacs.files_to_run.executable] + ctx.files._default_libs,
         transitive_files = depset(transitive = [result.transitive_outs, result.runfiles.files]),
     )
     emacs_runfiles = emacs.default_runfiles
@@ -172,9 +171,10 @@ elisp_binary = rule(
             default = "//emacs:exec",
             providers = [CcInfo],
         ),
-        _runfiles_lib = attr.label(
-            default = "//elisp/runfiles",
-            allow_single_file = [".elc"],
+        _default_libs = attr.label_list(
+            default = ["//elisp/runfiles"],
+            allow_files = [".elc"],
+            allow_empty = False,
         ),
         _template = attr.label(
             default = "//elisp:binary_template",
@@ -217,12 +217,8 @@ elisp_test = rule(
             default = "//emacs:exec",
             providers = [CcInfo],
         ),
-        _runfiles_lib = attr.label(
-            default = "//elisp/runfiles",
-            allow_single_file = [".elc"],
-        ),
         _default_libs = attr.label_list(
-            default = ["//elisp/ert:runner"],
+            default = ["//elisp/runfiles", "//elisp/ert:runner"],
             allow_files = [".elc"],
             allow_empty = False,
         ),
