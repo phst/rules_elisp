@@ -60,6 +60,7 @@ elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data<
 
 Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
+See the [ERT manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html) for details.
 The generated test binary loads all source files and executes all tests like `ert-run-tests-batch-and-exit`.
 You can restrict the tests to be run using the `--test_filter` option.  If set, the value of
 `--test_filter` must be a Lisp expression usable as an
