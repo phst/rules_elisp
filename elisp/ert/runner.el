@@ -24,7 +24,10 @@
 
 (require 'cl-lib)
 (require 'ert)
+(require 'json)
 (require 'pp)
+
+(require 'elisp/runfiles/runfiles)
 
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
@@ -41,9 +44,13 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (print-length 50)
          (test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
+         (xml-output-file (getenv "XML_OUTPUT_FILE"))
          (selector (if (member test-filter '(nil "")) t (read test-filter)))
          (tests (ert-select-tests selector t))
-         (unexpected 0))
+         (unexpected 0)
+         (report `((start-time . ,(format-time-string "%FT%T.%9NZ" nil t))))
+         (test-reports ())
+         (start-time (current-time)))
     (or tests (error "Selector %S doesn’t match any tests" selector))
     (random random-seed)
     (elisp/ert/log--message "Running %d tests" (length tests))
@@ -53,13 +60,16 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
              (start-time (current-time))
              (result (ert-run-test test))
              (duration (time-subtract nil start-time))
-             (expected (ert-test-result-expected-p test result)))
-        (elisp/ert/log--message "Test %s %s and took %d ms" name
-                                (ert-string-for-test-result result expected)
+             (expected (ert-test-result-expected-p test result))
+             (status (ert-string-for-test-result result expected))
+             (report `((name . ,(symbol-name name))
+                       (elapsed . ,(float-time duration))
+                       (status . ,status)
+                       (expected . ,(if expected :json-true :json-false)))))
+        (elisp/ert/log--message "Test %s %s and took %d ms" name status
                                 (* (float-time duration) 1000))
         (or expected (cl-incf unexpected))
         (when (ert-test-result-with-condition-p result)
-          (message "  Test %s backtrace:" name)
           (with-temp-buffer
             (debugger-insert-backtrace
              (ert-test-result-with-condition-backtrace result) nil)
@@ -68,15 +78,43 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
               (message "    %s"
                        (buffer-substring-no-properties
                         (point) (min (line-end-position) (+ 120 (point)))))
-              (forward-line)))
-          (dolist (info (ert-test-result-with-condition-infos result))
-            (message "  %s%s" (car info) (cdr info)))
-          (message "  Test %s condition:\n    %s\n"
-                   name
-                   (pp-to-string
-                    (ert-test-result-with-condition-condition result))))))
+              (forward-line))
+            (goto-char (point-min))
+            (insert (format-message "  Test %s backtrace:\n" name))
+            (goto-char (point-max))
+            (dolist (info (ert-test-result-with-condition-infos result))
+              (insert "  " (car info) (cdr info) ?\n))
+            (insert (format-message "  Test %s condition:\n" name))
+            (insert "    ")
+            (pp (ert-test-result-with-condition-condition result)
+                (current-buffer))
+            (insert ?\n)
+            (let ((message (buffer-substring-no-properties (point-min)
+                                                           (point-max))))
+              (message "%s" message)
+              (push `(message . ,message) report))))
+        (push report test-reports)))
+    (push `(elapsed . ,(float-time (time-subtract nil start-time))) report)
+    (push `(tests . ,(nreverse test-reports)) report)
     (elisp/ert/log--message "Running %d tests finished, %d results unexpected"
                             (length tests) unexpected)
+    (unless (member xml-output-file '(nil ""))
+      ;; Rather than trying to write a well-formed XML file in Emacs Lisp,
+      ;; write the report as a JSON file and let an external binary deal with
+      ;; the conversion to XML.
+      (let ((process-environment
+             (append (elisp/runfiles/env-vars) process-environment))
+            (converter (elisp/runfiles/rlocation
+                        "phst_rules_elisp/elisp/ert/write_xml_report"))
+            (json-file (make-temp-file "ert-report-" nil ".json"
+                                       (json-encode (nreverse report)))))
+        (unwind-protect
+            (with-temp-buffer
+              (unless (eq 0 (call-process (file-name-unquote converter) nil t
+                                          nil "--" json-file xml-output-file))
+                (message "%s" (buffer-string))
+                (error "Writing XML output file %s failed" xml-output-file)))
+          (delete-file json-file))))
     (kill-emacs (min unexpected 1))))
 
 (defun elisp/ert/log--message (format &rest args)

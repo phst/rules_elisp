@@ -18,5 +18,15 @@ elisp_library(
     name = "runner",
     testonly = 1,
     srcs = ["runner.el"],
+    data = [":write_xml_report"],
+    visibility = ["//visibility:public"],
+    deps = ["//elisp/runfiles"],
+)
+
+py_binary(
+    name = "write_xml_report",
+    srcs = ["write_xml_report.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
     visibility = ["//visibility:public"],
 )

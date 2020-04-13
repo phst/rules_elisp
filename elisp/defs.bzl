@@ -89,9 +89,15 @@ def _binary(ctx):
         transitive_files = depset(transitive = [result.transitive_outs, result.runfiles.files]),
     )
     emacs_runfiles = emacs.default_runfiles
+    runfiles = bin_runfiles.merge(emacs_runfiles)
+
+    # https://docs.bazel.build/versions/3.0.0/skylark/rules.html#tools-depending-on-tools
+    for tool in ctx.attr._tools:
+        runfiles = runfiles.merge(tool[DefaultInfo].default_runfiles)
+
     return DefaultInfo(
         executable = executable,
-        runfiles = bin_runfiles.merge(emacs_runfiles),
+        runfiles = runfiles,
     )
 
 elisp_toolchain = rule(
@@ -176,6 +182,7 @@ elisp_binary = rule(
             allow_files = [".elc"],
             allow_empty = False,
         ),
+        _tools = attr.label_list(),
         _template = attr.label(
             default = "//elisp:binary_template",
             allow_single_file = [".template"],
@@ -221,6 +228,11 @@ elisp_test = rule(
             default = ["//elisp/runfiles", "//elisp/ert:runner"],
             allow_files = [".elc"],
             allow_empty = False,
+        ),
+        _tools = attr.label_list(
+            default = ["//elisp/ert:write_xml_report"],
+            allow_files = True,
+            cfg = "target",
         ),
         _template = attr.label(
             default = "//elisp:test_template",
