@@ -32,11 +32,14 @@
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
-TESTBRIDGE_TEST_ONLY environmental variable as test selector."
+TESTBRIDGE_TEST_ONLY environmental variable as test selector.
+Treat all remaining command-line arguments as names of test
+source files and load them."
   (or noninteractive (error "This function works only in batch mode"))
-  (let* ((attempt-stack-overflow-recovery nil)
-         (attempt-orderly-shutdown-on-fatal-signal nil)
-         (print-escape-newlines t)
+  (setq attempt-stack-overflow-recovery nil
+        attempt-orderly-shutdown-on-fatal-signal nil)
+  (mapc #'load command-line-args-left)
+  (let* ((print-escape-newlines t)
          (pp-escape-newlines t)
          (print-circle t)
          (print-gensym t)

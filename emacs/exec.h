@@ -26,6 +26,10 @@ namespace phst_rules_elisp {
 
 struct for_test {};
 
+struct runfile {
+  std::filesystem::path path;
+};
+
 struct directory {
   std::filesystem::path path;
 };
@@ -34,7 +38,7 @@ struct load {
   std::filesystem::path path;
 };
 
-using argument = std::variant<std::string, directory, load>;
+using argument = std::variant<std::string, runfile, directory, load>;
 
 class executor {
  public:

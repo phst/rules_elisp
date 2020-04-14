@@ -149,6 +149,10 @@ executor::executor(for_test, int argc, const char* const* argv,
 
     void operator()(const std::string& str) { args.push_back(str); }
 
+    void operator()(const phst_rules_elisp::runfile& file) {
+      args.push_back(exec.runfile(file.path).string());
+    }
+
     void operator()(const directory& dir) {
       try {
         args.push_back("--directory=" + exec.runfile(dir.path).string());
