@@ -226,12 +226,14 @@ source files and load them."
 
 (defun elisp/ert/log--message (format &rest args)
   "Like ‘(message FORMAT ARGS…)’, but also print a timestamp."
+  (cl-check-type format string)
   (message "[%s] %s"
            (format-time-string "%F %T.%3N")
            (apply #'format-message format args)))
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
+  (cl-check-type string string)
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
   (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
