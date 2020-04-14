@@ -72,12 +72,12 @@ def _binary(ctx):
         output = driver,
         substitutions = {
             "[[directory]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
+                'phst_rules_elisp::directory{{R"**({})**"}}'.format(check_relative_filename(dir.for_runfiles))
                 for dir in result.transitive_load_path.to_list()
             ]),
             "[[emacs]]": check_relative_filename(paths.join(ctx.workspace_name, emacs.files_to_run.executable.short_path)),
             "[[load]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
+                'phst_rules_elisp::load{{R"**({})**"}}'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
                 for src in result.outs
             ]),
         },

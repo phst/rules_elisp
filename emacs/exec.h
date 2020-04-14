@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <string>
+#include <variant>
 #include <vector>
 
 #include "tools/cpp/runfiles/runfiles.h"
@@ -24,6 +25,16 @@
 namespace phst_rules_elisp {
 
 struct for_test {};
+
+struct directory {
+  std::filesystem::path path;
+};
+
+struct load {
+  std::filesystem::path path;
+};
+
+using argument = std::variant<std::string, directory, load>;
 
 class executor {
  public:
@@ -34,11 +45,8 @@ class executor {
 
   [[noreturn]] void exec_emacs(const char* install_rel);
 
-  [[noreturn]] void exec_binary(
-      const char* wrapper,
-      const std::vector<std::filesystem::path>& load_path,
-      const std::vector<std::filesystem::path>& load_files,
-      const std::vector<std::string>& suffix_args);
+  [[noreturn]] void exec_binary(const char* wrapper,
+                                const std::vector<argument>& args);
 
  private:
   std::filesystem::path runfile(const std::filesystem::path& rel) const;

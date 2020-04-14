@@ -27,6 +27,7 @@
 #include <string>
 #include <system_error>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include <unistd.h>
@@ -137,32 +138,40 @@ executor::executor(for_test, int argc, const char* const* argv,
   exec(emacs, {}, map);
 }
 
-[[noreturn]] void executor::exec_binary(
-    const char* const wrapper,
-    const std::vector<std::filesystem::path>& load_path,
-    const std::vector<std::filesystem::path>& load_files,
-    const std::vector<std::string>& suffix_args) {
+[[noreturn]] void executor::exec_binary(const char* const wrapper,
+                                        const std::vector<argument>& args) {
   const auto emacs = runfile(wrapper);
-  std::vector<std::string> args{"--quick", "--batch"};
-  constexpr const char* const runfiles_elc =
-      "phst_rules_elisp/elisp/runfiles/runfiles.elc";
-  bool runfile_handler_installed = false;
-  for (const auto& dir : load_path) {
-    try {
-      args.push_back("--directory=" + runfile(dir).string());
-    } catch (const missing_runfile&) {
-      if (!std::exchange(runfile_handler_installed, true)) {
-        args.push_back("--load=" + runfile(runfiles_elc).string());
-        args.push_back("--funcall=elisp/runfiles/install-handler");
+
+  struct {
+    const executor& exec;
+    std::vector<std::string> args = {"--quick", "--batch"};
+    bool runfile_handler_installed = false;
+
+    void operator()(const std::string& str) { args.push_back(str); }
+
+    void operator()(const directory& dir) {
+      try {
+        args.push_back("--directory=" + exec.runfile(dir.path).string());
+      } catch (const missing_runfile&) {
+        if (!std::exchange(runfile_handler_installed, true)) {
+          const auto runfiles_elc =
+              exec.runfile("phst_rules_elisp/elisp/runfiles/runfiles.elc");
+          args.push_back("--load=" + runfiles_elc.string());
+          args.push_back("--funcall=elisp/runfiles/install-handler");
+        }
+        args.push_back("--directory=/bazel-runfile:" + dir.path.string());
       }
-      args.push_back("--directory=/bazel-runfile:" + dir.string());
     }
+
+    void operator()(const load& file) {
+      args.push_back("--load=" + exec.runfile(file.path).string());
+    }
+  } visitor{*this};
+
+  for (const auto& arg : args) {
+    std::visit(visitor, arg);
   }
-  for (const auto& file : load_files) {
-    args.push_back("--load=" + runfile(file).string());
-  }
-  args.insert(args.end(), suffix_args.begin(), suffix_args.end());
-  exec(emacs, args, {});
+  exec(emacs, visitor.args, {});
 }
 
 fs::path executor::runfile(const fs::path& rel) const {
