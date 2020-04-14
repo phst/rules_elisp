@@ -102,7 +102,7 @@ Toolchain rule for Emacs Lisp.
 ## EmacsLispInfo
 
 <pre>
-EmacsLispInfo(<a href="#EmacsLispInfo-transitive_compiled_files">transitive_compiled_files</a>, <a href="#EmacsLispInfo-transitive_load_path">transitive_load_path</a>)
+EmacsLispInfo(<a href="#EmacsLispInfo-transitive_source_files">transitive_source_files</a>, <a href="#EmacsLispInfo-transitive_compiled_files">transitive_compiled_files</a>, <a href="#EmacsLispInfo-transitive_load_path">transitive_load_path</a>)
 </pre>
 
 Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provider.
@@ -112,6 +112,7 @@ Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provi
 
 | Name  | Description |
 | :-------------: | :-------------: |
+| transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the EmacsÂ Lisp source files of this library and all its transitive dependencies.    |
 | transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
 | transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first. The <code>depset</code> elements are structures with the following fields:<br><br>- <code>for_actions</code> is a string specifying the load directory to use for actions, relative to the execution root.<br><br>- <code>for_runfiles</code> is a string specifying the load directory to use at runtime, relative to the runfiles root.    |
 
