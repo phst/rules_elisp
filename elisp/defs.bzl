@@ -20,6 +20,7 @@ load(":util.bzl", "cc_wrapper", "check_relative_filename", "configure_cc_toolcha
 EmacsLispInfo = provider(
     doc = "Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provider.",
     fields = {
+        "transitive_source_files": "A `depset` of `File` objects containing the Emacs Lisp source files of this library and all its transitive dependencies.",
         "transitive_compiled_files": "A `depset` of `File` objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.",
         "transitive_load_path": """A `depset` containing necessary load path additions for this library and all its transitive dependencies.
 The `depset` uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.
@@ -44,6 +45,7 @@ def _library(ctx):
     return [
         DefaultInfo(files = depset(direct = result.outs), runfiles = result.runfiles),
         EmacsLispInfo(
+            transitive_source_files = result.transitive_srcs,
             transitive_compiled_files = result.transitive_outs,
             transitive_load_path = result.transitive_load_path,
         ),
@@ -59,6 +61,16 @@ def _binary(ctx):
     load_path = getattr(ctx.attr, "load_path", [])
     result = _compile(ctx, srcs, ctx.attr.deps, load_path)
     emacs = ctx.toolchains["//elisp:toolchain_type"].emacs
+
+    # If we’re supposed to generate coverage information, use source files
+    # instead of compiled files because we can’t instrument compiled files for
+    # coverage.  We ignore ctx.coverage_instrumented because that doesn’t work
+    # here: it assumes that coverage is generated during compilation, but we
+    # can generate coverage information only at runtime.  Bazel’s coverage
+    # support isn’t really documented; some information is available in the
+    # source code comments of the file
+    # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
+    transitive_files = result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
 
     # We use a C++ driver because the C++ toolchain framework exposes
     # individual actions (unlike Python), and the runfiles implementation
@@ -87,20 +99,45 @@ def _binary(ctx):
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
     bin_runfiles = ctx.runfiles(
-        files = [emacs.files_to_run.executable] + ctx.files._default_libs,
-        transitive_files = depset(transitive = [result.transitive_outs, result.runfiles.files]),
+        files = [emacs.files_to_run.executable] + ctx.files._default_libs + result.outs,
+        transitive_files = depset(transitive = [transitive_files, result.runfiles.files]),
     )
     emacs_runfiles = emacs.default_runfiles
     runfiles = bin_runfiles.merge(emacs_runfiles)
+
+    test_env = {}
+    if ctx.configuration.coverage_enabled and hasattr(ctx.attr, "_lcov_merger"):
+        # Bazel’s coverage runner
+        # (https://github.com/bazelbuild/bazel/blob/3.0.0/tools/test/collect_coverage.sh)
+        # needs a binary called “lcov_merge.”  Its location is passed in the
+        # LCOV_MERGER environmental variable.  For builtin rules, this variable
+        # is set automatically based on a magic “$lcov_merger” or
+        # “:lcov_merger” attribute, but it’s not possible to create such
+        # attributes in Starlark.  Therefore we specify the variable ourselves.
+        # Note that the coverage runner runs in the runfiles root instead of
+        # the execution root, therefore we use “path” instead of “short_path.”
+        runfiles = runfiles.merge(ctx.attr._lcov_merger[DefaultInfo].default_runfiles)
+        test_env["LCOV_MERGER"] = ctx.executable._lcov_merger.path
 
     # https://docs.bazel.build/versions/3.0.0/skylark/rules.html#tools-depending-on-tools
     for tool in ctx.attr._tools:
         runfiles = runfiles.merge(tool[DefaultInfo].default_runfiles)
 
-    return DefaultInfo(
-        executable = executable,
-        runfiles = runfiles,
-    )
+    # The InstrumentedFilesInfo provider needs to be added here instead of in
+    # the “elisp_library” rule for coverage collection to work.
+    return [
+        DefaultInfo(
+            executable = executable,
+            runfiles = runfiles,
+        ),
+        testing.TestEnvironment(test_env),
+        coverage_common.instrumented_files_info(
+            ctx,
+            source_attributes = ["srcs"],
+            dependency_attributes = ["deps"],
+            extensions = ["el"],
+        ),
+    ]
 
 elisp_toolchain = rule(
     implementation = _toolchain,
@@ -240,6 +277,11 @@ elisp_test = rule(
             default = "//elisp:test_template",
             allow_single_file = [".template"],
         ),
+        _lcov_merger = attr.label(
+            default = "@bazel_tools//tools/test:lcov_merger",
+            executable = True,
+            cfg = "target",
+        ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
@@ -281,6 +323,8 @@ def _compile(ctx, srcs, deps, load_path):
         runfiles: a runfiles object for the set of input files
         transitive_load_path: the load path required to load the compiled files
             and all their transitive dependencies
+        transitive_srcs: a depset of source files for this compilation unit
+            and all its transitive dependencies
         transitive_outs: a depset of compiled files for this compilation unit
             and all its transitive dependencies
     """
@@ -289,6 +333,7 @@ def _compile(ctx, srcs, deps, load_path):
         _load_directory_relative_to_package(ctx, dir)
         for dir in load_path
     ]
+    indirect_srcs = [dep[EmacsLispInfo].transitive_source_files for dep in deps]
     indirect_outs = [dep[EmacsLispInfo].transitive_compiled_files for dep in deps]
     transitive_load_path = depset(
         direct = load_path,
@@ -344,6 +389,7 @@ def _compile(ctx, srcs, deps, load_path):
         outs = outs,
         runfiles = ctx.runfiles(transitive_files = transitive_data),
         transitive_load_path = transitive_load_path,
+        transitive_srcs = depset(direct = srcs, transitive = indirect_srcs),
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
