@@ -34,6 +34,14 @@ def rules_elisp_dependencies():
         sha256 = "8369f7d4f372318b205f1e8fd283a3f2757a78751157bd874bac8a2d7187d472",
         strip_prefix = "abseil-cpp-71079e42cb4ae53db02f9bbe446ad51ed62fd17f",
     )
+    http_archive(
+        name = "bazel_skylib",
+        sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
+        urls = [
+            "https://mirror.bazel.build/github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+            "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
+        ],
+    )
 
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
