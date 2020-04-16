@@ -39,6 +39,9 @@ def _toolchain(ctx):
         use_default_shell_env = ctx.attr.use_default_shell_env,
     )
 
+# Note: Toolchain names need to be fully qualified, otherwise external
+# workspaces won’t find them.
+
 def _library(ctx):
     """Rule implementation for the “elisp_library” rule."""
     result = _compile(ctx, ctx.files.srcs, ctx.attr.deps, ctx.attr.load_path)
@@ -60,7 +63,7 @@ def _binary(ctx):
     srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
     load_path = getattr(ctx.attr, "load_path", [])
     result = _compile(ctx, srcs, ctx.attr.deps, load_path)
-    emacs = ctx.toolchains["//elisp:toolchain_type"].emacs
+    emacs = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"].emacs
 
     # If we’re supposed to generate coverage information, use source files
     # instead of compiled files because we can’t instrument compiled files for
@@ -194,7 +197,7 @@ By default, libraries need to be loaded using a filename relative to the workspa
 <var>package</var>/<var>file</var>.
 If you want to add further elements to the load path, use the `load_path` attribute.""",
     provides = [EmacsLispInfo],
-    toolchains = ["//elisp:toolchain_type"],
+    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
     implementation = _library,
 )
 
@@ -239,7 +242,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded in
     fragments = ["cpp"],
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        "//elisp:toolchain_type",
+        "@phst_rules_elisp//elisp:toolchain_type",
     ],
     implementation = _binary,
 )
@@ -300,7 +303,7 @@ You can restrict the tests to be run using the `--test_filter` option.  If set, 
     test = True,
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        "//elisp:toolchain_type",
+        "@phst_rules_elisp//elisp:toolchain_type",
     ],
     implementation = _binary,
 )
@@ -348,7 +351,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive = [dep[DefaultInfo].default_runfiles.files for dep in ctx.attr.deps],
     )
 
-    toolchain = ctx.toolchains["//elisp:toolchain_type"]
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
     emacs = toolchain.emacs
 
     # We compile only one file per Emacs process.  This might seem wasteful,
