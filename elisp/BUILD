@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load(":defs.bzl", "elisp_toolchain")
 load(":defs_test.bzl", "elisp_test_suite")
 
@@ -68,27 +67,22 @@ sh_binary(
     srcs = ["local_emacs.sh"],
 )
 
-stardoc(
-    name = "defs_doc",
-    out = "defs_doc.md",
-    input = "defs.bzl",
-    deps = [
-        ":util_bzl",
-        "@bazel_skylib//lib:paths",
-    ],
+filegroup(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//documentation:__pkg__"],
 )
 
-stardoc(
-    name = "repositories_doc",
-    out = "repositories_doc.md",
-    input = "repositories.bzl",
-    deps = [":builtin_bzl"],
+filegroup(
+    name = "repositories_bzl",
+    srcs = ["repositories.bzl"],
+    visibility = ["//documentation:__pkg__"],
 )
 
 bzl_library(
     name = "util_bzl",
     srcs = ["util.bzl"],
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//documentation:__pkg__"],
     deps = [
         ":builtin_bzl",
         "@bazel_skylib//lib:paths",
@@ -98,7 +92,7 @@ bzl_library(
 bzl_library(
     name = "builtin_bzl",
     srcs = ["@bazel_tools//tools:bzl_srcs"],
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//documentation:__pkg__"],
 )
 
 elisp_test_suite(name = "elisp_test")

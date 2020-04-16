@@ -35,7 +35,7 @@ Then you can use the `elisp_library`, `elisp_binary`, and `elisp_test` rules.
 See the [generated documentation][] and the examples in the `examples`
 directory for details.
 
-[generated documentation]: elisp/defs.md
+[generated documentation]: documentation/elisp_defs.md
 
 ## Load path management
 

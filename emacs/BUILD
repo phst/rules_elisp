@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("//elisp:util.bzl", "COPTS")
 
 alias(
@@ -54,13 +53,8 @@ filegroup(
     visibility = ["//visibility:public"],
 )
 
-stardoc(
-    name = "defs_doc",
-    out = "defs_doc.md",
-    input = "defs.bzl",
-    deps = [
-        "//elisp:builtin_bzl",
-        "//elisp:util_bzl",
-        "@bazel_skylib//lib:paths",
-    ],
+filegroup(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+    visibility = ["//documentation:__pkg__"],
 )
