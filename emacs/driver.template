@@ -15,7 +15,8 @@
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  phst_rules_elisp::executor(argc, argv, envp).exec_emacs(R"**([[install]])**");
+  return phst_rules_elisp::executor(argc, argv, envp)
+      .run_emacs(R"**([[install]])**");
 }
 
 // Local Variables:

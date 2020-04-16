@@ -30,7 +30,9 @@
 #include <variant>
 #include <vector>
 
-#include <unistd.h>
+#include <spawn.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #include "tools/cpp/runfiles/runfiles.h"
 
@@ -125,7 +127,7 @@ executor::executor(for_test, int argc, const char* const* argv,
       orig_env_(copy_env(envp)),
       runfiles_(create_runfiles_for_test()) {}
 
-[[noreturn]] void executor::exec_emacs(const char* install_rel) {
+int executor::run_emacs(const char* install_rel) {
   const auto install = runfile(install_rel);
   const auto emacs = install / "bin" / "emacs";
   const auto shared = get_shared_dir(install);
@@ -135,11 +137,11 @@ executor::executor(for_test, int argc, const char* const* argv,
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", shared / "lisp");
   map.emplace("EMACSPATH", install / "libexec");
-  exec(emacs, {}, map);
+  return this->run(emacs, {}, map);
 }
 
-[[noreturn]] void executor::exec_binary(const char* const wrapper,
-                                        const std::vector<argument>& args) {
+int executor::run_binary(const char* const wrapper,
+                         const std::vector<argument>& args) {
   const auto emacs = runfile(wrapper);
 
   struct {
@@ -175,7 +177,7 @@ executor::executor(for_test, int argc, const char* const* argv,
   for (const auto& arg : args) {
     std::visit(visitor, arg);
   }
-  exec(emacs, visitor.args, {});
+  return this->run(emacs, visitor.args, {});
 }
 
 fs::path executor::runfile(const fs::path& rel) const {
@@ -186,16 +188,26 @@ fs::path executor::runfile(const fs::path& rel) const {
   return fs::canonical(str);
 }
 
-[[noreturn]] void executor::exec(
-    const fs::path& binary, const std::vector<std::string>& args,
-    const std::map<std::string, std::string>& env) {
+int executor::run(const fs::path& binary, const std::vector<std::string>& args,
+                  const std::map<std::string, std::string>& env) {
   auto final_args = build_args(args);
   const auto argv = pointers(final_args);
   auto final_env = build_env(env);
   const auto envp = pointers(final_env);
-  execve(binary.c_str(), argv.data(), envp.data());
-  throw std::system_error(errno, std::generic_category(),
-                          "execve(" + binary.string() + ')');
+  int pid;
+  const int error = posix_spawn(&pid, binary.c_str(), nullptr, nullptr,
+                                argv.data(), envp.data());
+  if (error != 0) {
+    throw std::system_error(error, std::generic_category(),
+                            "posix_spawn(" + binary.string() + ')');
+  }
+  int wstatus;
+  const int status = waitpid(pid, &wstatus, 0);
+  if (status != pid) {
+    throw std::system_error(errno, std::generic_category(),
+                            "waitpid(" + std::to_string(pid) + ')');
+  }
+  return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 }
 
 std::vector<std::string> executor::build_args(

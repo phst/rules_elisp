@@ -15,8 +15,9 @@
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  phst_rules_elisp::executor(phst_rules_elisp::for_test(), argc, argv, envp)
-      .exec_binary(
+  return phst_rules_elisp::executor(phst_rules_elisp::for_test(), argc, argv,
+                                    envp)
+      .run_binary(
           R"**([[emacs]])**",
           {[[directory]],
            phst_rules_elisp::load{"phst_rules_elisp/elisp/ert/runner.elc"},

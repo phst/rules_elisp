@@ -47,17 +47,16 @@ class executor {
   explicit executor(for_test, int argc, const char* const* argv,
                     const char* const* envp);
 
-  [[noreturn]] void exec_emacs(const char* install_rel);
+  int run_emacs(const char* install_rel);
 
-  [[noreturn]] void exec_binary(const char* wrapper,
-                                const std::vector<argument>& args);
+  int run_binary(const char* wrapper, const std::vector<argument>& args);
 
  private:
   std::filesystem::path runfile(const std::filesystem::path& rel) const;
 
-  [[noreturn]] void exec(const std::filesystem::path& binary,
-                         const std::vector<std::string>& args,
-                         const std::map<std::string, std::string>& env);
+  int run(const std::filesystem::path& binary,
+          const std::vector<std::string>& args,
+          const std::map<std::string, std::string>& env);
 
   std::vector<std::string> build_args(
       const std::vector<std::string>& prefix) const;

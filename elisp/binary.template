@@ -15,11 +15,11 @@
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  phst_rules_elisp::executor(argc, argv, envp)
-      .exec_binary(
-        R"**([[emacs]])**",
-        {[[directory]],
-         [[load]]});
+  return phst_rules_elisp::executor(argc, argv, envp)
+      .run_binary(
+          R"**([[emacs]])**",
+          {[[directory]],
+           [[load]]});
 }
 
 // Local Variables:
