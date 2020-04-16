@@ -79,21 +79,19 @@ def _binary(ctx):
     # check_relative_filename should already reject all special characters, but
     # better be sure.
     driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
-    filenames = [
-        check_relative_filename(paths.join(ctx.workspace_name, src.short_path))
-        for src in result.outs
-    ]
     ctx.actions.expand_template(
         template = ctx.file._template,
         output = driver,
         substitutions = {
             "[[directory]]": ", ".join([
-                'phst_rules_elisp::directory{{R"**({})**"}}'.format(check_relative_filename(dir.for_runfiles))
+                'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
                 for dir in result.transitive_load_path.to_list()
             ]),
             "[[emacs]]": check_relative_filename(paths.join(ctx.workspace_name, emacs.files_to_run.executable.short_path)),
-            "[[load]]": ", ".join(['phst_rules_elisp::load{{R"**({})**"}}'.format(f) for f in filenames]),
-            "[[srcs]]": ", ".join(['phst_rules_elisp::runfile{{R"**({})**"}}'.format(f) for f in filenames]),
+            "[[load]]": ", ".join([
+                'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
+                for src in result.outs
+            ]),
         },
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)

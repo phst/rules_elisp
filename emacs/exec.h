@@ -26,20 +26,6 @@ namespace phst_rules_elisp {
 
 struct for_test {};
 
-struct runfile {
-  std::filesystem::path path;
-};
-
-struct directory {
-  std::filesystem::path path;
-};
-
-struct load {
-  std::filesystem::path path;
-};
-
-using argument = std::variant<std::string, runfile, directory, load>;
-
 class executor {
  public:
   explicit executor(int argc, const char* const* argv, const char* const* envp);
@@ -49,10 +35,19 @@ class executor {
 
   int run_emacs(const char* install_rel);
 
-  int run_binary(const char* wrapper, const std::vector<argument>& args);
+  int run_binary(const char* wrapper,
+                 const std::vector<std::filesystem::path>& load_path,
+                 const std::vector<std::filesystem::path>& load_files);
+
+  int run_test(const char* wrapper,
+               const std::vector<std::filesystem::path>& load_path,
+               const std::vector<std::filesystem::path>& srcs);
 
  private:
   std::filesystem::path runfile(const std::filesystem::path& rel) const;
+
+  void add_load_path(std::vector<std::string>& args,
+                     const std::vector<std::filesystem::path>& load_path) const;
 
   int run(const std::filesystem::path& binary,
           const std::vector<std::string>& args,

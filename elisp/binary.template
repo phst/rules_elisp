@@ -18,8 +18,8 @@ int main(int argc, char** argv, char** envp) {
   return phst_rules_elisp::executor(argc, argv, envp)
       .run_binary(
           R"**([[emacs]])**",
-          {[[directory]],
-           [[load]]});
+          {[[directory]]},
+          {[[load]]});
 }
 
 // Local Variables:

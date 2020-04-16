@@ -141,43 +141,30 @@ int executor::run_emacs(const char* install_rel) {
 }
 
 int executor::run_binary(const char* const wrapper,
-                         const std::vector<argument>& args) {
+                         const std::vector<std::filesystem::path>& load_path,
+                         const std::vector<std::filesystem::path>& load_files) {
   const auto emacs = runfile(wrapper);
-
-  struct {
-    const executor& exec;
-    std::vector<std::string> args = {"--quick", "--batch"};
-    bool runfile_handler_installed = false;
-
-    void operator()(const std::string& str) { args.push_back(str); }
-
-    void operator()(const phst_rules_elisp::runfile& file) {
-      args.push_back(exec.runfile(file.path).string());
-    }
-
-    void operator()(const directory& dir) {
-      try {
-        args.push_back("--directory=" + exec.runfile(dir.path).string());
-      } catch (const missing_runfile&) {
-        if (!std::exchange(runfile_handler_installed, true)) {
-          const auto runfiles_elc =
-              exec.runfile("phst_rules_elisp/elisp/runfiles/runfiles.elc");
-          args.push_back("--load=" + runfiles_elc.string());
-          args.push_back("--funcall=elisp/runfiles/install-handler");
-        }
-        args.push_back("--directory=/bazel-runfile:" + dir.path.string());
-      }
-    }
-
-    void operator()(const load& file) {
-      args.push_back("--load=" + exec.runfile(file.path).string());
-    }
-  } visitor{*this};
-
-  for (const auto& arg : args) {
-    std::visit(visitor, arg);
+  std::vector<std::string> args{"--quick", "--batch"};
+  this->add_load_path(args, load_path);
+  for (const auto& file : load_files) {
+    args.push_back("--load=" + runfile(file).string());
   }
-  return this->run(emacs, visitor.args, {});
+  return this->run(emacs, args, {});
+}
+
+int executor::run_test(const char* const wrapper,
+                       const std::vector<std::filesystem::path>& load_path,
+                       const std::vector<std::filesystem::path>& srcs){
+  const auto emacs = runfile(wrapper);
+  std::vector<std::string> args{"--quick", "--batch"};
+  this->add_load_path(args, load_path);
+  const auto runner = this->runfile("phst_rules_elisp/elisp/ert/runner.elc");
+  args.push_back("--load=" + runner.string());
+  args.push_back("--funcall=elisp/ert/run-batch-and-exit");
+  for (const auto& file : srcs) {
+    args.push_back(this->runfile(file).string());
+  }
+  return this->run(emacs, args, {});
 }
 
 fs::path executor::runfile(const fs::path& rel) const {
@@ -186,6 +173,25 @@ fs::path executor::runfile(const fs::path& rel) const {
     throw missing_runfile("runfile not found: " + rel.string());
   }
   return fs::canonical(str);
+}
+
+void executor::add_load_path(
+    std::vector<std::string>& args,
+    const std::vector<std::filesystem::path>& load_path) const {
+  constexpr const char* const runfiles_elc =
+      "phst_rules_elisp/elisp/runfiles/runfiles.elc";
+  bool runfile_handler_installed = false;
+  for (const auto& dir : load_path) {
+    try {
+      args.push_back("--directory=" + runfile(dir).string());
+    } catch (const missing_runfile&) {
+      if (!std::exchange(runfile_handler_installed, true)) {
+        args.push_back("--load=" + runfile(runfiles_elc).string());
+        args.push_back("--funcall=elisp/runfiles/install-handler");
+      }
+      args.push_back("--directory=/bazel-runfile:" + dir.string());
+    }
+  }
 }
 
 int executor::run(const fs::path& binary, const std::vector<std::string>& args,
