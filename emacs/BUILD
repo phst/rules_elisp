@@ -40,8 +40,21 @@ cc_library(
     hdrs = ["exec.h"],
     copts = COPTS,
     visibility = ["//visibility:public"],
+    # Note: This library can’t depend on Abseil directly because it uses
+    # incompatible build flags.  All dependencies need to be mediated through
+    # random.h for now.
     deps = [
+        ":random",
         "@bazel_tools//tools/cpp/runfiles",
+    ],
+)
+
+cc_library(
+    name = "random",
+    srcs = ["random.cc"],
+    hdrs = ["random.h"],
+    deps = [
+        "@com_google_absl//absl/memory",
         "@com_google_absl//absl/random",
         "@com_google_absl//absl/strings",
     ],

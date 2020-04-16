@@ -22,11 +22,7 @@
 
 #include "tools/cpp/runfiles/runfiles.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "absl/random/random.h"
-#pragma GCC diagnostic pop
+#include "emacs/random.h"
 
 namespace phst_rules_elisp {
 
@@ -69,7 +65,7 @@ class executor {
   const std::vector<std::string> orig_args_;
   const std::map<std::string, std::string> orig_env_;
   const std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
-  absl::BitGen random_;
+  random random_;
 };
 
 }  // namespace phst_rules_elisp

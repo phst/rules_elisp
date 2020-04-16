@@ -38,12 +38,7 @@
 
 #include "tools/cpp/runfiles/runfiles.h"
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include "absl/random/random.h"
-#include "absl/strings/str_cat.h"
-#pragma GCC diagnostic pop
+#include "emacs/random.h"
 
 namespace phst_rules_elisp {
 
@@ -112,10 +107,9 @@ static std::map<std::string, std::string> copy_env(const char* const* envp) {
   return map;
 }
 
-static fs::path temp_name(const fs::path& directory, absl::BitGen& random) {
-  std::uniform_int_distribution<unsigned long> dist;
+static fs::path temp_name(const fs::path& directory, random& random) {
   for (int i = 0; i < 10; i++) {
-    const auto name = directory / absl::StrCat("tmp", absl::Hex(dist(random)));
+    const auto name = directory / random.temp_name();
     if (!fs::exists(name)) return name;
   }
   throw std::runtime_error("can’t create temporary file");
