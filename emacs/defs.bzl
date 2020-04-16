@@ -107,7 +107,12 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
         feature_configuration = feature_configuration,
         action_name = C_COMPILE_ACTION_NAME,
         variables = vars,
-    ) + fragment.copts + fragment.conlyopts
+    ) + [
+        # Filter out flags that don’t make sense for C.
+        flag
+        for flag in fragment.copts
+        if flag != "--std=c++17"
+    ] + fragment.conlyopts
     ldflags = cc_common.get_memory_inefficient_command_line(
         feature_configuration = feature_configuration,
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,

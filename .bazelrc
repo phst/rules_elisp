@@ -12,20 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//elisp:defs.bzl", "elisp_library")
-
-elisp_library(
-    name = "runner",
-    testonly = 1,
-    srcs = ["runner.el"],
-    data = [":write_xml_report"],
-    visibility = ["//visibility:public"],
-)
-
-py_binary(
-    name = "write_xml_report",
-    srcs = ["write_xml_report.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    visibility = ["//visibility:public"],
-)
+# It’s important that we build both our code and Abseil with the same C++
+# version.  Otherwise there will be binary incompatibilities.
+build --copt=--std=c++17

@@ -30,8 +30,6 @@
 (require 'pp)
 (require 'rx)
 
-(require 'elisp/runfiles/runfiles)
-
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -48,9 +46,9 @@ source files and load them."
          (print-level 8)
          (print-length 50)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
+         (report-file (elisp/ert/pop--option "--report"))
          (test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
-         (xml-output-file (getenv "XML_OUTPUT_FILE"))
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-dir (getenv "COVERAGE_DIR"))
          (selector (if (member test-filter '(nil "")) t (read test-filter)))
@@ -105,11 +103,25 @@ source files and load them."
       (cl-callf nreverse report)
       (elisp/ert/log--message "Running %d tests finished, %d results unexpected"
                               (length tests) unexpected)
-      (unless (member xml-output-file '(nil ""))
-        (elisp/ert/write--xml-report report xml-output-file))
+      (when report-file
+        ;; Rather than trying to write a well-formed XML file in Emacs Lisp,
+        ;; write the report as a JSON file and let an external binary deal with
+        ;; the conversion to XML.
+        (write-region (json-encode report) nil report-file nil nil nil 'excl))
       (when load-buffers
         (elisp/ert/write--coverage-report coverage-dir load-buffers))
       (kill-emacs (min unexpected 1)))))
+
+(defun elisp/ert/pop--option (name)
+  "Pop a command-line option named NAME from ‘command-line-args-left’.
+If the head of ‘command-line-args-left’ starts with “NAME=”,
+remove it and return the value.  Otherwise, return nil."
+  (cl-check-type name string)
+  (let ((arg (car command-line-args-left))
+        (prefix (concat name "=")))
+    (when (and arg (string-prefix-p prefix arg))
+      (pop command-line-args-left)
+      (substring-no-properties arg (length prefix)))))
 
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
@@ -136,29 +148,6 @@ NAME is the name of the test."
         (current-buffer))
     (insert ?\n)
     (buffer-substring-no-properties (point-min) (point-max))))
-
-(defun elisp/ert/write--xml-report (report output-file)
-  "Write an XML report into OUTPUT-FILE.
-REPORT must be an alist that is used for an intermediary JSON
-representation of the report."
-  (cl-check-type report cons)
-  (cl-check-type output-file string)
-  ;; Rather than trying to write a well-formed XML file in Emacs Lisp,
-  ;; write the report as a JSON file and let an external binary deal with
-  ;; the conversion to XML.
-  (let ((process-environment
-         (append (elisp/runfiles/env-vars) process-environment))
-        (converter (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/ert/write_xml_report"))
-        (json-file (make-temp-file "ert-report-" nil ".json"
-                                   (json-encode report))))
-    (unwind-protect
-        (with-temp-buffer
-          (unless (eq 0 (call-process (file-name-unquote converter) nil t
-                                      nil "--" json-file output-file))
-            (message "%s" (buffer-string))
-            (error "Writing XML output file %s failed" output-file)))
-      (delete-file json-file))))
 
 (defun elisp/ert/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.

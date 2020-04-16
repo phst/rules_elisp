@@ -18,9 +18,11 @@
 #include <cstring>
 #include <filesystem>
 #include <iterator>
+#include <iostream>
 #include <map>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <regex>
 #include <set>
 #include <stdexcept>
@@ -36,16 +38,46 @@
 
 #include "tools/cpp/runfiles/runfiles.h"
 
-namespace phst_rules_elisp {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "absl/random/random.h"
+#include "absl/strings/str_cat.h"
+#pragma GCC diagnostic pop
 
-namespace {
-class missing_runfile : public std::runtime_error {
-  using std::runtime_error::runtime_error;
-};
-}  // namespace
+namespace phst_rules_elisp {
 
 namespace fs = std::filesystem;
 using bazel::tools::cpp::runfiles::Runfiles;
+
+namespace {
+
+class missing_runfile : public std::runtime_error {
+  using std::runtime_error::runtime_error;
+};
+
+class temp_file {
+ public:
+  explicit temp_file(fs::path path) : path_(std::move(path)) {}
+
+  ~temp_file() noexcept {
+    std::error_code code;
+    if (!std::filesystem::remove(path_, code)) {
+      std::clog << "error removing temporary file " << path_ << ": " << code
+                << std::endl;
+    }
+  }
+
+  temp_file(const temp_file&) = delete;
+  temp_file& operator=(const temp_file&) = delete;
+
+  const fs::path& path() const noexcept { return path_; }
+
+ private:
+  fs::path path_;
+};
+
+}  // namespace
 
 template <typename I>
 static std::string join(const I first, const I last) {
@@ -78,6 +110,15 @@ static std::map<std::string, std::string> copy_env(const char* const* envp) {
     }
   }
   return map;
+}
+
+static fs::path temp_name(const fs::path& directory, absl::BitGen& random) {
+  std::uniform_int_distribution<unsigned long> dist;
+  for (int i = 0; i < 10; i++) {
+    const auto name = directory / absl::StrCat("tmp", absl::Hex(dist(random)));
+    if (!fs::exists(name)) return name;
+  }
+  throw std::runtime_error("can’t create temporary file");
 }
 
 static std::unique_ptr<Runfiles> create_runfiles(const std::string& argv0) {
@@ -161,10 +202,28 @@ int executor::run_test(const char* const wrapper,
   const auto runner = this->runfile("phst_rules_elisp/elisp/ert/runner.elc");
   args.push_back("--load=" + runner.string());
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
+  const auto xml_output_file = this->env_var("XML_OUTPUT_FILE");
+  std::optional<temp_file> report_file;
+  if (!xml_output_file.empty()) {
+    const fs::path temp_dir = this->env_var("TEST_TMPDIR");
+    report_file.emplace(temp_name(temp_dir, random_));
+    args.push_back("--report=/:" + report_file->path().string());
+  }
   for (const auto& file : srcs) {
     args.push_back(this->runfile(file).string());
   }
-  return this->run(emacs, args, {});
+  const int code = this->run(emacs, args, {});
+  if (report_file.has_value()) {
+    const auto converter =
+        this->runfile("phst_rules_elisp/elisp/ert/write_xml_report");
+    const int code = this->run(
+        converter, {"--", report_file->path().string(), xml_output_file}, {});
+    if (code != 0) {
+      std::clog << "writing test XML report " << xml_output_file
+                << " failed with code " << code << std::endl;
+    }
+}
+  return code;
 }
 
 fs::path executor::runfile(const fs::path& rel) const {
@@ -173,6 +232,11 @@ fs::path executor::runfile(const fs::path& rel) const {
     throw missing_runfile("runfile not found: " + rel.string());
   }
   return fs::canonical(str);
+}
+
+std::string executor::env_var(const std::string& name) const noexcept {
+  const auto it = orig_env_.find(name);
+  return it == orig_env_.end() ? std::string() : it->second;
 }
 
 void executor::add_load_path(

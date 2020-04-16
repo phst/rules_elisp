@@ -22,6 +22,12 @@
 
 #include "tools/cpp/runfiles/runfiles.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#include "absl/random/random.h"
+#pragma GCC diagnostic pop
+
 namespace phst_rules_elisp {
 
 struct for_test {};
@@ -45,6 +51,7 @@ class executor {
 
  private:
   std::filesystem::path runfile(const std::filesystem::path& rel) const;
+  std::string env_var(const std::string& name) const noexcept;
 
   void add_load_path(std::vector<std::string>& args,
                      const std::vector<std::filesystem::path>& load_path) const;
@@ -62,6 +69,7 @@ class executor {
   const std::vector<std::string> orig_args_;
   const std::map<std::string, std::string> orig_env_;
   const std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
+  absl::BitGen random_;
 };
 
 }  // namespace phst_rules_elisp

@@ -28,6 +28,12 @@ def rules_elisp_dependencies():
         strip_prefix = "emacs-26.3/",
         urls = ["https://ftp.gnu.org/gnu/emacs/emacs-26.3.tar.xz"],
     )
+    http_archive(
+        name = "com_google_absl",
+        urls = ["https://github.com/abseil/abseil-cpp/archive/71079e42cb4ae53db02f9bbe446ad51ed62fd17f.zip"],
+        sha256 = "8369f7d4f372318b205f1e8fd283a3f2757a78751157bd874bac8a2d7187d472",
+        strip_prefix = "abseil-cpp-71079e42cb4ae53db02f9bbe446ad51ed62fd17f",
+    )
 
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""

@@ -41,7 +41,11 @@ cc_library(
     hdrs = ["exec.h"],
     copts = COPTS,
     visibility = ["//visibility:public"],
-    deps = ["@bazel_tools//tools/cpp/runfiles"],
+    deps = [
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/random",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 filegroup(
