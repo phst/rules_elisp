@@ -231,7 +231,9 @@ fs::path executor::runfile(const fs::path& rel) const {
   if (str.empty()) {
     throw missing_runfile("runfile not found: " + rel.string());
   }
-  return fs::canonical(str);
+  // Note: Don’t call fs::canonical here, because the Python stub looks for the
+  // runfiles directory in the original filename.
+  return fs::absolute(str);
 }
 
 std::string executor::env_var(const std::string& name) const noexcept {
