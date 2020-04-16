@@ -154,7 +154,7 @@ int executor::run_binary(const char* const wrapper,
 
 int executor::run_test(const char* const wrapper,
                        const std::vector<std::filesystem::path>& load_path,
-                       const std::vector<std::filesystem::path>& srcs){
+                       const std::vector<std::filesystem::path>& srcs) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args{"--quick", "--batch"};
   this->add_load_path(args, load_path);
