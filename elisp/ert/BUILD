@@ -18,7 +18,6 @@ elisp_library(
     name = "runner",
     testonly = 1,
     srcs = ["runner.el"],
-    data = [":write_xml_report"],
     visibility = ["//visibility:public"],
 )
 
