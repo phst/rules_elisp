@@ -36,7 +36,12 @@ def main() -> None:
         source = workspace / 'bazel-bin' / package / (stem + "_doc.md")
         dest = workspace / package / (stem + ".md")
         print(f'copying {source} to {dest}')
-        shutil.copyfile(source, dest)
+        # Bazel (including Stardoc) interprets all files as Latin-1,
+        # cf. https://docs.bazel.build/versions/3.0.0/build-ref.html#BUILD_files.
+        # However, our files all use UTF-8, leading to double encoding.  Reverse
+        # that effect here.
+        text = source.read_text('utf-8')
+        dest.write_text(text, 'latin-1')
 
 def bazel(*args: Tuple[Text], **kwargs: Dict[Text, Any]) -> Optional[Text]:
     return subprocess.run(['bazel', '--bazelrc=/dev/null'] + list(args),

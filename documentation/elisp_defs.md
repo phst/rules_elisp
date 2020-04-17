@@ -97,7 +97,7 @@ Toolchains can use this to sandbox Emacs, if desired.
 If `wrap` is `True`, the format of the command line is as follows:
 
 ```bash
-emacs --manifest=MANIFEST -- ARGSâ¦
+emacs --manifest=MANIFEST -- ARGS…
 ```
 
 That is, the original arguments for Emacs are separated by a double hyphen (`--`)
@@ -119,7 +119,7 @@ Otherwise, file names are relative to the runfiles root.
 | Name  | Description | Type | Mandatory | Default |
 | :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGSâ¦</code> or <code>emacs ARGSâ¦</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGS…</code> or <code>emacs ARGS…</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 | use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
 | wrap |  Whether the binary given in the <code>emacs</code> attribute is a wrapper around Emacs proper. If <code>True</code>, Bazel passes a manifest file using the <code>--manifest</code> option. See the rule documentation for details.   | Boolean | optional | False |
 
@@ -139,7 +139,7 @@ Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provi
 
 | Name  | Description |
 | :-------------: | :-------------: |
-| transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the EmacsÂ Lisp source files of this library and all its transitive dependencies.    |
+| transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
 | transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
 | transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first. The <code>depset</code> elements are structures with the following fields:<br><br>- <code>for_actions</code> is a string specifying the load directory to use for actions, relative to the execution root.<br><br>- <code>for_runfiles</code> is a string specifying the load directory to use at runtime, relative to the runfiles root.    |
 
