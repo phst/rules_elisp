@@ -299,7 +299,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
       std::clog << "writing test XML report " << xml_output_file
                 << " failed with code " << code << std::endl;
     }
-}
+  }
   return code;
 }
 
