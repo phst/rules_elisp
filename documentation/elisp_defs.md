@@ -82,10 +82,36 @@ You can restrict the tests to be run using the `--test_filter` option.  If set, 
 ## elisp_toolchain
 
 <pre>
-elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>, <a href="#elisp_toolchain-use_default_shell_env">use_default_shell_env</a>)
+elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>, <a href="#elisp_toolchain-use_default_shell_env">use_default_shell_env</a>, <a href="#elisp_toolchain-wrap">wrap</a>)
 </pre>
 
 Toolchain rule for Emacs Lisp.
+This toolchain configures how to run Emacs.
+The executable passed to the `emacs` attribute must be a binary that behaves like Emacs.
+If `wrap` is `False`, Bazel calls it as is, passing arguments that a normal Emacs binary would accept.
+If `wrap` is `True`, Bazel calls the binary with a special `--manifest` option.
+The value of the option is the filename of a JSON file containing a manifest.
+The manifest specifies which files should be readable and/or writable by Emacs.
+Toolchains can use this to sandbox Emacs, if desired.
+
+If `wrap` is `True`, the format of the command line is as follows:
+
+```bash
+emacs --manifest=MANIFEST -- ARGSâ¦
+```
+
+That is, the original arguments for Emacs are separated by a double hyphen (`--`)
+so that argument parsers can distinguish between the `--manifest` option and
+Emacs arguments.
+
+The manifest is a JSON object with the following keys:
+
+- `loadPath` is a list of directory names making up the load path.
+- `inputFiles` is a list of files that should be readable.
+- `outputFiles` is a list of files that should be writable.
+
+When executing an action, all file names are relative to the execution root.
+Otherwise, file names are relative to the runfiles root.
 
 **ATTRIBUTES**
 
@@ -93,8 +119,9 @@ Toolchain rule for Emacs Lisp.
 | Name  | Description | Type | Mandatory | Default |
 | :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| emacs |  An executable file that behaves like the Emacs binary.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGSâ¦</code> or <code>emacs ARGSâ¦</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 | use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
+| wrap |  Whether the binary given in the <code>emacs</code> attribute is a wrapper around Emacs proper. If <code>True</code>, Bazel passes a manifest file using the <code>--manifest</code> option. See the rule documentation for details.   | Boolean | optional | False |
 
 
 <a name="#EmacsLispInfo"></a>

@@ -14,16 +14,23 @@
 
 #include "emacs/exec.h"
 
-int main(int argc, char** argv, char** envp) {
-  return phst_rules_elisp::executor(argc, argv, envp)
-      .run_binary(
-          R"**([[emacs]])**",
-          phst_rules_elisp::mode::[[mode]],
-          {[[directory]]},
-          {[[load]]},
-          {[[data]]});
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+namespace phst_rules_elisp {
+namespace {
+
+using ::testing::Eq;
+
+TEST(executor, run_binary_wrap) {
+  const char *const argv[2] = {"unused", nullptr};
+  const char *const envp[1] = {nullptr};
+  EXPECT_THAT(executor(for_test(), 1, argv, envp)
+                  .run_binary("phst_rules_elisp/emacs/wrap/wrap", mode::wrap,
+                              {"phst_rules_elisp"}, {},
+                              {"phst_rules_elisp/emacs/exec.h"}),
+              Eq(0));
 }
 
-// Local Variables:
-// mode: c++
-// End:
+}  // namespace
+}  // namespace phst_rules_elisp

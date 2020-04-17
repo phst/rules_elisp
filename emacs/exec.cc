@@ -17,8 +17,11 @@
 #include <cerrno>
 #include <cstring>
 #include <filesystem>
+#include <fstream>
 #include <iterator>
+#include <ios>
 #include <iostream>
+#include <locale>
 #include <map>
 #include <memory>
 #include <numeric>
@@ -36,8 +39,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "google/protobuf/repeated_field.h"
+#include "google/protobuf/util/json_util.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
+#include "emacs/manifest.pb.h"
 #include "emacs/random.h"
 
 namespace phst_rules_elisp {
@@ -151,6 +157,59 @@ static fs::path get_shared_dir(const fs::path& install) {
   return *dirs.begin();
 }
 
+static void write_file(const fs::path& path, const std::string_view contents) {
+  std::ofstream stream;
+  // Ensure that failures aren’t silently ignored.
+  stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+  stream.imbue(std::locale::classic());
+  // We can only open the file now, otherwise failures during open would have
+  // been ignored.
+  stream.open(path);
+  // Make sure to use unformatted output to avoid messing around with locales.
+  stream.write(contents.data(), contents.size());
+  // It’s crucial to call close() explicitly because the destructor swallows
+  // exceptions.
+  stream.close();
+}
+
+static void add_manifest(const mode mode, std::optional<temp_file>& file,
+                         std::vector<std::string>& args, random& random) {
+  if (mode == mode::direct) return;
+  const auto path = temp_name(fs::temp_directory_path(), random);
+  file.emplace(path);
+  args.push_back("--manifest=" + path.string());
+  args.push_back("--");
+}
+
+static void add_to_manifest(
+    const std::vector<fs::path>& files,
+    google::protobuf::RepeatedPtrField<std::string>& field) {
+  for (const auto& file : files) {
+    if (file.is_absolute()) {
+      throw std::invalid_argument("filename " + file.string() + " is absolute");
+    }
+    field.Add(file.string());
+  }
+}
+
+static void write_manifest(const std::vector<fs::path>& load_path,
+                           const std::vector<fs::path>& load_files,
+                           const std::vector<fs::path>& data_files,
+                           const std::vector<fs::path>& output_files,
+                           const std::optional<temp_file>& file) {
+  if (!file.has_value()) return;
+  Manifest manifest;
+  add_to_manifest(load_path, *manifest.mutable_load_path());
+  add_to_manifest(load_files, *manifest.mutable_input_files());
+  add_to_manifest(data_files, *manifest.mutable_input_files());
+  add_to_manifest(output_files, *manifest.mutable_output_files());
+  std::string json;
+  const auto status =
+      google::protobuf::util::MessageToJsonString(manifest, &json);
+  if (!status.ok()) throw std::runtime_error(status.ToString());
+  write_file(file->path(), json);
+}
+
 executor::executor(int argc, const char* const* argv, const char* const* envp)
     : orig_args_(argv, argv + argc),
       orig_env_(copy_env(envp)),
@@ -175,23 +234,34 @@ int executor::run_emacs(const char* install_rel) {
   return this->run(emacs, {}, map);
 }
 
-int executor::run_binary(const char* const wrapper,
+int executor::run_binary(const char* const wrapper, const mode mode,
                          const std::vector<std::filesystem::path>& load_path,
-                         const std::vector<std::filesystem::path>& load_files) {
+                         const std::vector<std::filesystem::path>& load_files,
+                         const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
-  std::vector<std::string> args{"--quick", "--batch"};
+  std::optional<temp_file> manifest;
+  std::vector<std::string> args;
+  add_manifest(mode, manifest, args, random_);
+  args.push_back("--quick");
+  args.push_back("--batch");
   this->add_load_path(args, load_path);
   for (const auto& file : load_files) {
     args.push_back("--load=" + runfile(file).string());
   }
+  write_manifest(load_path, load_files, data_files, {}, manifest);
   return this->run(emacs, args, {});
 }
 
-int executor::run_test(const char* const wrapper,
+int executor::run_test(const char* const wrapper, const mode mode,
                        const std::vector<std::filesystem::path>& load_path,
-                       const std::vector<std::filesystem::path>& srcs) {
+                       const std::vector<std::filesystem::path>& srcs,
+                       const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
-  std::vector<std::string> args{"--quick", "--batch"};
+  std::optional<temp_file> manifest;
+  std::vector<std::string> args;
+  add_manifest(mode, manifest, args, random_);
+  args.push_back("--quick");
+  args.push_back("--batch");
   this->add_load_path(args, load_path);
   const auto runner = this->runfile("phst_rules_elisp/elisp/ert/runner.elc");
   args.push_back("--load=" + runner.string());
@@ -205,6 +275,19 @@ int executor::run_test(const char* const wrapper,
   }
   for (const auto& file : srcs) {
     args.push_back(this->runfile(file).string());
+  }
+  if (manifest.has_value()) {
+    std::vector<fs::path> outputs;
+    if (report_file.has_value()) {
+      outputs.push_back(report_file->path());
+    }
+    if (this->env_var("COVERAGE") == "1") {
+      const auto coverage_dir = this->env_var("COVERAGE_DIR");
+      if (!coverage_dir.empty()) {
+        outputs.push_back(fs::path(coverage_dir) / "emacs-lisp.dat");
+      }
+    }
+    write_manifest(load_path, srcs, data_files, outputs, manifest);
   }
   const int code = this->run(emacs, args, {});
   if (report_file.has_value()) {

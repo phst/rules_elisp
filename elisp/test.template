@@ -19,8 +19,10 @@ int main(int argc, char** argv, char** envp) {
                                     envp)
       .run_test(
           R"**([[emacs]])**",
+          phst_rules_elisp::mode::[[mode]],
           {[[directory]]},
-          {[[load]]});
+          {[[load]]},
+          {[[data]]});
 }
 
 // Local Variables:

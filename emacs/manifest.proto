@@ -12,18 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "emacs/exec.h"
+syntax = "proto3";
 
-int main(int argc, char** argv, char** envp) {
-  return phst_rules_elisp::executor(argc, argv, envp)
-      .run_binary(
-          R"**([[emacs]])**",
-          phst_rules_elisp::mode::[[mode]],
-          {[[directory]]},
-          {[[load]]},
-          {[[data]]});
+package phst_rules_elisp;
+
+// Represens an Emacs Lisp manifest.  See the documentation of elisp_toolchain
+// for details.
+message Manifest {
+  repeated string load_path = 1;
+  repeated string input_files = 2;
+  repeated string output_files = 3;
 }
-
-// Local Variables:
-// mode: c++
-// End:

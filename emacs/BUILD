@@ -44,8 +44,24 @@ cc_library(
     # incompatible build flags.  All dependencies need to be mediated through
     # random.h for now.
     deps = [
+        ":manifest_cc_proto",
         ":random",
         "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_protobuf//:protobuf",
+    ],
+)
+
+cc_test(
+    name = "exec_test",
+    srcs = ["exec_test.cc"],
+    copts = COPTS,
+    data = [
+        "exec.h",
+        "//emacs/wrap",
+    ],
+    deps = [
+        ":exec",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
@@ -58,6 +74,16 @@ cc_library(
         "@com_google_absl//absl/random",
         "@com_google_absl//absl/strings",
     ],
+)
+
+proto_library(
+    name = "manifest_proto",
+    srcs = ["manifest.proto"],
+)
+
+cc_proto_library(
+    name = "manifest_cc_proto",
+    deps = [":manifest_proto"],
 )
 
 filegroup(

@@ -28,6 +28,8 @@ namespace phst_rules_elisp {
 
 struct for_test {};
 
+enum class mode { direct, wrap };
+
 class executor {
  public:
   explicit executor(int argc, const char* const* argv, const char* const* envp);
@@ -37,13 +39,15 @@ class executor {
 
   int run_emacs(const char* install_rel);
 
-  int run_binary(const char* wrapper,
+  int run_binary(const char* wrapper, mode mode,
                  const std::vector<std::filesystem::path>& load_path,
-                 const std::vector<std::filesystem::path>& load_files);
+                 const std::vector<std::filesystem::path>& load_files,
+                 const std::vector<std::filesystem::path>& data_files);
 
-  int run_test(const char* wrapper,
+  int run_test(const char* wrapper, mode mode,
                const std::vector<std::filesystem::path>& load_path,
-               const std::vector<std::filesystem::path>& srcs);
+               const std::vector<std::filesystem::path>& srcs,
+               const std::vector<std::filesystem::path>& data_files);
 
  private:
   std::filesystem::path runfile(const std::filesystem::path& rel) const;

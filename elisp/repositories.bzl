@@ -42,6 +42,12 @@ def rules_elisp_dependencies():
             "https://github.com/bazelbuild/bazel-skylib/releases/download/1.0.2/bazel-skylib-1.0.2.tar.gz",
         ],
     )
+    http_archive(
+        name = "com_google_protobuf",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
+        strip_prefix = "protobuf-3.11.4",
+        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+    )
 
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""

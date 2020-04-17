@@ -37,6 +37,7 @@ def _toolchain(ctx):
     return platform_common.ToolchainInfo(
         emacs = ctx.attr.emacs,
         use_default_shell_env = ctx.attr.use_default_shell_env,
+        wrap = ctx.attr.wrap,
     )
 
 # Note: Toolchain names need to be fully qualified, otherwise external
@@ -63,7 +64,11 @@ def _binary(ctx):
     srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
     load_path = getattr(ctx.attr, "load_path", [])
     result = _compile(ctx, srcs, ctx.attr.deps, load_path)
-    emacs = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"].emacs
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    emacs = toolchain.emacs
+
+    # Only pass in data files when needed.
+    data_files_for_manifest = result.runfiles if toolchain.wrap else []
 
     # If we’re supposed to generate coverage information, use source files
     # instead of compiled files because we can’t instrument compiled files for
@@ -95,6 +100,11 @@ def _binary(ctx):
                 'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
                 for src in result.outs
             ]),
+            "[[data]]": ", ".join([
+                'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, file.short_path)))
+                for file in data_files_for_manifest
+            ]),
+            "[[mode]]": "wrap" if toolchain.wrap else "direct",
         },
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
@@ -144,7 +154,11 @@ elisp_toolchain = rule(
     implementation = _toolchain,
     attrs = {
         "emacs": attr.label(
-            doc = "An executable file that behaves like the Emacs binary.",
+            doc = """An executable file that behaves like the Emacs binary.
+Depending on whether `wrap` is `True`, Bazel invokes this executable
+with a command line like `emacs --manifest=MANIFEST -- ARGS…` or `emacs ARGS…`.
+The `--manifest` flag is only present if `wrap` is `True`.
+See the rule documentation for details.""",
             mandatory = True,
             executable = True,
             cfg = "target",
@@ -153,8 +167,40 @@ elisp_toolchain = rule(
             doc = "Whether actions should inherit the external shell environment.",
             default = False,
         ),
+        "wrap": attr.bool(
+            doc = """Whether the binary given in the `emacs` attribute is a wrapper around Emacs proper.
+If `True`, Bazel passes a manifest file using the `--manifest` option.
+See the rule documentation for details.""",
+            default = False,
+        ),
     },
-    doc = """Toolchain rule for Emacs Lisp.""",
+    doc = """Toolchain rule for Emacs Lisp.
+This toolchain configures how to run Emacs.
+The executable passed to the `emacs` attribute must be a binary that behaves like Emacs.
+If `wrap` is `False`, Bazel calls it as is, passing arguments that a normal Emacs binary would accept.
+If `wrap` is `True`, Bazel calls the binary with a special `--manifest` option.
+The value of the option is the filename of a JSON file containing a manifest.
+The manifest specifies which files should be readable and/or writable by Emacs.
+Toolchains can use this to sandbox Emacs, if desired.
+
+If `wrap` is `True`, the format of the command line is as follows:
+
+```bash
+emacs --manifest=MANIFEST -- ARGS…
+```
+
+That is, the original arguments for Emacs are separated by a double hyphen (`--`)
+so that argument parsers can distinguish between the `--manifest` option and
+Emacs arguments.
+
+The manifest is a JSON object with the following keys:
+
+- `loadPath` is a list of directory names making up the load path.
+- `inputFiles` is a list of files that should be readable.
+- `outputFiles` is a list of files that should be writable.
+
+When executing an action, all file names are relative to the execution root.
+Otherwise, file names are relative to the runfiles root.""",
     provides = [platform_common.ToolchainInfo],
 )
 
@@ -354,32 +400,53 @@ def _compile(ctx, srcs, deps, load_path):
     toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
     emacs = toolchain.emacs
 
+    # Expand load path only if needed.
+    flat_load_path = [
+        _load_directory_for_actions(d)
+        for d in transitive_load_path.to_list()
+    ] if toolchain.wrap else None
+
     # We compile only one file per Emacs process.  This might seem wasteful,
     # but since compilation can execute arbitrary code, it ensures that
     # compilation actions don’t interfere with each other.
     for src in srcs:
         out = ctx.actions.declare_file(src.basename + "c", sibling = src)
+        args = []
+        inputs = depset(
+            direct = [src, ctx.file._compile],
+            transitive = indirect_outs + [transitive_data],
+        )
+        if toolchain.wrap:
+            manifest = ctx.actions.declare_file(src.basename + ".manifest.json", sibling = src)
+            ctx.actions.write(
+                output = manifest,
+                content = struct(
+                    loadPath = flat_load_path,
+                    inputFiles = [f.path for f in inputs.to_list()],
+                    outputFiles = [out.path],
+                ).to_json(),
+            )
+            args += ["--manifest=" + manifest.path, "--"]
+            inputs = depset(direct = [manifest], transitive = [inputs])
+        args += [
+            "--quick",
+            "--batch",
+            ctx.actions.args().add_all(
+                transitive_load_path,
+                map_each = _load_directory_for_actions,
+                format_each = "--directory=%s",
+                uniquify = True,
+                expand_directories = False,
+            ),
+            "--load=" + ctx.file._compile.path,
+            src.path,
+            out.path,
+        ]
         ctx.actions.run(
             outputs = [out],
-            inputs = depset(
-                direct = [src, ctx.file._compile],
-                transitive = indirect_outs + [transitive_data],
-            ),
+            inputs = inputs,
             executable = emacs.files_to_run,
-            arguments = [
-                "--quick",
-                "--batch",
-                ctx.actions.args().add_all(
-                    transitive_load_path,
-                    map_each = _load_directory_for_actions,
-                    format_each = "--directory=%s",
-                    uniquify = True,
-                    expand_directories = False,
-                ),
-                "--load=" + ctx.file._compile.path,
-                src.path,
-                out.path,
-            ],
+            arguments = args,
             mnemonic = "ElispCompile",
             progress_message = "Compiling Emacs Lisp library {}".format(out.short_path),
             use_default_shell_env = toolchain.use_default_shell_env,
