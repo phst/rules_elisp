@@ -73,7 +73,7 @@ source files and load them."
     (mapc #'load command-line-args-left)
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
-          (report `((start-time . ,(format-time-string "%FT%T.%9NZ" nil t))))
+          (report `((startTime . ,(elisp/ert/json--timestamp))))
           (test-reports ())
           (start-time (current-time)))
       (or tests (error "Selector %S doesn’t match any tests" selector))
@@ -87,9 +87,9 @@ source files and load them."
                (expected (ert-test-result-expected-p test result))
                (status (ert-string-for-test-result result expected))
                (report `((name . ,(symbol-name name))
-                         (elapsed . ,(float-time duration))
-                         (status . ,status)
-                         (expected . ,(if expected :json-true :json-false)))))
+                         (elapsed . ,(elisp/ert/json--duration duration))
+                         (status . ,(upcase status))
+                         (expected . ,(if expected t :json-false)))))
           (elisp/ert/log--message "Test %s %s and took %d ms" name status
                                   (* (float-time duration) 1000))
           (or expected (cl-incf unexpected))
@@ -98,7 +98,9 @@ source files and load them."
               (message "%s" message)
               (push `(message . ,message) report)))
           (push report test-reports)))
-      (push `(elapsed . ,(float-time (time-subtract nil start-time))) report)
+      (push `(elapsed . ,(elisp/ert/json--duration
+                          (time-subtract nil start-time)))
+            report)
       (push `(tests . ,(nreverse test-reports)) report)
       (cl-callf nreverse report)
       (elisp/ert/log--message "Running %d tests finished, %d results unexpected"
@@ -263,6 +265,17 @@ to be used as root."
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
   (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
+
+;; The next two functions serialize time values in the format described at
+;; https://developers.google.com/protocol-buffers/docs/proto3#json.
+
+(defun elisp/ert/json--timestamp (&optional time)
+  "Format TIME or the current time for JSON."
+  (format-time-string "%FT%T.%NZ" time t))
+
+(defun elisp/ert/json--duration (duration)
+  "Format DURATION for JSON."
+  (format-time-string "%s.%Ns" duration t))
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here

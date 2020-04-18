@@ -12,11 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//elisp:defs.bzl", "elisp_library")
-
-elisp_library(
-    name = "runner",
-    testonly = 1,
-    srcs = ["runner.el"],
+cc_library(
+    name = "tinyxml2",
+    srcs = ["tinyxml2.cpp"],
+    hdrs = ["tinyxml2.h"],
     visibility = ["//visibility:public"],
 )

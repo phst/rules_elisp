@@ -130,10 +130,6 @@ def _binary(ctx):
         runfiles = runfiles.merge(ctx.attr._lcov_merger[DefaultInfo].default_runfiles)
         test_env["LCOV_MERGER"] = ctx.executable._lcov_merger.path
 
-    # https://docs.bazel.build/versions/3.0.0/skylark/rules.html#tools-depending-on-tools
-    for tool in ctx.attr._tools:
-        runfiles = runfiles.merge(tool[DefaultInfo].default_runfiles)
-
     # The InstrumentedFilesInfo provider needs to be added here instead of in
     # the “elisp_library” rule for coverage collection to work.
     return [
@@ -268,7 +264,6 @@ elisp_binary = rule(
             allow_files = [".elc"],
             allow_empty = False,
         ),
-        _tools = attr.label_list(),
         _template = attr.label(
             default = "//elisp:binary_template",
             allow_single_file = [".template"],
@@ -314,11 +309,6 @@ elisp_test = rule(
             default = ["//elisp/runfiles", "//elisp/ert:runner"],
             allow_files = [".elc"],
             allow_empty = False,
-        ),
-        _tools = attr.label_list(
-            default = ["//elisp/ert:write_xml_report"],
-            allow_files = True,
-            cfg = "target",
         ),
         _template = attr.label(
             default = "//elisp:test_template",

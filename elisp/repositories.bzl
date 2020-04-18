@@ -48,6 +48,13 @@ def rules_elisp_dependencies():
         strip_prefix = "protobuf-3.11.4",
         sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
     )
+    http_archive(
+        name = "leethomason_tinyxml2",
+        urls = ["https://github.com/leethomason/tinyxml2/archive/8.0.0.zip"],
+        sha256 = "ad17d277b23b32edfded29890201adeb946b33be80094c3f804688038be3a5bd",
+        strip_prefix = "tinyxml2-8.0.0",
+        build_file = "@//:tinyxml2.BUILD",
+    )
 
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""

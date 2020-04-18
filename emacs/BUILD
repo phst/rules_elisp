@@ -46,8 +46,10 @@ cc_library(
     deps = [
         ":manifest_cc_proto",
         ":random",
+        ":report_cc_proto",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_protobuf//:protobuf",
+        "@leethomason_tinyxml2//:tinyxml2",
     ],
 )
 
@@ -84,6 +86,20 @@ proto_library(
 cc_proto_library(
     name = "manifest_cc_proto",
     deps = [":manifest_proto"],
+)
+
+proto_library(
+    name = "report_proto",
+    srcs = ["report.proto"],
+    deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "report_cc_proto",
+    deps = [":report_proto"],
 )
 
 filegroup(

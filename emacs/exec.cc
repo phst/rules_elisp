@@ -14,13 +14,17 @@
 
 #include "emacs/exec.h"
 
+#include <algorithm>
 #include <cerrno>
+#include <cstdio>
 #include <cstring>
+#include <exception>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
 #include <ios>
 #include <iostream>
+#include <iterator>
+#include <limits>
 #include <locale>
 #include <map>
 #include <memory>
@@ -41,15 +45,19 @@
 
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/util/json_util.h"
+#include "google/protobuf/util/time_util.h"
+#include "tinyxml2.h"
 #include "tools/cpp/runfiles/runfiles.h"
 
 #include "emacs/manifest.pb.h"
+#include "emacs/report.pb.h"
 #include "emacs/random.h"
 
 namespace phst_rules_elisp {
 
 namespace fs = std::filesystem;
 using bazel::tools::cpp::runfiles::Runfiles;
+using google::protobuf::util::TimeUtil;
 
 namespace {
 
@@ -76,6 +84,57 @@ class temp_file {
 
  private:
   fs::path path_;
+};
+
+class stream {
+ public:
+  explicit stream(const fs::path& path, const char* const mode)
+      : file_(std::fopen(path.c_str(), mode)) {
+    if (file_ == nullptr) {
+      throw std::ios::failure("error opening file " + path.string() +
+                              " in mode " + mode);
+    }
+    this->check();
+  }
+
+  ~stream() noexcept {
+    // We require calling close() explicitly.
+    if (file_ == nullptr) return;
+    std::clog << "file still open" << std::endl;
+    std::terminate();
+  }
+
+  stream(const stream&) = delete;
+  stream& operator=(const stream&) = delete;
+
+  std::FILE* file() {
+    this->check();
+    return file_;
+  }
+
+  void close() {
+    this->check();
+    const auto status = std::fclose(file_);
+    file_ = nullptr;
+    if (status != 0) throw std::ios::failure("error closing file");
+  }
+
+  void write(const std::string_view data) {
+    this->check();
+    if (std::fwrite(data.data(), 1, data.size(), file_) != data.size()) {
+      throw std::ios::failure("error writing " + std::to_string(data.size()) +
+                              " characters");
+    }
+    this->check();
+  }
+
+ private:
+  void check() {
+    if (file_ == nullptr) throw std::logic_error("file is already closed");
+    if (std::ferror(file_) != 0) throw std::ios::failure("file error");
+  }
+
+  std::FILE* file_;
 };
 
 }  // namespace
@@ -157,16 +216,27 @@ static fs::path get_shared_dir(const fs::path& install) {
   return *dirs.begin();
 }
 
-static void write_file(const fs::path& path, const std::string_view contents) {
-  std::ofstream stream;
+static std::string read_file(const fs::path& path) {
+  std::ifstream stream;
   // Ensure that failures aren’t silently ignored.
   stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
   stream.imbue(std::locale::classic());
   // We can only open the file now, otherwise failures during open would have
   // been ignored.
-  stream.open(path);
-  // Make sure to use unformatted output to avoid messing around with locales.
-  stream.write(contents.data(), contents.size());
+  stream.open(path, std::ios::in | std::ios::binary);
+  // Make sure to use unformatted input to avoid messing around with locales.
+  using iterator = std::istreambuf_iterator<char>;
+  const std::string result(iterator(stream), iterator{});
+  // It’s crucial to call close() explicitly because the destructor swallows
+  // exceptions.
+  stream.close();
+  return result;
+}
+
+static void write_file(const fs::path& path, const std::string_view contents) {
+  // We use std::fopen, because only that can open a file in exclusive mode.
+  stream stream(path, "wbx");
+  stream.write(contents);
   // It’s crucial to call close() explicitly because the destructor swallows
   // exceptions.
   stream.close();
@@ -208,6 +278,74 @@ static void write_manifest(const std::vector<fs::path>& load_path,
       google::protobuf::util::MessageToJsonString(manifest, &json);
   if (!status.ok()) throw std::runtime_error(status.ToString());
   write_file(file->path(), json);
+}
+
+static double float_seconds(
+    const google::protobuf::Duration& duration) noexcept {
+  return static_cast<double>(duration.seconds()) +
+         static_cast<double>(duration.nanos()) / 1'000'000'000;
+}
+
+static void convert_report(const fs::path& json_file, const fs::path& xml_file) {
+  const auto json = read_file(json_file);
+  TestReport report;
+  const auto status =
+      google::protobuf::util::JsonStringToMessage(json, &report);
+  if (!status.ok()) {
+    throw std::runtime_error("invalid JSON report: " + json + "; " +
+                             status.ToString());
+  }
+  stream stream(xml_file, "wbx");
+  tinyxml2::XMLPrinter printer(stream.file());
+  // The expected format of the XML output file isn’t well-documented.
+  // https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
+  // only states that the XML file is “ANT-like.”
+  // https://llg.cubic.org/docs/junit/ and
+  // https://help.catchsoftware.com/display/ET/JUnit+Format contain a bit of
+  // documentation.
+  printer.PushHeader(false, true);
+  const auto& tests = report.tests();
+  const auto total = report.tests_size();
+  const auto unexpected =
+      std::count_if(tests.begin(), tests.end(),
+                    [](const Test& test) { return !test.expected(); });
+  const auto failures =
+      std::count_if(tests.begin(), tests.end(), [](const Test& test) {
+        return !test.expected() && test.status() == FAILED;
+      });
+  const auto errors = unexpected - failures;
+  const auto total_str = std::to_string(total);
+  const auto failures_str = std::to_string(failures);
+  const auto errors_str = std::to_string(errors);
+  const auto start_time_str = TimeUtil::ToString(report.start_time());
+  const auto elapsed_str = std::to_string(float_seconds(report.elapsed()));
+  printer.OpenElement("testsuites");
+  printer.PushAttribute("tests", total_str.c_str());
+  printer.PushAttribute("time", elapsed_str.c_str());
+  printer.PushAttribute("failures", failures_str.c_str());
+  printer.OpenElement("testsuite");
+  printer.PushAttribute("id", "0");
+  printer.PushAttribute("tests", total_str.c_str());
+  printer.PushAttribute("time", elapsed_str.c_str());
+  printer.PushAttribute("timestamp", start_time_str.c_str());
+  printer.PushAttribute("failures", failures_str.c_str());
+  printer.PushAttribute("errors", errors_str.c_str());
+  for (const auto& test : report.tests()) {
+    printer.OpenElement("testcase");
+    printer.PushAttribute("name", test.name().c_str());
+    printer.PushAttribute(
+        "time", std::to_string(float_seconds(test.elapsed())).c_str());
+    if (!test.expected()) {
+      printer.OpenElement(test.status() == FAILED ? "failure" : "error");
+      printer.PushAttribute("type", test.status());
+      printer.PushText(test.message().c_str());
+      printer.CloseElement();
+    }
+    printer.CloseElement();
+  }
+  printer.CloseElement();
+  printer.CloseElement();
+  stream.close();
 }
 
 executor::executor(int argc, const char* const* argv, const char* const* envp)
@@ -291,14 +429,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
   }
   const int code = this->run(emacs, args, {});
   if (report_file.has_value()) {
-    const auto converter =
-        this->runfile("phst_rules_elisp/elisp/ert/write_xml_report");
-    const int code = this->run(
-        converter, {"--", report_file->path().string(), xml_output_file}, {});
-    if (code != 0) {
-      std::clog << "writing test XML report " << xml_output_file
-                << " failed with code " << code << std::endl;
-    }
+    convert_report(report_file->path(), xml_output_file);
   }
   return code;
 }
