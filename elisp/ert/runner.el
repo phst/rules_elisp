@@ -109,7 +109,7 @@ source files and load them."
         ;; Rather than trying to write a well-formed XML file in Emacs Lisp,
         ;; write the report as a JSON file and let an external binary deal with
         ;; the conversion to XML.
-        (write-region (json-encode report) nil report-file nil nil nil 'excl))
+        (write-region (json-encode report) nil report-file))
       (when load-buffers
         (elisp/ert/write--coverage-report coverage-dir load-buffers))
       (kill-emacs (min unexpected 1)))))
