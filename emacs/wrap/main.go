@@ -38,11 +38,11 @@ func main() {
 	}
 	jsonData, err := ioutil.ReadFile(manifestFile)
 	if err != nil {
-		log.Fatal("can’t read manifest: %s", err)
+		log.Fatalf("can’t read manifest: %s", err)
 	}
 	var got map[string][]string
 	if err := json.Unmarshal(jsonData, &got); err != nil {
-		log.Fatal("can’t decode manifest: %s", err)
+		log.Fatalf("can’t decode manifest: %s", err)
 	}
 	want := map[string][]string{
 		"loadPath":   []string{"phst_rules_elisp"},
