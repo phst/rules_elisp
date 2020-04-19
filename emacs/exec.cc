@@ -241,7 +241,9 @@ class temp_file : public file {
         return;
       }
     }
-    throw std::runtime_error("can’t create temporary file");
+    throw std::runtime_error("can’t create temporary file in directory " +
+                             directory.string() + " with template " +
+                             std::string(tmpl));
   }
 
   ~temp_file() noexcept override {
