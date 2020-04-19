@@ -16,6 +16,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cassert>
 #include <cerrno>
 #include <cstdio>
 #include <cstring>
@@ -32,12 +33,14 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <optional>
 #include <ostream>
 #include <random>
 #include <regex>
 #include <set>
 #include <sstream>
 #include <stdexcept>
+#include <streambuf>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -70,28 +73,42 @@ class missing_runfile : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 
-class stream {
+class file : public std::streambuf {
  public:
-  static std::unique_ptr<stream> open(fs::path path, const char* const mode) {
-    const auto file = std::fopen(path.c_str(), mode);
-    if (file == nullptr) {
-      throw std::ios::failure("error opening file " + path.string() +
-                              " in mode " + mode);
-    }
-    return std::unique_ptr<stream>(new stream(file, std::move(path)));
+  explicit file(fs::path path, const char* const mode) {
+    this->open(std::move(path), mode);
+    this->init();
   }
 
-  ~stream() noexcept {
+  ~file() noexcept override {
     // We require calling close() explicitly.
     if (file_ == nullptr) return;
-    std::clog << "file still open" << std::endl;
+    std::clog << "file " << path_ << " still open" << std::endl;
     std::terminate();
   }
 
-  stream(const stream&) = delete;
-  stream& operator=(const stream&) = delete;
+  file(const file&) = delete;
 
-  std::FILE* file() {
+  file(file&& other) {
+    const auto n = other.egptr() - other.eback();
+    this->swap(other);
+    this->setg(&get_, &get_ + n, &get_ + 1);
+  }
+
+  file& operator=(file other) {
+    this->close();
+    this->swap(other);
+    return *this;
+  }
+
+  void swap(file& other) {
+    this->std::streambuf::swap(other);
+    std::swap(file_, other.file_);
+    std::swap(get_, other.get_);
+    path_.swap(other.path_);
+  }
+
+  std::FILE* c_file() {
     this->check();
     return file_;
   }
@@ -99,48 +116,102 @@ class stream {
   const fs::path& path() const noexcept { return path_; }
 
   void close() {
+    if (file_ == nullptr) return;
     this->check();
     const auto status = std::fclose(file_);
     file_ = nullptr;
     if (status != 0) {
       throw std::ios::failure("error closing file " + path_.string());
     }
+    path_.clear();
+    this->do_close();
   }
 
-  std::string read() {
-    this->check();
-    std::array<char, 0x1000> buffer;
-    std::string result;
-    while (true) {
-      const auto read = std::fread(buffer.data(), 1, buffer.size(), file_);
-      result.append(buffer.data(), read);
-      if (read != buffer.size()) break;
-    }
-    this->check();
-    if (std::feof(file_) == 0){
-      throw std::ios::failure("didn’t reach the end of the file " +
-                              path_.string());
-    }
-    return result;
-  }
+ protected:
+  file() { this->init(); }
 
-  void write(const std::string_view data) {
-    this->check();
-    if (std::fwrite(data.data(), 1, data.size(), file_) != data.size()) {
-      throw std::ios::failure("error writing " + std::to_string(data.size()) +
-                              " characters to file " + path_.string());
+  void open(fs::path path, const char* const mode) {
+    const auto file = std::fopen(path.c_str(), mode);
+    if (file == nullptr) {
+      throw std::ios::failure("error opening file " + path.string() +
+                              " in mode " + mode);
     }
-    this->check();
-    if (std::fflush(file_) != 0) {
-      throw std::ios::failure("error flushing file " + path_.string());
-    }
+    file_ = file;
+    path_ = std::move(path);
     this->check();
   }
 
  private:
-  explicit stream(std::FILE* const file, fs::path path)
-      : file_(file), path_(std::move(path)) {
+  virtual void do_close() {}
+
+  int_type overflow(const int_type ch = traits_type::eof()) final {
     this->check();
+    if (traits_type::eq_int_type(ch, traits_type::eof())) {
+      return traits_type::eof();
+    }
+    const auto result = std::fputc(ch, file_);
+    this->check();
+    return result == EOF ? traits_type::eof() : traits_type::not_eof(ch);
+  }
+
+  std::streamsize xsputn(const char_type* const data,
+                         const std::streamsize count) final {
+    this->check();
+    const auto written = std::fwrite(data, 1, count, file_);
+    this->check();
+    return written;
+  }
+
+  int_type underflow() final {
+    assert(this->eback() == &get_);
+    assert(this->gptr() == &get_ + 1);
+    assert(this->egptr() == &get_ + 1);
+    this->check();
+    const auto result = std::fgetc(file_);
+    this->check();
+    if (result == EOF) return traits_type::eof();
+    get_ = traits_type::to_char_type(result);
+    this->gbump(-1);
+    assert(this->eback() == &get_);
+    assert(this->gptr() == &get_);
+    assert(this->egptr() == &get_ + 1);
+    return result;
+  }
+
+  std::streamsize xsgetn(char_type* const data, std::streamsize count) final {
+    assert(this->eback() == &get_);
+    assert(this->egptr() == &get_ + 1);
+    this->check();
+    if (count == 0) return 0;
+    std::streamsize read = 0;
+    if (this->gptr() == &get_) {
+      *data = get_;
+      this->gbump(1);
+      --count;
+      read = 1;
+    }
+    if (count == 0) return read;
+    read += std::fread(data, 1, count, file_);
+    this->check();
+    assert(this->eback() == &get_);
+    assert(this->gptr() == &get_ + 1);
+    assert(this->egptr() == &get_ + 1);
+    return read;
+  }
+
+  void imbue(const std::locale& locale) final {
+    if (locale != std::locale::classic()) {
+      throw std::logic_error("this class only supports the C locale");
+    }
+  }
+
+  [[noreturn]] file* setbuf(char* const, const std::streamsize) final {
+    throw std::logic_error("this class doesn’t support changing the buffer");
+  }
+
+  int sync() final {
+    this->check();
+    return std::fflush(file_) == 0 ? 0 : -1;
   }
 
   void check() {
@@ -152,27 +223,29 @@ class stream {
     }
   }
 
+  void init() { this->setg(&get_, &get_ + 1, &get_ + 1); }
+
   std::FILE* file_ = nullptr;
+  char_type get_;
   fs::path path_;
 };
 
-class temp_file {
+class temp_file : public file {
  public:
-  static std::unique_ptr<temp_file> create(const fs::path& directory,
-                                           const std::string_view tmpl,
-                                           random& random) {
+  explicit temp_file(const fs::path& directory, const std::string_view tmpl,
+                     random& random) {
     for (int i = 0; i < 10; i++) {
       auto name = directory / random.temp_name(tmpl);
       if (!fs::exists(name)) {
-        return std::unique_ptr<temp_file>(
-            new temp_file(stream::open(std::move(name), "w+bx")));
+        this->open(std::move(name), "w+bx");
+        return;
       }
     }
     throw std::runtime_error("can’t create temporary file");
   }
 
-  ~temp_file() noexcept {
-    const auto path = stream_->path();
+  ~temp_file() noexcept override {
+    const auto& path = this->path();
     std::error_code code;
     // Only print an error if removing the file failed (“false” return value),
     // but the file wasn’t already removed before (zero error code).
@@ -184,24 +257,50 @@ class temp_file {
 
   temp_file(const temp_file&) = delete;
   temp_file& operator=(const temp_file&) = delete;
-
-  const fs::path& path() const noexcept { return stream_->path(); }
-
-  void close() {
-    std::filesystem::remove(this->path());
-    stream_->close();
-  }
-
-  std::string read() { return stream_->read(); }
-
-  void write(const std::string_view data) { stream_->write(data); }
+  temp_file(temp_file&&) = default;
+  temp_file& operator=(temp_file&&) = default;
 
  private:
-  explicit temp_file(std::unique_ptr<stream> stream)
-      : stream_(std::move(stream)) {}
-
-  std::unique_ptr<stream> stream_;
+  void do_close() final { std::filesystem::remove(this->path()); }
 };
+
+template <typename T>
+class basic_stream : public std::iostream {
+ public:
+  template <typename... As>
+  explicit basic_stream(As&&... args) : file_(std::forward<As>(args)...) {
+    this->init(&file_);
+    this->exceptions(badbit | failbit | eofbit);
+    this->imbue(std::locale::classic());
+  }
+
+  basic_stream(const basic_stream&) = delete;
+
+  basic_stream(basic_stream&& other) : file_(std::move(other.file_)) {
+    this->init(&file_);
+    this->copyfmt(other);
+    this->imbue(other.getloc());
+  }
+
+  basic_stream& operator=(basic_stream other) {
+    this->swap(other);
+    return *this;
+  }
+
+  void swap(basic_stream& other) {
+    this->std::iostream::swap(other);
+    file_.swap(other.file_);
+  }
+
+  void close() { file_.close(); }
+  const fs::path& path() const noexcept { return file_.path(); }
+
+ private:
+  T file_;
+};
+
+using stream = basic_stream<file>;
+using temp_stream = basic_stream<temp_file>;
 
 }  // namespace
 
@@ -274,15 +373,14 @@ static fs::path get_shared_dir(const fs::path& install) {
   return *dirs.begin();
 }
 
-static std::unique_ptr<temp_file> add_manifest(const mode mode,
+static std::optional<temp_stream> add_manifest(const mode mode,
                                                std::vector<std::string>& args,
                                                random& random) {
-  if (mode == mode::direct) return nullptr;
-  auto file =
-      temp_file::create(fs::temp_directory_path(), "manifest-*.json", random);
-  args.push_back("--manifest=" + file->path().string());
+  if (mode == mode::direct) return std::nullopt;
+  temp_stream file(fs::temp_directory_path(), "manifest-*.json", random);
+  args.push_back("--manifest=" + file.path().string());
   args.push_back("--");
-  return file;
+  return std::make_optional(std::move(file));
 }
 
 static void add_to_manifest(
@@ -300,8 +398,7 @@ static void write_manifest(const std::vector<fs::path>& load_path,
                            const std::vector<fs::path>& load_files,
                            const std::vector<fs::path>& data_files,
                            const std::vector<fs::path>& output_files,
-                           temp_file* file) {
-  if (file == nullptr) return;
+                           std::ostream& file) {
   Manifest manifest;
   add_to_manifest(load_path, *manifest.mutable_load_path());
   add_to_manifest(load_files, *manifest.mutable_input_files());
@@ -311,7 +408,8 @@ static void write_manifest(const std::vector<fs::path>& load_path,
   const auto status =
       google::protobuf::util::MessageToJsonString(manifest, &json);
   if (!status.ok()) throw std::runtime_error(status.ToString());
-  file->write(json);
+  file.write(json.data(), json.size());
+  file.flush();
 }
 
 static double float_seconds(
@@ -320,8 +418,9 @@ static double float_seconds(
          static_cast<double>(duration.nanos()) / 1'000'000'000;
 }
 
-static void convert_report(temp_file& json_file, const fs::path& xml_file) {
-  const auto json = json_file.read();
+static void convert_report(std::istream& json_file, const fs::path& xml_file) {
+  using iterator = std::istreambuf_iterator<char>;
+  const std::string json(iterator(json_file), iterator{});
   TestReport report;
   const auto status =
       google::protobuf::util::JsonStringToMessage(json, &report);
@@ -329,8 +428,8 @@ static void convert_report(temp_file& json_file, const fs::path& xml_file) {
     throw std::runtime_error("invalid JSON report: " + json + "; " +
                              status.ToString());
   }
-  const auto stream = stream::open(xml_file, "wbx");
-  tinyxml2::XMLPrinter printer(stream->file());
+  file stream(xml_file, "wbx");
+  tinyxml2::XMLPrinter printer(stream.c_file());
   // The expected format of the XML output file isn’t well-documented.
   // https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
   // only states that the XML file is “ANT-like.”
@@ -379,7 +478,7 @@ static void convert_report(temp_file& json_file, const fs::path& xml_file) {
   }
   printer.CloseElement();
   printer.CloseElement();
-  stream->close();
+  stream.close();
 }
 
 std::string random::temp_name(const std::string_view tmpl) {
@@ -442,16 +541,18 @@ int executor::run_binary(const char* const wrapper, const mode mode,
                          const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args;
-  const auto manifest = add_manifest(mode, args, random_);
+  auto manifest = add_manifest(mode, args, random_);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
   for (const auto& file : load_files) {
     args.push_back("--load=" + runfile(file).string());
   }
-  write_manifest(load_path, load_files, data_files, {}, manifest.get());
+  if (manifest) {
+    write_manifest(load_path, load_files, data_files, {}, manifest.value());
+  }
   const auto code = this->run(emacs, args, {});
-  if (manifest != nullptr) manifest->close();
+  if (manifest) manifest->close();
   return code;
 }
 
@@ -461,7 +562,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
                        const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args;
-  const auto manifest = add_manifest(mode, args, random_);
+  auto manifest = add_manifest(mode, args, random_);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
@@ -469,18 +570,18 @@ int executor::run_test(const char* const wrapper, const mode mode,
   args.push_back("--load=" + runner.string());
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->env_var("XML_OUTPUT_FILE");
-  std::unique_ptr<temp_file> report_file;
+  std::optional<temp_stream> report_file;
   if (!xml_output_file.empty()) {
     const fs::path temp_dir = this->env_var("TEST_TMPDIR");
-    report_file = temp_file::create(temp_dir, "test-report-*.json", random_);
+    report_file.emplace(temp_dir, "test-report-*.json", random_);
     args.push_back("--report=/:" + report_file->path().string());
   }
   for (const auto& file : srcs) {
     args.push_back(this->runfile(file).string());
   }
-  if (manifest != nullptr) {
+  if (manifest) {
     std::vector<fs::path> outputs;
-    if (report_file != nullptr) {
+    if (report_file) {
       outputs.push_back(report_file->path());
     }
     if (this->env_var("COVERAGE") == "1") {
@@ -489,14 +590,14 @@ int executor::run_test(const char* const wrapper, const mode mode,
         outputs.push_back(fs::path(coverage_dir) / "emacs-lisp.dat");
       }
     }
-    write_manifest(load_path, srcs, data_files, outputs, manifest.get());
+    write_manifest(load_path, srcs, data_files, outputs, manifest.value());
   }
   const int code = this->run(emacs, args, {});
-  if (report_file != nullptr) {
+  if (report_file) {
     convert_report(*report_file, xml_output_file);
     report_file->close();
   }
-  if (manifest != nullptr) manifest->close();
+  if (manifest) manifest->close();
   return code;
 }
 
