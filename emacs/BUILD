@@ -41,11 +41,9 @@ cc_library(
     copts = COPTS,
     visibility = ["//visibility:public"],
     # Note: This library can’t depend on Abseil directly because it uses
-    # incompatible build flags.  All dependencies need to be mediated through
-    # random.h for now.
+    # incompatible build flags.
     deps = [
         ":manifest_cc_proto",
-        ":random",
         ":report_cc_proto",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_protobuf//:protobuf",
@@ -64,17 +62,6 @@ cc_test(
     deps = [
         ":exec",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
-    name = "random",
-    srcs = ["random.cc"],
-    hdrs = ["random.h"],
-    deps = [
-        "@com_google_absl//absl/memory",
-        "@com_google_absl//absl/random",
-        "@com_google_absl//absl/strings",
     ],
 )
 

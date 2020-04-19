@@ -22,6 +22,8 @@
 #include <exception>
 #include <filesystem>
 #include <fstream>
+#include <functional>
+#include <iomanip>
 #include <ios>
 #include <iostream>
 #include <iterator>
@@ -30,8 +32,11 @@
 #include <map>
 #include <memory>
 #include <numeric>
+#include <ostream>
+#include <random>
 #include <regex>
 #include <set>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <system_error>
@@ -51,7 +56,6 @@
 
 #include "emacs/manifest.pb.h"
 #include "emacs/report.pb.h"
-#include "emacs/random.h"
 
 namespace phst_rules_elisp {
 
@@ -371,6 +375,30 @@ static void convert_report(temp_file& json_file, const fs::path& xml_file) {
   printer.CloseElement();
   printer.CloseElement();
   stream->close();
+}
+
+std::string random::temp_name() {
+  std::uniform_int_distribution<unsigned long> distribution;
+  using limits = std::numeric_limits<decltype(distribution)::result_type>;
+  static_assert(limits::radix == 2);
+  constexpr int bits_per_hex_digit = 4;
+  constexpr int width =
+      (limits::digits + bits_per_hex_digit - 1) / bits_per_hex_digit;
+  std::ostringstream stream;
+  stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+  stream.imbue(std::locale::classic());
+  stream << "tmp" << std::setfill('0') << std::right << std::hex
+         << std::setw(width) << distribution(engine_);
+  return stream.str();
+}
+
+random::engine random::init_engine() {
+  std::random_device device;
+  static_assert(engine::word_size == 32);
+  std::array<decltype(device)::result_type, engine::state_size> seed;
+  std::generate(seed.begin(), seed.end(), std::ref(device));
+  std::seed_seq sequence(seed.cbegin(), seed.cend());
+  return engine(sequence);
 }
 
 executor::executor(int argc, const char* const* argv, const char* const* envp)

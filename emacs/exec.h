@@ -16,19 +16,28 @@
 #define PHST_RULES_ELISP_EMACS_EXEC_H
 
 #include <filesystem>
+#include <random>
 #include <string>
 #include <variant>
 #include <vector>
 
 #include "tools/cpp/runfiles/runfiles.h"
 
-#include "emacs/random.h"
-
 namespace phst_rules_elisp {
 
 struct for_test {};
 
 enum class mode { direct, wrap };
+
+class random {
+ public:
+  std::string temp_name();
+
+ private:
+  using engine = std::mt19937;
+  static engine init_engine();
+  engine engine_ = init_engine();
+};
 
 class executor {
  public:

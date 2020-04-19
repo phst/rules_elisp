@@ -29,12 +29,6 @@ def rules_elisp_dependencies():
         urls = ["https://ftp.gnu.org/gnu/emacs/emacs-26.3.tar.xz"],
     )
     http_archive(
-        name = "com_google_absl",
-        urls = ["https://github.com/abseil/abseil-cpp/archive/71079e42cb4ae53db02f9bbe446ad51ed62fd17f.zip"],
-        sha256 = "8369f7d4f372318b205f1e8fd283a3f2757a78751157bd874bac8a2d7187d472",
-        strip_prefix = "abseil-cpp-71079e42cb4ae53db02f9bbe446ad51ed62fd17f",
-    )
-    http_archive(
         name = "bazel_skylib",
         sha256 = "97e70364e9249702246c0e9444bccdc4b847bed1eb03c5a3ece4f83dfe6abc44",
         urls = [
