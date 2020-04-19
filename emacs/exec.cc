@@ -176,7 +176,7 @@ class temp_file {
     // but the file wasn’t already removed before (zero error code).
     if (!std::filesystem::remove(path, code) && code) {
       std::clog << "error removing temporary file " << path << ": " << code
-                << std::endl;
+                << ": " << code.message() << std::endl;
     }
   }
 
