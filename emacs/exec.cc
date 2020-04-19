@@ -172,7 +172,9 @@ class temp_file {
   ~temp_file() noexcept {
     const auto path = stream_->path();
     std::error_code code;
-    if (!std::filesystem::remove(path, code)) {
+    // Only print an error if removing the file failed (“false” return value),
+    // but the file wasn’t already removed before (zero error code).
+    if (!std::filesystem::remove(path, code) && code) {
       std::clog << "error removing temporary file " << path << ": " << code
                 << std::endl;
     }
