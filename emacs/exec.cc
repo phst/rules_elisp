@@ -39,6 +39,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <utility>
 #include <variant>
@@ -158,9 +159,10 @@ class stream {
 class temp_file {
  public:
   static std::unique_ptr<temp_file> create(const fs::path& directory,
+                                           const std::string_view tmpl,
                                            random& random) {
     for (int i = 0; i < 10; i++) {
-      auto name = directory / random.temp_name();
+      auto name = directory / random.temp_name(tmpl);
       if (!fs::exists(name)) {
         return std::unique_ptr<temp_file>(
             new temp_file(stream::open(std::move(name), "w+bx")));
@@ -276,7 +278,8 @@ static std::unique_ptr<temp_file> add_manifest(const mode mode,
                                                std::vector<std::string>& args,
                                                random& random) {
   if (mode == mode::direct) return nullptr;
-  auto file = temp_file::create(fs::temp_directory_path(), random);
+  auto file =
+      temp_file::create(fs::temp_directory_path(), "manifest-*.json", random);
   args.push_back("--manifest=" + file->path().string());
   args.push_back("--");
   return file;
@@ -379,7 +382,13 @@ static void convert_report(temp_file& json_file, const fs::path& xml_file) {
   stream->close();
 }
 
-std::string random::temp_name() {
+std::string random::temp_name(const std::string_view tmpl) {
+  const auto pos = tmpl.rfind('*');
+  if (pos == tmpl.npos) {
+    throw std::invalid_argument("no * in template " + std::string(tmpl));
+  }
+  const auto prefix = tmpl.substr(0, pos);
+  const auto suffix = tmpl.substr(pos + 1);
   std::uniform_int_distribution<unsigned long> distribution;
   using limits = std::numeric_limits<decltype(distribution)::result_type>;
   static_assert(limits::radix == 2);
@@ -389,8 +398,8 @@ std::string random::temp_name() {
   std::ostringstream stream;
   stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
   stream.imbue(std::locale::classic());
-  stream << "tmp" << std::setfill('0') << std::right << std::hex
-         << std::setw(width) << distribution(engine_);
+  stream << prefix << std::setfill('0') << std::right << std::hex
+         << std::setw(width) << distribution(engine_) << suffix;
   return stream.str();
 }
 
@@ -463,7 +472,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
   std::unique_ptr<temp_file> report_file;
   if (!xml_output_file.empty()) {
     const fs::path temp_dir = this->env_var("TEST_TMPDIR");
-    report_file = temp_file::create(temp_dir, random_);
+    report_file = temp_file::create(temp_dir, "test-report-*.json", random_);
     args.push_back("--report=/:" + report_file->path().string());
   }
   for (const auto& file : srcs) {

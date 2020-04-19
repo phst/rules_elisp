@@ -18,6 +18,7 @@
 #include <filesystem>
 #include <random>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 
@@ -31,7 +32,7 @@ enum class mode { direct, wrap };
 
 class random {
  public:
-  std::string temp_name();
+  std::string temp_name(std::string_view tmpl);
 
  private:
   using engine = std::mt19937;
