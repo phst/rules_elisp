@@ -22,8 +22,10 @@
 
 ;;; Code:
 
+(require 'backtrace nil :noerror)  ; only in Emacs 27
 (require 'bytecomp)
 (require 'cl-lib)
+(require 'debug)
 (require 'edebug)
 (require 'ert)
 (require 'json)
@@ -131,8 +133,12 @@ NAME is the name of the test."
   (cl-check-type name symbol)
   (cl-check-type result ert-test-result-with-condition)
   (with-temp-buffer
-    (debugger-insert-backtrace
-     (ert-test-result-with-condition-backtrace result) nil)
+    (let ((backtrace (ert-test-result-with-condition-backtrace result)))
+      (cond ((fboundp 'backtrace-to-string)  ; Emacs 27
+             (insert (backtrace-to-string backtrace)))
+            ((fboundp 'debugger-insert-backtrace)  ; Emacs 26
+             (debugger-insert-backtrace backtrace nil))
+            (t (error "Unsupported Emacs version"))))
     (goto-char (point-min))
     (while (not (eobp))
       (message "    %s"
