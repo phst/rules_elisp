@@ -68,7 +68,7 @@ def _binary(ctx):
     emacs = toolchain.emacs
 
     # Only pass in data files when needed.
-    data_files_for_manifest = result.runfiles if toolchain.wrap else []
+    data_files_for_manifest = result.runfiles.files.to_list() if toolchain.wrap else []
 
     # If we’re supposed to generate coverage information, use source files
     # instead of compiled files because we can’t instrument compiled files for
