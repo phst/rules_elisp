@@ -16,6 +16,7 @@
 #define PHST_RULES_ELISP_EMACS_EXEC_H
 
 #include <filesystem>
+#include <map>
 #include <random>
 #include <string>
 #include <string_view>
