@@ -77,7 +77,6 @@ class file : public std::streambuf {
  public:
   explicit file(fs::path path, const char* const mode) {
     this->open(std::move(path), mode);
-    this->init();
   }
 
   ~file() noexcept override {
@@ -110,7 +109,7 @@ class file : public std::streambuf {
   }
 
  protected:
-  file() { this->init(); }
+  file() = default;
 
   void open(fs::path path, const char* const mode) {
     const auto file = std::fopen(path.c_str(), mode);
@@ -145,39 +144,30 @@ class file : public std::streambuf {
   }
 
   int_type underflow() final {
-    assert(this->eback() == &get_);
-    assert(this->gptr() == &get_ + 1);
-    assert(this->egptr() == &get_ + 1);
+    assert(this->gptr() == this->egptr());
     this->check();
-    const auto result = std::fgetc(file_);
+    const auto read = std::fread(get_.data(), 1, get_.size(), file_);
+    this->setg(get_.data(), get_.data(), get_.data() + read);
     this->check();
-    if (result == EOF) return traits_type::eof();
-    get_ = traits_type::to_char_type(result);
-    this->gbump(-1);
-    assert(this->eback() == &get_);
-    assert(this->gptr() == &get_);
-    assert(this->egptr() == &get_ + 1);
-    return result;
+    if (read == 0) return traits_type::eof();
+    assert(this->gptr() != nullptr);
+    assert(this->gptr() != this->egptr());
+    return traits_type::to_int_type(*this->gptr());
   }
 
   std::streamsize xsgetn(char_type* const data, std::streamsize count) final {
-    assert(this->eback() == &get_);
-    assert(this->egptr() == &get_ + 1);
     this->check();
     if (count == 0) return 0;
     std::streamsize read = 0;
-    if (this->gptr() == &get_) {
-      *data = get_;
-      this->gbump(1);
-      --count;
-      read = 1;
+    if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
+      read = std::min(count, this->egptr() - this->gptr());
+      traits_type::copy(data, this->gptr(), read);
+      count -= read;
+      this->setg(this->gptr(), this->gptr() + read, this->egptr());
     }
     if (count == 0) return read;
     read += std::fread(data, 1, count, file_);
     this->check();
-    assert(this->eback() == &get_);
-    assert(this->gptr() == &get_ + 1);
-    assert(this->egptr() == &get_ + 1);
     return read;
   }
 
@@ -205,10 +195,8 @@ class file : public std::streambuf {
     }
   }
 
-  void init() { this->setg(&get_, &get_ + 1, &get_ + 1); }
-
   std::FILE* file_ = nullptr;
-  char_type get_;
+  std::array<char_type, 0x1000> get_;
   fs::path path_;
 };
 
