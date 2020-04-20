@@ -25,6 +25,17 @@ cc_library(
     deps = [":random"],
 )
 
+cc_test(
+    name = "file_test",
+    srcs = ["file_test.cc"],
+    copts = COPTS,
+    deps = [
+        ":file",
+        ":random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_library(
     name = "random",
     srcs = ["random.cc"],
