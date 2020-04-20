@@ -225,7 +225,9 @@ to be used as root."
           (cl-assert (eq (marker-buffer begin) buffer))
           (cl-assert (eql (length frequencies) (length offsets)))
           (cl-loop for offset across offsets
-                   and freq across frequencies
+                   ;; This can’t be ‘and’ due to
+                   ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
+                   for freq across frequencies
                    for position = (+ begin offset)
                    for line = (line-number-at-pos position)
                    do (cl-callf max (gethash line lines 0) freq))
