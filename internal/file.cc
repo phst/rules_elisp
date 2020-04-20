@@ -65,8 +65,8 @@ void file::close() {
   if (status != 0) {
     throw std::ios::failure("error closing file " + path_.string());
   }
-  path_.clear();
   this->do_close();
+  path_.clear();
 }
 
 void file::do_close() {}
