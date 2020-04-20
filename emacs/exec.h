@@ -17,29 +17,19 @@
 
 #include <filesystem>
 #include <map>
-#include <random>
 #include <string>
-#include <string_view>
 #include <variant>
 #include <vector>
 
 #include "tools/cpp/runfiles/runfiles.h"
+
+#include "internal/random.h"
 
 namespace phst_rules_elisp {
 
 struct for_test {};
 
 enum class mode { direct, wrap };
-
-class random {
- public:
-  std::string temp_name(std::string_view tmpl);
-
- private:
-  using engine = std::mt19937;
-  static engine init_engine();
-  engine engine_ = init_engine();
-};
 
 class executor {
  public:
