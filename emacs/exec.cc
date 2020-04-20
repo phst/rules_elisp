@@ -18,6 +18,7 @@
 #include <array>
 #include <cassert>
 #include <cerrno>
+#include <cstddef>
 #include <cstdio>
 #include <cstring>
 #include <exception>
@@ -75,7 +76,7 @@ class missing_runfile : public std::runtime_error {
 
 class file : public std::streambuf {
  public:
-  explicit file(fs::path path, const char* const mode) {
+  explicit file(fs::path path, const char* const mode) : file() {
     this->open(std::move(path), mode);
   }
 
@@ -109,7 +110,7 @@ class file : public std::streambuf {
   }
 
  protected:
-  file() = default;
+  file() { this->setp(put_.data(), put_.data() + put_.size()); }
 
   void open(fs::path path, const char* const mode) {
     const auto file = std::fopen(path.c_str(), mode);
@@ -126,13 +127,14 @@ class file : public std::streambuf {
   virtual void do_close() {}
 
   int_type overflow(const int_type ch = traits_type::eof()) final {
-    this->check();
+    assert(this->pptr() == this->epptr());
+    if (!this->write()) return traits_type::eof();
     if (traits_type::eq_int_type(ch, traits_type::eof())) {
-      return traits_type::eof();
+      return traits_type::not_eof(0);
     }
-    const auto result = std::fputc(ch, file_);
-    this->check();
-    return result == EOF ? traits_type::eof() : traits_type::not_eof(ch);
+    traits_type::assign(put_.front(), traits_type::to_char_type(ch));
+    this->pbump(1);
+    return ch;
   }
 
   std::streamsize xsputn(const char_type* const data,
@@ -182,8 +184,23 @@ class file : public std::streambuf {
   }
 
   int sync() final {
+    if (!this->write()) return -1;
     this->check();
     return std::fflush(file_) == 0 ? 0 : -1;
+  }
+
+  [[nodiscard]] bool write() {
+    assert(this->pbase() != nullptr);
+    assert(this->pptr() != nullptr);
+    this->check();
+    const auto count = this->pptr() - this->pbase();
+    assert(count >= 0);
+    const auto written = std::fwrite(this->pbase(), 1, count, file_);
+    this->check();
+    assert(written <= static_cast<std::size_t>(count));
+    if (written < static_cast<std::size_t>(count)) return false;
+    this->setp(put_.data(), put_.data() + put_.size());
+    return true;
   }
 
   void check() {
@@ -197,6 +214,7 @@ class file : public std::streambuf {
 
   std::FILE* file_ = nullptr;
   std::array<char_type, 0x1000> get_;
+  std::array<char_type, 0x1000> put_;
   fs::path path_;
 };
 
