@@ -34,3 +34,13 @@ cc_library(
     # Note: This library can’t depend on Abseil directly because it uses
     # incompatible build flags.
 )
+
+cc_test(
+    name = "random_test",
+    srcs = ["random_test.cc"],
+    copts = COPTS,
+    deps = [
+        ":random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
