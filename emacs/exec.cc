@@ -88,25 +88,7 @@ class file : public std::streambuf {
   }
 
   file(const file&) = delete;
-
-  file(file&& other) {
-    const auto n = other.egptr() - other.eback();
-    this->swap(other);
-    this->setg(&get_, &get_ + n, &get_ + 1);
-  }
-
-  file& operator=(file other) {
-    this->close();
-    this->swap(other);
-    return *this;
-  }
-
-  void swap(file& other) {
-    this->std::streambuf::swap(other);
-    std::swap(file_, other.file_);
-    std::swap(get_, other.get_);
-    path_.swap(other.path_);
-  }
+  file& operator=(const file&) = delete;
 
   std::FILE* c_file() {
     this->check();
@@ -259,8 +241,6 @@ class temp_file : public file {
 
   temp_file(const temp_file&) = delete;
   temp_file& operator=(const temp_file&) = delete;
-  temp_file(temp_file&&) = default;
-  temp_file& operator=(temp_file&&) = default;
 
  private:
   void do_close() final { std::filesystem::remove(this->path()); }
@@ -277,22 +257,7 @@ class basic_stream : public std::iostream {
   }
 
   basic_stream(const basic_stream&) = delete;
-
-  basic_stream(basic_stream&& other) : file_(std::move(other.file_)) {
-    this->init(&file_);
-    this->copyfmt(other);
-    this->imbue(other.getloc());
-  }
-
-  basic_stream& operator=(basic_stream other) {
-    this->swap(other);
-    return *this;
-  }
-
-  void swap(basic_stream& other) {
-    this->std::iostream::swap(other);
-    file_.swap(other.file_);
-  }
+  basic_stream& operator=(const basic_stream&) = delete;
 
   void close() { file_.close(); }
   const fs::path& path() const noexcept { return file_.path(); }
@@ -375,14 +340,12 @@ static fs::path get_shared_dir(const fs::path& install) {
   return *dirs.begin();
 }
 
-static std::optional<temp_stream> add_manifest(const mode mode,
-                                               std::vector<std::string>& args,
-                                               random& random) {
-  if (mode == mode::direct) return std::nullopt;
-  temp_stream file(fs::temp_directory_path(), "manifest-*.json", random);
-  args.push_back("--manifest=" + file.path().string());
+static void add_manifest(const mode mode, std::vector<std::string>& args,
+                         random& random, std::optional<temp_stream>& stream) {
+  if (mode == mode::direct) return;
+  stream.emplace(fs::temp_directory_path(), "manifest-*.json", random);
+  args.push_back("--manifest=" + stream->path().string());
   args.push_back("--");
-  return std::make_optional(std::move(file));
 }
 
 static void add_to_manifest(
@@ -543,7 +506,8 @@ int executor::run_binary(const char* const wrapper, const mode mode,
                          const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args;
-  auto manifest = add_manifest(mode, args, random_);
+  std::optional<temp_stream> manifest;
+  add_manifest(mode, args, random_, manifest);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
@@ -564,7 +528,8 @@ int executor::run_test(const char* const wrapper, const mode mode,
                        const std::vector<std::filesystem::path>& data_files) {
   const auto emacs = runfile(wrapper);
   std::vector<std::string> args;
-  auto manifest = add_manifest(mode, args, random_);
+  std::optional<temp_stream> manifest;
+  add_manifest(mode, args, random_, manifest);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
