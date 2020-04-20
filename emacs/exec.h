@@ -17,8 +17,8 @@
 
 #include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
-#include <variant>
 #include <vector>
 
 #include "tools/cpp/runfiles/runfiles.h"

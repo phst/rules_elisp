@@ -31,13 +31,13 @@
 #include <string>
 #include <system_error>
 #include <utility>
-#include <variant>
 #include <vector>
 
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "google/protobuf/duration.pb.h"
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/util/json_util.h"
 #include "google/protobuf/util/time_util.h"
