@@ -141,9 +141,9 @@ NAME is the name of the test."
             (t (error "Unsupported Emacs version"))))
     (goto-char (point-min))
     (while (not (eobp))
-      (message "    %s"
-               (buffer-substring-no-properties
-                (point) (min (line-end-position) (+ 120 (point)))))
+      (delete-region (min (line-end-position) (+ 120 (point)))
+                     (line-end-position))
+      (insert "    ")
       (forward-line))
     (goto-char (point-min))
     (insert (format-message "  Test %s backtrace:\n" name))
