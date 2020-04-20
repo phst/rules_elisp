@@ -60,6 +60,9 @@ void file::open(fs::path path, const char* const mode) {
 void file::close() {
   if (file_ == nullptr) return;
   this->check();
+  if (!this->flush()) {
+    throw std::ios::failure("error closing file " + path_.string());
+  }
   const auto status = std::fclose(file_);
   file_ = nullptr;
   if (status != 0) {
@@ -85,6 +88,7 @@ file::int_type file::overflow(const int_type ch) {
 std::streamsize file::xsputn(const char_type* const data,
                              const std::streamsize count) {
   this->check();
+  if (!this->flush()) return 0;
   const auto written = std::fwrite(data, 1, count, file_);
   this->check();
   return written;
