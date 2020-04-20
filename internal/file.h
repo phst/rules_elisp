@@ -57,7 +57,7 @@ class file : public std::streambuf {
   void imbue(const std::locale& locale) final;
   [[noreturn]] file* setbuf(char*, std::streamsize) final;
   int sync() final;
-  [[nodiscard]] bool write();
+  [[nodiscard]] bool flush();
   void check();
 
   std::FILE* file_ = nullptr;

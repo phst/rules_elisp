@@ -73,7 +73,7 @@ void file::do_close() {}
 
 file::int_type file::overflow(const int_type ch) {
   assert(this->pptr() == this->epptr());
-  if (!this->write()) return traits_type::eof();
+  if (!this->flush()) return traits_type::eof();
   if (traits_type::eq_int_type(ch, traits_type::eof())) {
     return traits_type::not_eof(0);
   }
@@ -129,12 +129,12 @@ void file::imbue(const std::locale& locale) {
 }
 
 int file::sync() {
-  if (!this->write()) return -1;
+  if (!this->flush()) return -1;
   this->check();
   return std::fflush(file_) == 0 ? 0 : -1;
 }
 
-[[nodiscard]] bool file::write() {
+[[nodiscard]] bool file::flush() {
   assert(this->pbase() != nullptr);
   assert(this->pptr() != nullptr);
   this->check();
