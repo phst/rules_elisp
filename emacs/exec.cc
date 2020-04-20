@@ -15,22 +15,11 @@
 #include "emacs/exec.h"
 
 #include <algorithm>
-#include <array>
-#include <cassert>
 #include <cerrno>
-#include <cstddef>
-#include <cstdio>
 #include <cstring>
-#include <exception>
 #include <filesystem>
-#include <fstream>
-#include <functional>
-#include <iomanip>
 #include <ios>
-#include <iostream>
 #include <iterator>
-#include <limits>
-#include <locale>
 #include <map>
 #include <memory>
 #include <numeric>
@@ -39,7 +28,6 @@
 #include <regex>
 #include <set>
 #include <stdexcept>
-#include <streambuf>
 #include <string>
 #include <system_error>
 #include <utility>
@@ -58,6 +46,7 @@
 
 #include "emacs/manifest.pb.h"
 #include "emacs/report.pb.h"
+#include "internal/file.h"
 #include "internal/random.h"
 
 namespace phst_rules_elisp {
@@ -67,212 +56,9 @@ using bazel::tools::cpp::runfiles::Runfiles;
 using google::protobuf::util::TimeUtil;
 
 namespace {
-
 class missing_runfile : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
-
-class file : public std::streambuf {
- public:
-  explicit file(fs::path path, const char* const mode) : file() {
-    this->open(std::move(path), mode);
-  }
-
-  ~file() noexcept override {
-    // We require calling close() explicitly.
-    if (file_ == nullptr) return;
-    std::clog << "file " << path_ << " still open" << std::endl;
-    std::terminate();
-  }
-
-  file(const file&) = delete;
-  file& operator=(const file&) = delete;
-
-  std::FILE* c_file() {
-    this->check();
-    return file_;
-  }
-
-  const fs::path& path() const noexcept { return path_; }
-
-  void close() {
-    if (file_ == nullptr) return;
-    this->check();
-    const auto status = std::fclose(file_);
-    file_ = nullptr;
-    if (status != 0) {
-      throw std::ios::failure("error closing file " + path_.string());
-    }
-    path_.clear();
-    this->do_close();
-  }
-
- protected:
-  file() { this->setp(put_.data(), put_.data() + put_.size()); }
-
-  void open(fs::path path, const char* const mode) {
-    const auto file = std::fopen(path.c_str(), mode);
-    if (file == nullptr) {
-      throw std::ios::failure("error opening file " + path.string() +
-                              " in mode " + mode);
-    }
-    file_ = file;
-    path_ = std::move(path);
-    this->check();
-  }
-
- private:
-  virtual void do_close() {}
-
-  int_type overflow(const int_type ch = traits_type::eof()) final {
-    assert(this->pptr() == this->epptr());
-    if (!this->write()) return traits_type::eof();
-    if (traits_type::eq_int_type(ch, traits_type::eof())) {
-      return traits_type::not_eof(0);
-    }
-    traits_type::assign(put_.front(), traits_type::to_char_type(ch));
-    this->pbump(1);
-    return ch;
-  }
-
-  std::streamsize xsputn(const char_type* const data,
-                         const std::streamsize count) final {
-    this->check();
-    const auto written = std::fwrite(data, 1, count, file_);
-    this->check();
-    return written;
-  }
-
-  int_type underflow() final {
-    assert(this->gptr() == this->egptr());
-    this->check();
-    const auto read = std::fread(get_.data(), 1, get_.size(), file_);
-    this->setg(get_.data(), get_.data(), get_.data() + read);
-    this->check();
-    if (read == 0) return traits_type::eof();
-    assert(this->gptr() != nullptr);
-    assert(this->gptr() != this->egptr());
-    return traits_type::to_int_type(*this->gptr());
-  }
-
-  std::streamsize xsgetn(char_type* const data, std::streamsize count) final {
-    this->check();
-    if (count == 0) return 0;
-    std::streamsize read = 0;
-    if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
-      read = std::min(count, this->egptr() - this->gptr());
-      traits_type::copy(data, this->gptr(), read);
-      count -= read;
-      this->setg(this->gptr(), this->gptr() + read, this->egptr());
-    }
-    if (count == 0) return read;
-    read += std::fread(data, 1, count, file_);
-    this->check();
-    return read;
-  }
-
-  void imbue(const std::locale& locale) final {
-    if (locale != std::locale::classic()) {
-      throw std::logic_error("this class only supports the C locale");
-    }
-  }
-
-  [[noreturn]] file* setbuf(char* const, const std::streamsize) final {
-    throw std::logic_error("this class doesn’t support changing the buffer");
-  }
-
-  int sync() final {
-    if (!this->write()) return -1;
-    this->check();
-    return std::fflush(file_) == 0 ? 0 : -1;
-  }
-
-  [[nodiscard]] bool write() {
-    assert(this->pbase() != nullptr);
-    assert(this->pptr() != nullptr);
-    this->check();
-    const auto count = this->pptr() - this->pbase();
-    assert(count >= 0);
-    const auto written = std::fwrite(this->pbase(), 1, count, file_);
-    this->check();
-    assert(written <= static_cast<std::size_t>(count));
-    if (written < static_cast<std::size_t>(count)) return false;
-    this->setp(put_.data(), put_.data() + put_.size());
-    return true;
-  }
-
-  void check() {
-    if (file_ == nullptr) {
-      throw std::logic_error("file " + path_.string() + " is already closed");
-    }
-    if (std::ferror(file_) != 0) {
-      throw std::ios::failure("error in file " + path_.string());
-    }
-  }
-
-  std::FILE* file_ = nullptr;
-  std::array<char_type, 0x1000> get_;
-  std::array<char_type, 0x1000> put_;
-  fs::path path_;
-};
-
-class temp_file : public file {
- public:
-  explicit temp_file(const fs::path& directory, const std::string_view tmpl,
-                     random& random) {
-    for (int i = 0; i < 10; i++) {
-      auto name = directory / random.temp_name(tmpl);
-      if (!fs::exists(name)) {
-        this->open(std::move(name), "w+bx");
-        return;
-      }
-    }
-    throw std::runtime_error("can’t create temporary file in directory " +
-                             directory.string() + " with template " +
-                             std::string(tmpl));
-  }
-
-  ~temp_file() noexcept override {
-    const auto& path = this->path();
-    std::error_code code;
-    // Only print an error if removing the file failed (“false” return value),
-    // but the file wasn’t already removed before (zero error code).
-    if (!std::filesystem::remove(path, code) && code) {
-      std::clog << "error removing temporary file " << path << ": " << code
-                << ": " << code.message() << std::endl;
-    }
-  }
-
-  temp_file(const temp_file&) = delete;
-  temp_file& operator=(const temp_file&) = delete;
-
- private:
-  void do_close() final { std::filesystem::remove(this->path()); }
-};
-
-template <typename T>
-class basic_stream : public std::iostream {
- public:
-  template <typename... As>
-  explicit basic_stream(As&&... args) : file_(std::forward<As>(args)...) {
-    this->init(&file_);
-    this->exceptions(badbit | failbit | eofbit);
-    this->imbue(std::locale::classic());
-  }
-
-  basic_stream(const basic_stream&) = delete;
-  basic_stream& operator=(const basic_stream&) = delete;
-
-  void close() { file_.close(); }
-  const fs::path& path() const noexcept { return file_.path(); }
-
- private:
-  T file_;
-};
-
-using stream = basic_stream<file>;
-using temp_stream = basic_stream<temp_file>;
-
 }  // namespace
 
 template <typename I>

@@ -45,6 +45,7 @@ cc_library(
     deps = [
         ":manifest_cc_proto",
         ":report_cc_proto",
+        "//internal:file",
         "//internal:random",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_protobuf//:protobuf",

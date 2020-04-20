@@ -15,6 +15,17 @@
 load("//elisp:util.bzl", "COPTS")
 
 cc_library(
+    name = "file",
+    srcs = ["file.cc"],
+    hdrs = ["file.h"],
+    copts = COPTS,
+    visibility = ["//emacs:__pkg__"],
+    # Note: This library can’t depend on Abseil directly because it uses
+    # incompatible build flags.
+    deps = [":random"],
+)
+
+cc_library(
     name = "random",
     srcs = ["random.cc"],
     hdrs = ["random.h"],
