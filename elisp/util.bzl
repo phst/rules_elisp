@@ -114,5 +114,5 @@ COPTS = [
     "-Wconversion",
     "-pedantic-errors",
     "-std=c++17",
-    "-D_POSIX_C_SOURCE=200809L",
+    "-D_GNU_SOURCE",
 ]

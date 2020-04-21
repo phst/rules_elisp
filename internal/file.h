@@ -15,13 +15,18 @@
 #ifndef PHST_RULES_ELISP_INTERNAL_FILE_H
 #define PHST_RULES_ELISP_INTERNAL_FILE_H
 
+#include <sys/types.h>
+#include <dirent.h>
 #include <fcntl.h>
 
 #include <array>
-#include <filesystem>
 #include <iosfwd>
+#include <istream>
+#include <iterator>
 #include <locale>
+#include <string>
 #include <string_view>
+#include <system_error>
 #include <utility>
 
 #include "internal/random.h"
@@ -42,21 +47,21 @@ inline file_mode operator|(const file_mode a, const file_mode b) {
 
 class file : public std::streambuf {
  public:
-  explicit file(std::filesystem::path path, file_mode mode);
+  explicit file(std::string path, file_mode mode);
   ~file() noexcept override;
   file(const file&) = delete;
   file& operator=(const file&) = delete;
 
   std::FILE* open_c_file(const char* mode);
 
-  const std::filesystem::path& path() const noexcept { return path_; }
+  const std::string& path() const noexcept { return path_; }
 
   void close();
 
  protected:
   file();
 
-  void open(std::filesystem::path path, file_mode mode);
+  void open(std::string path, file_mode mode);
 
  private:
   virtual void do_close();
@@ -74,12 +79,12 @@ class file : public std::streambuf {
   int fd_ = -1;
   std::array<char_type, 0x1000> get_;
   std::array<char_type, 0x1000> put_;
-  std::filesystem::path path_;
+  std::string path_;
 };
 
 class temp_file : public file {
  public:
-  explicit temp_file(const std::filesystem::path& directory,
+  explicit temp_file(const std::string& directory,
                      std::string_view tmpl, random& random);
   ~temp_file() noexcept override;
   temp_file(const temp_file&) = delete;
@@ -87,6 +92,7 @@ class temp_file : public file {
 
  private:
   void do_close() final;
+  [[nodiscard]] std::error_code remove() noexcept;
 };
 
 template <typename T>
@@ -105,7 +111,7 @@ class basic_stream : public std::iostream {
   basic_stream& operator=(const basic_stream&) = delete;
 
   void close() { file_.close(); }
-  const std::filesystem::path& path() const noexcept { return file_.path(); }
+  const std::string& path() const noexcept { return file_.path(); }
 
  private:
   T file_;
@@ -113,6 +119,96 @@ class basic_stream : public std::iostream {
 
 using stream = basic_stream<file>;
 using temp_stream = basic_stream<temp_file>;
+
+inline constexpr std::string_view filename(std::string_view name) noexcept {
+  const auto pos = name.rfind('/');
+  return pos == name.npos ? name : name.substr(pos + 1);
+}
+
+inline constexpr std::string_view parent(std::string_view name) noexcept {
+  const auto pos = name.rfind('/');
+  return pos == name.npos ? std::string_view() : name.substr(0, pos);
+}
+
+constexpr std::string_view remove_slash(std::string_view name) noexcept {
+  return (name.empty() || name.back() != '/') ? name
+                                              : name.substr(0, name.size() - 1);
+}
+
+constexpr bool is_absolute(std::string_view name) noexcept {
+  return !name.empty() && name.front() == '/';
+}
+
+std::string join_path(std::string_view a, std::string_view b);
+
+template <typename... Ts>
+std::string join_path(std::string_view a, std::string_view b, Ts&&... rest) {
+  static_assert(sizeof...(Ts) > 0);
+  return join_path(join_path(a, b), std::forward<Ts>(rest)...);
+}
+
+std::string make_absolute(std::string_view name);
+
+[[nodiscard]] bool file_exists(const std::string& name) noexcept;
+[[nodiscard]] std::error_code remove_file(const std::string& name) noexcept;
+[[nodiscard]] std::string temp_dir();
+
+class directory {
+ public:
+  class iterator {
+   public:
+    using iterator_category = std::input_iterator_tag;
+    using value_type = std::string;
+    using difference_type = void;
+    using pointer = const std::string*;
+    using reference = const std::string&;
+
+    inline friend bool operator==(const iterator i, const iterator j) noexcept {
+      return i.end() == j.end();
+    }
+
+    inline friend bool operator!=(const iterator i, const iterator j) noexcept {
+      return !(i == j);
+    }
+
+    reference operator*() const noexcept { return entry_; }
+    pointer operator->() const noexcept { return &entry_; }
+
+    iterator& operator++() {
+      this->advance();
+      return *this;
+    }
+
+    iterator operator++(int) {
+      const auto copy = *this;
+      this->advance();
+      return copy;
+    }
+
+   private:
+    explicit iterator(DIR* const dir) : dir_(dir) { this->advance(); }
+    explicit iterator() : dir_(nullptr) {}
+
+    friend class directory;
+
+    bool end() const noexcept { return dir_ == nullptr; }
+    void advance();
+
+    ::DIR* dir_;
+    std::string entry_;
+  };
+
+  explicit directory(const std::string& name);
+  ~directory() noexcept;
+
+  [[nodiscard]] std::error_code close() noexcept;
+
+  iterator begin() const { return iterator(dir_); }
+  iterator end() const { return iterator(); }
+
+ private:
+  ::DIR* dir_;
+};
 
 }  // phst_rules_elisp
 

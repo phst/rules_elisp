@@ -15,7 +15,6 @@
 #ifndef PHST_RULES_ELISP_EMACS_EXEC_H
 #define PHST_RULES_ELISP_EMACS_EXEC_H
 
-#include <filesystem>
 #include <map>
 #include <memory>
 #include <string>
@@ -41,23 +40,23 @@ class executor {
   int run_emacs(const char* install_rel);
 
   int run_binary(const char* wrapper, mode mode,
-                 const std::vector<std::filesystem::path>& load_path,
-                 const std::vector<std::filesystem::path>& load_files,
-                 const std::vector<std::filesystem::path>& data_files);
+                 const std::vector<std::string>& load_path,
+                 const std::vector<std::string>& load_files,
+                 const std::vector<std::string>& data_files);
 
   int run_test(const char* wrapper, mode mode,
-               const std::vector<std::filesystem::path>& load_path,
-               const std::vector<std::filesystem::path>& srcs,
-               const std::vector<std::filesystem::path>& data_files);
+               const std::vector<std::string>& load_path,
+               const std::vector<std::string>& srcs,
+               const std::vector<std::string>& data_files);
 
  private:
-  std::filesystem::path runfile(const std::filesystem::path& rel) const;
+  std::string runfile(const std::string& rel) const;
   std::string env_var(const std::string& name) const noexcept;
 
   void add_load_path(std::vector<std::string>& args,
-                     const std::vector<std::filesystem::path>& load_path) const;
+                     const std::vector<std::string>& load_path) const;
 
-  int run(const std::filesystem::path& binary,
+  int run(const std::string& binary,
           const std::vector<std::string>& args,
           const std::map<std::string, std::string>& env);
 

@@ -22,11 +22,12 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstdio>
+#include <cerrno>
+#include <cstdlib>
 #include <exception>
-#include <filesystem>
 #include <ios>
 #include <iostream>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -37,11 +38,9 @@
 
 namespace phst_rules_elisp {
 
-namespace fs = std::filesystem;
-
 file::file() { this->setp(put_.data(), put_.data() + put_.size()); }
 
-file::file(fs::path path, const file_mode mode) : file() {
+file::file(std::string path, const file_mode mode) : file() {
   this->open(std::move(path), mode);
 }
 
@@ -52,12 +51,12 @@ file::~file() noexcept {
   std::terminate();
 }
 
-void file::open(fs::path path, const file_mode mode) {
+void file::open(std::string path, const file_mode mode) {
   const int fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
                         S_IRUSR | S_IWUSR);
   if (fd < 0) {
     throw std::system_error(errno, std::generic_category(),
-                            "open(" + path.string() + ')');
+                            "open(" + path + ')');
   }
   fd_ = fd;
   path_ = std::move(path);
@@ -74,7 +73,7 @@ std::FILE* file::open_c_file(const char* const mode) {
 void file::close() {
   if (fd_ < 0) return;
   if (!this->flush()) {
-    throw std::ios::failure("error closing file " + path_.string());
+    throw std::ios::failure("error closing file " + path_);
   }
   const auto status = ::close(fd_);
   fd_ = -1;
@@ -184,32 +183,122 @@ int file::sync() {
   return true;
 }
 
-temp_file::temp_file(const fs::path& directory, const std::string_view tmpl,
+temp_file::temp_file(const std::string& directory, const std::string_view tmpl,
                      random& random) {
   for (int i = 0; i < 10; i++) {
-    auto name = directory / random.temp_name(tmpl);
-    if (!fs::exists(name)) {
+    auto name = join_path(directory, random.temp_name(tmpl));
+    if (!file_exists(name)) {
       this->open(std::move(name),
                  file_mode::readwrite | file_mode::create | file_mode::excl);
       return;
     }
   }
   throw std::runtime_error("can’t create temporary file in directory " +
-                           directory.string() + " with template " +
-                           std::string(tmpl));
+                           directory + " with template " + std::string(tmpl));
 }
 
 temp_file::~temp_file() noexcept {
   const auto& path = this->path();
-  std::error_code code;
+  const auto code = this->remove();
   // Only print an error if removing the file failed (“false” return value), but
   // the file wasn’t already removed before (zero error code).
-  if (!std::filesystem::remove(path, code) && code) {
+  if (code && code != std::errc::no_such_file_or_directory) {
     std::clog << "error removing temporary file " << path << ": " << code
               << ": " << code.message() << std::endl;
   }
 }
 
-void temp_file::do_close() { std::filesystem::remove(this->path()); }
+void temp_file::do_close() {
+  const auto code = this->remove();
+  if (code) throw std::system_error(code);
+}
+
+[[nodiscard]] std::error_code temp_file::remove() noexcept {
+  return remove_file(this->path());
+}
+
+static constexpr std::string_view remove_prefix(const std::string_view string,
+                                                const char prefix) noexcept {
+  return (string.empty() || string.front() != prefix) ? string
+                                                      : string.substr(1);
+}
+
+static constexpr std::string_view remove_suffix(const std::string_view string,
+                                                const char suffix) noexcept {
+  return (string.empty() || string.back() != suffix)
+             ? string
+             : string.substr(0, string.size() - 1);
+}
+
+std::string join_path(const std::string_view a, const std::string_view b) {
+  return std::string(remove_slash(a)) + '/' +
+         std::string(remove_prefix(b, '/'));
+}
+
+std::string make_absolute(const std::string_view name) {
+  if (is_absolute(name)) return std::string(name);
+  struct free {
+    void operator()(void* const ptr) const noexcept { std::free(ptr); }
+  };
+  const std::unique_ptr<char, free> dir(get_current_dir_name());
+  if (dir == nullptr) {
+    throw std::system_error(errno, std::system_category(),
+                            "get_current_dir_name");
+  }
+  return join_path(dir.get(), name);
+}
+
+[[nodiscard]] bool file_exists(const std::string& name) noexcept {
+  struct stat info;
+  return ::lstat(name.c_str(), &info) == 0;
+}
+
+[[nodiscard]] std::error_code remove_file(const std::string& name) noexcept {
+  return std::error_code(::unlink(name.c_str()) == 0 ? 0 : errno,
+                         std::system_category());
+}
+
+[[nodiscard]] std::string temp_dir() {
+  const std::array<const char*, 2> vars = {"TEST_TMPDIR", "TMPDIR"};
+  for (const auto var : vars) {
+    const auto value = std::getenv(var);
+    if (value != nullptr && *value != '\0') return value;
+  }
+  return "/tmp";
+}
+
+directory::directory(const std::string& name) : dir_(::opendir(name.c_str())) {
+  if (dir_ == nullptr) {
+    throw std::system_error(errno, std::system_category(),
+                            "opendir(" + name + ')');
+  }
+}
+
+directory::~directory() noexcept {
+  const auto code = this->close();
+  if (code) std::clog << code << ": " << code.message() << std::endl;
+}
+
+[[nodiscard]] std::error_code directory::close() noexcept {
+  if (dir_ == nullptr) return std::error_code();
+  const std::error_code code(::closedir(dir_) == 0 ? 0 : errno,
+                             std::system_category());
+  dir_ = nullptr;
+  return code;
+}
+
+void directory::iterator::advance() {
+  errno = 0;
+  const auto entry = ::readdir(dir_);
+  if (entry == nullptr) {
+    dir_ = nullptr;
+    if (errno != 0) {
+      throw std::system_error(errno, std::system_category(), "readdir");
+    }
+    entry_.clear();
+  } else {
+    entry_ = entry->d_name;
+  }
+}
 
 }  // phst_rules_elisp

@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cerrno>
 #include <cstring>
-#include <filesystem>
 #include <ios>
 #include <iterator>
 #include <map>
@@ -51,7 +50,6 @@
 
 namespace phst_rules_elisp {
 
-namespace fs = std::filesystem;
 using bazel::tools::cpp::runfiles::Runfiles;
 using google::protobuf::util::TimeUtil;
 
@@ -112,13 +110,12 @@ static std::unique_ptr<Runfiles> create_runfiles_for_test() {
   return runfiles;
 }
 
-static fs::path get_shared_dir(const fs::path& install) {
-  std::set<fs::path> dirs;
-  for (const auto& entry :
-       fs::directory_iterator(install / "share" / "emacs")) {
-    if (entry.is_directory() &&
-        std::regex_match(entry.path().filename().string(),
-                         std::regex("[.0-9]+"))) {
+static std::string get_shared_dir(const std::string& install) {
+  const auto emacs = join_path(install, "share", "emacs");
+  directory dir(emacs);
+  std::set<std::string> dirs;
+  for (const auto& entry : dir) {
+    if (std::regex_match(entry, std::regex("[0-9][.0-9]*"))) {
       dirs.insert(entry);
     }
   }
@@ -127,32 +124,32 @@ static fs::path get_shared_dir(const fs::path& install) {
     throw std::runtime_error("expected exactly one shared directory, got [" +
                              join(dirs.begin(), dirs.end()) + ']');
   }
-  return *dirs.begin();
+  return join_path(emacs, *dirs.begin());
 }
 
 static void add_manifest(const mode mode, std::vector<std::string>& args,
                          random& random, std::optional<temp_stream>& stream) {
   if (mode == mode::direct) return;
-  stream.emplace(fs::temp_directory_path(), "manifest-*.json", random);
-  args.push_back("--manifest=" + stream->path().string());
+  stream.emplace(temp_dir(), "manifest-*.json", random);
+  args.push_back("--manifest=" + stream->path());
   args.push_back("--");
 }
 
 static void add_to_manifest(
-    const std::vector<fs::path>& files,
+    const std::vector<std::string>& files,
     google::protobuf::RepeatedPtrField<std::string>& field) {
   for (const auto& file : files) {
-    if (file.is_absolute()) {
-      throw std::invalid_argument("filename " + file.string() + " is absolute");
+    if (is_absolute(file)) {
+      throw std::invalid_argument("filename " + file + " is absolute");
     }
-    field.Add(file.string());
+    *field.Add() = file;
   }
 }
 
-static void write_manifest(const std::vector<fs::path>& load_path,
-                           const std::vector<fs::path>& load_files,
-                           const std::vector<fs::path>& data_files,
-                           const std::vector<fs::path>& output_files,
+static void write_manifest(const std::vector<std::string>& load_path,
+                           const std::vector<std::string>& load_files,
+                           const std::vector<std::string>& data_files,
+                           const std::vector<std::string>& output_files,
                            std::ostream& file) {
   Manifest manifest;
   add_to_manifest(load_path, *manifest.mutable_load_path());
@@ -173,7 +170,7 @@ static double float_seconds(
          static_cast<double>(duration.nanos()) / 1'000'000'000;
 }
 
-static void convert_report(std::istream& json_file, const fs::path& xml_file) {
+static void convert_report(std::istream& json_file, const std::string& xml_file) {
   using iterator = std::istreambuf_iterator<char>;
   const std::string json(iterator(json_file), iterator{});
   TestReport report;
@@ -252,23 +249,23 @@ executor::executor(for_test, int argc, const char* const* argv,
       runfiles_(create_runfiles_for_test()) {}
 
 int executor::run_emacs(const char* install_rel) {
-  const auto install = runfile(install_rel);
-  const auto emacs = install / "bin" / "emacs";
+  const auto install = this->runfile(install_rel);
+  const auto emacs = join_path(install, "bin", "emacs");
   const auto shared = get_shared_dir(install);
-  const auto etc = shared / "etc";
+  const auto etc = join_path(shared, "etc");
   std::map<std::string, std::string> map;
   map.emplace("EMACSDATA", etc);
   map.emplace("EMACSDOC", etc);
-  map.emplace("EMACSLOADPATH", shared / "lisp");
-  map.emplace("EMACSPATH", install / "libexec");
+  map.emplace("EMACSLOADPATH", join_path(shared, "lisp"));
+  map.emplace("EMACSPATH", join_path(install, "libexec"));
   return this->run(emacs, {}, map);
 }
 
 int executor::run_binary(const char* const wrapper, const mode mode,
-                         const std::vector<std::filesystem::path>& load_path,
-                         const std::vector<std::filesystem::path>& load_files,
-                         const std::vector<std::filesystem::path>& data_files) {
-  const auto emacs = runfile(wrapper);
+                         const std::vector<std::string>& load_path,
+                         const std::vector<std::string>& load_files,
+                         const std::vector<std::string>& data_files) {
+  const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
   std::optional<temp_stream> manifest;
   add_manifest(mode, args, random_, manifest);
@@ -276,7 +273,7 @@ int executor::run_binary(const char* const wrapper, const mode mode,
   args.push_back("--batch");
   this->add_load_path(args, load_path);
   for (const auto& file : load_files) {
-    args.push_back("--load=" + runfile(file).string());
+    args.push_back("--load=" + this->runfile(file));
   }
   if (manifest) {
     write_manifest(load_path, load_files, data_files, {}, manifest.value());
@@ -287,10 +284,10 @@ int executor::run_binary(const char* const wrapper, const mode mode,
 }
 
 int executor::run_test(const char* const wrapper, const mode mode,
-                       const std::vector<std::filesystem::path>& load_path,
-                       const std::vector<std::filesystem::path>& srcs,
-                       const std::vector<std::filesystem::path>& data_files) {
-  const auto emacs = runfile(wrapper);
+                       const std::vector<std::string>& load_path,
+                       const std::vector<std::string>& srcs,
+                       const std::vector<std::string>& data_files) {
+  const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
   std::optional<temp_stream> manifest;
   add_manifest(mode, args, random_, manifest);
@@ -298,27 +295,27 @@ int executor::run_test(const char* const wrapper, const mode mode,
   args.push_back("--batch");
   this->add_load_path(args, load_path);
   const auto runner = this->runfile("phst_rules_elisp/elisp/ert/runner.elc");
-  args.push_back("--load=" + runner.string());
+  args.push_back("--load=" + runner);
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->env_var("XML_OUTPUT_FILE");
   std::optional<temp_stream> report_file;
   if (!xml_output_file.empty()) {
-    const fs::path temp_dir = this->env_var("TEST_TMPDIR");
+    const std::string temp_dir = this->env_var("TEST_TMPDIR");
     report_file.emplace(temp_dir, "test-report-*.json", random_);
-    args.push_back("--report=/:" + report_file->path().string());
+    args.push_back("--report=/:" + report_file->path());
   }
   for (const auto& file : srcs) {
-    args.push_back(this->runfile(file).string());
+    args.push_back(this->runfile(file));
   }
   if (manifest) {
-    std::vector<fs::path> outputs;
+    std::vector<std::string> outputs;
     if (report_file) {
       outputs.push_back(report_file->path());
     }
     if (this->env_var("COVERAGE") == "1") {
       const auto coverage_dir = this->env_var("COVERAGE_DIR");
       if (!coverage_dir.empty()) {
-        outputs.push_back(fs::path(coverage_dir) / "emacs-lisp.dat");
+        outputs.push_back(join_path(coverage_dir, "emacs-lisp.dat"));
       }
     }
     write_manifest(load_path, srcs, data_files, outputs, manifest.value());
@@ -332,14 +329,14 @@ int executor::run_test(const char* const wrapper, const mode mode,
   return code;
 }
 
-fs::path executor::runfile(const fs::path& rel) const {
-  const std::string str = runfiles_->Rlocation(rel.lexically_normal());
+std::string executor::runfile(const std::string& rel) const {
+  const std::string str = runfiles_->Rlocation(rel);
   if (str.empty()) {
-    throw missing_runfile("runfile not found: " + rel.string());
+    throw missing_runfile("runfile not found: " + rel);
   }
-  // Note: Don’t call fs::canonical here, because the Python stub looks for the
-  // runfiles directory in the original filename.
-  return fs::absolute(str);
+  // Note: Don’t canonicalize the filename here, because the Python stub looks
+  // for the runfiles directory in the original filename.
+  return make_absolute(str);
 }
 
 std::string executor::env_var(const std::string& name) const noexcept {
@@ -349,24 +346,25 @@ std::string executor::env_var(const std::string& name) const noexcept {
 
 void executor::add_load_path(
     std::vector<std::string>& args,
-    const std::vector<std::filesystem::path>& load_path) const {
+    const std::vector<std::string>& load_path) const {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
   for (const auto& dir : load_path) {
     try {
-      args.push_back("--directory=" + runfile(dir).string());
+      args.push_back("--directory=" + this->runfile(dir));
     } catch (const missing_runfile&) {
       if (!std::exchange(runfile_handler_installed, true)) {
-        args.push_back("--load=" + runfile(runfiles_elc).string());
+        args.push_back("--load=" + this->runfile(runfiles_elc));
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
-      args.push_back("--directory=/bazel-runfile:" + dir.string());
+      args.push_back("--directory=/bazel-runfile:" + dir);
     }
   }
 }
 
-int executor::run(const fs::path& binary, const std::vector<std::string>& args,
+int executor::run(const std::string& binary,
+                  const std::vector<std::string>& args,
                   const std::map<std::string, std::string>& env) {
   auto final_args = build_args(args);
   const auto argv = pointers(final_args);
@@ -377,7 +375,7 @@ int executor::run(const fs::path& binary, const std::vector<std::string>& args,
                                 argv.data(), envp.data());
   if (error != 0) {
     throw std::system_error(error, std::generic_category(),
-                            "posix_spawn(" + binary.string() + ')');
+                            "posix_spawn(" + binary + ')');
   }
   int wstatus;
   const int status = waitpid(pid, &wstatus, 0);
