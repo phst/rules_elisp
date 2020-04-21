@@ -15,8 +15,9 @@
 #ifndef PHST_RULES_ELISP_INTERNAL_FILE_H
 #define PHST_RULES_ELISP_INTERNAL_FILE_H
 
+#include <fcntl.h>
+
 #include <array>
-#include <cstdio>
 #include <filesystem>
 #include <iosfwd>
 #include <locale>
@@ -27,17 +28,26 @@
 
 namespace phst_rules_elisp {
 
+enum class file_mode {
+  read = O_RDONLY,
+  write = O_WRONLY,
+  readwrite = O_RDWR,
+  create = O_CREAT,
+  excl = O_EXCL,
+};
+
+inline file_mode operator|(const file_mode a, const file_mode b) {
+  return static_cast<file_mode>(static_cast<int>(a) | static_cast<int>(b));
+}
+
 class file : public std::streambuf {
  public:
-  explicit file(std::filesystem::path path, const char* mode);
+  explicit file(std::filesystem::path path, file_mode mode);
   ~file() noexcept override;
   file(const file&) = delete;
   file& operator=(const file&) = delete;
 
-  std::FILE* c_file() {
-    this->check();
-    return file_;
-  }
+  std::FILE* open_c_file(const char* mode);
 
   const std::filesystem::path& path() const noexcept { return path_; }
 
@@ -46,21 +56,22 @@ class file : public std::streambuf {
  protected:
   file();
 
-  void open(std::filesystem::path path, const char* mode);
+  void open(std::filesystem::path path, file_mode mode);
 
  private:
   virtual void do_close();
   int_type overflow(int_type ch = traits_type::eof()) final;
   std::streamsize xsputn(const char_type* data, std::streamsize count) final;
+  std::size_t write(const char* data, std::size_t count);
   int_type underflow() final;
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
+  std::size_t read(char* data, std::size_t count);
   void imbue(const std::locale& locale) final;
   [[noreturn]] file* setbuf(char*, std::streamsize) final;
   int sync() final;
   [[nodiscard]] bool flush();
-  void check();
 
-  std::FILE* file_ = nullptr;
+  int fd_ = -1;
   std::array<char_type, 0x1000> get_;
   std::array<char_type, 0x1000> put_;
   std::filesystem::path path_;

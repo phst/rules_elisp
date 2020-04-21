@@ -183,8 +183,9 @@ static void convert_report(std::istream& json_file, const fs::path& xml_file) {
     throw std::runtime_error("invalid JSON report: " + json + "; " +
                              status.ToString());
   }
-  file stream(xml_file, "wbx");
-  tinyxml2::XMLPrinter printer(stream.c_file());
+  file stream(xml_file, file_mode::write | file_mode::create | file_mode::excl);
+  const auto c_file = stream.open_c_file("wb");
+  tinyxml2::XMLPrinter printer(c_file);
   // The expected format of the XML output file isn’t well-documented.
   // https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
   // only states that the XML file is “ANT-like.”
@@ -233,6 +234,9 @@ static void convert_report(std::istream& json_file, const fs::path& xml_file) {
   }
   printer.CloseElement();
   printer.CloseElement();
+  if (std::fflush(c_file) == EOF) {
+    throw std::system_error(errno, std::generic_category(), "fflush");
+  }
   stream.close();
 }
 

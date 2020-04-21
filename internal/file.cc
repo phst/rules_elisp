@@ -14,6 +14,12 @@
 
 #include "internal/file.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <unistd.h>
+
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
@@ -35,38 +41,45 @@ namespace fs = std::filesystem;
 
 file::file() { this->setp(put_.data(), put_.data() + put_.size()); }
 
-file::file(fs::path path, const char* const mode) : file() {
+file::file(fs::path path, const file_mode mode) : file() {
   this->open(std::move(path), mode);
 }
 
 file::~file() noexcept {
   // We require calling close() explicitly.
-  if (file_ == nullptr) return;
+  if (fd_ < 0) return;
   std::clog << "file " << path_ << " still open" << std::endl;
   std::terminate();
 }
 
-void file::open(fs::path path, const char* const mode) {
-  const auto file = std::fopen(path.c_str(), mode);
-  if (file == nullptr) {
-    throw std::ios::failure("error opening file " + path.string() +
-                            " in mode " + mode);
+void file::open(fs::path path, const file_mode mode) {
+  const int fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
+                        S_IRUSR | S_IWUSR);
+  if (fd < 0) {
+    throw std::system_error(errno, std::generic_category(),
+                            "open(" + path.string() + ')');
   }
-  file_ = file;
+  fd_ = fd;
   path_ = std::move(path);
-  this->check();
+}
+
+std::FILE* file::open_c_file(const char* const mode) {
+  const auto file = fdopen(fd_, mode);
+  if (file == nullptr) {
+    throw std::system_error(errno, std::generic_category(), "fdopen");
+  }
+  return file;
 }
 
 void file::close() {
-  if (file_ == nullptr) return;
-  this->check();
+  if (fd_ < 0) return;
   if (!this->flush()) {
     throw std::ios::failure("error closing file " + path_.string());
   }
-  const auto status = std::fclose(file_);
-  file_ = nullptr;
+  const auto status = ::close(fd_);
+  fd_ = -1;
   if (status != 0) {
-    throw std::ios::failure("error closing file " + path_.string());
+    throw std::system_error(errno, std::generic_category(), "close");
   }
   this->do_close();
   path_.clear();
@@ -87,27 +100,34 @@ file::int_type file::overflow(const int_type ch) {
 
 std::streamsize file::xsputn(const char_type* const data,
                              const std::streamsize count) {
-  this->check();
   if (!this->flush()) return 0;
-  const auto written = std::fwrite(data, 1, count, file_);
-  this->check();
+  return this->write(data, count);
+}
+
+std::size_t file::write(const char* data, std::size_t count) {
+  std::size_t written = 0;
+  while (count > 0) {
+    const auto n = ::write(fd_, data, count);
+    if (n < 0) throw std::system_error(errno, std::generic_category(), "write");
+    if (n == 0) break;
+    written += n;
+    data += n;
+    count -= n;
+  }
   return written;
 }
 
 file::int_type file::underflow() {
   assert(this->gptr() == this->egptr());
-  this->check();
-  const auto read = std::fread(get_.data(), 1, get_.size(), file_);
+  const auto read = this->read(get_.data(), get_.size());
   this->setg(get_.data(), get_.data(), get_.data() + read);
-  this->check();
   if (read == 0) return traits_type::eof();
   assert(this->gptr() != nullptr);
   assert(this->gptr() != this->egptr());
   return traits_type::to_int_type(*this->gptr());
 }
 
-std::streamsize file::xsgetn(char_type* const data, std::streamsize count) {
-  this->check();
+std::streamsize file::xsgetn(char_type* data, std::streamsize count) {
   if (count == 0) return 0;
   std::streamsize read = 0;
   if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
@@ -116,9 +136,19 @@ std::streamsize file::xsgetn(char_type* const data, std::streamsize count) {
     count -= read;
     this->setg(this->gptr(), this->gptr() + read, this->egptr());
   }
-  if (count == 0) return read;
-  read += std::fread(data, 1, count, file_);
-  this->check();
+  return read + this->read(data, count);
+}
+
+std::size_t file::read(char* data, std::size_t count) {
+  std::size_t read = 0;
+  while (count > 0) {
+    const auto n = ::read(fd_, data, count);
+    if (n < 0) throw std::system_error(errno, std::generic_category(), "read");
+    if (n == 0) break;
+    read += n;
+    data += n;
+    count -= n;
+  }
   return read;
 }
 
@@ -134,31 +164,23 @@ void file::imbue(const std::locale& locale) {
 
 int file::sync() {
   if (!this->flush()) return -1;
-  this->check();
-  return std::fflush(file_) == 0 ? 0 : -1;
+  if (::fsync(fd_) < 0) {
+    throw std::system_error(errno, std::generic_category(), "fsync");
+  }
+  return 0;
 }
 
 [[nodiscard]] bool file::flush() {
   assert(this->pbase() != nullptr);
   assert(this->pptr() != nullptr);
-  this->check();
-  const auto count = this->pptr() - this->pbase();
-  assert(count >= 0);
-  const auto written = std::fwrite(this->pbase(), 1, count, file_);
-  this->check();
-  assert(written <= static_cast<std::size_t>(count));
-  if (written < static_cast<std::size_t>(count)) return false;
+  const auto signed_count = this->pptr() - this->pbase();
+  assert(signed_count >= 0);
+  const auto count = static_cast<std::size_t>(signed_count);
+  const auto written = this->write(this->pbase(), count);
+  assert(written <= count);
+  if (written < count) return false;
   this->setp(put_.data(), put_.data() + put_.size());
   return true;
-}
-
-void file::check() {
-  if (file_ == nullptr) {
-    throw std::logic_error("file " + path_.string() + " is already closed");
-  }
-  if (std::ferror(file_) != 0) {
-    throw std::ios::failure("error in file " + path_.string());
-  }
 }
 
 temp_file::temp_file(const fs::path& directory, const std::string_view tmpl,
@@ -166,7 +188,8 @@ temp_file::temp_file(const fs::path& directory, const std::string_view tmpl,
   for (int i = 0; i < 10; i++) {
     auto name = directory / random.temp_name(tmpl);
     if (!fs::exists(name)) {
-      this->open(std::move(name), "w+bx");
+      this->open(std::move(name),
+                 file_mode::readwrite | file_mode::create | file_mode::excl);
       return;
     }
   }

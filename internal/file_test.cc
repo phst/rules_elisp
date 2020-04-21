@@ -54,7 +54,7 @@ TEST(file, write_read) {
   const auto path = fs::path(TempDir()) / "file.tmp";
   fs::remove(path);
   {
-    file file(path, "wbx");
+    file file(path, file_mode::readwrite | file_mode::create | file_mode::excl);
     EXPECT_THAT(file.path(), Eq(path));
     EXPECT_THAT(file.sputc('h'), traits::to_int_type('h'));
     EXPECT_THAT(file.sputn("ello worl", 9), Eq(9));
@@ -64,7 +64,7 @@ TEST(file, write_read) {
   }
   EXPECT_THAT(read_file(path), "hello world");
   {
-    file file(path, "rb");
+    file file(path, file_mode::read);
     EXPECT_THAT(file.path(), Eq(path));
     EXPECT_THAT(file.sbumpc(), Eq(traits::to_int_type('h')));
     EXPECT_THAT(file.sgetc(), Eq(traits::to_int_type('e')));
