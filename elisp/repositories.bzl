@@ -37,6 +37,12 @@ def rules_elisp_dependencies():
         ],
     )
     http_archive(
+        name = "com_google_absl",
+        urls = ["https://github.com/abseil/abseil-cpp/archive/1a02b7a2054c24f900dab796edb812f9260b51a6.zip"],
+        sha256 = "b62f077afb82579f9a77303aa05407dd8b76ad1d841d8c8957ab4049d2a2682f",
+        strip_prefix = "abseil-cpp-1a02b7a2054c24f900dab796edb812f9260b51a6",
+    )
+    http_archive(
         name = "com_google_protobuf",
         urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
         strip_prefix = "protobuf-3.11.4",

@@ -36,6 +36,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include "absl/types/optional.h"
+#include "absl/utility/utility.h"
 #include "google/protobuf/duration.pb.h"
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/util/json_util.h"
@@ -131,7 +133,7 @@ static std::string get_shared_dir(const std::string& install) {
 }
 
 static void add_manifest(const mode mode, std::vector<std::string>& args,
-                         random& random, std::optional<temp_stream>& stream) {
+                         random& random, absl::optional<temp_stream>& stream) {
   if (mode == mode::direct) return;
   stream.emplace(temp_dir(), "manifest-*.json", random);
   args.push_back("--manifest=" + stream->path());
@@ -270,7 +272,7 @@ int executor::run_binary(const char* const wrapper, const mode mode,
                          const std::vector<std::string>& data_files) {
   const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
-  std::optional<temp_stream> manifest;
+  absl::optional<temp_stream> manifest;
   add_manifest(mode, args, random_, manifest);
   args.push_back("--quick");
   args.push_back("--batch");
@@ -292,7 +294,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
                        const std::vector<std::string>& data_files) {
   const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
-  std::optional<temp_stream> manifest;
+  absl::optional<temp_stream> manifest;
   add_manifest(mode, args, random_, manifest);
   args.push_back("--quick");
   args.push_back("--batch");
@@ -301,7 +303,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
   args.push_back("--load=" + runner);
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->env_var("XML_OUTPUT_FILE");
-  std::optional<temp_stream> report_file;
+  absl::optional<temp_stream> report_file;
   if (!xml_output_file.empty()) {
     const std::string temp_dir = this->env_var("TEST_TMPDIR");
     report_file.emplace(temp_dir, "test-report-*.json", random_);
@@ -357,7 +359,7 @@ void executor::add_load_path(
     try {
       args.push_back("--directory=" + this->runfile(dir));
     } catch (const missing_runfile&) {
-      if (!std::exchange(runfile_handler_installed, true)) {
+      if (!absl::exchange(runfile_handler_installed, true)) {
         args.push_back("--load=" + this->runfile(runfiles_elc));
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }

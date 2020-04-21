@@ -113,6 +113,5 @@ COPTS = [
     "-Wextra",
     "-Wconversion",
     "-pedantic-errors",
-    "-std=c++17",
     "-D_GNU_SOURCE",
 ]

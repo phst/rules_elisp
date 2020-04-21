@@ -29,6 +29,8 @@
 #include <system_error>
 #include <utility>
 
+#include "absl/strings/string_view.h"
+
 #include "internal/random.h"
 
 namespace phst_rules_elisp {
@@ -85,7 +87,7 @@ class file : public std::streambuf {
 class temp_file : public file {
  public:
   explicit temp_file(const std::string& directory,
-                     std::string_view tmpl, random& random);
+                     absl::string_view tmpl, random& random);
   ~temp_file() noexcept override;
   temp_file(const temp_file&) = delete;
   temp_file& operator=(const temp_file&) = delete;
@@ -121,36 +123,36 @@ class basic_stream : public std::iostream {
 using stream = basic_stream<file>;
 using temp_stream = basic_stream<temp_file>;
 
-inline constexpr std::string_view filename(std::string_view name) noexcept {
+inline absl::string_view filename(absl::string_view name) noexcept {
   const auto pos = name.rfind('/');
   return pos == name.npos ? name : name.substr(pos + 1);
 }
 
-inline constexpr std::string_view parent(std::string_view name) noexcept {
+inline absl::string_view parent(absl::string_view name) noexcept {
   const auto pos = name.rfind('/');
-  return pos == name.npos ? std::string_view() : name.substr(0, pos);
+  return pos == name.npos ? absl::string_view() : name.substr(0, pos);
 }
 
-constexpr std::string_view remove_slash(std::string_view name) noexcept {
+constexpr absl::string_view remove_slash(absl::string_view name) noexcept {
   return (name.empty() || name.back() != '/') ? name
                                               : name.substr(0, name.size() - 1);
 }
 
-constexpr bool is_absolute(std::string_view name) noexcept {
+constexpr bool is_absolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';
 }
 
-std::string join_path(std::string_view a, std::string_view b);
+std::string join_path(absl::string_view a, absl::string_view b);
 
 template <typename... Ts>
-std::string join_path(std::string_view a, std::string_view b, Ts&&... rest) {
+std::string join_path(absl::string_view a, absl::string_view b, Ts&&... rest) {
   static_assert(sizeof...(Ts) > 0,
                 "this overload should only be instantiated with at least three "
                 "arguments");
   return join_path(join_path(a, b), std::forward<Ts>(rest)...);
 }
 
-std::string make_absolute(std::string_view name);
+std::string make_absolute(absl::string_view name);
 
 [[nodiscard]] bool file_exists(const std::string& name) noexcept;
 [[nodiscard]] std::error_code remove_file(const std::string& name) noexcept;

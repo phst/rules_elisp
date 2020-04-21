@@ -40,13 +40,13 @@ cc_library(
     hdrs = ["exec.h"],
     copts = COPTS,
     visibility = ["//visibility:public"],
-    # Note: This library can’t depend on Abseil directly because it uses
-    # incompatible build flags.
     deps = [
         ":manifest_cc_proto",
         ":report_cc_proto",
         "//internal:file",
         "//internal:random",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/utility",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_protobuf//:protobuf",
         "@leethomason_tinyxml2//:tinyxml2",

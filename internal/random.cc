@@ -24,11 +24,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <string_view>
+
+#include "absl/strings/string_view.h"
 
 namespace phst_rules_elisp {
 
-std::string random::temp_name(const std::string_view tmpl) {
+std::string random::temp_name(const absl::string_view tmpl) {
   const auto pos = tmpl.rfind('*');
   if (pos == tmpl.npos) {
     throw std::invalid_argument("no * in template " + std::string(tmpl));

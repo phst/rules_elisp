@@ -20,9 +20,10 @@ cc_library(
     hdrs = ["file.h"],
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
-    # Note: This library can’t depend on Abseil directly because it uses
-    # incompatible build flags.
-    deps = [":random"],
+    deps = [
+        ":random",
+        "@com_google_absl//absl/strings",
+    ],
 )
 
 cc_test(
@@ -42,8 +43,7 @@ cc_library(
     hdrs = ["random.h"],
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
-    # Note: This library can’t depend on Abseil directly because it uses
-    # incompatible build flags.
+    deps = ["@com_google_absl//absl/strings"],
 )
 
 cc_test(

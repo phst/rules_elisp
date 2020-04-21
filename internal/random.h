@@ -16,14 +16,15 @@
 #define PHST_RULES_ELISP_INTERNAL_RANDOM_H
 
 #include <string>
-#include <string_view>
 #include <random>
+
+#include "absl/strings/string_view.h"
 
 namespace phst_rules_elisp {
 
 class random {
  public:
-  std::string temp_name(std::string_view tmpl);
+  std::string temp_name(absl::string_view tmpl);
 
  private:
   using engine = std::mt19937;

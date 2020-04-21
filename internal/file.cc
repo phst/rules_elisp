@@ -33,6 +33,8 @@
 #include <system_error>
 #include <utility>
 
+#include "absl/strings/string_view.h"
+
 #include "internal/random.h"
 
 namespace phst_rules_elisp {
@@ -179,7 +181,7 @@ int file::sync() {
   return true;
 }
 
-temp_file::temp_file(const std::string& directory, const std::string_view tmpl,
+temp_file::temp_file(const std::string& directory, const absl::string_view tmpl,
                      random& random) {
   for (int i = 0; i < 10; i++) {
     auto name = join_path(directory, random.temp_name(tmpl));
@@ -213,25 +215,25 @@ void temp_file::do_close() {
   return remove_file(this->path());
 }
 
-static constexpr std::string_view remove_prefix(const std::string_view string,
-                                                const char prefix) noexcept {
+static constexpr absl::string_view remove_prefix(const absl::string_view string,
+                                                 const char prefix) noexcept {
   return (string.empty() || string.front() != prefix) ? string
                                                       : string.substr(1);
 }
 
-static constexpr std::string_view remove_suffix(const std::string_view string,
-                                                const char suffix) noexcept {
+static constexpr absl::string_view remove_suffix(const absl::string_view string,
+                                                 const char suffix) noexcept {
   return (string.empty() || string.back() != suffix)
              ? string
              : string.substr(0, string.size() - 1);
 }
 
-std::string join_path(const std::string_view a, const std::string_view b) {
+std::string join_path(const absl::string_view a, const absl::string_view b) {
   return std::string(remove_slash(a)) + '/' +
          std::string(remove_prefix(b, '/'));
 }
 
-std::string make_absolute(const std::string_view name) {
+std::string make_absolute(const absl::string_view name) {
   if (is_absolute(name)) return std::string(name);
   struct free {
     void operator()(void* const ptr) const noexcept { std::free(ptr); }
