@@ -37,7 +37,7 @@ std::string random::temp_name(const std::string_view tmpl) {
   const auto suffix = tmpl.substr(pos + 1);
   std::uniform_int_distribution<unsigned long> distribution;
   using limits = std::numeric_limits<decltype(distribution)::result_type>;
-  static_assert(limits::radix == 2);
+  static_assert(limits::radix == 2, "unexpected radix");
   constexpr int bits_per_hex_digit = 4;
   constexpr int width =
       (limits::digits + bits_per_hex_digit - 1) / bits_per_hex_digit;
@@ -51,7 +51,7 @@ std::string random::temp_name(const std::string_view tmpl) {
 
 random::engine random::init_engine() {
   std::random_device device;
-  static_assert(engine::word_size == 32);
+  static_assert(engine::word_size == 32, "unexpected word size");
   std::array<decltype(device)::result_type, engine::state_size> seed;
   std::generate(seed.begin(), seed.end(), std::ref(device));
   std::seed_seq sequence(seed.cbegin(), seed.cend());

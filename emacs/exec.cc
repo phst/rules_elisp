@@ -71,10 +71,13 @@ static std::string join(const I first, const I last) {
 static std::vector<char*> pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (auto& s : strings) {
+    if (s.empty()) {
+      throw std::invalid_argument("empty string");
+    }
     if (s.find('\0') != s.npos) {
       throw std::invalid_argument(s + " contains null character");
     }
-    ptrs.push_back(s.data());
+    ptrs.push_back(&s.front());
   }
   ptrs.push_back(nullptr);
   return ptrs;
@@ -167,7 +170,7 @@ static void write_manifest(const std::vector<std::string>& load_path,
 static double float_seconds(
     const google::protobuf::Duration& duration) noexcept {
   return static_cast<double>(duration.seconds()) +
-         static_cast<double>(duration.nanos()) / 1'000'000'000;
+         static_cast<double>(duration.nanos()) / 1e9;
 }
 
 static void convert_report(std::istream& json_file, const std::string& xml_file) {

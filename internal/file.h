@@ -98,7 +98,8 @@ class temp_file : public file {
 template <typename T>
 class basic_stream : public std::iostream {
  public:
-  static_assert(std::is_base_of_v<file, T>);
+  static_assert(std::is_base_of<file, T>::value,
+                "basic_stream works only with file types");
 
   template <typename... As>
   explicit basic_stream(As&&... args) : file_(std::forward<As>(args)...) {
@@ -143,7 +144,9 @@ std::string join_path(std::string_view a, std::string_view b);
 
 template <typename... Ts>
 std::string join_path(std::string_view a, std::string_view b, Ts&&... rest) {
-  static_assert(sizeof...(Ts) > 0);
+  static_assert(sizeof...(Ts) > 0,
+                "this overload should only be instantiated with at least three "
+                "arguments");
   return join_path(join_path(a, b), std::forward<Ts>(rest)...);
 }
 
