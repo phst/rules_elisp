@@ -20,14 +20,17 @@
 #include <fcntl.h>
 
 #include <array>
+#include <cerrno>
 #include <initializer_list>
 #include <iosfwd>
 #include <istream>
 #include <iterator>
 #include <locale>
+#include <memory>
 #include <string>
 #include <string_view>
 #include <system_error>
+#include <tuple>
 #include <utility>
 
 #pragma GCC diagnostic push
@@ -36,12 +39,35 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
 #include "absl/base/casts.h"
+#include "absl/status/status.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 
+#include "internal/macros.h"
 #include "internal/random.h"
+#include "internal/statusor.h"
 
 namespace phst_rules_elisp {
+
+absl::Status MakeErrorStatus(const std::error_code& code,
+                             absl::string_view function,
+                             absl::string_view args);
+
+template <typename... Ts>
+absl::Status ErrorStatus(const std::error_code& code,
+                         const absl::string_view function, Ts&&... args) {
+  return MakeErrorStatus(code, function,
+                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
+}
+
+template <typename... Ts>
+absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
+  return ErrorStatus(std::error_code(errno, std::system_category()), function,
+                     std::forward<Ts>(args)...);
+}
+
+absl::Status StreamStatus(const std::ios& stream);
 
 enum class FileMode {
   kRead = O_RDONLY,
@@ -57,23 +83,23 @@ inline FileMode operator|(const FileMode a, const FileMode b) {
 
 class File : public std::streambuf {
  public:
-  explicit File(std::string path, FileMode mode);
+  static StatusOr<File> Open(std::string path, FileMode mode);
   ~File() noexcept override;
   File(const File&) = delete;
   File(File&& other);
   File& operator=(const File&) = delete;
   File& operator=(File&& other);
 
-  std::FILE* OpenCFile(const char* mode);
+  StatusOr<std::FILE*> OpenCFile(const char* mode);
 
   const std::string& path() const noexcept { return path_; }
 
-  void Close();
+  absl::Status Close();
 
  protected:
   File();
 
-  void Open(std::string path, FileMode mode);
+  absl::Status DoOpen(std::string path, FileMode mode);
 
  private:
   struct ABSL_MUST_USE_RESULT Result {
@@ -81,7 +107,7 @@ class File : public std::streambuf {
     int error;
   };
 
-  virtual void DoClose();
+  virtual absl::Status DoClose();
   void Move(File&& other);
   int_type overflow(int_type ch = traits_type::eof()) final;
   std::streamsize xsputn(const char_type* data, std::streamsize count) final;
@@ -90,18 +116,22 @@ class File : public std::streambuf {
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
   Result Read(char* data, std::streamsize count);
   int sync() final;
-  ABSL_MUST_USE_RESULT bool Flush();
+  absl::Status Flush();
+  const absl::Status& Fail(absl::Status status);
+  const absl::Status& Fail(absl::string_view function);
 
   int fd_ = -1;
   std::array<char_type, 0x1000> get_;
   std::array<char_type, 0x1000> put_;
   std::string path_;
+  absl::Status status_;
 };
 
 class TempFile : public File {
  public:
-  explicit TempFile(const std::string& directory, absl::string_view tmpl,
-                    Random& random);
+  static StatusOr<TempFile> Open(const std::string& directory,
+                                 absl::string_view tmpl, Random& random);
+
   ~TempFile() noexcept override;
   TempFile(const TempFile&) = delete;
   TempFile(TempFile&&) = default;
@@ -109,8 +139,9 @@ class TempFile : public File {
   TempFile& operator=(TempFile&&) = default;
 
  private:
-  void DoClose() final;
-  ABSL_MUST_USE_RESULT std::error_code Remove() noexcept;
+  TempFile();
+  absl::Status DoClose() final;
+  absl::Status Remove() noexcept;
 };
 
 template <typename T>
@@ -120,10 +151,9 @@ class BasicStream : public std::iostream {
                 "basic_stream works only with file types");
 
   template <typename... As>
-  explicit BasicStream(As&&... args) : file_(std::forward<As>(args)...) {
-    this->init(&file_);
-    this->exceptions(badbit | failbit | eofbit);
-    this->imbue(std::locale::classic());
+  static StatusOr<BasicStream> Open(As&&... args) {
+    ASSIGN_OR_RETURN(auto file, T::Open(std::forward<As>(args)...));
+    return BasicStream(std::move(file));
   }
 
   BasicStream(const BasicStream&) = delete;
@@ -143,10 +173,15 @@ class BasicStream : public std::iostream {
     return *this;
   }
 
-  void Close() { file_.Close(); }
+  absl::Status Close() { return file_.Close(); }
   const std::string& path() const noexcept { return file_.path(); }
 
  private:
+  explicit BasicStream(T file) : file_(std::move(file)) {
+    this->init(&file_);
+    this->imbue(std::locale::classic());
+  }
+
   T file_;
 };
 
@@ -165,11 +200,10 @@ std::string JoinPath(Ts&&... pieces) {
   return JoinPathImpl({absl::implicit_cast<absl::string_view>(pieces)...});
 }
 
-std::string MakeAbsolute(absl::string_view name);
+StatusOr<std::string> MakeAbsolute(absl::string_view name);
 
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
-ABSL_MUST_USE_RESULT std::error_code RemoveFile(
-    const std::string& name) noexcept;
+absl::Status RemoveFile(const std::string& name) noexcept;
 ABSL_MUST_USE_RESULT std::string TempDir();
 
 class Directory {
@@ -217,7 +251,8 @@ class Directory {
     std::string entry_;
   };
 
-  explicit Directory(const std::string& name);
+  static StatusOr<Directory> Open(const std::string& name);
+
   Directory(const Directory&) = delete;
   Directory(Directory&& other) : dir_(other.dir_) { other.dir_ = nullptr; }
   Directory& operator=(const Directory&) = delete;
@@ -225,12 +260,14 @@ class Directory {
 
   ~Directory() noexcept;
 
-  ABSL_MUST_USE_RESULT std::error_code Close() noexcept;
+  absl::Status Close() noexcept;
 
   Iterator begin() const { return Iterator(dir_); }
   Iterator end() const { return Iterator(); }
 
  private:
+  explicit Directory(::DIR* dir) : dir_(dir) {}
+
   ::DIR* dir_;
 };
 

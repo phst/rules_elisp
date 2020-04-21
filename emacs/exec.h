@@ -20,44 +20,60 @@
 #include <string>
 #include <vector>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#include "absl/status/status.h"
 #include "tools/cpp/runfiles/runfiles.h"
+#pragma GCC diagnostic pop
 
 #include "internal/random.h"
+#include "internal/statusor.h"
 
 namespace phst_rules_elisp {
-
-struct ForTest {};
 
 enum class Mode { kDirect, kWrap };
 
 class Executor {
  public:
-  explicit Executor(int argc, const char* const* argv, const char* const* envp);
+  static StatusOr<Executor> Create(int argc, const char* const* argv,
+                                   const char* const* envp);
 
-  explicit Executor(ForTest, int argc, const char* const* argv,
-                    const char* const* envp);
+  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv,
+                                          const char* const* envp);
 
-  int RunEmacs(const char* install_rel);
+  Executor(const Executor&) = delete;
+  Executor(Executor&&) = default;
+  Executor& operator=(const Executor&) = delete;
+  Executor& operator=(Executor&&) = default;
 
-  int RunBinary(const char* wrapper, Mode mode,
-                const std::vector<std::string>& load_path,
-                const std::vector<std::string>& load_files,
-                const std::vector<std::string>& data_files);
+  StatusOr<int> RunEmacs(const char* install_rel);
 
-  int RunTest(const char* wrapper, Mode mode,
-              const std::vector<std::string>& load_path,
-              const std::vector<std::string>& srcs,
-              const std::vector<std::string>& data_files);
+  StatusOr<int> RunBinary(const char* wrapper, Mode mode,
+                          const std::vector<std::string>& load_path,
+                          const std::vector<std::string>& load_files,
+                          const std::vector<std::string>& data_files);
+
+  StatusOr<int> RunTest(const char* wrapper, Mode mode,
+                        const std::vector<std::string>& load_path,
+                        const std::vector<std::string>& srcs,
+                        const std::vector<std::string>& data_files);
 
  private:
-  std::string Runfile(const std::string& rel) const;
+  explicit Executor(
+      int argc, const char* const* argv, const char* const* envp,
+      std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles);
+
+  StatusOr<std::string> Runfile(const std::string& rel) const;
   std::string EnvVar(const std::string& name) const noexcept;
 
-  void AddLoadPath(std::vector<std::string>& args,
-                   const std::vector<std::string>& load_path) const;
+  absl::Status AddLoadPath(std::vector<std::string>& args,
+                           const std::vector<std::string>& load_path) const;
 
-  int Run(const std::string& binary, const std::vector<std::string>& args,
-          const std::map<std::string, std::string>& env);
+  StatusOr<int> Run(const std::string& binary,
+                    const std::vector<std::string>& args,
+                    const std::map<std::string, std::string>& env);
 
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
@@ -65,9 +81,9 @@ class Executor {
   std::vector<std::string> BuildEnv(
       const std::map<std::string, std::string>& other) const;
 
-  const std::vector<std::string> orig_args_;
-  const std::map<std::string, std::string> orig_env_;
-  const std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
+  std::vector<std::string> orig_args_;
+  std::map<std::string, std::string> orig_env_;
+  std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
   Random random_;
 };
 

@@ -16,17 +16,17 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cstdlib>
 #include <cstring>
 #include <ios>
+#include <iostream>
 #include <iterator>
 #include <map>
 #include <memory>
 #include <numeric>
-#include <optional>
 #include <ostream>
 #include <regex>
 #include <set>
-#include <stdexcept>
 #include <string>
 #include <system_error>
 #include <utility>
@@ -37,8 +37,12 @@
 #include <sys/wait.h>
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#include "absl/base/casts.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/optional.h"
 #include "absl/utility/utility.h"
@@ -55,26 +59,23 @@
 #include "internal/file.h"
 #include "internal/int.h"
 #include "internal/random.h"
+#include "internal/statusor.h"
 
 namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
 using google::protobuf::util::TimeUtil;
 
-namespace {
-class MissingRunfile : public std::runtime_error {
-  using std::runtime_error::runtime_error;
-};
-}  // namespace
-
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (auto& s : strings) {
     if (s.empty()) {
-      throw std::invalid_argument("empty string");
+      std::clog << "empty string" << std::endl;
+      std::abort();
     }
     if (s.find('\0') != s.npos) {
-      throw std::invalid_argument(s + " contains null character");
+      std::clog << s << " contains null character" << std::endl;
+      std::abort();
     }
     ptrs.push_back(&s.front());
   }
@@ -94,49 +95,63 @@ static std::map<std::string, std::string> CopyEnv(const char* const* envp) {
   return map;
 }
 
-static std::unique_ptr<Runfiles> CreateRunfiles(const std::string& argv0) {
+static absl::Status ProtobufToAbslStatus(
+    const google::protobuf::util::Status& status,
+    const absl::string_view prefix = absl::string_view()) {
+  if (status.ok()) return absl::OkStatus();
+  std::string message(prefix);
+  if (!prefix.empty()) message += ": ";
+  message += status.message();
+  return absl::Status(static_cast<absl::StatusCode>(status.code()), message);
+}
+
+static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
+    const std::string& argv0) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv0, &error));
   if (runfiles == nullptr) {
-    throw std::runtime_error("couldn’t create runfiles: " + error);
+    return absl::FailedPreconditionError("couldn’t create runfiles: " + error);
   }
   return runfiles;
 }
 
-static std::unique_ptr<Runfiles> CreateRunfilesForTest() {
+static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
   if (runfiles == nullptr) {
-    throw std::runtime_error("couldn’t create runfiles for test: " + error);
+    return absl::FailedPreconditionError("couldn’t create runfiles for test: " +
+                                         error);
   }
   return runfiles;
 }
 
-static std::string GetSharedDir(const std::string& install) {
+static StatusOr<std::string> GetSharedDir(const std::string& install) {
   const auto emacs = JoinPath(install, "share", "emacs");
-  Directory dir(emacs);
+  ASSIGN_OR_RETURN(const auto dir, Directory::Open(emacs));
   std::set<std::string> dirs;
   for (const auto& entry : dir) {
     if (std::regex_match(entry, std::regex("[0-9][.0-9]*"))) {
       dirs.insert(entry);
     }
   }
-  if (dirs.empty()) throw MissingRunfile("no shared directory found");
+  if (dirs.empty()) return absl::NotFoundError("no shared directory found");
   if (dirs.size() != 1) {
-    throw std::runtime_error("expected exactly one shared directory, got [" +
-                             absl::StrJoin(dirs, ", ") + ']');
+    return absl::FailedPreconditionError(
+        "expected exactly one shared directory, got [" +
+        absl::StrJoin(dirs, ", ") + ']');
   }
   return JoinPath(emacs, *dirs.begin());
 }
 
-static absl::optional<TempStream> AddManifest(const Mode mode,
-                                              std::vector<std::string>& args,
-                                              Random& random) {
-  if (mode == Mode::kDirect) return absl::nullopt;
-  TempStream stream(TempDir(), "manifest-*.json", random);
+static StatusOr<absl::optional<TempStream>> AddManifest(
+    const Mode mode, std::vector<std::string>& args, Random& random) {
+  using Type = absl::optional<TempStream>;
+  if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
+  ASSIGN_OR_RETURN(auto stream,
+                   TempStream::Open(TempDir(), "manifest-*.json", random));
   args.push_back("--manifest=" + stream.path());
   args.push_back("--");
-  return stream;
+  return absl::implicit_cast<Type>(std::move(stream));
 }
 
 static void AddToManifest(
@@ -144,31 +159,33 @@ static void AddToManifest(
     google::protobuf::RepeatedPtrField<std::string>& field) {
   for (const auto& file : files) {
     if (IsAbsolute(file)) {
-      throw std::invalid_argument("filename " + file + " is absolute");
+      std::clog << "filename " << file << " is absolute" << std::endl;
+      std::abort();
     }
     *field.Add() = file;
   }
 }
 
-static void WriteManifest(const std::vector<std::string>& load_path,
-                          const std::vector<std::string>& load_files,
-                          const std::vector<std::string>& data_files,
-                          const std::vector<std::string>& output_files,
-                          std::ostream& file) {
+static absl::Status WriteManifest(const std::vector<std::string>& load_path,
+                                  const std::vector<std::string>& load_files,
+                                  const std::vector<std::string>& data_files,
+                                  const std::vector<std::string>& output_files,
+                                  std::ostream& file) {
   Manifest manifest;
   AddToManifest(load_path, *manifest.mutable_load_path());
   AddToManifest(load_files, *manifest.mutable_input_files());
   AddToManifest(data_files, *manifest.mutable_input_files());
   AddToManifest(output_files, *manifest.mutable_output_files());
   std::string json;
-  const auto status =
-      google::protobuf::util::MessageToJsonString(manifest, &json);
-  if (!status.ok()) throw std::runtime_error(status.ToString());
+  RETURN_IF_ERROR(ProtobufToAbslStatus(
+      google::protobuf::util::MessageToJsonString(manifest, &json)));
   if (json.size() > UnsignedMax<std::streamsize>()) {
-    throw std::length_error("JSON object is too big");
+    return absl::OutOfRangeError("JSON object is too big");
   }
   file.write(json.data(), static_cast<std::streamsize>(json.size()));
+  RETURN_IF_ERROR(StreamStatus(file));
   file.flush();
+  return StreamStatus(file);
 }
 
 static double float_seconds(
@@ -177,19 +194,19 @@ static double float_seconds(
          static_cast<double>(duration.nanos()) / 1e9;
 }
 
-static void ConvertReport(std::istream& json_file, const std::string& xml_file) {
+static absl::Status ConvertReport(std::istream& json_file,
+                                  const std::string& xml_file) {
   using iterator = std::istreambuf_iterator<char>;
   const std::string json(iterator(json_file), iterator{});
+  RETURN_IF_ERROR(StreamStatus(json_file));
   TestReport report;
-  const auto status =
-      google::protobuf::util::JsonStringToMessage(json, &report);
-  if (!status.ok()) {
-    throw std::runtime_error("invalid JSON report: " + json + "; " +
-                             status.ToString());
-  }
-  File stream(xml_file,
-              FileMode::kWrite | FileMode::kCreate | FileMode::kExclusive);
-  const auto c_file = stream.OpenCFile("wb");
+  RETURN_IF_ERROR(ProtobufToAbslStatus(
+      google::protobuf::util::JsonStringToMessage(json, &report),
+      "invalid JSON report: " + json));
+  ASSIGN_OR_RETURN(auto stream,
+                   File::Open(xml_file, FileMode::kWrite | FileMode::kCreate |
+                                            FileMode::kExclusive));
+  ASSIGN_OR_RETURN(const auto c_file, stream.OpenCFile("wb"));
   tinyxml2::XMLPrinter printer(c_file);
   // The expected format of the XML output file isn’t well-documented.
   // https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
@@ -240,26 +257,34 @@ static void ConvertReport(std::istream& json_file, const std::string& xml_file) 
   printer.CloseElement();
   printer.CloseElement();
   if (std::fflush(c_file) == EOF) {
-    throw std::system_error(errno, std::generic_category(), "fflush");
+    return ErrorStatus(std::error_code(errno, std::generic_category()),
+                       "fflush");
   }
-  stream.Close();
+  return stream.Close();
 }
 
-Executor::Executor(int argc, const char* const* argv, const char* const* envp)
+StatusOr<Executor> Executor::Create(int argc, const char* const* argv,
+                                    const char* const* envp) {
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv[0]));
+  return Executor(argc, argv, envp, std::move(runfiles));
+}
+
+StatusOr<Executor> Executor::CreateForTest(int argc, const char* const* argv,
+                                           const char* const* envp) {
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
+  return Executor(argc, argv, envp, std::move(runfiles));
+}
+
+Executor::Executor(const int argc, const char* const* argv,
+                   const char* const* envp, std::unique_ptr<Runfiles> runfiles)
     : orig_args_(argv, argv + argc),
       orig_env_(CopyEnv(envp)),
-      runfiles_(CreateRunfiles(orig_args_.at(0))) {}
+      runfiles_(std::move(runfiles)) {}
 
-Executor::Executor(ForTest, int argc, const char* const* argv,
-                   const char* const* envp)
-    : orig_args_(argv, argv + argc),
-      orig_env_(CopyEnv(envp)),
-      runfiles_(CreateRunfilesForTest()) {}
-
-int Executor::RunEmacs(const char* install_rel) {
-  const auto install = this->Runfile(install_rel);
+StatusOr<int> Executor::RunEmacs(const char* install_rel) {
+  ASSIGN_OR_RETURN(const auto install, this->Runfile(install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
-  const auto shared = GetSharedDir(install);
+  ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
   std::map<std::string, std::string> map;
   map.emplace("EMACSDATA", etc);
@@ -269,49 +294,54 @@ int Executor::RunEmacs(const char* install_rel) {
   return this->Run(emacs, {}, map);
 }
 
-int Executor::RunBinary(const char* const wrapper, const Mode mode,
-                        const std::vector<std::string>& load_path,
-                        const std::vector<std::string>& load_files,
-                        const std::vector<std::string>& data_files) {
-  const auto emacs = this->Runfile(wrapper);
+StatusOr<int> Executor::RunBinary(const char* const wrapper, const Mode mode,
+                                  const std::vector<std::string>& load_path,
+                                  const std::vector<std::string>& load_files,
+                                  const std::vector<std::string>& data_files) {
+  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
   std::vector<std::string> args;
-  auto manifest = AddManifest(mode, args, random_);
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
   args.push_back("--quick");
   args.push_back("--batch");
-  this->AddLoadPath(args, load_path);
+  RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
   for (const auto& file : load_files) {
-    args.push_back("--load=" + this->Runfile(file));
+    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
+    args.push_back("--load=" + file);
   }
   if (manifest) {
-    WriteManifest(load_path, load_files, data_files, {}, manifest.value());
+    RETURN_IF_ERROR(
+        WriteManifest(load_path, load_files, data_files, {}, manifest.value()));
   }
-  const auto code = this->Run(emacs, args, {});
-  if (manifest) manifest->Close();
+  ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
+  if (manifest) RETURN_IF_ERROR(manifest->Close());
   return code;
 }
 
-int Executor::RunTest(const char* const wrapper, const Mode mode,
-                      const std::vector<std::string>& load_path,
-                      const std::vector<std::string>& srcs,
-                      const std::vector<std::string>& data_files) {
-  const auto emacs = this->Runfile(wrapper);
+StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
+                                const std::vector<std::string>& load_path,
+                                const std::vector<std::string>& srcs,
+                                const std::vector<std::string>& data_files) {
+  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
   std::vector<std::string> args;
-  auto manifest = AddManifest(mode, args, random_);
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
   args.push_back("--quick");
   args.push_back("--batch");
-  this->AddLoadPath(args, load_path);
-  const auto runner = this->Runfile("phst_rules_elisp/elisp/ert/runner.elc");
+  RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
+  ASSIGN_OR_RETURN(const auto runner,
+                   this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back("--load=" + runner);
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->EnvVar("XML_OUTPUT_FILE");
   absl::optional<TempStream> report_file;
   if (!xml_output_file.empty()) {
     const std::string temp_dir = this->EnvVar("TEST_TMPDIR");
-    report_file.emplace(temp_dir, "test-report-*.json", random_);
+    ASSIGN_OR_RETURN(report_file,
+                     TempStream::Open(temp_dir, "test-report-*.json", random_));
     args.push_back("--report=/:" + report_file->path());
   }
   for (const auto& file : srcs) {
-    args.push_back(this->Runfile(file));
+    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
+    args.push_back(abs);
   }
   if (manifest) {
     std::vector<std::string> outputs;
@@ -324,22 +354,22 @@ int Executor::RunTest(const char* const wrapper, const Mode mode,
         outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
       }
     }
-    WriteManifest(load_path, srcs, data_files, outputs, manifest.value());
+    RETURN_IF_ERROR(
+        WriteManifest(load_path, srcs, data_files, outputs, manifest.value()));
   }
-  const int code = this->Run(emacs, args, {});
+  ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
   if (report_file) {
-    ConvertReport(*report_file, xml_output_file);
-    report_file->Close();
+    auto status = ConvertReport(*report_file, xml_output_file);
+    status.Update(report_file->Close());
+    RETURN_IF_ERROR(status);
   }
-  if (manifest) manifest->Close();
+  if (manifest) RETURN_IF_ERROR(manifest->Close());
   return code;
 }
 
-std::string Executor::Runfile(const std::string& rel) const {
+StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
-  if (str.empty()) {
-    throw MissingRunfile("runfile not found: " + rel);
-  }
+  if (str.empty()) return absl::NotFoundError("runfile not found: " + rel);
   // Note: Don’t canonicalize the filename here, because the Python stub looks
   // for the runfiles directory in the original filename.
   return MakeAbsolute(str);
@@ -350,27 +380,33 @@ std::string Executor::EnvVar(const std::string& name) const noexcept {
   return it == orig_env_.end() ? std::string() : it->second;
 }
 
-void Executor::AddLoadPath(std::vector<std::string>& args,
-                           const std::vector<std::string>& load_path) const {
+absl::Status Executor::AddLoadPath(
+    std::vector<std::string>& args,
+    const std::vector<std::string>& load_path) const {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
   for (const auto& dir : load_path) {
-    try {
-      args.push_back("--directory=" + this->Runfile(dir));
-    } catch (const MissingRunfile&) {
+    const auto status_or_dir = this->Runfile(dir);
+    if (status_or_dir.ok()) {
+      args.push_back("--directory=" + status_or_dir.value());
+    } else if (absl::IsNotFound(status_or_dir.status())) {
       if (!absl::exchange(runfile_handler_installed, true)) {
-        args.push_back("--load=" + this->Runfile(runfiles_elc));
+        ASSIGN_OR_RETURN(const auto file, this->Runfile(runfiles_elc));
+        args.push_back("--load=" + file);
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
       args.push_back("--directory=/bazel-runfile:" + dir);
+    } else {
+      return status_or_dir.status();
     }
   }
+  return absl::OkStatus();
 }
 
-int Executor::Run(const std::string& binary,
-                  const std::vector<std::string>& args,
-                  const std::map<std::string, std::string>& env) {
+StatusOr<int> Executor::Run(const std::string& binary,
+                            const std::vector<std::string>& args,
+                            const std::map<std::string, std::string>& env) {
   auto final_args = this->BuildArgs(args);
   const auto argv = Pointers(final_args);
   auto final_env = this->BuildEnv(env);
@@ -379,15 +415,12 @@ int Executor::Run(const std::string& binary,
   const int error = posix_spawn(&pid, binary.c_str(), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
-    throw std::system_error(error, std::system_category(),
-                            "posix_spawn(" + binary + ')');
+    return ErrorStatus(std::error_code(error, std::system_category()),
+                       "posix_spawn", binary);
   }
   int wstatus;
   const int status = waitpid(pid, &wstatus, 0);
-  if (status != pid) {
-    throw std::system_error(errno, std::system_category(),
-                            "waitpid(" + std::to_string(pid) + ')');
-  }
+  if (status != pid) return ErrnoStatus("waitpid", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 }
 

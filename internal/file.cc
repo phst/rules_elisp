@@ -42,6 +42,8 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/memory/memory.h"
+#include "absl/status/status.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -55,11 +57,57 @@
 
 namespace phst_rules_elisp {
 
-File::File() { this->setp(put_.data(), put_.data() + put_.size()); }
-
-File::File(std::string path, const FileMode mode) : File() {
-  this->Open(std::move(path), mode);
+static absl::StatusCode MapErrorCode(const std::error_code& code) {
+  const auto condition = code.default_error_condition();
+  if (condition.category() != std::generic_category()) {
+    return absl::StatusCode::kUnknown;
+  }
+  switch (static_cast<std::errc>(condition.value())) {
+    case std::errc::file_exists:
+      return absl::StatusCode::kAlreadyExists;
+    case std::errc::function_not_supported:
+      return absl::StatusCode::kUnimplemented;
+    case std::errc::no_space_on_device:
+      return absl::StatusCode::kResourceExhausted;
+    case std::errc::no_such_file_or_directory:
+      return absl::StatusCode::kNotFound;
+    case std::errc::operation_canceled:
+      return absl::StatusCode::kCancelled;
+    case std::errc::permission_denied:
+      return absl::StatusCode::kPermissionDenied;
+    case std::errc::timed_out:
+      return absl::StatusCode::kDeadlineExceeded;
+    default:
+      return absl::StatusCode::kUnknown;
+  }
 }
+
+absl::Status MakeErrorStatus(const std::error_code& code,
+                             const absl::string_view function,
+                             const absl::string_view args) {
+  if (!code) return absl::OkStatus();
+  return absl::Status(
+      MapErrorCode(code),
+      absl::StrCat(function, args.empty() ? args : absl::StrCat("(", args, ")"),
+                   ": ", code.category().name(), "/", code.value(), ": ",
+                   code.message()));
+}
+
+absl::Status StreamStatus(const std::ios& stream) {
+  if (stream.good()) return absl::OkStatus();
+  if (stream.bad()) return absl::DataLossError("stream is bad");
+  if (stream.fail()) return absl::FailedPreconditionError("stream has failed");
+  if (stream.eof()) return absl::OutOfRangeError("end of file reached");
+  std::abort();  // can’t happen
+}
+
+StatusOr<File> File::Open(std::string path, const FileMode mode) {
+  File result;
+  RETURN_IF_ERROR(result.DoOpen(std::move(path), mode));
+  return result;
+}
+
+File::File() { this->setp(put_.data(), put_.data() + put_.size()); }
 
 File::File(File&& other)
     : std::streambuf(other),
@@ -83,55 +131,45 @@ File& File::operator=(File&& other) {
 File::~File() noexcept {
   if (fd_ < 0) return;
   std::clog << "file " << path_ << " still open" << std::endl;
-  try {
-    this->Close();
-  } catch (const std::exception& e) {
-    std::clog << "error closing file: " << e.what() << std::endl;
-  }
+  const auto status = this->Close();
+  if (!status.ok()) std::clog << "error closing file: " << status << std::endl;
 }
 
-void File::Open(std::string path, const FileMode mode) {
+absl::Status File::DoOpen(std::string path, const FileMode mode) {
   int fd = -1;
   while (true) {
     fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
                 S_IRUSR | S_IWUSR);
     if (fd >= 0 || errno != EINTR) break;
   }
-  if (fd < 0) {
-    throw std::system_error(errno, std::system_category(),
-                            "open(" + path + ')');
-  }
+  if (fd < 0) return ErrnoStatus("open", path);
   fd_ = fd;
   path_ = std::move(path);
+  return status_;
 }
 
-std::FILE* File::OpenCFile(const char* const mode) {
+StatusOr<std::FILE*> File::OpenCFile(const char* const mode) {
   const auto file = fdopen(fd_, mode);
-  if (file == nullptr) {
-    throw std::system_error(errno, std::system_category(), "fdopen");
-  }
+  if (file == nullptr) return ErrnoStatus("fdopen");
   return file;
 }
 
-void File::Close() {
-  if (fd_ < 0) return;
-  if (!this->Flush()) {
-    throw std::ios::failure("error closing file " + path_);
-  }
+absl::Status File::Close() {
+  if (fd_ < 0) return status_;
+  RETURN_IF_ERROR(this->Flush());
   int status = -1;
   while (true) {
     status = ::close(fd_);
     if (status == 0 || errno != EINTR) break;
   }
-  if (status != 0) {
-    throw std::system_error(errno, std::system_category(), "close");
-  }
   fd_ = -1;
-  this->DoClose();
+  if (status != 0) return this->Fail("close");
+  status_.Update(this->DoClose());
   path_.clear();
+  return status_;
 }
 
-void File::DoClose() {}
+absl::Status File::DoClose() { return absl::OkStatus(); }
 
 void File::Move(File&& other) {
   other.fd_ = -1;
@@ -151,7 +189,7 @@ void File::Move(File&& other) {
 
 File::int_type File::overflow(const int_type ch) {
   assert(this->pptr() == this->epptr());
-  if (!this->Flush()) return traits_type::eof();
+  if (!this->Flush().ok()) return traits_type::eof();
   if (traits_type::eq_int_type(ch, traits_type::eof())) {
     return traits_type::not_eof(0);
   }
@@ -164,7 +202,7 @@ File::int_type File::overflow(const int_type ch) {
 
 std::streamsize File::xsputn(const char_type* const data,
                              const std::streamsize count) {
-  if (!this->Flush()) return 0;
+  if (!this->Flush().ok()) return 0;
   return this->Write(data, count).count;
 }
 
@@ -231,14 +269,15 @@ File::Result File::Read(char* data, std::streamsize count) {
 }
 
 int File::sync() {
-  const auto success = this->Flush();
-  if (::fsync(fd_) < 0) {
-    throw std::system_error(errno, std::system_category(), "fsync");
+  this->Flush().IgnoreError();
+  if (::fsync(fd_) != 0) {
+    this->Fail("fdsync").IgnoreError();
+    return -1;
   }
-  return success ? 0 : -1;
+  return status_.ok() ? 0 : -1;
 }
 
-ABSL_MUST_USE_RESULT bool File::Flush() {
+absl::Status File::Flush() {
   const auto pbase = this->pbase();
   const auto pptr = this->pptr();
   assert(pbase != nullptr);
@@ -264,42 +303,61 @@ ABSL_MUST_USE_RESULT bool File::Flush() {
     assert(this->pptr() == pptr);
   }
   if (result.error != 0) {
-    throw std::system_error(result.error, std::system_category(), "write");
+    return ErrorStatus(std::error_code(result.error, std::system_category()),
+                       "write");
   }
-  return remaining == 0;
+  return remaining == 0 ? absl::OkStatus()
+                        : absl::DataLossError(
+                              absl::StrCat(remaining, " bytes not written"));
 }
 
-TempFile::TempFile(const std::string& directory, const absl::string_view tmpl,
-                   Random& random) {
+const absl::Status& File::Fail(absl::Status status) {
+  status_.Update(std::move(status));
+  return status_;
+}
+
+const absl::Status& File::Fail(const absl::string_view function) {
+  const auto status = ErrnoStatus(function);
+  return this->Fail(absl::Status(
+      status.code(), absl::StrCat("file ", path_, ": ", status.message())));
+}
+
+StatusOr<TempFile> TempFile::Open(const std::string& directory,
+                                  const absl::string_view tmpl,
+                                  Random& random) {
+  TempFile result;
   for (int i = 0; i < 10; i++) {
     auto name = JoinPath(directory, random.TempName(tmpl));
     if (!FileExists(name)) {
-      this->Open(std::move(name), FileMode::kReadWrite | FileMode::kCreate |
-                                      FileMode::kExclusive);
-      return;
+      RETURN_IF_ERROR(result.DoOpen(std::move(name), FileMode::kReadWrite |
+                                                         FileMode::kCreate |
+                                                         FileMode::kExclusive));
+      return result;
     }
   }
-  throw std::runtime_error("can’t create temporary file in directory " +
-                           directory + " with template " + std::string(tmpl));
+  return absl::UnavailableError("can’t create temporary file in directory " +
+                                directory + " with template " +
+                                std::string(tmpl));
 }
+
+TempFile::TempFile() {}
 
 TempFile::~TempFile() noexcept {
   const auto& path = this->path();
-  const auto code = this->Remove();
+  const auto status = this->Remove();
   // Only print an error if removing the file failed (“false” return value), but
   // the file wasn’t already removed before (zero error code).
-  if (code && code != std::errc::no_such_file_or_directory) {
-    std::clog << "error removing temporary file " << path << ": " << code
-              << ": " << code.message() << std::endl;
+  if (!status.ok() && !absl::IsNotFound(status)) {
+    std::clog << "error removing temporary file " << path << ": " << status
+              << std::endl;
   }
 }
 
-void TempFile::DoClose() {
-  const auto code = this->Remove();
-  if (code) throw std::system_error(code);
+absl::Status TempFile::DoClose() {
+  return this->Remove();
 }
 
-ABSL_MUST_USE_RESULT std::error_code TempFile::Remove() noexcept {
+absl::Status TempFile::Remove() noexcept {
   return RemoveFile(this->path());
 }
 
@@ -316,16 +374,13 @@ std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) 
                       absl::EndsWith(*(pieces.end() - 1), "/") ? "/" : "");
 }
 
-std::string MakeAbsolute(const absl::string_view name) {
+StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   if (IsAbsolute(name)) return std::string(name);
   struct free {
     void operator()(void* const ptr) const noexcept { std::free(ptr); }
   };
   const std::unique_ptr<char, free> dir(get_current_dir_name());
-  if (dir == nullptr) {
-    throw std::system_error(errno, std::system_category(),
-                            "get_current_dir_name");
-  }
+  if (dir == nullptr) return ErrnoStatus("get_current_dir_name");
   return JoinPath(dir.get(), name);
 }
 
@@ -334,10 +389,9 @@ ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
   return ::lstat(name.c_str(), &info) == 0;
 }
 
-ABSL_MUST_USE_RESULT std::error_code RemoveFile(
-    const std::string& name) noexcept {
-  return std::error_code(::unlink(name.c_str()) == 0 ? 0 : errno,
-                         std::system_category());
+absl::Status RemoveFile(const std::string& name) noexcept {
+  return ::unlink(name.c_str()) == 0 ? absl::OkStatus()
+                                     : ErrnoStatus("unlink", name);
 }
 
 ABSL_MUST_USE_RESULT std::string TempDir() {
@@ -349,31 +403,30 @@ ABSL_MUST_USE_RESULT std::string TempDir() {
   return "/tmp";
 }
 
-Directory::Directory(const std::string& name) : dir_(::opendir(name.c_str())) {
-  if (dir_ == nullptr) {
-    throw std::system_error(errno, std::system_category(),
-                            "opendir(" + name + ')');
-  }
+StatusOr<Directory> Directory::Open(const std::string& name) {
+  const auto dir = ::opendir(name.c_str());
+  if (dir == nullptr) return ErrnoStatus("opendir", name);
+  return Directory(dir);
 }
 
 Directory& Directory::operator=(Directory&& other) {
-  const auto code = this->Close();
-  if (code) std::clog << code << ": " << code.message() << std::endl;
+  const auto status = this->Close();
+  if (!status.ok()) std::clog << status << std::endl;
   dir_ = absl::exchange(other.dir_, nullptr);
   return *this;
 }
 
 Directory::~Directory() noexcept {
-  const auto code = this->Close();
-  if (code) std::clog << code << ": " << code.message() << std::endl;
+  const auto status = this->Close();
+  if (!status.ok()) std::clog << status << std::endl;
 }
 
-ABSL_MUST_USE_RESULT std::error_code Directory::Close() noexcept {
-  if (dir_ == nullptr) return std::error_code();
-  const std::error_code code(::closedir(dir_) == 0 ? 0 : errno,
-                             std::system_category());
+absl::Status Directory::Close() noexcept {
+  if (dir_ == nullptr) return absl::OkStatus();
+  const auto status =
+      ::closedir(dir_) == 0 ? absl::OkStatus() : ErrnoStatus("closedir");
   dir_ = nullptr;
-  return code;
+  return status;
 }
 
 void Directory::Iterator::Advance() {
@@ -381,9 +434,7 @@ void Directory::Iterator::Advance() {
   const auto entry = ::readdir(dir_);
   if (entry == nullptr) {
     dir_ = nullptr;
-    if (errno != 0) {
-      throw std::system_error(errno, std::system_category(), "readdir");
-    }
+    if (errno != 0) std::clog << ErrnoStatus("readdir") << std::endl;
     entry_.clear();
   } else {
     entry_ = entry->d_name;

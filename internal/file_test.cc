@@ -28,15 +28,17 @@
 #include <utility>
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #pragma GCC diagnostic pop
 
 #include "internal/random.h"
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
 
 namespace phst_rules_elisp {
 namespace {
@@ -64,32 +66,33 @@ static constexpr absl::string_view RemoveSlash(
                                               : name.substr(0, name.size() - 1);
 }
 
-static std::string ReadFile(const std::string& path) try {
+static std::string ReadFile(const std::string& path) {
   std::ifstream stream(path);
   stream.exceptions(stream.badbit | stream.failbit | stream.eofbit);
   using iterator = std::istreambuf_iterator<char>;
   return std::string(iterator(stream), iterator());
-} catch (const std::ios::failure& ex) {
-  std::clog << "error reading file " << path << ": " << ex.what() << std::endl;
-  throw;
 }
 
 TEST(File, WriteRead) {
   const auto path = JoinPath(TempDir(), Random().TempName("file-*.tmp"));
   using Traits = std::char_traits<char>;
   {
-    File file(path,
-              FileMode::kReadWrite | FileMode::kCreate | FileMode::kExclusive);
+    auto status_or_file = File::Open(
+        path, FileMode::kReadWrite | FileMode::kCreate | FileMode::kExclusive);
+    ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+    auto& file = status_or_file.value();
     EXPECT_THAT(file.path(), Eq(path));
     EXPECT_THAT(file.sputc('h'), Traits::to_int_type('h'));
     EXPECT_THAT(file.sputn("ello worl", 9), Eq(9));
     EXPECT_THAT(file.pubsync(), Eq(0));
     EXPECT_THAT(file.sputc('d'), Traits::to_int_type('d'));
-    file.Close();
+    EXPECT_TRUE(file.Close().ok());
   }
   EXPECT_THAT(ReadFile(path), "hello world");
   {
-    File file(path, FileMode::kRead);
+    auto status_or_file = File::Open(path, FileMode::kRead);
+    ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+    auto& file = status_or_file.value();
     EXPECT_THAT(file.path(), Eq(path));
     EXPECT_THAT(file.sbumpc(), Eq(Traits::to_int_type('h')));
     EXPECT_THAT(file.sgetc(), Eq(Traits::to_int_type('e')));
@@ -104,7 +107,7 @@ TEST(File, WriteRead) {
     EXPECT_THAT(file.snextc(), Eq(Traits::eof()));
     EXPECT_THAT(file.sbumpc(), Eq(Traits::eof()));
     EXPECT_THAT(file.pubsync(), Eq(0));
-    file.Close();
+    EXPECT_TRUE(file.Close().ok());
   }
 }
 
@@ -120,10 +123,13 @@ TEST(File, PartialWrite) {
       << std::error_code(errno, std::system_category());
   EXPECT_THAT(fcntl(fd, F_ADD_SEALS, F_SEAL_GROW), Eq(0))
       << std::error_code(errno, std::system_category());
-  File file(absl::StrCat("/dev/fd/", fd), FileMode::kWrite);
+  auto status_or_file =
+      File::Open(absl::StrCat("/dev/fd/", fd), FileMode::kWrite);
+  ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+  auto& file = status_or_file.value();
   EXPECT_THAT(file.sputc('h'), Eq(Traits::to_int_type('h')));  // fill buffer
   EXPECT_THAT(file.sputn("i", 1), Eq(0));  // try to flush
-  file.Close();  // buffer flushed, no new error
+  EXPECT_TRUE(file.Close().ok());  // buffer flushed, no new error
   std::array<char, 20> buffer;
   EXPECT_THAT(::read(fd, buffer.data(), buffer.size()), Eq(1));
   EXPECT_THAT(::close(fd), Eq(0))
@@ -138,16 +144,20 @@ TEST(File, Move) {
   using Traits = std::char_traits<char>;
   absl::optional<File> outer;
   {
-    File inner(path,
-               FileMode::kWrite | FileMode::kCreate | FileMode::kExclusive);
+    auto status_or_file = File::Open(
+        path, FileMode::kWrite | FileMode::kCreate | FileMode::kExclusive);
+    ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+    auto& inner = status_or_file.value();
     EXPECT_THAT(inner.sputc('h'), Eq(Traits::to_int_type('h')));
     outer = std::move(inner);
   }
   EXPECT_THAT(outer->sputc('i'), Eq(Traits::to_int_type('i')));
-  outer->Close();
+  EXPECT_TRUE(outer->Close().ok());
   EXPECT_THAT(ReadFile(path), "hi");
   {
-    File inner(path, FileMode::kRead);
+    auto status_or_file = File::Open(path, FileMode::kRead);
+    ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+    auto& inner = status_or_file.value();
     EXPECT_THAT(inner.sgetc(), Eq(Traits::to_int_type('h')));
     char ch;
     EXPECT_THAT(inner.sgetn(&ch, 1), Eq(1));
@@ -161,21 +171,26 @@ TEST(File, Move) {
 
 TEST(TempFile, Create) {
   Random rnd;
-  TempFile file(TempDir(), "foo-*.tmp", rnd);
+  auto status_or_file = TempFile::Open(TempDir(), "foo-*.tmp", rnd);
+  ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+  auto& file = status_or_file.value();
   const auto path = file.path();
   EXPECT_THAT(Parent(path), Eq(RemoveSlash(TempDir())));
   EXPECT_THAT(std::string(FileName(path)), StartsWith("foo-"));
   EXPECT_THAT(std::string(FileName(path)), EndsWith(".tmp"));
   EXPECT_TRUE(FileExists(path));
-  file.Close();
+  EXPECT_TRUE(file.Close().ok());
   EXPECT_TRUE(file.path().empty());
   EXPECT_FALSE(FileExists(path));
 }
 
 TEST(Stream, AssignRead) {
-  Stream a(JoinPath(std::getenv("TEST_SRCDIR"),
-                    "phst_rules_elisp/internal/test.txt"),
-           FileMode::kRead);
+  auto status_or_file =
+      Stream::Open(JoinPath(std::getenv("TEST_SRCDIR"),
+                            "phst_rules_elisp/internal/test.txt"),
+                   FileMode::kRead);
+  ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
+  auto a = std::move(status_or_file).value();
   auto b = std::move(a);
   using Iterator = std::istreambuf_iterator<char>;
   std::string contents(Iterator(b), Iterator{});
@@ -185,7 +200,9 @@ TEST(Stream, AssignRead) {
 
 TEST(TempStream, Format) {
   Random rnd;
-  TempStream stream(TempDir(), "foo-*.tmp", rnd);
+  auto status_or_stream = TempStream::Open(TempDir(), "foo-*.tmp", rnd);
+  ASSERT_TRUE(status_or_stream.ok()) << status_or_stream.status();
+  auto& stream = status_or_stream.value();
   const auto path = stream.path();
   EXPECT_THAT(Parent(path), Eq(RemoveSlash(TempDir())));
   EXPECT_THAT(std::string(FileName(path)), StartsWith("foo-"));
@@ -194,7 +211,7 @@ TEST(TempStream, Format) {
   stream << "hello world\n" << 123;
   stream.flush();
   EXPECT_THAT(ReadFile(path), "hello world\n123");
-  stream.Close();
+  EXPECT_TRUE(stream.Close().ok());
   EXPECT_TRUE(stream.path().empty());
   EXPECT_FALSE(FileExists(path));
 }

@@ -108,6 +108,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
 
 # Shared C++ compilation options.
 COPTS = [
+    "-fno-exceptions",
     "-Werror",
     "-Wall",
     "-Wextra",

@@ -22,8 +22,12 @@ cc_library(
     visibility = ["//emacs:__pkg__"],
     deps = [
         ":int",
+        ":macros",
         ":random",
+        ":statusor",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/utility",
     ],
@@ -37,6 +41,7 @@ cc_test(
     deps = [
         ":file",
         ":random",
+        "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
@@ -70,4 +75,27 @@ cc_library(
     hdrs = ["int.h"],
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
+)
+
+cc_library(
+    name = "macros",
+    hdrs = ["macros.h"],
+    copts = COPTS,
+    visibility = ["//emacs:__pkg__"],
+    deps = [
+        ":statusor",
+        "@com_google_absl//absl/status",
+    ],
+)
+
+cc_library(
+    name = "statusor",
+    hdrs = ["statusor.h"],
+    copts = COPTS,
+    visibility = ["//emacs:__pkg__"],
+    deps = [
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:variant",
+    ],
 )

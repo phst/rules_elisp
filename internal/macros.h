@@ -12,35 +12,33 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "internal/random.h"
-
-#include <cstdint>
-#include <cstdlib>
-#include <iostream>
-#include <random>
-#include <string>
+#ifndef PHST_RULES_ELISP_INTERNAL_MACROS_H
+#define PHST_RULES_ELISP_INTERNAL_MACROS_H
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#include "absl/strings/string_view.h"
-#include "absl/strings/str_cat.h"
+#include "absl/status/status.h"
 #pragma GCC diagnostic pop
 
-namespace phst_rules_elisp {
+#define RETURN_IF_ERROR(expr)          \
+  do {                                 \
+    const auto _status = (expr);       \
+    if (!_status.ok()) return _status; \
+  } while (false)
 
-std::string Random::TempName(const absl::string_view tmpl) {
-  const auto pos = tmpl.rfind('*');
-  if (pos == tmpl.npos) {
-    std::clog << "no * in template " << tmpl << std::endl;
-    std::abort();
-  }
-  const auto prefix = tmpl.substr(0, pos);
-  const auto suffix = tmpl.substr(pos + 1);
-  std::uniform_int_distribution<std::uint64_t> distribution;
-  return absl::StrCat(
-      prefix, absl::Hex(distribution(engine_), absl::kZeroPad16), suffix);
-}
+#define ASSIGN_OR_RETURN(lhs, rhs) \
+  ASSIGN_OR_RETURN_1(lhs, (rhs), __COUNTER__)
 
-}  // phst_rules_elisp
+#define ASSIGN_OR_RETURN_1(lhs, rhs, counter) \
+  ASSIGN_OR_RETURN_2(lhs, (rhs), PHST_RULES_ELISP_CONCAT(_status_or_, counter))
+
+#define ASSIGN_OR_RETURN_2(lhs, rhs, var) \
+  auto var = (rhs);                       \
+  if (!var.ok()) return var.status();     \
+  lhs = std::move(var).value()
+
+#define PHST_RULES_ELISP_CONCAT(a, b) a ## b
+
+#endif
