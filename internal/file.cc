@@ -133,6 +133,7 @@ std::streamsize file::xsgetn(char_type* data, std::streamsize count) {
   if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
     read = std::min(count, this->egptr() - this->gptr());
     traits_type::copy(data, this->gptr(), read);
+    data += read;
     count -= read;
     this->setg(this->gptr(), this->gptr() + read, this->egptr());
   }
