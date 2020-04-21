@@ -24,7 +24,6 @@
 #include <cassert>
 #include <cerrno>
 #include <cstdlib>
-#include <exception>
 #include <ios>
 #include <iostream>
 #include <memory>
@@ -45,10 +44,7 @@ file::file(std::string path, const file_mode mode) : file() {
 }
 
 file::~file() noexcept {
-  // We require calling close() explicitly.
-  if (fd_ < 0) return;
-  std::clog << "file " << path_ << " still open" << std::endl;
-  std::terminate();
+  if (fd_ >= 0) std::clog << "file " << path_ << " still open" << std::endl;
 }
 
 void file::open(std::string path, const file_mode mode) {
