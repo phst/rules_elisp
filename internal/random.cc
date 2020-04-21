@@ -14,18 +14,17 @@
 
 #include "internal/random.h"
 
-#include <algorithm>
-#include <array>
-#include <functional>
-#include <iomanip>
-#include <limits>
-#include <locale>
+#include <cstdint>
 #include <random>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
 #include "absl/strings/string_view.h"
+#include "absl/strings/str_cat.h"
+#pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
 
@@ -36,27 +35,9 @@ std::string random::temp_name(const absl::string_view tmpl) {
   }
   const auto prefix = tmpl.substr(0, pos);
   const auto suffix = tmpl.substr(pos + 1);
-  std::uniform_int_distribution<unsigned long> distribution;
-  using limits = std::numeric_limits<decltype(distribution)::result_type>;
-  static_assert(limits::radix == 2, "unexpected radix");
-  constexpr int bits_per_hex_digit = 4;
-  constexpr int width =
-      (limits::digits + bits_per_hex_digit - 1) / bits_per_hex_digit;
-  std::ostringstream stream;
-  stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
-  stream.imbue(std::locale::classic());
-  stream << prefix << std::setfill('0') << std::right << std::hex
-         << std::setw(width) << distribution(engine_) << suffix;
-  return stream.str();
-}
-
-random::engine random::init_engine() {
-  std::random_device device;
-  static_assert(engine::word_size == 32, "unexpected word size");
-  std::array<decltype(device)::result_type, engine::state_size> seed;
-  std::generate(seed.begin(), seed.end(), std::ref(device));
-  std::seed_seq sequence(seed.cbegin(), seed.cend());
-  return engine(sequence);
+  std::uniform_int_distribution<std::uint64_t> distribution;
+  return absl::StrCat(
+      prefix, absl::Hex(distribution(engine_), absl::kZeroPad16), suffix);
 }
 
 }  // phst_rules_elisp

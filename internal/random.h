@@ -16,9 +16,13 @@
 #define PHST_RULES_ELISP_INTERNAL_RANDOM_H
 
 #include <string>
-#include <random>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
+#include "absl/random/random.h"
 #include "absl/strings/string_view.h"
+#pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
 
@@ -27,9 +31,7 @@ class random {
   std::string temp_name(absl::string_view tmpl);
 
  private:
-  using engine = std::mt19937;
-  static engine init_engine();
-  engine engine_ = init_engine();
+  absl::BitGen engine_;
 };
 
 }  // phst_rules_elisp
