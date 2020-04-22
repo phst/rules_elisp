@@ -36,6 +36,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#include "absl/strings/str_join.h"
 #include "absl/types/optional.h"
 #include "absl/utility/utility.h"
 #include "google/protobuf/duration.pb.h"
@@ -44,6 +47,7 @@
 #include "google/protobuf/util/time_util.h"
 #include "tinyxml2.h"
 #include "tools/cpp/runfiles/runfiles.h"
+#pragma GCC diagnostic pop
 
 #include "emacs/manifest.pb.h"
 #include "emacs/report.pb.h"
@@ -60,15 +64,6 @@ class missing_runfile : public std::runtime_error {
   using std::runtime_error::runtime_error;
 };
 }  // namespace
-
-template <typename I>
-static std::string join(const I first, const I last) {
-  if (first == last) return "";
-  std::string init = *first;
-  return std::accumulate(
-      std::next(first), last, init,
-      [](const std::string& a, const std::string& b) { return a + ", " + b; });
-}
 
 static std::vector<char*> pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
@@ -127,7 +122,7 @@ static std::string get_shared_dir(const std::string& install) {
   if (dirs.empty()) throw missing_runfile("no shared directory found");
   if (dirs.size() != 1) {
     throw std::runtime_error("expected exactly one shared directory, got [" +
-                             join(dirs.begin(), dirs.end()) + ']');
+                             absl::StrJoin(dirs, ", ") + ']');
   }
   return join_path(emacs, *dirs.begin());
 }
