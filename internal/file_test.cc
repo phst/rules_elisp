@@ -100,7 +100,7 @@ TEST(File, PartialWrite) {
       << std::error_code(errno, std::system_category());
   file file(absl::StrCat("/dev/fd/", fd), file_mode::write);
   EXPECT_THAT(file.sputc('h'), Eq(traits::to_int_type('h')));  // fill buffer
-  EXPECT_THROW(file.sputn("i", 1), std::system_error);  // try to flush
+  EXPECT_THAT(file.sputn("i", 1), Eq(0));  // try to flush
   file.close();  // buffer flushed, no new error
   std::array<char, 20> buffer;
   EXPECT_THAT(::read(fd, buffer.data(), buffer.size()), Eq(1));

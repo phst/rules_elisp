@@ -26,6 +26,7 @@
 #include <cstdlib>
 #include <ios>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -108,27 +109,28 @@ file::int_type file::overflow(const int_type ch) {
 std::streamsize file::xsputn(const char_type* const data,
                              const std::streamsize count) {
   if (!this->flush()) return 0;
-  return this->write(data, count);
+  return this->write(data, count).count;
 }
 
-std::size_t file::write(const char* data, std::size_t count) {
-  std::size_t written = 0;
+file::result file::write(const char* data, std::size_t count) {
+  result result = {};
   while (count > 0) {
     const auto n = ::write(fd_, data, count);
-    if (n < 0) throw std::system_error(errno, std::system_category(), "write");
-    if (n == 0) break;
-    written += n;
+    if (n < 0) result.error = errno;
+    if (n <= 0) break;
+    result.count += n;
     data += n;
     count -= n;
   }
-  return written;
+  return result;
 }
 
 file::int_type file::underflow() {
   assert(this->gptr() == this->egptr());
-  const auto read = this->read(get_.data(), get_.size());
+  const auto result = this->read(get_.data(), get_.size());
+  const auto read = result.count;
   this->setg(get_.data(), get_.data(), get_.data() + read);
-  if (read == 0) return traits_type::eof();
+  if (result.error != 0 || read == 0) return traits_type::eof();
   assert(this->gptr() != nullptr);
   assert(this->gptr() != this->egptr());
   return traits_type::to_int_type(*this->gptr());
@@ -144,20 +146,20 @@ std::streamsize file::xsgetn(char_type* data, std::streamsize count) {
     count -= read;
     this->setg(this->gptr(), this->gptr() + read, this->egptr());
   }
-  return read + this->read(data, count);
+  return read + this->read(data, count).count;
 }
 
-std::size_t file::read(char* data, std::size_t count) {
-  std::size_t read = 0;
+file::result file::read(char* data, std::size_t count) {
+  result result = {};
   while (count > 0) {
     const auto n = ::read(fd_, data, count);
-    if (n < 0) throw std::system_error(errno, std::system_category(), "read");
-    if (n == 0) break;
-    read += n;
+    if (n < 0) result.error = errno;
+    if (n <= 0) break;
+    result.count += n;
     data += n;
     count -= n;
   }
-  return read;
+  return result;
 }
 
 int file::sync() {
@@ -169,16 +171,39 @@ int file::sync() {
 }
 
 [[nodiscard]] bool file::flush() {
-  assert(this->pbase() != nullptr);
-  assert(this->pptr() != nullptr);
-  const auto signed_count = this->pptr() - this->pbase();
+  const auto pbase = this->pbase();
+  const auto pptr = this->pptr();
+  assert(pbase != nullptr);
+  assert(pptr != nullptr);
+  const auto signed_count = pptr - pbase;
   assert(signed_count >= 0);
   const auto count = static_cast<std::size_t>(signed_count);
-  const auto written = this->write(this->pbase(), count);
+  const auto result = this->write(pbase, count);
+  const auto written = result.count;
   assert(written <= count);
-  if (written < count) return false;
-  this->setp(put_.data(), put_.data() + put_.size());
-  return true;
+  const auto remaining = count - written;
+  if (remaining == 0) {
+    this->setp(put_.data(), put_.data() + put_.size());
+  } else {
+    // If we only managed to do a partial write, we can’t reuse the array.
+    // Instead, we set pbase so that the next attempt to flush will start with
+    // the yet-unflushed data.
+    this->setp(pbase + written, put_.data() + put_.size());
+    // Set pptr to its previous value.
+    auto distance = remaining;
+    constexpr int max = std::numeric_limits<int>::max();
+    while (distance > max) {
+      this->pbump(max);
+      distance -= max;
+    }
+    assert(distance <= max);
+    this->pbump(static_cast<int>(distance));
+    assert(this->pptr() == pptr);
+  }
+  if (result.error != 0) {
+    throw std::system_error(result.error, std::system_category(), "write");
+  }
+  return remaining == 0;
 }
 
 temp_file::temp_file(const std::string& directory, const absl::string_view tmpl,

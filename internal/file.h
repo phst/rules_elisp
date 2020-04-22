@@ -66,13 +66,18 @@ class file : public std::streambuf {
   void open(std::string path, file_mode mode);
 
  private:
+  struct [[nodiscard]] result {
+    std::size_t count;
+    int error;
+  };
+
   virtual void do_close();
   int_type overflow(int_type ch = traits_type::eof()) final;
   std::streamsize xsputn(const char_type* data, std::streamsize count) final;
-  std::size_t write(const char* data, std::size_t count);
+  result write(const char* data, std::size_t count);
   int_type underflow() final;
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
-  std::size_t read(char* data, std::size_t count);
+  result read(char* data, std::size_t count);
   int sync() final;
   [[nodiscard]] bool flush();
 
