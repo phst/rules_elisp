@@ -53,7 +53,7 @@ def rules_elisp_dependencies():
         urls = ["https://github.com/leethomason/tinyxml2/archive/8.0.0.zip"],
         sha256 = "ad17d277b23b32edfded29890201adeb946b33be80094c3f804688038be3a5bd",
         strip_prefix = "tinyxml2-8.0.0",
-        build_file = "@//:tinyxml2.BUILD",
+        build_file = "@phst_rules_elisp//:tinyxml2.BUILD",
     )
 
 def rules_elisp_toolchains():
