@@ -379,13 +379,13 @@ int executor::run(const std::string& binary,
   const int error = posix_spawn(&pid, binary.c_str(), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
-    throw std::system_error(error, std::generic_category(),
+    throw std::system_error(error, std::system_category(),
                             "posix_spawn(" + binary + ')');
   }
   int wstatus;
   const int status = waitpid(pid, &wstatus, 0);
   if (status != pid) {
-    throw std::system_error(errno, std::generic_category(),
+    throw std::system_error(errno, std::system_category(),
                             "waitpid(" + std::to_string(pid) + ')');
   }
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;

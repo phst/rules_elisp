@@ -53,7 +53,7 @@ void file::open(std::string path, const file_mode mode) {
   const int fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
                         S_IRUSR | S_IWUSR);
   if (fd < 0) {
-    throw std::system_error(errno, std::generic_category(),
+    throw std::system_error(errno, std::system_category(),
                             "open(" + path + ')');
   }
   fd_ = fd;
@@ -63,7 +63,7 @@ void file::open(std::string path, const file_mode mode) {
 std::FILE* file::open_c_file(const char* const mode) {
   const auto file = fdopen(fd_, mode);
   if (file == nullptr) {
-    throw std::system_error(errno, std::generic_category(), "fdopen");
+    throw std::system_error(errno, std::system_category(), "fdopen");
   }
   return file;
 }
@@ -76,7 +76,7 @@ void file::close() {
   const auto status = ::close(fd_);
   fd_ = -1;
   if (status != 0) {
-    throw std::system_error(errno, std::generic_category(), "close");
+    throw std::system_error(errno, std::system_category(), "close");
   }
   this->do_close();
   path_.clear();
@@ -105,7 +105,7 @@ std::size_t file::write(const char* data, std::size_t count) {
   std::size_t written = 0;
   while (count > 0) {
     const auto n = ::write(fd_, data, count);
-    if (n < 0) throw std::system_error(errno, std::generic_category(), "write");
+    if (n < 0) throw std::system_error(errno, std::system_category(), "write");
     if (n == 0) break;
     written += n;
     data += n;
@@ -141,7 +141,7 @@ std::size_t file::read(char* data, std::size_t count) {
   std::size_t read = 0;
   while (count > 0) {
     const auto n = ::read(fd_, data, count);
-    if (n < 0) throw std::system_error(errno, std::generic_category(), "read");
+    if (n < 0) throw std::system_error(errno, std::system_category(), "read");
     if (n == 0) break;
     read += n;
     data += n;
@@ -163,7 +163,7 @@ void file::imbue(const std::locale& locale) {
 int file::sync() {
   if (!this->flush()) return -1;
   if (::fsync(fd_) < 0) {
-    throw std::system_error(errno, std::generic_category(), "fsync");
+    throw std::system_error(errno, std::system_category(), "fsync");
   }
   return 0;
 }
