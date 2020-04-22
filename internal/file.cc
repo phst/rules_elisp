@@ -50,8 +50,12 @@ file::~file() noexcept {
 }
 
 void file::open(std::string path, const file_mode mode) {
-  const int fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
-                        S_IRUSR | S_IWUSR);
+  int fd = -1;
+  while (true) {
+    fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
+                S_IRUSR | S_IWUSR);
+    if (fd >= 0 || errno != EINTR) break;
+  }
   if (fd < 0) {
     throw std::system_error(errno, std::system_category(),
                             "open(" + path + ')');
@@ -73,11 +77,15 @@ void file::close() {
   if (!this->flush()) {
     throw std::ios::failure("error closing file " + path_);
   }
-  const auto status = ::close(fd_);
-  fd_ = -1;
+  int status = -1;
+  while (true) {
+    status = ::close(fd_);
+    if (status == 0 || errno != EINTR) break;
+  }
   if (status != 0) {
     throw std::system_error(errno, std::system_category(), "close");
   }
+  fd_ = -1;
   this->do_close();
   path_.clear();
 }
