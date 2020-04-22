@@ -161,11 +161,11 @@ std::size_t file::read(char* data, std::size_t count) {
 }
 
 int file::sync() {
-  if (!this->flush()) return -1;
+  const auto success = this->flush();
   if (::fsync(fd_) < 0) {
     throw std::system_error(errno, std::system_category(), "fsync");
   }
-  return 0;
+  return success ? 0 : -1;
 }
 
 [[nodiscard]] bool file::flush() {
