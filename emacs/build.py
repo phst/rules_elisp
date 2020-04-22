@@ -56,6 +56,11 @@ def main() -> None:
             'CFLAGS=' + args.cflags,
             'LDFLAGS=' + args.ldflags)
         run('make', 'install')
+    # Delete source files that have a corresponding compiled file, as these
+    # files don’t work well with Coverage (see
+    # e.g. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40766).
+    for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
+        compiled.with_suffix('.el').unlink()
 
 
 if __name__ == '__main__':
