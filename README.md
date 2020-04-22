@@ -29,6 +29,10 @@ load("@phst_rules_elisp//elisp:repositories.bzl", "rules_elisp_dependencies", "r
 rules_elisp_dependencies()
 
 rules_elisp_toolchains()
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
 ```
 
 Then you can use the `elisp_library`, `elisp_binary`, and `elisp_test` rules.
