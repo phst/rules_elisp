@@ -73,8 +73,6 @@ class file : public std::streambuf {
   int_type underflow() final;
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
   std::size_t read(char* data, std::size_t count);
-  void imbue(const std::locale& locale) final;
-  [[noreturn]] file* setbuf(char*, std::streamsize) final;
   int sync() final;
   [[nodiscard]] bool flush();
 

@@ -160,16 +160,6 @@ std::size_t file::read(char* data, std::size_t count) {
   return read;
 }
 
-void file::imbue(const std::locale& locale) {
-  if (locale != std::locale::classic()) {
-    throw std::logic_error("this class only supports the C locale");
-  }
-}
-
-[[noreturn]] file* file::setbuf(char* const, const std::streamsize) {
-  throw std::logic_error("this class doesn’t support changing the buffer");
-}
-
 int file::sync() {
   if (!this->flush()) return -1;
   if (::fsync(fd_) < 0) {
