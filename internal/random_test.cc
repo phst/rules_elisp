@@ -24,7 +24,7 @@ using ::testing::StrNe;
 using ::testing::StartsWith;
 using ::testing::EndsWith;
 
-TEST(random, temp_name) {
+TEST(Random, TempName) {
   random rnd;
   const auto a = rnd.temp_name("temp-*.json");
   const auto b = rnd.temp_name("temp-*.json");
