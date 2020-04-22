@@ -38,6 +38,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/strings/str_join.h"
 #include "absl/types/optional.h"
 #include "absl/utility/utility.h"
@@ -52,6 +53,7 @@
 #include "emacs/manifest.pb.h"
 #include "emacs/report.pb.h"
 #include "internal/file.h"
+#include "internal/int.h"
 #include "internal/random.h"
 
 namespace phst_rules_elisp {
@@ -160,7 +162,10 @@ static void write_manifest(const std::vector<std::string>& load_path,
   const auto status =
       google::protobuf::util::MessageToJsonString(manifest, &json);
   if (!status.ok()) throw std::runtime_error(status.ToString());
-  file.write(json.data(), json.size());
+  if (json.size() > unsigned_max<std::streamsize>()) {
+    throw std::length_error("JSON object is too big");
+  }
+  file.write(json.data(), static_cast<std::streamsize>(json.size()));
   file.flush();
 }
 

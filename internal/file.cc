@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
+#include <cstddef>
 #include <cstdlib>
 #include <ios>
 #include <iostream>
@@ -36,6 +37,7 @@
 
 #include "absl/strings/string_view.h"
 
+#include "internal/int.h"
 #include "internal/random.h"
 
 namespace phst_rules_elisp {
@@ -112,10 +114,13 @@ std::streamsize file::xsputn(const char_type* const data,
   return this->write(data, count).count;
 }
 
-file::result file::write(const char* data, std::size_t count) {
+file::result file::write(const char* data, std::streamsize count) {
+  assert(count >= 0);
+  static_assert(unsigned_max<std::streamsize>() <= unsigned_max<std::size_t>(),
+                "unsupported architecture");
   result result = {};
   while (count > 0) {
-    const auto n = ::write(fd_, data, count);
+    const auto n = ::write(fd_, data, static_cast<std::size_t>(count));
     if (n < 0) result.error = errno;
     if (n <= 0) break;
     result.count += n;
@@ -127,7 +132,11 @@ file::result file::write(const char* data, std::size_t count) {
 
 file::int_type file::underflow() {
   assert(this->gptr() == this->egptr());
-  const auto result = this->read(get_.data(), get_.size());
+  static_assert(
+      std::tuple_size<decltype(get_)>::value <= unsigned_max<std::streamsize>(),
+      "buffer too large");
+  const auto result =
+      this->read(get_.data(), static_cast<std::streamsize>(get_.size()));
   const auto read = result.count;
   this->setg(get_.data(), get_.data(), get_.data() + read);
   if (result.error != 0 || read == 0) return traits_type::eof();
@@ -139,9 +148,11 @@ file::int_type file::underflow() {
 std::streamsize file::xsgetn(char_type* data, std::streamsize count) {
   if (count == 0) return 0;
   std::streamsize read = 0;
+  static_assert(unsigned_max<std::streamsize>() <= unsigned_max<std::size_t>(),
+                "unsupported architecture");
   if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
     read = std::min(count, this->egptr() - this->gptr());
-    traits_type::copy(data, this->gptr(), read);
+    traits_type::copy(data, this->gptr(), static_cast<std::size_t>(read));
     data += read;
     count -= read;
     this->setg(this->gptr(), this->gptr() + read, this->egptr());
@@ -149,10 +160,13 @@ std::streamsize file::xsgetn(char_type* data, std::streamsize count) {
   return read + this->read(data, count).count;
 }
 
-file::result file::read(char* data, std::size_t count) {
+file::result file::read(char* data, std::streamsize count) {
+  assert(count >= 0);
+  static_assert(unsigned_max<std::streamsize>() <= unsigned_max<std::size_t>(),
+                "unsupported architecture");
   result result = {};
   while (count > 0) {
-    const auto n = ::read(fd_, data, count);
+    const auto n = ::read(fd_, data, static_cast<std::size_t>(count));
     if (n < 0) result.error = errno;
     if (n <= 0) break;
     result.count += n;
@@ -175,11 +189,11 @@ int file::sync() {
   const auto pptr = this->pptr();
   assert(pbase != nullptr);
   assert(pptr != nullptr);
-  const auto signed_count = pptr - pbase;
-  assert(signed_count >= 0);
-  const auto count = static_cast<std::size_t>(signed_count);
+  const auto count = pptr - pbase;
+  assert(count >= 0);
   const auto result = this->write(pbase, count);
   const auto written = result.count;
+  assert(written >= 0);
   assert(written <= count);
   const auto remaining = count - written;
   if (remaining == 0) {

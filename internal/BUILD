@@ -21,6 +21,7 @@ cc_library(
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
     deps = [
+        ":int",
         ":random",
         "@com_google_absl//absl/strings",
     ],
@@ -58,4 +59,11 @@ cc_test(
         ":random",
         "@com_google_googletest//:gtest_main",
     ],
+)
+
+cc_library(
+    name = "int",
+    hdrs = ["int.h"],
+    copts = COPTS,
+    visibility = ["//emacs:__pkg__"],
 )

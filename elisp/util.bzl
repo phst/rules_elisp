@@ -112,6 +112,7 @@ COPTS = [
     "-Wall",
     "-Wextra",
     "-Wconversion",
+    "-Wsign-conversion",
     "-pedantic-errors",
     "-D_GNU_SOURCE",
 ]
