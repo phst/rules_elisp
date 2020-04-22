@@ -98,6 +98,8 @@ file::int_type file::overflow(const int_type ch) {
   if (traits_type::eq_int_type(ch, traits_type::eof())) {
     return traits_type::not_eof(0);
   }
+  assert(this->pptr() == put_.data());
+  assert(this->epptr() > put_.data());
   traits_type::assign(put_.front(), traits_type::to_char_type(ch));
   this->pbump(1);
   return ch;
