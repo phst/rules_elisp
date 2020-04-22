@@ -153,9 +153,10 @@ NAME is the name of the test."
     (dolist (info (ert-test-result-with-condition-infos result))
       (insert "  " (car info) (cdr info) ?\n))
     (insert (format-message "  Test %s condition:\n" name))
-    (insert "    ")
-    (pp (ert-test-result-with-condition-condition result)
-        (current-buffer))
+    (let ((point (point)))
+      (pp (ert-test-result-with-condition-condition result)
+          (current-buffer))
+      (indent-rigidly point (point) 4))
     (insert ?\n)
     (buffer-substring-no-properties (point-min) (point-max))))
 
