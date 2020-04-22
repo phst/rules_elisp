@@ -38,22 +38,22 @@ def rules_elisp_dependencies():
     )
     http_archive(
         name = "com_google_absl",
-        urls = ["https://github.com/abseil/abseil-cpp/archive/1a02b7a2054c24f900dab796edb812f9260b51a6.zip"],
         sha256 = "b62f077afb82579f9a77303aa05407dd8b76ad1d841d8c8957ab4049d2a2682f",
         strip_prefix = "abseil-cpp-1a02b7a2054c24f900dab796edb812f9260b51a6",
+        urls = ["https://github.com/abseil/abseil-cpp/archive/1a02b7a2054c24f900dab796edb812f9260b51a6.zip"],
     )
     http_archive(
         name = "com_google_protobuf",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
-        strip_prefix = "protobuf-3.11.4",
         sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
+        strip_prefix = "protobuf-3.11.4",
+        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
     )
     http_archive(
+        build_file = "@phst_rules_elisp//:tinyxml2.BUILD",
         name = "leethomason_tinyxml2",
-        urls = ["https://github.com/leethomason/tinyxml2/archive/8.0.0.zip"],
         sha256 = "ad17d277b23b32edfded29890201adeb946b33be80094c3f804688038be3a5bd",
         strip_prefix = "tinyxml2-8.0.0",
-        build_file = "@phst_rules_elisp//:tinyxml2.BUILD",
+        urls = ["https://github.com/leethomason/tinyxml2/archive/8.0.0.zip"],
     )
 
 def rules_elisp_toolchains():
