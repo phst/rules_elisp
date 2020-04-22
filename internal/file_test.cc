@@ -43,13 +43,8 @@ static std::string read_file(const std::string& path) try {
 }
 
 TEST(File, WriteRead) {
+  const auto path = join_path(TempDir(), random().temp_name("file-*.tmp"));
   using traits = std::char_traits<char>;
-  const auto path = join_path(TempDir(), "file.tmp");
-  const auto code = remove_file(path);
-  if (code &&
-      code != std::make_error_condition(std::errc::no_such_file_or_directory)) {
-    throw std::system_error(code);
-  }
   {
     file file(path, file_mode::readwrite | file_mode::create | file_mode::excl);
     EXPECT_THAT(file.path(), Eq(path));
