@@ -32,7 +32,7 @@ The `depset` elements are structures with the following fields:
     },
 )
 
-def _toolchain(ctx):
+def _toolchain_rule(ctx):
     """Rule implementation for the “elisp_toolchain” toolchain rule."""
     return platform_common.ToolchainInfo(
         emacs = ctx.attr.emacs,
@@ -42,6 +42,11 @@ def _toolchain(ctx):
 
 # Note: Toolchain names need to be fully qualified, otherwise external
 # workspaces won’t find them.
+_TOOLCHAIN_TYPE = "@phst_rules_elisp//elisp:toolchain_type"
+
+def _toolchain(ctx):
+    """Return the Emacs Lisp toolchain for the given context."""
+    return ctx.toolchains[_TOOLCHAIN_TYPE]
 
 def _library(ctx):
     """Rule implementation for the “elisp_library” rule."""
@@ -64,7 +69,7 @@ def _binary(ctx):
     srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
     load_path = getattr(ctx.attr, "load_path", [])
     result = _compile(ctx, srcs, ctx.attr.deps, load_path)
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
 
     # Only pass in data files when needed.
@@ -147,7 +152,7 @@ def _binary(ctx):
     ]
 
 elisp_toolchain = rule(
-    implementation = _toolchain,
+    implementation = _toolchain_rule,
     attrs = {
         "emacs": attr.label(
             doc = """An executable file that behaves like the Emacs binary.
@@ -239,7 +244,7 @@ By default, libraries need to be loaded using a filename relative to the workspa
 <var>package</var>/<var>file</var>.
 If you want to add further elements to the load path, use the `load_path` attribute.""",
     provides = [EmacsLispInfo],
-    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    toolchains = [_TOOLCHAIN_TYPE],
     implementation = _library,
 )
 
@@ -283,7 +288,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded in
     fragments = ["cpp"],
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        "@phst_rules_elisp//elisp:toolchain_type",
+        _TOOLCHAIN_TYPE,
     ],
     implementation = _binary,
 )
@@ -339,7 +344,7 @@ You can restrict the tests to be run using the `--test_filter` option.  If set, 
     test = True,
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        "@phst_rules_elisp//elisp:toolchain_type",
+        _TOOLCHAIN_TYPE,
     ],
     implementation = _binary,
 )
@@ -387,7 +392,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive = [dep[DefaultInfo].default_runfiles.files for dep in ctx.attr.deps],
     )
 
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
 
     # Expand load path only if needed.
