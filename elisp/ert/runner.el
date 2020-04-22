@@ -143,7 +143,9 @@ NAME is the name of the test."
     (while (not (eobp))
       (delete-region (min (line-end-position) (+ 120 (point)))
                      (line-end-position))
-      (insert "    ")
+      ;; ‘backtrace-to-string’ and ‘debugger-insert-backtrace’ already indent
+      ;; all lines by two spaces, so we only add two more spaces.
+      (insert "  ")
       (forward-line))
     (goto-char (point-min))
     (insert (format-message "  Test %s backtrace:\n" name))
