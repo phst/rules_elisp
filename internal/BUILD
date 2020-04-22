@@ -33,6 +33,7 @@ cc_test(
     deps = [
         ":file",
         ":random",
+        "@com_google_absl//absl/strings",
         "@com_google_googletest//:gtest_main",
     ],
 )

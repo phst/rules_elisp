@@ -14,11 +14,21 @@
 
 #include "internal/file.h"
 
+#include <sys/mman.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+
 #include <fstream>
 #include <iterator>
 #include <iostream>
 #include <string>
 #include <string_view>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#include "absl/strings/str_cat.h"
+#pragma GCC diagnostic pop
 
 #include "internal/random.h"
 #include "gmock/gmock.h"
@@ -29,6 +39,7 @@ namespace {
 
 using ::testing::TempDir;
 using ::testing::Eq;
+using ::testing::Ge;
 using ::testing::StartsWith;
 using ::testing::EndsWith;
 
@@ -73,6 +84,29 @@ TEST(File, WriteRead) {
     EXPECT_THAT(file.pubsync(), Eq(0));
     file.close();
   }
+}
+
+TEST(File, PartialWrite) {
+  using traits = std::char_traits<char>;
+  const int fd = memfd_create("test", MFD_CLOEXEC | MFD_ALLOW_SEALING);
+  ASSERT_THAT(fd, Ge(0)) << std::error_code(errno, std::system_category());
+  const struct closer {
+    ~closer() noexcept { ::close(fd); }
+    int fd;
+  } closer{fd};
+  EXPECT_THAT(ftruncate(fd, 1), Eq(0))
+      << std::error_code(errno, std::system_category());
+  EXPECT_THAT(fcntl(fd, F_ADD_SEALS, F_SEAL_GROW), Eq(0))
+      << std::error_code(errno, std::system_category());
+  file file(absl::StrCat("/dev/fd/", fd), file_mode::write);
+  EXPECT_THAT(file.sputc('h'), Eq(traits::to_int_type('h')));  // fill buffer
+  EXPECT_THROW(file.sputn("i", 1), std::system_error);  // try to flush
+  file.close();  // buffer flushed, no new error
+  std::array<char, 20> buffer;
+  EXPECT_THAT(::read(fd, buffer.data(), buffer.size()), Eq(1));
+  EXPECT_THAT(::close(fd), Eq(0))
+      << std::error_code(errno, std::system_category());
+  EXPECT_THAT(buffer.front(), Eq('h'));
 }
 
 TEST(TempFile, Create) {
