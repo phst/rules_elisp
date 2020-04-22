@@ -42,7 +42,7 @@ static std::string read_file(const std::string& path) try {
   throw;
 }
 
-TEST(file, write_read) {
+TEST(File, WriteRead) {
   using traits = std::char_traits<char>;
   const auto path = join_path(TempDir(), "file.tmp");
   const auto code = remove_file(path);
@@ -80,7 +80,7 @@ TEST(file, write_read) {
   }
 }
 
-TEST(temp_file, create) {
+TEST(TempFile, Create) {
   random rnd;
   temp_file file(TempDir(), "foo-*.tmp", rnd);
   const auto path = file.path();
@@ -93,7 +93,7 @@ TEST(temp_file, create) {
   EXPECT_FALSE(file_exists(path));
 }
 
-TEST(temp_stream, format) {
+TEST(TempStream, Format) {
   random rnd;
   temp_stream stream(TempDir(), "foo-*.tmp", rnd);
   const auto path = stream.path();
