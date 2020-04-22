@@ -47,6 +47,7 @@ cc_library(
         "//internal:int",
         "//internal:random",
         "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/utility",
         "@com_google_protobuf//:protobuf",
