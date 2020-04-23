@@ -52,7 +52,9 @@ class file : public std::streambuf {
   explicit file(std::string path, file_mode mode);
   ~file() noexcept override;
   file(const file&) = delete;
+  file(file&& other);
   file& operator=(const file&) = delete;
+  file& operator=(file&& other);
 
   std::FILE* open_c_file(const char* mode);
 
@@ -72,6 +74,7 @@ class file : public std::streambuf {
   };
 
   virtual void do_close();
+  void move(file&& other);
   int_type overflow(int_type ch = traits_type::eof()) final;
   std::streamsize xsputn(const char_type* data, std::streamsize count) final;
   result write(const char* data, std::streamsize count);
@@ -93,7 +96,9 @@ class temp_file : public file {
                      absl::string_view tmpl, random& random);
   ~temp_file() noexcept override;
   temp_file(const temp_file&) = delete;
+  temp_file(temp_file&&) = default;
   temp_file& operator=(const temp_file&) = delete;
+  temp_file& operator=(temp_file&&) = default;
 
  private:
   void do_close() final;
@@ -115,6 +120,20 @@ class basic_stream : public std::iostream {
 
   basic_stream(const basic_stream&) = delete;
   basic_stream& operator=(const basic_stream&) = delete;
+
+  basic_stream(basic_stream&& other)
+      : std::iostream(std::move(other)), file_(std::move(other.file_)) {
+    this->set_rdbuf(&file_);
+    other.set_rdbuf(nullptr);
+  }
+
+  basic_stream& operator=(basic_stream&& other) {
+    this->std::iostream::operator=(other);
+    file_ = other.file;
+    other.file_ = nullptr;
+    this->set_rdbuf(file_);
+    other.set_rdbuf(nullptr);
+  }
 
   void close() { file_.close(); }
   const std::string& path() const noexcept { return file_.path(); }

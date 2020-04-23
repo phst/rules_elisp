@@ -48,6 +48,25 @@ file::file(std::string path, const file_mode mode) : file() {
   this->open(std::move(path), mode);
 }
 
+file::file(file&& other)
+    : std::streambuf(other),
+      fd_(other.fd_),
+      get_(other.get_),
+      put_(other.put_),
+      path_(std::move(other.path_)) {
+  this->move(std::move(other));
+}
+
+file& file::operator=(file&& other) {
+  this->std::streambuf::operator=(other);
+  fd_ = other.fd_;
+  get_ = other.get_;
+  put_ = other.put_;
+  path_ = std::move(other.path_);
+  this->move(std::move(other));
+  return *this;
+}
+
 file::~file() noexcept {
   if (fd_ >= 0) std::clog << "file " << path_ << " still open" << std::endl;
 }
@@ -94,6 +113,22 @@ void file::close() {
 }
 
 void file::do_close() {}
+
+void file::move(file&& other) {
+  other.fd_ = -1;
+  other.path_.clear();
+  if (other.eback() != nullptr) {
+    this->setg(get_.data() + (other.eback() - other.get_.data()),
+               get_.data() + (other.gptr() - other.get_.data()),
+               get_.data() + (other.egptr() - other.get_.data()));
+  }
+  const auto offset = this->pptr() - this->pbase();
+  this->setp(put_.data() + (other.pbase() - other.put_.data()),
+             put_.data() + (other.epptr() - other.put_.data()));
+  static_assert(std::tuple_size<decltype(put_)>::value < unsigned_max<int>(),
+                "buffer too large");
+  this->pbump(static_cast<int>(offset));
+}
 
 file::int_type file::overflow(const int_type ch) {
   assert(this->pptr() == this->epptr());

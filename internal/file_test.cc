@@ -29,6 +29,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/strings/str_cat.h"
+#include "absl/types/optional.h"
 #pragma GCC diagnostic pop
 
 #include "internal/random.h"
@@ -108,6 +109,33 @@ TEST(File, PartialWrite) {
   EXPECT_THAT(::close(fd), Eq(0))
       << std::error_code(errno, std::system_category());
   EXPECT_THAT(buffer.front(), Eq('h'));
+}
+
+TEST(File, Move) {
+  // This test should typically be run under Address Sanitizer to debug issues
+  // with the move constructor.
+  const auto path = join_path(TempDir(), random().temp_name("file-*.tmp"));
+  using traits = std::char_traits<char>;
+  absl::optional<file> outer;
+  {
+    file inner(path, file_mode::write | file_mode::create | file_mode::excl);
+    EXPECT_THAT(inner.sputc('h'), Eq(traits::to_int_type('h')));
+    outer = std::move(inner);
+  }
+  EXPECT_THAT(outer->sputc('i'), Eq(traits::to_int_type('i')));
+  outer->close();
+  EXPECT_THAT(read_file(path), "hi");
+  {
+    file inner(path, file_mode::read);
+    EXPECT_THAT(inner.sgetc(), Eq(traits::to_int_type('h')));
+    char ch;
+    EXPECT_THAT(inner.sgetn(&ch, 1), Eq(1));
+    EXPECT_THAT(ch, Eq('h'));
+    outer = std::move(inner);
+  }
+  EXPECT_THAT(outer->sgetc(), Eq(traits::to_int_type('i')));
+  EXPECT_THAT(outer->sbumpc(), Eq(traits::to_int_type('i')));
+  EXPECT_THAT(outer->sbumpc(), Eq(traits::eof()));
 }
 
 TEST(TempFile, Create) {

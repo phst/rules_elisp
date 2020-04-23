@@ -129,12 +129,14 @@ static std::string get_shared_dir(const std::string& install) {
   return join_path(emacs, *dirs.begin());
 }
 
-static void add_manifest(const mode mode, std::vector<std::string>& args,
-                         random& random, absl::optional<temp_stream>& stream) {
-  if (mode == mode::direct) return;
-  stream.emplace(temp_dir(), "manifest-*.json", random);
-  args.push_back("--manifest=" + stream->path());
+static absl::optional<temp_stream> add_manifest(const mode mode,
+                                                std::vector<std::string>& args,
+                                                random& random) {
+  if (mode == mode::direct) return absl::nullopt;
+  temp_stream stream(temp_dir(), "manifest-*.json", random);
+  args.push_back("--manifest=" + stream.path());
   args.push_back("--");
+  return stream;
 }
 
 static void add_to_manifest(
@@ -272,8 +274,7 @@ int executor::run_binary(const char* const wrapper, const mode mode,
                          const std::vector<std::string>& data_files) {
   const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
-  absl::optional<temp_stream> manifest;
-  add_manifest(mode, args, random_, manifest);
+  auto manifest = add_manifest(mode, args, random_);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
@@ -294,8 +295,7 @@ int executor::run_test(const char* const wrapper, const mode mode,
                        const std::vector<std::string>& data_files) {
   const auto emacs = this->runfile(wrapper);
   std::vector<std::string> args;
-  absl::optional<temp_stream> manifest;
-  add_manifest(mode, args, random_, manifest);
+  auto manifest = add_manifest(mode, args, random_);
   args.push_back("--quick");
   args.push_back("--batch");
   this->add_load_path(args, load_path);
