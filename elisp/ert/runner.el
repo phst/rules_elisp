@@ -51,6 +51,9 @@ source files and load them."
          (report-file (elisp/ert/pop--option "--report"))
          (test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
+         (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
+         (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
+         (shard-status-file (getenv "TEST_SHARD_STATUS_FILE"))
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-dir (getenv "COVERAGE_DIR"))
          (selector (if (member test-filter '(nil "")) t (read test-filter)))
@@ -71,7 +74,13 @@ source files and load them."
             load-source-file-function)))
     (and coverage-enabled (member coverage-dir '(nil ""))
          (error "Coverage requested but COVERAGE_DIR not set"))
+    (unless (and (natnump shard-count) (natnump shard-index)
+                 (< shard-index shard-count))
+      (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
+             shard-count shard-index))
     (random random-seed)
+    (when shard-status-file
+      (write-region "" nil (file-name-quote shard-status-file) :append))
     (mapc #'load command-line-args-left)
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
@@ -79,6 +88,12 @@ source files and load them."
           (test-reports ())
           (start-time (current-time)))
       (or tests (error "Selector %S doesn’t match any tests" selector))
+      (when (> shard-count 1)
+        (setq tests (cl-loop for test in tests
+                             for i from 0
+                             when (eql (mod i shard-count) shard-index)
+                             collect test))
+        (or tests (message "Empty shard with index %d" shard-index)))
       (elisp/ert/log--message "Running %d tests" (length tests))
       (dolist (test tests)
         (elisp/ert/log--message "Running test %s" (ert-test-name test))
