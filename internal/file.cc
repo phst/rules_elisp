@@ -125,7 +125,7 @@ void file::move(file&& other) {
   const auto offset = this->pptr() - this->pbase();
   this->setp(put_.data() + (other.pbase() - other.put_.data()),
              put_.data() + (other.epptr() - other.put_.data()));
-  static_assert(std::tuple_size<decltype(put_)>::value < unsigned_max<int>(),
+  static_assert(std::tuple_size<decltype(put_)>::value <= unsigned_max<int>(),
                 "buffer too large");
   this->pbump(static_cast<int>(offset));
 }
