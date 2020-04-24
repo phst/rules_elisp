@@ -239,14 +239,9 @@ int file::sync() {
     // the yet-unflushed data.
     this->setp(pbase + written, put_.data() + put_.size());
     // Set pptr to its previous value.
-    auto distance = remaining;
-    constexpr int max = std::numeric_limits<int>::max();
-    while (distance > max) {
-      this->pbump(max);
-      distance -= max;
-    }
-    assert(distance <= max);
-    this->pbump(static_cast<int>(distance));
+    static_assert(std::tuple_size<decltype(put_)>::value <= unsigned_max<int>(),
+                  "buffer too large");
+    this->pbump(static_cast<int>(remaining));
     assert(this->pptr() == pptr);
   }
   if (result.error != 0) {
