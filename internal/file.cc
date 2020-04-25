@@ -114,7 +114,8 @@ File::File(File&& other)
       fd_(other.fd_),
       get_(other.get_),
       put_(other.put_),
-      path_(std::move(other.path_)) {
+      path_(std::move(other.path_)),
+      status_(std::move(other.status_)) {
   this->Move(std::move(other));
 }
 
@@ -126,6 +127,7 @@ File& File::operator=(File&& other) {
   get_ = other.get_;
   put_ = other.put_;
   path_ = std::move(other.path_);
+  status_ = std::move(other.status_);
   this->Move(std::move(other));
   return *this;
 }
