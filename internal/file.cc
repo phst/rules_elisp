@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdlib>
+#include <exception>
 #include <initializer_list>
 #include <ios>
 #include <iostream>
@@ -80,7 +81,13 @@ File& File::operator=(File&& other) {
 }
 
 File::~File() noexcept {
-  if (fd_ >= 0) std::clog << "file " << path_ << " still open" << std::endl;
+  if (fd_ < 0) return;
+  std::clog << "file " << path_ << " still open" << std::endl;
+  try {
+    this->Close();
+  } catch (const std::exception& e) {
+    std::clog << "error closing file: " << e.what() << std::endl;
+  }
 }
 
 void File::Open(std::string path, const FileMode mode) {
