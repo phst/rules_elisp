@@ -26,50 +26,49 @@
 
 namespace phst_rules_elisp {
 
-struct for_test {};
+struct ForTest {};
 
-enum class mode { direct, wrap };
+enum class Mode { kDirect, kWrap };
 
-class executor {
+class Executor {
  public:
-  explicit executor(int argc, const char* const* argv, const char* const* envp);
+  explicit Executor(int argc, const char* const* argv, const char* const* envp);
 
-  explicit executor(for_test, int argc, const char* const* argv,
+  explicit Executor(ForTest, int argc, const char* const* argv,
                     const char* const* envp);
 
-  int run_emacs(const char* install_rel);
+  int RunEmacs(const char* install_rel);
 
-  int run_binary(const char* wrapper, mode mode,
-                 const std::vector<std::string>& load_path,
-                 const std::vector<std::string>& load_files,
-                 const std::vector<std::string>& data_files);
+  int RunBinary(const char* wrapper, Mode mode,
+                const std::vector<std::string>& load_path,
+                const std::vector<std::string>& load_files,
+                const std::vector<std::string>& data_files);
 
-  int run_test(const char* wrapper, mode mode,
-               const std::vector<std::string>& load_path,
-               const std::vector<std::string>& srcs,
-               const std::vector<std::string>& data_files);
+  int RunTest(const char* wrapper, Mode mode,
+              const std::vector<std::string>& load_path,
+              const std::vector<std::string>& srcs,
+              const std::vector<std::string>& data_files);
 
  private:
-  std::string runfile(const std::string& rel) const;
-  std::string env_var(const std::string& name) const noexcept;
+  std::string Runfile(const std::string& rel) const;
+  std::string EnvVar(const std::string& name) const noexcept;
 
-  void add_load_path(std::vector<std::string>& args,
-                     const std::vector<std::string>& load_path) const;
+  void AddLoadPath(std::vector<std::string>& args,
+                   const std::vector<std::string>& load_path) const;
 
-  int run(const std::string& binary,
-          const std::vector<std::string>& args,
+  int Run(const std::string& binary, const std::vector<std::string>& args,
           const std::map<std::string, std::string>& env);
 
-  std::vector<std::string> build_args(
+  std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
 
-  std::vector<std::string> build_env(
+  std::vector<std::string> BuildEnv(
       const std::map<std::string, std::string>& other) const;
 
   const std::vector<std::string> orig_args_;
   const std::map<std::string, std::string> orig_env_;
   const std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
-  random random_;
+  Random random_;
 };
 
 }  // namespace phst_rules_elisp

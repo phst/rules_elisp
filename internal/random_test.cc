@@ -25,9 +25,9 @@ using ::testing::StartsWith;
 using ::testing::EndsWith;
 
 TEST(Random, TempName) {
-  random rnd;
-  const auto a = rnd.temp_name("temp-*.json");
-  const auto b = rnd.temp_name("temp-*.json");
+  Random rnd;
+  const auto a = rnd.TempName("temp-*.json");
+  const auto b = rnd.TempName("temp-*.json");
   EXPECT_THAT(a, StartsWith("temp-"));
   EXPECT_THAT(a, EndsWith(".json"));
   EXPECT_THAT(b, StartsWith("temp-"));

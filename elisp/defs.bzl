@@ -109,7 +109,7 @@ def _binary(ctx):
                 'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, file.short_path)))
                 for file in data_files_for_manifest
             ]),
-            "[[mode]]": "wrap" if toolchain.wrap else "direct",
+            "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
         },
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)

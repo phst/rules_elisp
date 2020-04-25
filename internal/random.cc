@@ -29,7 +29,7 @@
 
 namespace phst_rules_elisp {
 
-std::string random::temp_name(const absl::string_view tmpl) {
+std::string Random::TempName(const absl::string_view tmpl) {
   const auto pos = tmpl.rfind('*');
   if (pos == tmpl.npos) {
     throw std::invalid_argument("no * in template " + std::string(tmpl));

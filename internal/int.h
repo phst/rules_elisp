@@ -24,7 +24,7 @@ template <typename T>
 constexpr typename std::enable_if<std::is_integral<T>::value &&
                                       std::is_signed<T>::value,
                                   typename std::make_unsigned<T>::type>::type
-unsigned_max() noexcept {
+UnsignedMax() noexcept {
   static_assert(std::numeric_limits<T>::max() >= 0, "type maximum is negative");
   return static_cast<typename std::make_unsigned<T>::type>(
       std::numeric_limits<T>::max());
@@ -33,13 +33,13 @@ unsigned_max() noexcept {
 template <typename T>
 constexpr typename std::enable_if<
     std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
-unsigned_max() noexcept {
+UnsignedMax() noexcept {
   return std::numeric_limits<T>::max();
 }
 
 template <typename T>
 constexpr typename std::enable_if<!std::is_integral<T>::value>::type
-unsigned_max() noexcept = delete;
+UnsignedMax() noexcept = delete;
 
 }  // phst_rules_elisp
 

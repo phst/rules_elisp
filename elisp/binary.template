@@ -15,10 +15,10 @@
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  return phst_rules_elisp::executor(argc, argv, envp)
-      .run_binary(
+  return phst_rules_elisp::Executor(argc, argv, envp)
+      .RunBinary(
           R"**([[emacs]])**",
-          phst_rules_elisp::mode::[[mode]],
+          phst_rules_elisp::Mode::[[mode]],
           {[[directory]]},
           {[[load]]},
           {[[data]]});

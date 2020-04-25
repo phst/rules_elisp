@@ -27,9 +27,9 @@
 
 namespace phst_rules_elisp {
 
-class random {
+class Random {
  public:
-  std::string temp_name(absl::string_view tmpl);
+  std::string TempName(absl::string_view tmpl);
 
  private:
   absl::BitGen engine_;

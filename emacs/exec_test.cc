@@ -22,13 +22,13 @@ namespace {
 
 using ::testing::Eq;
 
-TEST(executor, run_binary_wrap) {
+TEST(Executor, RunBinaryWrap) {
   const char *const argv[2] = {"unused", nullptr};
   const char *const envp[1] = {nullptr};
-  EXPECT_THAT(executor(for_test(), 1, argv, envp)
-                  .run_binary("phst_rules_elisp/emacs/wrap/wrap", mode::wrap,
-                              {"phst_rules_elisp"}, {},
-                              {"phst_rules_elisp/emacs/exec.h"}),
+  EXPECT_THAT(Executor(ForTest(), 1, argv, envp)
+                  .RunBinary("phst_rules_elisp/emacs/wrap/wrap", Mode::kWrap,
+                             {"phst_rules_elisp"}, {},
+                             {"phst_rules_elisp/emacs/exec.h"}),
               Eq(0));
 }
 

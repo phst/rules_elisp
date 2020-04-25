@@ -15,11 +15,11 @@
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  return phst_rules_elisp::executor(phst_rules_elisp::for_test(), argc, argv,
+  return phst_rules_elisp::Executor(phst_rules_elisp::ForTest(), argc, argv,
                                     envp)
-      .run_test(
+      .RunTest(
           R"**([[emacs]])**",
-          phst_rules_elisp::mode::[[mode]],
+          phst_rules_elisp::Mode::[[mode]],
           {[[directory]]},
           {[[load]]},
           {[[data]]});

@@ -35,54 +35,54 @@
 
 namespace phst_rules_elisp {
 
-enum class file_mode {
-  read = O_RDONLY,
-  write = O_WRONLY,
-  readwrite = O_RDWR,
-  create = O_CREAT,
-  excl = O_EXCL,
+enum class FileMode {
+  kRead = O_RDONLY,
+  kWrite = O_WRONLY,
+  kReadWrite = O_RDWR,
+  kCreate = O_CREAT,
+  kExclusive = O_EXCL,
 };
 
-inline file_mode operator|(const file_mode a, const file_mode b) {
-  return static_cast<file_mode>(static_cast<int>(a) | static_cast<int>(b));
+inline FileMode operator|(const FileMode a, const FileMode b) {
+  return static_cast<FileMode>(static_cast<int>(a) | static_cast<int>(b));
 }
 
-class file : public std::streambuf {
+class File : public std::streambuf {
  public:
-  explicit file(std::string path, file_mode mode);
-  ~file() noexcept override;
-  file(const file&) = delete;
-  file(file&& other);
-  file& operator=(const file&) = delete;
-  file& operator=(file&& other);
+  explicit File(std::string path, FileMode mode);
+  ~File() noexcept override;
+  File(const File&) = delete;
+  File(File&& other);
+  File& operator=(const File&) = delete;
+  File& operator=(File&& other);
 
-  std::FILE* open_c_file(const char* mode);
+  std::FILE* OpenCFile(const char* mode);
 
   const std::string& path() const noexcept { return path_; }
 
-  void close();
+  void Close();
 
  protected:
-  file();
+  File();
 
-  void open(std::string path, file_mode mode);
+  void Open(std::string path, FileMode mode);
 
  private:
-  struct [[nodiscard]] result {
+  struct [[nodiscard]] Result {
     std::streamsize count;
     int error;
   };
 
-  virtual void do_close();
-  void move(file&& other);
+  virtual void DoClose();
+  void Move(File&& other);
   int_type overflow(int_type ch = traits_type::eof()) final;
   std::streamsize xsputn(const char_type* data, std::streamsize count) final;
-  result write(const char* data, std::streamsize count);
+  Result Write(const char* data, std::streamsize count);
   int_type underflow() final;
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
-  result read(char* data, std::streamsize count);
+  Result Read(char* data, std::streamsize count);
   int sync() final;
-  [[nodiscard]] bool flush();
+  [[nodiscard]] bool Flush();
 
   int fd_ = -1;
   std::array<char_type, 0x1000> get_;
@@ -90,44 +90,44 @@ class file : public std::streambuf {
   std::string path_;
 };
 
-class temp_file : public file {
+class TempFile : public File {
  public:
-  explicit temp_file(const std::string& directory,
-                     absl::string_view tmpl, random& random);
-  ~temp_file() noexcept override;
-  temp_file(const temp_file&) = delete;
-  temp_file(temp_file&&) = default;
-  temp_file& operator=(const temp_file&) = delete;
-  temp_file& operator=(temp_file&&) = default;
+  explicit TempFile(const std::string& directory, absl::string_view tmpl,
+                    Random& random);
+  ~TempFile() noexcept override;
+  TempFile(const TempFile&) = delete;
+  TempFile(TempFile&&) = default;
+  TempFile& operator=(const TempFile&) = delete;
+  TempFile& operator=(TempFile&&) = default;
 
  private:
-  void do_close() final;
-  [[nodiscard]] std::error_code remove() noexcept;
+  void DoClose() final;
+  [[nodiscard]] std::error_code Remove() noexcept;
 };
 
 template <typename T>
-class basic_stream : public std::iostream {
+class BasicStream : public std::iostream {
  public:
-  static_assert(std::is_base_of<file, T>::value,
+  static_assert(std::is_base_of<File, T>::value,
                 "basic_stream works only with file types");
 
   template <typename... As>
-  explicit basic_stream(As&&... args) : file_(std::forward<As>(args)...) {
+  explicit BasicStream(As&&... args) : file_(std::forward<As>(args)...) {
     this->init(&file_);
     this->exceptions(badbit | failbit | eofbit);
     this->imbue(std::locale::classic());
   }
 
-  basic_stream(const basic_stream&) = delete;
-  basic_stream& operator=(const basic_stream&) = delete;
+  BasicStream(const BasicStream&) = delete;
+  BasicStream& operator=(const BasicStream&) = delete;
 
-  basic_stream(basic_stream&& other)
+  BasicStream(BasicStream&& other)
       : std::iostream(std::move(other)), file_(std::move(other.file_)) {
     this->set_rdbuf(&file_);
     other.set_rdbuf(nullptr);
   }
 
-  basic_stream& operator=(basic_stream&& other) {
+  BasicStream& operator=(BasicStream&& other) {
     this->std::iostream::operator=(other);
     file_ = other.file;
     other.file_ = nullptr;
@@ -135,54 +135,54 @@ class basic_stream : public std::iostream {
     other.set_rdbuf(nullptr);
   }
 
-  void close() { file_.close(); }
+  void Close() { file_.Close(); }
   const std::string& path() const noexcept { return file_.path(); }
 
  private:
   T file_;
 };
 
-using stream = basic_stream<file>;
-using temp_stream = basic_stream<temp_file>;
+using Stream = BasicStream<File>;
+using TempStream = BasicStream<TempFile>;
 
-inline absl::string_view filename(absl::string_view name) noexcept {
+inline absl::string_view FileName(absl::string_view name) noexcept {
   const auto pos = name.rfind('/');
   return pos == name.npos ? name : name.substr(pos + 1);
 }
 
-inline absl::string_view parent(absl::string_view name) noexcept {
+inline absl::string_view Parent(absl::string_view name) noexcept {
   const auto pos = name.rfind('/');
   return pos == name.npos ? absl::string_view() : name.substr(0, pos);
 }
 
-constexpr absl::string_view remove_slash(absl::string_view name) noexcept {
+constexpr absl::string_view RemoveSlash(absl::string_view name) noexcept {
   return (name.empty() || name.back() != '/') ? name
                                               : name.substr(0, name.size() - 1);
 }
 
-constexpr bool is_absolute(absl::string_view name) noexcept {
+constexpr bool IsAbsolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';
 }
 
-std::string join_path(absl::string_view a, absl::string_view b);
+std::string JoinPath(absl::string_view a, absl::string_view b);
 
 template <typename... Ts>
-std::string join_path(absl::string_view a, absl::string_view b, Ts&&... rest) {
+std::string JoinPath(absl::string_view a, absl::string_view b, Ts&&... rest) {
   static_assert(sizeof...(Ts) > 0,
                 "this overload should only be instantiated with at least three "
                 "arguments");
-  return join_path(join_path(a, b), std::forward<Ts>(rest)...);
+  return JoinPath(JoinPath(a, b), std::forward<Ts>(rest)...);
 }
 
-std::string make_absolute(absl::string_view name);
+std::string MakeAbsolute(absl::string_view name);
 
-[[nodiscard]] bool file_exists(const std::string& name) noexcept;
-[[nodiscard]] std::error_code remove_file(const std::string& name) noexcept;
-[[nodiscard]] std::string temp_dir();
+[[nodiscard]] bool FileExists(const std::string& name) noexcept;
+[[nodiscard]] std::error_code RemoveFile(const std::string& name) noexcept;
+[[nodiscard]] std::string TempDir();
 
-class directory {
+class Directory {
  public:
-  class iterator {
+  class Iterator {
    public:
     using iterator_category = std::input_iterator_tag;
     using value_type = std::string;
@@ -190,48 +190,48 @@ class directory {
     using pointer = const std::string*;
     using reference = const std::string&;
 
-    inline friend bool operator==(const iterator i, const iterator j) noexcept {
-      return i.end() == j.end();
+    inline friend bool operator==(const Iterator i, const Iterator j) noexcept {
+      return i.End() == j.End();
     }
 
-    inline friend bool operator!=(const iterator i, const iterator j) noexcept {
+    inline friend bool operator!=(const Iterator i, const Iterator j) noexcept {
       return !(i == j);
     }
 
     reference operator*() const noexcept { return entry_; }
     pointer operator->() const noexcept { return &entry_; }
 
-    iterator& operator++() {
-      this->advance();
+    Iterator& operator++() {
+      this->Advance();
       return *this;
     }
 
-    iterator operator++(int) {
+    Iterator operator++(int) {
       const auto copy = *this;
-      this->advance();
+      this->Advance();
       return copy;
     }
 
    private:
-    explicit iterator(DIR* const dir) : dir_(dir) { this->advance(); }
-    explicit iterator() : dir_(nullptr) {}
+    explicit Iterator(DIR* const dir) : dir_(dir) { this->Advance(); }
+    explicit Iterator() : dir_(nullptr) {}
 
-    friend class directory;
+    friend class Directory;
 
-    bool end() const noexcept { return dir_ == nullptr; }
-    void advance();
+    bool End() const noexcept { return dir_ == nullptr; }
+    void Advance();
 
     ::DIR* dir_;
     std::string entry_;
   };
 
-  explicit directory(const std::string& name);
-  ~directory() noexcept;
+  explicit Directory(const std::string& name);
+  ~Directory() noexcept;
 
-  [[nodiscard]] std::error_code close() noexcept;
+  [[nodiscard]] std::error_code Close() noexcept;
 
-  iterator begin() const { return iterator(dir_); }
-  iterator end() const { return iterator(); }
+  Iterator begin() const { return Iterator(dir_); }
+  Iterator end() const { return Iterator(); }
 
  private:
   ::DIR* dir_;
