@@ -33,6 +33,7 @@ cc_test(
     name = "file_test",
     srcs = ["file_test.cc"],
     copts = COPTS,
+    data = ["test.txt"],
     deps = [
         ":file",
         ":random",

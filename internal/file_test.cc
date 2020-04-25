@@ -19,11 +19,13 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <iostream>
 #include <string>
 #include <string_view>
+#include <utility>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -168,6 +170,17 @@ TEST(TempFile, Create) {
   file.Close();
   EXPECT_TRUE(file.path().empty());
   EXPECT_FALSE(FileExists(path));
+}
+
+TEST(Stream, AssignRead) {
+  Stream a(JoinPath(std::getenv("TEST_SRCDIR"),
+                    "phst_rules_elisp/internal/test.txt"),
+           FileMode::kRead);
+  auto b = std::move(a);
+  using Iterator = std::istreambuf_iterator<char>;
+  std::string contents(Iterator(b), Iterator{});
+  EXPECT_THAT(contents, StrEq("hi\n"));
+  std::swap(a, b);
 }
 
 TEST(TempStream, Format) {
