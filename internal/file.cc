@@ -119,6 +119,8 @@ File::File(File&& other)
 }
 
 File& File::operator=(File&& other) {
+  const auto status = this->Close();
+  if (!status.ok()) std::clog << status << std::endl;
   this->std::streambuf::operator=(other);
   fd_ = other.fd_;
   get_ = other.get_;
