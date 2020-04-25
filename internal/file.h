@@ -145,21 +145,6 @@ class BasicStream : public std::iostream {
 using Stream = BasicStream<File>;
 using TempStream = BasicStream<TempFile>;
 
-inline absl::string_view FileName(absl::string_view name) noexcept {
-  const auto pos = name.rfind('/');
-  return pos == name.npos ? name : name.substr(pos + 1);
-}
-
-inline absl::string_view Parent(absl::string_view name) noexcept {
-  const auto pos = name.rfind('/');
-  return pos == name.npos ? absl::string_view() : name.substr(0, pos);
-}
-
-constexpr absl::string_view RemoveSlash(absl::string_view name) noexcept {
-  return (name.empty() || name.back() != '/') ? name
-                                              : name.substr(0, name.size() - 1);
-}
-
 constexpr bool IsAbsolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';
 }

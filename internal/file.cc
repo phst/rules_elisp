@@ -300,7 +300,8 @@ static constexpr absl::string_view RemoveSuffix(const absl::string_view string,
 }
 
 std::string JoinPath(const absl::string_view a, const absl::string_view b) {
-  return std::string(RemoveSlash(a)) + '/' + std::string(RemovePrefix(b, '/'));
+  return std::string(RemoveSuffix(a, '/')) + '/' +
+         std::string(RemovePrefix(b, '/'));
 }
 
 std::string MakeAbsolute(const absl::string_view name) {

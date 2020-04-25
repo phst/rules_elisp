@@ -45,6 +45,22 @@ using ::testing::Ge;
 using ::testing::StartsWith;
 using ::testing::EndsWith;
 
+static absl::string_view FileName(absl::string_view name) noexcept {
+  const auto pos = name.rfind('/');
+  return pos == name.npos ? name : name.substr(pos + 1);
+}
+
+static absl::string_view Parent(absl::string_view name) noexcept {
+  const auto pos = name.rfind('/');
+  return pos == name.npos ? absl::string_view() : name.substr(0, pos);
+}
+
+static constexpr absl::string_view RemoveSlash(
+    absl::string_view name) noexcept {
+  return (name.empty() || name.back() != '/') ? name
+                                              : name.substr(0, name.size() - 1);
+}
+
 static std::string ReadFile(const std::string& path) try {
   std::ifstream stream(path);
   stream.exceptions(stream.badbit | stream.failbit | stream.eofbit);
