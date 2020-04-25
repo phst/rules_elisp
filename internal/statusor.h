@@ -25,6 +25,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/base/macros.h"
 #include "absl/status/status.h"
 #include "absl/types/variant.h"
 #pragma GCC diagnostic pop
@@ -37,7 +38,11 @@ class ABSL_MUST_USE_RESULT StatusOr {
   static_assert(!std::is_convertible<T, absl::Status>::value,
                 "StatusOr type may not be absl::Status");
 
-  StatusOr(absl::Status status) {
+  StatusOr(absl::Status status)
+#ifdef ABSL_BAD_CALL_IF
+      ABSL_BAD_CALL_IF(status.ok(), "can’t initialize status_or with OK status")
+#endif
+  {
     if (status.ok()) {
       std::clog << "can’t initialize status_or with OK status" << std::endl;
       std::abort();
