@@ -22,9 +22,8 @@ cc_library(
     visibility = ["//emacs:__pkg__"],
     deps = [
         ":int",
-        ":macros",
         ":random",
-        ":statusor",
+        ":status",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
@@ -78,19 +77,8 @@ cc_library(
 )
 
 cc_library(
-    name = "macros",
-    hdrs = ["macros.h"],
-    copts = COPTS,
-    visibility = ["//emacs:__pkg__"],
-    deps = [
-        ":statusor",
-        "@com_google_absl//absl/status",
-    ],
-)
-
-cc_library(
-    name = "statusor",
-    hdrs = ["statusor.h"],
+    name = "status",
+    hdrs = ["status.h"],
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
     deps = [

@@ -44,9 +44,8 @@
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 
-#include "internal/macros.h"
 #include "internal/random.h"
-#include "internal/statusor.h"
+#include "internal/status.h"
 
 namespace phst_rules_elisp {
 

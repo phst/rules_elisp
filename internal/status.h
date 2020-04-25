@@ -71,4 +71,22 @@ class ABSL_MUST_USE_RESULT StatusOr {
 
 }  // phst_google_elisp
 
+#define RETURN_IF_ERROR(expr)          \
+  do {                                 \
+    const auto _status = (expr);       \
+    if (!_status.ok()) return _status; \
+  } while (false)
+
+#define ASSIGN_OR_RETURN(lhs, rhs) ASSIGN_OR_RETURN_1(lhs, (rhs), __COUNTER__)
+
+#define ASSIGN_OR_RETURN_1(lhs, rhs, counter) \
+  ASSIGN_OR_RETURN_2(lhs, (rhs), PHST_RULES_ELISP_CONCAT(_status_or_, counter))
+
+#define ASSIGN_OR_RETURN_2(lhs, rhs, var) \
+  auto var = (rhs);                       \
+  if (!var.ok()) return var.status();     \
+  lhs = std::move(var).value()
+
+#define PHST_RULES_ELISP_CONCAT(a, b) a ## b
+
 #endif

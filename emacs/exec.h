@@ -29,7 +29,7 @@
 #pragma GCC diagnostic pop
 
 #include "internal/random.h"
-#include "internal/statusor.h"
+#include "internal/status.h"
 
 namespace phst_rules_elisp {
 

@@ -59,7 +59,7 @@
 #include "internal/file.h"
 #include "internal/int.h"
 #include "internal/random.h"
-#include "internal/statusor.h"
+#include "internal/status.h"
 
 namespace phst_rules_elisp {
 
