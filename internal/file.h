@@ -20,6 +20,7 @@
 #include <fcntl.h>
 
 #include <array>
+#include <initializer_list>
 #include <iosfwd>
 #include <istream>
 #include <iterator>
@@ -29,8 +30,14 @@
 #include <system_error>
 #include <utility>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/base/casts.h"
 #include "absl/strings/string_view.h"
+#pragma GCC diagnostic pop
 
 #include "internal/random.h"
 
@@ -149,14 +156,12 @@ constexpr bool IsAbsolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';
 }
 
-std::string JoinPath(absl::string_view a, absl::string_view b);
+std::string JoinPathImpl(std::initializer_list<absl::string_view> pieces);
 
 template <typename... Ts>
-std::string JoinPath(absl::string_view a, absl::string_view b, Ts&&... rest) {
-  static_assert(sizeof...(Ts) > 0,
-                "this overload should only be instantiated with at least three "
-                "arguments");
-  return JoinPath(JoinPath(a, b), std::forward<Ts>(rest)...);
+std::string JoinPath(Ts&&... pieces) {
+  static_assert(sizeof...(pieces) >= 1, "need at least one piece to join");
+  return JoinPathImpl({absl::implicit_cast<absl::string_view>(pieces)...});
 }
 
 std::string MakeAbsolute(absl::string_view name);

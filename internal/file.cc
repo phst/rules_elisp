@@ -25,6 +25,7 @@
 #include <cerrno>
 #include <cstddef>
 #include <cstdlib>
+#include <initializer_list>
 #include <ios>
 #include <iostream>
 #include <limits>
@@ -35,9 +36,18 @@
 #include <system_error>
 #include <utility>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "absl/strings/strip.h"
 #include "absl/utility/utility.h"
+#pragma GCC diagnostic pop
 
 #include "internal/int.h"
 #include "internal/random.h"
@@ -286,22 +296,17 @@ ABSL_MUST_USE_RESULT std::error_code TempFile::Remove() noexcept {
   return RemoveFile(this->path());
 }
 
-static constexpr absl::string_view RemovePrefix(const absl::string_view string,
-                                                const char prefix) noexcept {
-  return (string.empty() || string.front() != prefix) ? string
-                                                      : string.substr(1);
-}
-
-static constexpr absl::string_view RemoveSuffix(const absl::string_view string,
-                                                const char suffix) noexcept {
-  return (string.empty() || string.back() != suffix)
-             ? string
-             : string.substr(0, string.size() - 1);
-}
-
-std::string JoinPath(const absl::string_view a, const absl::string_view b) {
-  return std::string(RemoveSuffix(a, '/')) + '/' +
-         std::string(RemovePrefix(b, '/'));
+std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) {
+  assert(pieces.begin() < pieces.end());
+  const auto format = [](std::string* const out, absl::string_view name) {
+    absl::ConsumePrefix(&name, "/");
+    absl::ConsumeSuffix(&name, "/");
+    out->append(name.begin(), name.end());
+  };
+  // Make sure to not strip leading or trailing slashes.
+  return absl::StrCat(absl::StartsWith(*pieces.begin(), "/") ? "/" : "",
+                      absl::StrJoin(pieces, "/", format),
+                      absl::EndsWith(*(pieces.end() - 1), "/") ? "/" : "");
 }
 
 std::string MakeAbsolute(const absl::string_view name) {

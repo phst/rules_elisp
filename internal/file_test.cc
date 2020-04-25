@@ -42,6 +42,7 @@ namespace {
 using ::testing::TempDir;
 using ::testing::Eq;
 using ::testing::Ge;
+using ::testing::StrEq;
 using ::testing::StartsWith;
 using ::testing::EndsWith;
 
@@ -183,6 +184,19 @@ TEST(TempStream, Format) {
   stream.Close();
   EXPECT_TRUE(stream.path().empty());
   EXPECT_FALSE(FileExists(path));
+}
+
+TEST(JoinPath, Relative) {
+  EXPECT_THAT(JoinPath("foo/", "/bar/", "baz/qux/"), StrEq("foo/bar/baz/qux/"));
+}
+
+TEST(JoinPath, Absolute) {
+  EXPECT_THAT(JoinPath("/foo/", "/bar/", "baz/qux/"),
+              StrEq("/foo/bar/baz/qux/"));
+}
+
+TEST(JoinPath, TwoPieces) {
+  EXPECT_THAT(JoinPath("/foo/", "/bar/"), StrEq("/foo/bar/"));
 }
 
 }  // namespace
