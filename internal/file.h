@@ -29,6 +29,7 @@
 #include <system_error>
 #include <utility>
 
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 
 #include "internal/random.h"
@@ -68,7 +69,7 @@ class File : public std::streambuf {
   void Open(std::string path, FileMode mode);
 
  private:
-  struct [[nodiscard]] Result {
+  struct ABSL_MUST_USE_RESULT Result {
     std::streamsize count;
     int error;
   };
@@ -82,7 +83,7 @@ class File : public std::streambuf {
   std::streamsize xsgetn(char_type* data, std::streamsize count) final;
   Result Read(char* data, std::streamsize count);
   int sync() final;
-  [[nodiscard]] bool Flush();
+  ABSL_MUST_USE_RESULT bool Flush();
 
   int fd_ = -1;
   std::array<char_type, 0x1000> get_;
@@ -102,7 +103,7 @@ class TempFile : public File {
 
  private:
   void DoClose() final;
-  [[nodiscard]] std::error_code Remove() noexcept;
+  ABSL_MUST_USE_RESULT std::error_code Remove() noexcept;
 };
 
 template <typename T>
@@ -176,9 +177,10 @@ std::string JoinPath(absl::string_view a, absl::string_view b, Ts&&... rest) {
 
 std::string MakeAbsolute(absl::string_view name);
 
-[[nodiscard]] bool FileExists(const std::string& name) noexcept;
-[[nodiscard]] std::error_code RemoveFile(const std::string& name) noexcept;
-[[nodiscard]] std::string TempDir();
+ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
+ABSL_MUST_USE_RESULT std::error_code RemoveFile(
+    const std::string& name) noexcept;
+ABSL_MUST_USE_RESULT std::string TempDir();
 
 class Directory {
  public:
@@ -228,7 +230,7 @@ class Directory {
   explicit Directory(const std::string& name);
   ~Directory() noexcept;
 
-  [[nodiscard]] std::error_code Close() noexcept;
+  ABSL_MUST_USE_RESULT std::error_code Close() noexcept;
 
   Iterator begin() const { return Iterator(dir_); }
   Iterator end() const { return Iterator(); }

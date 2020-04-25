@@ -35,6 +35,7 @@
 #include <system_error>
 #include <utility>
 
+#include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
 
 #include "internal/int.h"
@@ -219,7 +220,7 @@ int File::sync() {
   return success ? 0 : -1;
 }
 
-[[nodiscard]] bool File::Flush() {
+ABSL_MUST_USE_RESULT bool File::Flush() {
   const auto pbase = this->pbase();
   const auto pptr = this->pptr();
   assert(pbase != nullptr);
@@ -280,7 +281,7 @@ void TempFile::DoClose() {
   if (code) throw std::system_error(code);
 }
 
-[[nodiscard]] std::error_code TempFile::Remove() noexcept {
+ABSL_MUST_USE_RESULT std::error_code TempFile::Remove() noexcept {
   return RemoveFile(this->path());
 }
 
@@ -314,17 +315,18 @@ std::string MakeAbsolute(const absl::string_view name) {
   return JoinPath(dir.get(), name);
 }
 
-[[nodiscard]] bool FileExists(const std::string& name) noexcept {
+ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
   struct stat info;
   return ::lstat(name.c_str(), &info) == 0;
 }
 
-[[nodiscard]] std::error_code RemoveFile(const std::string& name) noexcept {
+ABSL_MUST_USE_RESULT std::error_code RemoveFile(
+    const std::string& name) noexcept {
   return std::error_code(::unlink(name.c_str()) == 0 ? 0 : errno,
                          std::system_category());
 }
 
-[[nodiscard]] std::string TempDir() {
+ABSL_MUST_USE_RESULT std::string TempDir() {
   const std::array<const char*, 2> vars = {"TEST_TMPDIR", "TMPDIR"};
   for (const auto var : vars) {
     const auto value = std::getenv(var);
@@ -345,7 +347,7 @@ Directory::~Directory() noexcept {
   if (code) std::clog << code << ": " << code.message() << std::endl;
 }
 
-[[nodiscard]] std::error_code Directory::Close() noexcept {
+ABSL_MUST_USE_RESULT std::error_code Directory::Close() noexcept {
   if (dir_ == nullptr) return std::error_code();
   const std::error_code code(::closedir(dir_) == 0 ? 0 : errno,
                              std::system_category());

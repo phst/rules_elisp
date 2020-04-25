@@ -23,6 +23,7 @@ cc_library(
     deps = [
         ":int",
         ":random",
+        "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
     ],
 )
