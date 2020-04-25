@@ -25,6 +25,7 @@ cc_library(
         ":random",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/utility",
     ],
 )
 

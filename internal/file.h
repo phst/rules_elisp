@@ -130,8 +130,7 @@ class BasicStream : public std::iostream {
 
   BasicStream& operator=(BasicStream&& other) {
     this->std::iostream::operator=(other);
-    file_ = other.file;
-    other.file_ = nullptr;
+    file_ = absl::exchange(other.file, nullptr);
     this->set_rdbuf(file_);
     other.set_rdbuf(nullptr);
   }

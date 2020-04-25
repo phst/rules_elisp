@@ -37,6 +37,7 @@
 
 #include "absl/base/attributes.h"
 #include "absl/strings/string_view.h"
+#include "absl/utility/utility.h"
 
 #include "internal/int.h"
 #include "internal/random.h"
