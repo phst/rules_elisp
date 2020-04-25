@@ -343,6 +343,13 @@ Directory::Directory(const std::string& name) : dir_(::opendir(name.c_str())) {
   }
 }
 
+Directory& Directory::operator=(Directory&& other) {
+  const auto code = this->Close();
+  if (code) std::clog << code << ": " << code.message() << std::endl;
+  dir_ = absl::exchange(other.dir_, nullptr);
+  return *this;
+}
+
 Directory::~Directory() noexcept {
   const auto code = this->Close();
   if (code) std::clog << code << ": " << code.message() << std::endl;

@@ -227,6 +227,11 @@ class Directory {
   };
 
   explicit Directory(const std::string& name);
+  Directory(const Directory&) = delete;
+  Directory(Directory&& other) : dir_(other.dir_) { other.dir_ = nullptr; }
+  Directory& operator=(const Directory&) = delete;
+  Directory& operator=(Directory&& other);
+
   ~Directory() noexcept;
 
   ABSL_MUST_USE_RESULT std::error_code Close() noexcept;
