@@ -167,6 +167,7 @@ TEST(File, Move) {
   EXPECT_THAT(outer->sgetc(), Eq(Traits::to_int_type('i')));
   EXPECT_THAT(outer->sbumpc(), Eq(Traits::to_int_type('i')));
   EXPECT_THAT(outer->sbumpc(), Eq(Traits::eof()));
+  EXPECT_TRUE(outer->Close().ok());
 }
 
 TEST(TempFile, Create) {
@@ -196,6 +197,7 @@ TEST(Stream, AssignRead) {
   std::string contents(Iterator(b), Iterator{});
   EXPECT_THAT(contents, StrEq("hi\n"));
   std::swap(a, b);
+  EXPECT_TRUE(a.Close().ok());
 }
 
 TEST(TempStream, Format) {
