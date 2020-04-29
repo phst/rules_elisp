@@ -228,7 +228,9 @@ elisp_library = rule(
         ),
         load_path = attr.string_list(
             doc = """List of additional load path elements.
-The elements are directory names relative to the current package.
+The elements are directory names, which can be either relative or absolute.
+Relative names are relative to the current package.
+Absolute names are relative to the workspace root.
 To add a load path entry for the current package, specify `.` here.""",
         ),
         deps = attr.label_list(
@@ -371,10 +373,7 @@ def _compile(ctx, srcs, deps, load_path):
             and all its transitive dependencies
     """
     outs = []
-    load_path = [_load_directory_for_workspace_root(ctx)] + [
-        _load_directory_relative_to_package(ctx, dir)
-        for dir in load_path
-    ]
+    load_path = [_load_directory(ctx, dir) for dir in ["/"] + load_path]
     indirect_srcs = [dep[EmacsLispInfo].transitive_source_files for dep in deps]
     indirect_outs = [dep[EmacsLispInfo].transitive_compiled_files for dep in deps]
     transitive_load_path = depset(
@@ -456,44 +455,23 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _load_directory_relative_to_package(ctx, relative):
-    """Returns a load directory structure relative to the current package.
-
-    Args:
-      ctx (ctx): the rule context
-      relative (string): directory name relative to the package directory of
-          the current rule; may not resolve to a directory above the package
-          directory
-
-    Returns:
-      a structure usable as a load path entry for `EmacsLispProvider`
-    """
-    return _load_directory_relative_to_workspace_root(ctx, paths.join(ctx.label.package, check_relative_filename(relative)))
-
-def _load_directory_for_workspace_root(ctx):
-    """Returns a load directory structure for the current workspace root.
-
-    Args:
-      ctx (ctx): the rule context
-
-    Returns:
-      a structure usable as a load path entry for `EmacsLispProvider`
-    """
-    return _load_directory_relative_to_workspace_root(ctx, "")
-
-def _load_directory_relative_to_workspace_root(ctx, relative):
+def _load_directory(ctx, dir):
     """Returns a load directory relative to the current workspace root.
 
     Args:
       ctx (ctx): the rule context
-      relative (string): directory name relative to the workspace root
-          directory of the current rule; may not resolve to a directory
-          above the workspace root
+      dir (string): directory name; either relative (interpreted as relative
+          to the current package) or absolute (interpreted as relative to the
+          workspace root)
 
     Returns:
       a structure usable as a load path entry for `EmacsLispProvider`
     """
-    check_relative_filename(relative)
+    if paths.is_absolute(dir):
+        dir = "." + dir
+    else:
+        dir = paths.join(ctx.label.package, check_relative_filename(dir))
+    check_relative_filename(dir)
     return struct(
         # Actions should load byte-compiled files.  Since we place them into
         # the bin directory, we need to start from there, append the workspace
@@ -502,7 +480,7 @@ def _load_directory_relative_to_workspace_root(ctx, relative):
         # and then the directory name relative to the workspace root.  The
         # workspace root will only be nonempty if the current rule lives in a
         # different workspace than the one that Bazel is run from.
-        for_actions = check_relative_filename(paths.join(ctx.bin_dir.path, ctx.label.workspace_root, relative)),
+        for_actions = check_relative_filename(paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir)),
         # The runfiles tree looks different, see
         # https://docs.bazel.build/versions/2.0.0/output_directories.html.  The
         # top-level directories in the runfiles root are always the workspace
@@ -511,7 +489,7 @@ def _load_directory_relative_to_workspace_root(ctx, relative):
         # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_name.
         # Therefore, it can be empty, in which case we need to use the current
         # workspace.
-        for_runfiles = check_relative_filename(paths.join(ctx.label.workspace_name or ctx.workspace_name, relative)),
+        for_runfiles = check_relative_filename(paths.join(ctx.label.workspace_name or ctx.workspace_name, dir)),
     )
 
 def _load_directory_for_actions(directory):

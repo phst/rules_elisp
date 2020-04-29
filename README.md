@@ -47,8 +47,9 @@ The Emacs Lisp rules by default only add the workspace root directories to the
 [load path][].  However, many Emacs Lisp libraries assume that their immediate
 parent directory is present in the load path.  To support such libraries, the
 `elisp_library` rule supports an optional `load_path` attribute.  You can
-specify additional load path directories using this attribute; the directories
-are relative to the Bazel package directory.  A typical use case is to specify
+specify additional load path directories using this attribute.  Relative
+directories are relative to the Bazel package directory; absolute directories
+are relative to the workspace root.  A typical use case is to specify
 `load_path = ["."]` to add the current package to the load path.
 
 [load path]: https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html

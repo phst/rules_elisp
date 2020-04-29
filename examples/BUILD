@@ -44,7 +44,7 @@ elisp_test(
 elisp_library(
     name = "lib_3",
     srcs = ["subdir/lib-3.el"],
-    load_path = ["subdir"],
+    load_path = ["/examples/subdir"],
 )
 
 elisp_test(
