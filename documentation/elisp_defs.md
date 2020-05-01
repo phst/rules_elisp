@@ -46,7 +46,7 @@ If you want to add further elements to the load path, use the `load_path` attrib
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| load_path |  List of additional load path elements. The elements are directory names relative to the current package. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
+| load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
 | srcs |  List of source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
@@ -106,12 +106,16 @@ Emacs arguments.
 
 The manifest is a JSON object with the following keys:
 
+- `root` can be either `EXECUTION_ROOT` or `RUNFILES_ROOT` and specifies
+  the root directory for relative file names.
 - `loadPath` is a list of directory names making up the load path.
 - `inputFiles` is a list of files that should be readable.
 - `outputFiles` is a list of files that should be writable.
 
-When executing an action, all file names are relative to the execution root.
+When executing an action, file names are relative to the execution root.
 Otherwise, file names are relative to the runfiles root.
+File names in `outputFiles` can also be absolute; in this case they
+specify temporary files that are deleted after the action completes.
 
 **ATTRIBUTES**
 
