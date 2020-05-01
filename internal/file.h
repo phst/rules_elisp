@@ -176,8 +176,7 @@ class BasicStream : public std::iostream {
   const std::string& path() const noexcept { return file_.path(); }
 
  private:
-  explicit BasicStream(T file) : file_(std::move(file)) {
-    this->init(&file_);
+  explicit BasicStream(T file) : std::iostream(&file_), file_(std::move(file)) {
     this->imbue(std::locale::classic());
   }
 
