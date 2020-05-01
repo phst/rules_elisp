@@ -38,17 +38,22 @@ class ABSL_MUST_USE_RESULT StatusOr {
   static_assert(!std::is_convertible<T, absl::Status>::value,
                 "StatusOr type may not be absl::Status");
 
-  StatusOr(absl::Status status)
-#ifdef ABSL_BAD_CALL_IF
-      ABSL_BAD_CALL_IF(status.ok(), "can’t initialize status_or with OK status")
-#endif
-  {
+  StatusOr(absl::Status status) {
     if (status.ok()) {
       std::clog << "can’t initialize status_or with OK status" << std::endl;
       std::abort();
     }
     data_ = std::move(status);
   }
+
+#ifdef ABSL_BAD_CALL_IF
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wgcc-compat"
+  StatusOr(const absl::Status status)
+      ABSL_BAD_CALL_IF(status.ok(),
+                       "can’t initialize status_or with OK status");
+#pragma GCC diagnostic pop
+#endif
 
   StatusOr(T value) : data_(std::move(value)) {}
 
