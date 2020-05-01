@@ -196,6 +196,8 @@ Emacs arguments.
 
 The manifest is a JSON object with the following keys:
 
+- `root` can be either `EXECUTION_ROOT` or `RUNFILES_ROOT` and specifies
+  the root directory for relative file names.
 - `loadPath` is a list of directory names making up the load path.
 - `inputFiles` is a list of files that should be readable.
 - `outputFiles` is a list of files that should be writable.
@@ -417,6 +419,7 @@ def _compile(ctx, srcs, deps, load_path):
             ctx.actions.write(
                 output = manifest,
                 content = struct(
+                    root = "EXECUTION_ROOT",
                     loadPath = flat_load_path,
                     inputFiles = [f.path for f in inputs.to_list()],
                     outputFiles = [out.path],

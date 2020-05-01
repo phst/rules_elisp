@@ -175,6 +175,7 @@ static absl::Status WriteManifest(const std::vector<std::string>& load_path,
                                   const std::vector<std::string>& output_files,
                                   std::ostream& file) {
   Manifest manifest;
+  manifest.set_root(RUNFILES_ROOT);
   AddToManifest(load_path, *manifest.mutable_load_path(), Absolute::kForbid);
   AddToManifest(load_files, *manifest.mutable_input_files(), Absolute::kForbid);
   AddToManifest(data_files, *manifest.mutable_input_files(), Absolute::kForbid);

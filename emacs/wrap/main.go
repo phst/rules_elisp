@@ -40,13 +40,14 @@ func main() {
 	if err != nil {
 		log.Fatalf("can’t read manifest: %s", err)
 	}
-	var got map[string][]string
+	var got map[string]interface{}
 	if err := json.Unmarshal(jsonData, &got); err != nil {
 		log.Fatalf("can’t decode manifest: %s", err)
 	}
-	want := map[string][]string{
-		"loadPath":   []string{"phst_rules_elisp"},
-		"inputFiles": []string{"phst_rules_elisp/emacs/exec.h"},
+	want := map[string]interface{}{
+		"root":       "RUNFILES_ROOT",
+		"loadPath":   []interface{}{"phst_rules_elisp"},
+		"inputFiles": []interface{}{"phst_rules_elisp/emacs/exec.h"},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)

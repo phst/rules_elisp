@@ -22,4 +22,11 @@ message Manifest {
   repeated string load_path = 1;
   repeated string input_files = 2;
   repeated string output_files = 3;
+  Root root = 4;
+}
+
+enum Root {
+  ROOT_UNSPECIFIED = 0;
+  EXECUTION_ROOT = 1;
+  RUNFILES_ROOT = 2;
 }
