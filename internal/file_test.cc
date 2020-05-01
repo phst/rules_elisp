@@ -111,6 +111,8 @@ TEST(File, WriteRead) {
   }
 }
 
+#if defined MFD_CLOEXEC && defined MFD_ALLOW_SEALING \
+  && defined F_ADD_SEALS && defined F_SEAL_GROW
 TEST(File, PartialWrite) {
   using Traits = std::char_traits<char>;
   const int fd = memfd_create("test", MFD_CLOEXEC | MFD_ALLOW_SEALING);
@@ -136,6 +138,7 @@ TEST(File, PartialWrite) {
       << std::error_code(errno, std::system_category());
   EXPECT_THAT(buffer.front(), Eq('h'));
 }
+#endif
 
 TEST(File, Move) {
   // This test should typically be run under Address Sanitizer to debug issues
