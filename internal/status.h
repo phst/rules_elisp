@@ -49,24 +49,24 @@ class ABSL_MUST_USE_RESULT StatusOr {
 #ifdef ABSL_BAD_CALL_IF
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wgcc-compat"
-  StatusOr(const absl::Status status)
+  constexpr StatusOr(const absl::Status status)
       ABSL_BAD_CALL_IF(status.ok(),
                        "can’t initialize status_or with OK status");
 #pragma GCC diagnostic pop
 #endif
 
-  StatusOr(T value) : data_(std::move(value)) {}
+  constexpr StatusOr(T value) : data_(std::move(value)) {}
 
   absl::Status status() const {
     return this->ok() ? absl::OkStatus() : absl::get<absl::Status>(data_);
   }
 
-  bool ok() const { return absl::holds_alternative<T>(data_); }
+  constexpr bool ok() const { return absl::holds_alternative<T>(data_); }
   T& value()& { return absl::get<T>(data_); }
-  const T& value() const& { return absl::get<T>(data_); }
+  constexpr const T& value() const& { return absl::get<T>(data_); }
   T&& value()&& { return absl::get<T>(std::move(data_)); }
 
-  T value_or(T alternative) const {
+  constexpr T value_or(T alternative) const {
     return this->ok() ? this->value() : std::move(alternative);
   }
 
