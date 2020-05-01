@@ -200,8 +200,10 @@ The manifest is a JSON object with the following keys:
 - `inputFiles` is a list of files that should be readable.
 - `outputFiles` is a list of files that should be writable.
 
-When executing an action, all file names are relative to the execution root.
-Otherwise, file names are relative to the runfiles root.""",
+When executing an action, file names are relative to the execution root.
+Otherwise, file names are relative to the runfiles root.
+File names in `outputFiles` can also be absolute; in this case they
+specify temporary files that are deleted after the action completes.""",
     provides = [platform_common.ToolchainInfo],
 )
 

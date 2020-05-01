@@ -154,11 +154,14 @@ static StatusOr<absl::optional<TempStream>> AddManifest(
   return absl::implicit_cast<Type>(std::move(stream));
 }
 
+enum class Absolute { kAllow, kForbid };
+
 static void AddToManifest(
     const std::vector<std::string>& files,
-    google::protobuf::RepeatedPtrField<std::string>& field) {
+    google::protobuf::RepeatedPtrField<std::string>& field,
+    const Absolute absolute) {
   for (const auto& file : files) {
-    if (IsAbsolute(file)) {
+    if (absolute == Absolute::kForbid && IsAbsolute(file)) {
       std::clog << "filename " << file << " is absolute" << std::endl;
       std::abort();
     }
@@ -172,10 +175,11 @@ static absl::Status WriteManifest(const std::vector<std::string>& load_path,
                                   const std::vector<std::string>& output_files,
                                   std::ostream& file) {
   Manifest manifest;
-  AddToManifest(load_path, *manifest.mutable_load_path());
-  AddToManifest(load_files, *manifest.mutable_input_files());
-  AddToManifest(data_files, *manifest.mutable_input_files());
-  AddToManifest(output_files, *manifest.mutable_output_files());
+  AddToManifest(load_path, *manifest.mutable_load_path(), Absolute::kForbid);
+  AddToManifest(load_files, *manifest.mutable_input_files(), Absolute::kForbid);
+  AddToManifest(data_files, *manifest.mutable_input_files(), Absolute::kForbid);
+  AddToManifest(output_files, *manifest.mutable_output_files(),
+                Absolute::kAllow);
   std::string json;
   RETURN_IF_ERROR(ProtobufToAbslStatus(
       google::protobuf::util::MessageToJsonString(manifest, &json)));
