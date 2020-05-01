@@ -104,7 +104,7 @@ absl::Status StreamStatus(const std::ios& stream) {
 StatusOr<File> File::Open(std::string path, const FileMode mode) {
   File result;
   RETURN_IF_ERROR(result.DoOpen(std::move(path), mode));
-  return result;
+  return std::move(result);
 }
 
 File::File() { this->setp(put_.data(), put_.data() + put_.size()); }
@@ -336,7 +336,7 @@ StatusOr<TempFile> TempFile::Open(const std::string& directory,
       RETURN_IF_ERROR(result.DoOpen(std::move(name), FileMode::kReadWrite |
                                                          FileMode::kCreate |
                                                          FileMode::kExclusive));
-      return result;
+      return std::move(result);
     }
   }
   return absl::UnavailableError("can’t create temporary file in directory " +

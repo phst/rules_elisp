@@ -112,7 +112,7 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
   if (runfiles == nullptr) {
     return absl::FailedPreconditionError("couldn’t create runfiles: " + error);
   }
-  return runfiles;
+  return std::move(runfiles);
 }
 
 static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
@@ -122,7 +122,7 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
     return absl::FailedPreconditionError("couldn’t create runfiles for test: " +
                                          error);
   }
-  return runfiles;
+  return std::move(runfiles);
 }
 
 static StatusOr<std::string> GetSharedDir(const std::string& install) {
