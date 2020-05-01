@@ -25,6 +25,7 @@ cc_library(
         ":random",
         ":status",
         "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
@@ -82,7 +83,7 @@ cc_library(
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
     deps = [
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:variant",
     ],
