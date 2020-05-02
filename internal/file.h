@@ -22,13 +22,10 @@
 #include <array>
 #include <cerrno>
 #include <initializer_list>
-#include <iosfwd>
-#include <istream>
 #include <iterator>
 #include <locale>
 #include <memory>
 #include <string>
-#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
@@ -66,8 +63,6 @@ absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
                      std::forward<Ts>(args)...);
 }
 
-absl::Status StreamStatus(const std::ios& stream);
-
 enum class FileMode {
   kRead = O_RDONLY,
   kWrite = O_WRONLY,
@@ -80,10 +75,10 @@ inline FileMode operator|(const FileMode a, const FileMode b) {
   return static_cast<FileMode>(static_cast<int>(a) | static_cast<int>(b));
 }
 
-class File : public std::streambuf {
+class File {
  public:
   static StatusOr<File> Open(std::string path, FileMode mode);
-  ~File() noexcept override;
+  virtual ~File() noexcept;
   File(const File&) = delete;
   File(File&& other);
   File& operator=(const File&) = delete;
@@ -95,35 +90,21 @@ class File : public std::streambuf {
 
   absl::Status Close();
 
+  StatusOr<std::string> Read();
+  absl::Status Write(absl::string_view data);
+
  protected:
   File();
 
   absl::Status DoOpen(std::string path, FileMode mode);
 
  private:
-  struct ABSL_MUST_USE_RESULT Result {
-    std::streamsize count;
-    int error;
-  };
-
   virtual absl::Status DoClose();
-  void Move(File&& other);
-  int_type overflow(int_type ch = traits_type::eof()) final;
-  std::streamsize xsputn(const char_type* data, std::streamsize count) final;
-  Result Write(const char* data, std::streamsize count);
-  int_type underflow() final;
-  std::streamsize xsgetn(char_type* data, std::streamsize count) final;
-  Result Read(char* data, std::streamsize count);
-  int sync() final;
-  absl::Status Flush();
-  const absl::Status& Fail(absl::Status status);
-  const absl::Status& Fail(absl::string_view function);
+
+  absl::Status Fail(absl::string_view function) const;
 
   int fd_ = -1;
-  std::array<char_type, 0x1000> get_;
-  std::array<char_type, 0x1000> put_;
   std::string path_;
-  absl::Status status_;
 };
 
 class TempFile : public File {
@@ -142,49 +123,6 @@ class TempFile : public File {
   absl::Status DoClose() final;
   absl::Status Remove() noexcept;
 };
-
-template <typename T>
-class BasicStream : public std::iostream {
- public:
-  static_assert(std::is_base_of<File, T>::value,
-                "basic_stream works only with file types");
-
-  template <typename... As>
-  static StatusOr<BasicStream> Open(As&&... args) {
-    ASSIGN_OR_RETURN(auto file, T::Open(std::forward<As>(args)...));
-    return BasicStream(std::move(file));
-  }
-
-  BasicStream(const BasicStream&) = delete;
-  BasicStream& operator=(const BasicStream&) = delete;
-
-  BasicStream(BasicStream&& other)
-      : std::iostream(std::move(other)), file_(std::move(other.file_)) {
-    this->set_rdbuf(&file_);
-    other.set_rdbuf(nullptr);
-  }
-
-  BasicStream& operator=(BasicStream&& other) {
-    this->std::iostream::operator=(std::move(other));
-    file_ = std::move(other.file_);
-    this->set_rdbuf(&file_);
-    other.set_rdbuf(nullptr);
-    return *this;
-  }
-
-  absl::Status Close() { return file_.Close(); }
-  const std::string& path() const noexcept { return file_.path(); }
-
- private:
-  explicit BasicStream(T file) : std::iostream(&file_), file_(std::move(file)) {
-    this->imbue(std::locale::classic());
-  }
-
-  T file_;
-};
-
-using Stream = BasicStream<File>;
-using TempStream = BasicStream<TempFile>;
 
 constexpr bool IsAbsolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';

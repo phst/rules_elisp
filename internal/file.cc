@@ -23,10 +23,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cerrno>
-#include <cstddef>
 #include <cstdlib>
 #include <initializer_list>
-#include <ios>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -89,42 +87,22 @@ absl::Status MakeErrorStatus(const std::error_code& code,
                    code.message()));
 }
 
-absl::Status StreamStatus(const std::ios& stream) {
-  if (stream.good()) return absl::OkStatus();
-  if (stream.bad()) return absl::DataLossError("stream is bad");
-  if (stream.fail()) return absl::FailedPreconditionError("stream has failed");
-  if (stream.eof()) return absl::OutOfRangeError("end of file reached");
-  std::abort();  // can’t happen
-}
-
 StatusOr<File> File::Open(std::string path, const FileMode mode) {
   File result;
   RETURN_IF_ERROR(result.DoOpen(std::move(path), mode));
   return result;
 }
 
-File::File() { this->setp(put_.data(), put_.data() + put_.size()); }
+File::File() = default;
 
 File::File(File&& other)
-    : std::streambuf(other),
-      fd_(other.fd_),
-      get_(other.get_),
-      put_(other.put_),
-      path_(std::move(other.path_)),
-      status_(std::move(other.status_)) {
-  this->Move(std::move(other));
-}
+    : fd_(absl::exchange(other.fd_, -1)), path_(std::move(other.path_)) {}
 
 File& File::operator=(File&& other) {
   const auto status = this->Close();
   if (!status.ok()) std::clog << status << std::endl;
-  this->std::streambuf::operator=(other);
-  fd_ = other.fd_;
-  get_ = other.get_;
-  put_ = other.put_;
+  fd_ = absl::exchange(other.fd_, -1);
   path_ = std::move(other.path_);
-  status_ = std::move(other.status_);
-  this->Move(std::move(other));
   return *this;
 }
 
@@ -145,18 +123,17 @@ absl::Status File::DoOpen(std::string path, const FileMode mode) {
   if (fd < 0) return ErrnoStatus("open", path);
   fd_ = fd;
   path_ = std::move(path);
-  return status_;
+  return absl::OkStatus();
 }
 
 StatusOr<std::FILE*> File::OpenCFile(const char* const mode) {
   const auto file = fdopen(fd_, mode);
-  if (file == nullptr) return ErrnoStatus("fdopen");
+  if (file == nullptr) return this->Fail("fdopen");
   return file;
 }
 
 absl::Status File::Close() {
-  if (fd_ < 0) return status_;
-  RETURN_IF_ERROR(this->Flush());
+  if (fd_ < 0) return absl::OkStatus();
   int status = -1;
   while (true) {
     status = ::close(fd_);
@@ -164,162 +141,55 @@ absl::Status File::Close() {
   }
   fd_ = -1;
   if (status != 0) return this->Fail("close");
-  status_.Update(this->DoClose());
+  const auto close_status = this->DoClose();
   path_.clear();
-  return status_;
+  return close_status;
 }
 
 absl::Status File::DoClose() { return absl::OkStatus(); }
 
-void File::Move(File&& other) {
-  other.fd_ = -1;
-  other.path_.clear();
-  if (other.eback() != nullptr) {
-    this->setg(get_.data() + (other.eback() - other.get_.data()),
-               get_.data() + (other.gptr() - other.get_.data()),
-               get_.data() + (other.egptr() - other.get_.data()));
-  }
-  const auto offset = this->pptr() - this->pbase();
-  this->setp(put_.data() + (other.pbase() - other.put_.data()),
-             put_.data() + (other.epptr() - other.put_.data()));
-  static_assert(std::tuple_size<decltype(put_)>::value <= UnsignedMax<int>(),
-                "buffer too large");
-  this->pbump(static_cast<int>(offset));
-}
-
-File::int_type File::overflow(const int_type ch) {
-  assert(this->pptr() == this->epptr());
-  if (!this->Flush().ok()) return traits_type::eof();
-  if (traits_type::eq_int_type(ch, traits_type::eof())) {
-    return traits_type::not_eof(0);
-  }
-  assert(this->pptr() == put_.data());
-  assert(this->epptr() > put_.data());
-  traits_type::assign(put_.front(), traits_type::to_char_type(ch));
-  this->pbump(1);
-  return ch;
-}
-
-std::streamsize File::xsputn(const char_type* const data,
-                             const std::streamsize count) {
-  if (!this->Flush().ok()) return 0;
-  return this->Write(data, count).count;
-}
-
-File::Result File::Write(const char* data, std::streamsize count) {
-  assert(count >= 0);
-  static_assert(UnsignedMax<std::streamsize>() <= UnsignedMax<std::size_t>(),
-                "unsupported architecture");
-  Result result = {};
-  while (count > 0) {
-    const auto n = ::write(fd_, data, static_cast<std::size_t>(count));
-    if (n < 0) result.error = errno;
-    if (n <= 0) break;
-    result.count += n;
-    data += n;
-    count -= n;
-  }
-  return result;
-}
-
-File::int_type File::underflow() {
-  assert(this->gptr() == this->egptr());
+absl::Status File::Write(const absl::string_view data) {
   static_assert(
-      std::tuple_size<decltype(get_)>::value <= UnsignedMax<std::streamsize>(),
-      "buffer too large");
-  const auto result =
-      this->Read(get_.data(), static_cast<std::streamsize>(get_.size()));
-  const auto read = result.count;
-  this->setg(get_.data(), get_.data(), get_.data() + read);
-  if (result.error != 0 || read == 0) return traits_type::eof();
-  assert(this->gptr() != nullptr);
-  assert(this->gptr() != this->egptr());
-  return traits_type::to_int_type(*this->gptr());
-}
-
-std::streamsize File::xsgetn(char_type* data, std::streamsize count) {
-  if (count == 0) return 0;
-  std::streamsize read = 0;
-  static_assert(UnsignedMax<std::streamsize>() <= UnsignedMax<std::size_t>(),
-                "unsupported architecture");
-  if (this->gptr() != nullptr && this->egptr() != this->gptr()) {
-    read = std::min(count, this->egptr() - this->gptr());
-    traits_type::copy(data, this->gptr(), static_cast<std::size_t>(read));
-    data += read;
-    count -= read;
-    this->setg(this->gptr(), this->gptr() + read, this->egptr());
+      UnsignedMax<ssize_t>() <= UnsignedMax<absl::string_view::size_type>(),
+      "unsupported architecture");
+  absl::string_view::size_type written = 0;
+  auto rest = data;
+  while (!rest.empty()) {
+    const auto m = ::write(fd_, rest.data(), rest.size());
+    if (m < 0) return this->Fail("write");
+    if (m == 0) break;
+    const auto n = static_cast<absl::string_view::size_type>(m);
+    written += n;
+    rest.remove_prefix(n);
   }
-  return read + this->Read(data, count).count;
+  assert(written <= data.size());
+  if (written != data.size()) {
+    return absl::DataLossError(absl::StrCat("requested write of ", data.size(),
+                                            " bytes, but only ", written,
+                                            " bytes written"));
+  }
+  return absl::OkStatus();
 }
 
-File::Result File::Read(char* data, std::streamsize count) {
-  assert(count >= 0);
-  static_assert(UnsignedMax<std::streamsize>() <= UnsignedMax<std::size_t>(),
+StatusOr<std::string> File::Read() {
+  static_assert(UnsignedMax<ssize_t>() <= UnsignedMax<std::size_t>(),
                 "unsupported architecture");
-  Result result = {};
-  while (count > 0) {
-    const auto n = ::read(fd_, data, static_cast<std::size_t>(count));
-    if (n < 0) result.error = errno;
-    if (n <= 0) break;
-    result.count += n;
-    data += n;
-    count -= n;
+  std::array<char, 0x1000> buffer;
+  std::string result;
+  while (true) {
+    const auto m = ::read(fd_, buffer.data(), buffer.size());
+    if (m < 0) return this->Fail("read");
+    if (m == 0) break;
+    const auto n = static_cast<std::string::size_type>(m);
+    result.append(buffer.data(), n);
   }
   return result;
 }
 
-int File::sync() {
-  this->Flush().IgnoreError();
-  if (::fsync(fd_) != 0) {
-    this->Fail("fdsync").IgnoreError();
-    return -1;
-  }
-  return status_.ok() ? 0 : -1;
-}
-
-absl::Status File::Flush() {
-  const auto pbase = this->pbase();
-  const auto pptr = this->pptr();
-  assert(pbase != nullptr);
-  assert(pptr != nullptr);
-  const auto count = pptr - pbase;
-  assert(count >= 0);
-  const auto result = this->Write(pbase, count);
-  const auto written = result.count;
-  assert(written >= 0);
-  assert(written <= count);
-  const auto remaining = count - written;
-  if (remaining == 0) {
-    this->setp(put_.data(), put_.data() + put_.size());
-  } else {
-    // If we only managed to do a partial write, we can’t reuse the array.
-    // Instead, we set pbase so that the next attempt to flush will start with
-    // the yet-unflushed data.
-    this->setp(pbase + written, put_.data() + put_.size());
-    // Set pptr to its previous value.
-    static_assert(std::tuple_size<decltype(put_)>::value <= UnsignedMax<int>(),
-                  "buffer too large");
-    this->pbump(static_cast<int>(remaining));
-    assert(this->pptr() == pptr);
-  }
-  if (result.error != 0) {
-    return ErrorStatus(std::error_code(result.error, std::system_category()),
-                       "write");
-  }
-  return remaining == 0 ? absl::OkStatus()
-                        : absl::DataLossError(
-                              absl::StrCat(remaining, " bytes not written"));
-}
-
-const absl::Status& File::Fail(absl::Status status) {
-  status_.Update(std::move(status));
-  return status_;
-}
-
-const absl::Status& File::Fail(const absl::string_view function) {
+absl::Status File::Fail(const absl::string_view function) const {
   const auto status = ErrnoStatus(function);
-  return this->Fail(absl::Status(
-      status.code(), absl::StrCat("file ", path_, ": ", status.message())));
+  return absl::Status(status.code(),
+                      absl::StrCat("file ", path_, ": ", status.message()));
 }
 
 StatusOr<TempFile> TempFile::Open(const std::string& directory,

@@ -75,7 +75,6 @@ cc_library(
     name = "int",
     hdrs = ["int.h"],
     copts = COPTS,
-    visibility = ["//emacs:__pkg__"],
 )
 
 cc_library(

@@ -19,12 +19,9 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
-#include <ios>
 #include <iostream>
-#include <iterator>
 #include <map>
 #include <memory>
-#include <ostream>
 #include <regex>
 #include <set>
 #include <string>
@@ -66,7 +63,6 @@
 #include "emacs/manifest.pb.h"
 #include "emacs/report.pb.h"
 #include "internal/file.h"
-#include "internal/int.h"
 #include "internal/random.h"
 #include "internal/status.h"
 #include "internal/str.h"
@@ -155,12 +151,12 @@ static StatusOr<std::string> GetSharedDir(const std::string& install) {
   return JoinPath(emacs, *dirs.begin());
 }
 
-static StatusOr<absl::optional<TempStream>> AddManifest(
+static StatusOr<absl::optional<TempFile>> AddManifest(
     const Mode mode, std::vector<std::string>& args, Random& random) {
-  using Type = absl::optional<TempStream>;
+  using Type = absl::optional<TempFile>;
   if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
   ASSIGN_OR_RETURN(auto stream,
-                   TempStream::Open(TempDir(), "manifest-*.json", random));
+                   TempFile::Open(TempDir(), "manifest-*.json", random));
   args.push_back(absl::StrCat("--manifest=", stream.path()));
   args.push_back("--");
   return absl::implicit_cast<Type>(std::move(stream));
@@ -185,7 +181,7 @@ static absl::Status WriteManifest(
     const absl::Span<const char* const> load_path,
     const absl::Span<const char* const> load_files,
     const absl::Span<const char* const> data_files,
-    const absl::Span<const std::string> output_files, std::ostream& file) {
+    const absl::Span<const std::string> output_files, File& file) {
   Manifest manifest;
   manifest.set_root(RUNFILES_ROOT);
   AddToManifest(load_path, *manifest.mutable_load_path(), Absolute::kForbid);
@@ -196,13 +192,7 @@ static absl::Status WriteManifest(
   std::string json;
   RETURN_IF_ERROR(ProtobufToAbslStatus(
       google::protobuf::util::MessageToJsonString(manifest, &json)));
-  if (json.size() > UnsignedMax<std::streamsize>()) {
-    return absl::OutOfRangeError("JSON object is too big");
-  }
-  file.write(json.data(), static_cast<std::streamsize>(json.size()));
-  RETURN_IF_ERROR(StreamStatus(file));
-  file.flush();
-  return StreamStatus(file);
+  return file.Write(json);
 }
 
 static double FloatSeconds(
@@ -211,11 +201,9 @@ static double FloatSeconds(
          static_cast<double>(duration.nanos()) / 1e9;
 }
 
-static absl::Status ConvertReport(std::istream& json_file,
+static absl::Status ConvertReport(File& json_file,
                                   const std::string& xml_file) {
-  using iterator = std::istreambuf_iterator<char>;
-  const std::string json(iterator(json_file), iterator{});
-  RETURN_IF_ERROR(StreamStatus(json_file));
+  ASSIGN_OR_RETURN(const auto json, json_file.Read());
   TestReport report;
   RETURN_IF_ERROR(ProtobufToAbslStatus(
       google::protobuf::util::JsonStringToMessage(json, &report),
@@ -399,11 +387,11 @@ StatusOr<int> Executor::RunTest(
   args.push_back(absl::StrCat("--load=", runner));
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->EnvVar("XML_OUTPUT_FILE");
-  absl::optional<TempStream> report_file;
+  absl::optional<TempFile> report_file;
   if (!xml_output_file.empty()) {
     const std::string temp_dir = this->EnvVar("TEST_TMPDIR");
     ASSIGN_OR_RETURN(report_file,
-                     TempStream::Open(temp_dir, "test-report-*.json", random_));
+                     TempFile::Open(temp_dir, "test-report-*.json", random_));
     args.push_back(absl::StrCat("--report=/:", report_file->path()));
   }
   for (const auto& file : srcs) {

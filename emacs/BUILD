@@ -44,7 +44,6 @@ cc_library(
         ":manifest_cc_proto",
         ":report_cc_proto",
         "//internal:file",
-        "//internal:int",
         "//internal:random",
         "//internal:status",
         "//internal:str",
