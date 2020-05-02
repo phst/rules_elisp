@@ -324,12 +324,14 @@ class Executor {
   Random random_;
 };
 
-StatusOr<Executor> Executor::Create(int argc, const char* const* argv) {
+StatusOr<Executor> Executor::Create(const int argc,
+                                    const char* const* const argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv[0]));
   return Executor(argc, argv, std::move(runfiles));
 }
 
-StatusOr<Executor> Executor::CreateForTest(int argc, const char* const* argv) {
+StatusOr<Executor> Executor::CreateForTest(const int argc,
+                                           const char* const* const argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
   return Executor(argc, argv, std::move(runfiles));
 }
@@ -340,7 +342,7 @@ Executor::Executor(const int argc, const char* const* argv,
       orig_env_(CopyEnv()),
       runfiles_(std::move(runfiles)) {}
 
-StatusOr<int> Executor::RunEmacs(const char* install_rel) {
+StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
   ASSIGN_OR_RETURN(const auto install, this->Runfile(install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
