@@ -41,7 +41,11 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Woverflow"
+#include "absl/algorithm/container.h"
 #include "absl/base/casts.h"
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -89,8 +93,8 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   return ptrs;
 }
 
-static std::map<std::string, std::string> CopyEnv() {
-  std::map<std::string, std::string> map;
+static absl::flat_hash_map<std::string, std::string> CopyEnv() {
+  absl::flat_hash_map<std::string, std::string> map;
   for (const char* const* pp = environ; *pp != nullptr; ++pp) {
     const char* p = *pp;
     const char* q = std::strchr(p, '=');
@@ -134,7 +138,7 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
 static StatusOr<std::string> GetSharedDir(const std::string& install) {
   const auto emacs = JoinPath(install, "share", "emacs");
   ASSIGN_OR_RETURN(const auto dir, Directory::Open(emacs));
-  std::set<std::string> dirs;
+  absl::flat_hash_set<std::string> dirs;
   for (const auto& entry : dir) {
     if (std::regex_match(entry, std::regex("[0-9][.0-9]*"))) {
       dirs.insert(entry);
@@ -310,16 +314,16 @@ class Executor {
 
   StatusOr<int> Run(const std::string& binary,
                     const std::vector<std::string>& args,
-                    const std::map<std::string, std::string>& env);
+                    const absl::flat_hash_map<std::string, std::string>& env);
 
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
 
   std::vector<std::string> BuildEnv(
-      const std::map<std::string, std::string>& other) const;
+      const absl::flat_hash_map<std::string, std::string>& other) const;
 
   std::vector<std::string> orig_args_;
-  std::map<std::string, std::string> orig_env_;
+  absl::flat_hash_map<std::string, std::string> orig_env_;
   std::unique_ptr<Runfiles> runfiles_;
   Random random_;
 };
@@ -347,7 +351,7 @@ StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
-  std::map<std::string, std::string> map;
+  absl::flat_hash_map<std::string, std::string> map;
   map.emplace("EMACSDATA", etc);
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
@@ -467,9 +471,9 @@ absl::Status Executor::AddLoadPath(
   return absl::OkStatus();
 }
 
-StatusOr<int> Executor::Run(const std::string& binary,
-                            const std::vector<std::string>& args,
-                            const std::map<std::string, std::string>& env) {
+StatusOr<int> Executor::Run(
+    const std::string& binary, const std::vector<std::string>& args,
+    const absl::flat_hash_map<std::string, std::string>& env) {
   auto final_args = this->BuildArgs(args);
   const auto argv = Pointers(final_args);
   auto final_env = this->BuildEnv(env);
@@ -496,15 +500,17 @@ std::vector<std::string> Executor::BuildArgs(
 }
 
 std::vector<std::string> Executor::BuildEnv(
-    const std::map<std::string, std::string>& other) const {
+    const absl::flat_hash_map<std::string, std::string>& other) const {
   const auto& pairs = runfiles_->EnvVars();
-  std::map<std::string, std::string> map(pairs.begin(), pairs.end());
+  absl::flat_hash_map<std::string, std::string> map(pairs.begin(), pairs.end());
   map.insert(other.begin(), other.end());
   map.insert(orig_env_.begin(), orig_env_.end());
   std::vector<std::string> vec;
   for (const auto& p : map) {
     vec.push_back(p.first + '=' + p.second);
   }
+  // Sort entries for hermeticity.
+  absl::c_sort(vec);
   return vec;
 }
 
