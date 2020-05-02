@@ -199,7 +199,7 @@ static absl::Status WriteManifest(
   return StreamStatus(file);
 }
 
-static double float_seconds(
+static double FloatSeconds(
     const google::protobuf::Duration& duration) noexcept {
   return static_cast<double>(duration.seconds()) +
          static_cast<double>(duration.nanos()) / 1e9;
@@ -240,7 +240,7 @@ static absl::Status ConvertReport(std::istream& json_file,
   const auto failures_str = std::to_string(failures);
   const auto errors_str = std::to_string(errors);
   const auto start_time_str = TimeUtil::ToString(report.start_time());
-  const auto elapsed_str = std::to_string(float_seconds(report.elapsed()));
+  const auto elapsed_str = std::to_string(FloatSeconds(report.elapsed()));
   printer.OpenElement("testsuites");
   printer.PushAttribute("tests", Pointer(total_str));
   printer.PushAttribute("time", Pointer(elapsed_str));
@@ -255,7 +255,7 @@ static absl::Status ConvertReport(std::istream& json_file,
   for (const auto& test : report.tests()) {
     printer.OpenElement("testcase");
     printer.PushAttribute("name", Pointer(test.name()));
-    const auto elapsed = absl::StrCat(float_seconds(test.elapsed()));
+    const auto elapsed = absl::StrCat(FloatSeconds(test.elapsed()));
     printer.PushAttribute("time", Pointer(elapsed));
     if (!test.expected()) {
       printer.OpenElement(test.status() == FAILED ? "failure" : "error");
