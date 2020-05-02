@@ -49,6 +49,7 @@
 
 #include "internal/int.h"
 #include "internal/random.h"
+#include "internal/str.h"
 
 namespace phst_rules_elisp {
 
@@ -137,7 +138,7 @@ File::~File() noexcept {
 absl::Status File::DoOpen(std::string path, const FileMode mode) {
   int fd = -1;
   while (true) {
-    fd = ::open(path.c_str(), static_cast<int>(mode) | O_CLOEXEC,
+    fd = ::open(Pointer(path), static_cast<int>(mode) | O_CLOEXEC,
                 S_IRUSR | S_IWUSR);
     if (fd >= 0 || errno != EINTR) break;
   }
@@ -385,12 +386,12 @@ StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
 
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
   struct stat info;
-  return ::lstat(name.c_str(), &info) == 0;
+  return ::lstat(Pointer(name), &info) == 0;
 }
 
 absl::Status RemoveFile(const std::string& name) noexcept {
-  return ::unlink(name.c_str()) == 0 ? absl::OkStatus()
-                                     : ErrnoStatus("unlink", name);
+  return ::unlink(Pointer(name)) == 0 ? absl::OkStatus()
+                                      : ErrnoStatus("unlink", name);
 }
 
 ABSL_MUST_USE_RESULT std::string TempDir() {
@@ -403,7 +404,7 @@ ABSL_MUST_USE_RESULT std::string TempDir() {
 }
 
 StatusOr<Directory> Directory::Open(const std::string& name) {
-  const auto dir = ::opendir(name.c_str());
+  const auto dir = ::opendir(Pointer(name));
   if (dir == nullptr) return ErrnoStatus("opendir", name);
   return Directory(dir);
 }

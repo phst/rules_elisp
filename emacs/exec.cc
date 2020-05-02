@@ -65,6 +65,7 @@
 #include "internal/int.h"
 #include "internal/random.h"
 #include "internal/status.h"
+#include "internal/str.h"
 
 namespace phst_rules_elisp {
 
@@ -241,25 +242,25 @@ static absl::Status ConvertReport(std::istream& json_file,
   const auto start_time_str = TimeUtil::ToString(report.start_time());
   const auto elapsed_str = std::to_string(float_seconds(report.elapsed()));
   printer.OpenElement("testsuites");
-  printer.PushAttribute("tests", total_str.c_str());
-  printer.PushAttribute("time", elapsed_str.c_str());
-  printer.PushAttribute("failures", failures_str.c_str());
+  printer.PushAttribute("tests", Pointer(total_str));
+  printer.PushAttribute("time", Pointer(elapsed_str));
+  printer.PushAttribute("failures", Pointer(failures_str));
   printer.OpenElement("testsuite");
   printer.PushAttribute("id", "0");
-  printer.PushAttribute("tests", total_str.c_str());
-  printer.PushAttribute("time", elapsed_str.c_str());
-  printer.PushAttribute("timestamp", start_time_str.c_str());
-  printer.PushAttribute("failures", failures_str.c_str());
-  printer.PushAttribute("errors", errors_str.c_str());
+  printer.PushAttribute("tests", Pointer(total_str));
+  printer.PushAttribute("time", Pointer(elapsed_str));
+  printer.PushAttribute("timestamp", Pointer(start_time_str));
+  printer.PushAttribute("failures", Pointer(failures_str));
+  printer.PushAttribute("errors", Pointer(errors_str));
   for (const auto& test : report.tests()) {
     printer.OpenElement("testcase");
-    printer.PushAttribute("name", test.name().c_str());
-    printer.PushAttribute(
-        "time", std::to_string(float_seconds(test.elapsed())).c_str());
+    printer.PushAttribute("name", Pointer(test.name()));
+    const auto elapsed = absl::StrCat(float_seconds(test.elapsed()));
+    printer.PushAttribute("time", Pointer(elapsed));
     if (!test.expected()) {
       printer.OpenElement(test.status() == FAILED ? "failure" : "error");
       printer.PushAttribute("type", test.status());
-      printer.PushText(test.message().c_str());
+      printer.PushText(Pointer(test.message()));
       printer.CloseElement();
     }
     printer.CloseElement();
@@ -472,7 +473,7 @@ StatusOr<int> Executor::Run(const std::string& binary,
   auto final_env = this->BuildEnv(env);
   const auto envp = Pointers(final_env);
   int pid;
-  const int error = posix_spawn(&pid, binary.c_str(), nullptr, nullptr,
+  const int error = posix_spawn(&pid, Pointer(binary), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),

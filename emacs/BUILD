@@ -47,6 +47,7 @@ cc_library(
         "//internal:int",
         "//internal:random",
         "//internal:status",
+        "//internal:str",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:core_headers",

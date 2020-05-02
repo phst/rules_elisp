@@ -24,6 +24,7 @@ cc_library(
         ":int",
         ":random",
         ":status",
+        ":str",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/memory",
@@ -73,6 +74,13 @@ cc_test(
 cc_library(
     name = "int",
     hdrs = ["int.h"],
+    copts = COPTS,
+    visibility = ["//emacs:__pkg__"],
+)
+
+cc_library(
+    name = "str",
+    hdrs = ["str.h"],
     copts = COPTS,
     visibility = ["//emacs:__pkg__"],
 )
