@@ -18,12 +18,12 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 #include <ios>
 #include <iostream>
 #include <iterator>
 #include <map>
 #include <memory>
-#include <numeric>
 #include <ostream>
 #include <regex>
 #include <set>
@@ -41,13 +41,15 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/casts.h"
-#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "absl/utility/utility.h"
 #include "google/protobuf/duration.pb.h"
 #include "google/protobuf/repeated_field.h"
+#include "google/protobuf/stubs/status.h"
+#include "google/protobuf/stubs/stringpiece.h"
 #include "google/protobuf/util/json_util.h"
 #include "google/protobuf/util/time_util.h"
 #include "tinyxml2.h"
