@@ -509,7 +509,7 @@ std::vector<std::string> Executor::BuildEnv(
 
 int RunEmacs(const char* const install_rel, const int argc,
              const char* const* const argv) {
-  auto status_or_executor = phst_rules_elisp::Executor::Create(argc, argv);
+  auto status_or_executor = Executor::Create(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
@@ -528,7 +528,7 @@ int RunBinary(const char* const wrapper, const Mode mode,
               const std::initializer_list<const char*> load_files,
               const std::initializer_list<const char*> data_files,
               const int argc, const char* const* const argv) {
-  auto status_or_executor = phst_rules_elisp::Executor::Create(argc, argv);
+  auto status_or_executor = Executor::Create(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
@@ -548,8 +548,7 @@ int RunTest(const char* const wrapper, const Mode mode,
             const std::initializer_list<const char*> srcs,
             const std::initializer_list<const char*> data_files, const int argc,
             const char* const* const argv) {
-  auto status_or_executor =
-      phst_rules_elisp::Executor::CreateForTest(argc, argv);
+  auto status_or_executor = Executor::CreateForTest(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
