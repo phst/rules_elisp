@@ -335,9 +335,9 @@ StatusOr<TempFile> TempFile::Open(const std::string& directory,
       return result;
     }
   }
-  return absl::UnavailableError("can’t create temporary file in directory " +
-                                directory + " with template " +
-                                std::string(tmpl));
+  return absl::UnavailableError(
+      absl::StrCat("can’t create temporary file in directory ", directory,
+                   " with template ", tmpl));
 }
 
 TempFile::TempFile() {}

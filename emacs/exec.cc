@@ -121,7 +121,8 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv0, &error));
   if (runfiles == nullptr) {
-    return absl::FailedPreconditionError("couldn’t create runfiles: " + error);
+    return absl::FailedPreconditionError(
+        absl::StrCat("couldn’t create runfiles: ", error));
   }
   return runfiles;
 }
@@ -148,8 +149,8 @@ static StatusOr<std::string> GetSharedDir(const std::string& install) {
   if (dirs.empty()) return absl::NotFoundError("no shared directory found");
   if (dirs.size() != 1) {
     return absl::FailedPreconditionError(
-        "expected exactly one shared directory, got [" +
-        absl::StrJoin(dirs, ", ") + ']');
+        absl::StrCat("expected exactly one shared directory, got [",
+                     absl::StrJoin(dirs, ", "), "]"));
   }
   return JoinPath(emacs, *dirs.begin());
 }
@@ -160,7 +161,7 @@ static StatusOr<absl::optional<TempStream>> AddManifest(
   if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
   ASSIGN_OR_RETURN(auto stream,
                    TempStream::Open(TempDir(), "manifest-*.json", random));
-  args.push_back("--manifest=" + stream.path());
+  args.push_back(absl::StrCat("--manifest=", stream.path()));
   args.push_back("--");
   return absl::implicit_cast<Type>(std::move(stream));
 }
@@ -218,7 +219,7 @@ static absl::Status ConvertReport(std::istream& json_file,
   TestReport report;
   RETURN_IF_ERROR(ProtobufToAbslStatus(
       google::protobuf::util::JsonStringToMessage(json, &report),
-      "invalid JSON report: " + json));
+      absl::StrCat("invalid JSON report: ", json)));
   ASSIGN_OR_RETURN(auto stream,
                    File::Open(xml_file, FileMode::kWrite | FileMode::kCreate |
                                             FileMode::kExclusive));
@@ -241,11 +242,11 @@ static absl::Status ConvertReport(std::istream& json_file,
         return !test.expected() && test.status() == FAILED;
       });
   const auto errors = unexpected - failures;
-  const auto total_str = std::to_string(total);
-  const auto failures_str = std::to_string(failures);
-  const auto errors_str = std::to_string(errors);
+  const auto total_str = absl::StrCat(total);
+  const auto failures_str = absl::StrCat(failures);
+  const auto errors_str = absl::StrCat(errors);
   const auto start_time_str = TimeUtil::ToString(report.start_time());
-  const auto elapsed_str = std::to_string(FloatSeconds(report.elapsed()));
+  const auto elapsed_str = absl::StrCat(FloatSeconds(report.elapsed()));
   printer.OpenElement("testsuites");
   printer.PushAttribute("tests", Pointer(total_str));
   printer.PushAttribute("time", Pointer(elapsed_str));
@@ -395,7 +396,7 @@ StatusOr<int> Executor::RunTest(
   RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
   ASSIGN_OR_RETURN(const auto runner,
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
-  args.push_back("--load=" + runner);
+  args.push_back(absl::StrCat("--load=", runner));
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   const auto xml_output_file = this->EnvVar("XML_OUTPUT_FILE");
   absl::optional<TempStream> report_file;
@@ -403,7 +404,7 @@ StatusOr<int> Executor::RunTest(
     const std::string temp_dir = this->EnvVar("TEST_TMPDIR");
     ASSIGN_OR_RETURN(report_file,
                      TempStream::Open(temp_dir, "test-report-*.json", random_));
-    args.push_back("--report=/:" + report_file->path());
+    args.push_back(absl::StrCat("--report=/:", report_file->path()));
   }
   for (const auto& file : srcs) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
@@ -435,7 +436,9 @@ StatusOr<int> Executor::RunTest(
 
 StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
-  if (str.empty()) return absl::NotFoundError("runfile not found: " + rel);
+  if (str.empty()) {
+    return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
+  }
   // Note: Don’t canonicalize the filename here, because the Python stub looks
   // for the runfiles directory in the original filename.
   return MakeAbsolute(str);
@@ -455,11 +458,11 @@ absl::Status Executor::AddLoadPath(
   for (const auto& dir : load_path) {
     const auto status_or_dir = this->Runfile(dir);
     if (status_or_dir.ok()) {
-      args.push_back("--directory=" + status_or_dir.value());
+      args.push_back(absl::StrCat("--directory=", status_or_dir.value()));
     } else if (absl::IsNotFound(status_or_dir.status())) {
       if (!absl::exchange(runfile_handler_installed, true)) {
         ASSIGN_OR_RETURN(const auto file, this->Runfile(runfiles_elc));
-        args.push_back("--load=" + file);
+        args.push_back(absl::StrCat("--load=", file));
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
       args.push_back(absl::StrCat("--directory=/bazel-runfile:", dir));
@@ -505,7 +508,7 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
   map.insert(orig_env_.begin(), orig_env_.end());
   std::vector<std::string> vec;
   for (const auto& p : map) {
-    vec.push_back(p.first + '=' + p.second);
+    vec.push_back(absl::StrCat(p.first, "=", p.second));
   }
   // Sort entries for hermeticity.
   absl::c_sort(vec);
