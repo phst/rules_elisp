@@ -75,6 +75,7 @@ namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
 using google::protobuf::util::TimeUtil;
+using Environment = absl::flat_hash_map<std::string, std::string>;
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
@@ -93,8 +94,8 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   return ptrs;
 }
 
-static absl::flat_hash_map<std::string, std::string> CopyEnv() {
-  absl::flat_hash_map<std::string, std::string> map;
+static Environment CopyEnv() {
+  Environment map;
   for (const char* const* pp = environ; *pp != nullptr; ++pp) {
     const char* p = *pp;
     const char* q = std::strchr(p, '=');
@@ -314,16 +315,15 @@ class Executor {
 
   StatusOr<int> Run(const std::string& binary,
                     const std::vector<std::string>& args,
-                    const absl::flat_hash_map<std::string, std::string>& env);
+                    const Environment& env);
 
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
 
-  std::vector<std::string> BuildEnv(
-      const absl::flat_hash_map<std::string, std::string>& other) const;
+  std::vector<std::string> BuildEnv(const Environment& other) const;
 
   std::vector<std::string> orig_args_;
-  absl::flat_hash_map<std::string, std::string> orig_env_ = CopyEnv();
+  Environment orig_env_ = CopyEnv();
   std::unique_ptr<Runfiles> runfiles_;
   Random random_;
 };
@@ -350,7 +350,7 @@ StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
-  absl::flat_hash_map<std::string, std::string> map;
+  Environment map;
   map.emplace("EMACSDATA", etc);
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
@@ -470,9 +470,9 @@ absl::Status Executor::AddLoadPath(
   return absl::OkStatus();
 }
 
-StatusOr<int> Executor::Run(
-    const std::string& binary, const std::vector<std::string>& args,
-    const absl::flat_hash_map<std::string, std::string>& env) {
+StatusOr<int> Executor::Run(const std::string& binary,
+                            const std::vector<std::string>& args,
+                            const Environment& env) {
   auto final_args = this->BuildArgs(args);
   const auto argv = Pointers(final_args);
   auto final_env = this->BuildEnv(env);
@@ -498,10 +498,9 @@ std::vector<std::string> Executor::BuildArgs(
   return vec;
 }
 
-std::vector<std::string> Executor::BuildEnv(
-    const absl::flat_hash_map<std::string, std::string>& other) const {
+std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
   const auto& pairs = runfiles_->EnvVars();
-  absl::flat_hash_map<std::string, std::string> map(pairs.begin(), pairs.end());
+  Environment map(pairs.begin(), pairs.end());
   map.insert(other.begin(), other.end());
   map.insert(orig_env_.begin(), orig_env_.end());
   std::vector<std::string> vec;
