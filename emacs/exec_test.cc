@@ -24,10 +24,9 @@ using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
   const char *const argv[2] = {"unused", nullptr};
-  const char *const envp[1] = {nullptr};
   EXPECT_THAT(RunBinary("phst_rules_elisp/emacs/wrap/wrap", Mode::kWrap,
                         {"phst_rules_elisp"}, {},
-                        {"phst_rules_elisp/emacs/exec.h"}, 1, argv, envp),
+                        {"phst_rules_elisp/emacs/exec.h"}, 1, argv),
               Eq(0));
 }
 

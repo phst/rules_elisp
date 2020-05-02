@@ -35,6 +35,7 @@
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -87,9 +88,9 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   return ptrs;
 }
 
-static std::map<std::string, std::string> CopyEnv(const char* const* envp) {
+static std::map<std::string, std::string> CopyEnv() {
   std::map<std::string, std::string> map;
-  for (const char* const* pp = envp; *pp != nullptr; ++pp) {
+  for (const char* const* pp = environ; *pp != nullptr; ++pp) {
     const char* p = *pp;
     const char* q = std::strchr(p, '=');
     if (q != nullptr) {
@@ -276,11 +277,8 @@ namespace {
 
 class Executor {
  public:
-  static StatusOr<Executor> Create(int argc, const char* const* argv,
-                                   const char* const* envp);
-
-  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv,
-                                          const char* const* envp);
+  static StatusOr<Executor> Create(int argc, const char* const* argv);
+  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
@@ -300,7 +298,7 @@ class Executor {
                         absl::Span<const char* const> data_files);
 
  private:
-  explicit Executor(int argc, const char* const* argv, const char* const* envp,
+  explicit Executor(int argc, const char* const* argv,
                     std::unique_ptr<Runfiles> runfiles);
 
   StatusOr<std::string> Runfile(const std::string& rel) const;
@@ -325,22 +323,20 @@ class Executor {
   Random random_;
 };
 
-StatusOr<Executor> Executor::Create(int argc, const char* const* argv,
-                                    const char* const* envp) {
+StatusOr<Executor> Executor::Create(int argc, const char* const* argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv[0]));
-  return Executor(argc, argv, envp, std::move(runfiles));
+  return Executor(argc, argv, std::move(runfiles));
 }
 
-StatusOr<Executor> Executor::CreateForTest(int argc, const char* const* argv,
-                                           const char* const* envp) {
+StatusOr<Executor> Executor::CreateForTest(int argc, const char* const* argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  return Executor(argc, argv, envp, std::move(runfiles));
+  return Executor(argc, argv, std::move(runfiles));
 }
 
 Executor::Executor(const int argc, const char* const* argv,
-                   const char* const* envp, std::unique_ptr<Runfiles> runfiles)
+                   std::unique_ptr<Runfiles> runfiles)
     : orig_args_(argv, argv + argc),
-      orig_env_(CopyEnv(envp)),
+      orig_env_(CopyEnv()),
       runfiles_(std::move(runfiles)) {}
 
 StatusOr<int> Executor::RunEmacs(const char* install_rel) {
@@ -512,9 +508,8 @@ std::vector<std::string> Executor::BuildEnv(
 }  // namespace
 
 int RunEmacs(const char* const install_rel, const int argc,
-             const char* const* const argv, const char* const* const envp) {
-  auto status_or_executor =
-      phst_rules_elisp::Executor::Create(argc, argv, envp);
+             const char* const* const argv) {
+  auto status_or_executor = phst_rules_elisp::Executor::Create(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
@@ -532,10 +527,8 @@ int RunBinary(const char* const wrapper, const Mode mode,
               const std::initializer_list<const char*> load_path,
               const std::initializer_list<const char*> load_files,
               const std::initializer_list<const char*> data_files,
-              const int argc, const char* const* const argv,
-              const char* const* const envp) {
-  auto status_or_executor =
-      phst_rules_elisp::Executor::Create(argc, argv, envp);
+              const int argc, const char* const* const argv) {
+  auto status_or_executor = phst_rules_elisp::Executor::Create(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
@@ -554,9 +547,9 @@ int RunTest(const char* const wrapper, const Mode mode,
             const std::initializer_list<const char*> load_path,
             const std::initializer_list<const char*> srcs,
             const std::initializer_list<const char*> data_files, const int argc,
-            const char* const* const argv, const char* const* const envp) {
+            const char* const* const argv) {
   auto status_or_executor =
-      phst_rules_elisp::Executor::CreateForTest(argc, argv, envp);
+      phst_rules_elisp::Executor::CreateForTest(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;

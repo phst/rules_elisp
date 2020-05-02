@@ -24,22 +24,20 @@ namespace phst_rules_elisp {
 enum class Mode { kDirect, kWrap };
 
 ABSL_MUST_USE_RESULT int RunEmacs(const char* install_rel, int argc,
-                                  const char* const* argv,
-                                  const char* const* envp);
+                                  const char* const* argv);
 
 ABSL_MUST_USE_RESULT int RunBinary(
     const char* wrapper, Mode mode,
     std::initializer_list<const char*> load_path,
     std::initializer_list<const char*> load_files,
     std::initializer_list<const char*> data_files, int argc,
-    const char* const* argv, const char* const* envp);
+    const char* const* argv);
 
 ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
                                  std::initializer_list<const char*> load_path,
                                  std::initializer_list<const char*> srcs,
                                  std::initializer_list<const char*> data_files,
-                                 int argc, const char* const* argv,
-                                 const char* const* envp);
+                                 int argc, const char* const* argv);
 
 }  // namespace phst_rules_elisp
 

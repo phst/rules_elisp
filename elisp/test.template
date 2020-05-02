@@ -14,14 +14,14 @@
 
 #include "emacs/exec.h"
 
-int main(int argc, char** argv, char** envp) {
+int main(int argc, char** argv) {
   return phst_rules_elisp::RunTest(
       R"**([[emacs]])**",
       phst_rules_elisp::Mode::[[mode]],
       {[[directory]]},
       {[[load]]},
       {[[data]]},
-      argc, argv, envp);
+      argc, argv);
 }
 
 // Local Variables:
