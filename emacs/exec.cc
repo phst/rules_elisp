@@ -323,7 +323,7 @@ class Executor {
       const absl::flat_hash_map<std::string, std::string>& other) const;
 
   std::vector<std::string> orig_args_;
-  absl::flat_hash_map<std::string, std::string> orig_env_;
+  absl::flat_hash_map<std::string, std::string> orig_env_ = CopyEnv();
   std::unique_ptr<Runfiles> runfiles_;
   Random random_;
 };
@@ -343,7 +343,6 @@ StatusOr<Executor> Executor::CreateForTest(const int argc,
 Executor::Executor(const int argc, const char* const* argv,
                    std::unique_ptr<Runfiles> runfiles)
     : orig_args_(argv, argv + argc),
-      orig_env_(CopyEnv()),
       runfiles_(std::move(runfiles)) {}
 
 StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
