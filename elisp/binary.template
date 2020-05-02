@@ -12,30 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cstdlib>
-#include <iostream>
-
 #include "emacs/exec.h"
 
 int main(int argc, char** argv, char** envp) {
-  auto status_or_executor =
-      phst_rules_elisp::Executor::Create(argc, argv, envp);
-  if (!status_or_executor.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
-    return EXIT_FAILURE;
-  }
-  auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunBinary(
-    R"**([[emacs]])**",
-    phst_rules_elisp::Mode::[[mode]],
-    {[[directory]]},
-    {[[load]]},
-    {[[data]]});
-  if (!status_or_code.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
-    return EXIT_FAILURE;
-  }
-  return status_or_code.value();
+  return phst_rules_elisp::RunBinary(
+      R"**([[emacs]])**",
+      phst_rules_elisp::Mode::[[mode]],
+      {[[directory]]},
+      {[[load]]},
+      {[[data]]},
+      argc, argv, envp);
 }
 
 // Local Variables:

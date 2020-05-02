@@ -15,77 +15,32 @@
 #ifndef PHST_RULES_ELISP_EMACS_EXEC_H
 #define PHST_RULES_ELISP_EMACS_EXEC_H
 
-#include <map>
-#include <memory>
-#include <string>
 #include <vector>
+#include <string>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#include "absl/status/status.h"
-#include "tools/cpp/runfiles/runfiles.h"
-#pragma GCC diagnostic pop
-
-#include "internal/random.h"
-#include "internal/status.h"
+#include "absl/base/attributes.h"
 
 namespace phst_rules_elisp {
 
 enum class Mode { kDirect, kWrap };
 
-class Executor {
- public:
-  static StatusOr<Executor> Create(int argc, const char* const* argv,
+ABSL_MUST_USE_RESULT int RunEmacs(const char* install_rel, int argc,
+                                  const char* const* argv,
+                                  const char* const* envp);
+
+ABSL_MUST_USE_RESULT int RunBinary(const char* wrapper, Mode mode,
+                                   const std::vector<std::string>& load_path,
+                                   const std::vector<std::string>& load_files,
+                                   const std::vector<std::string>& data_files,
+                                   int argc, const char* const* argv,
                                    const char* const* envp);
 
-  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv,
-                                          const char* const* envp);
-
-  Executor(const Executor&) = delete;
-  Executor(Executor&&) = default;
-  Executor& operator=(const Executor&) = delete;
-  Executor& operator=(Executor&&) = default;
-
-  StatusOr<int> RunEmacs(const char* install_rel);
-
-  StatusOr<int> RunBinary(const char* wrapper, Mode mode,
-                          const std::vector<std::string>& load_path,
-                          const std::vector<std::string>& load_files,
-                          const std::vector<std::string>& data_files);
-
-  StatusOr<int> RunTest(const char* wrapper, Mode mode,
-                        const std::vector<std::string>& load_path,
-                        const std::vector<std::string>& srcs,
-                        const std::vector<std::string>& data_files);
-
- private:
-  explicit Executor(
-      int argc, const char* const* argv, const char* const* envp,
-      std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles);
-
-  StatusOr<std::string> Runfile(const std::string& rel) const;
-  std::string EnvVar(const std::string& name) const noexcept;
-
-  absl::Status AddLoadPath(std::vector<std::string>& args,
-                           const std::vector<std::string>& load_path) const;
-
-  StatusOr<int> Run(const std::string& binary,
-                    const std::vector<std::string>& args,
-                    const std::map<std::string, std::string>& env);
-
-  std::vector<std::string> BuildArgs(
-      const std::vector<std::string>& prefix) const;
-
-  std::vector<std::string> BuildEnv(
-      const std::map<std::string, std::string>& other) const;
-
-  std::vector<std::string> orig_args_;
-  std::map<std::string, std::string> orig_env_;
-  std::unique_ptr<bazel::tools::cpp::runfiles::Runfiles> runfiles_;
-  Random random_;
-};
+ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
+                                 const std::vector<std::string>& load_path,
+                                 const std::vector<std::string>& srcs,
+                                 const std::vector<std::string>& data_files,
+                                 int argc, const char* const* argv,
+                                 const char* const* envp);
 
 }  // namespace phst_rules_elisp
 

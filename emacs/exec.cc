@@ -268,6 +268,59 @@ static absl::Status ConvertReport(std::istream& json_file,
   return stream.Close();
 }
 
+namespace {
+
+class Executor {
+ public:
+  static StatusOr<Executor> Create(int argc, const char* const* argv,
+                                   const char* const* envp);
+
+  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv,
+                                          const char* const* envp);
+
+  Executor(const Executor&) = delete;
+  Executor(Executor&&) = default;
+  Executor& operator=(const Executor&) = delete;
+  Executor& operator=(Executor&&) = default;
+
+  StatusOr<int> RunEmacs(const char* install_rel);
+
+  StatusOr<int> RunBinary(const char* wrapper, Mode mode,
+                          const std::vector<std::string>& load_path,
+                          const std::vector<std::string>& load_files,
+                          const std::vector<std::string>& data_files);
+
+  StatusOr<int> RunTest(const char* wrapper, Mode mode,
+                        const std::vector<std::string>& load_path,
+                        const std::vector<std::string>& srcs,
+                        const std::vector<std::string>& data_files);
+
+ private:
+  explicit Executor(int argc, const char* const* argv, const char* const* envp,
+                    std::unique_ptr<Runfiles> runfiles);
+
+  StatusOr<std::string> Runfile(const std::string& rel) const;
+  std::string EnvVar(const std::string& name) const noexcept;
+
+  absl::Status AddLoadPath(std::vector<std::string>& args,
+                           const std::vector<std::string>& load_path) const;
+
+  StatusOr<int> Run(const std::string& binary,
+                    const std::vector<std::string>& args,
+                    const std::map<std::string, std::string>& env);
+
+  std::vector<std::string> BuildArgs(
+      const std::vector<std::string>& prefix) const;
+
+  std::vector<std::string> BuildEnv(
+      const std::map<std::string, std::string>& other) const;
+
+  std::vector<std::string> orig_args_;
+  std::map<std::string, std::string> orig_env_;
+  std::unique_ptr<Runfiles> runfiles_;
+  Random random_;
+};
+
 StatusOr<Executor> Executor::Create(int argc, const char* const* argv,
                                     const char* const* envp) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv[0]));
@@ -448,6 +501,67 @@ std::vector<std::string> Executor::BuildEnv(
     vec.push_back(p.first + '=' + p.second);
   }
   return vec;
+}
+
+}  // namespace
+
+int RunEmacs(const char* const install_rel, const int argc,
+             const char* const* const argv, const char* const* const envp) {
+  auto status_or_executor =
+      phst_rules_elisp::Executor::Create(argc, argv, envp);
+  if (!status_or_executor.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  auto& executor = status_or_executor.value();
+  const auto status_or_code = executor.RunEmacs(install_rel);
+  if (!status_or_code.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  return status_or_code.value();
+}
+
+int RunBinary(const char* const wrapper, const Mode mode,
+              const std::vector<std::string>& load_path,
+              const std::vector<std::string>& load_files,
+              const std::vector<std::string>& data_files, const int argc,
+              const char* const* const argv, const char* const* const envp) {
+  auto status_or_executor =
+      phst_rules_elisp::Executor::Create(argc, argv, envp);
+  if (!status_or_executor.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  auto& executor = status_or_executor.value();
+  const auto status_or_code =
+      executor.RunBinary(wrapper, mode, load_path, load_files, data_files);
+  if (!status_or_code.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  return status_or_code.value();
+}
+
+int RunTest(const char* const wrapper, const Mode mode,
+            const std::vector<std::string>& load_path,
+            const std::vector<std::string>& srcs,
+            const std::vector<std::string>& data_files, const int argc,
+            const char* const* const argv, const char* const* const envp) {
+  auto status_or_executor =
+      phst_rules_elisp::Executor::CreateForTest(argc, argv, envp);
+  if (!status_or_executor.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  auto& executor = status_or_executor.value();
+  const auto status_or_code =
+      executor.RunTest(wrapper, mode, load_path, srcs, data_files);
+  if (!status_or_code.ok()) {
+    std::clog << status_or_executor.status() << std::endl;
+    return EXIT_FAILURE;
+  }
+  return status_or_code.value();
 }
 
 }  // namespace phst_rules_elisp
