@@ -42,9 +42,11 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/casts.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
+#include "absl/types/span.h"
 #include "absl/utility/utility.h"
 #include "google/protobuf/duration.pb.h"
 #include "google/protobuf/repeated_field.h"
@@ -158,24 +160,24 @@ static StatusOr<absl::optional<TempStream>> AddManifest(
 
 enum class Absolute { kAllow, kForbid };
 
+template <typename T>
 static void AddToManifest(
-    const std::vector<std::string>& files,
-    google::protobuf::RepeatedPtrField<std::string>& field,
+    const T& files, google::protobuf::RepeatedPtrField<std::string>& field,
     const Absolute absolute) {
-  for (const auto& file : files) {
+  for (const absl::string_view file : files) {
     if (absolute == Absolute::kForbid && IsAbsolute(file)) {
       std::clog << "filename " << file << " is absolute" << std::endl;
       std::abort();
     }
-    *field.Add() = file;
+    *field.Add() = std::string(file);
   }
 }
 
-static absl::Status WriteManifest(const std::vector<std::string>& load_path,
-                                  const std::vector<std::string>& load_files,
-                                  const std::vector<std::string>& data_files,
-                                  const std::vector<std::string>& output_files,
-                                  std::ostream& file) {
+static absl::Status WriteManifest(
+    const absl::Span<const char* const> load_path,
+    const absl::Span<const char* const> load_files,
+    const absl::Span<const char* const> data_files,
+    const absl::Span<const std::string> output_files, std::ostream& file) {
   Manifest manifest;
   manifest.set_root(RUNFILES_ROOT);
   AddToManifest(load_path, *manifest.mutable_load_path(), Absolute::kForbid);
@@ -288,14 +290,14 @@ class Executor {
   StatusOr<int> RunEmacs(const char* install_rel);
 
   StatusOr<int> RunBinary(const char* wrapper, Mode mode,
-                          const std::vector<std::string>& load_path,
-                          const std::vector<std::string>& load_files,
-                          const std::vector<std::string>& data_files);
+                          absl::Span<const char* const> load_path,
+                          absl::Span<const char* const> load_files,
+                          absl::Span<const char* const> data_files);
 
   StatusOr<int> RunTest(const char* wrapper, Mode mode,
-                        const std::vector<std::string>& load_path,
-                        const std::vector<std::string>& srcs,
-                        const std::vector<std::string>& data_files);
+                        absl::Span<const char* const> load_path,
+                        absl::Span<const char* const> srcs,
+                        absl::Span<const char* const> data_files);
 
  private:
   explicit Executor(int argc, const char* const* argv, const char* const* envp,
@@ -305,7 +307,7 @@ class Executor {
   std::string EnvVar(const std::string& name) const noexcept;
 
   absl::Status AddLoadPath(std::vector<std::string>& args,
-                           const std::vector<std::string>& load_path) const;
+                           absl::Span<const char* const> load_path) const;
 
   StatusOr<int> Run(const std::string& binary,
                     const std::vector<std::string>& args,
@@ -354,10 +356,11 @@ StatusOr<int> Executor::RunEmacs(const char* install_rel) {
   return this->Run(emacs, {}, map);
 }
 
-StatusOr<int> Executor::RunBinary(const char* const wrapper, const Mode mode,
-                                  const std::vector<std::string>& load_path,
-                                  const std::vector<std::string>& load_files,
-                                  const std::vector<std::string>& data_files) {
+StatusOr<int> Executor::RunBinary(
+    const char* const wrapper, const Mode mode,
+    const absl::Span<const char* const> load_path,
+    const absl::Span<const char* const> load_files,
+    const absl::Span<const char* const> data_files) {
   ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
   std::vector<std::string> args;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
@@ -366,7 +369,7 @@ StatusOr<int> Executor::RunBinary(const char* const wrapper, const Mode mode,
   RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
   for (const auto& file : load_files) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
-    args.push_back("--load=" + file);
+    args.push_back(absl::StrCat("--load=", file));
   }
   if (manifest) {
     RETURN_IF_ERROR(
@@ -377,10 +380,11 @@ StatusOr<int> Executor::RunBinary(const char* const wrapper, const Mode mode,
   return code;
 }
 
-StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
-                                const std::vector<std::string>& load_path,
-                                const std::vector<std::string>& srcs,
-                                const std::vector<std::string>& data_files) {
+StatusOr<int> Executor::RunTest(
+    const char* const wrapper, const Mode mode,
+    const absl::Span<const char* const> load_path,
+    const absl::Span<const char* const> srcs,
+    const absl::Span<const char* const> data_files) {
   ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
   std::vector<std::string> args;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
@@ -442,7 +446,7 @@ std::string Executor::EnvVar(const std::string& name) const noexcept {
 
 absl::Status Executor::AddLoadPath(
     std::vector<std::string>& args,
-    const std::vector<std::string>& load_path) const {
+    const absl::Span<const char* const> load_path) const {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
@@ -456,7 +460,7 @@ absl::Status Executor::AddLoadPath(
         args.push_back("--load=" + file);
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
-      args.push_back("--directory=/bazel-runfile:" + dir);
+      args.push_back(absl::StrCat("--directory=/bazel-runfile:", dir));
     } else {
       return status_or_dir.status();
     }
@@ -525,10 +529,11 @@ int RunEmacs(const char* const install_rel, const int argc,
 }
 
 int RunBinary(const char* const wrapper, const Mode mode,
-              const std::vector<std::string>& load_path,
-              const std::vector<std::string>& load_files,
-              const std::vector<std::string>& data_files, const int argc,
-              const char* const* const argv, const char* const* const envp) {
+              const std::initializer_list<const char*> load_path,
+              const std::initializer_list<const char*> load_files,
+              const std::initializer_list<const char*> data_files,
+              const int argc, const char* const* const argv,
+              const char* const* const envp) {
   auto status_or_executor =
       phst_rules_elisp::Executor::Create(argc, argv, envp);
   if (!status_or_executor.ok()) {
@@ -546,9 +551,9 @@ int RunBinary(const char* const wrapper, const Mode mode,
 }
 
 int RunTest(const char* const wrapper, const Mode mode,
-            const std::vector<std::string>& load_path,
-            const std::vector<std::string>& srcs,
-            const std::vector<std::string>& data_files, const int argc,
+            const std::initializer_list<const char*> load_path,
+            const std::initializer_list<const char*> srcs,
+            const std::initializer_list<const char*> data_files, const int argc,
             const char* const* const argv, const char* const* const envp) {
   auto status_or_executor =
       phst_rules_elisp::Executor::CreateForTest(argc, argv, envp);

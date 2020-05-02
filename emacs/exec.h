@@ -15,8 +15,7 @@
 #ifndef PHST_RULES_ELISP_EMACS_EXEC_H
 #define PHST_RULES_ELISP_EMACS_EXEC_H
 
-#include <vector>
-#include <string>
+#include <initializer_list>
 
 #include "absl/base/attributes.h"
 
@@ -28,17 +27,17 @@ ABSL_MUST_USE_RESULT int RunEmacs(const char* install_rel, int argc,
                                   const char* const* argv,
                                   const char* const* envp);
 
-ABSL_MUST_USE_RESULT int RunBinary(const char* wrapper, Mode mode,
-                                   const std::vector<std::string>& load_path,
-                                   const std::vector<std::string>& load_files,
-                                   const std::vector<std::string>& data_files,
-                                   int argc, const char* const* argv,
-                                   const char* const* envp);
+ABSL_MUST_USE_RESULT int RunBinary(
+    const char* wrapper, Mode mode,
+    std::initializer_list<const char*> load_path,
+    std::initializer_list<const char*> load_files,
+    std::initializer_list<const char*> data_files, int argc,
+    const char* const* argv, const char* const* envp);
 
 ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
-                                 const std::vector<std::string>& load_path,
-                                 const std::vector<std::string>& srcs,
-                                 const std::vector<std::string>& data_files,
+                                 std::initializer_list<const char*> load_path,
+                                 std::initializer_list<const char*> srcs,
+                                 std::initializer_list<const char*> data_files,
                                  int argc, const char* const* argv,
                                  const char* const* envp);
 
