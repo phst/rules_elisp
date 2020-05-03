@@ -43,6 +43,7 @@
 #include "absl/base/casts.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/container/flat_hash_set.h"
+#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
@@ -62,7 +63,6 @@
 
 #include "elisp/file.h"
 #include "elisp/manifest.pb.h"
-#include "elisp/random.h"
 #include "elisp/report.pb.h"
 #include "elisp/status.h"
 #include "elisp/str.h"
@@ -152,7 +152,7 @@ static StatusOr<std::string> GetSharedDir(const std::string& install) {
 }
 
 static StatusOr<absl::optional<TempFile>> AddManifest(
-    const Mode mode, std::vector<std::string>& args, Random& random) {
+    const Mode mode, std::vector<std::string>& args, absl::BitGen& random) {
   using Type = absl::optional<TempFile>;
   if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
   ASSIGN_OR_RETURN(auto stream,
@@ -314,7 +314,7 @@ class Executor {
   std::vector<std::string> orig_args_;
   Environment orig_env_ = CopyEnv();
   std::unique_ptr<Runfiles> runfiles_;
-  Random random_;
+  absl::BitGen random_;
 };
 
 StatusOr<Executor> Executor::Create(const int argc,

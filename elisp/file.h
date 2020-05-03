@@ -30,11 +30,11 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
 #include "absl/base/casts.h"
+#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/random.h"
 #include "elisp/status.h"
 
 namespace phst_rules_elisp {
@@ -80,7 +80,7 @@ class File {
 class TempFile : public File {
  public:
   static StatusOr<TempFile> Create(const std::string& directory,
-                                   absl::string_view tmpl, Random& random);
+                                   absl::string_view tmpl, absl::BitGen& random);
 
   ~TempFile() noexcept override;
   TempFile(const TempFile&) = delete;
@@ -111,6 +111,9 @@ StatusOr<std::string> MakeAbsolute(absl::string_view name);
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 absl::Status RemoveFile(const std::string& name) noexcept;
 ABSL_MUST_USE_RESULT std::string TempDir();
+ABSL_MUST_USE_RESULT std::string TempName(absl::string_view dir,
+                                          absl::string_view tmpl,
+                                          absl::BitGen& random);
 
 class Directory {
  public:

@@ -36,8 +36,6 @@
 #include "gtest/gtest.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/random.h"
-
 namespace phst_rules_elisp {
 namespace {
 
@@ -47,6 +45,7 @@ using ::testing::IsTrue;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::StrEq;
+using ::testing::StrNe;
 using ::testing::StartsWith;
 using ::testing::EndsWith;
 using ::testing::IsEmpty;
@@ -75,7 +74,8 @@ static std::string ReadFile(const std::string& path) {
 }
 
 TEST(File, WriteRead) {
-  const auto path = JoinPath(TempDir(), Random().TempName("file-*.tmp"));
+  absl::BitGen rnd;
+  const auto path = TempName(TempDir(), "file-*.tmp", rnd);
   {
     auto status_or_file = File::Open(
         path, FileMode::kReadWrite | FileMode::kCreate | FileMode::kExclusive);
@@ -130,7 +130,8 @@ TEST(File, PartialWrite) {
 TEST(File, Move) {
   // This test should typically be run under Address Sanitizer to debug issues
   // with the move constructor.
-  const auto path = JoinPath(TempDir(), Random().TempName("file-*.tmp"));
+  absl::BitGen rnd;
+  const auto path = TempName(TempDir(), "file-*.tmp", rnd);
   absl::optional<File> outer;
   {
     auto status_or_file = File::Open(
@@ -161,7 +162,7 @@ TEST(File, Move) {
 }
 
 TEST(TempFile, Create) {
-  Random rnd;
+  absl::BitGen rnd;
   auto status_or_file = TempFile::Create(TempDir(), "foo-*.tmp", rnd);
   ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
   auto& file = status_or_file.value();
@@ -190,7 +191,7 @@ TEST(File, AssignRead) {
 }
 
 TEST(TempFile, Write) {
-  Random rnd;
+  absl::BitGen rnd;
   auto status_or_stream = TempFile::Create(TempDir(), "foo-*.tmp", rnd);
   ASSERT_TRUE(status_or_stream.ok()) << status_or_stream.status();
   auto& stream = status_or_stream.value();
@@ -226,6 +227,17 @@ TEST(JoinPath, Root) {
 
 TEST(JoinPath, FinalSlash) {
   EXPECT_THAT(JoinPath("dir", "/"), StrEq("dir/"));
+}
+
+TEST(TempName, Create) {
+  absl::BitGen rnd;
+  const auto a = TempName("/", "temp-*.json", rnd);
+  const auto b = TempName("/", "temp-*.json", rnd);
+  EXPECT_THAT(a, StartsWith("/temp-"));
+  EXPECT_THAT(a, EndsWith(".json"));
+  EXPECT_THAT(b, StartsWith("/temp-"));
+  EXPECT_THAT(b, EndsWith(".json"));
+  EXPECT_THAT(b, StrNe(a));
 }
 
 }  // namespace
