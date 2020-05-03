@@ -14,11 +14,8 @@
 
 #include "elisp/exec.h"
 
-#include <algorithm>
-#include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <cstdio>
 #include <iostream>
 #include <iterator>
 #include <memory>
@@ -47,17 +44,13 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
-#include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "absl/utility/utility.h"
-#include "google/protobuf/duration.pb.h"
 #include "google/protobuf/repeated_field.h"
 #include "google/protobuf/stubs/status.h"
 #include "google/protobuf/stubs/stringpiece.h"
 #include "google/protobuf/util/json_util.h"
-#include "google/protobuf/util/time_util.h"
-#include "tinyxml2.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
@@ -73,7 +66,6 @@
 namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
-using google::protobuf::util::TimeUtil;
 using Environment = absl::flat_hash_map<std::string, std::string>;
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
@@ -206,83 +198,6 @@ static absl::Status WriteManifest(
   return file.Write(json);
 }
 
-static double FloatSeconds(
-    const google::protobuf::Duration& duration) noexcept {
-  return static_cast<double>(duration.seconds()) +
-         static_cast<double>(duration.nanos()) / 1e9;
-}
-
-static absl::Status ConvertReport(File& json_file,
-                                  const std::string& xml_file) {
-  ASSIGN_OR_RETURN(const auto json, json_file.Read());
-  TestReport report;
-  RETURN_IF_ERROR(ProtobufToAbslStatus(
-      google::protobuf::util::JsonStringToMessage(json, &report),
-      absl::StrCat("invalid JSON report: ", json)));
-  ASSIGN_OR_RETURN(auto stream,
-                   File::Open(xml_file, FileMode::kWrite | FileMode::kCreate |
-                                            FileMode::kExclusive));
-  ASSIGN_OR_RETURN(const auto c_file, stream.OpenCFile("wb"));
-  tinyxml2::XMLPrinter printer(c_file);
-  // The expected format of the XML output file isn’t well-documented.
-  // https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
-  // only states that the XML file is “ANT-like.”
-  // https://llg.cubic.org/docs/junit/ and
-  // https://help.catchsoftware.com/display/ET/JUnit+Format contain a bit of
-  // documentation.
-  printer.PushHeader(false, true);
-  const auto& tests = report.tests();
-  const auto total = report.tests_size();
-  const auto unexpected =
-      std::count_if(tests.begin(), tests.end(),
-                    [](const Test& test) { return !test.expected(); });
-  const auto failures =
-      std::count_if(tests.begin(), tests.end(), [](const Test& test) {
-        return !test.expected() && test.status() == FAILED;
-      });
-  const auto errors = unexpected - failures;
-  const auto total_str = absl::StrCat(total);
-  const auto failures_str = absl::StrCat(failures);
-  const auto errors_str = absl::StrCat(errors);
-  // Note: no timezone or fractional seconds allowed!
-  const auto start_time_str = absl::FormatTime(
-      "%FT%T",
-      absl::TimeFromTimeval(TimeUtil::TimestampToTimeval(report.start_time())),
-      absl::LocalTimeZone());
-  const auto elapsed_str = absl::StrCat(FloatSeconds(report.elapsed()));
-  printer.OpenElement("testsuites");
-  printer.PushAttribute("tests", Pointer(total_str));
-  printer.PushAttribute("time", Pointer(elapsed_str));
-  printer.PushAttribute("failures", Pointer(failures_str));
-  printer.OpenElement("testsuite");
-  printer.PushAttribute("id", "0");
-  printer.PushAttribute("tests", Pointer(total_str));
-  printer.PushAttribute("time", Pointer(elapsed_str));
-  printer.PushAttribute("timestamp", Pointer(start_time_str));
-  printer.PushAttribute("failures", Pointer(failures_str));
-  printer.PushAttribute("errors", Pointer(errors_str));
-  for (const auto& test : report.tests()) {
-    printer.OpenElement("testcase");
-    printer.PushAttribute("name", Pointer(test.name()));
-    const auto elapsed = absl::StrCat(FloatSeconds(test.elapsed()));
-    printer.PushAttribute("time", Pointer(elapsed));
-    if (!test.expected()) {
-      printer.OpenElement(test.status() == FAILED ? "failure" : "error");
-      printer.PushAttribute("type", test.status());
-      printer.PushText(Pointer(test.message()));
-      printer.CloseElement();
-    }
-    printer.CloseElement();
-  }
-  printer.CloseElement();
-  printer.CloseElement();
-  if (std::fflush(c_file) == EOF) {
-    return ErrorStatus(std::error_code(errno, std::generic_category()),
-                       "fflush");
-  }
-  return stream.Close();
-}
-
 namespace {
 
 class Executor {
@@ -401,22 +316,15 @@ StatusOr<int> Executor::RunTest(
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
-  const auto xml_output_file = this->EnvVar("XML_OUTPUT_FILE");
-  absl::optional<TempFile> report_file;
-  if (!xml_output_file.empty()) {
-    const std::string temp_dir = this->EnvVar("TEST_TMPDIR");
-    ASSIGN_OR_RETURN(report_file,
-                     TempFile::Create(temp_dir, "test-report-*.json", random_));
-    args.push_back(absl::StrCat("--report=/:", report_file->path()));
-  }
   for (const auto& file : srcs) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
     args.push_back(abs);
   }
   if (manifest) {
     std::vector<std::string> outputs;
-    if (report_file) {
-      outputs.push_back(report_file->path());
+    const auto report_file = this->EnvVar("XML_OUTPUT_FILE");
+    if (!report_file.empty()) {
+      outputs.push_back(report_file);
     }
     if (this->EnvVar("COVERAGE") == "1") {
       const auto coverage_dir = this->EnvVar("COVERAGE_DIR");
@@ -428,11 +336,6 @@ StatusOr<int> Executor::RunTest(
         WriteManifest(load_path, srcs, data_files, outputs, manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
-  if (report_file) {
-    auto status = ConvertReport(*report_file, xml_output_file);
-    status.Update(report_file->Close());
-    RETURN_IF_ERROR(status);
-  }
   if (manifest) RETURN_IF_ERROR(manifest->Close());
   return code;
 }

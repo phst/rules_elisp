@@ -123,12 +123,10 @@ cc_library(
         "@com_google_absl//absl/random",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/time",
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
         "@com_google_absl//absl/utility",
         "@com_google_protobuf//:protobuf",
-        "@leethomason_tinyxml2//:tinyxml2",
     ],
 )
 
@@ -207,10 +205,6 @@ cc_library(
 proto_library(
     name = "elisp_proto",
     srcs = ["elisp.proto"],
-    deps = [
-        "@com_google_protobuf//:duration_proto",
-        "@com_google_protobuf//:timestamp_proto",
-    ],
 )
 
 cc_proto_library(

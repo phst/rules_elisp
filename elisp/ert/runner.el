@@ -28,9 +28,9 @@
 (require 'debug)
 (require 'edebug)
 (require 'ert)
-(require 'json)
 (require 'pp)
 (require 'rx)
+(require 'xml)
 
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
@@ -48,7 +48,7 @@ source files and load them."
          (print-level 8)
          (print-length 50)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
-         (report-file (elisp/ert/pop--option "--report"))
+         (report-file (getenv "XML_OUTPUT_FILE"))
          (test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
          (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
@@ -84,7 +84,8 @@ source files and load them."
     (mapc #'load command-line-args-left)
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
-          (report `((startTime . ,(elisp/ert/json--timestamp))))
+          (errors 0)
+          (failures 0)
           (test-reports ())
           (start-time (current-time)))
       (or tests (error "Selector %S doesn’t match any tests" selector))
@@ -102,45 +103,63 @@ source files and load them."
                (result (ert-run-test test))
                (duration (time-subtract nil start-time))
                (expected (ert-test-result-expected-p test result))
+               (failed
+                (and (not expected)
+                     (cl-typep result
+                               ;; A test that passed unexpectedly should count
+                               ;; as failed for the XML report.
+                               '(or ert-test-passed ert-test-failed))))
+               (error (and (not expected) (not failed)))
                (status (ert-string-for-test-result result expected))
-               (report `((name . ,(symbol-name name))
-                         (elapsed . ,(elisp/ert/json--duration duration))
-                         (status . ,(upcase status))
-                         (expected . ,(if expected t :json-false)))))
+               (report nil))
           (elisp/ert/log--message "Test %s %s and took %d ms" name status
                                   (* (float-time duration) 1000))
           (or expected (cl-incf unexpected))
+          (and failed (cl-incf failures))
+          (and error (cl-incf errors))
           (when (ert-test-result-with-condition-p result)
             (let ((message (elisp/ert/failure--message name result)))
               (message "%s" message)
-              (push `(message . ,message) report)))
-          (push report test-reports)))
-      (push `(elapsed . ,(elisp/ert/json--duration
-                          (time-subtract nil start-time)))
-            report)
-      (push `(tests . ,(nreverse test-reports)) report)
-      (cl-callf nreverse report)
+              (unless expected
+                (setq report `(,(if failed 'failure 'error)
+                               ((type . ,status))
+                               ,message)))))
+          (push `(testcase ((name . ,(symbol-name name))
+                            (time . ,(number-to-string (float-time duration)))
+                            (status . ,status))
+                           ,@report)
+                test-reports)))
       (elisp/ert/log--message "Running %d tests finished, %d results unexpected"
                               (length tests) unexpected)
-      (when report-file
-        ;; Rather than trying to write a well-formed XML file in Emacs Lisp,
-        ;; write the report as a JSON file and let an external binary deal with
-        ;; the conversion to XML.
-        (write-region (json-encode report) nil report-file))
+      (unless (member report-file '(nil ""))
+        (with-temp-buffer
+          ;; The expected format of the XML output file isn’t well-documented.
+          ;; https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions
+          ;; only states that the XML file is “ANT-like.”
+          ;; https://llg.cubic.org/docs/junit/ and
+          ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
+          ;; bit of documentation.
+          (let ((attributes
+                 ;; Attributes shared between root element and our only
+                 ;; <testsuite> element.
+                 `((tests . ,(number-to-string (length tests)))
+                   (errors . ,(number-to-string errors))
+                   (failures . ,(number-to-string failures))
+                   (time . ,(number-to-string
+                             (float-time (time-subtract nil start-time)))))))
+            (xml-print
+             `((testsuites
+                ,attributes
+                (testsuite
+                 ((id . "0")
+                  ;; No timezone or fractional seconds allowed.
+                  (timestamp . ,(format-time-string "%FT%T" start-time))
+                  ,@attributes)
+                 ,@test-reports)))))
+          (write-region nil nil report-file nil nil nil 'excl)))
       (when load-buffers
         (elisp/ert/write--coverage-report coverage-dir load-buffers))
       (kill-emacs (min unexpected 1)))))
-
-(defun elisp/ert/pop--option (name)
-  "Pop a command-line option named NAME from ‘command-line-args-left’.
-If the head of ‘command-line-args-left’ starts with “NAME=”,
-remove it and return the value.  Otherwise, return nil."
-  (cl-check-type name string)
-  (let ((arg (car command-line-args-left))
-        (prefix (concat name "=")))
-    (when (and arg (string-prefix-p prefix arg))
-      (pop command-line-args-left)
-      (substring-no-properties arg (length prefix)))))
 
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
@@ -293,17 +312,6 @@ to be used as root."
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
   (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
-
-;; The next two functions serialize time values in the format described at
-;; https://developers.google.com/protocol-buffers/docs/proto3#json.
-
-(defun elisp/ert/json--timestamp (&optional time)
-  "Format TIME or the current time for JSON."
-  (format-time-string "%FT%T.%NZ" time t))
-
-(defun elisp/ert/json--duration (duration)
-  "Format DURATION for JSON."
-  (format-time-string "%s.%Ns" duration t))
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here

@@ -14,9 +14,6 @@
 
 syntax = "proto3";
 
-import "google/protobuf/duration.proto";
-import "google/protobuf/timestamp.proto";
-
 package phst_rules_elisp;
 
 // Represens an Emacs Lisp manifest.  See the documentation of elisp_toolchain
@@ -32,27 +29,4 @@ enum Root {
   ROOT_UNSPECIFIED = 0;
   EXECUTION_ROOT = 1;
   RUNFILES_ROOT = 2;
-}
-
-message TestReport {
-  google.protobuf.Timestamp start_time = 1;
-  google.protobuf.Duration elapsed = 2;
-  repeated Test tests = 3;
-}
-
-message Test {
-  string name = 1;
-  google.protobuf.Duration elapsed = 2;
-  Status status = 3;
-  bool expected = 4;
-  string message = 5;
-}
-
-enum Status {
-  PASSED = 0;
-  FAILED = 1;
-  SKIPPED = 2;
-  UNKNOWN = 3;
-  ABORTED = 4;
-  QUIT = 5;
 }
