@@ -46,23 +46,6 @@
 
 namespace phst_rules_elisp {
 
-absl::Status MakeErrorStatus(const std::error_code& code,
-                             absl::string_view function,
-                             absl::string_view args);
-
-template <typename... Ts>
-absl::Status ErrorStatus(const std::error_code& code,
-                         const absl::string_view function, Ts&&... args) {
-  return MakeErrorStatus(code, function,
-                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
-}
-
-template <typename... Ts>
-absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
-  return ErrorStatus(std::error_code(errno, std::system_category()), function,
-                     std::forward<Ts>(args)...);
-}
-
 enum class FileMode {
   kRead = O_RDONLY,
   kWrite = O_WRONLY,

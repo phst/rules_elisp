@@ -51,42 +51,6 @@
 
 namespace phst_rules_elisp {
 
-static absl::StatusCode MapErrorCode(const std::error_code& code) {
-  const auto condition = code.default_error_condition();
-  if (condition.category() != std::generic_category()) {
-    return absl::StatusCode::kUnknown;
-  }
-  switch (static_cast<std::errc>(condition.value())) {
-    case std::errc::file_exists:
-      return absl::StatusCode::kAlreadyExists;
-    case std::errc::function_not_supported:
-      return absl::StatusCode::kUnimplemented;
-    case std::errc::no_space_on_device:
-      return absl::StatusCode::kResourceExhausted;
-    case std::errc::no_such_file_or_directory:
-      return absl::StatusCode::kNotFound;
-    case std::errc::operation_canceled:
-      return absl::StatusCode::kCancelled;
-    case std::errc::permission_denied:
-      return absl::StatusCode::kPermissionDenied;
-    case std::errc::timed_out:
-      return absl::StatusCode::kDeadlineExceeded;
-    default:
-      return absl::StatusCode::kUnknown;
-  }
-}
-
-absl::Status MakeErrorStatus(const std::error_code& code,
-                             const absl::string_view function,
-                             const absl::string_view args) {
-  if (!code) return absl::OkStatus();
-  return absl::Status(
-      MapErrorCode(code),
-      absl::StrCat(function, args.empty() ? args : absl::StrCat("(", args, ")"),
-                   ": ", code.category().name(), "/", code.value(), ": ",
-                   code.message()));
-}
-
 StatusOr<File> File::Open(std::string path, const FileMode mode) {
   File result;
   RETURN_IF_ERROR(result.DoOpen(std::move(path), mode));

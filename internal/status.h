@@ -15,9 +15,12 @@
 #ifndef PHST_RULES_ELISP_INTERNAL_STATUSOR_H
 #define PHST_RULES_ELISP_INTERNAL_STATUSOR_H
 
+#include <cerrno>
 #include <cstdlib>
 #include <iostream>
 #include <type_traits>
+#include <system_error>
+#include <tuple>
 #include <utility>
 
 #pragma GCC diagnostic push
@@ -27,10 +30,29 @@
 #include "absl/base/attributes.h"
 #include "absl/base/macros.h"
 #include "absl/status/status.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/variant.h"
 #pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
+
+absl::Status MakeErrorStatus(const std::error_code& code,
+                             absl::string_view function,
+                             absl::string_view args);
+
+template <typename... Ts>
+absl::Status ErrorStatus(const std::error_code& code,
+                         const absl::string_view function, Ts&&... args) {
+  return MakeErrorStatus(code, function,
+                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
+}
+
+template <typename... Ts>
+absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
+  return ErrorStatus(std::error_code(errno, std::system_category()), function,
+                     std::forward<Ts>(args)...);
+}
 
 template <typename T>
 class ABSL_MUST_USE_RESULT StatusOr {
