@@ -115,5 +115,7 @@ COPTS = [
     "-Wconversion",
     "-Wsign-conversion",
     "-pedantic-errors",
+    # GCC appears to treat some moves as redundant that are in fact necessary.
+    "-Wno-redundant-move",
     "-D_GNU_SOURCE",
 ]
