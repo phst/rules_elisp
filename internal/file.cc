@@ -177,13 +177,12 @@ StatusOr<TempFile> TempFile::Create(const std::string& directory,
 TempFile::TempFile() {}
 
 TempFile::~TempFile() noexcept {
-  const auto& path = this->path();
   const auto status = this->Remove();
   // Only print an error if removing the file failed (“false” return value), but
   // the file wasn’t already removed before (zero error code).
   if (!status.ok() && !absl::IsNotFound(status)) {
-    std::clog << "error removing temporary file " << path << ": " << status
-              << std::endl;
+    std::clog << "error removing temporary file " << this->path() << ": "
+              << status << std::endl;
   }
 }
 
