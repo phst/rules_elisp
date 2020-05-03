@@ -220,5 +220,13 @@ TEST(JoinPath, TwoPieces) {
   EXPECT_THAT(JoinPath("/foo/", "/bar/"), StrEq("/foo/bar/"));
 }
 
+TEST(JoinPath, Root) {
+  EXPECT_THAT(JoinPath("/", "file"), StrEq("/file"));
+}
+
+TEST(JoinPath, FinalSlash) {
+  EXPECT_THAT(JoinPath("dir", "/"), StrEq("dir/"));
+}
+
 }  // namespace
 }  // namespace phst_rules_elisp

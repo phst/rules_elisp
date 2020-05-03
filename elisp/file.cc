@@ -202,9 +202,11 @@ std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) 
     out->append(name.begin(), name.end());
   };
   // Make sure to not strip leading or trailing slashes.
-  return absl::StrCat(absl::StartsWith(*pieces.begin(), "/") ? "/" : "",
+  const auto first = *pieces.begin();
+  const auto last = *(pieces.end() - 1);
+  return absl::StrCat((first.length() > 1 && first.front() == '/') ? "/" : "",
                       absl::StrJoin(pieces, "/", format),
-                      absl::EndsWith(*(pieces.end() - 1), "/") ? "/" : "");
+                      (last.length() > 1 && last.back() == '/') ? "/" : "");
 }
 
 StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
