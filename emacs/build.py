@@ -61,6 +61,9 @@ def main() -> None:
     # e.g. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40766).
     for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
         compiled.with_suffix('.el').unlink()
+    # Sanity check to verify that the resulting binary works.
+    subprocess.run([install / 'bin/emacs', '--quick', '--batch'],
+                   check=True, stdin=subprocess.DEVNULL)
 
 
 if __name__ == '__main__':
