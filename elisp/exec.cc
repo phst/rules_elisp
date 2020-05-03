@@ -525,7 +525,7 @@ int RunEmacs(const char* const install_rel, const int argc,
   auto& executor = status_or_executor.value();
   const auto status_or_code = executor.RunEmacs(install_rel);
   if (!status_or_code.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
+    std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
   }
   return status_or_code.value();
