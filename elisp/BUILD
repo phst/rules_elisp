@@ -110,7 +110,6 @@ cc_library(
     copts = COPTS,
     visibility = ["//visibility:public"],
     deps = [
-        ":elisp_cc_proto",
         ":file",
         ":status",
         ":str",
@@ -126,7 +125,7 @@ cc_library(
         "@com_google_absl//absl/types:optional",
         "@com_google_absl//absl/types:span",
         "@com_google_absl//absl/utility",
-        "@com_google_protobuf//:protobuf",
+        "@nlohmann_json//:json",
     ],
 )
 
@@ -200,14 +199,4 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/types:variant",
     ],
-)
-
-proto_library(
-    name = "elisp_proto",
-    srcs = ["elisp.proto"],
-)
-
-cc_proto_library(
-    name = "elisp_cc_proto",
-    deps = [":elisp_proto"],
 )

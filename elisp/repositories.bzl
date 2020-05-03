@@ -43,10 +43,11 @@ def rules_elisp_dependencies():
         urls = ["https://github.com/abseil/abseil-cpp/archive/1a02b7a2054c24f900dab796edb812f9260b51a6.zip"],
     )
     http_archive(
-        name = "com_google_protobuf",
-        sha256 = "9748c0d90e54ea09e5e75fb7fac16edce15d2028d4356f32211cfa3c0e956564",
-        strip_prefix = "protobuf-3.11.4",
-        urls = ["https://github.com/protocolbuffers/protobuf/archive/v3.11.4.zip"],
+        name = "nlohmann_json",
+        urls = ["https://github.com/nlohmann/json/releases/download/v3.7.3/include.zip"],
+        sha256 = "87b5884741427220d3a33df1363ae0e8b898099fbc59f1c451113f6732891014",
+        strip_prefix = "single_include",
+        build_file = "@phst_rules_elisp//:json.BUILD",
     )
 
 def rules_elisp_toolchains():

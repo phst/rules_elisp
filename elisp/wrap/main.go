@@ -45,9 +45,10 @@ func main() {
 		log.Fatalf("can’t decode manifest: %s", err)
 	}
 	want := map[string]interface{}{
-		"root":       "RUNFILES_ROOT",
-		"loadPath":   []interface{}{"phst_rules_elisp"},
-		"inputFiles": []interface{}{"phst_rules_elisp/elisp/exec.h"},
+		"root":        "RUNFILES_ROOT",
+		"loadPath":    []interface{}{"phst_rules_elisp"},
+		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/exec.h"},
+		"outputFiles": []interface{}{},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)

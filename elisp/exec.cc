@@ -47,14 +47,10 @@
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "absl/utility/utility.h"
-#include "google/protobuf/repeated_field.h"
-#include "google/protobuf/stubs/status.h"
-#include "google/protobuf/stubs/stringpiece.h"
-#include "google/protobuf/util/json_util.h"
+#include "nlohmann/json.hpp"
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/elisp.pb.h"
 #include "elisp/file.h"
 #include "elisp/status.h"
 #include "elisp/str.h"
@@ -103,16 +99,6 @@ static Environment CopyEnv() {
     }
   }
   return map;
-}
-
-static absl::Status ProtobufToAbslStatus(
-    const google::protobuf::util::Status& status,
-    const absl::string_view prefix = absl::string_view()) {
-  if (status.ok()) return absl::OkStatus();
-  std::string message(prefix);
-  if (!prefix.empty()) message += ": ";
-  message += status.message();
-  return absl::Status(static_cast<absl::StatusCode>(status.code()), message);
 }
 
 static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
@@ -165,18 +151,12 @@ static StatusOr<absl::optional<TempFile>> AddManifest(
   return absl::implicit_cast<Type>(std::move(stream));
 }
 
-enum class Absolute { kAllow, kForbid };
-
-template <typename T>
-static void AddToManifest(
-    const T& files, google::protobuf::RepeatedPtrField<std::string>& field,
-    const Absolute absolute) {
+static void CheckRelative(const absl::Span<const char* const> files) {
   for (const absl::string_view file : files) {
-    if (absolute == Absolute::kForbid && IsAbsolute(file)) {
+    if (IsAbsolute(file)) {
       std::clog << "filename " << file << " is absolute" << std::endl;
       std::abort();
     }
-    *field.Add() = std::string(file);
   }
 }
 
@@ -185,17 +165,18 @@ static absl::Status WriteManifest(
     const absl::Span<const char* const> load_files,
     const absl::Span<const char* const> data_files,
     const absl::Span<const std::string> output_files, File& file) {
-  Manifest manifest;
-  manifest.set_root(RUNFILES_ROOT);
-  AddToManifest(load_path, *manifest.mutable_load_path(), Absolute::kForbid);
-  AddToManifest(load_files, *manifest.mutable_input_files(), Absolute::kForbid);
-  AddToManifest(data_files, *manifest.mutable_input_files(), Absolute::kForbid);
-  AddToManifest(output_files, *manifest.mutable_output_files(),
-                Absolute::kAllow);
-  std::string json;
-  RETURN_IF_ERROR(ProtobufToAbslStatus(
-      google::protobuf::util::MessageToJsonString(manifest, &json)));
-  return file.Write(json);
+  CheckRelative(load_path);
+  CheckRelative(load_files);
+  CheckRelative(data_files);
+  std::vector<std::string> input_files(load_files.begin(), load_files.end());
+  input_files.insert(input_files.end(), data_files.begin(), data_files.end());
+  const nlohmann::json json = {
+      {"root", "RUNFILES_ROOT"},
+      {"loadPath", load_path},
+      {"inputFiles", input_files},
+      {"outputFiles", output_files},
+  };
+  return file.Write(json.dump());
 }
 
 namespace {

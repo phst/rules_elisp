@@ -48,10 +48,6 @@ local_repository(
     path = "examples/ext",
 )
 
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 http_archive(
     name = "com_google_googletest",
     sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
