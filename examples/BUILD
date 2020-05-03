@@ -58,3 +58,9 @@ elisp_binary(
     src = "bin.el",
     deps = [":lib_1"],
 )
+
+sh_test(
+    name = "bin_test",
+    srcs = ["bin_test.sh"],
+    data = ["bin"],
+)
