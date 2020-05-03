@@ -47,6 +47,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
+#include "absl/time/time.h"
 #include "absl/types/optional.h"
 #include "absl/types/span.h"
 #include "absl/utility/utility.h"
@@ -243,7 +244,11 @@ static absl::Status ConvertReport(File& json_file,
   const auto total_str = absl::StrCat(total);
   const auto failures_str = absl::StrCat(failures);
   const auto errors_str = absl::StrCat(errors);
-  const auto start_time_str = TimeUtil::ToString(report.start_time());
+  // Note: no timezone or fractional seconds allowed!
+  const auto start_time_str = absl::FormatTime(
+      "%FT%T",
+      absl::TimeFromTimeval(TimeUtil::TimestampToTimeval(report.start_time())),
+      absl::LocalTimeZone());
   const auto elapsed_str = absl::StrCat(FloatSeconds(report.elapsed()));
   printer.OpenElement("testsuites");
   printer.PushAttribute("tests", Pointer(total_str));

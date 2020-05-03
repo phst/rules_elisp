@@ -72,7 +72,7 @@ func Test(t *testing.T) {
 		Errors    int        `xml:"errors,attr"`
 		Failures  int        `xml:"failures,attr"`
 		Time      float64    `xml:"time,attr"`
-		Timestamp time.Time  `xml:"timestamp,attr"`
+		Timestamp timestamp  `xml:"timestamp,attr"`
 		TestCases []testCase `xml:"testcase"`
 	}
 	type report struct {
@@ -96,11 +96,23 @@ func Test(t *testing.T) {
 			Errors:    0,
 			Failures:  0,
 			Time:      wantElapsed,
-			Timestamp: time.Now(),
+			Timestamp: timestamp(time.Now()),
 			TestCases: []testCase{{Name: "lib-1-test", Time: wantElapsed}},
 		}},
 	}
-	if diff := cmp.Diff(got, want, cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {
+	if diff := cmp.Diff(got, want, cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {
 		t.Errorf("-got +want:\n%s", diff)
 	}
 }
+
+type timestamp time.Time
+
+func (t *timestamp) UnmarshalText(b []byte) error {
+	// The XML report format doesn’t allow timezones in timestamps, so
+	// time.Time.UnmarshalText doesn’t work.
+	u, err := time.Parse("2006-01-02T15:04:05", string(b))
+	*t = timestamp(u)
+	return err
+}
+
+func toTime(t timestamp) time.Time { return time.Time(t) }
