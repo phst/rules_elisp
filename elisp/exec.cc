@@ -65,6 +65,10 @@
 #include "elisp/status.h"
 #include "elisp/str.h"
 
+#ifdef __APPLE__
+#include <crt_externs.h>  // for _NSGetEnviron
+#endif
+
 namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
@@ -89,8 +93,16 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
 }
 
 static Environment CopyEnv() {
+  const char* const* const envp =
+#ifdef __APPLE__
+      // See environ(7) why this is necessary.
+      *_NSGetEnviron()
+#else
+      environ
+#endif
+      ;
   Environment map;
-  for (const char* const* pp = environ; *pp != nullptr; ++pp) {
+  for (const char* const* pp = envp; *pp != nullptr; ++pp) {
     const char* p = *pp;
     const char* q = std::strchr(p, '=');
     if (q != nullptr) {

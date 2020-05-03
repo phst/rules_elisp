@@ -215,7 +215,7 @@ StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   struct free {
     void operator()(void* const ptr) const noexcept { std::free(ptr); }
   };
-  const std::unique_ptr<char, free> dir(get_current_dir_name());
+  const std::unique_ptr<char, free> dir(::getcwd(nullptr, 0));
   if (dir == nullptr) return ErrnoStatus("get_current_dir_name");
   return JoinPath(dir.get(), name);
 }
