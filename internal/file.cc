@@ -178,8 +178,8 @@ TempFile::TempFile() {}
 
 TempFile::~TempFile() noexcept {
   const auto status = this->Remove();
-  // Only print an error if removing the file failed (“false” return value), but
-  // the file wasn’t already removed before (zero error code).
+  // Only print an error if removing the file failed (status not OK), but
+  // the file wasn’t already removed before (NOT_FOUND status).
   if (!status.ok() && !absl::IsNotFound(status)) {
     std::clog << "error removing temporary file " << this->path() << ": "
               << status << std::endl;
