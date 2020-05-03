@@ -59,24 +59,18 @@ class File {
   File(File&& other);
   File& operator=(const File&) = delete;
   File& operator=(File&& other);
-
   StatusOr<std::FILE*> OpenCFile(const char* mode);
-
   const std::string& path() const noexcept { return path_; }
-
   absl::Status Close();
-
   StatusOr<std::string> Read();
   absl::Status Write(absl::string_view data);
 
  protected:
   File();
-
   absl::Status DoOpen(std::string path, FileMode mode);
 
  private:
   virtual absl::Status DoClose();
-
   absl::Status Fail(absl::string_view function) const;
 
   int fd_ = -1;
@@ -164,16 +158,12 @@ class Directory {
   };
 
   static StatusOr<Directory> Open(const std::string& name);
-
   Directory(const Directory&) = delete;
   Directory(Directory&& other) : dir_(other.dir_) { other.dir_ = nullptr; }
   Directory& operator=(const Directory&) = delete;
   Directory& operator=(Directory&& other);
-
   ~Directory() noexcept;
-
   absl::Status Close() noexcept;
-
   Iterator begin() const { return Iterator(dir_); }
   Iterator end() const { return Iterator(); }
 
