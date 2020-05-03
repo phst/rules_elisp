@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Binary wrap is a test helper program for //emacs:wrap_test, which see.
+// Binary wrap is a test helper program for //elisp:exec_test, which see.
 package main
 
 import (
@@ -47,7 +47,7 @@ func main() {
 	want := map[string]interface{}{
 		"root":       "RUNFILES_ROOT",
 		"loadPath":   []interface{}{"phst_rules_elisp"},
-		"inputFiles": []interface{}{"phst_rules_elisp/emacs/exec.h"},
+		"inputFiles": []interface{}{"phst_rules_elisp/elisp/exec.h"},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)

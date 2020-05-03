@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "internal/file.h"
+#include "elisp/file.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,9 +45,9 @@
 #include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
 
-#include "internal/int.h"
-#include "internal/random.h"
-#include "internal/str.h"
+#include "elisp/int.h"
+#include "elisp/random.h"
+#include "elisp/str.h"
 
 namespace phst_rules_elisp {
 

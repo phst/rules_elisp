@@ -65,7 +65,7 @@ This is necessary to determine the source root directory.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_exec": attr.label(
-            default = "//emacs:exec",
+            default = "//elisp:exec",
             providers = [CcInfo],
         ),
         "_template": attr.label(

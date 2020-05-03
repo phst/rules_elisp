@@ -12,26 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_INTERNAL_STR_H
-#define PHST_RULES_ELISP_INTERNAL_STR_H
+#include "elisp/random.h"
 
-#include <cstdlib>
-#include <iostream>
-#include <string>
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 
 namespace phst_rules_elisp {
+namespace {
 
-inline const char* Pointer(const std::string& s) {
-  if (s.find('\0') != s.npos) {
-    std::clog << s << " contains null character" << std::endl;
-    std::abort();
-  }
-  return s.c_str();
+using ::testing::StrNe;
+using ::testing::StartsWith;
+using ::testing::EndsWith;
+
+TEST(Random, TempName) {
+  Random rnd;
+  const auto a = rnd.TempName("temp-*.json");
+  const auto b = rnd.TempName("temp-*.json");
+  EXPECT_THAT(a, StartsWith("temp-"));
+  EXPECT_THAT(a, EndsWith(".json"));
+  EXPECT_THAT(b, StartsWith("temp-"));
+  EXPECT_THAT(b, EndsWith(".json"));
+  EXPECT_THAT(b, StrNe(a));
 }
 
-// Don’t allow passing a temporary.
-inline void Pointer(const std::string&&) = delete;
-
-}  // phst_rules_elisp
-
-#endif
+}  // namespace
+}  // namespace phst_rules_elisp

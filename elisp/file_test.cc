@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "internal/file.h"
+#include "elisp/file.h"
 
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -36,7 +36,7 @@
 #include "gtest/gtest.h"
 #pragma GCC diagnostic pop
 
-#include "internal/random.h"
+#include "elisp/random.h"
 
 namespace phst_rules_elisp {
 namespace {
@@ -176,10 +176,9 @@ TEST(TempFile, Create) {
 }
 
 TEST(File, AssignRead) {
-  auto status_or_file =
-      File::Open(JoinPath(std::getenv("TEST_SRCDIR"),
-                          "phst_rules_elisp/internal/test.txt"),
-                 FileMode::kRead);
+  auto status_or_file = File::Open(
+      JoinPath(std::getenv("TEST_SRCDIR"), "phst_rules_elisp/elisp/test.txt"),
+      FileMode::kRead);
   ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
   auto a = std::move(status_or_file).value();
   auto b = std::move(a);

@@ -267,7 +267,7 @@ elisp_binary = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         _exec = attr.label(
-            default = "//emacs:exec",
+            default = "//elisp:exec",
             providers = [CcInfo],
         ),
         _default_libs = attr.label_list(
@@ -313,7 +313,7 @@ elisp_test = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         _exec = attr.label(
-            default = "//emacs:exec",
+            default = "//elisp:exec",
             providers = [CcInfo],
         ),
         _default_libs = attr.label_list(

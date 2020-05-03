@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_INTERNAL_FILE_H
-#define PHST_RULES_ELISP_INTERNAL_FILE_H
+#ifndef PHST_RULES_ELISP_ELISP_FILE_H
+#define PHST_RULES_ELISP_ELISP_FILE_H
 
 #include <sys/types.h>
 #include <dirent.h>
@@ -34,8 +34,8 @@
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 
-#include "internal/random.h"
-#include "internal/status.h"
+#include "elisp/random.h"
+#include "elisp/status.h"
 
 namespace phst_rules_elisp {
 

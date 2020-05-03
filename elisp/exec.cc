@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "emacs/exec.h"
+#include "elisp/exec.h"
 
 #include <algorithm>
 #include <cerrno>
@@ -60,12 +60,12 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "emacs/manifest.pb.h"
-#include "emacs/report.pb.h"
-#include "internal/file.h"
-#include "internal/random.h"
-#include "internal/status.h"
-#include "internal/str.h"
+#include "elisp/file.h"
+#include "elisp/manifest.pb.h"
+#include "elisp/random.h"
+#include "elisp/report.pb.h"
+#include "elisp/status.h"
+#include "elisp/str.h"
 
 namespace phst_rules_elisp {
 

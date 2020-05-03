@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_INTERNAL_INT_H
-#define PHST_RULES_ELISP_INTERNAL_INT_H
+#ifndef PHST_RULES_ELISP_ELISP_INT_H
+#define PHST_RULES_ELISP_ELISP_INT_H
 
 #include <limits>
 #include <type_traits>

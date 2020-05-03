@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//elisp:util.bzl", "COPTS")
-
 alias(
     name = "emacs",
     actual = "@gnu_emacs_stable//:emacs",
@@ -32,73 +30,6 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     visibility = ["//visibility:public"],
-)
-
-cc_library(
-    name = "exec",
-    srcs = ["exec.cc"],
-    hdrs = ["exec.h"],
-    copts = COPTS,
-    visibility = ["//visibility:public"],
-    deps = [
-        ":manifest_cc_proto",
-        ":report_cc_proto",
-        "//internal:file",
-        "//internal:random",
-        "//internal:status",
-        "//internal:str",
-        "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/algorithm:container",
-        "@com_google_absl//absl/base",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/container:flat_hash_set",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/types:span",
-        "@com_google_absl//absl/utility",
-        "@com_google_protobuf//:protobuf",
-        "@leethomason_tinyxml2//:tinyxml2",
-    ],
-)
-
-cc_test(
-    name = "exec_test",
-    srcs = ["exec_test.cc"],
-    copts = COPTS,
-    data = [
-        "exec.h",
-        "//emacs/wrap",
-    ],
-    deps = [
-        ":exec",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-proto_library(
-    name = "manifest_proto",
-    srcs = ["manifest.proto"],
-)
-
-cc_proto_library(
-    name = "manifest_cc_proto",
-    deps = [":manifest_proto"],
-)
-
-proto_library(
-    name = "report_proto",
-    srcs = ["report.proto"],
-    deps = [
-        "@com_google_protobuf//:duration_proto",
-        "@com_google_protobuf//:timestamp_proto",
-    ],
-)
-
-cc_proto_library(
-    name = "report_cc_proto",
-    deps = [":report_proto"],
 )
 
 filegroup(

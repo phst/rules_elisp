@@ -15,6 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load(":defs.bzl", "elisp_toolchain")
 load(":defs_test.bzl", "elisp_test_suite")
+load(":util.bzl", "COPTS")
 
 toolchain_type(
     name = "toolchain_type",
@@ -96,3 +97,149 @@ bzl_library(
 )
 
 elisp_test_suite(name = "elisp_test")
+
+cc_library(
+    name = "exec",
+    srcs = ["exec.cc"],
+    hdrs = ["exec.h"],
+    copts = COPTS,
+    visibility = ["//visibility:public"],
+    deps = [
+        ":file",
+        ":manifest_cc_proto",
+        ":random",
+        ":report_cc_proto",
+        ":status",
+        ":str",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_absl//absl/types:span",
+        "@com_google_absl//absl/utility",
+        "@com_google_protobuf//:protobuf",
+        "@leethomason_tinyxml2//:tinyxml2",
+    ],
+)
+
+cc_test(
+    name = "exec_test",
+    srcs = ["exec_test.cc"],
+    copts = COPTS,
+    data = [
+        "exec.h",
+        "//elisp/wrap",
+    ],
+    deps = [
+        ":exec",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "file",
+    srcs = ["file.cc"],
+    hdrs = ["file.h"],
+    copts = COPTS,
+    deps = [
+        ":int",
+        ":random",
+        ":status",
+        ":str",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/memory",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/utility",
+    ],
+)
+
+cc_test(
+    name = "file_test",
+    srcs = ["file_test.cc"],
+    copts = COPTS,
+    data = ["test.txt"],
+    deps = [
+        ":file",
+        ":random",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/types:optional",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "random",
+    srcs = ["random.cc"],
+    hdrs = ["random.h"],
+    copts = COPTS,
+    deps = [
+        "@com_google_absl//absl/random",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "random_test",
+    srcs = ["random_test.cc"],
+    copts = COPTS,
+    deps = [
+        ":random",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "int",
+    hdrs = ["int.h"],
+    copts = COPTS,
+)
+
+cc_library(
+    name = "str",
+    hdrs = ["str.h"],
+    copts = COPTS,
+)
+
+cc_library(
+    name = "status",
+    srcs = ["status.cc"],
+    hdrs = ["status.h"],
+    copts = COPTS,
+    deps = [
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/types:variant",
+    ],
+)
+
+proto_library(
+    name = "manifest_proto",
+    srcs = ["manifest.proto"],
+)
+
+cc_proto_library(
+    name = "manifest_cc_proto",
+    deps = [":manifest_proto"],
+)
+
+proto_library(
+    name = "report_proto",
+    srcs = ["report.proto"],
+    deps = [
+        "@com_google_protobuf//:duration_proto",
+        "@com_google_protobuf//:timestamp_proto",
+    ],
+)
+
+cc_proto_library(
+    name = "report_cc_proto",
+    deps = [":report_proto"],
+)

@@ -19,6 +19,6 @@ go_binary(
     testonly = 1,
     srcs = ["main.go"],
     out = "wrap",
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//elisp:__pkg__"],
     deps = ["@com_github_google_go_cmp//cmp:go_default_library"],
 )
