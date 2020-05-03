@@ -105,9 +105,8 @@ cc_library(
     copts = COPTS,
     visibility = ["//visibility:public"],
     deps = [
+        ":elisp_cc_proto",
         ":file",
-        ":manifest_cc_proto",
-        ":report_cc_proto",
         ":status",
         ":str",
         "@bazel_tools//tools/cpp/runfiles",
@@ -200,18 +199,8 @@ cc_library(
 )
 
 proto_library(
-    name = "manifest_proto",
-    srcs = ["manifest.proto"],
-)
-
-cc_proto_library(
-    name = "manifest_cc_proto",
-    deps = [":manifest_proto"],
-)
-
-proto_library(
-    name = "report_proto",
-    srcs = ["report.proto"],
+    name = "elisp_proto",
+    srcs = ["elisp.proto"],
     deps = [
         "@com_google_protobuf//:duration_proto",
         "@com_google_protobuf//:timestamp_proto",
@@ -219,6 +208,6 @@ proto_library(
 )
 
 cc_proto_library(
-    name = "report_cc_proto",
-    deps = [":report_proto"],
+    name = "elisp_cc_proto",
+    deps = [":elisp_proto"],
 )

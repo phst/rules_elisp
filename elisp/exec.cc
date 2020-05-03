@@ -60,9 +60,8 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
+#include "elisp/elisp.pb.h"
 #include "elisp/file.h"
-#include "elisp/manifest.pb.h"
-#include "elisp/report.pb.h"
 #include "elisp/status.h"
 #include "elisp/str.h"
 
