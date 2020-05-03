@@ -75,6 +75,13 @@ go_rules_dependencies()
 go_register_toolchains()
 
 http_archive(
+    name = "phst_runfiles",
+    sha256 = "9e538ebe5ab41a96a3e61baf1a6475b6405c2b46a5536c7c9b64da5bdcaee01e",
+    strip_prefix = "runfiles-27635edc007e045259ff247985c8d40bfe2116ce",
+    urls = ["https://github.com/phst/runfiles/archive/27635edc007e045259ff247985c8d40bfe2116ce.zip"],
+)
+
+http_archive(
     name = "bazel_gazelle",
     sha256 = "d8c45ee70ec39a57e7a05e5027c32b1576cc7f16d9dd37135b0eddde45cf1b10",
     urls = [
@@ -92,4 +99,11 @@ go_repository(
     importpath = "github.com/google/go-cmp",
     sum = "h1:xsAVV57WRhGj6kEIi8ReJzQlHHqcBYCElAvkovg3B/4=",
     version = "v0.4.0",
+)
+
+go_repository(
+    name = "org_golang_x_xerrors",
+    importpath = "golang.org/x/xerrors",
+    sum = "h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=",
+    version = "v0.0.0-20191204190536-9bdfabe68543",
 )

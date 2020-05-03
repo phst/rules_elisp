@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_library")
 
 elisp_library(
@@ -19,4 +20,15 @@ elisp_library(
     testonly = 1,
     srcs = ["runner.el"],
     visibility = ["//visibility:public"],
+)
+
+go_test(
+    name = "runner_test",
+    srcs = ["runner_test.go"],
+    data = ["//examples:lib_1_test"],
+    deps = [
+        "@com_github_google_go_cmp//cmp:go_default_library",
+        "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
+        "@phst_runfiles//runfiles",
+    ],
 )
