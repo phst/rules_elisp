@@ -533,7 +533,7 @@ int RunBinary(const char* const wrapper, const Mode mode,
   const auto status_or_code =
       executor.RunBinary(wrapper, mode, load_path, load_files, data_files);
   if (!status_or_code.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
+    std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
   }
   return status_or_code.value();
@@ -553,7 +553,7 @@ int RunTest(const char* const wrapper, const Mode mode,
   const auto status_or_code =
       executor.RunTest(wrapper, mode, load_path, srcs, data_files);
   if (!status_or_code.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
+    std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
   }
   return status_or_code.value();
