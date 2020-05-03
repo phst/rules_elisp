@@ -370,7 +370,7 @@ StatusOr<int> Executor::RunBinary(
   RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
   for (const auto& file : load_files) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
-    args.push_back(absl::StrCat("--load=", file));
+    args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
     RETURN_IF_ERROR(
