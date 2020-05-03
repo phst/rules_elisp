@@ -19,16 +19,10 @@
 #include <dirent.h>
 #include <fcntl.h>
 
-#include <array>
-#include <cerrno>
+#include <cstdio>
 #include <initializer_list>
 #include <iterator>
-#include <locale>
-#include <memory>
 #include <string>
-#include <system_error>
-#include <tuple>
-#include <utility>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -37,7 +31,6 @@
 #include "absl/base/attributes.h"
 #include "absl/base/casts.h"
 #include "absl/status/status.h"
-#include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 

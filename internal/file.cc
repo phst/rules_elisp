@@ -20,15 +20,15 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include <algorithm>
+#include <array>
 #include <cassert>
 #include <cerrno>
+#include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <system_error>
 #include <utility>
 
 #pragma GCC diagnostic push
