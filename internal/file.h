@@ -109,8 +109,8 @@ class File {
 
 class TempFile : public File {
  public:
-  static StatusOr<TempFile> Open(const std::string& directory,
-                                 absl::string_view tmpl, Random& random);
+  static StatusOr<TempFile> Create(const std::string& directory,
+                                   absl::string_view tmpl, Random& random);
 
   ~TempFile() noexcept override;
   TempFile(const TempFile&) = delete;

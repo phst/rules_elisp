@@ -156,7 +156,7 @@ static StatusOr<absl::optional<TempFile>> AddManifest(
   using Type = absl::optional<TempFile>;
   if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
   ASSIGN_OR_RETURN(auto stream,
-                   TempFile::Open(TempDir(), "manifest-*.json", random));
+                   TempFile::Create(TempDir(), "manifest-*.json", random));
   args.push_back(absl::StrCat("--manifest=", stream.path()));
   args.push_back("--");
   return absl::implicit_cast<Type>(std::move(stream));
@@ -391,7 +391,7 @@ StatusOr<int> Executor::RunTest(
   if (!xml_output_file.empty()) {
     const std::string temp_dir = this->EnvVar("TEST_TMPDIR");
     ASSIGN_OR_RETURN(report_file,
-                     TempFile::Open(temp_dir, "test-report-*.json", random_));
+                     TempFile::Create(temp_dir, "test-report-*.json", random_));
     args.push_back(absl::StrCat("--report=/:", report_file->path()));
   }
   for (const auto& file : srcs) {

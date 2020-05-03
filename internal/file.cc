@@ -192,9 +192,9 @@ absl::Status File::Fail(const absl::string_view function) const {
                       absl::StrCat("file ", path_, ": ", status.message()));
 }
 
-StatusOr<TempFile> TempFile::Open(const std::string& directory,
-                                  const absl::string_view tmpl,
-                                  Random& random) {
+StatusOr<TempFile> TempFile::Create(const std::string& directory,
+                                    const absl::string_view tmpl,
+                                    Random& random) {
   TempFile result;
   for (int i = 0; i < 10; i++) {
     auto name = JoinPath(directory, random.TempName(tmpl));

@@ -162,7 +162,7 @@ TEST(File, Move) {
 
 TEST(TempFile, Create) {
   Random rnd;
-  auto status_or_file = TempFile::Open(TempDir(), "foo-*.tmp", rnd);
+  auto status_or_file = TempFile::Create(TempDir(), "foo-*.tmp", rnd);
   ASSERT_TRUE(status_or_file.ok()) << status_or_file.status();
   auto& file = status_or_file.value();
   const auto path = file.path();
@@ -192,7 +192,7 @@ TEST(File, AssignRead) {
 
 TEST(TempFile, Write) {
   Random rnd;
-  auto status_or_stream = TempFile::Open(TempDir(), "foo-*.tmp", rnd);
+  auto status_or_stream = TempFile::Create(TempDir(), "foo-*.tmp", rnd);
   ASSERT_TRUE(status_or_stream.ok()) << status_or_stream.status();
   auto& stream = status_or_stream.value();
   const auto path = stream.path();
