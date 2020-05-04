@@ -34,6 +34,7 @@
 #include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/strings/string_view.h"
+#include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
 
 #include "elisp/status.h"
@@ -164,7 +165,7 @@ class Directory {
 
   static StatusOr<Directory> Open(const std::string& name);
   Directory(const Directory&) = delete;
-  Directory(Directory&& other) : dir_(other.dir_) { other.dir_ = nullptr; }
+  Directory(Directory&& other) : dir_(absl::exchange(other.dir_, nullptr)) {}
   Directory& operator=(const Directory&) = delete;
   Directory& operator=(Directory&& other);
   ~Directory() noexcept;
