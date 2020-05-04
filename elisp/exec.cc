@@ -164,7 +164,7 @@ static absl::Status WriteManifest(
     const absl::Span<const char* const> load_path,
     const absl::Span<const char* const> load_files,
     const absl::Span<const char* const> data_files,
-    const absl::Span<const std::string> output_files, File& file) {
+    const absl::Span<const std::string> output_files, TempFile& file) {
   CheckRelative(load_path);
   CheckRelative(load_files);
   CheckRelative(data_files);

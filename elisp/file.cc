@@ -53,12 +53,15 @@
 namespace phst_rules_elisp {
 
 StatusOr<File> File::Open(std::string path, const FileMode mode) {
-  File result;
-  RETURN_IF_ERROR(result.DoOpen(std::move(path), mode));
-  return std::move(result);
+  int fd = -1;
+  while (true) {
+    fd = ::open(Pointer(path), static_cast<int>(mode) | O_CLOEXEC,
+                S_IRUSR | S_IWUSR);
+    if (fd >= 0 || errno != EINTR) break;
+  }
+  if (fd < 0) return ErrnoStatus("open", path);
+  return File(fd, std::move(path));
 }
-
-File::File() = default;
 
 File::File(File&& other)
     : fd_(absl::exchange(other.fd_, -1)), path_(std::move(other.path_)) {}
@@ -78,19 +81,6 @@ File::~File() noexcept {
   if (!status.ok()) std::clog << "error closing file: " << status << std::endl;
 }
 
-absl::Status File::DoOpen(std::string path, const FileMode mode) {
-  int fd = -1;
-  while (true) {
-    fd = ::open(Pointer(path), static_cast<int>(mode) | O_CLOEXEC,
-                S_IRUSR | S_IWUSR);
-    if (fd >= 0 || errno != EINTR) break;
-  }
-  if (fd < 0) return ErrnoStatus("open", path);
-  fd_ = fd;
-  path_ = std::move(path);
-  return absl::OkStatus();
-}
-
 StatusOr<std::FILE*> File::OpenCFile(const char* const mode) {
   const auto file = fdopen(fd_, mode);
   if (file == nullptr) return this->Fail("fdopen");
@@ -105,13 +95,10 @@ absl::Status File::Close() {
     if (status == 0 || errno != EINTR) break;
   }
   fd_ = -1;
-  if (status != 0) return this->Fail("close");
-  const auto close_status = this->DoClose();
   path_.clear();
-  return close_status;
+  if (status != 0) return this->Fail("close");
+  return absl::OkStatus();
 }
-
-absl::Status File::DoClose() { return absl::OkStatus(); }
 
 absl::Status File::Write(const absl::string_view data) {
   static_assert(
@@ -160,14 +147,14 @@ absl::Status File::Fail(const absl::string_view function) const {
 StatusOr<TempFile> TempFile::Create(const std::string& directory,
                                     const absl::string_view tmpl,
                                     absl::BitGen& random) {
-  TempFile result;
   for (int i = 0; i < 10; i++) {
     auto name = TempName(directory, tmpl, random);
     if (!FileExists(name)) {
-      RETURN_IF_ERROR(result.DoOpen(std::move(name), FileMode::kReadWrite |
-                                                         FileMode::kCreate |
-                                                         FileMode::kExclusive));
-      return std::move(result);
+      ASSIGN_OR_RETURN(
+          auto file,
+          File::Open(std::move(name), FileMode::kReadWrite | FileMode::kCreate |
+                                          FileMode::kExclusive));
+      return TempFile(std::move(file));
     }
   }
   return absl::UnavailableError(
@@ -175,10 +162,8 @@ StatusOr<TempFile> TempFile::Create(const std::string& directory,
                    " with template ", tmpl));
 }
 
-TempFile::TempFile() {}
-
 TempFile::~TempFile() noexcept {
-  const auto status = this->Remove();
+  const auto status = this->Close();
   // Only print an error if removing the file failed (status not OK), but
   // the file wasn’t already removed before (NOT_FOUND status).
   if (!status.ok() && !absl::IsNotFound(status)) {
@@ -187,12 +172,10 @@ TempFile::~TempFile() noexcept {
   }
 }
 
-absl::Status TempFile::DoClose() {
-  return this->Remove();
-}
-
-absl::Status TempFile::Remove() noexcept {
-  return RemoveFile(this->path());
+absl::Status TempFile::Close() {
+  auto status = RemoveFile(this->path());
+  status.Update(file_.Close());
+  return status;
 }
 
 std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) {

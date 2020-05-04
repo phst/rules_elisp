@@ -23,6 +23,7 @@
 #include <initializer_list>
 #include <iterator>
 #include <string>
+#include <utility>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -54,7 +55,7 @@ inline FileMode operator|(const FileMode a, const FileMode b) {
 class File {
  public:
   static StatusOr<File> Open(std::string path, FileMode mode);
-  virtual ~File() noexcept;
+  ~File() noexcept;
   File(const File&) = delete;
   File(File&& other);
   File& operator=(const File&) = delete;
@@ -65,33 +66,34 @@ class File {
   StatusOr<std::string> Read();
   absl::Status Write(absl::string_view data);
 
- protected:
-  File();
-  absl::Status DoOpen(std::string path, FileMode mode);
-
  private:
-  virtual absl::Status DoClose();
+  explicit File(int fd, std::string path) : fd_(fd), path_(std::move(path)) {}
   absl::Status Fail(absl::string_view function) const;
 
   int fd_ = -1;
   std::string path_;
 };
 
-class TempFile : public File {
+class TempFile {
  public:
   static StatusOr<TempFile> Create(const std::string& directory,
-                                   absl::string_view tmpl, absl::BitGen& random);
+                                   absl::string_view tmpl,
+                                   absl::BitGen& random);
 
-  ~TempFile() noexcept override;
+  ~TempFile() noexcept;
   TempFile(const TempFile&) = delete;
   TempFile(TempFile&&) = default;
   TempFile& operator=(const TempFile&) = delete;
   TempFile& operator=(TempFile&&) = default;
+  const std::string& path() const noexcept { return file_.path(); }
+  absl::Status Close();
+  StatusOr<std::string> Read() { return file_.Read(); }
+  absl::Status Write(const absl::string_view data) { return file_.Write(data); }
 
  private:
-  TempFile();
-  absl::Status DoClose() final;
-  absl::Status Remove() noexcept;
+  explicit TempFile(File file) : file_(std::move(file)) {}
+
+  File file_;
 };
 
 constexpr bool IsAbsolute(absl::string_view name) noexcept {
