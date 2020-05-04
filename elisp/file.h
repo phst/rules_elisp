@@ -16,6 +16,7 @@
 #define PHST_RULES_ELISP_ELISP_FILE_H
 
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <dirent.h>
 #include <fcntl.h>
 
