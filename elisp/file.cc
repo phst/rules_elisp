@@ -256,16 +256,14 @@ absl::Status Directory::Close() noexcept {
   return absl::OkStatus();
 }
 
-void Directory::Iterator::Advance() {
+StatusOr<std::string> Directory::Read() {
   errno = 0;
   const auto entry = ::readdir(dir_);
   if (entry == nullptr) {
-    dir_ = nullptr;
-    if (errno != 0) std::clog << ErrnoStatus("readdir") << std::endl;
-    entry_.clear();
-  } else {
-    entry_ = entry->d_name;
+    if (errno != 0) return ErrnoStatus("readdir");
+    return std::string();  // end of stream
   }
+  return absl::implicit_cast<std::string>(entry->d_name);
 }
 
 }  // phst_rules_elisp

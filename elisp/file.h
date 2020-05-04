@@ -21,7 +21,6 @@
 #include <fcntl.h>
 
 #include <initializer_list>
-#include <iterator>
 #include <string>
 #include <utility>
 
@@ -120,49 +119,6 @@ ABSL_MUST_USE_RESULT std::string TempName(absl::string_view dir,
 
 class Directory {
  public:
-  class Iterator {
-   public:
-    using iterator_category = std::input_iterator_tag;
-    using value_type = std::string;
-    using difference_type = void;
-    using pointer = const std::string*;
-    using reference = const std::string&;
-
-    inline friend bool operator==(const Iterator i, const Iterator j) noexcept {
-      return i.End() == j.End();
-    }
-
-    inline friend bool operator!=(const Iterator i, const Iterator j) noexcept {
-      return !(i == j);
-    }
-
-    reference operator*() const noexcept { return entry_; }
-    pointer operator->() const noexcept { return &entry_; }
-
-    Iterator& operator++() {
-      this->Advance();
-      return *this;
-    }
-
-    Iterator operator++(int) {
-      const auto copy = *this;
-      this->Advance();
-      return copy;
-    }
-
-   private:
-    explicit Iterator(DIR* const dir) : dir_(dir) { this->Advance(); }
-    explicit Iterator() : dir_(nullptr) {}
-
-    friend class Directory;
-
-    bool End() const noexcept { return dir_ == nullptr; }
-    void Advance();
-
-    ::DIR* dir_;
-    std::string entry_;
-  };
-
   static StatusOr<Directory> Open(const std::string& name);
   Directory(const Directory&) = delete;
   Directory(Directory&& other) : dir_(absl::exchange(other.dir_, nullptr)) {}
@@ -170,8 +126,7 @@ class Directory {
   Directory& operator=(Directory&& other);
   ~Directory() noexcept;
   absl::Status Close() noexcept;
-  Iterator begin() const { return Iterator(dir_); }
-  Iterator end() const { return Iterator(); }
+  StatusOr<std::string> Read();
 
  private:
   explicit Directory(::DIR* const dir) : dir_(dir) {}

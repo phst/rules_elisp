@@ -124,13 +124,16 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
 
 static StatusOr<std::string> GetSharedDir(const std::string& install) {
   const auto emacs = JoinPath(install, "share", "emacs");
-  ASSIGN_OR_RETURN(const auto dir, Directory::Open(emacs));
+  ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
   absl::flat_hash_set<std::string> dirs;
-  for (const auto& entry : dir) {
+  while (true) {
+    ASSIGN_OR_RETURN(const auto entry, dir.Read());
+    if (entry.empty()) break;
     if (std::regex_match(entry, std::regex("[0-9][.0-9]*"))) {
       dirs.insert(entry);
     }
   }
+  RETURN_IF_ERROR(dir.Close());
   if (dirs.empty()) return absl::NotFoundError("no shared directory found");
   if (dirs.size() != 1) {
     return absl::FailedPreconditionError(
