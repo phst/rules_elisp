@@ -66,7 +66,8 @@ class File {
   absl::Status Write(absl::string_view data);
 
  private:
-  explicit File(int fd, std::string path) : fd_(fd), path_(std::move(path)) {}
+  explicit File(const int fd, std::string path)
+      : fd_(fd), path_(std::move(path)) {}
   absl::Status Fail(absl::string_view function) const;
 
   int fd_ = -1;
@@ -172,7 +173,7 @@ class Directory {
   Iterator end() const { return Iterator(); }
 
  private:
-  explicit Directory(::DIR* dir) : dir_(dir) {}
+  explicit Directory(::DIR* const dir) : dir_(dir) {}
 
   ::DIR* dir_;
 };
