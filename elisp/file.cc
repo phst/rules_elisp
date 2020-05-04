@@ -251,10 +251,9 @@ Directory::~Directory() noexcept {
 
 absl::Status Directory::Close() noexcept {
   if (dir_ == nullptr) return absl::OkStatus();
-  const auto status =
-      ::closedir(dir_) == 0 ? absl::OkStatus() : ErrnoStatus("closedir");
+  if (::closedir(dir_) != 0) return ErrnoStatus("closedir");
   dir_ = nullptr;
-  return status;
+  return absl::OkStatus();
 }
 
 void Directory::Iterator::Advance() {
