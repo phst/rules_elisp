@@ -41,6 +41,8 @@ namespace {
 
 using ::testing::TempDir;
 using ::testing::Not;
+using ::testing::IsFalse;
+using ::testing::IsTrue;
 using ::testing::Eq;
 using ::testing::Ge;
 using ::testing::StrEq;
@@ -181,10 +183,10 @@ TEST(TempFile, Create) {
   EXPECT_THAT(Parent(path), Eq(RemoveSlash(TempDir())));
   EXPECT_THAT(std::string(FileName(path)), StartsWith("foo-"));
   EXPECT_THAT(std::string(FileName(path)), EndsWith(".tmp"));
-  EXPECT_TRUE(FileExists(path));
+  EXPECT_THAT(FileExists(path), IsTrue());
   EXPECT_THAT(file.Close(), IsOK());
-  EXPECT_TRUE(file.path().empty());
-  EXPECT_FALSE(FileExists(path));
+  EXPECT_THAT(file.path(), IsEmpty());
+  EXPECT_THAT(FileExists(path), IsFalse());
 }
 
 TEST(File, AssignRead) {
@@ -210,12 +212,12 @@ TEST(TempFile, Write) {
   EXPECT_THAT(Parent(path), Eq(RemoveSlash(TempDir())));
   EXPECT_THAT(std::string(FileName(path)), StartsWith("foo-"));
   EXPECT_THAT(std::string(FileName(path)), EndsWith(".tmp"));
-  EXPECT_TRUE(FileExists(path));
+  EXPECT_THAT(FileExists(path), IsTrue());
   EXPECT_THAT(stream.Write("hello world\n"), IsOK());
   EXPECT_THAT(ReadFile(path), "hello world\n");
   EXPECT_THAT(stream.Close(), IsOK());
-  EXPECT_TRUE(stream.path().empty());
-  EXPECT_FALSE(FileExists(path));
+  EXPECT_THAT(stream.path(), IsEmpty());
+  EXPECT_THAT(FileExists(path), IsFalse());
 }
 
 TEST(JoinPath, Relative) {
