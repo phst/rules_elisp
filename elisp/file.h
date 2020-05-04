@@ -19,7 +19,6 @@
 #include <dirent.h>
 #include <fcntl.h>
 
-#include <cstdio>
 #include <initializer_list>
 #include <iterator>
 #include <string>
@@ -60,7 +59,6 @@ class File {
   File(File&& other);
   File& operator=(const File&) = delete;
   File& operator=(File&& other);
-  StatusOr<std::FILE*> OpenCFile(const char* mode);
   const std::string& path() const noexcept { return path_; }
   absl::Status Close();
   StatusOr<std::string> Read();

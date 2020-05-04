@@ -17,14 +17,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <stdio.h>
 #include <unistd.h>
 
 #include <array>
 #include <cassert>
 #include <cerrno>
 #include <cstdint>
-#include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
 #include <iostream>
@@ -79,12 +77,6 @@ File::~File() noexcept {
   std::clog << "file " << path_ << " still open" << std::endl;
   const auto status = this->Close();
   if (!status.ok()) std::clog << "error closing file: " << status << std::endl;
-}
-
-StatusOr<std::FILE*> File::OpenCFile(const char* const mode) {
-  const auto file = fdopen(fd_, mode);
-  if (file == nullptr) return this->Fail("fdopen");
-  return file;
 }
 
 absl::Status File::Close() {
