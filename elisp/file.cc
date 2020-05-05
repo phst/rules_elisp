@@ -123,21 +123,17 @@ absl::Status File::Write(const absl::string_view data) {
   static_assert(
       UnsignedMax<ssize_t>() <= UnsignedMax<absl::string_view::size_type>(),
       "unsupported architecture");
-  absl::string_view::size_type written = 0;
   auto rest = data;
   while (!rest.empty()) {
-    const auto m = ::write(fd_, rest.data(), rest.size());
-    if (m < 0) return this->Fail("write");
-    if (m == 0) break;
-    const auto n = static_cast<absl::string_view::size_type>(m);
-    written += n;
-    rest.remove_prefix(n);
+    const auto n = ::write(fd_, rest.data(), rest.size());
+    if (n < 0) return this->Fail("write");
+    if (n == 0) break;
+    rest.remove_prefix(static_cast<absl::string_view::size_type>(n));
   }
-  assert(written <= data.size());
-  if (written != data.size()) {
-    return absl::DataLossError(absl::StrCat("requested write of ", data.size(),
-                                            " bytes, but only ", written,
-                                            " bytes written"));
+  if (!rest.empty()) {
+    return absl::DataLossError(
+        absl::StrCat("requested write of ", data.size(), " bytes, but only ",
+                     data.size() - rest.size(), " bytes written"));
   }
   return absl::OkStatus();
 }
