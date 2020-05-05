@@ -160,9 +160,11 @@ source files and load them."
                 (timestamp . ,(format-time-string "%FT%T" start-time)))
                ,@(nreverse test-reports)))))
           (let ((coding-system-for-write 'utf-8-unix))
-            (write-region nil nil report-file nil nil nil 'excl))))
+            (write-region nil nil (file-name-quote report-file)
+                          nil nil nil 'excl))))
       (when load-buffers
-        (elisp/ert/write--coverage-report coverage-dir load-buffers))
+        (elisp/ert/write--coverage-report (file-name-quote coverage-dir)
+                                          load-buffers))
       (kill-emacs (min unexpected 1)))))
 
 (defun elisp/ert/failure--message (name result)
