@@ -52,7 +52,7 @@ func Test(t *testing.T) {
 	cmd := exec.Command(bin)
 	// See
 	// https://docs.bazel.build/versions/3.1.0/test-encyclopedia.html#initial-conditions.
-	cmd.Env = append(os.Environ(), append(runfilesEnv, "XML_OUTPUT_FILE="+reportName)...)
+	cmd.Env = append(os.Environ(), append(runfilesEnv, "XML_OUTPUT_FILE="+reportName, "TESTBRIDGE_TEST_ONLY=(not (tag skip))")...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	switch err := cmd.Run().(type) {
@@ -100,9 +100,9 @@ func Test(t *testing.T) {
 	want := report{
 		XMLName:   xml.Name{"", "testsuite"},
 		Name:      "ERT",
-		Tests:     9,
+		Tests:     8,
 		Errors:    0,
-		Failures:  6,
+		Failures:  5,
 		Skipped:   1,
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
@@ -112,7 +112,6 @@ func Test(t *testing.T) {
 			{Name: "expect-failure", ClassName: "ERT", Status: "failed", Time: wantElapsed},
 			{Name: "expect-failure-but-pass", ClassName: "ERT", Status: "PASSED", Time: wantElapsed},
 			{Name: "fail", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
-			{Name: "filter", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
 			{Name: "pass", ClassName: "ERT", Status: "passed", Time: wantElapsed},
 			{Name: "skip", ClassName: "ERT", Status: "skipped", Time: wantElapsed},
 			{Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
