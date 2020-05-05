@@ -144,7 +144,8 @@ source files and load them."
           ;; bit of documentation.
           (xml-print
            `((testsuite
-              ((tests . ,(number-to-string (length tests)))
+              ((name . "ERT")  ; required
+               (tests . ,(number-to-string (length tests)))
                (errors . ,(number-to-string errors))
                (failures . ,(number-to-string failures))
                (id . "0")

@@ -77,6 +77,7 @@ func Test(t *testing.T) {
 	}
 	type report struct {
 		XMLName   xml.Name
+		Name      string     `xml:"name,attr"`
 		Tests     int        `xml:"tests,attr"`
 		Errors    int        `xml:"errors,attr"`
 		Failures  int        `xml:"failures,attr"`
@@ -96,6 +97,7 @@ func Test(t *testing.T) {
 	wantElapsed := margin.Seconds() / 2
 	want := report{
 		XMLName:   xml.Name{"", "testsuite"},
+		Name:      "ERT",
 		Tests:     9,
 		Errors:    0,
 		Failures:  6,
