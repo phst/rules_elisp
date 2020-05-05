@@ -73,6 +73,7 @@ func Test(t *testing.T) {
 	type testCase struct {
 		Name      string  `xml:"name,attr"`
 		ClassName string  `xml:"classname,attr"`
+		Status    string  `xml:"status,attr"`
 		Time      float64 `xml:"time,attr"`
 	}
 	type report struct {
@@ -106,15 +107,15 @@ func Test(t *testing.T) {
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
 		TestCases: []testCase{
-			{Name: "abort", ClassName: "ERT", Time: wantElapsed},
-			{Name: "error", ClassName: "ERT", Time: wantElapsed},
-			{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
-			{Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed},
-			{Name: "fail", ClassName: "ERT", Time: wantElapsed},
-			{Name: "filter", ClassName: "ERT", Time: wantElapsed},
-			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
-			{Name: "skip", ClassName: "ERT", Time: wantElapsed},
-			{Name: "throw", ClassName: "ERT", Time: wantElapsed},
+			{Name: "abort", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{Name: "error", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{Name: "expect-failure", ClassName: "ERT", Status: "failed", Time: wantElapsed},
+			{Name: "expect-failure-but-pass", ClassName: "ERT", Status: "PASSED", Time: wantElapsed},
+			{Name: "fail", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{Name: "filter", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{Name: "pass", ClassName: "ERT", Status: "passed", Time: wantElapsed},
+			{Name: "skip", ClassName: "ERT", Status: "skipped", Time: wantElapsed},
+			{Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
 		},
 	}
 	if diff := cmp.Diff(got, want, cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {
