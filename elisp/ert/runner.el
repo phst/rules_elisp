@@ -109,14 +109,13 @@ source files and load them."
                      ;; A test that passed unexpectedly should count as failed
                      ;; for the XML report.
                      (ert-test-result-type-p result '(or :passed :failed))))
-               (error (and (not expected) (not failed)))
                (status (ert-string-for-test-result result expected))
                (report nil))
           (elisp/ert/log--message "Test %s %s and took %d ms" name status
                                   (* (float-time duration) 1000))
           (or expected (cl-incf unexpected))
           (and failed (cl-incf failures))
-          (and error (cl-incf errors))
+          (and (not expected) (not failed) (cl-incf errors))
           (and (ert-test-skipped-p result) (cl-incf skipped))
           (when (ert-test-result-with-condition-p result)
             (let ((message (elisp/ert/failure--message name result)))
