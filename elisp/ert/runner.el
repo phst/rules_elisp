@@ -162,7 +162,7 @@ source files and load them."
           (let ((coding-system-for-write 'utf-8-unix))
             (write-region nil nil (file-name-quote report-file)
                           nil nil nil 'excl))))
-      (when load-buffers
+      (when coverage-enabled
         (elisp/ert/write--coverage-report (file-name-quote coverage-dir)
                                           load-buffers))
       (kill-emacs (min unexpected 1)))))
@@ -238,7 +238,7 @@ visiting the file."
 BUFFERS is a list of buffers containing Emacs Lisp sources
 instrumented using Edebug."
   (cl-check-type coverage-dir string)
-  (cl-check-type buffers cons)
+  (cl-check-type buffers list)
   (with-temp-buffer
     (let ((coding-system-for-write 'utf-8-unix)
           (root (getenv "TEST_SRCDIR")))
