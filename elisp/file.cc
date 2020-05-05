@@ -141,9 +141,9 @@ absl::Status File::Write(const absl::string_view data) {
 StatusOr<std::string> File::Read() {
   static_assert(UnsignedMax<ssize_t>() <= UnsignedMax<std::size_t>(),
                 "unsupported architecture");
-  std::array<char, 0x1000> buffer;
   std::string result;
   while (true) {
+    std::array<char, 0x1000> buffer;
     const auto n = ::read(fd_, buffer.data(), buffer.size());
     if (n < 0) return this->Fail("read");
     if (n == 0) break;
