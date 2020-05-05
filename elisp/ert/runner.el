@@ -69,7 +69,8 @@ source files and load them."
                 (cond
                  ((file-readable-p fullname)
                   (push (elisp/ert/load--instrument fullname file)
-                        load-buffers))
+                        load-buffers)
+                  t)
                  (noerror nil)
                  (t (signal 'file-error (list "Cannot open load file" file)))))
             load-source-file-function)))
