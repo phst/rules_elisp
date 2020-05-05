@@ -155,7 +155,7 @@ source files and load them."
                   ;; No timezone or fractional seconds allowed.
                   (timestamp . ,(format-time-string "%FT%T" start-time))
                   ,@attributes)
-                 ,@test-reports)))))
+                 ,@(nreverse test-reports))))))
           (write-region nil nil report-file nil nil nil 'excl)))
       (when load-buffers
         (elisp/ert/write--coverage-report coverage-dir load-buffers))
