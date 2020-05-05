@@ -118,11 +118,13 @@ source files and load them."
           (and (not expected) (not failed) (cl-incf errors))
           (and (ert-test-skipped-p result) (cl-incf skipped))
           (when (ert-test-result-with-condition-p result)
-            (let ((message (elisp/ert/failure--message name result)))
+            (let ((message (elisp/ert/failure--message name result))
+                  (condition (ert-test-result-with-condition-condition result)))
               (message "%s" message)
               (unless expected
                 (setq report `((,(if failed 'failure 'error)
-                                ((type . ,status))
+                                ((message . ,(error-message-string condition))
+                                 (type . ,(symbol-name (car condition))))
                                 ,message))))))
           (push `(testcase ((name . ,(symbol-name name))
                             ;; classname is required, but we don’t have test
