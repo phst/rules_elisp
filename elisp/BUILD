@@ -62,6 +62,16 @@ sh_binary(
 )
 
 bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+)
+
+bzl_library(
+    name = "repositories_bzl",
+    srcs = ["repositories.bzl"],
+)
+
+bzl_library(
     name = "util_bzl",
     srcs = ["util.bzl"],
     visibility = ["//documentation:__pkg__"],

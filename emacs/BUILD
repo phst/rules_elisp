@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+
 alias(
     name = "emacs",
     actual = "@gnu_emacs_stable//:emacs",
@@ -33,6 +35,11 @@ py_binary(
 )
 
 exports_files(srcs = ["driver.template"])
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
+)
 
 exports_files(
     ["defs.bzl"],
