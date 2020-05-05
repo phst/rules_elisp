@@ -69,7 +69,7 @@ This is necessary to determine the source root directory.""",
             providers = [CcInfo],
         ),
         "_template": attr.label(
-            default = "//emacs:driver_template",
+            default = "//emacs:driver.template",
             allow_single_file = [".template"],
         ),
     },

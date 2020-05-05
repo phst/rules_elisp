@@ -32,14 +32,9 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
-filegroup(
-    name = "driver_template",
-    srcs = ["driver.template"],
-    visibility = ["//visibility:public"],
-)
+exports_files(srcs = ["driver.template"])
 
-filegroup(
-    name = "defs_bzl",
-    srcs = ["defs.bzl"],
+exports_files(
+    ["defs.bzl"],
     visibility = ["//documentation:__pkg__"],
 )

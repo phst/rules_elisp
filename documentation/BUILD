@@ -18,7 +18,7 @@ load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 stardoc(
     name = "elisp_defs_doc",
     out = "elisp_defs_doc.md",
-    input = "//elisp:defs_bzl",
+    input = "//elisp:defs.bzl",
     deps = [
         "//elisp:util_bzl",
         "@bazel_skylib//lib:paths",
@@ -28,7 +28,7 @@ stardoc(
 stardoc(
     name = "emacs_defs_doc",
     out = "emacs_defs_doc.md",
-    input = "//emacs:defs_bzl",
+    input = "//emacs:defs.bzl",
     deps = [
         "//elisp:builtin_bzl",
         "//elisp:util_bzl",
@@ -39,6 +39,6 @@ stardoc(
 stardoc(
     name = "repositories_doc",
     out = "repositories_doc.md",
-    input = "//elisp:repositories_bzl",
+    input = "//elisp:repositories.bzl",
     deps = ["//elisp:builtin_bzl"],
 )

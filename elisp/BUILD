@@ -50,39 +50,15 @@ elisp_toolchain(
     use_default_shell_env = True,
 )
 
-filegroup(
-    name = "compile",
-    srcs = ["compile.el"],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "binary_template",
-    srcs = ["binary.template"],
-    visibility = ["//visibility:public"],
-)
-
-filegroup(
-    name = "test_template",
-    srcs = ["test.template"],
-    visibility = ["//visibility:public"],
-)
+exports_files([
+    "compile.el",
+    "binary.template",
+    "test.template",
+])
 
 sh_binary(
     name = "local_emacs",
     srcs = ["local_emacs.sh"],
-)
-
-filegroup(
-    name = "defs_bzl",
-    srcs = ["defs.bzl"],
-    visibility = ["//documentation:__pkg__"],
-)
-
-filegroup(
-    name = "repositories_bzl",
-    srcs = ["repositories.bzl"],
-    visibility = ["//documentation:__pkg__"],
 )
 
 bzl_library(
@@ -194,4 +170,12 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:variant",
     ],
+)
+
+exports_files(
+    [
+        "defs.bzl",
+        "repositories.bzl",
+    ],
+    visibility = ["//documentation:__pkg__"],
 )

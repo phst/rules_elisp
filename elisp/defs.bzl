@@ -212,7 +212,7 @@ specify temporary files that are deleted after the action completes.""",
 # Tool attributes shared between elisp_library, elisp_binary, and elisp_test.
 _TOOLS = {
     "_compile": attr.label(
-        default = "//elisp:compile",
+        default = "//elisp:compile.el",
         allow_single_file = [".el"],
     ),
 }
@@ -276,7 +276,7 @@ elisp_binary = rule(
             allow_empty = False,
         ),
         _template = attr.label(
-            default = "//elisp:binary_template",
+            default = "//elisp:binary.template",
             allow_single_file = [".template"],
         ),
         data = attr.label_list(
@@ -322,7 +322,7 @@ elisp_test = rule(
             allow_empty = False,
         ),
         _template = attr.label(
-            default = "//elisp:test_template",
+            default = "//elisp:test.template",
             allow_single_file = [".template"],
         ),
         _lcov_merger = attr.label(
