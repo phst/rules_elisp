@@ -39,6 +39,11 @@ exports_files(srcs = ["driver.template"])
 bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
+    deps = [
+        "//elisp:builtin_bzl",
+        "//elisp:util_bzl",
+        "@bazel_skylib//lib:paths",
+    ],
 )
 
 exports_files(

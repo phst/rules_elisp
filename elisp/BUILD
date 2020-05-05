@@ -64,6 +64,10 @@ sh_binary(
 bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
+    deps = [
+        ":util_bzl",
+        "@bazel_skylib//lib:paths",
+    ],
 )
 
 bzl_library(
@@ -74,7 +78,10 @@ bzl_library(
 bzl_library(
     name = "util_bzl",
     srcs = ["util.bzl"],
-    visibility = ["//documentation:__pkg__"],
+    visibility = [
+        "//documentation:__pkg__",
+        "//emacs:__pkg__",
+    ],
     deps = [
         ":builtin_bzl",
         "@bazel_skylib//lib:paths",
@@ -84,7 +91,10 @@ bzl_library(
 bzl_library(
     name = "builtin_bzl",
     srcs = ["@bazel_tools//tools:bzl_srcs"],
-    visibility = ["//documentation:__pkg__"],
+    visibility = [
+        "//documentation:__pkg__",
+        "//emacs:__pkg__",
+    ],
 )
 
 elisp_test_suite(name = "elisp_test")
