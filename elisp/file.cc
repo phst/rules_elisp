@@ -122,11 +122,10 @@ StatusOr<std::string> File::Read() {
   std::array<char, 0x1000> buffer;
   std::string result;
   while (true) {
-    const auto m = ::read(fd_, buffer.data(), buffer.size());
-    if (m < 0) return this->Fail("read");
-    if (m == 0) break;
-    const auto n = static_cast<std::string::size_type>(m);
-    result.append(buffer.data(), n);
+    const auto n = ::read(fd_, buffer.data(), buffer.size());
+    if (n < 0) return this->Fail("read");
+    if (n == 0) break;
+    result.append(buffer.data(), static_cast<std::string::size_type>(n));
   }
   return result;
 }
