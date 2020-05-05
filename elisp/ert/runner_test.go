@@ -19,6 +19,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -36,7 +37,8 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	reportFile, err := ioutil.TempFile(os.Getenv("TEST_TMPDIR"), "report-*.xml")
+	tempDir := os.Getenv("TEST_TMPDIR")
+	reportFile, err := ioutil.TempFile(tempDir, "report-*.xml")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,11 +50,19 @@ func Test(t *testing.T) {
 	if err := reportFile.Close(); err != nil {
 		t.Error(err)
 	}
+	coverageDir, err := ioutil.TempDir(tempDir, "coverage-")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(coverageDir)
 
 	cmd := exec.Command(bin)
 	// See
 	// https://docs.bazel.build/versions/3.1.0/test-encyclopedia.html#initial-conditions.
-	cmd.Env = append(os.Environ(), append(runfilesEnv, "XML_OUTPUT_FILE="+reportName, "TESTBRIDGE_TEST_ONLY=(not (tag skip))")...)
+	cmd.Env = append(os.Environ(), append(runfilesEnv,
+		"XML_OUTPUT_FILE="+reportName,
+		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
+		"COVERAGE=1", "COVERAGE_DIR="+coverageDir)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	switch err := cmd.Run().(type) {
@@ -98,8 +108,8 @@ func Test(t *testing.T) {
 		Timestamp timestamp  `xml:"timestamp,attr"`
 		TestCases []testCase `xml:"testcase"`
 	}
-	var got report
-	if err := xml.Unmarshal(b, &got); err != nil {
+	var gotReport report
+	if err := xml.Unmarshal(b, &gotReport); err != nil {
 		t.Error(err)
 	}
 	// Margin for time comparisons.  One hour is excessive, but we only
@@ -108,10 +118,10 @@ func Test(t *testing.T) {
 	// This, together with the EquateApprox below, ensures that the elapsed
 	// time is nonnegative and below the margin.
 	wantElapsed := margin.Seconds() / 2
-	want := report{
+	wantReport := report{
 		XMLName:   xml.Name{"", "testsuite"},
 		Name:      "ERT",
-		Tests:     9,
+		Tests:     10,
 		Errors:    0,
 		Failures:  6,
 		Skipped:   1,
@@ -122,6 +132,7 @@ func Test(t *testing.T) {
 				Name: "abort", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
 				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
 			},
+			{Name: "coverage", ClassName: "ERT", Status: "passed", Time: wantElapsed},
 			{
 				Name: "error", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
 				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
@@ -145,12 +156,40 @@ func Test(t *testing.T) {
 		},
 	}
 	if diff := cmp.Diff(
-		got, want,
+		gotReport, wantReport,
 		cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin),
 		// We only check that the description isn’t absent or empty.
 		cmp.FilterPath(isDescription, cmp.Comparer(bothEmpty)),
 	); diff != "" {
-		t.Errorf("-got +want:\n%s", diff)
+		t.Error("XML test report (-got +want):\n", diff)
+	}
+
+	files, err := filepath.Glob(filepath.Join(coverageDir, "*.dat"))
+	if err != nil {
+		t.Error(err)
+	}
+	if len(files) != 1 {
+		t.Fatalf("got %d coverage files %v, want exactly one", len(files), files)
+	}
+	b, err = ioutil.ReadFile(files[0])
+	if err != nil {
+		t.Error(err)
+	}
+	gotCoverage := string(b)
+	const wantCoverage = `SF:phst_rules_elisp/elisp/ert/test-lib.el
+FN:24,elisp/ert/test-function
+FNDA:1,elisp/ert/test-function
+FNF:1
+FNH:1
+DA:26,1
+DA:27,0
+DA:28,1
+LH:2
+LF:3
+end_of_record
+`
+	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
+		t.Error("coverage report (-got +want):\n", diff)
 	}
 }
 

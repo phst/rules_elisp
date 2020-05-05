@@ -21,6 +21,7 @@
 ;;; Code:
 
 (require 'ert)
+(require 'elisp/ert/test-lib)
 
 (ert-deftest pass ()
   (should (= 0 0)))
@@ -56,5 +57,8 @@
 (ert-deftest special-chars ()
   (error (concat "Error äöü \t \r\n \0 \uFFFD \uFFFE \uFFFF 𝑨 "
                  "<![CDATA[ ]]> & < > \" ' <!-- -->")))
+
+(ert-deftest coverage ()
+  (elisp/ert/test-function nil))
 
 ;;; test.el ends here

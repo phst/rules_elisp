@@ -36,5 +36,15 @@ go_test(
 elisp_test(
     name = "test_test",
     srcs = ["test.el"],
+    # We need to explicitly include the source file as data dependency,
+    # otherwise it won’t be present and we can’t test coverage.  For real
+    # tests, Bazel does the right thing.
+    data = ["test-lib.el"],
     tags = ["manual"],
+    deps = [":test_lib"],
+)
+
+elisp_library(
+    name = "test_lib",
+    srcs = ["test-lib.el"],
 )
