@@ -28,7 +28,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	bin, err := runfiles.Path("phst_rules_elisp/examples/lib_1_test")
+	bin, err := runfiles.Path("phst_rules_elisp/elisp/ert/test_test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -55,7 +55,14 @@ func Test(t *testing.T) {
 	cmd.Env = append(os.Environ(), append(runfilesEnv, "XML_OUTPUT_FILE="+reportName)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	switch err := cmd.Run().(type) {
+	case nil:
+		t.Error("test binary succeeded unexpectedly")
+	case *exec.ExitError:
+		if err.ExitCode() != 1 {
+			t.Errorf("test binary: got exit code %d, want 1", err.ExitCode())
+		}
+	default:
 		t.Error(err)
 	}
 
@@ -92,12 +99,22 @@ func Test(t *testing.T) {
 	want := report{
 		XMLName: xml.Name{"", "testsuites"},
 		TestSuites: []testSuite{{
-			Tests:     1,
+			Tests:     9,
 			Errors:    0,
-			Failures:  0,
+			Failures:  6,
 			Time:      wantElapsed,
 			Timestamp: timestamp(time.Now()),
-			TestCases: []testCase{{Name: "lib-1-test", Time: wantElapsed}},
+			TestCases: []testCase{
+				{Name: "abort", Time: wantElapsed},
+				{Name: "error", Time: wantElapsed},
+				{Name: "expect-failure", Time: wantElapsed},
+				{Name: "expect-failure-but-pass", Time: wantElapsed},
+				{Name: "fail", Time: wantElapsed},
+				{Name: "filter", Time: wantElapsed},
+				{Name: "pass", Time: wantElapsed},
+				{Name: "skip", Time: wantElapsed},
+				{Name: "throw", Time: wantElapsed},
+			},
 		}},
 	}
 	if diff := cmp.Diff(got, want, cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {

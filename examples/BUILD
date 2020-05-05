@@ -26,7 +26,6 @@ elisp_library(
 elisp_test(
     name = "lib_1_test",
     srcs = ["lib-1-test.el"],
-    visibility = ["//elisp/ert:__pkg__"],
     deps = [":lib_1"],
 )
 
