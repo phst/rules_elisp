@@ -106,10 +106,9 @@ source files and load them."
                (expected (ert-test-result-expected-p test result))
                (failed
                 (and (not expected)
-                     (cl-typep result
-                               ;; A test that passed unexpectedly should count
-                               ;; as failed for the XML report.
-                               '(or ert-test-passed ert-test-failed))))
+                     ;; A test that passed unexpectedly should count as failed
+                     ;; for the XML report.
+                     (ert-test-result-type-p result '(or :passed :failed))))
                (error (and (not expected) (not failed)))
                (status (ert-string-for-test-result result expected))
                (report nil))
