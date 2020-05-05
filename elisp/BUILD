@@ -149,7 +149,6 @@ cc_library(
     hdrs = ["file.h"],
     copts = COPTS,
     deps = [
-        ":int",
         ":status",
         ":str",
         "@com_google_absl//absl/base",
@@ -175,12 +174,6 @@ cc_test(
         "@com_google_absl//absl/types:optional",
         "@com_google_googletest//:gtest_main",
     ],
-)
-
-cc_library(
-    name = "int",
-    hdrs = ["int.h"],
-    copts = COPTS,
 )
 
 cc_library(

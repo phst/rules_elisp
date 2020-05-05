@@ -27,9 +27,11 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <random>
 #include <string>
+#include <type_traits>
 #include <utility>
 
 #pragma GCC diagnostic push
@@ -46,10 +48,34 @@
 #include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/int.h"
 #include "elisp/str.h"
 
 namespace phst_rules_elisp {
+
+namespace {
+
+template <typename T>
+constexpr typename std::enable_if<std::is_integral<T>::value &&
+                                      std::is_signed<T>::value,
+                                  typename std::make_unsigned<T>::type>::type
+UnsignedMax() noexcept {
+  static_assert(std::numeric_limits<T>::max() >= 0, "type maximum is negative");
+  return static_cast<typename std::make_unsigned<T>::type>(
+      std::numeric_limits<T>::max());
+}
+
+template <typename T>
+constexpr typename std::enable_if<
+    std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
+UnsignedMax() noexcept {
+  return std::numeric_limits<T>::max();
+}
+
+template <typename T>
+constexpr typename std::enable_if<!std::is_integral<T>::value>::type
+UnsignedMax() noexcept = delete;
+
+}  // namespace
 
 StatusOr<File> File::Open(std::string path, const FileMode mode) {
   int fd = -1;
