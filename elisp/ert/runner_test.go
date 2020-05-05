@@ -70,11 +70,22 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	type message struct {
+		Message     string `xml:"message,attr"`
+		Type        string `xml:"type,attr"`
+		Description string `xml:",chardata"`
+	}
+	isDescription := func(p cmp.Path) bool {
+		f, ok := p.Last().(cmp.StructField)
+		return ok && f.Name() == "Description"
+	}
 	type testCase struct {
 		Name      string  `xml:"name,attr"`
 		ClassName string  `xml:"classname,attr"`
 		Status    string  `xml:"status,attr"`
 		Time      float64 `xml:"time,attr"`
+		Error     message `xml:"error"`
+		Failure   message `xml:"failure"`
 	}
 	type report struct {
 		XMLName   xml.Name
@@ -107,17 +118,34 @@ func Test(t *testing.T) {
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
 		TestCases: []testCase{
-			{Name: "abort", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
-			{Name: "error", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{
+				Name: "abort", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
+			},
+			{
+				Name: "error", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
+			},
 			{Name: "expect-failure", ClassName: "ERT", Status: "failed", Time: wantElapsed},
 			{Name: "expect-failure-but-pass", ClassName: "ERT", Status: "PASSED", Time: wantElapsed},
-			{Name: "fail", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{
+				Name: "fail", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Failure: message{Message: `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`, Type: `ert-test-failed`, Description: "something"},
+			},
 			{Name: "pass", ClassName: "ERT", Status: "passed", Time: wantElapsed},
 			{Name: "skip", ClassName: "ERT", Status: "skipped", Time: wantElapsed},
-			{Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed},
+			{
+				Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Failure: message{Message: `No catch for tag: unknown-tag, hi`, Type: `no-catch`, Description: "something"},
+			},
 		},
 	}
-	if diff := cmp.Diff(got, want, cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {
+	if diff := cmp.Diff(
+		got, want,
+		cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin),
+		// We only check that the description isn’t absent or empty.
+		cmp.FilterPath(isDescription, cmp.Comparer(bothEmpty)),
+	); diff != "" {
 		t.Errorf("-got +want:\n%s", diff)
 	}
 }
@@ -133,3 +161,5 @@ func (t *timestamp) UnmarshalText(b []byte) error {
 }
 
 func toTime(t timestamp) time.Time { return time.Time(t) }
+
+func bothEmpty(a, b string) bool { return (a == "") == (b == "") }
