@@ -28,6 +28,7 @@
 (require 'debug)
 (require 'edebug)
 (require 'ert)
+(require 'format)
 (require 'pp)
 (require 'rx)
 (require 'xml)
@@ -145,18 +146,19 @@ source files and load them."
           ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
           ;; bit of documentation.
           (xml-print
-           `((testsuite
-              ((name . "ERT")  ; required
-               (tests . ,(number-to-string (length tests)))
-               (errors . ,(number-to-string errors))
-               (failures . ,(number-to-string failures))
-               (skipped . ,(number-to-string skipped))
-               (id . "0")
-               (time . ,(number-to-string
-                         (float-time (time-subtract nil start-time))))
-               ;; No timezone or fractional seconds allowed.
-               (timestamp . ,(format-time-string "%FT%T" start-time)))
-              ,@(nreverse test-reports))))
+           (elisp/ert/sanitize--xml
+            `((testsuite
+               ((name . "ERT")  ; required
+                (tests . ,(number-to-string (length tests)))
+                (errors . ,(number-to-string errors))
+                (failures . ,(number-to-string failures))
+                (skipped . ,(number-to-string skipped))
+                (id . "0")
+                (time . ,(number-to-string
+                          (float-time (time-subtract nil start-time))))
+                ;; No timezone or fractional seconds allowed.
+                (timestamp . ,(format-time-string "%FT%T" start-time)))
+               ,@(nreverse test-reports)))))
           (let ((coding-system-for-write 'utf-8-unix))
             (write-region nil nil report-file nil nil nil 'excl))))
       (when load-buffers
@@ -314,6 +316,54 @@ to be used as root."
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
   (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
+
+(defun elisp/ert/sanitize--xml (tree)
+  "Return a sanitized version of the XML TREE."
+  ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
+  ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41094.  Use a hashtable
+  ;; to avoid infinite loops on cyclic data structures.
+  (cl-check-type tree list)
+  (let ((map (make-hash-table :test #'eq))
+        (marker (cons nil nil)))
+    (cl-labels ((walk
+                 (obj)
+                 (let ((existing (gethash obj map marker)))
+                   (if (not (eq existing marker)) existing
+                     (let ((new (cl-etypecase obj
+                                  (symbol (elisp/ert/check--xml-name obj))
+                                  (string (elisp/ert/sanitize--xml-string obj))
+                                  (format-proper-list (mapcar #'walk obj))
+                                  (cons
+                                   (cons (walk (car obj)) (walk (cdr obj)))))))
+                       (puthash obj new map)
+                       new)))))
+      (walk tree))))
+
+(defun elisp/ert/check--xml-name (symbol)
+  "Check that SYMBOL maps to a valid XML name.
+Return SYMBOL."
+  (cl-check-type symbol symbol)
+  (let ((name (symbol-name symbol)))
+    ;; Allow only known-safe characters in tags.  Also see
+    ;; https://www.w3.org/TR/xml/#sec-common-syn.
+    (when (or (string-prefix-p "xml" name :ignore-case)
+              (not (string-match-p (rx bos (any "a-z" "A-Z" ?_)
+                                       (* (any "a-z" "A-Z" "0-9" ?- ?_)) eos)
+                                   name)))
+      (error "Invalid XML symbol %s" symbol)))
+  symbol)
+
+(defun elisp/ert/sanitize--xml-string (string)
+  "Return a sanitized variant of STRING containing only valid XML characters."
+  (cl-check-type string string)
+  (replace-regexp-in-string
+   ;; https://www.w3.org/TR/xml/#charsets
+   (rx (not (any #x9 #xA #xD (#x20 . #xD7FF) (#xE000 . #xFFFD)
+                 (#x10000 . #x10FFFF))))
+   (lambda (s)
+     (let ((c (string-to-char s)))
+       (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
+   string :fixedcase :literal))
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here

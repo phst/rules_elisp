@@ -111,9 +111,9 @@ func Test(t *testing.T) {
 	want := report{
 		XMLName:   xml.Name{"", "testsuite"},
 		Name:      "ERT",
-		Tests:     8,
+		Tests:     9,
 		Errors:    0,
-		Failures:  5,
+		Failures:  6,
 		Skipped:   1,
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
@@ -134,6 +134,10 @@ func Test(t *testing.T) {
 			},
 			{Name: "pass", ClassName: "ERT", Status: "passed", Time: wantElapsed},
 			{Name: "skip", ClassName: "ERT", Status: "skipped", Time: wantElapsed},
+			{
+				Name: "special-chars", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Failure: message{Message: "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->", Type: `error`, Description: "something"},
+			},
 			{
 				Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
 				Failure: message{Message: `No catch for tag: unknown-tag, hi`, Type: `no-catch`, Description: "something"},

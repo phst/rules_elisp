@@ -53,4 +53,8 @@
 (ert-deftest throw ()
   (throw 'unknown-tag 'hi))
 
+(ert-deftest special-chars ()
+  (error (concat "Error äöü \t \r\n \0 \uFFFD \uFFFE \uFFFF 𝑨 "
+                 "<![CDATA[ ]]> & < > \" ' <!-- -->")))
+
 ;;; test.el ends here
