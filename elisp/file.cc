@@ -39,6 +39,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/meta/type_traits.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
@@ -55,25 +56,10 @@ namespace phst_rules_elisp {
 namespace {
 
 template <typename T>
-constexpr typename std::enable_if<std::is_integral<T>::value &&
-                                      std::is_signed<T>::value,
-                                  typename std::make_unsigned<T>::type>::type
-UnsignedMax() noexcept {
-  static_assert(std::numeric_limits<T>::max() >= 0, "type maximum is negative");
-  return static_cast<typename std::make_unsigned<T>::type>(
-      std::numeric_limits<T>::max());
+constexpr absl::make_unsigned_t<T> ToUnsigned(const T n) noexcept {
+  static_assert(std::is_integral<T>::value, "type is not integral");
+  return static_cast<absl::make_unsigned_t<T>>(n);
 }
-
-template <typename T>
-constexpr typename std::enable_if<
-    std::is_integral<T>::value && std::is_unsigned<T>::value, T>::type
-UnsignedMax() noexcept {
-  return std::numeric_limits<T>::max();
-}
-
-template <typename T>
-constexpr typename std::enable_if<!std::is_integral<T>::value>::type
-UnsignedMax() noexcept = delete;
 
 }  // namespace
 
@@ -120,15 +106,12 @@ absl::Status File::Close() {
 }
 
 absl::Status File::Write(const absl::string_view data) {
-  static_assert(
-      UnsignedMax<ssize_t>() <= UnsignedMax<absl::string_view::size_type>(),
-      "unsupported architecture");
   auto rest = data;
   while (!rest.empty()) {
     const auto n = ::write(fd_, rest.data(), rest.size());
     if (n < 0) return this->Fail("write");
     if (n == 0) break;
-    rest.remove_prefix(static_cast<absl::string_view::size_type>(n));
+    rest.remove_prefix(ToUnsigned(n));
   }
   if (!rest.empty()) {
     return absl::DataLossError(
@@ -139,15 +122,13 @@ absl::Status File::Write(const absl::string_view data) {
 }
 
 StatusOr<std::string> File::Read() {
-  static_assert(UnsignedMax<ssize_t>() <= UnsignedMax<std::string::size_type>(),
-                "unsupported architecture");
   std::string result;
   while (true) {
     std::array<char, 0x1000> buffer;
     const auto n = ::read(fd_, buffer.data(), buffer.size());
     if (n < 0) return this->Fail("read");
     if (n == 0) break;
-    result.append(buffer.data(), static_cast<std::string::size_type>(n));
+    result.append(buffer.data(), ToUnsigned(n));
   }
   return result;
 }
