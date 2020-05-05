@@ -121,9 +121,9 @@ source files and load them."
             (let ((message (elisp/ert/failure--message name result)))
               (message "%s" message)
               (unless expected
-                (setq report `(,(if failed 'failure 'error)
-                               ((type . ,status))
-                               ,message)))))
+                (setq report `((,(if failed 'failure 'error)
+                                ((type . ,status))
+                                ,message))))))
           (push `(testcase ((name . ,(symbol-name name))
                             (time . ,(number-to-string (float-time duration)))
                             (status . ,status))
