@@ -71,8 +71,9 @@ func Test(t *testing.T) {
 		t.Fatal(err)
 	}
 	type testCase struct {
-		Name string  `xml:"name,attr"`
-		Time float64 `xml:"time,attr"`
+		Name      string  `xml:"name,attr"`
+		ClassName string  `xml:"classname,attr"`
+		Time      float64 `xml:"time,attr"`
 	}
 	type testSuite struct {
 		Tests     int        `xml:"tests,attr"`
@@ -105,15 +106,15 @@ func Test(t *testing.T) {
 			Time:      wantElapsed,
 			Timestamp: timestamp(time.Now()),
 			TestCases: []testCase{
-				{Name: "abort", Time: wantElapsed},
-				{Name: "error", Time: wantElapsed},
-				{Name: "expect-failure", Time: wantElapsed},
-				{Name: "expect-failure-but-pass", Time: wantElapsed},
-				{Name: "fail", Time: wantElapsed},
-				{Name: "filter", Time: wantElapsed},
-				{Name: "pass", Time: wantElapsed},
-				{Name: "skip", Time: wantElapsed},
-				{Name: "throw", Time: wantElapsed},
+				{Name: "abort", ClassName: "ERT", Time: wantElapsed},
+				{Name: "error", ClassName: "ERT", Time: wantElapsed},
+				{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
+				{Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed},
+				{Name: "fail", ClassName: "ERT", Time: wantElapsed},
+				{Name: "filter", ClassName: "ERT", Time: wantElapsed},
+				{Name: "pass", ClassName: "ERT", Time: wantElapsed},
+				{Name: "skip", ClassName: "ERT", Time: wantElapsed},
+				{Name: "throw", ClassName: "ERT", Time: wantElapsed},
 			},
 		}},
 	}

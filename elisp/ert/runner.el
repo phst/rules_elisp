@@ -125,6 +125,9 @@ source files and load them."
                                 ((type . ,status))
                                 ,message))))))
           (push `(testcase ((name . ,(symbol-name name))
+                            ;; classname is required, but we don’t have test
+                            ;; classes, so fill in a dummy value.
+                            (classname . "ERT")
                             (time . ,(number-to-string (float-time duration)))
                             (status . ,status))
                            ,@report)
