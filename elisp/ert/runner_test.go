@@ -81,6 +81,7 @@ func Test(t *testing.T) {
 		Tests     int        `xml:"tests,attr"`
 		Errors    int        `xml:"errors,attr"`
 		Failures  int        `xml:"failures,attr"`
+		Skipped   int        `xml:"skipped,attr"`
 		Time      float64    `xml:"time,attr"`
 		Timestamp timestamp  `xml:"timestamp,attr"`
 		TestCases []testCase `xml:"testcase"`
@@ -101,6 +102,7 @@ func Test(t *testing.T) {
 		Tests:     9,
 		Errors:    0,
 		Failures:  6,
+		Skipped:   1,
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
 		TestCases: []testCase{

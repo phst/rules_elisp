@@ -86,6 +86,7 @@ source files and load them."
           (unexpected 0)
           (errors 0)
           (failures 0)
+          (skipped 0)
           (test-reports ())
           (start-time (current-time)))
       (or tests (error "Selector %S doesn’t match any tests" selector))
@@ -117,6 +118,7 @@ source files and load them."
           (or expected (cl-incf unexpected))
           (and failed (cl-incf failures))
           (and error (cl-incf errors))
+          (and (ert-test-skipped-p result) (cl-incf skipped))
           (when (ert-test-result-with-condition-p result)
             (let ((message (elisp/ert/failure--message name result)))
               (message "%s" message)
@@ -148,6 +150,7 @@ source files and load them."
                (tests . ,(number-to-string (length tests)))
                (errors . ,(number-to-string errors))
                (failures . ,(number-to-string failures))
+               (skipped . ,(number-to-string skipped))
                (id . "0")
                (time . ,(number-to-string
                          (float-time (time-subtract nil start-time))))
