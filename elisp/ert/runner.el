@@ -238,12 +238,13 @@ instrumented using Edebug."
   (cl-check-type coverage-dir string)
   (cl-check-type buffers cons)
   (with-temp-buffer
-    (let ((root (getenv "TEST_SRCDIR")))
+    (let ((coding-system-for-write 'utf-8-unix)
+          (root (getenv "TEST_SRCDIR")))
       (dolist (buffer buffers)
         (elisp/ert/insert--coverage-report buffer root)
-        (kill-buffer buffer)))
-    (write-region nil nil (expand-file-name "emacs-lisp.dat" coverage-dir)
-                  nil nil nil 'excl)))
+        (kill-buffer buffer))
+      (write-region nil nil (expand-file-name "emacs-lisp.dat" coverage-dir)
+                    nil nil nil 'excl))))
 
 (defun elisp/ert/insert--coverage-report (buffer root)
   "Insert a coverage report into the current buffer.
