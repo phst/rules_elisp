@@ -75,17 +75,14 @@ func Test(t *testing.T) {
 		ClassName string  `xml:"classname,attr"`
 		Time      float64 `xml:"time,attr"`
 	}
-	type testSuite struct {
+	type report struct {
+		XMLName   xml.Name
 		Tests     int        `xml:"tests,attr"`
 		Errors    int        `xml:"errors,attr"`
 		Failures  int        `xml:"failures,attr"`
 		Time      float64    `xml:"time,attr"`
 		Timestamp timestamp  `xml:"timestamp,attr"`
 		TestCases []testCase `xml:"testcase"`
-	}
-	type report struct {
-		XMLName    xml.Name
-		TestSuites []testSuite `xml:"testsuite"`
 	}
 	var got report
 	if err := xml.Unmarshal(b, &got); err != nil {
@@ -98,25 +95,23 @@ func Test(t *testing.T) {
 	// time is nonnegative and below the margin.
 	wantElapsed := margin.Seconds() / 2
 	want := report{
-		XMLName: xml.Name{"", "testsuites"},
-		TestSuites: []testSuite{{
-			Tests:     9,
-			Errors:    0,
-			Failures:  6,
-			Time:      wantElapsed,
-			Timestamp: timestamp(time.Now()),
-			TestCases: []testCase{
-				{Name: "abort", ClassName: "ERT", Time: wantElapsed},
-				{Name: "error", ClassName: "ERT", Time: wantElapsed},
-				{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
-				{Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed},
-				{Name: "fail", ClassName: "ERT", Time: wantElapsed},
-				{Name: "filter", ClassName: "ERT", Time: wantElapsed},
-				{Name: "pass", ClassName: "ERT", Time: wantElapsed},
-				{Name: "skip", ClassName: "ERT", Time: wantElapsed},
-				{Name: "throw", ClassName: "ERT", Time: wantElapsed},
-			},
-		}},
+		XMLName:   xml.Name{"", "testsuite"},
+		Tests:     9,
+		Errors:    0,
+		Failures:  6,
+		Time:      wantElapsed,
+		Timestamp: timestamp(time.Now()),
+		TestCases: []testCase{
+			{Name: "abort", ClassName: "ERT", Time: wantElapsed},
+			{Name: "error", ClassName: "ERT", Time: wantElapsed},
+			{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
+			{Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed},
+			{Name: "fail", ClassName: "ERT", Time: wantElapsed},
+			{Name: "filter", ClassName: "ERT", Time: wantElapsed},
+			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
+			{Name: "skip", ClassName: "ERT", Time: wantElapsed},
+			{Name: "throw", ClassName: "ERT", Time: wantElapsed},
+		},
 	}
 	if diff := cmp.Diff(got, want, cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin)); diff != "" {
 		t.Errorf("-got +want:\n%s", diff)

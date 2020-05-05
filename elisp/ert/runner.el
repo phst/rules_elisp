@@ -142,23 +142,17 @@ source files and load them."
           ;; https://llg.cubic.org/docs/junit/ and
           ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
           ;; bit of documentation.
-          (let ((attributes
-                 ;; Attributes shared between root element and our only
-                 ;; <testsuite> element.
-                 `((tests . ,(number-to-string (length tests)))
-                   (errors . ,(number-to-string errors))
-                   (failures . ,(number-to-string failures))
-                   (time . ,(number-to-string
-                             (float-time (time-subtract nil start-time)))))))
-            (xml-print
-             `((testsuites
-                ,attributes
-                (testsuite
-                 ((id . "0")
-                  ;; No timezone or fractional seconds allowed.
-                  (timestamp . ,(format-time-string "%FT%T" start-time))
-                  ,@attributes)
-                 ,@(nreverse test-reports))))))
+          (xml-print
+           `((testsuite
+              ((tests . ,(number-to-string (length tests)))
+               (errors . ,(number-to-string errors))
+               (failures . ,(number-to-string failures))
+               (id . "0")
+               (time . ,(number-to-string
+                         (float-time (time-subtract nil start-time))))
+               ;; No timezone or fractional seconds allowed.
+               (timestamp . ,(format-time-string "%FT%T" start-time)))
+              ,@(nreverse test-reports))))
           (write-region nil nil report-file nil nil nil 'excl)))
       (when load-buffers
         (elisp/ert/write--coverage-report coverage-dir load-buffers))
