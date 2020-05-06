@@ -370,7 +370,7 @@ StatusOr<int> Executor::Run(const std::string& binary,
   const auto argv = Pointers(final_args);
   auto final_env = this->BuildEnv(env);
   const auto envp = Pointers(final_env);
-  int pid;
+  pid_t pid;
   const int error = posix_spawn(&pid, Pointer(binary), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
@@ -378,7 +378,7 @@ StatusOr<int> Executor::Run(const std::string& binary,
                        "posix_spawn", binary);
   }
   int wstatus;
-  const int status = waitpid(pid, &wstatus, 0);
+  const pid_t status = waitpid(pid, &wstatus, 0);
   if (status != pid) return ErrnoStatus("waitpid", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 }
