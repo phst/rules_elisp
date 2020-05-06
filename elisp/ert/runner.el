@@ -370,6 +370,11 @@ to be used as root."
   ;; newlines.
   (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
 
+;; This polyfill needs to be defined before using it as type to prevent errors
+;; during compilation.
+(defalias 'elisp/ert/proper--list-p
+  (if (fboundp 'proper-list-p) 'proper-list-p 'format-proper-list-p))
+
 (defun elisp/ert/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
   ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
@@ -385,7 +390,7 @@ to be used as root."
                      (let ((new (cl-etypecase obj
                                   (symbol (elisp/ert/check--xml-name obj))
                                   (string (elisp/ert/sanitize--xml-string obj))
-                                  (format-proper-list (mapcar #'walk obj))
+                                  (elisp/ert/proper--list (mapcar #'walk obj))
                                   (cons
                                    (cons (walk (car obj)) (walk (cdr obj)))))))
                        (puthash obj new map)
