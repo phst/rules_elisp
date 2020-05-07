@@ -86,7 +86,7 @@ Signal an error of type ‘elisp/runfiles/not-found’ if FILENAME
 wasn’t found in the runfiles tree."
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles elisp/runfiles/runfiles)
-  (file-name-quote (elisp/runfiles/rlocation--internal runfiles filename)))
+  (concat "/:" (elisp/runfiles/rlocation--internal runfiles filename)))
 
 (cl-defun elisp/runfiles/env-vars (&optional (runfiles (elisp/runfiles/get)))
   "Return a list of environmental variable for subprocesses.

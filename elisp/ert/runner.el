@@ -105,7 +105,7 @@ source files and load them."
              shard-count shard-index))
     (random random-seed)
     (when shard-status-file
-      (write-region "" nil (file-name-quote shard-status-file) :append))
+      (write-region "" nil (concat "/:" shard-status-file) :append))
     (mapc #'load command-line-args-left)
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
@@ -184,10 +184,10 @@ source files and load them."
                 (timestamp . ,(format-time-string "%FT%T" start-time)))
                ,@(nreverse test-reports)))))
           (let ((coding-system-for-write 'utf-8-unix))
-            (write-region nil nil (file-name-quote report-file)
+            (write-region nil nil (concat "/:" report-file)
                           nil nil nil 'excl))))
       (when coverage-enabled
-        (elisp/ert/write--coverage-report (file-name-quote coverage-dir)
+        (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
                                           load-buffers))
       (kill-emacs (min unexpected 1)))))
 
