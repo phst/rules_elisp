@@ -25,6 +25,24 @@ def _provider_test_impl(ctx):
     info = target_under_test[EmacsLispInfo]
     asserts.equals(
         env,
+        actual = [f.path for f in info.source_files],
+        expected = ["elisp/compile.el"],
+    )
+    asserts.equals(
+        env,
+        actual = [(f.root, f.short_path) for f in info.compiled_files],
+        expected = [(ctx.bin_dir, "elisp/compile.elc")],
+    )
+    asserts.equals(
+        env,
+        actual = info.load_path,
+        expected = [struct(
+            for_actions = ctx.bin_dir.path,
+            for_runfiles = "phst_rules_elisp",
+        )],
+    )
+    asserts.equals(
+        env,
         actual = [
             (f.root, f.short_path)
             for f in info.transitive_compiled_files.to_list()

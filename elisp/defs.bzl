@@ -32,6 +32,13 @@ Load path directory entries are structures with the following fields:
 - `for_runfiles` is a string specifying the load directory to use at runtime,
   relative to the runfiles root.""",
     fields = {
+        "source_files": """A list of `File` objects containing
+the Emacs Lisp source files of this library.""",
+        "compiled_files": """A list of `File` objects containing
+the byte-compiled Emacs Lisp files of this library.""",
+        "load_path": """A list containing necessary load path
+additions for this library.  The `depset` elements are structures as
+described in the provider documentation.""",
         "transitive_source_files": """A `depset` of `File` objects containing
 the Emacs Lisp source files of this library
 and all its transitive dependencies.""",
@@ -71,6 +78,9 @@ def _library(ctx):
             runfiles = result.runfiles,
         ),
         EmacsLispInfo(
+            source_files = ctx.files.srcs,
+            compiled_files = result.outs,
+            load_path = result.load_path,
             transitive_source_files = result.transitive_srcs,
             transitive_compiled_files = result.transitive_outs,
             transitive_load_path = result.transitive_load_path,
@@ -409,6 +419,7 @@ def _compile(ctx, srcs, deps, load_path):
     Returns:
       A structure with the following fields:
         outs: a list of File objects containing the byte-compiled files
+        load_path: the load path required to load the compiled files
         runfiles: a runfiles object for the set of input files
         transitive_load_path: the load path required to load the compiled files
             and all their transitive dependencies
@@ -509,6 +520,7 @@ def _compile(ctx, srcs, deps, load_path):
 
     return struct(
         outs = outs,
+        load_path = load_path,
         runfiles = ctx.runfiles(transitive_files = transitive_data),
         transitive_load_path = transitive_load_path,
         transitive_srcs = depset(direct = srcs, transitive = indirect_srcs),

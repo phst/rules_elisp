@@ -138,7 +138,8 @@ specify temporary files that are deleted after the action completes.
 ## EmacsLispInfo
 
 <pre>
-EmacsLispInfo(<a href="#EmacsLispInfo-transitive_source_files">transitive_source_files</a>, <a href="#EmacsLispInfo-transitive_compiled_files">transitive_compiled_files</a>, <a href="#EmacsLispInfo-transitive_load_path">transitive_load_path</a>)
+EmacsLispInfo(<a href="#EmacsLispInfo-source_files">source_files</a>, <a href="#EmacsLispInfo-compiled_files">compiled_files</a>, <a href="#EmacsLispInfo-load_path">load_path</a>, <a href="#EmacsLispInfo-transitive_source_files">transitive_source_files</a>,
+              <a href="#EmacsLispInfo-transitive_compiled_files">transitive_compiled_files</a>, <a href="#EmacsLispInfo-transitive_load_path">transitive_load_path</a>)
 </pre>
 
 Provider for Emacs Lisp libraries.
@@ -155,6 +156,9 @@ Load path directory entries are structures with the following fields:
 
 | Name  | Description |
 | :-------------: | :-------------: |
+| source_files |  A list of <code>File</code> objects containing the Emacs Lisp source files of this library.    |
+| compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library.    |
+| load_path |  A list containing necessary load path additions for this library.  The <code>depset</code> elements are structures as described in the provider documentation.    |
 | transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
 | transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
 | transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.  The <code>depset</code> elements are structures as described in the provider documentation.    |
