@@ -24,7 +24,15 @@ load(
 
 EmacsLispInfo = provider(
     doc = """Provider for Emacs Lisp libraries.
-The `elisp_library` rule produces this provider.""",
+The `elisp_library` rule produces this provider.
+
+Load path directory entries are structures with the following fields:
+
+- `for_actions` is a string specifying the load directory to use for actions,
+  relative to the execution root.
+
+- `for_runfiles` is a string specifying the load directory to use at runtime,
+  relative to the runfiles root.""",
     fields = {
         "transitive_source_files": """A `depset` of `File` objects containing
 the Emacs Lisp source files of this library
@@ -35,14 +43,8 @@ and all its transitive dependencies.""",
         "transitive_load_path": """A `depset` containing necessary load path
 additions for this library and all its transitive dependencies.
 The `depset` uses preorder traversal: entries for libraries closer to the root
-of the dependency graph come first.
-The `depset` elements are structures with the following fields:
-
-- `for_actions` is a string specifying the load directory to use for actions,
-  relative to the execution root.
-
-- `for_runfiles` is a string specifying the load directory to use at runtime,
-  relative to the runfiles root.""",
+of the dependency graph come first.  The `depset` elements are structures as
+described in the provider documentation.""",
     },
 )
 
