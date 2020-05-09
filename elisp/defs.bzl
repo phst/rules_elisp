@@ -27,10 +27,8 @@ EmacsLispInfo = provider(
 The `elisp_library` rule produces this provider.
 
 Load path directory entries are structures with the following fields:
-
 - `for_actions` is a string specifying the load directory to use for actions,
   relative to the execution root.
-
 - `for_runfiles` is a string specifying the load directory to use at runtime,
   relative to the runfiles root.""",
     fields = {
@@ -235,7 +233,6 @@ That is, the original arguments for Emacs are separated by a double hyphen
 and Emacs arguments.
 
 The manifest is a JSON object with the following keys:
-
 - `root` can be either `EXECUTION_ROOT` or `RUNFILES_ROOT` and specifies
   the root directory for relative file names.
 - `loadPath` is a list of directory names making up the load path.
