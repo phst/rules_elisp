@@ -22,8 +22,10 @@ load(
 elisp_library(
     name = "lib_1",
     srcs = ["lib-1.el"],
+    data = ["data.txt"],
     deps = [
         ":lib_2",
+        "//elisp/runfiles",
         "@example//:lib_4",
     ],
 )

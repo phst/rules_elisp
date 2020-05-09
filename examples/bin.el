@@ -25,5 +25,6 @@
 (message "hi from bin, %S" command-line-args-left)
 (setq command-line-args-left nil)
 (lib-1-func)
+(lib-1-data-dep)
 
 ;;; bin.el ends here
