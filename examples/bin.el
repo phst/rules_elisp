@@ -16,7 +16,7 @@
 
 ;;; Commentary:
 
-;; 
+;; An example binary.
 
 ;;; Code:
 
