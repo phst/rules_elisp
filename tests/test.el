@@ -16,12 +16,12 @@
 
 ;;; Commentary:
 
-;; An ERT test that is used by runner_test.go.
+;; An ERT test that is used by ert_test.go.
 
 ;;; Code:
 
 (require 'ert)
-(require 'elisp/ert/test-lib)
+(require 'tests/test-lib)
 
 (ert-deftest pass ()
   (should (= 0 0)))
@@ -59,6 +59,6 @@
                  "<![CDATA[ ]]> & < > \" ' <!-- -->")))
 
 (ert-deftest coverage ()
-  (elisp/ert/test-function nil))
+  (tests/test-function nil))
 
 ;;; test.el ends here

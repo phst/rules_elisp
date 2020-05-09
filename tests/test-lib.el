@@ -21,11 +21,11 @@
 
 ;;; Code:
 
-(defun elisp/ert/test-function (arg)
+(defun tests/test-function (arg)
   ;; The two branches should be on separate lines, for line coverage testing.
   (if arg
       (message "Foo")
     (message "Bar")))
 
-(provide 'elisp/ert/test-lib)
+(provide 'tests/test-lib)
 ;;; test-lib.el ends here

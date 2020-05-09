@@ -29,7 +29,7 @@ import (
 )
 
 func Test(t *testing.T) {
-	bin, err := runfiles.Path("phst_rules_elisp/elisp/ert/test_test")
+	bin, err := runfiles.Path("phst_rules_elisp/tests/test_test")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -176,9 +176,9 @@ func Test(t *testing.T) {
 		t.Error(err)
 	}
 	gotCoverage := string(b)
-	const wantCoverage = `SF:phst_rules_elisp/elisp/ert/test-lib.el
-FN:24,elisp/ert/test-function
-FNDA:1,elisp/ert/test-function
+	const wantCoverage = `SF:phst_rules_elisp/tests/test-lib.el
+FN:24,tests/test-function
+FNDA:1,tests/test-function
 FNF:1
 FNH:1
 DA:26,1

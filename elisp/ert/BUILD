@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
 elisp_library(
@@ -20,32 +19,4 @@ elisp_library(
     testonly = 1,
     srcs = ["runner.el"],
     visibility = ["//visibility:public"],
-)
-
-go_test(
-    name = "runner_test",
-    srcs = ["runner_test.go"],
-    data = [":test_test"],
-    rundir = ".",
-    deps = [
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
-        "@phst_runfiles//runfiles",
-    ],
-)
-
-elisp_test(
-    name = "test_test",
-    srcs = ["test.el"],
-    # We need to explicitly include the source file as data dependency,
-    # otherwise it won’t be present and we can’t test coverage.  For real
-    # tests, Bazel does the right thing.
-    data = ["test-lib.el"],
-    tags = ["manual"],
-    deps = [":test_lib"],
-)
-
-elisp_library(
-    name = "test_lib",
-    srcs = ["test-lib.el"],
 )

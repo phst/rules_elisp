@@ -79,13 +79,6 @@ go_rules_dependencies()
 go_register_toolchains()
 
 http_archive(
-    name = "phst_runfiles",
-    sha256 = "9e538ebe5ab41a96a3e61baf1a6475b6405c2b46a5536c7c9b64da5bdcaee01e",
-    strip_prefix = "runfiles-27635edc007e045259ff247985c8d40bfe2116ce",
-    urls = ["https://github.com/phst/runfiles/archive/27635edc007e045259ff247985c8d40bfe2116ce.zip"],
-)
-
-http_archive(
     name = "bazel_gazelle",
     sha256 = "d8c45ee70ec39a57e7a05e5027c32b1576cc7f16d9dd37135b0eddde45cf1b10",
     urls = [
