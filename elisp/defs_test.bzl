@@ -41,6 +41,7 @@ def _provider_test_impl(ctx):
             for_runfiles = "phst_rules_elisp",
         )],
     )
+    asserts.equals(env, actual = info.data_files, expected = [])
     asserts.equals(
         env,
         actual = [

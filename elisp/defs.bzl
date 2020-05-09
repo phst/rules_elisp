@@ -39,6 +39,8 @@ the byte-compiled Emacs Lisp files of this library.""",
         "load_path": """A list containing necessary load path
 additions for this library.  The `depset` elements are structures as
 described in the provider documentation.""",
+        "data_files": """A list of `File` object that this library requires
+at runtime.""",
         "transitive_source_files": """A `depset` of `File` objects containing
 the Emacs Lisp source files of this library
 and all its transitive dependencies.""",
@@ -81,6 +83,7 @@ def _library(ctx):
             source_files = ctx.files.srcs,
             compiled_files = result.outs,
             load_path = result.load_path,
+            data_files = ctx.files.data,
             transitive_source_files = result.transitive_srcs,
             transitive_compiled_files = result.transitive_outs,
             transitive_load_path = result.transitive_load_path,
