@@ -44,6 +44,11 @@ def _provider_test_impl(ctx):
     asserts.equals(env, actual = info.data_files, expected = [])
     asserts.equals(
         env,
+        actual = [f.path for f in info.transitive_source_files.to_list()],
+        expected = ["elisp/compile.el"],
+    )
+    asserts.equals(
+        env,
         actual = [
             (f.root, f.short_path)
             for f in info.transitive_compiled_files.to_list()
