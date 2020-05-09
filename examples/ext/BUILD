@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@phst_rules_elisp//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_test")
+load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_4",
