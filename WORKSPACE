@@ -14,7 +14,11 @@
 
 workspace(name = "phst_rules_elisp")
 
-load("//elisp:repositories.bzl", "rules_elisp_dependencies", "rules_elisp_toolchains")
+load(
+    "//elisp:repositories.bzl",
+    "rules_elisp_dependencies",
+    "rules_elisp_toolchains",
+)
 
 rules_elisp_dependencies()
 
@@ -64,7 +68,11 @@ http_archive(
     ],
 )
 
-load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_dependencies")
+load(
+    "@io_bazel_rules_go//go:deps.bzl",
+    "go_register_toolchains",
+    "go_rules_dependencies",
+)
 
 go_rules_dependencies()
 

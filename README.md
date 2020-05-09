@@ -24,7 +24,11 @@ http_archive(
     urls = ["https://github.com/phst/rules_elisp/archive/02fab20e0bbc568ea56c5482349443bef9ccc004.zip"],
 )
 
-load("@phst_rules_elisp//elisp:repositories.bzl", "rules_elisp_dependencies", "rules_elisp_toolchains")
+load(
+    "@phst_rules_elisp//elisp:repositories.bzl",
+    "rules_elisp_dependencies",
+    "rules_elisp_toolchains",
+)
 
 rules_elisp_dependencies()
 
