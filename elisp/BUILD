@@ -131,7 +131,7 @@ cc_test(
     copts = COPTS,
     data = [
         "exec.h",
-        "//elisp/wrap",
+        "//tests/wrap",
     ],
     deps = [
         ":exec",

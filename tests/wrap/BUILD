@@ -12,13 +12,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_binary")
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
+go_library(
+    name = "go_default_library",
+    testonly = 1,
+    srcs = ["main.go"],
+    importpath = "github.com/phst/rules_elisp/tests/wrap",
+    visibility = ["//visibility:private"],
+    deps = ["@com_github_google_go_cmp//cmp:go_default_library"],
+)
 
 go_binary(
     name = "wrap",
     testonly = 1,
-    srcs = ["main.go"],
     out = "wrap",
+    embed = [":go_default_library"],
     visibility = ["//elisp:__pkg__"],
-    deps = ["@com_github_google_go_cmp//cmp:go_default_library"],
 )
