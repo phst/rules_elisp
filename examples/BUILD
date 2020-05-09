@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load(
     "@phst_rules_elisp//elisp:defs.bzl",
     "elisp_binary",
@@ -66,8 +67,10 @@ elisp_binary(
     deps = [":lib_1"],
 )
 
-sh_test(
-    name = "bin_test",
-    srcs = ["bin_test.sh"],
+go_test(
+    name = "go_default_test",
+    srcs = ["bin_test.go"],
     data = ["bin"],
+    rundir = ".",
+    deps = ["@com_github_phst_runfiles//:go_default_library"],
 )
