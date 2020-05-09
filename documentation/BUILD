@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 
 stardoc(
@@ -41,4 +42,27 @@ stardoc(
     out = "repositories_doc.md",
     input = "//elisp:repositories.bzl",
     deps = ["//elisp:builtin_bzl"],
+)
+
+go_test(
+    name = "go_default_test",
+    srcs = ["consistency_test.go"],
+    args = ["$(locations :markdown)"],
+    data = [":markdown"],
+    rundir = ".",
+    deps = [
+        "@com_github_google_go_cmp//cmp:go_default_library",
+        "@org_golang_x_text//encoding:go_default_library",
+        "@org_golang_x_text//encoding/charmap:go_default_library",
+        "@org_golang_x_text//transform:go_default_library",
+    ],
+)
+
+filegroup(
+    name = "markdown",
+    srcs = glob(["*.md"]) + [
+        "elisp_defs_doc.md",
+        "emacs_defs_doc.md",
+        "repositories_doc.md",
+    ],
 )

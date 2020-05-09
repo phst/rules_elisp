@@ -111,3 +111,10 @@ go_repository(
     sum = "h1:E7g+9GITq07hpfrRu66IVDexMakfv52eLZ2CXBWiKr4=",
     version = "v0.0.0-20191204190536-9bdfabe68543",
 )
+
+go_repository(
+    name = "org_golang_x_text",
+    importpath = "golang.org/x/text",
+    sum = "h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=",
+    version = "v0.3.2",
+)
