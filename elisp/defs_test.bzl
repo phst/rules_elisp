@@ -22,15 +22,22 @@ load(":defs.bzl", "EmacsLispInfo", "elisp_library")
 def _provider_test_impl(ctx):
     env = analysistest.begin(ctx)
     target_under_test = analysistest.target_under_test(env)
+    info = target_under_test[EmacsLispInfo]
     asserts.equals(
         env,
-        actual = [(f.root, f.short_path) for f in target_under_test[EmacsLispInfo].transitive_compiled_files.to_list()],
+        actual = [
+            (f.root, f.short_path)
+            for f in info.transitive_compiled_files.to_list()
+        ],
         expected = [(ctx.bin_dir, "elisp/compile.elc")],
     )
     asserts.equals(
         env,
-        actual = target_under_test[EmacsLispInfo].transitive_load_path.to_list(),
-        expected = [struct(for_actions = ctx.bin_dir.path, for_runfiles = "phst_rules_elisp")],
+        actual = info.transitive_load_path.to_list(),
+        expected = [struct(
+            for_actions = ctx.bin_dir.path,
+            for_runfiles = "phst_rules_elisp",
+        )],
     )
     return analysistest.end(env)
 

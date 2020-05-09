@@ -15,20 +15,34 @@
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load(":util.bzl", "cc_wrapper", "check_relative_filename", "configure_cc_toolchain")
+load(
+    ":util.bzl",
+    "cc_wrapper",
+    "check_relative_filename",
+    "configure_cc_toolchain",
+)
 
 EmacsLispInfo = provider(
-    doc = "Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provider.",
+    doc = """Provider for Emacs Lisp libraries.
+The `elisp_library` rule produces this provider.""",
     fields = {
-        "transitive_source_files": "A `depset` of `File` objects containing the Emacs Lisp source files of this library and all its transitive dependencies.",
-        "transitive_compiled_files": "A `depset` of `File` objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.",
-        "transitive_load_path": """A `depset` containing necessary load path additions for this library and all its transitive dependencies.
-The `depset` uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.
+        "transitive_source_files": """A `depset` of `File` objects containing
+the Emacs Lisp source files of this library
+and all its transitive dependencies.""",
+        "transitive_compiled_files": """A `depset` of `File` objects containing
+the byte-compiled Emacs Lisp files of this library
+and all its transitive dependencies.""",
+        "transitive_load_path": """A `depset` containing necessary load path
+additions for this library and all its transitive dependencies.
+The `depset` uses preorder traversal: entries for libraries closer to the root
+of the dependency graph come first.
 The `depset` elements are structures with the following fields:
 
-- `for_actions` is a string specifying the load directory to use for actions, relative to the execution root.
+- `for_actions` is a string specifying the load directory to use for actions,
+  relative to the execution root.
 
-- `for_runfiles` is a string specifying the load directory to use at runtime, relative to the runfiles root.""",
+- `for_runfiles` is a string specifying the load directory to use at runtime,
+  relative to the runfiles root.""",
     },
 )
 
@@ -52,7 +66,10 @@ def _library(ctx):
     """Rule implementation for the “elisp_library” rule."""
     result = _compile(ctx, ctx.files.srcs, ctx.attr.deps, ctx.attr.load_path)
     return [
-        DefaultInfo(files = depset(direct = result.outs), runfiles = result.runfiles),
+        DefaultInfo(
+            files = depset(direct = result.outs),
+            runfiles = result.runfiles,
+        ),
         EmacsLispInfo(
             transitive_source_files = result.transitive_srcs,
             transitive_compiled_files = result.transitive_outs,
@@ -73,7 +90,9 @@ def _binary(ctx):
     emacs = toolchain.emacs
 
     # Only pass in data files when needed.
-    data_files_for_manifest = result.runfiles.files.to_list() if toolchain.wrap else []
+    data_files_for_manifest = (
+        result.runfiles.files.to_list() if toolchain.wrap else []
+    )
 
     # If we’re supposed to generate coverage information, use source files
     # instead of compiled files because we can’t instrument compiled files for
@@ -83,7 +102,9 @@ def _binary(ctx):
     # support isn’t really documented; some information is available in the
     # source code comments of the file
     # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
-    transitive_files = result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
+    transitive_files = (
+        result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
+    )
 
     # We use a C++ driver because the C++ toolchain framework exposes
     # individual actions (unlike Python), and the runfiles implementation
@@ -100,13 +121,20 @@ def _binary(ctx):
                 'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
                 for dir in result.transitive_load_path.to_list()
             ]),
-            "[[emacs]]": check_relative_filename(paths.join(ctx.workspace_name, emacs.files_to_run.executable.short_path)),
+            "[[emacs]]": check_relative_filename(paths.join(
+                ctx.workspace_name,
+                emacs.files_to_run.executable.short_path,
+            )),
             "[[load]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, src.short_path)))
+                'R"**({})**"'.format(check_relative_filename(
+                    paths.join(ctx.workspace_name, src.short_path),
+                ))
                 for src in result.outs
             ]),
             "[[data]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(paths.join(ctx.workspace_name, file.short_path)))
+                'R"**({})**"'.format(check_relative_filename(
+                    paths.join(ctx.workspace_name, file.short_path),
+                ))
                 for file in data_files_for_manifest
             ]),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
@@ -115,8 +143,13 @@ def _binary(ctx):
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
     bin_runfiles = ctx.runfiles(
-        files = [emacs.files_to_run.executable] + ctx.files._default_libs + result.outs,
-        transitive_files = depset(transitive = [transitive_files, result.runfiles.files]),
+        files = (
+            [emacs.files_to_run.executable] + ctx.files._default_libs +
+            result.outs
+        ),
+        transitive_files = depset(
+            transitive = [transitive_files, result.runfiles.files],
+        ),
     )
     emacs_runfiles = emacs.default_runfiles
     runfiles = bin_runfiles.merge(emacs_runfiles)
@@ -132,7 +165,9 @@ def _binary(ctx):
         # attributes in Starlark.  Therefore we specify the variable ourselves.
         # Note that the coverage runner runs in the runfiles root instead of
         # the execution root, therefore we use “path” instead of “short_path.”
-        runfiles = runfiles.merge(ctx.attr._lcov_merger[DefaultInfo].default_runfiles)
+        runfiles = runfiles.merge(
+            ctx.attr._lcov_merger[DefaultInfo].default_runfiles,
+        )
         test_env["LCOV_MERGER"] = ctx.executable._lcov_merger.path
 
     # The InstrumentedFilesInfo provider needs to be added here instead of in
@@ -169,7 +204,8 @@ See the rule documentation for details.""",
             default = False,
         ),
         "wrap": attr.bool(
-            doc = """Whether the binary given in the `emacs` attribute is a wrapper around Emacs proper.
+            doc = """Whether the binary given in the `emacs` attribute is a
+wrapper around Emacs proper.
 If `True`, Bazel passes a manifest file using the `--manifest` option.
 See the rule documentation for details.""",
             default = False,
@@ -177,8 +213,10 @@ See the rule documentation for details.""",
     },
     doc = """Toolchain rule for Emacs Lisp.
 This toolchain configures how to run Emacs.
-The executable passed to the `emacs` attribute must be a binary that behaves like Emacs.
-If `wrap` is `False`, Bazel calls it as is, passing arguments that a normal Emacs binary would accept.
+The executable passed to the `emacs` attribute must be a binary
+that behaves like Emacs.
+If `wrap` is `False`, Bazel calls it as is, passing arguments
+that a normal Emacs binary would accept.
 If `wrap` is `True`, Bazel calls the binary with a special `--manifest` option.
 The value of the option is the filename of a JSON file containing a manifest.
 The manifest specifies which files should be readable and/or writable by Emacs.
@@ -190,9 +228,9 @@ If `wrap` is `True`, the format of the command line is as follows:
 emacs --manifest=MANIFEST -- ARGS…
 ```
 
-That is, the original arguments for Emacs are separated by a double hyphen (`--`)
-so that argument parsers can distinguish between the `--manifest` option and
-Emacs arguments.
+That is, the original arguments for Emacs are separated by a double hyphen
+(`--`) so that argument parsers can distinguish between the `--manifest` option
+and Emacs arguments.
 
 The manifest is a JSON object with the following keys:
 
@@ -242,13 +280,14 @@ To add a load path entry for the current package, specify `.` here.""",
             providers = [EmacsLispInfo],
         ),
     ),
-    doc = """Byte-compiles Emacs Lisp source files and makes the compiled output available to dependencies.
-All sources are byte-compiled.  `elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
+    doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
+available to dependencies. All sources are byte-compiled.
+`elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
 can then use `load` or `require` to load them.
 
-By default, libraries need to be loaded using a filename relative to the workspace root, i.e.,
-<var>package</var>/<var>file</var>.
-If you want to add further elements to the load path, use the `load_path` attribute.""",
+By default, libraries need to be loaded using a filename relative to the
+workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
+further elements to the load path, use the `load_path` attribute.""",
     provides = [EmacsLispInfo],
     toolchains = [_TOOLCHAIN_TYPE],
     implementation = _library,
@@ -289,7 +328,8 @@ elisp_binary = rule(
         ),
     ),
     doc = """Binary rule that loads a single Emacs Lisp file.
-The source file is byte-compiled.  At runtime, the compiled version is loaded in batch mode.""",
+The source file is byte-compiled.  At runtime, the compiled version is loaded
+in batch mode.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = [
@@ -341,11 +381,13 @@ elisp_test = rule(
     ),
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
-See the [ERT manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html) for details.
-The generated test binary loads all source files and executes all tests like `ert-run-tests-batch-and-exit`.
-You can restrict the tests to be run using the `--test_filter` option.  If set, the value of
-`--test_filter` must be a Lisp expression usable as an
-[ERT test selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).""",
+See the [ERT
+manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html)
+for details.  The generated test binary loads all source files and executes all
+tests like `ert-run-tests-batch-and-exit`.  You can restrict the tests to be
+run using the `--test_filter` option.  If set, the value of `--test_filter`
+must be a Lisp expression usable as an [ERT test
+selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).""",
     fragments = ["cpp"],
     test = True,
     toolchains = [
@@ -378,8 +420,14 @@ def _compile(ctx, srcs, deps, load_path):
     """
     outs = []
     load_path = [_load_directory(ctx, dir) for dir in ["/"] + load_path]
-    indirect_srcs = [dep[EmacsLispInfo].transitive_source_files for dep in deps]
-    indirect_outs = [dep[EmacsLispInfo].transitive_compiled_files for dep in deps]
+    indirect_srcs = [
+        dep[EmacsLispInfo].transitive_source_files
+        for dep in deps
+    ]
+    indirect_outs = [
+        dep[EmacsLispInfo].transitive_compiled_files
+        for dep in deps
+    ]
     transitive_load_path = depset(
         direct = load_path,
         # We explicitly specify preorder traversal.  The load path is an
@@ -392,7 +440,10 @@ def _compile(ctx, srcs, deps, load_path):
     )
     transitive_data = depset(
         direct = ctx.files.data,
-        transitive = [dep[DefaultInfo].default_runfiles.files for dep in ctx.attr.deps],
+        transitive = [
+            dep[DefaultInfo].default_runfiles.files
+            for dep in ctx.attr.deps
+        ],
     )
 
     toolchain = _toolchain(ctx)
@@ -415,7 +466,10 @@ def _compile(ctx, srcs, deps, load_path):
             transitive = indirect_outs + [transitive_data],
         )
         if toolchain.wrap:
-            manifest = ctx.actions.declare_file(src.basename + ".manifest.json", sibling = src)
+            manifest = ctx.actions.declare_file(
+                src.basename + ".manifest.json",
+                sibling = src,
+            )
             ctx.actions.write(
                 output = manifest,
                 content = struct(
@@ -447,7 +501,9 @@ def _compile(ctx, srcs, deps, load_path):
             executable = emacs.files_to_run,
             arguments = args,
             mnemonic = "ElispCompile",
-            progress_message = "Compiling Emacs Lisp library {}".format(out.short_path),
+            progress_message = (
+                "Compiling Emacs Lisp library {}".format(out.short_path)
+            ),
             use_default_shell_env = toolchain.use_default_shell_env,
         )
         outs.append(out)
@@ -485,7 +541,9 @@ def _load_directory(ctx, dir):
         # and then the directory name relative to the workspace root.  The
         # workspace root will only be nonempty if the current rule lives in a
         # different workspace than the one that Bazel is run from.
-        for_actions = check_relative_filename(paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir)),
+        for_actions = check_relative_filename(
+            paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
+        ),
         # The runfiles tree looks different, see
         # https://docs.bazel.build/versions/2.0.0/output_directories.html.  The
         # top-level directories in the runfiles root are always the workspace
@@ -494,7 +552,9 @@ def _load_directory(ctx, dir):
         # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_name.
         # Therefore, it can be empty, in which case we need to use the current
         # workspace.
-        for_runfiles = check_relative_filename(paths.join(ctx.label.workspace_name or ctx.workspace_name, dir)),
+        for_runfiles = check_relative_filename(
+            paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
+        ),
     )
 
 def _load_directory_for_actions(directory):

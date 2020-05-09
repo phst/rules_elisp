@@ -15,8 +15,17 @@
 """Defines the rule “emacs_binary”, which compiles Emacs for use in Bazel."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/build_defs/cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
-load("//elisp:util.bzl", "cc_wrapper", "check_relative_filename", "configure_cc_toolchain")
+load(
+    "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+    "CPP_LINK_EXECUTABLE_ACTION_NAME",
+    "C_COMPILE_ACTION_NAME",
+)
+load(
+    "//elisp:util.bzl",
+    "cc_wrapper",
+    "check_relative_filename",
+    "configure_cc_toolchain",
+)
 
 def _binary(ctx):
     """Rule implementation of the “emacs_binary” rule."""
@@ -31,7 +40,9 @@ def _binary(ctx):
     ctx.actions.expand_template(
         template = ctx.file._template,
         output = driver,
-        substitutions = {"[[install]]": check_relative_filename(paths.join(ctx.workspace_name, install.short_path))},
+        substitutions = {"[[install]]": check_relative_filename(
+            paths.join(ctx.workspace_name, install.short_path),
+        )},
         is_executable = True,
     )
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
@@ -120,10 +131,15 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
             action_name = action,
             variables = vars,
         ))
-    install = ctx.actions.declare_directory("_{}_install".format(ctx.label.name))
+    install = ctx.actions.declare_directory(
+        "_{}_install".format(ctx.label.name),
+    )
     ctx.actions.run(
         outputs = [install],
-        inputs = depset(direct = ctx.files.srcs, transitive = [cc_toolchain.all_files]),
+        inputs = depset(
+            direct = ctx.files.srcs,
+            transitive = [cc_toolchain.all_files],
+        ),
         executable = ctx.executable._build,
         arguments = [
             "--source=" + source,
@@ -133,7 +149,9 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
             "--ldflags=" + " ".join(ldflags),
         ],
         mnemonic = "EmacsInstall",
-        progress_message = "Installing Emacs into {}".format(install.short_path),
+        progress_message = (
+            "Installing Emacs into {}".format(install.short_path)
+        ),
         env = env,
     )
     return install
