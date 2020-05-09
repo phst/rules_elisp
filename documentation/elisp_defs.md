@@ -9,7 +9,8 @@ elisp_binary(<a href="#elisp_binary-name">name</a>, <a href="#elisp_binary-data"
 </pre>
 
 Binary rule that loads a single Emacs Lisp file.
-The source file is byte-compiled.  At runtime, the compiled version is loaded in batch mode.
+The source file is byte-compiled.  At runtime, the compiled version is loaded
+in batch mode.
 
 **ATTRIBUTES**
 
@@ -30,13 +31,14 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded in
 elisp_library(<a href="#elisp_library-name">name</a>, <a href="#elisp_library-data">data</a>, <a href="#elisp_library-deps">deps</a>, <a href="#elisp_library-load_path">load_path</a>, <a href="#elisp_library-srcs">srcs</a>)
 </pre>
 
-Byte-compiles Emacs Lisp source files and makes the compiled output available to dependencies.
-All sources are byte-compiled.  `elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
+Byte-compiles Emacs Lisp source files and makes the compiled output
+available to dependencies. All sources are byte-compiled.
+`elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
 can then use `load` or `require` to load them.
 
-By default, libraries need to be loaded using a filename relative to the workspace root, i.e.,
-<var>package</var>/<var>file</var>.
-If you want to add further elements to the load path, use the `load_path` attribute.
+By default, libraries need to be loaded using a filename relative to the
+workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
+further elements to the load path, use the `load_path` attribute.
 
 **ATTRIBUTES**
 
@@ -60,11 +62,13 @@ elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data<
 
 Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
-See the [ERT manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html) for details.
-The generated test binary loads all source files and executes all tests like `ert-run-tests-batch-and-exit`.
-You can restrict the tests to be run using the `--test_filter` option.  If set, the value of
-`--test_filter` must be a Lisp expression usable as an
-[ERT test selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).
+See the [ERT
+manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html)
+for details.  The generated test binary loads all source files and executes all
+tests like `ert-run-tests-batch-and-exit`.  You can restrict the tests to be
+run using the `--test_filter` option.  If set, the value of `--test_filter`
+must be a Lisp expression usable as an [ERT test
+selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).
 
 **ATTRIBUTES**
 
@@ -87,8 +91,10 @@ elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolch
 
 Toolchain rule for Emacs Lisp.
 This toolchain configures how to run Emacs.
-The executable passed to the `emacs` attribute must be a binary that behaves like Emacs.
-If `wrap` is `False`, Bazel calls it as is, passing arguments that a normal Emacs binary would accept.
+The executable passed to the `emacs` attribute must be a binary
+that behaves like Emacs.
+If `wrap` is `False`, Bazel calls it as is, passing arguments
+that a normal Emacs binary would accept.
 If `wrap` is `True`, Bazel calls the binary with a special `--manifest` option.
 The value of the option is the filename of a JSON file containing a manifest.
 The manifest specifies which files should be readable and/or writable by Emacs.
@@ -100,9 +106,9 @@ If `wrap` is `True`, the format of the command line is as follows:
 emacs --manifest=MANIFEST -- ARGS…
 ```
 
-That is, the original arguments for Emacs are separated by a double hyphen (`--`)
-so that argument parsers can distinguish between the `--manifest` option and
-Emacs arguments.
+That is, the original arguments for Emacs are separated by a double hyphen
+(`--`) so that argument parsers can distinguish between the `--manifest` option
+and Emacs arguments.
 
 The manifest is a JSON object with the following keys:
 
@@ -136,7 +142,8 @@ specify temporary files that are deleted after the action completes.
 EmacsLispInfo(<a href="#EmacsLispInfo-transitive_source_files">transitive_source_files</a>, <a href="#EmacsLispInfo-transitive_compiled_files">transitive_compiled_files</a>, <a href="#EmacsLispInfo-transitive_load_path">transitive_load_path</a>)
 </pre>
 
-Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provider.
+Provider for Emacs Lisp libraries.
+The `elisp_library` rule produces this provider.
 
 **FIELDS**
 
@@ -145,6 +152,6 @@ Provider for Emacs Lisp libraries.  The `elisp_library` rule produces this provi
 | :-------------: | :-------------: |
 | transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
 | transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
-| transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first. The <code>depset</code> elements are structures with the following fields:<br><br>- <code>for_actions</code> is a string specifying the load directory to use for actions, relative to the execution root.<br><br>- <code>for_runfiles</code> is a string specifying the load directory to use at runtime, relative to the runfiles root.    |
+| transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first. The <code>depset</code> elements are structures with the following fields:<br><br>- <code>for_actions</code> is a string specifying the load directory to use for actions,   relative to the execution root.<br><br>- <code>for_runfiles</code> is a string specifying the load directory to use at runtime,   relative to the runfiles root.    |
 
 
