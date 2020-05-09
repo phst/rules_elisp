@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Copyright 2020 Google LLC
 #
@@ -14,11 +14,5 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu
-
-if [[ "${OSTYPE}" != linux-gnu ]]; then
-  echo "This test doesn’t work on ${OSTYPE}" >&2
-  exit  # Successful exit so that “blaze test //...” works
-fi
-
-"${TEST_SRCDIR}/gnu_emacs_stable/emacs" --version
+echo 'The //emacs binary isn’t supported on this platform' >&2
+exit 2
