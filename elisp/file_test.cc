@@ -107,9 +107,6 @@ TEST(File, WriteRead) {
     ASSERT_THAT(status_or_file, IsOK());
     auto& file = status_or_file.value();
     EXPECT_THAT(file.path(), Eq(path));
-    const auto status_or_contents = file.Read();
-    ASSERT_THAT(status_or_contents, IsOK());
-    EXPECT_THAT(status_or_contents.value(), StrEq("hello world"));
     EXPECT_THAT(file.Close(), IsOK());
   }
 }
@@ -162,15 +159,8 @@ TEST(File, Move) {
   {
     auto status_or_file = File::Open(path, FileMode::kRead);
     ASSERT_THAT(status_or_file, IsOK());
-    auto& inner = status_or_file.value();
-    const auto status_or_contents = inner.Read();
-    ASSERT_THAT(status_or_contents, IsOK());
-    EXPECT_THAT(status_or_contents.value(), StrEq("hi"));
-    outer = std::move(inner);
+    outer = std::move(status_or_file).value();
   }
-  const auto status_or_contents = outer->Read();
-  ASSERT_THAT(status_or_contents, IsOK());
-  EXPECT_THAT(status_or_contents.value(), IsEmpty());
   EXPECT_THAT(outer->Close(), IsOK());
 }
 
@@ -196,9 +186,6 @@ TEST(File, AssignRead) {
   ASSERT_THAT(status_or_file, IsOK());
   auto a = std::move(status_or_file).value();
   auto b = std::move(a);
-  const auto status_or_contents = b.Read();
-  ASSERT_THAT(status_or_contents, IsOK());
-  EXPECT_THAT(status_or_contents.value(), StrEq("hi\n"));
   std::swap(a, b);
   EXPECT_THAT(a.Close(), IsOK());
 }

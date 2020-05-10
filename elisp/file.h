@@ -62,7 +62,6 @@ class File {
   File& operator=(File&& other);
   const std::string& path() const noexcept { return path_; }
   absl::Status Close();
-  StatusOr<std::string> Read();
   absl::Status Write(absl::string_view data);
 
  private:
@@ -87,7 +86,6 @@ class TempFile {
   TempFile& operator=(TempFile&&) = default;
   const std::string& path() const noexcept { return file_.path(); }
   absl::Status Close();
-  StatusOr<std::string> Read() { return file_.Read(); }
   absl::Status Write(const absl::string_view data) { return file_.Write(data); }
 
  private:

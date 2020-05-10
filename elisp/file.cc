@@ -121,18 +121,6 @@ absl::Status File::Write(const absl::string_view data) {
   return absl::OkStatus();
 }
 
-StatusOr<std::string> File::Read() {
-  std::string result;
-  while (true) {
-    std::array<char, 0x1000> buffer;
-    const auto n = ::read(fd_, buffer.data(), buffer.size());
-    if (n < 0) return this->Fail("read");
-    if (n == 0) break;
-    result.append(buffer.data(), ToUnsigned(n));
-  }
-  return result;
-}
-
 absl::Status File::Fail(const absl::string_view function) const {
   const auto status = ErrnoStatus(function);
   return absl::Status(status.code(),
