@@ -107,8 +107,19 @@ TempFile::~TempFile() noexcept {
 
 absl::Status TempFile::Close() {
   auto status = RemoveFile(this->path());
+  status.Update(this->Flush());
   status.Update(this->CloseHandle());
   return status;
+}
+
+absl::Status TempFile::Flush() {
+  int status = -1;
+  while (true) {
+    status = ::fsync(fd_);
+    if (status == 0 || errno != EINTR) break;
+  }
+  if (status != 0) return this->Fail("fsync");
+  return absl::OkStatus();
 }
 
 absl::Status TempFile::CloseHandle() {
@@ -133,7 +144,7 @@ absl::Status TempFile::Write(const absl::string_view data) {
         absl::StrCat("requested write of ", data.size(), " bytes, but only ",
                      data.size() - rest.size(), " bytes written"));
   }
-  return absl::OkStatus();
+  return this->Flush();
 }
 
 absl::Status TempFile::Fail(const absl::string_view function) const {

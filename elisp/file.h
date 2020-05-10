@@ -59,6 +59,7 @@ class TempFile {
   explicit TempFile(const int fd, std::string path)
       : fd_(fd), path_(std::move(path)) {}
   absl::Status CloseHandle();
+  absl::Status Flush();
   absl::Status Fail(absl::string_view function) const;
 
   int fd_ = -1;
