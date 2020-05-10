@@ -63,21 +63,31 @@ constexpr absl::make_unsigned_t<T> ToUnsigned(const T n) noexcept {
 
 }  // namespace
 
-StatusOr<File> File::Open(std::string path, const FileMode mode) {
-  int fd = -1;
-  while (true) {
-    fd = ::open(Pointer(path), static_cast<int>(mode) | O_CLOEXEC,
-                S_IRUSR | S_IWUSR);
-    if (fd >= 0 || errno != EINTR) break;
+StatusOr<TempFile> TempFile::Create(const std::string& directory,
+                                    const absl::string_view tmpl,
+                                    absl::BitGen& random) {
+  for (int i = 0; i < 10; i++) {
+    auto name = TempName(directory, tmpl, random);
+    if (!FileExists(name)) {
+      int fd = -1;
+      while (true) {
+        fd = ::open(Pointer(name), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC,
+                    S_IRUSR | S_IWUSR);
+        if (fd >= 0 || errno != EINTR) break;
+      }
+      if (fd < 0) return ErrnoStatus("open", name);
+      return TempFile(fd, std::move(name));
+    }
   }
-  if (fd < 0) return ErrnoStatus("open", path);
-  return File(fd, std::move(path));
+  return absl::UnavailableError(
+      absl::StrCat("can’t create temporary file in directory ", directory,
+                   " with template ", tmpl));
 }
 
-File::File(File&& other)
+TempFile::TempFile(TempFile&& other)
     : fd_(absl::exchange(other.fd_, -1)), path_(std::move(other.path_)) {}
 
-File& File::operator=(File&& other) {
+TempFile& TempFile::operator=(TempFile&& other) {
   const auto status = this->Close();
   if (!status.ok()) std::clog << status << std::endl;
   fd_ = absl::exchange(other.fd_, -1);
@@ -85,14 +95,23 @@ File& File::operator=(File&& other) {
   return *this;
 }
 
-File::~File() noexcept {
-  if (fd_ < 0) return;
-  std::clog << "file " << path_ << " still open" << std::endl;
+TempFile::~TempFile() noexcept {
   const auto status = this->Close();
-  if (!status.ok()) std::clog << "error closing file: " << status << std::endl;
+  // Only print an error if removing the file failed (status not OK), but
+  // the file wasn’t already removed before (NOT_FOUND status).
+  if (!status.ok() && !absl::IsNotFound(status)) {
+    std::clog << "error removing temporary file " << this->path() << ": "
+              << status << std::endl;
+  }
 }
 
-absl::Status File::Close() {
+absl::Status TempFile::Close() {
+  auto status = RemoveFile(this->path());
+  status.Update(this->CloseHandle());
+  return status;
+}
+
+absl::Status TempFile::CloseHandle() {
   if (fd_ < 0) return absl::OkStatus();
   int status = -1;
   while (true) {
@@ -105,7 +124,7 @@ absl::Status File::Close() {
   return absl::OkStatus();
 }
 
-absl::Status File::Write(const absl::string_view data) {
+absl::Status TempFile::Write(const absl::string_view data) {
   auto rest = data;
   while (!rest.empty()) {
     const auto n = ::write(fd_, rest.data(), rest.size());
@@ -121,44 +140,10 @@ absl::Status File::Write(const absl::string_view data) {
   return absl::OkStatus();
 }
 
-absl::Status File::Fail(const absl::string_view function) const {
+absl::Status TempFile::Fail(const absl::string_view function) const {
   const auto status = ErrnoStatus(function);
   return absl::Status(status.code(),
                       absl::StrCat("file ", path_, ": ", status.message()));
-}
-
-StatusOr<TempFile> TempFile::Create(const std::string& directory,
-                                    const absl::string_view tmpl,
-                                    absl::BitGen& random) {
-  for (int i = 0; i < 10; i++) {
-    auto name = TempName(directory, tmpl, random);
-    if (!FileExists(name)) {
-      ASSIGN_OR_RETURN(
-          auto file,
-          File::Open(std::move(name), FileMode::kReadWrite | FileMode::kCreate |
-                                          FileMode::kExclusive));
-      return TempFile(std::move(file));
-    }
-  }
-  return absl::UnavailableError(
-      absl::StrCat("can’t create temporary file in directory ", directory,
-                   " with template ", tmpl));
-}
-
-TempFile::~TempFile() noexcept {
-  const auto status = this->Close();
-  // Only print an error if removing the file failed (status not OK), but
-  // the file wasn’t already removed before (NOT_FOUND status).
-  if (!status.ok() && !absl::IsNotFound(status)) {
-    std::clog << "error removing temporary file " << this->path() << ": "
-              << status << std::endl;
-  }
-}
-
-absl::Status TempFile::Close() {
-  auto status = RemoveFile(this->path());
-  status.Update(file_.Close());
-  return status;
 }
 
 std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) {

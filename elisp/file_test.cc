@@ -89,78 +89,20 @@ MATCHER(IsOK, "OK") {
   return false;
 }
 
-TEST(File, WriteRead) {
-  absl::BitGen rnd;
-  const auto path = TempName(TempDir(), "file-*.tmp", rnd);
-  {
-    auto status_or_file = File::Open(
-        path, FileMode::kReadWrite | FileMode::kCreate | FileMode::kExclusive);
-    ASSERT_THAT(status_or_file, IsOK());
-    auto& file = status_or_file.value();
-    EXPECT_THAT(file.path(), Eq(path));
-    EXPECT_THAT(file.Write("hello world"), IsOK());
-    EXPECT_THAT(file.Close(), IsOK());
-  }
-  EXPECT_THAT(ReadFile(path), "hello world");
-  {
-    auto status_or_file = File::Open(path, FileMode::kRead);
-    ASSERT_THAT(status_or_file, IsOK());
-    auto& file = status_or_file.value();
-    EXPECT_THAT(file.path(), Eq(path));
-    EXPECT_THAT(file.Close(), IsOK());
-  }
-}
-
-#if defined MFD_CLOEXEC && defined MFD_ALLOW_SEALING \
-  && defined F_ADD_SEALS && defined F_SEAL_GROW
-TEST(File, PartialWrite) {
-  const int fd = memfd_create("test", MFD_CLOEXEC | MFD_ALLOW_SEALING);
-  ASSERT_THAT(fd, Ge(0)) << std::error_code(errno, std::system_category());
-  const struct Closer {
-    ~Closer() noexcept { ::close(fd); }
-    int fd;
-  } closer{fd};
-  EXPECT_THAT(ftruncate(fd, 1), Eq(0))
-      << std::error_code(errno, std::system_category());
-  EXPECT_THAT(fcntl(fd, F_ADD_SEALS, F_SEAL_GROW), Eq(0))
-      << std::error_code(errno, std::system_category());
-  auto status_or_file =
-      File::Open(absl::StrCat("/dev/fd/", fd), FileMode::kWrite);
-  ASSERT_THAT(status_or_file, IsOK());
-  auto& file = status_or_file.value();
-  EXPECT_THAT(file.Write("h"), IsOK());
-  EXPECT_THAT(file.Write("i"), Not(IsOK()));
-  EXPECT_THAT(file.Close(), IsOK());  // buffer flushed, no new error
-  std::array<char, 20> buffer;
-  EXPECT_THAT(::read(fd, buffer.data(), buffer.size()), Eq(1));
-  EXPECT_THAT(::close(fd), Eq(0))
-      << std::error_code(errno, std::system_category());
-  EXPECT_THAT(buffer.front(), Eq('h'));
-}
-#endif
-
-TEST(File, Move) {
+TEST(TempFile, Move) {
   // This test should typically be run under Address Sanitizer to debug issues
   // with the move constructor.
   absl::BitGen rnd;
-  const auto path = TempName(TempDir(), "file-*.tmp", rnd);
-  absl::optional<File> outer;
+  absl::optional<TempFile> outer;
   {
-    auto status_or_file = File::Open(
-        path, FileMode::kWrite | FileMode::kCreate | FileMode::kExclusive);
+    auto status_or_file = TempFile::Create(TempDir(), "file-*.tmp", rnd);
     EXPECT_THAT(status_or_file, IsOK());
     auto& inner = status_or_file.value();
     EXPECT_THAT(inner.Write("h"), IsOK());
     outer = std::move(inner);
   }
   EXPECT_THAT(outer->Write("i"), IsOK());
-  EXPECT_THAT(outer->Close(), IsOK());
-  EXPECT_THAT(ReadFile(path), "hi");
-  {
-    auto status_or_file = File::Open(path, FileMode::kRead);
-    ASSERT_THAT(status_or_file, IsOK());
-    outer = std::move(status_or_file).value();
-  }
+  EXPECT_THAT(ReadFile(outer->path()), "hi");
   EXPECT_THAT(outer->Close(), IsOK());
 }
 
@@ -179,10 +121,9 @@ TEST(TempFile, Create) {
   EXPECT_THAT(FileExists(path), IsFalse());
 }
 
-TEST(File, AssignRead) {
-  auto status_or_file = File::Open(
-      JoinPath(std::getenv("TEST_SRCDIR"), "phst_rules_elisp/elisp/test.txt"),
-      FileMode::kRead);
+TEST(TempFile, Assign) {
+  absl::BitGen rnd;
+  auto status_or_file = TempFile::Create(TempDir(), "foo-*.tmp", rnd);
   ASSERT_THAT(status_or_file, IsOK());
   auto a = std::move(status_or_file).value();
   auto b = std::move(a);

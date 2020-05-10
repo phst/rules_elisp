@@ -40,39 +40,6 @@
 
 namespace phst_rules_elisp {
 
-enum class FileMode {
-  kRead = O_RDONLY,
-  kWrite = O_WRONLY,
-  kReadWrite = O_RDWR,
-  kCreate = O_CREAT,
-  kExclusive = O_EXCL,
-};
-
-inline FileMode operator|(const FileMode a, const FileMode b) {
-  return static_cast<FileMode>(static_cast<int>(a) | static_cast<int>(b));
-}
-
-class File {
- public:
-  static StatusOr<File> Open(std::string path, FileMode mode);
-  ~File() noexcept;
-  File(const File&) = delete;
-  File(File&& other);
-  File& operator=(const File&) = delete;
-  File& operator=(File&& other);
-  const std::string& path() const noexcept { return path_; }
-  absl::Status Close();
-  absl::Status Write(absl::string_view data);
-
- private:
-  explicit File(const int fd, std::string path)
-      : fd_(fd), path_(std::move(path)) {}
-  absl::Status Fail(absl::string_view function) const;
-
-  int fd_ = -1;
-  std::string path_;
-};
-
 class TempFile {
  public:
   static StatusOr<TempFile> Create(const std::string& directory,
@@ -81,17 +48,21 @@ class TempFile {
 
   ~TempFile() noexcept;
   TempFile(const TempFile&) = delete;
-  TempFile(TempFile&&) = default;
+  TempFile(TempFile&&);
   TempFile& operator=(const TempFile&) = delete;
-  TempFile& operator=(TempFile&&) = default;
-  const std::string& path() const noexcept { return file_.path(); }
+  TempFile& operator=(TempFile&&);
+  const std::string& path() const noexcept { return path_; }
   absl::Status Close();
-  absl::Status Write(const absl::string_view data) { return file_.Write(data); }
+  absl::Status Write(absl::string_view data);
 
  private:
-  explicit TempFile(File file) : file_(std::move(file)) {}
+  explicit TempFile(const int fd, std::string path)
+      : fd_(fd), path_(std::move(path)) {}
+  absl::Status CloseHandle();
+  absl::Status Fail(absl::string_view function) const;
 
-  File file_;
+  int fd_ = -1;
+  std::string path_;
 };
 
 constexpr bool IsAbsolute(absl::string_view name) noexcept {
