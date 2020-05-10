@@ -113,12 +113,8 @@ absl::Status TempFile::Close() {
 
 absl::Status TempFile::CloseHandle() {
   if (fd_ < 0) return absl::OkStatus();
-  int status = -1;
-  while (true) {
-    status = ::close(fd_);
-    if (status == 0 || errno != EINTR) break;
-  }
-  fd_ = -1;
+  // Don’t check for EINTR, see https://lwn.net/Articles/576478/.
+  const int status = ::close(fd_);
   path_.clear();
   if (status != 0) return this->Fail("close");
   return absl::OkStatus();
