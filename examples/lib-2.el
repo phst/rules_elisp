@@ -23,6 +23,11 @@
 (defun lib-2-func ()
   (message "hi from lib-2"))
 
+;; This definition generates a byte-compile warning.  Normally this would cause
+;; compilation to fail, but since the library rule use “fatal_warnings = False”
+;; it only prints a warning message.
+(defvar foo)
+
 (provide 'examples/lib-2)
 (provide 'lib-2)
 ;;; lib-2.el ends here

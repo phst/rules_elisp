@@ -40,6 +40,7 @@ elisp_test(
 elisp_library(
     name = "lib_2",
     srcs = ["lib-2.el"],
+    fatal_warnings = False,
     load_path = ["."],
 )
 
