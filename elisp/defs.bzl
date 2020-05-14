@@ -150,6 +150,8 @@ def _binary(ctx):
                 ))
                 for file in data_files_for_manifest
             ]),
+            "[[skip_tests]]": _cpp_strings(getattr(ctx.attr, "skip_tests", [])),
+            "[[skip_tags]]": _cpp_strings(getattr(ctx.attr, "skip_tags", [])),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
         },
     )
@@ -400,16 +402,36 @@ elisp_test = rule(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
         ),
+        skip_tests = attr.string_list(
+            doc = """List of tests to skip.  This attribute contains a list of
+ERT test symbols; when running the test rule, these tests are skipped.
+
+Most of the time, you should use [the `skip-unless`
+macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html)
+instead.  The `skip_tests` attribute is mainly useful for third-party code that
+you don’t control.""",
+        ),
+        skip_tags = attr.string_list(
+            doc = """List of test tags to skip.  This attribute contains a list
+of tag names; if a test is tagged with one of the tags from this list, it is
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+interactive mode.  Use the `:tags` keyword argument to `ert-deftest` to tag
+tests.""",
+        ),
     ),
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
 See the [ERT
 manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html)
 for details.  The generated test binary loads all source files and executes all
-tests like `ert-run-tests-batch-and-exit`.  You can restrict the tests to be
-run using the `--test_filter` option.  If set, the value of `--test_filter`
-must be a Lisp expression usable as an [ERT test
-selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).""",
+tests like `ert-run-tests-batch-and-exit`.
+
+You can restrict the tests to be run using the `--test_filter` option.  If set,
+the value of `--test_filter` must be a Lisp expression usable as an [ERT test
+selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).
+You can also restrict the tests to be run using the `skip_tests` and
+`skip_tags` rule attributes.  These restrictions are additive, i.e., a test
+only runs if it’s not suppressed by either facility.""",
     fragments = ["cpp"],
     test = True,
     toolchains = [
@@ -599,3 +621,19 @@ def _load_directory_for_actions(directory):
     # This trivial function exists because we have to pass a function to
     # map_each above.
     return check_relative_filename(directory.for_actions)
+
+def _cpp_strings(strings):
+    """Format the given string list as C++ initializer list."""
+    return ", ".join([_cpp_string(s) for s in strings])
+
+def _cpp_string(string):
+    """Format the given string as C++ string literal."""
+
+    # Use raw strings and choose a delimiter that’s extremely unlikely to occur
+    # in real-world code.
+    delim = "#*?&"
+    open = 'R"' + delim + "("
+    close = ")" + delim + '"'
+    if close in string:
+        fail("String {} can’t be transferred to C++".format(string))
+    return open + string + close

@@ -21,6 +21,8 @@ int main(int argc, char** argv) {
       {[[directory]]},
       {[[load]]},
       {[[data]]},
+      {[[skip_tests]]},
+      {[[skip_tags]]},
       argc, argv);
 }
 

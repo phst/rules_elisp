@@ -33,6 +33,9 @@
 (require 'rx)
 (require 'xml)
 
+(add-to-list 'command-switch-alist (cons "--skip-test" #'elisp/ert/skip-test))
+(add-to-list 'command-switch-alist (cons "--skip-tag" #'elisp/ert/skip-tag))
+
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -53,14 +56,13 @@ source files and load them."
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory (concat "/:" temp-dir))
          (report-file (getenv "XML_OUTPUT_FILE"))
-         (test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
          (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
          (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
          (shard-status-file (getenv "TEST_SHARD_STATUS_FILE"))
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-dir (getenv "COVERAGE_DIR"))
-         (selector (if (member test-filter '(nil "")) t (read test-filter)))
+         (selector (elisp/ert/make--selector))
          (original-load-suffixes load-suffixes)
          (load-suffixes
           ;; Prefer source files when coverage is requested, as only those can
@@ -190,6 +192,44 @@ source files and load them."
         (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
                                           load-buffers))
       (kill-emacs (min unexpected 1)))))
+
+(defvar elisp/ert/skip--tests nil
+  "Test symbols to be skipped.
+This list is populated by --skip-test command-line options.")
+
+(defvar elisp/ert/skip--tags nil
+  "Test tags to be skipped.
+This list is populated by --skip-tag command-line options.")
+
+(defun elisp/ert/skip-test (_arg)
+  "Handle the --skip-test command-line argument."
+  (let ((test (pop command-line-args-left)))
+    (or test (error "Missing value for --skip-test option"))
+    (push (intern test) elisp/ert/skip--tests)))
+
+(defun elisp/ert/skip-tag (_arg)
+  "Handle the --skip-tag command-line argument."
+  (let ((tag (pop command-line-args-left)))
+    (or tag (error "Missing value for --skip-tag option"))
+    (push (intern tag) elisp/ert/skip--tags)))
+
+(defun elisp/ert/make--selector ()
+  "Build an ERT selector from environment and command line."
+  ;; We optimize the test selector somewhat.  It’s displayed to the user if no
+  ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
+  (cl-flet ((combine (op def elts) (cond ((null elts) def)
+                                         ((cdr elts) `(,op ,@elts))
+                                         (t (car elts))))
+            (invert (sel) (if sel `(not ,sel) t)))
+    (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
+           (filter (if (member test-filter '(nil "")) t (read test-filter)))
+           (skip-tags
+            (invert
+             (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
+                                                elisp/ert/skip--tags)))))
+           (skip-tests
+            (invert (combine 'member nil (reverse elisp/ert/skip--tests)))))
+      (combine 'and t (delq t (list filter skip-tags skip-tests))))))
 
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.

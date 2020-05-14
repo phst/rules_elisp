@@ -27,4 +27,10 @@
 (ert-deftest lib-2-test ()
   (should (equal (lib-2-func) "hi from lib-2")))
 
+(ert-deftest lib-2-broken-test ()
+  :tags '(skip)
+  ;; This test is broken, but Bazel will skip it due to the “skip_tags”
+  ;; attribute in the build rule.
+  (should (= 0 1)))
+
 ;;; lib-2-test.el ends here

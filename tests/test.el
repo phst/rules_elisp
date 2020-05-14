@@ -45,6 +45,13 @@
   :tags '(skip)
   (should (= 0 1)))
 
+(ert-deftest filter-via-skip-tests-attribute ()
+  (should (= 0 1)))
+
+(ert-deftest filter-via-skip-tags-attribute ()
+  :tags '(skip-from-attribute)
+  (should (= 0 1)))
+
 (ert-deftest error ()
   (error "Boo"))
 

@@ -59,7 +59,7 @@ further elements to the load path, use the `load_path` attribute.
 ## elisp_test
 
 <pre>
-elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data</a>, <a href="#elisp_test-deps">deps</a>, <a href="#elisp_test-fatal_warnings">fatal_warnings</a>, <a href="#elisp_test-srcs">srcs</a>)
+elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data</a>, <a href="#elisp_test-deps">deps</a>, <a href="#elisp_test-fatal_warnings">fatal_warnings</a>, <a href="#elisp_test-skip_tags">skip_tags</a>, <a href="#elisp_test-skip_tests">skip_tests</a>, <a href="#elisp_test-srcs">srcs</a>)
 </pre>
 
 Runs ERT tests that are defined in the source files.
@@ -67,10 +67,14 @@ The given source files should contain ERT tests defined with `ert-deftest`.
 See the [ERT
 manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html)
 for details.  The generated test binary loads all source files and executes all
-tests like `ert-run-tests-batch-and-exit`.  You can restrict the tests to be
-run using the `--test_filter` option.  If set, the value of `--test_filter`
-must be a Lisp expression usable as an [ERT test
+tests like `ert-run-tests-batch-and-exit`.
+
+You can restrict the tests to be run using the `--test_filter` option.  If set,
+the value of `--test_filter` must be a Lisp expression usable as an [ERT test
 selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).
+You can also restrict the tests to be run using the `skip_tests` and
+`skip_tags` rule attributes.  These restrictions are additive, i.e., a test
+only runs if it’s not suppressed by either facility.
 
 **ATTRIBUTES**
 
@@ -81,6 +85,8 @@ selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
+| skip_tags |  List of test tags to skip.  This attribute contains a list of tag names; if a test is tagged with one of the tags from this list, it is skipped.  This can be useful to e.g. skip tests that are flaky or only work in interactive mode.  Use the <code>:tags</code> keyword argument to <code>ert-deftest</code> to tag tests.   | List of strings | optional | [] |
+| skip_tests |  List of tests to skip.  This attribute contains a list of ERT test symbols; when running the test rule, these tests are skipped.<br><br>Most of the time, you should use [the <code>skip-unless</code> macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html) instead.  The <code>skip_tests</code> attribute is mainly useful for third-party code that you don’t control.   | List of strings | optional | [] |
 | srcs |  List of source files to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 

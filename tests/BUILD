@@ -38,6 +38,8 @@ elisp_test(
     # otherwise it won’t be present and we can’t test coverage.  For real
     # tests, Bazel does the right thing.
     data = ["test-lib.el"],
+    skip_tags = ["skip-from-attribute"],
+    skip_tests = ["filter-via-skip-tests-attribute"],
     tags = ["manual"],
     deps = [":test_lib"],
 )

@@ -204,7 +204,9 @@ class Executor {
   StatusOr<int> RunTest(const char* wrapper, Mode mode,
                         absl::Span<const char* const> load_path,
                         absl::Span<const char* const> srcs,
-                        absl::Span<const char* const> data_files);
+                        absl::Span<const char* const> data_files,
+                        absl::Span<const char* const> skip_tests,
+                        absl::Span<const char* const> skip_tags);
 
  private:
   explicit Executor(int argc, const char* const* argv,
@@ -285,11 +287,12 @@ StatusOr<int> Executor::RunBinary(
   return code;
 }
 
-StatusOr<int> Executor::RunTest(
-    const char* const wrapper, const Mode mode,
-    const absl::Span<const char* const> load_path,
-    const absl::Span<const char* const> srcs,
-    const absl::Span<const char* const> data_files) {
+StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
+                                const absl::Span<const char* const> load_path,
+                                const absl::Span<const char* const> srcs,
+                                const absl::Span<const char* const> data_files,
+                                const absl::Span<const char* const> skip_tests,
+                                const absl::Span<const char* const> skip_tags) {
   ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
   std::vector<std::string> args;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
@@ -299,6 +302,15 @@ StatusOr<int> Executor::RunTest(
   ASSIGN_OR_RETURN(const auto runner,
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
+  // Note that using equals signs for --skip-test and --skip-tag doesn’t work.
+  for (const auto& test : skip_tests) {
+    args.push_back("--skip-test");
+    args.push_back(test);
+  }
+  for (const auto& tag : skip_tags) {
+    args.push_back("--skip-tag");
+    args.push_back(tag);
+  }
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   for (const auto& file : srcs) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
@@ -446,16 +458,18 @@ int RunBinary(const char* const wrapper, const Mode mode,
 int RunTest(const char* const wrapper, const Mode mode,
             const std::initializer_list<const char*> load_path,
             const std::initializer_list<const char*> srcs,
-            const std::initializer_list<const char*> data_files, const int argc,
-            const char* const* const argv) {
+            const std::initializer_list<const char*> data_files,
+            const std::initializer_list<const char*> skip_tests,
+            const std::initializer_list<const char*> skip_tags,
+            const int argc, const char* const* const argv) {
   auto status_or_executor = Executor::CreateForTest(argc, argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code =
-      executor.RunTest(wrapper, mode, load_path, srcs, data_files);
+  const auto status_or_code = executor.RunTest(
+      wrapper, mode, load_path, srcs, data_files, skip_tests, skip_tags);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;

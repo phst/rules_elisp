@@ -37,6 +37,8 @@ ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
                                  std::initializer_list<const char*> load_path,
                                  std::initializer_list<const char*> srcs,
                                  std::initializer_list<const char*> data_files,
+                                 std::initializer_list<const char*> skip_tests,
+                                 std::initializer_list<const char*> skip_tags,
                                  int argc, const char* const* argv);
 
 }  // namespace phst_rules_elisp
