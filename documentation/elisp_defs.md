@@ -5,7 +5,7 @@
 ## elisp_binary
 
 <pre>
-elisp_binary(<a href="#elisp_binary-name">name</a>, <a href="#elisp_binary-data">data</a>, <a href="#elisp_binary-deps">deps</a>, <a href="#elisp_binary-src">src</a>)
+elisp_binary(<a href="#elisp_binary-name">name</a>, <a href="#elisp_binary-data">data</a>, <a href="#elisp_binary-deps">deps</a>, <a href="#elisp_binary-fatal_warnings">fatal_warnings</a>, <a href="#elisp_binary-src">src</a>)
 </pre>
 
 Binary rule that loads a single Emacs Lisp file.
@@ -20,6 +20,7 @@ in batch mode.
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
 | src |  Source file to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 
 
@@ -28,7 +29,7 @@ in batch mode.
 ## elisp_library
 
 <pre>
-elisp_library(<a href="#elisp_library-name">name</a>, <a href="#elisp_library-data">data</a>, <a href="#elisp_library-deps">deps</a>, <a href="#elisp_library-load_path">load_path</a>, <a href="#elisp_library-srcs">srcs</a>)
+elisp_library(<a href="#elisp_library-name">name</a>, <a href="#elisp_library-data">data</a>, <a href="#elisp_library-deps">deps</a>, <a href="#elisp_library-fatal_warnings">fatal_warnings</a>, <a href="#elisp_library-load_path">load_path</a>, <a href="#elisp_library-srcs">srcs</a>)
 </pre>
 
 Byte-compiles Emacs Lisp source files and makes the compiled output
@@ -48,6 +49,7 @@ further elements to the load path, use the `load_path` attribute.
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
 | load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
 | srcs |  List of source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
@@ -57,7 +59,7 @@ further elements to the load path, use the `load_path` attribute.
 ## elisp_test
 
 <pre>
-elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data</a>, <a href="#elisp_test-deps">deps</a>, <a href="#elisp_test-srcs">srcs</a>)
+elisp_test(<a href="#elisp_test-name">name</a>, <a href="#elisp_test-data">data</a>, <a href="#elisp_test-deps">deps</a>, <a href="#elisp_test-fatal_warnings">fatal_warnings</a>, <a href="#elisp_test-srcs">srcs</a>)
 </pre>
 
 Runs ERT tests that are defined in the source files.
@@ -78,6 +80,7 @@ selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors
 | name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
 | srcs |  List of source files to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 

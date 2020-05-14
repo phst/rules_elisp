@@ -38,8 +38,6 @@
        ;; sense in batch mode.
        (attempt-stack-overflow-recovery nil)
        (attempt-orderly-shutdown-on-fatal-signal nil)
-       ;; We don’t want to allow warnings, as users will ignore them.
-       (byte-compile-error-on-warn t)
        ;; Ensure filenames in the output are relative to the current directory.
        (byte-compile-root-dir default-directory)
        (byte-compile-dest-file-function (lambda (_) out))

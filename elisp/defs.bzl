@@ -259,8 +259,18 @@ specify temporary files that are deleted after the action completes.""",
     provides = [platform_common.ToolchainInfo],
 )
 
-# Tool attributes shared between elisp_library, elisp_binary, and elisp_test.
-_TOOLS = {
+# Compilation-related attributes shared between elisp_library, elisp_binary,
+# and elisp_test.
+_COMPILE_ATTRS = {
+    "fatal_warnings": attr.bool(
+        doc = """If `True` (the default), then byte compile warnings should be
+treated as errors.  If `False`, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+`True`, because otherwise important issues might remain undetected.  Set this
+attribute to `False` only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.""",
+        default = True,
+    ),
     "_compile": attr.label(
         default = "//elisp:compile.el",
         allow_single_file = [".el"],
@@ -269,7 +279,7 @@ _TOOLS = {
 
 elisp_library = rule(
     attrs = dict(
-        _TOOLS,
+        _COMPILE_ATTRS,
         srcs = attr.label_list(
             allow_empty = False,
             doc = "List of source files.",
@@ -307,7 +317,7 @@ further elements to the load path, use the `load_path` attribute.""",
 
 elisp_binary = rule(
     attrs = dict(
-        _TOOLS,
+        _COMPILE_ATTRS,
         src = attr.label(
             doc = "Source file to load.",
             allow_single_file = [".el"],
@@ -353,7 +363,7 @@ in batch mode.""",
 
 elisp_test = rule(
     attrs = dict(
-        _TOOLS,
+        _COMPILE_ATTRS,
         srcs = attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",
@@ -497,12 +507,16 @@ def _compile(ctx, srcs, deps, load_path):
         args += [
             "--quick",
             "--batch",
+            "--load=bytecomp",
             ctx.actions.args().add_all(
                 transitive_load_path,
                 map_each = _load_directory_for_actions,
                 format_each = "--directory=%s",
                 uniquify = True,
                 expand_directories = False,
+            ),
+            "--eval=(setq byte-compile-error-on-warn {})".format(
+                "t" if ctx.attr.fatal_warnings else "nil",
             ),
             "--load=" + ctx.file._compile.path,
             src.path,
