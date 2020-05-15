@@ -97,8 +97,7 @@ def _binary(ctx):
     file to be expanded.
     """
     srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
-    load_path = getattr(ctx.attr, "load_path", [])
-    result = _compile(ctx, srcs, ctx.attr.deps, load_path)
+    result = _compile(ctx, srcs, ctx.attr.deps, [])
     toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
 
