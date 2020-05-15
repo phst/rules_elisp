@@ -31,6 +31,7 @@
 (require 'format)
 (require 'pp)
 (require 'rx)
+(require 'subr-x)
 (require 'xml)
 
 (add-to-list 'command-switch-alist (cons "--skip-test" #'elisp/ert/skip-test))
@@ -140,7 +141,12 @@ source files and load them."
                (report nil))
           (elisp/ert/log--message "Test %s %s and took %d ms" name status
                                   (* (float-time duration) 1000))
-          (or expected (cl-incf unexpected))
+          (unless expected
+            (cl-incf unexpected)
+            ;; Print a nice error message that should point back to the source
+            ;; file in a compilation buffer.
+            (elisp/ert/log--error name
+                                  (format-message "Test %s %s" name status)))
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (and (ert-test-skipped-p result) (cl-incf skipped))
@@ -402,6 +408,56 @@ to be used as root."
   (message "[%s] %s"
            (format-time-string "%F %T.%3N")
            (apply #'format-message format args)))
+
+(defun elisp/ert/log--error (test message)
+  "Log an error for TEST.
+TEST should be an ERT test symbol.  MESSAGE is the error message.
+If possible, format the message according to the
+GNU Coding Standards; see Info node ‘(standards) Errors’."
+  (cl-check-type message string)
+  (cl-check-type test symbol)
+  ;; Yuck!  ‘ert--test’ is an implementation detail.
+  (when-let ((file (symbol-file test 'ert--test)))
+    ;; The filename typically refers to a compiled file in the execution root.
+    ;; Try to resolve it to a source file.  See
+    ;; https://docs.bazel.build/versions/3.1.0/output_directories.html#layout-diagram.
+    (when (string-match (rx "/execroot/"
+                            (+ (not (any ?/))) ?/ ; workspace
+                            (+ (not (any ?/))) ?/ ; bazel-out
+                            (+ (not (any ?/))) ?/ ; configuration
+                            "bin/"
+                            (group (+ nonl)) ".elc" eos)
+                        file)
+      ;; We can use the filename relative to the Bazel binary directory since
+      ;; that corresponds to a source filename relative to some workspace root.
+      ;; ‘find-function-search-for-symbol’ will find the corresponding source
+      ;; file because all workspace roots are in the ‘load-path’.
+      (cl-callf2 match-string-no-properties 1 file))
+    (let ((buffers (buffer-list))
+          (directory default-directory)
+          ;; Try to print nice and short filenames.  We do this by using the
+          ;; filename relative to the test working directory
+          ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).  Prevent both ‘find-file’ and
+          ;; ‘vc-refresh-state’ from following symbolic links to the original
+          ;; source file.
+          (find-file-visit-truename nil)
+          (vc-handled-backends nil))
+      (when-let ((definition
+                   ;; ‘find-function-search-for-symbol’ signals errors if it
+                   ;; can’t find the library.  Since we’re only attempting to
+                   ;; print a log message here, ignore them and move on.
+                   (ignore-errors
+                     ;; Yuck!  ‘ert--test’ is an implementation detail.
+                     (find-function-search-for-symbol test 'ert--test file))))
+        (cl-destructuring-bind (buffer . point) definition
+          (with-current-buffer buffer
+            (message "%s:%d: %s"
+                     (file-relative-name buffer-file-name directory)
+                     (line-number-at-pos point :absolute)
+                     message)
+            ;; If ‘find-function-search-for-symbol’ has created a new buffer,
+            ;; kill it.
+            (unless (memq buffer buffers) (kill-buffer))))))))
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
