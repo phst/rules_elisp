@@ -96,6 +96,7 @@ def _binary(ctx):
     The rule should define a “_template” attribute containing the C++ template
     file to be expanded.
     """
+    is_test = hasattr(ctx.attr, "_lcov_merger")
     srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
     result = _compile(ctx, srcs, ctx.attr.deps, [])
     toolchain = _toolchain(ctx)
@@ -159,9 +160,10 @@ def _binary(ctx):
     bin_runfiles = ctx.runfiles(
         files = (
             [emacs.files_to_run.executable] + ctx.files._default_libs +
+            result.outs +
             # We include the original source files in the runfiles so that
             # error messages in tests can link back to them.
-            result.outs + srcs
+            (srcs if is_test else [])
         ),
         transitive_files = depset(
             transitive = [transitive_files, result.runfiles.files],
