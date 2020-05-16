@@ -594,8 +594,8 @@ def _compile(ctx, srcs, deps, load_path):
         )
         if toolchain.wrap:
             manifest = ctx.actions.declare_file(
-                src.basename + ".manifest.json",
-                sibling = src,
+                out.basename + ".manifest.json",
+                sibling = out,
             )
             ctx.actions.write(
                 output = manifest,
