@@ -574,18 +574,17 @@ def _compile(ctx, srcs, deps, load_path):
     # but since compilation can execute arbitrary code, it ensures that
     # compilation actions don’t interfere with each other.
     for src in srcs:
-        if relocate_output:
-            out = ctx.actions.declare_file(
+        out = (
+            ctx.actions.declare_file(
                 paths.join(
                     _OUTPUT_DIR,
                     paths.replace_extension(src.short_path, ".elc"),
                 ),
-            )
-        else:
-            out = ctx.actions.declare_file(
+            ) if relocate_output else ctx.actions.declare_file(
                 paths.replace_extension(src.basename, ".elc"),
                 sibling = src,
             )
+        )
         args = []
         inputs = depset(
             # Add all source files as input files so they can load each other
