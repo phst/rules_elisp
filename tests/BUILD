@@ -48,3 +48,8 @@ elisp_library(
     name = "test_lib",
     srcs = ["test-lib.el"],
 )
+
+exports_files(
+    ["test-lib.el"],
+    visibility = ["//tests/pkg:__pkg__"],
+)

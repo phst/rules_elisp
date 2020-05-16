@@ -473,6 +473,22 @@ def _compile(ctx, srcs, deps, load_path):
     """
     outs = []
 
+    # If any file comes for a different package, we can’t place the compiled
+    # files adjacent to the source files.  See
+    # https://docs.bazel.build/versions/3.1.0/skylark/lib/actions.html#declare_file.
+    relocate_output = any([
+        src.owner.workspace_name != ctx.label.workspace_name or
+        src.owner.package != ctx.label.package
+        for src in srcs
+    ])
+
+    # Directory relative to the workspace root where outputs should be stored.
+    # We prefer storing them adjacent to source files to reduce the number of
+    # load path entries, but if necessary, we generate a subdirectory in the
+    # current package.
+    output_base = (
+        paths.join(ctx.label.package, _OUTPUT_DIR) if relocate_output else ""
+    )
     resolved_load_path = []
     source_load_path = []
     for dir in ["/"] + load_path:
@@ -480,7 +496,12 @@ def _compile(ctx, srcs, deps, load_path):
             dir = "." + dir
         else:
             dir = paths.join(ctx.label.package, check_relative_filename(dir))
-        check_relative_filename(dir)
+
+        # If we’re compiling source files from another package, we need to
+        # insert the output base directory for this rule.  In that case, we
+        # still have to append the workspace-relative directory, so that
+        # filenames relative to the (relocated) workspace root work.
+        dir = check_relative_filename(paths.join(output_base, dir))
         resolved = struct(
             # Actions should load byte-compiled files.  Since we place them
             # into the bin directory, we need to start from there, append the
@@ -553,7 +574,12 @@ def _compile(ctx, srcs, deps, load_path):
     # but since compilation can execute arbitrary code, it ensures that
     # compilation actions don’t interfere with each other.
     for src in srcs:
-        out = ctx.actions.declare_file(src.basename + "c", sibling = src)
+        if relocate_output:
+            out = ctx.actions.declare_file(
+                paths.join(_OUTPUT_DIR, src.short_path + "c"),
+            )
+        else:
+            out = ctx.actions.declare_file(src.basename + "c", sibling = src)
         args = []
         inputs = depset(
             # Add all source files as input files so they can load each other
@@ -651,3 +677,8 @@ def _cpp_string(string):
     if close in string:
         fail("String {} can’t be transferred to C++".format(string))
     return open + string + close
+
+# Directory relative to the current package where to store compiled files.
+# This equivalent to _objs for C++ rules.  See
+# https://docs.bazel.build/versions/3.1.0/output_directories.html#layout-diagram.
+_OUTPUT_DIR = "_elisp"
