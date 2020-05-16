@@ -13,7 +13,8 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load(":defs.bzl", "elisp_toolchain")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load(":defs.bzl", "elisp_library", "elisp_toolchain")
 load(":defs_test.bzl", "elisp_test_suite")
 load(":util.bzl", "COPTS")
 
@@ -198,4 +199,16 @@ exports_files(
         "repositories.bzl",
     ],
     visibility = ["//documentation:__pkg__"],
+)
+
+# Make sure compile.el can itself be byte-compiled.  We don’t use the compiled
+# output for bootstrapping reasons.
+elisp_library(
+    name = "compile",
+    srcs = ["compile.el"],
+)
+
+build_test(
+    name = "compile_test",
+    targets = [":compile"],
 )
