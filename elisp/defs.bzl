@@ -55,7 +55,7 @@ described in the provider documentation.""",
     },
 )
 
-def _toolchain_rule(ctx):
+def _elisp_toolchain_impl(ctx):
     """Rule implementation for the “elisp_toolchain” toolchain rule."""
     return platform_common.ToolchainInfo(
         emacs = ctx.attr.emacs,
@@ -71,7 +71,7 @@ def _toolchain(ctx):
     """Return the Emacs Lisp toolchain for the given context."""
     return ctx.toolchains[_TOOLCHAIN_TYPE]
 
-def _library(ctx):
+def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
     result = _compile(ctx, ctx.files.srcs, ctx.attr.deps, ctx.attr.load_path)
     return [
@@ -90,7 +90,7 @@ def _library(ctx):
         ),
     ]
 
-def _binary(ctx):
+def _elisp_binary_impl(ctx):
     """Rule implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
@@ -205,7 +205,7 @@ def _binary(ctx):
     ]
 
 elisp_toolchain = rule(
-    implementation = _toolchain_rule,
+    implementation = _elisp_toolchain_impl,
     attrs = {
         "emacs": attr.label(
             doc = """An executable file that behaves like the Emacs binary.
@@ -322,7 +322,7 @@ also load each other.  However, it’s often preferable to only have one
 ensure that files get only loaded in their byte-compiled form.""",
     provides = [EmacsLispInfo],
     toolchains = [_TOOLCHAIN_TYPE],
-    implementation = _library,
+    implementation = _elisp_library_impl,
 )
 
 elisp_binary = rule(
@@ -368,7 +368,7 @@ in batch mode.""",
         "@bazel_tools//tools/cpp:toolchain_type",
         _TOOLCHAIN_TYPE,
     ],
-    implementation = _binary,
+    implementation = _elisp_binary_impl,
 )
 
 elisp_test = rule(
@@ -446,7 +446,7 @@ only runs if it’s not suppressed by either facility.""",
         "@bazel_tools//tools/cpp:toolchain_type",
         _TOOLCHAIN_TYPE,
     ],
-    implementation = _binary,
+    implementation = _elisp_binary_impl,
 )
 
 def _compile(ctx, srcs, deps, load_path):
