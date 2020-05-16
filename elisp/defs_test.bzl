@@ -15,7 +15,7 @@
 """Unit tests for defs.bzl."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
-load(":defs.bzl", "EmacsLispInfo", "elisp_library")
+load(":defs.bzl", "EmacsLispInfo")
 
 # Test for the EmacsLispInfo provider.
 
@@ -68,14 +68,9 @@ def _provider_test_impl(ctx):
 provider_test = analysistest.make(_provider_test_impl)
 
 def _test_provider():
-    elisp_library(
-        name = "provider_test_subject",
-        srcs = ["compile.el"],
-        tags = ["manual"],
-    )
     provider_test(
         name = "provider_test",
-        target_under_test = ":provider_test_subject",
+        target_under_test = "//elisp:compile",
     )
 
 def elisp_test_suite(name):
