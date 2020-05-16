@@ -467,7 +467,40 @@ def _compile(ctx, srcs, deps, load_path):
             and all its transitive dependencies
     """
     outs = []
-    load_path = [_load_directory(ctx, dir) for dir in ["/"] + load_path]
+
+    resolved_load_path = []
+    for dir in ["/"] + load_path:
+        if paths.is_absolute(dir):
+            dir = "." + dir
+        else:
+            dir = paths.join(ctx.label.package, check_relative_filename(dir))
+        check_relative_filename(dir)
+        resolved = struct(
+            # Actions should load byte-compiled files.  Since we place them
+            # into the bin directory, we need to start from there, append the
+            # workspace root (see
+            # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_root),
+            # and then the directory name relative to the workspace root.  The
+            # workspace root will only be nonempty if the current rule lives in
+            # a different workspace than the one that Bazel is run from.
+            for_actions = check_relative_filename(
+                paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
+            ),
+            # The runfiles tree looks different, see
+            # https://docs.bazel.build/versions/2.0.0/output_directories.html.
+            # The top-level directories in the runfiles root are always the
+            # workspace names, and the load directories are relative to those.
+            # The workspace name is the workspace part of the lexical label,
+            # see
+            # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_name.
+            # Therefore, it can be empty, in which case we need to use the
+            # current workspace.
+            for_runfiles = check_relative_filename(
+                paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
+            ),
+        )
+        resolved_load_path.append(resolved)
+
     indirect_srcs = [
         dep[EmacsLispInfo].transitive_source_files
         for dep in deps
@@ -477,7 +510,7 @@ def _compile(ctx, srcs, deps, load_path):
         for dep in deps
     ]
     transitive_load_path = depset(
-        direct = load_path,
+        direct = resolved_load_path,
         # We explicitly specify preorder traversal.  The load path is an
         # ordered list, not a set, so the traversal order matters when
         # generating the --directory flags for tests and binaries.  Using
@@ -562,52 +595,11 @@ def _compile(ctx, srcs, deps, load_path):
 
     return struct(
         outs = outs,
-        load_path = load_path,
+        load_path = resolved_load_path,
         runfiles = ctx.runfiles(transitive_files = transitive_data),
         transitive_load_path = transitive_load_path,
         transitive_srcs = depset(direct = srcs, transitive = indirect_srcs),
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
-    )
-
-def _load_directory(ctx, dir):
-    """Returns a load directory relative to the current workspace root.
-
-    Args:
-      ctx (ctx): the rule context
-      dir (string): directory name; either relative (interpreted as relative
-          to the current package) or absolute (interpreted as relative to the
-          workspace root)
-
-    Returns:
-      a structure usable as a load path entry for `EmacsLispProvider`
-    """
-    if paths.is_absolute(dir):
-        dir = "." + dir
-    else:
-        dir = paths.join(ctx.label.package, check_relative_filename(dir))
-    check_relative_filename(dir)
-    return struct(
-        # Actions should load byte-compiled files.  Since we place them into
-        # the bin directory, we need to start from there, append the workspace
-        # root (see
-        # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_root),
-        # and then the directory name relative to the workspace root.  The
-        # workspace root will only be nonempty if the current rule lives in a
-        # different workspace than the one that Bazel is run from.
-        for_actions = check_relative_filename(
-            paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
-        ),
-        # The runfiles tree looks different, see
-        # https://docs.bazel.build/versions/2.0.0/output_directories.html.  The
-        # top-level directories in the runfiles root are always the workspace
-        # names, and the load directories are relative to those.  The workspace
-        # name is the workspace part of the lexical label, see
-        # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_name.
-        # Therefore, it can be empty, in which case we need to use the current
-        # workspace.
-        for_runfiles = check_relative_filename(
-            paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
-        ),
     )
 
 def _load_directory_for_actions(directory):
