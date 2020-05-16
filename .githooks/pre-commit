@@ -14,12 +14,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu
+set -u
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
 echo 'Looking for unwanted Go targets in public packages'
 grep --fixed-strings --regexp='@io_bazel_rules_go' \
-  --line-number --context=3 --color=auto --recursive -- elisp emacs && exit 1
+  --line-number --context=3 --color=auto --recursive -- elisp emacs
+# Check explicitly for exit status 1, to detect grep errors.
+if (($? != 1)); then
+  echo 'Unwanted Go targets found'
+  exit 1
+fi
 
-bazel test //...
+bazel test //... || exit
