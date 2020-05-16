@@ -15,7 +15,7 @@
 """Unit tests for defs.bzl."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
-load("//elisp:defs.bzl", "EmacsLispInfo")
+load("//elisp:defs.bzl", "EmacsLispInfo", "elisp_library")
 
 # Test for the EmacsLispInfo provider.
 
@@ -26,12 +26,12 @@ def _provider_test_impl(ctx):
     asserts.equals(
         env,
         actual = [f.path for f in info.source_files],
-        expected = ["tests/test-lib.el"],
+        expected = ["tests/provider-test.el"],
     )
     asserts.equals(
         env,
         actual = [(f.root, f.short_path) for f in info.compiled_files],
-        expected = [(ctx.bin_dir, "tests/test-lib.elc")],
+        expected = [(ctx.bin_dir, "tests/provider-test.elc")],
     )
     asserts.equals(
         env,
@@ -45,7 +45,7 @@ def _provider_test_impl(ctx):
     asserts.equals(
         env,
         actual = [f.path for f in info.transitive_source_files.to_list()],
-        expected = ["tests/test-lib.el"],
+        expected = ["tests/provider-test.el"],
     )
     asserts.equals(
         env,
@@ -53,7 +53,7 @@ def _provider_test_impl(ctx):
             (f.root, f.short_path)
             for f in info.transitive_compiled_files.to_list()
         ],
-        expected = [(ctx.bin_dir, "tests/test-lib.elc")],
+        expected = [(ctx.bin_dir, "tests/provider-test.elc")],
     )
     asserts.equals(
         env,
@@ -68,9 +68,14 @@ def _provider_test_impl(ctx):
 provider_test = analysistest.make(_provider_test_impl)
 
 def _test_provider():
+    elisp_library(
+        name = "provider_test_subject",
+        srcs = ["provider-test.el"],
+        tags = ["manual"],
+    )
     provider_test(
         name = "provider_test",
-        target_under_test = "//tests:test_lib",
+        target_under_test = ":provider_test_subject",
     )
 
 def elisp_test_suite(name):
