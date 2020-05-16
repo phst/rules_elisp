@@ -41,6 +41,11 @@ By default, libraries need to be loaded using a filename relative to the
 workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
 further elements to the load path, use the `load_path` attribute.
 
+If there are multiple source files specified in `srcs`, these source files can
+also load each other.  However, it’s often preferable to only have one
+`elisp_library` target per source file to make dependencies more obvious and
+ensure that files get only loaded in their byte-compiled form.
+
 **ATTRIBUTES**
 
 

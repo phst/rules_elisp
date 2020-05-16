@@ -1,4 +1,4 @@
-;;; lib-2.el --- example library 2                   -*- lexical-binding: t; -*-
+;;; lib-2-a.el --- example library 2, first part -*- lexical-binding: t; -*-
 
 ;; Copyright 2020 Google LLC
 ;;
@@ -20,6 +20,10 @@
 
 ;;; Code:
 
+;; Even though lib-2-a.el and lib-2-b.el are sources for the same
+;; elisp_library, they can access each other.
+(require 'examples/lib-2-b)
+
 (defun lib-2-func ()
   (message "hi from lib-2"))
 
@@ -28,6 +32,6 @@
 ;; it only prints a warning message.
 (defvar foo)
 
-(provide 'examples/lib-2)
-(provide 'lib-2)
-;;; lib-2.el ends here
+(provide 'examples/lib-2-a)
+(provide 'lib-2-a)
+;;; lib-2-a.el ends here

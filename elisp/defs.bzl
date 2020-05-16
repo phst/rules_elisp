@@ -314,7 +314,12 @@ can then use `load` or `require` to load them.
 
 By default, libraries need to be loaded using a filename relative to the
 workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
-further elements to the load path, use the `load_path` attribute.""",
+further elements to the load path, use the `load_path` attribute.
+
+If there are multiple source files specified in `srcs`, these source files can
+also load each other.  However, it’s often preferable to only have one
+`elisp_library` target per source file to make dependencies more obvious and
+ensure that files get only loaded in their byte-compiled form.""",
     provides = [EmacsLispInfo],
     toolchains = [_TOOLCHAIN_TYPE],
     implementation = _library,
@@ -469,6 +474,7 @@ def _compile(ctx, srcs, deps, load_path):
     outs = []
 
     resolved_load_path = []
+    source_load_path = []
     for dir in ["/"] + load_path:
         if paths.is_absolute(dir):
             dir = "." + dir
@@ -500,6 +506,13 @@ def _compile(ctx, srcs, deps, load_path):
             ),
         )
         resolved_load_path.append(resolved)
+        if len(srcs) > 1:
+            # If we have more than one source file, we need to add the
+            # respective source directory to the load path for this rule’s
+            # actions only, so that the source files can load each other.
+            source_load_path.append(check_relative_filename(
+                paths.join(ctx.label.workspace_root, dir),
+            ))
 
     indirect_srcs = [
         dep[EmacsLispInfo].transitive_source_files
@@ -543,7 +556,9 @@ def _compile(ctx, srcs, deps, load_path):
         out = ctx.actions.declare_file(src.basename + "c", sibling = src)
         args = []
         inputs = depset(
-            direct = [src, ctx.file._compile],
+            # Add all source files as input files so they can load each other
+            # if necessary.
+            direct = srcs + [ctx.file._compile],
             transitive = indirect_outs + [transitive_data],
         )
         if toolchain.wrap:
@@ -569,6 +584,11 @@ def _compile(ctx, srcs, deps, load_path):
             ctx.actions.args().add_all(
                 transitive_load_path,
                 map_each = _load_directory_for_actions,
+                format_each = "--directory=%s",
+                uniquify = True,
+                expand_directories = False,
+            ).add_all(
+                source_load_path,
                 format_each = "--directory=%s",
                 uniquify = True,
                 expand_directories = False,

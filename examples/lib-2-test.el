@@ -20,7 +20,8 @@
 
 ;;; Code:
 
-(require 'lib-2)
+(require 'lib-2-a)
+(require 'examples/lib-2-b)
 
 (require 'ert)
 

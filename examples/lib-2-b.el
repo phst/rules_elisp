@@ -1,4 +1,4 @@
-;;; lib-1.el --- example library 1 -*- lexical-binding: t; -*-
+;;; lib-2-b.el --- example library 2, second part -*- lexical-binding: t; -*-
 
 ;; Copyright 2020 Google LLC
 ;;
@@ -20,22 +20,5 @@
 
 ;;; Code:
 
-(require 'lib-2-a)
-(require 'lib-4)
-
-(require 'elisp/runfiles/runfiles)
-
-(defun lib-1-func ()
-  (lib-2-func)
-  (lib-4-func)
-  (message "hi from lib-1"))
-
-(defun lib-1-data-dep ()
-  ;; Use runfiles library to access data dependencies.
-  (with-temp-buffer
-    (insert-file-contents
-     (elisp/runfiles/rlocation "phst_rules_elisp/examples/data.txt"))
-    (message "%s" (buffer-string))))
-
-(provide 'examples/lib-1)
-;;; lib-1.el ends here
+(provide 'examples/lib-2-b)
+;;; lib-2-b.el ends here
