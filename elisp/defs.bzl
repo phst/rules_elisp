@@ -14,6 +14,7 @@
 
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
+load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
     ":util.bzl",
@@ -91,89 +92,34 @@ def _elisp_library_impl(ctx):
     ]
 
 def _elisp_binary_impl(ctx):
-    """Rule implementation for the “elisp_binary” and “elisp_test” rules.
-
-    The rule should define a “_template” attribute containing the C++ template
-    file to be expanded.
-    """
-    is_test = hasattr(ctx.attr, "_lcov_merger")
-    srcs = ctx.files.srcs if hasattr(ctx.files, "srcs") else ctx.files.src
-    result = _compile(ctx, srcs, ctx.attr.deps, [])
-    toolchain = _toolchain(ctx)
-    emacs = toolchain.emacs
-
-    # Only pass in data files when needed.
-    data_files_for_manifest = (
-        result.runfiles.files.to_list() if toolchain.wrap else []
+    """Rule implementation for the “elisp_binary” rules."""
+    executable, runfiles = _binary(
+        ctx,
+        srcs = ctx.files.src,
+        substitutions = {},
+    )
+    return DefaultInfo(
+        executable = executable,
+        runfiles = runfiles,
     )
 
-    # If we’re supposed to generate coverage information, use source files
-    # instead of compiled files because we can’t instrument compiled files for
-    # coverage.  We ignore ctx.coverage_instrumented because that doesn’t work
-    # here: it assumes that coverage is generated during compilation, but we
-    # can generate coverage information only at runtime.  Bazel’s coverage
-    # support isn’t really documented; some information is available in the
-    # source code comments of the file
-    # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
-    transitive_files = (
-        result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
-    )
-
-    # We use a C++ driver because the C++ toolchain framework exposes
-    # individual actions (unlike Python), and the runfiles implementation
-    # doesn’t have bugs (unlike Go).  We use raw strings to minimize the risk
-    # of misinterpreting special characters in a filename.
-    # check_relative_filename should already reject all special characters, but
-    # better be sure.
-    driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
-    ctx.actions.expand_template(
-        template = ctx.file._template,
-        output = driver,
+def _elisp_test_impl(ctx):
+    """Rule implementation for the “elisp_test” rule."""
+    executable, runfiles = _binary(
+        ctx,
+        srcs = ctx.files.srcs,
         substitutions = {
-            "[[directory]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
-                for dir in result.transitive_load_path.to_list()
-            ]),
-            "[[emacs]]": check_relative_filename(paths.join(
-                ctx.workspace_name,
-                emacs.files_to_run.executable.short_path,
-            )),
-            "[[load]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(
-                    paths.join(ctx.workspace_name, src.short_path),
-                ))
-                for src in result.outs
-            ]),
-            "[[data]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(
-                    paths.join(ctx.workspace_name, file.short_path),
-                ))
-                for file in data_files_for_manifest
-            ]),
-            "[[skip_tests]]": _cpp_strings(getattr(ctx.attr, "skip_tests", [])),
-            "[[skip_tags]]": _cpp_strings(getattr(ctx.attr, "skip_tags", [])),
-            "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
+            "[[skip_tests]]": _cpp_strings(ctx.attr.skip_tests),
+            "[[skip_tags]]": _cpp_strings(ctx.attr.skip_tags),
         },
     )
-    cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
-    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
-    bin_runfiles = ctx.runfiles(
-        files = (
-            [emacs.files_to_run.executable] + ctx.files._default_libs +
-            result.outs +
-            # We include the original source files in the runfiles so that
-            # error messages in tests can link back to them.
-            (srcs if is_test else [])
-        ),
-        transitive_files = depset(
-            transitive = [transitive_files, result.runfiles.files],
-        ),
-    )
-    emacs_runfiles = emacs.default_runfiles
-    runfiles = bin_runfiles.merge(emacs_runfiles)
+
+    # We include the original source files in the runfiles so that error
+    # messages in tests can link back to them.
+    runfiles = runfiles.merge(ctx.runfiles(files = ctx.files.srcs))
 
     test_env = {}
-    if ctx.configuration.coverage_enabled and hasattr(ctx.attr, "_lcov_merger"):
+    if ctx.configuration.coverage_enabled:
         # Bazel’s coverage runner
         # (https://github.com/bazelbuild/bazel/blob/3.0.0/tools/test/collect_coverage.sh)
         # needs a binary called “lcov_merge.”  Its location is passed in the
@@ -446,7 +392,7 @@ only runs if it’s not suppressed by either facility.""",
         "@bazel_tools//tools/cpp:toolchain_type",
         _TOOLCHAIN_TYPE,
     ],
-    implementation = _elisp_binary_impl,
+    implementation = _elisp_test_impl,
 )
 
 def _compile(ctx, srcs, deps, load_path):
@@ -651,6 +597,91 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_srcs = depset(direct = srcs, transitive = indirect_srcs),
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
+
+def _binary(ctx, srcs, substitutions):
+    """Shared implementation for the “elisp_binary” and “elisp_test” rules.
+
+    The rule should define a “_template” attribute containing the C++ template
+    file to be expanded.
+
+    Args:
+      ctx: rule context
+      srcs: list of File objects denoting the source files to load
+      substitutions: a dictionary of rule-specific template substitutions
+
+    Returns:
+      a pair (executable, runfiles) containing the compiled binary and the
+          runfiles it needs.
+    """
+    result = _compile(ctx, srcs, ctx.attr.deps, [])
+    toolchain = _toolchain(ctx)
+    emacs = toolchain.emacs
+
+    # Only pass in data files when needed.
+    data_files_for_manifest = (
+        result.runfiles.files.to_list() if toolchain.wrap else []
+    )
+
+    # If we’re supposed to generate coverage information, use source files
+    # instead of compiled files because we can’t instrument compiled files for
+    # coverage.  We ignore ctx.coverage_instrumented because that doesn’t work
+    # here: it assumes that coverage is generated during compilation, but we
+    # can generate coverage information only at runtime.  Bazel’s coverage
+    # support isn’t really documented; some information is available in the
+    # source code comments of the file
+    # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
+    transitive_files = (
+        result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
+    )
+
+    # We use a C++ driver because the C++ toolchain framework exposes
+    # individual actions (unlike Python), and the runfiles implementation
+    # doesn’t have bugs (unlike Go).  We use raw strings to minimize the risk
+    # of misinterpreting special characters in a filename.
+    # check_relative_filename should already reject all special characters, but
+    # better be sure.
+    driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
+    ctx.actions.expand_template(
+        template = ctx.file._template,
+        output = driver,
+        substitutions = dicts.add({
+            "[[directory]]": ", ".join([
+                'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
+                for dir in result.transitive_load_path.to_list()
+            ]),
+            "[[emacs]]": check_relative_filename(paths.join(
+                ctx.workspace_name,
+                emacs.files_to_run.executable.short_path,
+            )),
+            "[[load]]": ", ".join([
+                'R"**({})**"'.format(check_relative_filename(
+                    paths.join(ctx.workspace_name, src.short_path),
+                ))
+                for src in result.outs
+            ]),
+            "[[data]]": ", ".join([
+                'R"**({})**"'.format(check_relative_filename(
+                    paths.join(ctx.workspace_name, file.short_path),
+                ))
+                for file in data_files_for_manifest
+            ]),
+            "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
+        }, substitutions),
+    )
+    cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
+    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
+    bin_runfiles = ctx.runfiles(
+        files = (
+            [emacs.files_to_run.executable] + ctx.files._default_libs +
+            result.outs
+        ),
+        transitive_files = depset(
+            transitive = [transitive_files, result.runfiles.files],
+        ),
+    )
+    emacs_runfiles = emacs.default_runfiles
+    runfiles = bin_runfiles.merge(emacs_runfiles)
+    return executable, runfiles
 
 def _load_directory_for_actions(directory):
     """Returns the load directory to be used for build-time actions.
