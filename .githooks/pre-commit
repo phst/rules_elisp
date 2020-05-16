@@ -20,6 +20,6 @@ set -eu
 # depend on the Go rules then as well.
 echo 'Looking for unwanted Go targets in public packages'
 grep --fixed-strings --regexp='@io_bazel_rules_go' \
-  --line-number --context --color=auto --recursive -- elisp emacs && exit 1
+  --line-number --context=3 --color=auto --recursive -- elisp emacs && exit 1
 
 bazel test //...
