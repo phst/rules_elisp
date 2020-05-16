@@ -29,19 +29,39 @@
 
 (require 'bytecomp)
 
-(unless noninteractive
-  (error "This file works only in batch mode"))
+(add-to-list 'command-switch-alist
+             (cons "--fatal-warnings" #'elisp/fatal-warnings))
 
-(let* ((src (pop command-line-args-left))
-       (out (pop command-line-args-left))
-       ;; Leaving these enabled leads to undefined behavior and doesn’t make
-       ;; sense in batch mode.
-       (attempt-stack-overflow-recovery nil)
-       (attempt-orderly-shutdown-on-fatal-signal nil)
-       ;; Ensure filenames in the output are relative to the current directory.
-       (byte-compile-root-dir default-directory)
-       (byte-compile-dest-file-function (lambda (_) out))
-       (success (byte-compile-file src)))
-  (kill-emacs (if success 0 1)))
+(defvar elisp/fatal--warnings nil
+  "Whether byte-compile warnings should be treated as errors.
+The --fatal-warnings option sets this variable.")
 
+(defun elisp/compile-batch-and-exit ()
+  "Byte-compiles a single Emacs Lisp file and exits Emacs.
+There must be exactly two remaining arguments on the command
+line.  These are interpreted as source and output file,
+respectively.  If compilation fails, exit with a nonzero exit
+code.  If the command line option --fatal-warnings is given,
+treat warnings as errors."
+  (unless noninteractive
+    (error "This function works only in batch mode"))
+  (let* ((src (pop command-line-args-left))
+         (out (pop command-line-args-left))
+         ;; Leaving these enabled leads to undefined behavior and doesn’t make
+         ;; sense in batch mode.
+         (attempt-stack-overflow-recovery nil)
+         (attempt-orderly-shutdown-on-fatal-signal nil)
+         ;; Ensure filenames in the output are relative to the current
+         ;; directory.
+         (byte-compile-root-dir default-directory)
+         (byte-compile-dest-file-function (lambda (_) out))
+         (byte-compile-error-on-warn elisp/fatal--warnings)
+         (success (byte-compile-file src)))
+    (kill-emacs (if success 0 1))))
+
+(defun elisp/fatal-warnings (_arg)
+  "Process the --fatal-warnings command-line option."
+  (setq elisp/fatal--warnings t))
+
+(provide 'elisp/compile)
 ;;; compile.el ends here

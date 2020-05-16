@@ -580,7 +580,7 @@ def _compile(ctx, srcs, deps, load_path):
         args += [
             "--quick",
             "--batch",
-            "--load=bytecomp",
+            "--load=" + ctx.file._compile.path,
             ctx.actions.args().add_all(
                 transitive_load_path,
                 map_each = _load_directory_for_actions,
@@ -592,11 +592,10 @@ def _compile(ctx, srcs, deps, load_path):
                 format_each = "--directory=%s",
                 uniquify = True,
                 expand_directories = False,
+            ).add_all(
+                ["--fatal-warnings"] if ctx.attr.fatal_warnings else [],
             ),
-            "--eval=(setq byte-compile-error-on-warn {})".format(
-                "t" if ctx.attr.fatal_warnings else "nil",
-            ),
-            "--load=" + ctx.file._compile.path,
+            "--funcall=elisp/compile-batch-and-exit",
             src.path,
             out.path,
         ]
