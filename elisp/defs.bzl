@@ -442,6 +442,13 @@ def _compile(ctx, srcs, deps, load_path):
             dir = "." + dir
         else:
             dir = paths.join(ctx.label.package, check_relative_filename(dir))
+        if len(srcs) > 1:
+            # If we have more than one source file, we need to add the
+            # respective source directory to the load path for this rule’s
+            # actions only, so that the source files can load each other.
+            source_load_path.append(check_relative_filename(
+                paths.join(ctx.label.workspace_root, dir),
+            ))
 
         # If we’re compiling source files from another package, we need to
         # insert the output base directory for this rule.  In that case, we
@@ -473,13 +480,6 @@ def _compile(ctx, srcs, deps, load_path):
             ),
         )
         resolved_load_path.append(resolved)
-        if len(srcs) > 1:
-            # If we have more than one source file, we need to add the
-            # respective source directory to the load path for this rule’s
-            # actions only, so that the source files can load each other.
-            source_load_path.append(check_relative_filename(
-                paths.join(ctx.label.workspace_root, dir),
-            ))
 
     indirect_srcs = [
         dep[EmacsLispInfo].transitive_source_files
