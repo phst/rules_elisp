@@ -18,6 +18,9 @@
 
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
+load(":test.bzl", "elisp_test_suite")
+
+elisp_test_suite(name = "elisp_test")
 
 go_test(
     name = "go_default_test",

@@ -15,7 +15,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_library", "elisp_toolchain")
-load(":defs_test.bzl", "elisp_test_suite")
 load(":util.bzl", "COPTS")
 
 toolchain_type(
@@ -98,8 +97,6 @@ bzl_library(
         "//emacs:__pkg__",
     ],
 )
-
-elisp_test_suite(name = "elisp_test")
 
 cc_library(
     name = "exec",
