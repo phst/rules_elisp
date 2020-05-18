@@ -22,6 +22,7 @@ stardoc(
     input = "//elisp:defs.bzl",
     deps = [
         "//elisp:util_bzl",
+        "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
     ],

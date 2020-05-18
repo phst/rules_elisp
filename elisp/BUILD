@@ -66,6 +66,7 @@ bzl_library(
     srcs = ["defs.bzl"],
     deps = [
         ":util_bzl",
+        "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
     ],

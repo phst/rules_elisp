@@ -14,6 +14,7 @@
 
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
+load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
@@ -96,6 +97,7 @@ def _elisp_binary_impl(ctx):
     executable, runfiles = _binary(
         ctx,
         srcs = ctx.files.src,
+        tags = [],
         substitutions = {},
     )
     return DefaultInfo(
@@ -108,6 +110,9 @@ def _elisp_test_impl(ctx):
     executable, runfiles = _binary(
         ctx,
         srcs = ctx.files.srcs,
+        # “local = 1” is equivalent to adding a “local” tag,
+        # cf. https://docs.bazel.build/versions/3.1.0/be/common-definitions.html#test.local.
+        tags = ["local"] if ctx.attr.local else [],
         substitutions = {
             "[[skip_tests]]": _cpp_strings(ctx.attr.skip_tests),
             "[[skip_tags]]": _cpp_strings(ctx.attr.skip_tags),
@@ -600,7 +605,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, srcs, substitutions):
+def _binary(ctx, srcs, tags, substitutions):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
@@ -609,6 +614,7 @@ def _binary(ctx, srcs, substitutions):
     Args:
       ctx: rule context
       srcs: list of File objects denoting the source files to load
+      tags: list of strings with additional rule-specific tags
       substitutions: a dictionary of rule-specific template substitutions
 
     Returns:
@@ -668,7 +674,7 @@ def _binary(ctx, srcs, substitutions):
                 for file in data_files_for_manifest
             ]),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
-            "[[tags]]": _cpp_strings(ctx.attr.tags),
+            "[[tags]]": _cpp_strings(collections.uniq(ctx.attr.tags + tags)),
         }, substitutions),
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
