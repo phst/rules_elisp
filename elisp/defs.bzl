@@ -202,6 +202,7 @@ The manifest is a JSON object with the following keys:
 - `loadPath` is a list of directory names making up the load path.
 - `inputFiles` is a list of files that should be readable.
 - `outputFiles` is a list of files that should be writable.
+- `tags` is the list of tags for the current rule.
 
 When executing an action, file names are relative to the execution root.
 Otherwise, file names are relative to the runfiles root.
@@ -550,6 +551,7 @@ def _compile(ctx, srcs, deps, load_path):
                     loadPath = flat_load_path,
                     inputFiles = [f.path for f in inputs.to_list()],
                     outputFiles = [out.path],
+                    tags = ctx.attr.tags,
                 ).to_json(),
             )
             args += ["--manifest=" + manifest.path, "--"]
@@ -666,6 +668,7 @@ def _binary(ctx, srcs, substitutions):
                 for file in data_files_for_manifest
             ]),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
+            "[[tags]]": _cpp_strings(ctx.attr.tags),
         }, substitutions),
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)

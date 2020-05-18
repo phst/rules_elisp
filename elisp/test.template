@@ -18,6 +18,7 @@ int main(int argc, char** argv) {
   return phst_rules_elisp::RunTest(
       R"**([[emacs]])**",
       phst_rules_elisp::Mode::[[mode]],
+      {[[tags]]},
       {[[directory]]},
       {[[load]]},
       {[[data]]},

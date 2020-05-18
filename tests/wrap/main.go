@@ -46,6 +46,7 @@ func main() {
 	}
 	want := map[string]interface{}{
 		"root":        "RUNFILES_ROOT",
+		"tags":        []interface{}{"local", "mytag"},
 		"loadPath":    []interface{}{"phst_rules_elisp"},
 		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/exec.h"},
 		"outputFiles": []interface{}{},

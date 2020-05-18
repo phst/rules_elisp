@@ -164,6 +164,7 @@ static void CheckRelative(const absl::Span<const char* const> files) {
 }
 
 static absl::Status WriteManifest(
+    const absl::Span<const char* const> rule_tags,
     const absl::Span<const char* const> load_path,
     const absl::Span<const char* const> load_files,
     const absl::Span<const char* const> data_files,
@@ -178,6 +179,7 @@ static absl::Status WriteManifest(
       {"loadPath", load_path},
       {"inputFiles", input_files},
       {"outputFiles", output_files},
+      {"tags", rule_tags},
   };
   return file.Write(json.dump());
 }
@@ -197,11 +199,13 @@ class Executor {
   StatusOr<int> RunEmacs(const char* install_rel);
 
   StatusOr<int> RunBinary(const char* wrapper, Mode mode,
+                          absl::Span<const char* const> rule_tags,
                           absl::Span<const char* const> load_path,
                           absl::Span<const char* const> load_files,
                           absl::Span<const char* const> data_files);
 
   StatusOr<int> RunTest(const char* wrapper, Mode mode,
+                        absl::Span<const char* const> rule_tags,
                         absl::Span<const char* const> load_path,
                         absl::Span<const char* const> srcs,
                         absl::Span<const char* const> data_files,
@@ -265,6 +269,7 @@ StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
 
 StatusOr<int> Executor::RunBinary(
     const char* const wrapper, const Mode mode,
+    const absl::Span<const char* const> rule_tags,
     const absl::Span<const char* const> load_path,
     const absl::Span<const char* const> load_files,
     const absl::Span<const char* const> data_files) {
@@ -279,8 +284,8 @@ StatusOr<int> Executor::RunBinary(
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
-    RETURN_IF_ERROR(
-        WriteManifest(load_path, load_files, data_files, {}, manifest.value()));
+    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, load_files, data_files,
+                                  {}, manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
@@ -288,6 +293,7 @@ StatusOr<int> Executor::RunBinary(
 }
 
 StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
+                                const absl::Span<const char* const> rule_tags,
                                 const absl::Span<const char* const> load_path,
                                 const absl::Span<const char* const> srcs,
                                 const absl::Span<const char* const> data_files,
@@ -328,8 +334,8 @@ StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
         outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
       }
     }
-    RETURN_IF_ERROR(
-        WriteManifest(load_path, srcs, data_files, outputs, manifest.value()));
+    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, srcs, data_files,
+                                  outputs, manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
@@ -436,6 +442,7 @@ int RunEmacs(const char* const install_rel, const int argc,
 }
 
 int RunBinary(const char* const wrapper, const Mode mode,
+              const std::initializer_list<const char*> rule_tags,
               const std::initializer_list<const char*> load_path,
               const std::initializer_list<const char*> load_files,
               const std::initializer_list<const char*> data_files,
@@ -446,8 +453,8 @@ int RunBinary(const char* const wrapper, const Mode mode,
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code =
-      executor.RunBinary(wrapper, mode, load_path, load_files, data_files);
+  const auto status_or_code = executor.RunBinary(
+      wrapper, mode, rule_tags, load_path, load_files, data_files);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
@@ -456,6 +463,7 @@ int RunBinary(const char* const wrapper, const Mode mode,
 }
 
 int RunTest(const char* const wrapper, const Mode mode,
+            const std::initializer_list<const char*> rule_tags,
             const std::initializer_list<const char*> load_path,
             const std::initializer_list<const char*> srcs,
             const std::initializer_list<const char*> data_files,
@@ -468,8 +476,9 @@ int RunTest(const char* const wrapper, const Mode mode,
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunTest(
-      wrapper, mode, load_path, srcs, data_files, skip_tests, skip_tags);
+  const auto status_or_code =
+      executor.RunTest(wrapper, mode, rule_tags, load_path, srcs, data_files,
+                       skip_tests, skip_tags);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
