@@ -16,7 +16,7 @@
 
 int main(int argc, char** argv) {
   return phst_rules_elisp::RunBinary(
-      R"**([[emacs]])**",
+      [[emacs]],
       phst_rules_elisp::Mode::[[mode]],
       {[[tags]]},
       {[[directory]]},

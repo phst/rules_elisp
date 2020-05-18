@@ -653,24 +653,24 @@ def _binary(ctx, srcs, tags, substitutions):
         template = ctx.file._template,
         output = driver,
         substitutions = dicts.add({
-            "[[directory]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(dir.for_runfiles))
+            "[[directory]]": _cpp_strings([
+                check_relative_filename(dir.for_runfiles)
                 for dir in result.transitive_load_path.to_list()
             ]),
-            "[[emacs]]": check_relative_filename(paths.join(
+            "[[emacs]]": _cpp_string(check_relative_filename(paths.join(
                 ctx.workspace_name,
                 emacs.files_to_run.executable.short_path,
-            )),
-            "[[load]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(
+            ))),
+            "[[load]]": _cpp_strings([
+                check_relative_filename(
                     paths.join(ctx.workspace_name, src.short_path),
-                ))
+                )
                 for src in result.outs
             ]),
-            "[[data]]": ", ".join([
-                'R"**({})**"'.format(check_relative_filename(
+            "[[data]]": _cpp_strings([
+                check_relative_filename(
                     paths.join(ctx.workspace_name, file.short_path),
-                ))
+                )
                 for file in data_files_for_manifest
             ]),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
