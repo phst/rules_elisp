@@ -124,9 +124,9 @@ source files and load them."
                              when (eql (mod i shard-count) shard-index)
                              collect test))
         (or tests (message "Empty shard with index %d" shard-index)))
-      (elisp/ert/log--message "Running %d tests" (length tests))
+      (message "Running %d tests" (length tests))
       (dolist (test tests)
-        (elisp/ert/log--message "Running test %s" (ert-test-name test))
+        (message "Running test %s" (ert-test-name test))
         (let* ((name (ert-test-name test))
                (start-time (current-time))
                (result (ert-run-test test))
@@ -139,8 +139,8 @@ source files and load them."
                      (ert-test-result-type-p result '(or :passed :failed))))
                (status (ert-string-for-test-result result expected))
                (report nil))
-          (elisp/ert/log--message "Test %s %s and took %d ms" name status
-                                  (* (float-time duration) 1000))
+          (message "Test %s %s and took %d ms" name status
+                   (* (float-time duration) 1000))
           (unless expected
             (cl-incf unexpected)
             ;; Print a nice error message that should point back to the source
@@ -167,8 +167,8 @@ source files and load them."
                             (status . ,status))
                            ,@report)
                 test-reports)))
-      (elisp/ert/log--message "Running %d tests finished, %d results unexpected"
-                              (length tests) unexpected)
+      (message "Running %d tests finished, %d results unexpected"
+               (length tests) unexpected)
       (unless (member report-file '(nil ""))
         (with-temp-buffer
           ;; The expected format of the XML output file isn’t well-documented.
@@ -401,13 +401,6 @@ to be used as root."
         (insert (format "DA:%d,%d\n" (car line) (cdr line))))
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (hash-table-count lines))))))
-
-(defun elisp/ert/log--message (format &rest args)
-  "Like ‘(message FORMAT ARGS…)’, but also print a timestamp."
-  (cl-check-type format string)
-  (message "[%s] %s"
-           (format-time-string "%F %T.%3N")
-           (apply #'format-message format args)))
 
 (defun elisp/ert/log--error (test message)
   "Log an error for TEST.
