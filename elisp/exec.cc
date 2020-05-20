@@ -370,7 +370,7 @@ StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
 
 std::string Executor::RunfilesDir() const {
   const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
-  for (const auto var : vars) {
+  for (const auto& var : vars) {
     auto value = this->EnvVar(var);
     if (!value.empty()) return value;
   }
