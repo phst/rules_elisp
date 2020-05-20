@@ -223,6 +223,7 @@ class Executor {
                     std::unique_ptr<Runfiles> runfiles);
 
   StatusOr<std::string> Runfile(const std::string& rel) const;
+  std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
 
   absl::Status AddLoadPath(std::vector<std::string>& args,
@@ -295,7 +296,7 @@ StatusOr<int> Executor::RunBinary(
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
-    const auto runfiles = this->EnvVar("RUNFILES_DIR");
+    const auto runfiles = this->RunfilesDir();
     ASSIGN_OR_RETURN(auto input_files, this->ArgFiles(runfiles, input_args));
     ASSIGN_OR_RETURN(auto output_files, this->ArgFiles(runfiles, output_args));
     RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, load_files, data_files,
@@ -365,6 +366,15 @@ StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   // Note: Don’t canonicalize the filename here, because the Python stub looks
   // for the runfiles directory in the original filename.
   return MakeAbsolute(str);
+}
+
+std::string Executor::RunfilesDir() const {
+  const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
+  for (const auto var : vars) {
+    auto value = this->EnvVar(var);
+    if (!value.empty()) return value;
+  }
+  return std::string();
 }
 
 std::string Executor::EnvVar(const std::string& name) const noexcept {
