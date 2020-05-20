@@ -23,8 +23,8 @@ load(
 load(
     "//elisp:util.bzl",
     "cc_wrapper",
-    "check_relative_filename",
     "configure_cc_toolchain",
+    "runfile_location",
 )
 
 def _binary(ctx):
@@ -40,9 +40,7 @@ def _binary(ctx):
     ctx.actions.expand_template(
         template = ctx.file._template,
         output = driver,
-        substitutions = {"[[install]]": check_relative_filename(
-            paths.join(ctx.workspace_name, install.short_path),
-        )},
+        substitutions = {"[[install]]": runfile_location(ctx, install)},
         is_executable = True,
     )
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)

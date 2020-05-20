@@ -49,6 +49,27 @@ def check_relative_filename(filename):
             fail("invalid character {} in filename {}".format(char, filename))
     return filename
 
+def runfile_location(ctx, file):
+    """Return the filename of the given file relative to the runfiles root.
+
+    Args:
+      ctx (ctx): the current rule context
+      file (File): any file that’s included in the runfiles
+
+    Returns:
+      a string representing the filename of the file relative to the runfiles
+      root
+    """
+
+    # It might seem surprising that we can use “ctx.workspace_name”
+    # unconditionally.  However, for files in external workspaces, “short_path”
+    # will start with “../〈workspace〉/…”, so the logic here is correct.
+    # “check_relative_filename” not only ensures that the filename is relative,
+    # but also canonicalizes it.
+    return check_relative_filename(
+        paths.join(ctx.workspace_name, file.short_path),
+    )
+
 def configure_cc_toolchain(ctx):
     """
     Configures the C/C++ toolchain for use with the current rule.

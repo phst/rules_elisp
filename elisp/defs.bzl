@@ -22,6 +22,7 @@ load(
     "cc_wrapper",
     "check_relative_filename",
     "configure_cc_toolchain",
+    "runfile_location",
 )
 
 EmacsLispInfo = provider(
@@ -679,9 +680,7 @@ def _binary(ctx, srcs, tags, substitutions):
     # creating a symbolic link is just the easiest approach because we can use
     # Bazel’s “root_symlinks” feature.
     links = {
-        check_relative_filename(
-            paths.join(ctx.workspace_name, src.short_path + ".instrument"),
-        ): src
+        runfile_location(ctx, src) + ".instrument": src
         for src in result.transitive_srcs.to_list()
     } if ctx.configuration.coverage_enabled else {}
 
@@ -700,20 +699,14 @@ def _binary(ctx, srcs, tags, substitutions):
                 check_relative_filename(dir.for_runfiles)
                 for dir in result.transitive_load_path.to_list()
             ]),
-            "[[emacs]]": _cpp_string(check_relative_filename(paths.join(
-                ctx.workspace_name,
-                emacs.files_to_run.executable.short_path,
-            ))),
-            "[[load]]": _cpp_strings([
-                check_relative_filename(
-                    paths.join(ctx.workspace_name, src.short_path),
-                )
-                for src in result.outs
-            ]),
+            "[[emacs]]": _cpp_string(
+                runfile_location(ctx, emacs.files_to_run.executable),
+            ),
+            "[[load]]": _cpp_strings(
+                [runfile_location(ctx, src) for src in result.outs],
+            ),
             "[[data]]": _cpp_strings([
-                check_relative_filename(
-                    paths.join(ctx.workspace_name, file.short_path),
-                )
+                runfile_location(ctx, file)
                 for file in data_files_for_manifest
             ] + links.keys()),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
