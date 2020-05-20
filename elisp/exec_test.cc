@@ -24,7 +24,7 @@ namespace {
 using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
-  const char *const argv[] = {"unused", "--option", "tests/BUILD",
+  const char *const argv[] = {"unused", "--option", "elisp/exec.cc",
                               "/:/tmp/output.dat", nullptr};
   EXPECT_THAT(RunBinary("phst_rules_elisp/tests/wrap/wrap", Mode::kWrap,
                         {"local", "mytag"}, {"phst_rules_elisp"}, {},

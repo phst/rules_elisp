@@ -130,6 +130,7 @@ cc_test(
     srcs = ["exec_test.cc"],
     copts = COPTS,
     data = [
+        "exec.cc",
         "exec.h",
         "//tests/wrap",
     ],
