@@ -79,6 +79,7 @@ std::string JoinPath(Ts&&... pieces) {
 }
 
 StatusOr<std::string> MakeAbsolute(absl::string_view name);
+StatusOr<std::string> MakeRelative(absl::string_view name, std::string root);
 
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 absl::Status RemoveFile(const std::string& name) noexcept;

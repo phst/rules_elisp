@@ -31,8 +31,9 @@ ABSL_MUST_USE_RESULT int RunBinary(
     std::initializer_list<const char*> rule_tags,
     std::initializer_list<const char*> load_path,
     std::initializer_list<const char*> load_files,
-    std::initializer_list<const char*> data_files, int argc,
-    const char* const* argv);
+    std::initializer_list<const char*> data_files,
+    std::initializer_list<int> input_args,
+    std::initializer_list<int> output_args, int argc, const char* const* argv);
 
 ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
                                  std::initializer_list<const char*> rule_tags,

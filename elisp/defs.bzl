@@ -98,7 +98,10 @@ def _elisp_binary_impl(ctx):
         ctx,
         srcs = ctx.files.src,
         tags = [],
-        substitutions = {},
+        substitutions = {
+            "[[input_args]]": _cpp_ints(ctx.attr.input_args),
+            "[[output_args]]": _cpp_ints(ctx.attr.output_args),
+        },
     )
     return DefaultInfo(
         executable = executable,
@@ -210,9 +213,11 @@ The manifest is a JSON object with the following keys:
 - `tags` is the list of tags for the current rule.
 
 When executing an action, file names are relative to the execution root.
-Otherwise, file names are relative to the runfiles root.
-File names in `outputFiles` can also be absolute; in this case they
-specify temporary files that are deleted after the action completes.""",
+Otherwise, file names are relative to the runfiles root.  File names in
+`inputFiles` or `outputFiles` can also be absolute; in this case they specify
+temporary files that are deleted after the action completes, or files passed on
+the command line interpreted according to the `input_args` and `output_args`
+attributes of the `elisp_binary` rule.""",
     provides = [platform_common.ToolchainInfo],
 )
 
@@ -309,6 +314,26 @@ elisp_binary = rule(
         deps = attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
+        ),
+        input_args = attr.int_list(
+            doc = """Indices of command-line arguments that represent input
+filenames.  These number specify indices into the `argv` array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index `2` stands for `argv[2]`, and the index `-2` stands for
+`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
+command line, the corresponding arguments are treated as filenames for input
+files and added to the `inputFiles` field of the manifest.  This only has an
+effect for toolchains that specify `wrap = True`.""",
+        ),
+        output_args = attr.int_list(
+            doc = """Indices of command-line arguments that represent output
+filenames.  These number specify indices into the `argv` array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index `2` stands for `argv[2]`, and the index `-2` stands for
+`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
+command line, the corresponding arguments are treated as filenames for output
+files and added to the `outputFiles` field of the manifest.  This only has an
+effect for toolchains that specify `wrap = True`.""",
         ),
     ),
     doc = """Binary rule that loads a single Emacs Lisp file.
@@ -722,6 +747,19 @@ def _cpp_string(string):
     if close in string:
         fail("String {} can’t be transferred to C++".format(string))
     return open + string + close
+
+def _cpp_ints(ints):
+    """Format the given integer list as C++ initializer list."""
+    return ", ".join([_cpp_int(i) for i in ints])
+
+def _cpp_int(int):
+    """Format the given integer as C++ decimal literal."""
+
+    # See https://stackoverflow.com/a/1819236 for the guarantees on the C++ int
+    # type range.
+    if int < -32767 or int > 32767:
+        fail("integer {} out of range".format(int))
+    return str(int)
 
 # Directory relative to the current package where to store compiled files.
 # This equivalent to _objs for C++ rules.  See

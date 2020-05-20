@@ -135,6 +135,7 @@ cc_test(
     ],
     deps = [
         ":exec",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_googletest//:gtest_main",
     ],
 )

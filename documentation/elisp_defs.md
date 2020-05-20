@@ -5,7 +5,7 @@
 ## elisp_binary
 
 <pre>
-elisp_binary(<a href="#elisp_binary-name">name</a>, <a href="#elisp_binary-data">data</a>, <a href="#elisp_binary-deps">deps</a>, <a href="#elisp_binary-fatal_warnings">fatal_warnings</a>, <a href="#elisp_binary-src">src</a>)
+elisp_binary(<a href="#elisp_binary-name">name</a>, <a href="#elisp_binary-data">data</a>, <a href="#elisp_binary-deps">deps</a>, <a href="#elisp_binary-fatal_warnings">fatal_warnings</a>, <a href="#elisp_binary-input_args">input_args</a>, <a href="#elisp_binary-output_args">output_args</a>, <a href="#elisp_binary-src">src</a>)
 </pre>
 
 Binary rule that loads a single Emacs Lisp file.
@@ -21,6 +21,8 @@ in batch mode.
 | data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
+| input_args |  Indices of command-line arguments that represent input filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for input files and added to the <code>inputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
+| output_args |  Indices of command-line arguments that represent output filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for output files and added to the <code>outputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
 | src |  Source file to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 
 
@@ -133,9 +135,11 @@ The manifest is a JSON object with the following keys:
 - `tags` is the list of tags for the current rule.
 
 When executing an action, file names are relative to the execution root.
-Otherwise, file names are relative to the runfiles root.
-File names in `outputFiles` can also be absolute; in this case they
-specify temporary files that are deleted after the action completes.
+Otherwise, file names are relative to the runfiles root.  File names in
+`inputFiles` or `outputFiles` can also be absolute; in this case they specify
+temporary files that are deleted after the action completes, or files passed on
+the command line interpreted according to the `input_args` and `output_args`
+attributes of the `elisp_binary` rule.
 
 **ATTRIBUTES**
 

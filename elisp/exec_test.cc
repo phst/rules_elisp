@@ -14,6 +14,7 @@
 
 #include "elisp/exec.h"
 
+#include "absl/base/macros.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -23,10 +24,12 @@ namespace {
 using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
-  const char *const argv[2] = {"unused", nullptr};
+  const char *const argv[] = {"unused", "--option", "tests/BUILD",
+                              "/:/tmp/output.dat", nullptr};
   EXPECT_THAT(RunBinary("phst_rules_elisp/tests/wrap/wrap", Mode::kWrap,
                         {"local", "mytag"}, {"phst_rules_elisp"}, {},
-                        {"phst_rules_elisp/elisp/exec.h"}, 1, argv),
+                        {"phst_rules_elisp/elisp/exec.h"}, {2}, {-1},
+                        ABSL_ARRAYSIZE(argv) - 1, argv),
               Eq(0));
 }
 
