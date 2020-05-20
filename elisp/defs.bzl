@@ -22,6 +22,9 @@ load(
     "cc_wrapper",
     "check_relative_filename",
     "configure_cc_toolchain",
+    "cpp_ints",
+    "cpp_string",
+    "cpp_strings",
     "runfile_location",
 )
 
@@ -100,8 +103,8 @@ def _elisp_binary_impl(ctx):
         srcs = ctx.files.src,
         tags = [],
         substitutions = {
-            "[[input_args]]": _cpp_ints(ctx.attr.input_args),
-            "[[output_args]]": _cpp_ints(ctx.attr.output_args),
+            "[[input_args]]": cpp_ints(ctx.attr.input_args),
+            "[[output_args]]": cpp_ints(ctx.attr.output_args),
         },
     )
     return DefaultInfo(
@@ -118,8 +121,8 @@ def _elisp_test_impl(ctx):
         # cf. https://docs.bazel.build/versions/3.1.0/be/common-definitions.html#test.local.
         tags = ["local"] if ctx.attr.local else [],
         substitutions = {
-            "[[skip_tests]]": _cpp_strings(ctx.attr.skip_tests),
-            "[[skip_tags]]": _cpp_strings(ctx.attr.skip_tags),
+            "[[skip_tests]]": cpp_strings(ctx.attr.skip_tests),
+            "[[skip_tags]]": cpp_strings(ctx.attr.skip_tags),
         },
     )
 
@@ -695,22 +698,22 @@ def _binary(ctx, srcs, tags, substitutions):
         template = ctx.file._template,
         output = driver,
         substitutions = dicts.add({
-            "[[directory]]": _cpp_strings([
+            "[[directory]]": cpp_strings([
                 check_relative_filename(dir.for_runfiles)
                 for dir in result.transitive_load_path.to_list()
             ]),
-            "[[emacs]]": _cpp_string(
+            "[[emacs]]": cpp_string(
                 runfile_location(ctx, emacs.files_to_run.executable),
             ),
-            "[[load]]": _cpp_strings(
+            "[[load]]": cpp_strings(
                 [runfile_location(ctx, src) for src in result.outs],
             ),
-            "[[data]]": _cpp_strings([
+            "[[data]]": cpp_strings([
                 runfile_location(ctx, file)
                 for file in data_files_for_manifest
             ] + links.keys()),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
-            "[[tags]]": _cpp_strings(collections.uniq(ctx.attr.tags + tags)),
+            "[[tags]]": cpp_strings(collections.uniq(ctx.attr.tags + tags)),
         }, substitutions),
     )
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
@@ -743,35 +746,6 @@ def _load_directory_for_actions(directory):
     # This trivial function exists because we have to pass a function to
     # map_each above.
     return check_relative_filename(directory.for_actions)
-
-def _cpp_strings(strings):
-    """Format the given string list as C++ initializer list."""
-    return ", ".join([_cpp_string(s) for s in strings])
-
-def _cpp_string(string):
-    """Format the given string as C++ string literal."""
-
-    # Use raw strings and choose a delimiter that’s extremely unlikely to occur
-    # in real-world code.
-    delim = "#*?&"
-    open = 'R"' + delim + "("
-    close = ")" + delim + '"'
-    if close in string:
-        fail("String {} can’t be transferred to C++".format(string))
-    return open + string + close
-
-def _cpp_ints(ints):
-    """Format the given integer list as C++ initializer list."""
-    return ", ".join([_cpp_int(i) for i in ints])
-
-def _cpp_int(int):
-    """Format the given integer as C++ decimal literal."""
-
-    # See https://stackoverflow.com/a/1819236 for the guarantees on the C++ int
-    # type range.
-    if int < -32767 or int > 32767:
-        fail("integer {} out of range".format(int))
-    return str(int)
 
 # Directory relative to the current package where to store compiled files.
 # This equivalent to _objs for C++ rules.  See

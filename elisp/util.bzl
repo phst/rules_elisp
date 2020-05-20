@@ -127,6 +127,67 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
     )
     return bin.executable
 
+def cpp_strings(strings):
+    """Formats the given string list as C++ initializer list.
+
+    This function makes an effort to support strings with special characters.
+
+    Args:
+      strings (list of string): strings to be formatted
+
+    Returns:
+      a string containing C++ code representing the given string list
+    """
+    return ", ".join([cpp_string(s) for s in strings])
+
+def cpp_string(string):
+    """Formats the given string as C++ string literal.
+
+    This function makes an effort to support strings with special characters.
+
+    Args:
+      string: any string
+
+    Returns:
+      a string containing a properly escaped C++ string literal
+    """
+
+    # Use raw strings and choose a delimiter that’s extremely unlikely to occur
+    # in real-world code.
+    delim = "#*?&"
+    open = 'R"' + delim + "("
+    close = ")" + delim + '"'
+    if close in string:
+        fail("String {} can’t be transferred to C++".format(string))
+    return open + string + close
+
+def cpp_ints(ints):
+    """Formats the given integer list as C++ initializer list.
+
+    Args:
+      ints (list of int): numbers to be formatted
+
+    Returns:
+      a string containing C++ code representing the given number list
+    """
+    return ", ".join([cpp_int(i) for i in ints])
+
+def cpp_int(int):
+    """Format the given integer as C++ decimal literal.
+
+    Args:
+      int: an integer
+
+    Returns:
+      a string containing a C++ decimal literal
+    """
+
+    # See https://stackoverflow.com/a/1819236 for the guarantees on the C++ int
+    # type range.
+    if int < -32767 or int > 32767:
+        fail("integer {} out of range".format(int))
+    return str(int)
+
 # Shared C++ compilation options.
 COPTS = [
     "-fno-exceptions",
