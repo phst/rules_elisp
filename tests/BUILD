@@ -37,10 +37,17 @@ go_test(
 elisp_test(
     name = "test_test",
     srcs = ["test.el"],
-    # We need to explicitly include the source file as data dependency,
-    # otherwise it won’t be present and we can’t test coverage.  For real
-    # tests, Bazel does the right thing.
-    data = ["test-lib.el"],
+    data = [
+        # We need to explicitly include the source file as data dependency,
+        # otherwise it won’t be present and we can’t test coverage.  For real
+        # tests, Bazel does the right thing.
+        "test-lib.el",
+        # We also need to explicitly include the marker file that Bazel would
+        # generate to indicate that a file should be instrumented.  See the
+        # commentary in //elisp:defs.bzl for details.  Again, for real tests,
+        # Bazel itself takes care of this.
+        "test-lib.el.instrument",
+    ],
     skip_tags = ["skip-from-attribute"],
     skip_tests = ["filter-via-skip-tests-attribute"],
     tags = ["manual"],

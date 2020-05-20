@@ -29,6 +29,7 @@
 (require 'edebug)
 (require 'ert)
 (require 'format)
+(require 'nadvice)
 (require 'pp)
 (require 'rx)
 (require 'subr-x)
@@ -64,48 +65,41 @@ source files and load them."
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-dir (getenv "COVERAGE_DIR"))
          (selector (elisp/ert/make--selector))
-         (original-load-suffixes load-suffixes)
-         (load-suffixes
-          ;; Prefer source files when coverage is requested, as only those can
-          ;; be instrumented.
-          (if coverage-enabled (cons ".el" load-suffixes) load-suffixes))
-         (load-buffers ())
-         (load-source-file-function
-          (if coverage-enabled
-              (lambda (fullname file noerror _nomessage)
-                (cond
-                 ;; Note: ‘file-in-directory-p’ wouldn’t work here because
-                 ;; Bazel runfiles are in fact symbolic links, and
-                 ;; ‘file-in-directory-p’ resolves symbolic links.
-                 ((elisp/ert/outside--tree-p fullname source-dir)
-                  ;; File is from outside the Bazel tree, probably a built-in
-                  ;; file.  Don’t try to instrument it, as that is unlikely to
-                  ;; work.  Search for a corresponding compiled file instead.
-                  ;; Since loading a built-in file can only ever load other
-                  ;; built-in files, restore the original load suffixes.
-                  (let ((load-suffixes original-load-suffixes))
-                    (elisp/ert/load--compiled fullname file noerror)))
-                 ((file-readable-p fullname)
-                  (push (elisp/ert/load--instrument fullname file)
-                        load-buffers)
-                  t)
-                 (noerror nil)
-                 (t (signal 'file-error (list "Cannot open load file" file)))))
-            load-source-file-function)))
+         ;; If coverage is enabled, check for a file with a well-known
+         ;; extension first.  The Bazel runfiles machinery is expected to
+         ;; generate these files for source files that should be instrumented.
+         ;; See the commentary in //elisp:defs.bzl for details.
+         (load-suffixes (if coverage-enabled
+                            (cons ".el.instrument" load-suffixes)
+                          load-suffixes))
+         (load-buffers ()))
     ;; TEST_SRCDIR and TEST_TMPDIR are required,
     ;; cf. https://docs.bazel.build/versions/3.1.0/test-encyclopedia.html#initial-conditions.
     (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
     (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
-    ;; Emacs 26 suffers from
-    ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=29579, so don’t quote in
-    ;; that case.
-    (and (> emacs-major-version 26) (cl-callf2 concat "/:" source-dir))
     (and coverage-enabled (member coverage-dir '(nil ""))
          (error "Coverage requested but COVERAGE_DIR not set"))
     (unless (and (natnump shard-count) (natnump shard-index)
                  (< shard-index shard-count))
       (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
              shard-count shard-index))
+    (when coverage-enabled
+      ;; We don’t bother removing the advice since we are going to kill Emacs
+      ;; anyway.
+      (add-function
+       :before-until load-source-file-function
+       (lambda (fullname file _noerror _nomessage)
+         ;; If we got a magic filename that tells us to instrument a file, then
+         ;; instrument the corresponding source file if that exists.  See the
+         ;; commentary in //elisp:defs.bzl for details.  In all other cases, we
+         ;; defer to the normal ‘load-source-file-function’, which is also
+         ;; responsible for raising errors if desired.
+         (when (string-suffix-p ".el.instrument" fullname)
+           (cl-callf2 string-remove-suffix ".instrument" fullname)
+           (cl-callf2 string-remove-suffix ".instrument" file)
+           (when (file-readable-p fullname)
+             (push (elisp/ert/load--instrument fullname file) load-buffers)
+             t)))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
@@ -271,32 +265,6 @@ NAME is the name of the test."
       (indent-rigidly point (point) 4))
     (insert ?\n)
     (buffer-substring-no-properties (point-min) (point-max))))
-
-(defun elisp/ert/outside--tree-p (file dir)
-  "Return whether FILE is outside DIR.
-Unlike ‘file-in-directory-p’, this doesn’t resolve symbolic
-links."
-  (cl-check-type file string)
-  (cl-check-type dir string)
-  (null (locate-dominating-file file (lambda (d) (file-equal-p d dir)))))
-
-(defun elisp/ert/load--compiled (fullname file noerror)
-  "Load a compiled file corresponding to FULLNAME.
-FILE and NOERROR are as in ‘load-source-file-function’.  Return t
-if loading was successful."
-  (cl-check-type fullname string)
-  (cl-check-type file string)
-  (let* ((dir (file-name-directory fullname))
-         (name (file-name-nondirectory fullname))
-         (suffix (or (cl-find-if (lambda (s) (string-suffix-p s name))
-                                 (get-load-suffixes))
-                     (error "File %s has unknown suffix" file)))
-         (stem
-          (substring-no-properties name 0 (- (length name) (length suffix))))
-         (compiled (or (locate-file (concat stem ".elc") (list dir)
-                                    load-file-rep-suffixes)
-                       (error "No compiled version of %s found" file))))
-    (load compiled noerror nil :nosuffix :must-suffix)))
 
 (defun elisp/ert/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.

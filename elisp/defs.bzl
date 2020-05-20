@@ -667,6 +667,24 @@ def _binary(ctx, srcs, tags, substitutions):
         result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
     )
 
+    # When collecting coverage information, the ERT test runner needs a way to
+    # determine whether or not to instrument a file.  In particular, we should
+    # avoid instrumenting files that are part of Emacs, because instrumenting
+    # them often causes spurious errors and likely makes the run much slower.
+    # To distinguish between files to instrument and other files, we employ the
+    # following trick: For each file to be instrumented, we create an adjacent
+    # symbolic link with the same name, but a magic “.instrument” extension.
+    # The test runner can then use the presence of these links to make the
+    # decision.  The type and target of the file is actually irrelevant;
+    # creating a symbolic link is just the easiest approach because we can use
+    # Bazel’s “root_symlinks” feature.
+    links = {
+        check_relative_filename(
+            paths.join(ctx.workspace_name, src.short_path + ".instrument"),
+        ): src
+        for src in result.transitive_srcs.to_list()
+    } if ctx.configuration.coverage_enabled else {}
+
     # We use a C++ driver because the C++ toolchain framework exposes
     # individual actions (unlike Python), and the runfiles implementation
     # doesn’t have bugs (unlike Go).  We use raw strings to minimize the risk
@@ -697,7 +715,7 @@ def _binary(ctx, srcs, tags, substitutions):
                     paths.join(ctx.workspace_name, file.short_path),
                 )
                 for file in data_files_for_manifest
-            ]),
+            ] + links.keys()),
             "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
             "[[tags]]": _cpp_strings(collections.uniq(ctx.attr.tags + tags)),
         }, substitutions),
@@ -712,6 +730,7 @@ def _binary(ctx, srcs, tags, substitutions):
         transitive_files = depset(
             transitive = [transitive_files, result.runfiles.files],
         ),
+        root_symlinks = links,
     )
     emacs_runfiles = emacs.default_runfiles
     runfiles = bin_runfiles.merge(emacs_runfiles)
