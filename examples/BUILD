@@ -70,8 +70,6 @@ elisp_test(
 elisp_binary(
     name = "bin",
     src = "bin.el",
-    input_args = [2],
-    output_args = [-1],
     deps = [":lib_1"],
 )
 
