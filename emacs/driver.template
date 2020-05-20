@@ -16,7 +16,7 @@
 
 int main(int argc, char** argv) {
   return phst_rules_elisp::RunEmacs(
-      R"**([[install]])**",
+      [[install]],
       argc, argv);
 }
 
