@@ -76,6 +76,17 @@ func Test(t *testing.T) {
 		t.Error(err)
 	}
 
+	schema, err := runfiles.Path("junit_xsd/file/JUnit.xsd")
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd = exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		t.Errorf("error validating XML report file: %s", err)
+	}
+
 	b, err := ioutil.ReadFile(reportName)
 	if err != nil {
 		t.Fatal(err)
@@ -90,12 +101,12 @@ func Test(t *testing.T) {
 		return ok && f.Name() == "Description"
 	}
 	type testCase struct {
-		Name      string  `xml:"name,attr"`
-		ClassName string  `xml:"classname,attr"`
-		Status    string  `xml:"status,attr"`
-		Time      float64 `xml:"time,attr"`
-		Error     message `xml:"error"`
-		Failure   message `xml:"failure"`
+		Name      string    `xml:"name,attr"`
+		ClassName string    `xml:"classname,attr"`
+		Time      float64   `xml:"time,attr"`
+		Skipped   *struct{} `xml:"skipped"`
+		Error     message   `xml:"error"`
+		Failure   message   `xml:"failure"`
 	}
 	type report struct {
 		XMLName   xml.Name
@@ -129,28 +140,31 @@ func Test(t *testing.T) {
 		Timestamp: timestamp(time.Now()),
 		TestCases: []testCase{
 			{
-				Name: "abort", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Name: "abort", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
 			},
-			{Name: "coverage", ClassName: "ERT", Status: "passed", Time: wantElapsed},
+			{Name: "coverage", ClassName: "ERT", Time: wantElapsed},
 			{
-				Name: "error", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Name: "error", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
 			},
-			{Name: "expect-failure", ClassName: "ERT", Status: "failed", Time: wantElapsed},
-			{Name: "expect-failure-but-pass", ClassName: "ERT", Status: "PASSED", Time: wantElapsed},
+			{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
 			{
-				Name: "fail", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed,
+				Failure: message{Message: `Test passed unexpectedly`, Type: `error`},
+			},
+			{
+				Name: "fail", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`, Type: `ert-test-failed`, Description: "something"},
 			},
-			{Name: "pass", ClassName: "ERT", Status: "passed", Time: wantElapsed},
-			{Name: "skip", ClassName: "ERT", Status: "skipped", Time: wantElapsed},
+			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
+			{Name: "skip", ClassName: "ERT", Time: wantElapsed, Skipped: new(struct{})},
 			{
-				Name: "special-chars", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Name: "special-chars", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->", Type: `error`, Description: "something"},
 			},
 			{
-				Name: "throw", ClassName: "ERT", Status: "FAILED", Time: wantElapsed,
+				Name: "throw", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `No catch for tag: unknown-tag, hi`, Type: `no-catch`, Description: "something"},
 			},
 		},

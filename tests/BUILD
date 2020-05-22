@@ -25,7 +25,10 @@ elisp_test_suite(name = "elisp_test")
 go_test(
     name = "go_default_test",
     srcs = ["ert_test.go"],
-    data = [":test_test"],
+    data = [
+        ":test_test",
+        "@junit_xsd//file",
+    ],
     rundir = ".",
     deps = [
         "@com_github_google_go_cmp//cmp:go_default_library",

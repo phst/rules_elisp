@@ -34,7 +34,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 # https://github.com/bazelbuild/bazel/issues/8305.
 versions.check("3.0.0")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 
 http_archive(
     name = "io_bazel_stardoc",
@@ -57,6 +57,13 @@ http_archive(
     sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
     strip_prefix = "googletest-1.10.x",
     urls = ["https://github.com/google/googletest/archive/v1.10.x.zip"],
+)
+
+http_file(
+    name = "junit_xsd",
+    downloaded_file_path = "JUnit.xsd",
+    sha256 = "cfc8bc26da1794da8c3f4c4c4de9d24a671b232076d4e61d92fa72834e28230e",
+    urls = ["https://raw.githubusercontent.com/windyroad/JUnit-Schema/d6daa414c448da22b810c8562f9d6fca086983ba/JUnit.xsd"],
 )
 
 http_archive(

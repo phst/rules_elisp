@@ -137,7 +137,14 @@ source files and load them."
                                   (format-message "Test %s %s" name status)))
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
-          (and (ert-test-skipped-p result) (cl-incf skipped))
+          (when (ert-test-skipped-p result)
+            (cl-incf skipped)
+            (setq report '((skipped))))
+          (and (not expected) (ert-test-passed-p result)
+               ;; Fake an error so that the test is marked as failed in the XML
+               ;; report.
+               (setq report '((failure ((message . "Test passed unexpectedly")
+                                        (type . "error"))))))
           (when (ert-test-result-with-condition-p result)
             (let ((message (elisp/ert/failure--message name result))
                   (condition (ert-test-result-with-condition-condition result)))
@@ -151,8 +158,7 @@ source files and load them."
                             ;; classname is required, but we don’t have test
                             ;; classes, so fill in a dummy value.
                             (classname . "ERT")
-                            (time . ,(number-to-string (float-time duration)))
-                            (status . ,status))
+                            (time . ,(format-time-string "%s.%N" duration)))
                            ,@report)
                 test-reports)))
       (message "Running %d tests finished, %d results unexpected"
@@ -169,16 +175,18 @@ source files and load them."
            (elisp/ert/sanitize--xml
             `((testsuite
                ((name . "ERT")  ; required
+                (hostname . "localhost")  ; required
                 (tests . ,(number-to-string (length tests)))
                 (errors . ,(number-to-string errors))
                 (failures . ,(number-to-string failures))
                 (skipped . ,(number-to-string skipped))
-                (id . "0")
-                (time . ,(number-to-string
-                          (float-time (time-subtract nil start-time))))
+                (time . ,(format-time-string "%s.%N"
+                                             (time-subtract nil start-time)))
                 ;; No timezone or fractional seconds allowed.
                 (timestamp . ,(format-time-string "%FT%T" start-time)))
-               ,@(nreverse test-reports)))))
+               (properties)  ; required
+               ,@(nreverse test-reports)
+               (system-out) (system-err)))))
           (let ((coding-system-for-write 'utf-8-unix))
             (write-region nil nil (concat "/:" report-file)
                           nil nil nil 'excl))))
