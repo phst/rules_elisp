@@ -45,7 +45,7 @@ def check_relative_filename(filename):
     if filename != "." and not filename[0].isalpha():
         fail("filename {} has to start with a letter".format(filename))
     for char in filename.elems():
-        if not char.isalnum() and char not in "-_./":
+        if not char.isalnum() and char not in "-_./+$":
             fail("invalid character {} in filename {}".format(char, filename))
     return filename
 
