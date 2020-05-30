@@ -337,23 +337,20 @@ instrumented using Edebug."
   (cl-check-type coverage-dir string)
   (cl-check-type buffers list)
   (with-temp-buffer
-    (let ((coding-system-for-write 'utf-8-unix)
-          (root (getenv "TEST_SRCDIR")))
+    (let ((coding-system-for-write 'utf-8-unix))
       (dolist (buffer buffers)
-        (elisp/ert/insert--coverage-report buffer root)
+        (elisp/ert/insert--coverage-report buffer)
         (kill-buffer buffer))
       (write-region nil nil (expand-file-name "emacs-lisp.dat" coverage-dir)
                     nil nil nil 'excl))))
 
-(defun elisp/ert/insert--coverage-report (buffer root)
+(defun elisp/ert/insert--coverage-report (buffer)
   "Insert a coverage report into the current buffer.
 BUFFER must be a different buffer visiting an Emacs Lisp source
-file that has been instrumented with Edebug.  ROOT is a directory
-to be used as root."
+file that has been instrumented with Edebug."
   (cl-check-type buffer buffer-live)
-  (cl-check-type root string)
   (let ((file-name (elisp/ert/sanitize--string
-                    (file-relative-name (buffer-file-name buffer) root)))
+                    (file-relative-name (buffer-file-name buffer))))
         (functions ())
         (functions-hit 0)
         (lines (make-hash-table :test #'eql)))
