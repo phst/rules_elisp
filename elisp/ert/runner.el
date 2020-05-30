@@ -322,7 +322,10 @@ visiting the file."
       ;; Yuck!  We have to mess with internal Edebug data here.
       ;; Byte-compile all functions to be a bit more realistic.
       (dolist (data edebug-form-data)
-        (byte-compile (edebug--form-data-name data))))
+        (let ((name (edebug--form-data-name data)))
+          ;; Don’t attempt to byte-compile macros due to
+          ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41618.
+          (unless (macrop name) (byte-compile name)))))
     (do-after-load-evaluation fullname)
     (progress-reporter-done reporter)
     buffer))
