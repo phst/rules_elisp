@@ -85,6 +85,12 @@ def _elisp_library_impl(ctx):
             files = depset(direct = result.outs),
             runfiles = result.runfiles,
         ),
+        coverage_common.instrumented_files_info(
+            ctx,
+            source_attributes = ["srcs"],
+            dependency_attributes = ["deps"],
+            extensions = ["el"],
+        ),
         EmacsLispInfo(
             source_files = ctx.files.srcs,
             compiled_files = result.outs,
@@ -146,7 +152,7 @@ def _elisp_test_impl(ctx):
         )
         test_env["LCOV_MERGER"] = ctx.executable._lcov_merger.path
 
-    # The InstrumentedFilesInfo provider needs to be added here instead of in
+    # The InstrumentedFilesInfo provider needs to be added here as well as in
     # the “elisp_library” rule for coverage collection to work.
     return [
         DefaultInfo(
@@ -659,16 +665,26 @@ def _binary(ctx, srcs, tags, substitutions):
         result.runfiles.files.to_list() if toolchain.wrap else []
     )
 
-    # If we’re supposed to generate coverage information, use source files
-    # instead of compiled files because we can’t instrument compiled files for
+    # If we’re supposed to generate coverage information, use source files in
+    # addition to compiled files because we can’t instrument compiled files for
     # coverage.  We ignore ctx.coverage_instrumented because that doesn’t work
     # here: it assumes that coverage is generated during compilation, but we
     # can generate coverage information only at runtime.  Bazel’s coverage
     # support isn’t really documented; some information is available in the
     # source code comments of the file
     # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
+    # When runtime coverage support is enabled, Bazel writes a list of
+    # filenames that are covered by --instrumentation_filter to a text file
+    # whose filename is in COVERAGE_MANIFEST.  The test runner then parses that
+    # file and only instruments the files that should be instrumented.  This
+    # saves time and increases robustness.  Because we might load some
+    # combination of source and compiled files, always supply both files at
+    # runtime.
     transitive_files = (
-        result.transitive_srcs if ctx.configuration.coverage_enabled else result.transitive_outs
+        depset(transitive = [
+            result.transitive_srcs,
+            result.transitive_outs,
+        ]) if ctx.configuration.coverage_enabled else result.transitive_outs
     )
 
     # When collecting coverage information, the ERT test runner needs a way to
@@ -681,7 +697,11 @@ def _binary(ctx, srcs, tags, substitutions):
     # The test runner can then use the presence of these links to make the
     # decision.  The type and target of the file is actually irrelevant;
     # creating a symbolic link is just the easiest approach because we can use
-    # Bazel’s “root_symlinks” feature.
+    # Bazel’s “root_symlinks” feature.  We could rely solely on the
+    # COVERAGE_MANIFEST file (see above), however, that would increase the
+    # complexity of the test runner because it would have to find the correct
+    # compiled file for each source file.  Using the magic extension allows us
+    # to use the ‘load-suffixes’ variable for this purpose.
     links = {
         runfile_location(ctx, src) + ".instrument": src
         for src in result.transitive_srcs.to_list()

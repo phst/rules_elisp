@@ -16,6 +16,7 @@ package runner_test
 
 import (
 	"encoding/xml"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -29,10 +30,11 @@ import (
 )
 
 func Test(t *testing.T) {
-	bin, err := runfiles.Path("phst_rules_elisp/tests/test_test")
+	workspace, err := runfiles.Path("phst_rules_elisp")
 	if err != nil {
 		t.Fatal(err)
 	}
+	bin := filepath.Join(workspace, "tests/test_test")
 	runfilesEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
@@ -50,6 +52,15 @@ func Test(t *testing.T) {
 	if err := reportFile.Close(); err != nil {
 		t.Error(err)
 	}
+	coverageManifest, err := ioutil.TempFile(tempDir, "coverage-manifest-*.txt")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer coverageManifest.Close()
+	defer os.Remove(coverageManifest.Name())
+	if _, err := io.WriteString(coverageManifest, "tests/test-lib.el\nunrelated.el\n"); err != nil {
+		t.Error(err)
+	}
 	coverageDir, err := ioutil.TempDir(tempDir, "coverage-")
 	if err != nil {
 		t.Fatal(err)
@@ -62,9 +73,12 @@ func Test(t *testing.T) {
 	cmd.Env = append(os.Environ(), append(runfilesEnv,
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
-		"COVERAGE=1", "COVERAGE_DIR="+coverageDir)...)
+		"COVERAGE=1",
+		"COVERAGE_MANIFEST="+coverageManifest.Name(),
+		"COVERAGE_DIR="+coverageDir)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+	cmd.Dir = workspace
 	switch err := cmd.Run().(type) {
 	case nil:
 		t.Error("test binary succeeded unexpectedly")

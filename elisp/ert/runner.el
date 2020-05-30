@@ -57,6 +57,7 @@ source files and load them."
          (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
          (shard-status-file (getenv "TEST_SHARD_STATUS_FILE"))
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
+         (coverage-manifest (getenv "COVERAGE_MANIFEST"))
          (coverage-dir (getenv "COVERAGE_DIR"))
          (selector (elisp/ert/make--selector))
          ;; If coverage is enabled, check for a file with a well-known
@@ -71,6 +72,8 @@ source files and load them."
     ;; cf. https://docs.bazel.build/versions/3.1.0/test-encyclopedia.html#initial-conditions.
     (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
     (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
+    (and coverage-enabled (member coverage-manifest '(nil ""))
+         (error "Coverage requested but COVERAGE_MANIFEST not set"))
     (and coverage-enabled (member coverage-dir '(nil ""))
          (error "Coverage requested but COVERAGE_DIR not set"))
     (unless (and (natnump shard-count) (natnump shard-index)
@@ -78,22 +81,41 @@ source files and load them."
       (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
              shard-count shard-index))
     (when coverage-enabled
-      ;; We don’t bother removing the advice since we are going to kill Emacs
-      ;; anyway.
-      (add-function
-       :before-until load-source-file-function
-       (lambda (fullname file _noerror _nomessage)
-         ;; If we got a magic filename that tells us to instrument a file, then
-         ;; instrument the corresponding source file if that exists.  See the
-         ;; commentary in //elisp:defs.bzl for details.  In all other cases, we
-         ;; defer to the normal ‘load-source-file-function’, which is also
-         ;; responsible for raising errors if desired.
-         (when (string-suffix-p ".el.instrument" fullname)
-           (cl-callf2 string-remove-suffix ".instrument" fullname)
-           (cl-callf2 string-remove-suffix ".instrument" file)
-           (when (file-readable-p fullname)
-             (push (elisp/ert/load--instrument fullname file) load-buffers)
-             t)))))
+      (let ((format-alist nil)
+            (after-insert-file-functions nil)
+            ;; The coverage manifest uses ISO-8859-1, see
+            ;; https://github.com/bazelbuild/bazel/blob/3.1.0/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L68.
+            (coding-system-for-read 'iso-8859-1-unix)
+            (instrumented-files ()))
+        (with-temp-buffer
+          (insert-file-contents (concat "/:" coverage-manifest))
+          (while (not (eobp))
+            ;; The filenames in the coverage manifest are typically relative to
+            ;; the current directory, so expand them here.
+            (push (expand-file-name
+                   (buffer-substring-no-properties (point) (line-end-position)))
+                  instrumented-files)
+            (forward-line)))
+        ;; We don’t bother removing the advice since we are going to kill Emacs
+        ;; anyway.
+        (add-function
+         :before-until load-source-file-function
+         (lambda (fullname file _noerror _nomessage)
+           ;; If we got a magic filename that tells us to instrument a file,
+           ;; then instrument the corresponding source file if that exists.
+           ;; See the commentary in //elisp:defs.bzl for details.  In all other
+           ;; cases, we defer to the normal ‘load-source-file-function’, which
+           ;; is also responsible for raising errors if desired.
+           (when (string-suffix-p ".el.instrument" fullname)
+             (cl-callf2 string-remove-suffix ".instrument" fullname)
+             (cl-callf2 string-remove-suffix ".instrument" file)
+             (when (and (file-readable-p fullname)
+                        ;; We still need to check whether Bazel wants us to
+                        ;; instrument the file.
+                        (cl-find fullname instrumented-files
+                                 :test #'file-equal-p))
+               (push (elisp/ert/load--instrument fullname file) load-buffers)
+               t))))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
