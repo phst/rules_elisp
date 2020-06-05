@@ -530,6 +530,10 @@ def _compile(ctx, srcs, deps, load_path):
         dep[EmacsLispInfo].transitive_compiled_files
         for dep in deps
     ]
+    indirect_load_path = [
+        dep[EmacsLispInfo].transitive_load_path
+        for dep in deps
+    ]
     transitive_load_path = depset(
         direct = resolved_load_path,
         # We explicitly specify preorder traversal.  The load path is an
@@ -538,7 +542,7 @@ def _compile(ctx, srcs, deps, load_path):
         # preorder traversal makes most sense since it causes libraries closer
         # to the binary/test in the dependency graph to be considered first.
         order = "preorder",
-        transitive = [dep[EmacsLispInfo].transitive_load_path for dep in deps],
+        transitive = indirect_load_path,
     )
     transitive_data = depset(
         direct = ctx.files.data,
@@ -601,7 +605,9 @@ def _compile(ctx, srcs, deps, load_path):
             "--batch",
             "--load=" + ctx.file._compile.path,
             ctx.actions.args().add_all(
-                transitive_load_path,
+                # We don’t add the full transitive load path here because the
+                # direct load path would only contain the file to be compiled.
+                depset(order = "preorder", transitive = indirect_load_path),
                 map_each = _load_directory_for_actions,
                 format_each = "--directory=%s",
                 uniquify = True,
