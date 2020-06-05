@@ -555,11 +555,15 @@ def _compile(ctx, srcs, deps, load_path):
     toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
 
-    # Expand load path only if needed.
+    # Expand load path only if needed.  It’s important that the expanded load
+    # path is equivalent to the --directory arguments below.
     flat_load_path = [
         _load_directory_for_actions(d)
-        for d in transitive_load_path.to_list()
-    ] if toolchain.wrap else None
+        for d in depset(
+            order = "preorder",
+            transitive = indirect_load_path,
+        ).to_list()
+    ] + source_load_path if toolchain.wrap else None
 
     # We compile only one file per Emacs process.  This might seem wasteful,
     # but since compilation can execute arbitrary code, it ensures that
