@@ -19,7 +19,10 @@
 #include <vector>
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/base/attributes.h"
 #include "absl/container/flat_hash_set.h"
 #pragma GCC diagnostic pop
