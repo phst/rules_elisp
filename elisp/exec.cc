@@ -339,19 +339,24 @@ StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
     args.push_back(abs);
   }
   if (manifest) {
-    std::vector<std::string> outputs;
+    std::vector<std::string> inputs, outputs;
     const auto report_file = this->EnvVar("XML_OUTPUT_FILE");
     if (!report_file.empty()) {
       outputs.push_back(report_file);
     }
     if (this->EnvVar("COVERAGE") == "1") {
+      std::string coverage_manifest = this->EnvVar("COVERAGE_MANIFEST");
+      if (!coverage_manifest.empty()) {
+        inputs.push_back(std::move(coverage_manifest));
+      }
       const auto coverage_dir = this->EnvVar("COVERAGE_DIR");
       if (!coverage_dir.empty()) {
         outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
       }
     }
-    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, srcs, data_files, {},
-                                  outputs, manifest.value()));
+    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, srcs, data_files,
+                                  std::move(inputs), outputs,
+                                  manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
