@@ -15,16 +15,17 @@
 #include "elisp/exec.h"
 
 int main(int argc, char** argv) {
-  return phst_rules_elisp::RunBinary(
-      [[emacs]],
-      phst_rules_elisp::Mode::[[mode]],
-      {[[tags]]},
-      {[[directory]]},
-      {[[load]]},
-      {[[data]]},
-      {[[input_args]]},
-      {[[output_args]]},
-      argc, argv);
+  phst_rules_elisp::BinaryOptions opts;
+  opts.wrapper = [[emacs]];
+  opts.mode = phst_rules_elisp::Mode::[[mode]];
+  opts.rule_tags = {[[tags]]};
+  opts.load_path = {[[directory]]};
+  opts.load_files = {[[load]]};
+  opts.data_files = {[[data]]};
+  opts.input_args = {[[input_args]]};
+  opts.output_args = {[[output_args]]};
+  opts.argv.assign(argv, argv + argc);
+  return phst_rules_elisp::RunBinary(opts);
 }
 
 // Local Variables:

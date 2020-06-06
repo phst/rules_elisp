@@ -15,34 +15,46 @@
 #ifndef PHST_RULES_ELISP_ELISP_EXEC_H
 #define PHST_RULES_ELISP_ELISP_EXEC_H
 
-#include <initializer_list>
+#include <string>
+#include <vector>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/container/flat_hash_set.h"
+#pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
 
 enum class Mode { kDirect, kWrap };
 
-ABSL_MUST_USE_RESULT int RunEmacs(const char* install_rel, int argc,
-                                  const char* const* argv);
+struct EmacsOptions {
+  std::string install_rel;
+  std::vector<std::string> argv;
+};
 
-ABSL_MUST_USE_RESULT int RunBinary(
-    const char* wrapper, Mode mode,
-    std::initializer_list<const char*> rule_tags,
-    std::initializer_list<const char*> load_path,
-    std::initializer_list<const char*> load_files,
-    std::initializer_list<const char*> data_files,
-    std::initializer_list<int> input_args,
-    std::initializer_list<int> output_args, int argc, const char* const* argv);
+ABSL_MUST_USE_RESULT int RunEmacs(const EmacsOptions& opts);
 
-ABSL_MUST_USE_RESULT int RunTest(const char* wrapper, Mode mode,
-                                 std::initializer_list<const char*> rule_tags,
-                                 std::initializer_list<const char*> load_path,
-                                 std::initializer_list<const char*> srcs,
-                                 std::initializer_list<const char*> data_files,
-                                 std::initializer_list<const char*> skip_tests,
-                                 std::initializer_list<const char*> skip_tags,
-                                 int argc, const char* const* argv);
+struct CommonOptions {
+  std::string wrapper;
+  Mode mode;
+  absl::flat_hash_set<std::string> rule_tags;
+  std::vector<std::string> load_path, load_files;
+  absl::flat_hash_set<std::string> data_files;
+  std::vector<std::string> argv;
+};
+
+struct BinaryOptions : CommonOptions {
+  absl::flat_hash_set<int> input_args, output_args;
+};
+
+ABSL_MUST_USE_RESULT int RunBinary(const BinaryOptions& opts);
+
+struct TestOptions : CommonOptions {
+  absl::flat_hash_set<std::string> skip_tests, skip_tags;
+};
+
+ABSL_MUST_USE_RESULT int RunTest(const TestOptions& opts);
 
 }  // namespace phst_rules_elisp
 

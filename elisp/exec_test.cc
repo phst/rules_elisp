@@ -14,7 +14,6 @@
 
 #include "elisp/exec.h"
 
-#include "absl/base/macros.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -24,13 +23,16 @@ namespace {
 using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
-  const char *const argv[] = {"unused", "--option", "elisp/exec.cc",
-                              "/:/tmp/output.dat", nullptr};
-  EXPECT_THAT(RunBinary("phst_rules_elisp/tests/wrap/wrap", Mode::kWrap,
-                        {"local", "mytag"}, {"phst_rules_elisp"}, {},
-                        {"phst_rules_elisp/elisp/exec.h"}, {2}, {-1},
-                        ABSL_ARRAYSIZE(argv) - 1, argv),
-              Eq(0));
+  BinaryOptions opts;
+  opts.wrapper = "phst_rules_elisp/tests/wrap/wrap";
+  opts.mode = Mode::kWrap;
+  opts.rule_tags = {"local", "mytag"};
+  opts.load_path = {"phst_rules_elisp"};
+  opts.data_files = {"phst_rules_elisp/elisp/exec.h"};
+  opts.input_args = {2};
+  opts.output_args = {-1};
+  opts.argv = {"unused", "--option", "elisp/exec.cc", "/:/tmp/output.dat"};
+  EXPECT_THAT(RunBinary(opts), Eq(0));
 }
 
 }  // namespace

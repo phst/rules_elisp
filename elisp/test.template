@@ -15,16 +15,17 @@
 #include "elisp/exec.h"
 
 int main(int argc, char** argv) {
-  return phst_rules_elisp::RunTest(
-      [[emacs]],
-      phst_rules_elisp::Mode::[[mode]],
-      {[[tags]]},
-      {[[directory]]},
-      {[[load]]},
-      {[[data]]},
-      {[[skip_tests]]},
-      {[[skip_tags]]},
-      argc, argv);
+  phst_rules_elisp::TestOptions opts;
+  opts.wrapper = [[emacs]];
+  opts.mode = phst_rules_elisp::Mode::[[mode]];
+  opts.rule_tags = {[[tags]]};
+  opts.load_path = {[[directory]]};
+  opts.load_files = {[[load]]};
+  opts.data_files = {[[data]]};
+  opts.skip_tests = {[[skip_tests]]};
+  opts.skip_tags = {[[skip_tags]]};
+  opts.argv.assign(argv, argv + argc);
+  return phst_rules_elisp::RunTest(opts);
 }
 
 // Local Variables:

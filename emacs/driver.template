@@ -15,9 +15,10 @@
 #include "elisp/exec.h"
 
 int main(int argc, char** argv) {
-  return phst_rules_elisp::RunEmacs(
-      [[install]],
-      argc, argv);
+  phst_rules_elisp::EmacsOptions opts;
+  opts.install_rel = [[install]];
+  opts.argv.assign(argv, argv + argc);
+  return phst_rules_elisp::RunEmacs(opts);
 }
 
 // Local Variables:

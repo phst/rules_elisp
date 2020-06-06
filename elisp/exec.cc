@@ -48,7 +48,6 @@
 #include "absl/strings/string_view.h"
 #include "absl/strings/strip.h"
 #include "absl/types/optional.h"
-#include "absl/types/span.h"
 #include "absl/utility/utility.h"
 #include "nlohmann/json.hpp"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -66,6 +65,17 @@ namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
 using Environment = absl::flat_hash_map<std::string, std::string>;
+
+namespace {
+
+template <typename T>
+std::vector<T> Sort(const absl::flat_hash_set<T>& set) {
+  std::vector<T> result(set.begin(), set.end());
+  absl::c_sort(result);
+  return result;
+}
+
+}  // namespace
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
@@ -157,8 +167,8 @@ static StatusOr<absl::optional<TempFile>> AddManifest(
   return absl::implicit_cast<Type>(std::move(stream));
 }
 
-static void CheckRelative(const absl::Span<const char* const> files) {
-  for (const absl::string_view file : files) {
+static void CheckRelative(const std::vector<std::string>& files) {
+  for (const std::string& file : files) {
     if (IsAbsolute(file)) {
       std::clog << "filename " << file << " is absolute" << std::endl;
       std::abort();
@@ -166,24 +176,23 @@ static void CheckRelative(const absl::Span<const char* const> files) {
   }
 }
 
-static absl::Status WriteManifest(
-    const absl::Span<const char* const> rule_tags,
-    const absl::Span<const char* const> load_path,
-    const absl::Span<const char* const> load_files,
-    const absl::Span<const char* const> data_files,
-    std::vector<std::string> input_files,
-    const absl::Span<const std::string> output_files, TempFile& file) {
-  CheckRelative(load_path);
-  CheckRelative(load_files);
+static absl::Status WriteManifest(const CommonOptions& opts,
+                                  std::vector<std::string> input_files,
+                                  const std::vector<std::string>& output_files,
+                                  TempFile& file) {
+  CheckRelative(opts.load_path);
+  CheckRelative(opts.load_files);
+  const auto data_files = Sort(opts.data_files);
   CheckRelative(data_files);
-  input_files.insert(input_files.end(), load_files.begin(), load_files.end());
+  input_files.insert(input_files.end(),
+                     opts.load_files.begin(), opts.load_files.end());
   input_files.insert(input_files.end(), data_files.begin(), data_files.end());
   const nlohmann::json json = {
       {"root", "RUNFILES_ROOT"},
-      {"loadPath", load_path},
+      {"loadPath", opts.load_path},
       {"inputFiles", input_files},
       {"outputFiles", output_files},
-      {"tags", rule_tags},
+      {"tags", Sort(opts.rule_tags)},
   };
   return file.Write(json.dump());
 }
@@ -192,34 +201,20 @@ namespace {
 
 class Executor {
  public:
-  static StatusOr<Executor> Create(int argc, const char* const* argv);
-  static StatusOr<Executor> CreateForTest(int argc, const char* const* argv);
+  static StatusOr<Executor> Create(std::vector<std::string> argv);
+  static StatusOr<Executor> CreateForTest(std::vector<std::string> argv);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
   Executor& operator=(const Executor&) = delete;
   Executor& operator=(Executor&&) = default;
 
-  StatusOr<int> RunEmacs(const char* install_rel);
-
-  StatusOr<int> RunBinary(const char* wrapper, Mode mode,
-                          absl::Span<const char* const> rule_tags,
-                          absl::Span<const char* const> load_path,
-                          absl::Span<const char* const> load_files,
-                          absl::Span<const char* const> data_files,
-                          absl::Span<const int> input_args,
-                          absl::Span<const int> output_args);
-
-  StatusOr<int> RunTest(const char* wrapper, Mode mode,
-                        absl::Span<const char* const> rule_tags,
-                        absl::Span<const char* const> load_path,
-                        absl::Span<const char* const> srcs,
-                        absl::Span<const char* const> data_files,
-                        absl::Span<const char* const> skip_tests,
-                        absl::Span<const char* const> skip_tags);
+  StatusOr<int> RunEmacs(const EmacsOptions& opts);
+  StatusOr<int> RunBinary(const BinaryOptions& opts);
+  StatusOr<int> RunTest(const TestOptions& opts);
 
  private:
-  explicit Executor(int argc, const char* const* argv,
+  explicit Executor(std::vector<std::string> argv,
                     std::unique_ptr<Runfiles> runfiles);
 
   StatusOr<std::string> Runfile(const std::string& rel) const;
@@ -227,7 +222,7 @@ class Executor {
   std::string EnvVar(const std::string& name) const noexcept;
 
   absl::Status AddLoadPath(std::vector<std::string>& args,
-                           absl::Span<const char* const> load_path) const;
+                           const std::vector<std::string>& load_path) const;
 
   StatusOr<int> Run(const std::string& binary,
                     const std::vector<std::string>& args,
@@ -239,7 +234,7 @@ class Executor {
   std::vector<std::string> BuildEnv(const Environment& other) const;
 
   StatusOr<std::vector<std::string>> ArgFiles(
-      const std::string& root, absl::Span<const int> indices) const;
+      const std::string& root, const absl::flat_hash_set<int>& indices) const;
 
   std::vector<std::string> orig_args_;
   Environment orig_env_ = CopyEnv();
@@ -247,25 +242,22 @@ class Executor {
   absl::BitGen random_;
 };
 
-StatusOr<Executor> Executor::Create(const int argc,
-                                    const char* const* const argv) {
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv[0]));
-  return Executor(argc, argv, std::move(runfiles));
+StatusOr<Executor> Executor::Create(std::vector<std::string> argv) {
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv.at(0)));
+  return Executor(std::move(argv), std::move(runfiles));
 }
 
-StatusOr<Executor> Executor::CreateForTest(const int argc,
-                                           const char* const* const argv) {
+StatusOr<Executor> Executor::CreateForTest(std::vector<std::string> argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  return Executor(argc, argv, std::move(runfiles));
+  return Executor(std::move(argv), std::move(runfiles));
 }
 
-Executor::Executor(const int argc, const char* const* argv,
+Executor::Executor(std::vector<std::string> argv,
                    std::unique_ptr<Runfiles> runfiles)
-    : orig_args_(argv, argv + argc),
-      runfiles_(std::move(runfiles)) {}
+    : orig_args_(std::move(argv)), runfiles_(std::move(runfiles)) {}
 
-StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
-  ASSIGN_OR_RETURN(const auto install, this->Runfile(install_rel));
+StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
+  ASSIGN_OR_RETURN(const auto install, this->Runfile(opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
@@ -277,30 +269,24 @@ StatusOr<int> Executor::RunEmacs(const char* const install_rel) {
   return this->Run(emacs, {}, map);
 }
 
-StatusOr<int> Executor::RunBinary(
-    const char* const wrapper, const Mode mode,
-    const absl::Span<const char* const> rule_tags,
-    const absl::Span<const char* const> load_path,
-    const absl::Span<const char* const> load_files,
-    const absl::Span<const char* const> data_files,
-    const absl::Span<const int> input_args,
-    const absl::Span<const int> output_args) {
-  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
+StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {
+  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
   std::vector<std::string> args;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
   args.push_back("--quick");
   args.push_back("--batch");
-  RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
-  for (const auto& file : load_files) {
+  RETURN_IF_ERROR(this->AddLoadPath(args, opts.load_path));
+  for (const auto& file : opts.load_files) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
     const auto runfiles = this->RunfilesDir();
-    ASSIGN_OR_RETURN(auto input_files, this->ArgFiles(runfiles, input_args));
-    ASSIGN_OR_RETURN(auto output_files, this->ArgFiles(runfiles, output_args));
-    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, load_files, data_files,
-                                  std::move(input_files),
+    ASSIGN_OR_RETURN(auto input_files,
+                     this->ArgFiles(runfiles, opts.input_args));
+    ASSIGN_OR_RETURN(auto output_files,
+                     this->ArgFiles(runfiles, opts.output_args));
+    RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
                                   std::move(output_files), manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
@@ -308,33 +294,27 @@ StatusOr<int> Executor::RunBinary(
   return code;
 }
 
-StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
-                                const absl::Span<const char* const> rule_tags,
-                                const absl::Span<const char* const> load_path,
-                                const absl::Span<const char* const> srcs,
-                                const absl::Span<const char* const> data_files,
-                                const absl::Span<const char* const> skip_tests,
-                                const absl::Span<const char* const> skip_tags) {
-  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(wrapper));
+StatusOr<int> Executor::RunTest(const TestOptions& opts) {
+  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
   std::vector<std::string> args;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(mode, args, random_));
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
   args.push_back("--quick");
   args.push_back("--batch");
-  RETURN_IF_ERROR(this->AddLoadPath(args, load_path));
+  RETURN_IF_ERROR(this->AddLoadPath(args, opts.load_path));
   ASSIGN_OR_RETURN(const auto runner,
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
   // Note that using equals signs for --skip-test and --skip-tag doesn’t work.
-  for (const auto& test : skip_tests) {
+  for (const auto& test : Sort(opts.skip_tests)) {
     args.push_back("--skip-test");
     args.push_back(test);
   }
-  for (const auto& tag : skip_tags) {
+  for (const auto& tag : Sort(opts.skip_tags)) {
     args.push_back("--skip-tag");
     args.push_back(tag);
   }
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
-  for (const auto& file : srcs) {
+  for (const auto& file : opts.load_files) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
     args.push_back(abs);
   }
@@ -354,9 +334,8 @@ StatusOr<int> Executor::RunTest(const char* const wrapper, const Mode mode,
         outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
       }
     }
-    RETURN_IF_ERROR(WriteManifest(rule_tags, load_path, srcs, data_files,
-                                  std::move(inputs), outputs,
-                                  manifest.value()));
+    RETURN_IF_ERROR(
+        WriteManifest(opts, std::move(inputs), outputs, manifest.value()));
   }
   ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
@@ -389,7 +368,7 @@ std::string Executor::EnvVar(const std::string& name) const noexcept {
 
 absl::Status Executor::AddLoadPath(
     std::vector<std::string>& args,
-    const absl::Span<const char* const> load_path) const {
+    const std::vector<std::string>& load_path) const {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
@@ -454,14 +433,14 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
 }
 
 StatusOr<std::vector<std::string>> Executor::ArgFiles(
-    const std::string& root, const absl::Span<const int> indices) const {
+    const std::string& root, const absl::flat_hash_set<int>& indices) const {
   // The assertion holds because orig_args_ was constructed from argc and argv,
   // so it necessarily has fewer than std::numeric_limits<int>::max() elements.
   assert(orig_args_.size() <
          static_cast<unsigned int>(std::numeric_limits<int>::max()));
   const int argc = static_cast<int>(orig_args_.size());
   std::vector<std::string> result;
-  for (int i : indices) {
+  for (int i : Sort(indices)) {
     if (i < 0) i += argc;
     if (i >= 0 && i < argc) {
       absl::string_view arg = orig_args_[static_cast<unsigned int>(i)];
@@ -481,15 +460,14 @@ StatusOr<std::vector<std::string>> Executor::ArgFiles(
 
 }  // namespace
 
-int RunEmacs(const char* const install_rel, const int argc,
-             const char* const* const argv) {
-  auto status_or_executor = Executor::Create(argc, argv);
+int RunEmacs(const EmacsOptions& opts) {
+  auto status_or_executor = Executor::Create(opts.argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunEmacs(install_rel);
+  const auto status_or_code = executor.RunEmacs(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
@@ -497,23 +475,14 @@ int RunEmacs(const char* const install_rel, const int argc,
   return status_or_code.value();
 }
 
-int RunBinary(const char* const wrapper, const Mode mode,
-              const std::initializer_list<const char*> rule_tags,
-              const std::initializer_list<const char*> load_path,
-              const std::initializer_list<const char*> load_files,
-              const std::initializer_list<const char*> data_files,
-              const std::initializer_list<int> input_args,
-              const std::initializer_list<int> output_args,
-              const int argc, const char* const* const argv) {
-  auto status_or_executor = Executor::Create(argc, argv);
+int RunBinary(const BinaryOptions& opts) {
+  auto status_or_executor = Executor::Create(opts.argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code =
-      executor.RunBinary(wrapper, mode, rule_tags, load_path, load_files,
-                         data_files, input_args, output_args);
+  const auto status_or_code = executor.RunBinary(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
@@ -521,23 +490,14 @@ int RunBinary(const char* const wrapper, const Mode mode,
   return status_or_code.value();
 }
 
-int RunTest(const char* const wrapper, const Mode mode,
-            const std::initializer_list<const char*> rule_tags,
-            const std::initializer_list<const char*> load_path,
-            const std::initializer_list<const char*> srcs,
-            const std::initializer_list<const char*> data_files,
-            const std::initializer_list<const char*> skip_tests,
-            const std::initializer_list<const char*> skip_tags,
-            const int argc, const char* const* const argv) {
-  auto status_or_executor = Executor::CreateForTest(argc, argv);
+int RunTest(const TestOptions& opts) {
+  auto status_or_executor = Executor::CreateForTest(opts.argv);
   if (!status_or_executor.ok()) {
     std::clog << status_or_executor.status() << std::endl;
     return EXIT_FAILURE;
   }
   auto& executor = status_or_executor.value();
-  const auto status_or_code =
-      executor.RunTest(wrapper, mode, rule_tags, load_path, srcs, data_files,
-                       skip_tests, skip_tags);
+  const auto status_or_code = executor.RunTest(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
