@@ -67,7 +67,7 @@ func Test(t *testing.T) {
 	}
 	defer os.RemoveAll(coverageDir)
 
-	cmd := exec.Command(bin)
+	cmd := exec.Command(bin, "arg 1", "arg\n2")
 	// See
 	// https://docs.bazel.build/versions/3.1.0/test-encyclopedia.html#initial-conditions.
 	cmd.Env = append(os.Environ(), append(runfilesEnv,
@@ -146,7 +146,7 @@ func Test(t *testing.T) {
 	wantReport := report{
 		XMLName:   xml.Name{"", "testsuite"},
 		Name:      "ERT",
-		Tests:     10,
+		Tests:     11,
 		Errors:    0,
 		Failures:  6,
 		Skipped:   1,
@@ -157,6 +157,7 @@ func Test(t *testing.T) {
 				Name: "abort", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
 			},
+			{Name: "command-line", ClassName: "ERT", Time: wantElapsed},
 			{Name: "coverage", ClassName: "ERT", Time: wantElapsed},
 			{
 				Name: "error", ClassName: "ERT", Time: wantElapsed,

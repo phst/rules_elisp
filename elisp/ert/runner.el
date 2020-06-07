@@ -42,8 +42,8 @@
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
 TESTBRIDGE_TEST_ONLY environmental variable as test selector.
-Treat all remaining command-line arguments as names of test
-source files and load them."
+Treat command-line arguments as names of test source files and
+load them.  Stop parsing the command line on a \"--\" element."
   (or noninteractive (error "This function works only in batch mode"))
   (let* ((attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
@@ -119,7 +119,14 @@ source files and load them."
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
-    (mapc #'load command-line-args-left)
+    (let* ((index (or (cl-position "--" command-line-args-left
+                                   :test #'string-equal)
+                      (length command-line-args-left)))
+           (files (cl-subseq command-line-args-left 0 index)))
+      ;; Remove files and "--" first so that test files see the expected
+      ;; command line.
+      (cl-callf2 nthcdr (1+ index) command-line-args-left)
+      (mapc #'load files))
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
           (errors 0)

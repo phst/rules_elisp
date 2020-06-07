@@ -318,6 +318,7 @@ StatusOr<int> Executor::RunTest(const TestOptions& opts) {
     ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
     args.push_back(abs);
   }
+  args.push_back("--");
   if (manifest) {
     std::vector<std::string> inputs, outputs;
     const auto report_file = this->EnvVar("XML_OUTPUT_FILE");

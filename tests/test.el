@@ -20,8 +20,14 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'ert)
 (require 'tests/test-lib)
+
+;; Ensure that command-line arguments are passed on correctly.
+(cl-assert (equal-including-properties command-line-args-left
+                                       '("arg 1" "arg\n2"))
+           :show-args)
 
 (ert-deftest pass ()
   (should (= 0 0)))
@@ -67,5 +73,9 @@
 
 (ert-deftest coverage ()
   (tests/test-function nil))
+
+(ert-deftest command-line ()
+  (should (equal-including-properties command-line-args-left
+                                      '("arg 1" "arg\n2"))))
 
 ;;; test.el ends here
