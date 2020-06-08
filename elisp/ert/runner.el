@@ -63,7 +63,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-manifest (getenv "COVERAGE_MANIFEST"))
          (coverage-dir (getenv "COVERAGE_DIR"))
-         (selector (elisp/ert/make--selector))
+         (selector (elisp/ert/make--selector
+                    (and coverage-enabled '(:nocover))))
          ;; If coverage is enabled, check for a file with a well-known
          ;; extension first.  The Bazel runfiles machinery is expected to
          ;; generate these files for source files that should be instrumented.
@@ -247,8 +248,11 @@ This list is populated by --skip-tag command-line options.")
     (or tag (error "Missing value for --skip-tag option"))
     (push (intern tag) elisp/ert/skip--tags)))
 
-(defun elisp/ert/make--selector ()
-  "Build an ERT selector from environment and command line."
+(defun elisp/ert/make--selector (skip-tags)
+  "Build an ERT selector from environment and command line.
+SKIP-TAGS is a list of additional tags to skip."
+  (cl-check-type skip-tags list)
+  (cl-callf append skip-tags (reverse elisp/ert/skip--tags))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
   (cl-flet ((combine (op def elts) (cond ((null elts) def)
@@ -257,13 +261,13 @@ This list is populated by --skip-tag command-line options.")
             (invert (sel) (if sel `(not ,sel) t)))
     (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
            (filter (if (member test-filter '(nil "")) t (read test-filter)))
-           (skip-tags
+           (skip-tags-sel
             (invert
              (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
-                                                elisp/ert/skip--tags)))))
+                                                skip-tags)))))
            (skip-tests
             (invert (combine 'member nil (reverse elisp/ert/skip--tests)))))
-      (combine 'and t (delq t (list filter skip-tags skip-tests))))))
+      (combine 'and t (delq t (list filter skip-tags-sel skip-tests))))))
 
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.

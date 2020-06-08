@@ -78,4 +78,8 @@
   (should (equal-including-properties command-line-args-left
                                       '("arg 1" "arg\n2"))))
 
+(ert-deftest nocover ()
+  :tags '(:nocover)
+  (should (= 0 1)))
+
 ;;; test.el ends here

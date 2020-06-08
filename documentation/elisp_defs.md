@@ -83,6 +83,10 @@ You can also restrict the tests to be run using the `skip_tests` and
 `skip_tags` rule attributes.  These restrictions are additive, i.e., a test
 only runs if it’s not suppressed by either facility.
 
+In coverage mode (i.e., when run under `bazel coverage`), all tests tagged with
+the `:nocover` tag are also skipped.  You can use this tag to skip tests that
+normally pass, but don’t work under coverage for some reason.
+
 **ATTRIBUTES**
 
 
