@@ -35,15 +35,19 @@
 (require 'subr-x)
 (require 'xml)
 
+(add-to-list 'command-switch-alist
+             (cons "--test-source" #'elisp/ert/test-source))
 (add-to-list 'command-switch-alist (cons "--skip-test" #'elisp/ert/skip-test))
 (add-to-list 'command-switch-alist (cons "--skip-tag" #'elisp/ert/skip-tag))
+
+(defvar elisp/ert/test--sources ()
+  "Test source files to be loaded.
+This list is populated by --test-source command-line options.")
 
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
-TESTBRIDGE_TEST_ONLY environmental variable as test selector.
-Treat command-line arguments as names of test source files and
-load them.  Stop parsing the command line on a \"--\" element."
+TESTBRIDGE_TEST_ONLY environmental variable as test selector."
   (or noninteractive (error "This function works only in batch mode"))
   (let* ((attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
@@ -119,14 +123,7 @@ load them.  Stop parsing the command line on a \"--\" element."
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
-    (let* ((index (or (cl-position "--" command-line-args-left
-                                   :test #'string-equal)
-                      (length command-line-args-left)))
-           (files (cl-subseq command-line-args-left 0 index)))
-      ;; Remove files and "--" first so that test files see the expected
-      ;; command line.
-      (cl-callf2 nthcdr (1+ index) command-line-args-left)
-      (mapc #'load files))
+    (mapc #'load (reverse elisp/ert/test--sources))
     (let ((tests (ert-select-tests selector t))
           (unexpected 0)
           (errors 0)
@@ -231,6 +228,12 @@ This list is populated by --skip-test command-line options.")
 (defvar elisp/ert/skip--tags nil
   "Test tags to be skipped.
 This list is populated by --skip-tag command-line options.")
+
+(defun elisp/ert/test-source (_arg)
+  "Handle the --test-source command-line argument."
+  (let ((file (pop command-line-args-left)))
+    (or file (error "Missing value for --test-source option"))
+    (push file elisp/ert/test--sources)))
 
 (defun elisp/ert/skip-test (_arg)
   "Handle the --skip-test command-line argument."

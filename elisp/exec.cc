@@ -304,7 +304,13 @@ StatusOr<int> Executor::RunTest(const TestOptions& opts) {
   ASSIGN_OR_RETURN(const auto runner,
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
-  // Note that using equals signs for --skip-test and --skip-tag doesn’t work.
+  // Note that using equals signs for "--test-source, --skip-test, and
+  // --skip-tag doesn’t work.
+  for (const auto& file : opts.load_files) {
+    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
+    args.push_back("--test-source");
+    args.push_back(absl::StrCat("/:", abs));
+  }
   for (const auto& test : Sort(opts.skip_tests)) {
     args.push_back("--skip-test");
     args.push_back(test);
@@ -314,11 +320,6 @@ StatusOr<int> Executor::RunTest(const TestOptions& opts) {
     args.push_back(tag);
   }
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
-  for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
-    args.push_back(abs);
-  }
-  args.push_back("--");
   if (manifest) {
     std::vector<std::string> inputs, outputs;
     const auto report_file = this->EnvVar("XML_OUTPUT_FILE");
