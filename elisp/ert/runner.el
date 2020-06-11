@@ -381,8 +381,9 @@ file that has been instrumented with Edebug."
                (stuff (get name 'edebug))
                (begin (car stuff))
                (offsets (caddr stuff)))
+          (unless (eq (marker-buffer begin) buffer)
+            (error "Function %s got redefined in some other file" name))
           (cl-incf functions-hit (min calls 1))
-          (cl-assert (eq (marker-buffer begin) buffer) :show-args)
           (cl-assert (eql (length frequencies) (length offsets)) :show-args)
           (cl-loop for offset across offsets
                    ;; This can’t be ‘and’ due to
