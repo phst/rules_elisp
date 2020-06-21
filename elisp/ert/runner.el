@@ -91,7 +91,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             ;; The coverage manifest uses ISO-8859-1, see
             ;; https://github.com/bazelbuild/bazel/blob/3.1.0/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L68.
             (coding-system-for-read 'iso-8859-1-unix)
-            (instrumented-files ()))
+            (instrumented-files ())
+            (instrumented-names ()))
         (with-temp-buffer
           (insert-file-contents (concat "/:" coverage-manifest))
           (while (not (eobp))
@@ -101,8 +102,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                    (buffer-substring-no-properties (point) (line-end-position)))
                   instrumented-files)
             (forward-line)))
-        ;; We don’t bother removing the advice since we are going to kill Emacs
-        ;; anyway.
+        ;; We don’t bother removing the advises since we are going to kill
+        ;; Emacs anyway.
         (add-function
          :before-until load-source-file-function
          (lambda (fullname file _noerror _nomessage)
@@ -120,7 +121,17 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                         (cl-find fullname instrumented-files
                                  :test #'file-equal-p))
                (push (elisp/ert/load--instrument fullname file) load-buffers)
-               t))))))
+               t))))
+        ;; Check for duplicate names, if possible.  Duplicates cause subtle
+        ;; errors that are otherwise very hard to debug,
+        ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41853.
+        (when (boundp 'edebug-new-definition-function)  ; new in Emacs 27
+          (add-function
+           :before edebug-new-definition-function
+           (lambda (name)
+             (when (memq name instrumented-names)
+               (error "Symbol ‘%s’ instrumented twice" name))
+             (push name instrumented-names))))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
