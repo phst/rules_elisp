@@ -76,6 +76,12 @@ This is necessary to determine the source root directory.""",
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
             providers = [cc_common.CcToolchainInfo],
         ),
+        "_grep_includes": attr.label(
+            allow_single_file = True,
+            executable = True,
+            cfg = "host",
+            default = Label("@bazel_tools//tools/cpp:grep-includes"),
+        ),
         "_exec": attr.label(
             default = "//elisp:exec",
             providers = [CcInfo],

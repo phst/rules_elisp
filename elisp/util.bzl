@@ -124,6 +124,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
         linking_contexts = [exec.linking_context],
+        grep_includes = ctx.executable._grep_includes,
     )
     return bin.executable
 
