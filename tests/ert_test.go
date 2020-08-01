@@ -205,16 +205,28 @@ func Test(t *testing.T) {
 		t.Error(err)
 	}
 	gotCoverage := string(b)
+	// See geninfo(1) for the coverage file format.  The function hit count
+	// doesn’t work yet for nested functions.  The jump in the suffix index
+	// for the nested functions is due to
+	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
 	const wantCoverage = `SF:tests/test-lib.el
 FN:24,tests/test-function
+FN:30,foo@cl-flet@1
+FN:32,foo@cl-flet@3
 FNDA:1,tests/test-function
-FNF:1
+FNDA:0,foo@cl-flet@1
+FNDA:0,foo@cl-flet@3
+FNF:3
 FNH:1
 DA:26,1
 DA:27,0
 DA:28,1
-LH:2
-LF:3
+DA:30,1
+DA:31,1
+DA:32,1
+DA:33,1
+LH:6
+LF:7
 end_of_record
 `
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {

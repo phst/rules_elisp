@@ -25,6 +25,7 @@
 (require 'backtrace nil :noerror)  ; only in Emacs 27
 (require 'bytecomp)
 (require 'cl-lib)
+(require 'cl-macs)
 (require 'debug)
 (require 'edebug)
 (require 'ert)
@@ -131,7 +132,22 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
            (lambda (name)
              (when (memq name instrumented-names)
                (error "Symbol ‘%s’ instrumented twice" name))
-             (push name instrumented-names))))))
+             (push name instrumented-names))))
+        ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
+        ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
+        ;; the Edebug symbols for ‘cl-flet’ (and ‘cl-labels’, which defers to
+        ;; ‘cl-flet’).
+        (put :unique 'edebug-form-spec #'elisp/ert/edebug--unique)
+        (put #'cl-flet 'edebug-form-spec
+             ;; This is the expansion of the Edebug specification for
+             ;; ‘cl-flet’, plus a ‘:unique’ specifier to uniquify the name.
+             '((&rest [&or (&define name :unique "cl-flet@" function-form)
+                           (&define name :unique "cl-flet@"
+                                    cl-lambda-list
+                                    cl-declarations-or-string
+                                    [&optional ("interactive" interactive)]
+                                    def-body)])
+               cl-declarations body))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
@@ -536,6 +552,18 @@ Return SYMBOL."
      (let ((c (string-to-char s)))
        (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
    string :fixedcase :literal))
+
+(defun elisp/ert/edebug--unique (_cursor spec)
+  "Handle the ‘:unique’ Edebug specification.
+SPEC is the prefix for ‘gensym’."
+  (cl-check-type spec string)
+  ;; See ‘edebug-match-colon-name’ for a similar function.
+  (let ((suffix (gensym spec)))
+    (setq edebug-def-name
+          (if edebug-def-name
+              (intern (format "%s@%s" edebug-def-name suffix))
+            suffix)))
+  nil)
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here

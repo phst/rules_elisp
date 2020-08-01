@@ -25,7 +25,12 @@
   ;; The two branches should be on separate lines, for line coverage testing.
   (if arg
       (message "Foo")
-    (message "Bar")))
+    (message "Bar"))
+  ;; Multiple local functions with the same name should work.
+  (cl-flet ((foo () 1))
+    (message "%d" (foo)))
+  (cl-flet ((foo () 2))
+    (message "%d" (foo))))
 
 (provide 'tests/test-lib)
 ;;; test-lib.el ends here
