@@ -32,19 +32,18 @@
 #include "absl/base/casts.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
-
-#include "elisp/status.h"
 
 namespace phst_rules_elisp {
 
 class TempFile {
  public:
-  static StatusOr<TempFile> Create(const std::string& directory,
-                                   absl::string_view tmpl,
-                                   absl::BitGen& random);
+  static absl::StatusOr<TempFile> Create(const std::string& directory,
+                                         absl::string_view tmpl,
+                                         absl::BitGen& random);
 
   ~TempFile() noexcept;
   TempFile(const TempFile&) = delete;
@@ -78,8 +77,9 @@ std::string JoinPath(Ts&&... pieces) {
   return JoinPathImpl({absl::implicit_cast<absl::string_view>(pieces)...});
 }
 
-StatusOr<std::string> MakeAbsolute(absl::string_view name);
-StatusOr<std::string> MakeRelative(absl::string_view name, std::string root);
+absl::StatusOr<std::string> MakeAbsolute(absl::string_view name);
+absl::StatusOr<std::string> MakeRelative(absl::string_view name,
+                                         std::string root);
 
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 absl::Status RemoveFile(const std::string& name) noexcept;
@@ -90,14 +90,14 @@ ABSL_MUST_USE_RESULT std::string TempName(absl::string_view dir,
 
 class Directory {
  public:
-  static StatusOr<Directory> Open(const std::string& name);
+  static absl::StatusOr<Directory> Open(const std::string& name);
   Directory(const Directory&) = delete;
   Directory(Directory&& other) : dir_(absl::exchange(other.dir_, nullptr)) {}
   Directory& operator=(const Directory&) = delete;
   Directory& operator=(Directory&& other);
   ~Directory() noexcept;
   absl::Status Close() noexcept;
-  StatusOr<std::string> Read();
+  absl::StatusOr<std::string> Read();
 
  private:
   explicit Directory(::DIR* const dir) : dir_(dir) {}

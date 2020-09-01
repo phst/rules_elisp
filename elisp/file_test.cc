@@ -24,6 +24,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "gmock/gmock.h"
@@ -73,7 +74,7 @@ static absl::Status GetStatus(const absl::Status& status) {
 }
 
 template <typename T>
-static absl::Status GetStatus(const StatusOr<T>& status_or) {
+static absl::Status GetStatus(const absl::StatusOr<T>& status_or) {
   return status_or.status();
 }
 

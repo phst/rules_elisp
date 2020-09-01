@@ -43,6 +43,7 @@
 #include "absl/container/flat_hash_set.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -114,7 +115,7 @@ static Environment CopyEnv() {
   return map;
 }
 
-static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
+static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
     const std::string& argv0) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv0, &error));
@@ -125,7 +126,7 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
   return std::move(runfiles);
 }
 
-static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
+static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
   if (runfiles == nullptr) {
@@ -135,7 +136,7 @@ static StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   return std::move(runfiles);
 }
 
-static StatusOr<std::string> GetSharedDir(const std::string& install) {
+static absl::StatusOr<std::string> GetSharedDir(const std::string& install) {
   const auto emacs = JoinPath(install, "share", "emacs");
   ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
   absl::flat_hash_set<std::string> dirs;
@@ -156,7 +157,7 @@ static StatusOr<std::string> GetSharedDir(const std::string& install) {
   return JoinPath(emacs, *dirs.begin());
 }
 
-static StatusOr<absl::optional<TempFile>> AddManifest(
+static absl::StatusOr<absl::optional<TempFile>> AddManifest(
     const Mode mode, std::vector<std::string>& args, absl::BitGen& random) {
   using Type = absl::optional<TempFile>;
   if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
@@ -201,39 +202,39 @@ namespace {
 
 class Executor {
  public:
-  static StatusOr<Executor> Create(std::vector<std::string> argv);
-  static StatusOr<Executor> CreateForTest(std::vector<std::string> argv);
+  static absl::StatusOr<Executor> Create(std::vector<std::string> argv);
+  static absl::StatusOr<Executor> CreateForTest(std::vector<std::string> argv);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
   Executor& operator=(const Executor&) = delete;
   Executor& operator=(Executor&&) = default;
 
-  StatusOr<int> RunEmacs(const EmacsOptions& opts);
-  StatusOr<int> RunBinary(const BinaryOptions& opts);
-  StatusOr<int> RunTest(const TestOptions& opts);
+  absl::StatusOr<int> RunEmacs(const EmacsOptions& opts);
+  absl::StatusOr<int> RunBinary(const BinaryOptions& opts);
+  absl::StatusOr<int> RunTest(const TestOptions& opts);
 
  private:
   explicit Executor(std::vector<std::string> argv,
                     std::unique_ptr<Runfiles> runfiles);
 
-  StatusOr<std::string> Runfile(const std::string& rel) const;
+  absl::StatusOr<std::string> Runfile(const std::string& rel) const;
   std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
 
   absl::Status AddLoadPath(std::vector<std::string>& args,
                            const std::vector<std::string>& load_path) const;
 
-  StatusOr<int> Run(const std::string& binary,
-                    const std::vector<std::string>& args,
-                    const Environment& env);
+  absl::StatusOr<int> Run(const std::string& binary,
+                          const std::vector<std::string>& args,
+                          const Environment& env);
 
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
 
   std::vector<std::string> BuildEnv(const Environment& other) const;
 
-  StatusOr<std::vector<std::string>> ArgFiles(
+  absl::StatusOr<std::vector<std::string>> ArgFiles(
       const std::string& root, const absl::flat_hash_set<int>& indices) const;
 
   std::vector<std::string> orig_args_;
@@ -242,12 +243,13 @@ class Executor {
   absl::BitGen random_;
 };
 
-StatusOr<Executor> Executor::Create(std::vector<std::string> argv) {
+absl::StatusOr<Executor> Executor::Create(std::vector<std::string> argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv.at(0)));
   return Executor(std::move(argv), std::move(runfiles));
 }
 
-StatusOr<Executor> Executor::CreateForTest(std::vector<std::string> argv) {
+absl::StatusOr<Executor> Executor::CreateForTest(
+    std::vector<std::string> argv) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
   return Executor(std::move(argv), std::move(runfiles));
 }
@@ -256,7 +258,7 @@ Executor::Executor(std::vector<std::string> argv,
                    std::unique_ptr<Runfiles> runfiles)
     : orig_args_(std::move(argv)), runfiles_(std::move(runfiles)) {}
 
-StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
+absl::StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(const auto install, this->Runfile(opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
@@ -269,7 +271,7 @@ StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
   return this->Run(emacs, {}, map);
 }
 
-StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {
+absl::StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {
   ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
   std::vector<std::string> args;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
@@ -294,7 +296,7 @@ StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {
   return code;
 }
 
-StatusOr<int> Executor::RunTest(const TestOptions& opts) {
+absl::StatusOr<int> Executor::RunTest(const TestOptions& opts) {
   ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
   std::vector<std::string> args;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
@@ -344,7 +346,7 @@ StatusOr<int> Executor::RunTest(const TestOptions& opts) {
   return code;
 }
 
-StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
+absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
   if (str.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
@@ -392,9 +394,9 @@ absl::Status Executor::AddLoadPath(
   return absl::OkStatus();
 }
 
-StatusOr<int> Executor::Run(const std::string& binary,
-                            const std::vector<std::string>& args,
-                            const Environment& env) {
+absl::StatusOr<int> Executor::Run(const std::string& binary,
+                                  const std::vector<std::string>& args,
+                                  const Environment& env) {
   auto final_args = this->BuildArgs(args);
   const auto argv = Pointers(final_args);
   auto final_env = this->BuildEnv(env);
@@ -434,7 +436,7 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
   return vec;
 }
 
-StatusOr<std::vector<std::string>> Executor::ArgFiles(
+absl::StatusOr<std::vector<std::string>> Executor::ArgFiles(
     const std::string& root, const absl::flat_hash_set<int>& indices) const {
   // The assertion holds because orig_args_ was constructed from argc and argv,
   // so it necessarily has fewer than std::numeric_limits<int>::max() elements.

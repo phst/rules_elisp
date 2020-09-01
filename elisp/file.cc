@@ -41,6 +41,7 @@
 #include "absl/meta/type_traits.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
@@ -63,9 +64,9 @@ constexpr absl::make_unsigned_t<T> ToUnsigned(const T n) noexcept {
 
 }  // namespace
 
-StatusOr<TempFile> TempFile::Create(const std::string& directory,
-                                    const absl::string_view tmpl,
-                                    absl::BitGen& random) {
+absl::StatusOr<TempFile> TempFile::Create(const std::string& directory,
+                                          const absl::string_view tmpl,
+                                          absl::BitGen& random) {
   for (int i = 0; i < 10; i++) {
     auto name = TempName(directory, tmpl, random);
     if (!FileExists(name)) {
@@ -168,7 +169,7 @@ std::string JoinPathImpl(const std::initializer_list<absl::string_view> pieces) 
                       (last.length() > 1 && last.back() == '/') ? "/" : "");
 }
 
-StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
+absl::StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   if (IsAbsolute(name)) return std::string(name);
   struct free {
     void operator()(void* const ptr) const noexcept { std::free(ptr); }
@@ -178,8 +179,8 @@ StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   return JoinPath(dir.get(), name);
 }
 
-StatusOr<std::string> MakeRelative(const absl::string_view name,
-                                   std::string root) {
+absl::StatusOr<std::string> MakeRelative(const absl::string_view name,
+                                         std::string root) {
   ASSIGN_OR_RETURN(const auto abs, MakeAbsolute(name));
   assert(!root.empty());
   if (root.back() != '/') root += '/';
@@ -223,7 +224,7 @@ ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view dir,
   return JoinPath(dir, name);
 }
 
-StatusOr<Directory> Directory::Open(const std::string& name) {
+absl::StatusOr<Directory> Directory::Open(const std::string& name) {
   const auto dir = ::opendir(Pointer(name));
   if (dir == nullptr) return ErrnoStatus("opendir", name);
   return Directory(dir);
@@ -248,7 +249,7 @@ absl::Status Directory::Close() noexcept {
   return absl::OkStatus();
 }
 
-StatusOr<std::string> Directory::Read() {
+absl::StatusOr<std::string> Directory::Read() {
   errno = 0;
   const auto entry = ::readdir(dir_);
   if (entry == nullptr) {
