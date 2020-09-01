@@ -14,12 +14,6 @@
 
 #include "elisp/file.h"
 
-#include <sys/mman.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <cstdlib>
 #include <fstream>
 #include <iterator>
 #include <string>
@@ -30,7 +24,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/status/status.h"
-#include "absl/strings/str_cat.h"
+#include "absl/strings/string_view.h"
 #include "absl/types/optional.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"

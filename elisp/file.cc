@@ -27,7 +27,6 @@
 #include <cstdlib>
 #include <initializer_list>
 #include <iostream>
-#include <limits>
 #include <memory>
 #include <random>
 #include <string>
@@ -49,6 +48,7 @@
 #include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
 
+#include "elisp/status.h"
 #include "elisp/str.h"
 
 namespace phst_rules_elisp {
