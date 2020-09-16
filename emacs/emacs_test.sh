@@ -16,9 +16,4 @@
 
 set -eu
 
-if [[ "${OSTYPE}" != linux-gnu ]]; then
-  echo "This test doesn’t work on ${OSTYPE}" >&2
-  exit  # Successful exit so that “blaze test //...” works
-fi
-
 "${TEST_SRCDIR}/gnu_emacs_stable/emacs" --version

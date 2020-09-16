@@ -16,10 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 alias(
     name = "emacs",
-    actual = select({
-        ":supported": "@gnu_emacs_stable//:emacs",
-        "//conditions:default": ":dummy",
-    }),
+    actual = "@gnu_emacs_stable//:emacs",
     visibility = ["//visibility:public"],
 )
 
@@ -27,11 +24,6 @@ sh_test(
     name = "emacs_test",
     srcs = ["emacs_test.sh"],
     data = [":emacs"],
-)
-
-sh_binary(
-    name = "dummy",
-    srcs = ["dummy.sh"],
 )
 
 py_binary(
@@ -57,11 +49,4 @@ bzl_library(
 exports_files(
     ["defs.bzl"],
     visibility = ["//documentation:__pkg__"],
-)
-
-# The Emacs binary built by build.el currently crashes on macOS.  Reevaluate
-# once we’re on Emacs 27.
-config_setting(
-    name = "supported",
-    constraint_values = ["@platforms//os:linux"],
 )

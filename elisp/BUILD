@@ -22,13 +22,8 @@ toolchain_type(
     visibility = ["//visibility:public"],
 )
 
-# Restrict the hermetic toolchain to GNU/Linux for now because Bazel produces a
-# broken binary on macOS.  Revisit once we have Emacs 27 with the portable
-# dumper.
 toolchain(
     name = "hermetic_toolchain",
-    exec_compatible_with = ["@platforms//os:linux"],
-    target_compatible_with = ["@platforms//os:linux"],
     toolchain = ":hermetic",
     toolchain_type = ":toolchain_type",
 )
