@@ -157,6 +157,45 @@ static absl::StatusOr<std::string> GetSharedDir(const std::string& install) {
   return JoinPath(emacs, *dirs.begin());
 }
 
+static absl::StatusOr<std::string> FindDumpFile(const std::string& libexec) {
+  const auto emacs = JoinPath(libexec, "emacs");
+  ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
+  absl::flat_hash_set<std::string> files;
+  while (true) {
+    ASSIGN_OR_RETURN(const auto entry, dir.Read());
+    if (entry.empty()) break;
+    if (entry.front() != '.') {
+      const auto version = JoinPath(emacs, entry);
+      ASSIGN_OR_RETURN(auto dir, Directory::Open(version));
+      while (true) {
+        ASSIGN_OR_RETURN(const auto entry, dir.Read());
+        if (entry.empty()) break;
+        if (entry.front() != '.') {
+          const auto arch = JoinPath(version, entry);
+          ASSIGN_OR_RETURN(auto dir, Directory::Open(arch));
+          while (true) {
+            ASSIGN_OR_RETURN(const auto entry, dir.Read());
+            if (entry.empty()) break;
+            if (entry == "emacs.pdmp") {
+              files.insert(JoinPath(arch, entry));
+            }
+          }
+          RETURN_IF_ERROR(dir.Close());
+        }
+      }
+      RETURN_IF_ERROR(dir.Close());
+    }
+  }
+  RETURN_IF_ERROR(dir.Close());
+  if (files.empty()) return absl::NotFoundError("no portable dump file found");
+  if (files.size() != 1) {
+    return absl::FailedPreconditionError(
+        absl::StrCat("expected exactly one dump file, got [",
+                     absl::StrJoin(files, ", "), "]"));
+  }
+  return *files.begin();
+}
+
 static absl::StatusOr<absl::optional<TempFile>> AddManifest(
     const Mode mode, std::vector<std::string>& args, absl::BitGen& random) {
   using Type = absl::optional<TempFile>;
@@ -263,12 +302,14 @@ absl::StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
+  const auto libexec = JoinPath(install, "libexec");
+  ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
   Environment map;
   map.emplace("EMACSDATA", etc);
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
-  map.emplace("EMACSPATH", JoinPath(install, "libexec"));
-  return this->Run(emacs, {}, map);
+  map.emplace("EMACSPATH", libexec);
+  return this->Run(emacs, {"--dump-file=" + dump}, map);
 }
 
 absl::StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {

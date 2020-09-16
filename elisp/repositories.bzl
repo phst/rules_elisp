@@ -24,9 +24,12 @@ def rules_elisp_dependencies():
     http_archive(
         name = "gnu_emacs_stable",
         build_file = "@phst_rules_elisp//emacs:emacs.BUILD",
-        sha256 = "4d90e6751ad8967822c6e092db07466b9d383ef1653feb2f95c93e7de66d3485",
-        strip_prefix = "emacs-26.3/",
-        urls = ["https://ftp.gnu.org/gnu/emacs/emacs-26.3.tar.xz"],
+        sha256 = "4a4c128f915fc937d61edfc273c98106711b540c9be3cd5d2e2b9b5b2f172e41",
+        strip_prefix = "emacs-27.1/",
+        urls = [
+            "https://ftpmirror.gnu.org/emacs/emacs-27.1.tar.xz",
+            "https://ftp.gnu.org/gnu/emacs/emacs-27.1.tar.xz",
+        ],
     )
     http_archive(
         name = "bazel_skylib",
