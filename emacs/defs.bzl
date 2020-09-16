@@ -28,7 +28,7 @@ load(
     "runfile_location",
 )
 
-def _binary(ctx):
+def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
     cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
 
@@ -96,7 +96,7 @@ The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
-    implementation = _binary,
+    implementation = _emacs_binary_impl,
 )
 
 def _install(ctx, cc_toolchain, feature_configuration, source):
