@@ -21,6 +21,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defun tests/test-function (arg)
   ;; The two branches should be on separate lines, for line coverage testing.
   (if arg

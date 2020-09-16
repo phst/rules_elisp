@@ -210,21 +210,21 @@ func Test(t *testing.T) {
 	// for the nested functions is due to
 	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
 	const wantCoverage = `SF:tests/test-lib.el
-FN:24,tests/test-function
-FN:30,foo@cl-flet@1
-FN:32,foo@cl-flet@3
+FN:26,tests/test-function
+FN:32,foo@cl-flet@1
+FN:34,foo@cl-flet@3
 FNDA:1,tests/test-function
 FNDA:0,foo@cl-flet@1
 FNDA:0,foo@cl-flet@3
 FNF:3
 FNH:1
-DA:26,1
-DA:27,0
 DA:28,1
+DA:29,0
 DA:30,1
-DA:31,1
 DA:32,1
 DA:33,1
+DA:34,1
+DA:35,1
 LH:6
 LF:7
 end_of_record
