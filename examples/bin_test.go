@@ -39,8 +39,12 @@ func Example() {
 	cmd.Stderr = os.Stdout
 	// The working directory doesn’t matter.  Binaries still find their
 	// runfiles.  Be sure to pass environment variables to find runfiles.
+	// We also set GCOV_PREFIX (see
+	// https://gcc.gnu.org/onlinedocs/gcc/Cross-profiling.html) to a
+	// directory that’s hopefully writable, to avoid logspam when running
+	// with “bazel coverage”.
 	cmd.Dir = "/"
-	cmd.Env = append(env, "PATH="+os.Getenv("PATH"))
+	cmd.Env = append(env, "PATH="+os.Getenv("PATH"), "GCOV_PREFIX="+os.TempDir())
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
