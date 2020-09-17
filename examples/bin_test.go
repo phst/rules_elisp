@@ -15,8 +15,12 @@
 package bin_test
 
 import (
+	"bufio"
+	"fmt"
+	"io"
 	"os"
 	"os/exec"
+	"regexp"
 
 	"github.com/phst/runfiles"
 )
@@ -35,8 +39,13 @@ func Example() {
 	cmd := exec.Command(bin, "human")
 	cmd.Stdout = os.Stdout
 	// Note: Emacs writes to stderr, but the example runner only captures
-	// stdout.
-	cmd.Stderr = os.Stdout
+	// stdout.  We filter out some irrelevant messages that can cause
+	// spurious failures.
+	r, w := io.Pipe()
+	defer r.Close()
+	defer w.Close()
+	go filter(r, os.Stdout)
+	cmd.Stderr = w
 	// The working directory doesn’t matter.  Binaries still find their
 	// runfiles.  Be sure to pass environment variables to find runfiles.
 	// We also set GCOV_PREFIX (see
@@ -55,3 +64,17 @@ func Example() {
 	// hi from lib-1
 	// hi from data dependency
 }
+
+func filter(r io.Reader, w io.Writer) {
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		line := s.Text()
+		if !irrelevant.MatchString(line) {
+			fmt.Fprintln(w, line)
+		}
+	}
+}
+
+// This message can happen depending on the mtime of files in the Bazel
+// sandbox.  It shouldn’t influence the test outcome.
+var irrelevant = regexp.MustCompile(`^Source file .+ newer than byte-compiled file; using older file$`)
