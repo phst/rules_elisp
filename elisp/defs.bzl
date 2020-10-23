@@ -697,18 +697,18 @@ def _binary(ctx, srcs, tags, substitutions):
     # If we’re supposed to generate coverage information, use source files in
     # addition to compiled files because we can’t instrument compiled files for
     # coverage.  We ignore ctx.coverage_instrumented because that doesn’t work
-    # here: it assumes that coverage is generated during compilation, but we
-    # can generate coverage information only at runtime.  Bazel’s coverage
-    # support isn’t really documented; some information is available in the
-    # source code comments of the file
+    # here: it assumes that coverage is generated during compilation, but we can
+    # generate coverage information only at runtime.  Bazel’s coverage support
+    # isn’t really documented; some information is available at
+    # https://github.com/bazelbuild/bazel/blob/3.7.0/CODEBASE.md#coverage-collection
+    # and in the source code comments of the file
     # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
-    # When runtime coverage support is enabled, Bazel writes a list of
-    # filenames that are covered by --instrumentation_filter to a text file
-    # whose filename is in COVERAGE_MANIFEST.  The test runner then parses that
-    # file and only instruments the files that should be instrumented.  This
-    # saves time and increases robustness.  Because we might load some
-    # combination of source and compiled files, always supply both files at
-    # runtime.
+    # When runtime coverage support is enabled, Bazel writes a list of filenames
+    # that are covered by --instrumentation_filter to a text file whose filename
+    # is in COVERAGE_MANIFEST.  The test runner then parses that file and only
+    # instruments the files that should be instrumented.  This saves time and
+    # increases robustness.  Because we might load some combination of source
+    # and compiled files, always supply both files at runtime.
     transitive_files = (
         depset(transitive = [
             result.transitive_srcs,
