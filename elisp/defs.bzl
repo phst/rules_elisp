@@ -289,6 +289,7 @@ also load each other.  However, it’s often preferable to only have one
 ensure that files get only loaded in their byte-compiled form.""",
     provides = [EmacsLispInfo],
     toolchains = [_TOOLCHAIN_TYPE],
+    incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
 )
 
@@ -361,6 +362,7 @@ in batch mode.""",
         "@bazel_tools//tools/cpp:toolchain_type",
         _TOOLCHAIN_TYPE,
     ],
+    incompatible_use_toolchain_transition = True,
     implementation = _elisp_binary_impl,
 )
 
@@ -449,6 +451,7 @@ normally pass, but don’t work under coverage for some reason.""",
         "@bazel_tools//tools/cpp:toolchain_type",
         _TOOLCHAIN_TYPE,
     ],
+    incompatible_use_toolchain_transition = True,
     implementation = _elisp_test_impl,
 )
 

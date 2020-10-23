@@ -96,6 +96,7 @@ The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    incompatible_use_toolchain_transition = True,
     implementation = _emacs_binary_impl,
 )
 
