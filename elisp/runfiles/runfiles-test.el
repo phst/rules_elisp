@@ -34,6 +34,6 @@
     (should (file-readable-p filename))
     (should (file-regular-p filename))
     (should (> (file-attribute-size (file-attributes filename)) 0))
-    (should (getenv "RUNFILES_DIR"))))
+    (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
 
 ;;; runfiles-test.el ends here
