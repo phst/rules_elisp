@@ -131,7 +131,9 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,
         variables = vars,
     ) + fragment.linkopts
-    env = {}
+    # The build process needs to find some common binaries like “make” or the
+    # GNU coreutils.
+    env = {"PATH": "/usr/bin:/bin"}
     for action in (C_COMPILE_ACTION_NAME, CPP_LINK_EXECUTABLE_ACTION_NAME):
         env.update(cc_common.get_environment_variables(
             feature_configuration = feature_configuration,
