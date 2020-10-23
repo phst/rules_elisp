@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-<a name="#elisp_binary"></a>
+<a id="#elisp_binary"></a>
 
 ## elisp_binary
 
@@ -16,17 +16,17 @@ in batch mode.
 
 
 | Name  | Description | Type | Mandatory | Default |
-| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
-| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
-| input_args |  Indices of command-line arguments that represent input filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for input files and added to the <code>inputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
-| output_args |  Indices of command-line arguments that represent output filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for output files and added to the <code>outputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
-| src |  Source file to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="elisp_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="elisp_binary-data"></a>data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_binary-deps"></a>deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_binary-fatal_warnings"></a>fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
+| <a id="elisp_binary-input_args"></a>input_args |  Indices of command-line arguments that represent input filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for input files and added to the <code>inputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
+| <a id="elisp_binary-output_args"></a>output_args |  Indices of command-line arguments that represent output filenames.  These number specify indices into the <code>argv</code> array.  Negative indices are interpreted as counting from the end of the array.  For example, the index <code>2</code> stands for <code>argv[2]</code>, and the index <code>-2</code> stands for <code>argv[argc - 2]</code>.  When passing arguments to an <code>emacs_binary</code> program on the command line, the corresponding arguments are treated as filenames for output files and added to the <code>outputFiles</code> field of the manifest.  This only has an effect for toolchains that specify <code>wrap = True</code>.   | List of integers | optional | [] |
+| <a id="elisp_binary-src"></a>src |  Source file to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
 
 
-<a name="#elisp_library"></a>
+<a id="#elisp_library"></a>
 
 ## elisp_library
 
@@ -52,16 +52,16 @@ ensure that files get only loaded in their byte-compiled form.
 
 
 | Name  | Description | Type | Mandatory | Default |
-| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
-| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
-| load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
-| srcs |  List of source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="elisp_library-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="elisp_library-data"></a>data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_library-deps"></a>deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_library-fatal_warnings"></a>fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
+| <a id="elisp_library-load_path"></a>load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
+| <a id="elisp_library-srcs"></a>srcs |  List of source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
-<a name="#elisp_test"></a>
+<a id="#elisp_test"></a>
 
 ## elisp_test
 
@@ -91,17 +91,17 @@ normally pass, but don’t work under coverage for some reason.
 
 
 | Name  | Description | Type | Mandatory | Default |
-| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
-| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
-| fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
-| skip_tags |  List of test tags to skip.  This attribute contains a list of tag names; if a test is tagged with one of the tags from this list, it is skipped.  This can be useful to e.g. skip tests that are flaky or only work in interactive mode.  Use the <code>:tags</code> keyword argument to <code>ert-deftest</code> to tag tests.   | List of strings | optional | [] |
-| skip_tests |  List of tests to skip.  This attribute contains a list of ERT test symbols; when running the test rule, these tests are skipped.<br><br>Most of the time, you should use [the <code>skip-unless</code> macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html) instead.  The <code>skip_tests</code> attribute is mainly useful for third-party code that you don’t control.   | List of strings | optional | [] |
-| srcs |  List of source files to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="elisp_test-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="elisp_test-data"></a>data |  List of files to be made available at runtime.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_test-deps"></a>deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
+| <a id="elisp_test-fatal_warnings"></a>fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
+| <a id="elisp_test-skip_tags"></a>skip_tags |  List of test tags to skip.  This attribute contains a list of tag names; if a test is tagged with one of the tags from this list, it is skipped.  This can be useful to e.g. skip tests that are flaky or only work in interactive mode.  Use the <code>:tags</code> keyword argument to <code>ert-deftest</code> to tag tests.   | List of strings | optional | [] |
+| <a id="elisp_test-skip_tests"></a>skip_tests |  List of tests to skip.  This attribute contains a list of ERT test symbols; when running the test rule, these tests are skipped.<br><br>Most of the time, you should use [the <code>skip-unless</code> macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html) instead.  The <code>skip_tests</code> attribute is mainly useful for third-party code that you don’t control.   | List of strings | optional | [] |
+| <a id="elisp_test-srcs"></a>srcs |  List of source files to load.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
-<a name="#elisp_toolchain"></a>
+<a id="#elisp_toolchain"></a>
 
 ## elisp_toolchain
 
@@ -149,14 +149,14 @@ attributes of the `elisp_binary` rule.
 
 
 | Name  | Description | Type | Mandatory | Default |
-| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
-| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGS…</code> or <code>emacs ARGS…</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
-| wrap |  Whether the binary given in the <code>emacs</code> attribute is a wrapper around Emacs proper. If <code>True</code>, Bazel passes a manifest file using the <code>--manifest</code> option. See the rule documentation for details.   | Boolean | optional | False |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="elisp_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="elisp_toolchain-emacs"></a>emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGS…</code> or <code>emacs ARGS…</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="elisp_toolchain-use_default_shell_env"></a>use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
+| <a id="elisp_toolchain-wrap"></a>wrap |  Whether the binary given in the <code>emacs</code> attribute is a wrapper around Emacs proper. If <code>True</code>, Bazel passes a manifest file using the <code>--manifest</code> option. See the rule documentation for details.   | Boolean | optional | False |
 
 
-<a name="#EmacsLispInfo"></a>
+<a id="#EmacsLispInfo"></a>
 
 ## EmacsLispInfo
 
@@ -178,13 +178,13 @@ Load path directory entries are structures with the following fields:
 
 
 | Name  | Description |
-| :-------------: | :-------------: |
-| source_files |  A list of <code>File</code> objects containing the Emacs Lisp source files of this library.    |
-| compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library.    |
-| load_path |  A list containing necessary load path additions for this library.  The <code>depset</code> elements are structures as described in the provider documentation.    |
-| data_files |  A list of <code>File</code> object that this library requires at runtime.    |
-| transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
-| transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
-| transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.  The <code>depset</code> elements are structures as described in the provider documentation.    |
+| :------------- | :------------- |
+| <a id="EmacsLispInfo-source_files"></a>source_files |  A list of <code>File</code> objects containing the Emacs Lisp source files of this library.    |
+| <a id="EmacsLispInfo-compiled_files"></a>compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library.    |
+| <a id="EmacsLispInfo-load_path"></a>load_path |  A list containing necessary load path additions for this library.  The <code>depset</code> elements are structures as described in the provider documentation.    |
+| <a id="EmacsLispInfo-data_files"></a>data_files |  A list of <code>File</code> object that this library requires at runtime.    |
+| <a id="EmacsLispInfo-transitive_source_files"></a>transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
+| <a id="EmacsLispInfo-transitive_compiled_files"></a>transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
+| <a id="EmacsLispInfo-transitive_load_path"></a>transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.  The <code>depset</code> elements are structures as described in the provider documentation.    |
 
 

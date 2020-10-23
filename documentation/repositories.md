@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-<a name="#rules_elisp_dependencies"></a>
+<a id="#rules_elisp_dependencies"></a>
 
 ## rules_elisp_dependencies
 
@@ -12,11 +12,9 @@ Installs necessary dependencies for Emacs Lisp rules.
 
 Call this function in your `WORKSPACE` file.
 
-**PARAMETERS**
 
 
-
-<a name="#rules_elisp_toolchains"></a>
+<a id="#rules_elisp_toolchains"></a>
 
 ## rules_elisp_toolchains
 
@@ -25,8 +23,6 @@ rules_elisp_toolchains()
 </pre>
 
 Registers the default toolchains for Emacs Lisp.
-
-**PARAMETERS**
 
 
 

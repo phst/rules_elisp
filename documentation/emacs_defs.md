@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-<a name="#emacs_binary"></a>
+<a id="#emacs_binary"></a>
 
 ## emacs_binary
 
@@ -15,9 +15,9 @@ The resulting executable can be used to run the compiled Emacs.
 
 
 | Name  | Description | Type | Mandatory | Default |
-| :-------------: | :-------------: | :-------------: | :-------------: | :-------------: |
-| name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
-| readme |  The README file in the root of the Emacs repository. This is necessary to determine the source root directory.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
-| srcs |  All Emacs source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="emacs_binary-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="emacs_binary-readme"></a>readme |  The README file in the root of the Emacs repository. This is necessary to determine the source root directory.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="emacs_binary-srcs"></a>srcs |  All Emacs source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
