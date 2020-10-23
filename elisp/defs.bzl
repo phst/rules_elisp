@@ -43,9 +43,9 @@ the Emacs Lisp source files of this library.""",
         "compiled_files": """A list of `File` objects containing
 the byte-compiled Emacs Lisp files of this library.""",
         "load_path": """A list containing necessary load path
-additions for this library.  The `depset` elements are structures as
+additions for this library.  The list elements are structures as
 described in the provider documentation.""",
-        "data_files": """A list of `File` object that this library requires
+        "data_files": """A list of `File` objects that this library requires
 at runtime.""",
         "transitive_source_files": """A `depset` of `File` objects containing
 the Emacs Lisp source files of this library

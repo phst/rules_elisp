@@ -181,8 +181,8 @@ Load path directory entries are structures with the following fields:
 | :------------- | :------------- |
 | <a id="EmacsLispInfo-source_files"></a>source_files |  A list of <code>File</code> objects containing the Emacs Lisp source files of this library.    |
 | <a id="EmacsLispInfo-compiled_files"></a>compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library.    |
-| <a id="EmacsLispInfo-load_path"></a>load_path |  A list containing necessary load path additions for this library.  The <code>depset</code> elements are structures as described in the provider documentation.    |
-| <a id="EmacsLispInfo-data_files"></a>data_files |  A list of <code>File</code> object that this library requires at runtime.    |
+| <a id="EmacsLispInfo-load_path"></a>load_path |  A list containing necessary load path additions for this library.  The list elements are structures as described in the provider documentation.    |
+| <a id="EmacsLispInfo-data_files"></a>data_files |  A list of <code>File</code> objects that this library requires at runtime.    |
 | <a id="EmacsLispInfo-transitive_source_files"></a>transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
 | <a id="EmacsLispInfo-transitive_compiled_files"></a>transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
 | <a id="EmacsLispInfo-transitive_load_path"></a>transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.  The <code>depset</code> elements are structures as described in the provider documentation.    |
