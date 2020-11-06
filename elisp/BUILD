@@ -76,7 +76,7 @@ bzl_library(
     name = "util_bzl",
     srcs = ["util.bzl"],
     visibility = [
-        "//documentation:__pkg__",
+        "//docs:__pkg__",
         "//emacs:__pkg__",
     ],
     deps = [
@@ -89,7 +89,7 @@ bzl_library(
     name = "builtin_bzl",
     srcs = ["@bazel_tools//tools:bzl_srcs"],
     visibility = [
-        "//documentation:__pkg__",
+        "//docs:__pkg__",
         "//emacs:__pkg__",
     ],
 )
@@ -191,7 +191,7 @@ exports_files(
         "defs.bzl",
         "repositories.bzl",
     ],
-    visibility = ["//documentation:__pkg__"],
+    visibility = ["//docs:__pkg__"],
 )
 
 # Make sure compile.el can itself be byte-compiled.  We don’t use the compiled

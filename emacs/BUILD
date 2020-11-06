@@ -48,5 +48,5 @@ bzl_library(
 
 exports_files(
     ["defs.bzl"],
-    visibility = ["//documentation:__pkg__"],
+    visibility = ["//docs:__pkg__"],
 )

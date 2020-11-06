@@ -62,7 +62,10 @@ go_test(
 
 filegroup(
     name = "markdown",
-    srcs = glob(["*.md"]) + [
+    srcs = glob(
+        ["*.md"],
+        exclude = ["index.md"],
+    ) + [
         "elisp_defs_doc.md",
         "emacs_defs_doc.md",
         "repositories_doc.md",
