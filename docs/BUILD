@@ -17,8 +17,8 @@ load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 
 stardoc(
-    name = "elisp_defs_doc",
-    out = "elisp_defs_doc.md",
+    name = "elisp_doc",
+    out = "elisp_doc.md",
     input = "//elisp:defs.bzl",
     deps = [
         "//elisp:util_bzl",
@@ -29,8 +29,8 @@ stardoc(
 )
 
 stardoc(
-    name = "emacs_defs_doc",
-    out = "emacs_defs_doc.md",
+    name = "emacs_doc",
+    out = "emacs_doc.md",
     input = "//emacs:defs.bzl",
     deps = [
         "//elisp:builtin_bzl",
@@ -66,8 +66,8 @@ filegroup(
         ["*.md"],
         exclude = ["index.md"],
     ) + [
-        "elisp_defs_doc.md",
-        "emacs_defs_doc.md",
+        "elisp_doc.md",
+        "emacs_doc.md",
         "repositories_doc.md",
     ],
 )
