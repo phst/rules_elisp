@@ -61,3 +61,21 @@ a build dependency on `@phst_rules_elisp//elisp/runfiles`.  See the header
 comments in `runfiles.el` for further usage hints.
 
 [runfiles]: https://docs.bazel.build/versions/3.0.0/skylark/rules.html#runfiles
+
+* * *
+
+The following symbols are defined in `//elisp/defs.bzl`:
+
+{: include_relative elisp.md :}
+
+* * *
+
+The following symbols are defined in `//elisp/repositories.bzl`:
+
+{: include_relative repositories.md :}
+
+* * *
+
+The following symbols are defined in `//emacs/defs.bzl`:
+
+{: include_relative emacs.md :}
