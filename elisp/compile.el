@@ -54,9 +54,12 @@ treat warnings as errors."
          ;; Ensure filenames in the output are relative to the current
          ;; directory.
          (byte-compile-root-dir default-directory)
-         (byte-compile-dest-file-function (lambda (_) out))
+         ;; Write output to a temporary file (Bug#44631).
+         (temp (make-temp-file "compile-" nil ".elc"))
+         (byte-compile-dest-file-function (lambda (_) temp))
          (byte-compile-error-on-warn elisp/fatal--warnings)
          (success (byte-compile-file src)))
+    (when success (copy-file temp out))
     (kill-emacs (if success 0 1))))
 
 (defun elisp/fatal-warnings (_arg)
