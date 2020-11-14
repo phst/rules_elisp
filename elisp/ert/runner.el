@@ -242,8 +242,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                ,@(nreverse test-reports)
                (system-out) (system-err)))))
           (let ((coding-system-for-write 'utf-8-unix))
-            (write-region nil nil (concat "/:" report-file)
-                          nil nil nil 'excl))))
+            (write-region nil nil (concat "/:" report-file)))))
       (when coverage-enabled
         (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
                                           load-buffers))
