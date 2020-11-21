@@ -66,6 +66,7 @@ def _elisp_toolchain_impl(ctx):
     return platform_common.ToolchainInfo(
         emacs = ctx.attr.emacs,
         use_default_shell_env = ctx.attr.use_default_shell_env,
+        execution_requirements = ctx.attr.execution_requirements,
         wrap = ctx.attr.wrap,
     )
 
@@ -120,6 +121,8 @@ def _elisp_binary_impl(ctx):
 
 def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
+    toolchain = _toolchain(ctx)
+
     executable, runfiles = _binary(
         ctx,
         srcs = ctx.files.srcs,
@@ -159,6 +162,7 @@ def _elisp_test_impl(ctx):
             executable = executable,
             runfiles = runfiles,
         ),
+        testing.ExecutionInfo(toolchain.execution_requirements),
         testing.TestEnvironment(test_env),
         coverage_common.instrumented_files_info(
             ctx,
@@ -184,6 +188,9 @@ See the rule documentation for details.""",
         "use_default_shell_env": attr.bool(
             doc = "Whether actions should inherit the external shell environment.",
             default = False,
+        ),
+        "execution_requirements": attr.string_dict(
+            doc = "Execution requirements for compilation and test actions.",
         ),
         "wrap": attr.bool(
             doc = """Whether the binary given in the `emacs` attribute is a
@@ -657,6 +664,7 @@ def _compile(ctx, srcs, deps, load_path):
                 "Compiling Emacs Lisp library {}".format(out.short_path)
             ),
             use_default_shell_env = toolchain.use_default_shell_env,
+            execution_requirements = toolchain.execution_requirements,
         )
         outs.append(out)
 

@@ -106,7 +106,7 @@ normally pass, but don’t work under coverage for some reason.
 ## elisp_toolchain
 
 <pre>
-elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>, <a href="#elisp_toolchain-use_default_shell_env">use_default_shell_env</a>, <a href="#elisp_toolchain-wrap">wrap</a>)
+elisp_toolchain(<a href="#elisp_toolchain-name">name</a>, <a href="#elisp_toolchain-emacs">emacs</a>, <a href="#elisp_toolchain-execution_requirements">execution_requirements</a>, <a href="#elisp_toolchain-use_default_shell_env">use_default_shell_env</a>, <a href="#elisp_toolchain-wrap">wrap</a>)
 </pre>
 
 Toolchain rule for Emacs Lisp.
@@ -152,6 +152,7 @@ attributes of the `elisp_binary` rule.
 | :------------- | :------------- | :------------- | :------------- | :------------- |
 | <a id="elisp_toolchain-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
 | <a id="elisp_toolchain-emacs"></a>emacs |  An executable file that behaves like the Emacs binary. Depending on whether <code>wrap</code> is <code>True</code>, Bazel invokes this executable with a command line like <code>emacs --manifest=MANIFEST -- ARGS…</code> or <code>emacs ARGS…</code>. The <code>--manifest</code> flag is only present if <code>wrap</code> is <code>True</code>. See the rule documentation for details.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="elisp_toolchain-execution_requirements"></a>execution_requirements |  Execution requirements for compilation and test actions.   | <a href="https://bazel.build/docs/skylark/lib/dict.html">Dictionary: String -> String</a> | optional | {} |
 | <a id="elisp_toolchain-use_default_shell_env"></a>use_default_shell_env |  Whether actions should inherit the external shell environment.   | Boolean | optional | False |
 | <a id="elisp_toolchain-wrap"></a>wrap |  Whether the binary given in the <code>emacs</code> attribute is a wrapper around Emacs proper. If <code>True</code>, Bazel passes a manifest file using the <code>--manifest</code> option. See the rule documentation for details.   | Boolean | optional | False |
 
