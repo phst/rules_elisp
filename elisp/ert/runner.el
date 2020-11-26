@@ -34,6 +34,7 @@
 (require 'pp)
 (require 'rx)
 (require 'subr-x)
+(require 'trampver)  ; load eagerly to work around Bug#11218
 (require 'xml)
 
 (add-to-list 'command-switch-alist
