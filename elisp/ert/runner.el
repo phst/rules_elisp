@@ -382,7 +382,7 @@ instrumented using Edebug."
         (elisp/ert/insert--coverage-report buffer)
         (kill-buffer buffer))
       (write-region nil nil (expand-file-name "emacs-lisp.dat" coverage-dir)
-                    nil nil nil 'excl))))
+                    :append))))
 
 (defun elisp/ert/insert--coverage-report (buffer)
   "Insert a coverage report into the current buffer.
