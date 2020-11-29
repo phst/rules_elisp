@@ -51,7 +51,8 @@ def main() -> None:
                 raise
 
         run('./configure', '--prefix=' + str(install),
-            '--without-all', '--without-ns', '--disable-build-details',
+            '--without-all', '--without-ns', '--with-x-toolkit=no',
+            '--disable-build-details',
             'CC=' + str(args.cc.resolve()),
             'CFLAGS=' + args.cflags,
             'LDFLAGS=' + args.ldflags)
