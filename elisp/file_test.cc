@@ -35,11 +35,9 @@ namespace phst_rules_elisp {
 namespace {
 
 using ::testing::TempDir;
-using ::testing::Not;
 using ::testing::IsFalse;
 using ::testing::IsTrue;
 using ::testing::Eq;
-using ::testing::Ge;
 using ::testing::StrEq;
 using ::testing::StrNe;
 using ::testing::StartsWith;
