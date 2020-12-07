@@ -82,4 +82,8 @@
   :tags '(:nocover)
   (should (= 0 1)))
 
+(ert-deftest ert-fail ()
+  "This test validates a workaround for an ERT bug."
+  (should (integerp (ert-fail "Fail!"))))
+
 ;;; test.el ends here

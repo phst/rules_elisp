@@ -204,6 +204,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             (let ((message (elisp/ert/failure--message name result))
                   (condition (ert-test-result-with-condition-condition result)))
               (message "%s" message)
+              (unless (symbolp (car condition))
+                ;; This shouldn’t normally happen, but happens due to a bug in
+                ;; ERT for forms such as (should (integerp (ert-fail "Boo"))).
+                (push 'ert-test-failed condition))
               (unless expected
                 (setq report `((,(if failed 'failure 'error)
                                 ((message . ,(error-message-string condition))

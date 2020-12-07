@@ -146,9 +146,9 @@ func Test(t *testing.T) {
 	wantReport := report{
 		XMLName:   xml.Name{"", "testsuite"},
 		Name:      "ERT",
-		Tests:     11,
+		Tests:     12,
 		Errors:    0,
-		Failures:  6,
+		Failures:  7,
 		Skipped:   1,
 		Time:      wantElapsed,
 		Timestamp: timestamp(time.Now()),
@@ -162,6 +162,10 @@ func Test(t *testing.T) {
 			{
 				Name: "error", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
+			},
+			{
+				Name: "ert-fail", ClassName: "ERT", Time: wantElapsed,
+				Failure: message{Message: `Test failed: "Fail!"`, Type: `ert-test-failed`, Description: "something"},
 			},
 			{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
 			{
