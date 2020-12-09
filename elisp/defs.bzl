@@ -41,7 +41,7 @@ Load path directory entries are structures with the following fields:
         "source_files": """A list of `File` objects containing
 the Emacs Lisp source files of this library.""",
         "compiled_files": """A list of `File` objects containing
-the byte-compiled Emacs Lisp files of this library.""",
+the byte-compiled Emacs Lisp files and module objects of this library.""",
         "load_path": """A list containing necessary load path
 additions for this library.  The list elements are structures as
 described in the provider documentation.""",
@@ -51,7 +51,7 @@ at runtime.""",
 the Emacs Lisp source files of this library
 and all its transitive dependencies.""",
         "transitive_compiled_files": """A `depset` of `File` objects containing
-the byte-compiled Emacs Lisp files of this library
+the byte-compiled Emacs Lisp files and module objects of this library
 and all its transitive dependencies.""",
         "transitive_load_path": """A `depset` containing necessary load path
 additions for this library and all its transitive dependencies.
@@ -261,8 +261,9 @@ elisp_library = rule(
         _COMPILE_ATTRS,
         srcs = attr.label_list(
             allow_empty = False,
-            doc = "List of source files.",
-            allow_files = [".el"],
+            doc = """List of source files.  These must either be Emacs Lisp
+files ending in `.el`, or module objects ending in `.so`.""",
+            allow_files = [".el", ".so"],
             mandatory = True,
         ),
         data = attr.label_list(
@@ -293,7 +294,11 @@ further elements to the load path, use the `load_path` attribute.
 If there are multiple source files specified in `srcs`, these source files can
 also load each other.  However, it’s often preferable to only have one
 `elisp_library` target per source file to make dependencies more obvious and
-ensure that files get only loaded in their byte-compiled form.""",
+ensure that files get only loaded in their byte-compiled form.
+
+The source files in `srcs` can also list shared objects.  The rule treats them
+as Emacs modules and doesn’t try to byte-compile them.  You can use
+e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
     toolchains = [_TOOLCHAIN_TYPE],
     incompatible_use_toolchain_transition = True,
@@ -467,24 +472,31 @@ def _compile(ctx, srcs, deps, load_path):
 
     Args:
       ctx (ctx): rule context
-      srcs (list of Files): Emacs Lisp sources files to compile
+      srcs (list of Files): Emacs Lisp sources files to compile; can also
+          include module objects
       deps (list of targets): Emacs Lisp libraries that the sources depend on
       load_path (list of strings): additional load path directories, relative
           to the current package
 
     Returns:
       A structure with the following fields:
-        outs: a list of File objects containing the byte-compiled files
+        outs: a list of File objects containing the byte-compiled files and
+            module objects
         load_path: the load path required to load the compiled files
         runfiles: a runfiles object for the set of input files
         transitive_load_path: the load path required to load the compiled files
             and all their transitive dependencies
         transitive_srcs: a depset of source files for this compilation unit
             and all its transitive dependencies
-        transitive_outs: a depset of compiled files for this compilation unit
-            and all its transitive dependencies
+        transitive_outs: a depset of compiled files and module objects for this
+            compilation unit and all its transitive dependencies
     """
-    outs = []
+
+    # Only byte-compile Lisp source files.  Use module objects directly as
+    # outputs.
+    lisp = [src for src in srcs if src.short_path.endswith(".el")]
+    mods = [src for src in srcs if src.short_path.endswith(".so")]
+    outs = mods
 
     # If any file comes for a different package, we can’t place the compiled
     # files adjacent to the source files.  See
@@ -492,8 +504,15 @@ def _compile(ctx, srcs, deps, load_path):
     relocate_output = any([
         src.owner.workspace_name != ctx.label.workspace_name or
         src.owner.package != ctx.label.package
-        for src in srcs
+        for src in lisp
     ])
+
+    # When relocating output, we’d need to copy modules into the relocated
+    # places, which is possible, but not yet supported.  Likewise, we require
+    # all modules to reside in the bin directory for now.
+    for mod in mods:
+        if mod.root != ctx.bin_dir or relocate_output:
+            fail("module object {} in unsupported location".format(mod.path))
 
     # Directory relative to the workspace root where outputs should be stored.
     # We prefer storing them adjacent to source files to reduce the number of
@@ -529,7 +548,9 @@ def _compile(ctx, srcs, deps, load_path):
             # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_root),
             # and then the directory name relative to the workspace root.  The
             # workspace root will only be nonempty if the current rule lives in
-            # a different workspace than the one that Bazel is run from.
+            # a different workspace than the one that Bazel is run from.  This
+            # approach also works for dynamic modules placed in the bin
+            # directory.
             for_actions = check_relative_filename(
                 paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
             ),
@@ -594,7 +615,7 @@ def _compile(ctx, srcs, deps, load_path):
     # We compile only one file per Emacs process.  This might seem wasteful,
     # but since compilation can execute arbitrary code, it ensures that
     # compilation actions don’t interfere with each other.
-    for src in srcs:
+    for src in lisp:
         out = (
             ctx.actions.declare_file(
                 paths.join(

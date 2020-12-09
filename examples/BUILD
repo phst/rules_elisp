@@ -43,6 +43,7 @@ elisp_library(
     srcs = [
         "lib-2-a.el",
         "lib-2-b.el",
+        "module.so",
     ],
     fatal_warnings = False,
     load_path = ["."],
@@ -71,6 +72,12 @@ elisp_binary(
     name = "bin",
     src = "bin.el",
     deps = [":lib_1"],
+)
+
+cc_binary(
+    name = "module.so",
+    srcs = ["module.c"],
+    linkshared = True,
 )
 
 go_test(

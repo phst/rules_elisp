@@ -22,6 +22,7 @@
 
 (require 'lib-2-a)
 (require 'examples/lib-2-b)
+(require 'examples/module)
 
 (require 'ert)
 
@@ -33,5 +34,8 @@
   ;; This test is broken, but Bazel will skip it due to the “skip_tags”
   ;; attribute in the build rule.
   (should (= 0 1)))
+
+(ert-deftest module-test ()
+  (should (equal (module-func) "hi from module")))
 
 ;;; lib-2-test.el ends here

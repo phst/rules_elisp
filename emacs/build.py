@@ -52,6 +52,7 @@ def main() -> None:
 
         run('./configure', '--prefix=' + str(install),
             '--without-all', '--without-ns', '--with-x-toolkit=no',
+            '--with-modules',
             '--disable-build-details',
             'CC=' + str(args.cc.resolve()),
             'CFLAGS=' + args.cflags,

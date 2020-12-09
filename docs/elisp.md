@@ -48,6 +48,10 @@ also load each other.  However, it’s often preferable to only have one
 `elisp_library` target per source file to make dependencies more obvious and
 ensure that files get only loaded in their byte-compiled form.
 
+The source files in `srcs` can also list shared objects.  The rule treats them
+as Emacs modules and doesn’t try to byte-compile them.  You can use
+e.g. `cc_binary` with `linkshared = True` to create shared objects.
+
 **ATTRIBUTES**
 
 
@@ -58,7 +62,7 @@ ensure that files get only loaded in their byte-compiled form.
 | <a id="elisp_library-deps"></a>deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | <a id="elisp_library-fatal_warnings"></a>fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
 | <a id="elisp_library-load_path"></a>load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
-| <a id="elisp_library-srcs"></a>srcs |  List of source files.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
+| <a id="elisp_library-srcs"></a>srcs |  List of source files.  These must either be Emacs Lisp files ending in <code>.el</code>, or module objects ending in <code>.so</code>.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
 <a id="#elisp_test"></a>
@@ -181,11 +185,11 @@ Load path directory entries are structures with the following fields:
 | Name  | Description |
 | :------------- | :------------- |
 | <a id="EmacsLispInfo-source_files"></a>source_files |  A list of <code>File</code> objects containing the Emacs Lisp source files of this library.    |
-| <a id="EmacsLispInfo-compiled_files"></a>compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library.    |
+| <a id="EmacsLispInfo-compiled_files"></a>compiled_files |  A list of <code>File</code> objects containing the byte-compiled Emacs Lisp files and module objects of this library.    |
 | <a id="EmacsLispInfo-load_path"></a>load_path |  A list containing necessary load path additions for this library.  The list elements are structures as described in the provider documentation.    |
 | <a id="EmacsLispInfo-data_files"></a>data_files |  A list of <code>File</code> objects that this library requires at runtime.    |
 | <a id="EmacsLispInfo-transitive_source_files"></a>transitive_source_files |  A <code>depset</code> of <code>File</code> objects containing the Emacs Lisp source files of this library and all its transitive dependencies.    |
-| <a id="EmacsLispInfo-transitive_compiled_files"></a>transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files of this library and all its transitive dependencies.    |
+| <a id="EmacsLispInfo-transitive_compiled_files"></a>transitive_compiled_files |  A <code>depset</code> of <code>File</code> objects containing the byte-compiled Emacs Lisp files and module objects of this library and all its transitive dependencies.    |
 | <a id="EmacsLispInfo-transitive_load_path"></a>transitive_load_path |  A <code>depset</code> containing necessary load path additions for this library and all its transitive dependencies. The <code>depset</code> uses preorder traversal: entries for libraries closer to the root of the dependency graph come first.  The <code>depset</code> elements are structures as described in the provider documentation.    |
 
 
