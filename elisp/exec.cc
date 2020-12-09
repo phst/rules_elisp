@@ -343,6 +343,7 @@ absl::StatusOr<int> Executor::RunTest(const TestOptions& opts) {
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
   args.push_back("--quick");
   args.push_back("--batch");
+  args.push_back("--module-assertions");
   RETURN_IF_ERROR(this->AddLoadPath(args, opts.load_path));
   ASSIGN_OR_RETURN(const auto runner,
                    this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
