@@ -64,18 +64,18 @@ comments in `runfiles.el` for further usage hints.
 
 * * *
 
-The following symbols are defined in `//elisp/defs.bzl`:
+The following symbols are defined in `//elisp:defs.bzl`:
 
 {% include_relative elisp.md %}
 
 * * *
 
-The following symbols are defined in `//elisp/repositories.bzl`:
+The following symbols are defined in `//elisp:repositories.bzl`:
 
 {% include_relative repositories.md %}
 
 * * *
 
-The following symbols are defined in `//emacs/defs.bzl`:
+The following symbols are defined in `//emacs:defs.bzl`:
 
 {% include_relative emacs.md %}
