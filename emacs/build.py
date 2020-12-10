@@ -29,6 +29,7 @@ def main() -> None:
     parser.add_argument('--cc', type=pathlib.Path, required=True)
     parser.add_argument('--cflags', required=True)
     parser.add_argument('--ldflags', required=True)
+    parser.add_argument('--module-header', type=pathlib.Path, required=True)
     args = parser.parse_args()
     with tempfile.TemporaryDirectory() as temp:
         temp = pathlib.Path(temp)
@@ -66,6 +67,8 @@ def main() -> None:
     # Sanity check to verify that the resulting binary works.
     subprocess.run([install / 'bin/emacs', '--quick', '--batch'],
                    check=True, stdin=subprocess.DEVNULL)
+    # Copy emacs-module.h to the desired location.
+    shutil.copy(install / 'include/emacs-module.h', args.module_header)
 
 
 if __name__ == '__main__':

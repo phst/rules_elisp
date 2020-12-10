@@ -67,6 +67,11 @@ emacs_binary = rule(
             doc = """The README file in the root of the Emacs repository.
 This is necessary to determine the source root directory.""",
         ),
+        "module_header": attr.output(
+            mandatory = True,
+            doc = """Label for a file target that will receive the
+`emacs-module.h` header.""",
+        ),
         "_build": attr.label(
             default = "//emacs:build",
             executable = True,
@@ -145,7 +150,7 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
         "_{}_install".format(ctx.label.name),
     )
     ctx.actions.run(
-        outputs = [install],
+        outputs = [install, ctx.outputs.module_header],
         inputs = depset(
             direct = ctx.files.srcs,
             transitive = [cc_toolchain.all_files],
@@ -157,6 +162,7 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
             "--cc=" + cc,
             "--cflags=" + " ".join(cflags),
             "--ldflags=" + " ".join(ldflags),
+            "--module-header=" + ctx.outputs.module_header.path,
         ],
         mnemonic = "EmacsInstall",
         progress_message = (

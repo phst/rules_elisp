@@ -78,6 +78,7 @@ cc_binary(
     name = "module.so",
     srcs = ["module.c"],
     linkshared = True,
+    deps = ["//emacs:module_header"],
 )
 
 go_test(

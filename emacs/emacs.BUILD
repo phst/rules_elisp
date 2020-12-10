@@ -17,6 +17,17 @@ load("@phst_rules_elisp//emacs:defs.bzl", "emacs_binary")
 emacs_binary(
     name = "emacs",
     srcs = glob(["**"]),
+    module_header = "emacs-module.h",
     readme = "README",
+    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
+)
+
+cc_library(
+    name = "module_header",
+    srcs = ["emacs-module.h"],
+    # Using an empty include_prefix causes Bazel to emit -I instead of -iquote
+    # options for the include directory, so that #include <emacs-module.h>
+    # works.
+    include_prefix = "",
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )

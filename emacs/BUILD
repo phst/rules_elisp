@@ -26,6 +26,12 @@ sh_test(
     data = [":emacs"],
 )
 
+alias(
+    name = "module_header",
+    actual = "@gnu_emacs_stable//:module_header",
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "build",
     srcs = ["build.py"],
