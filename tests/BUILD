@@ -45,12 +45,17 @@ elisp_test(
         # otherwise it won’t be present and we can’t test coverage.  For real
         # tests, Bazel does the right thing.
         "test-lib.el",
+    ] + select({
         # We also need to explicitly include the marker file that Bazel would
         # generate to indicate that a file should be instrumented.  See the
         # commentary in //elisp:defs.bzl for details.  Again, for real tests,
-        # Bazel itself takes care of this.
-        "test-lib.el.instrument",
-    ],
+        # Bazel itself takes care of this.  We also skip this if we’re already
+        # collecting coverage information, because then the marker file is
+        # already present, and including it here would trigger a symlink target
+        # clash.
+        ":coverage": [],
+        "//conditions:default": ["test-lib.el.instrument"],
+    }),
     skip_tags = ["skip-from-attribute"],
     skip_tests = ["filter-via-skip-tests-attribute"],
     tags = ["manual"],
@@ -65,4 +70,9 @@ elisp_library(
 exports_files(
     ["test-lib.el"],
     visibility = ["//tests/pkg:__pkg__"],
+)
+
+config_setting(
+    name = "coverage",
+    values = {"collect_code_coverage": "true"},
 )
