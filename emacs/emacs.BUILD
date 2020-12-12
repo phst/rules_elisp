@@ -31,3 +31,7 @@ cc_library(
     include_prefix = "",
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
+
+# Local Variables:
+# mode: bazel-build
+# End:

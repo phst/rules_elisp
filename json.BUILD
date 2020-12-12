@@ -17,3 +17,7 @@ cc_library(
     hdrs = ["nlohmann/json.hpp"],
     visibility = ["//visibility:public"],
 )
+
+# Local Variables:
+# mode: bazel-build
+# End:
