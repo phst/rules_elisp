@@ -262,8 +262,8 @@ elisp_library = rule(
         srcs = attr.label_list(
             allow_empty = False,
             doc = """List of source files.  These must either be Emacs Lisp
-files ending in `.el`, or module objects ending in `.so`.""",
-            allow_files = [".el", ".so"],
+files ending in `.el`, or module objects ending in `.so` or `.dylib`.""",
+            allow_files = [".el", ".so", ".dylib"],
             mandatory = True,
         ),
         data = attr.label_list(
@@ -495,7 +495,11 @@ def _compile(ctx, srcs, deps, load_path):
     # Only byte-compile Lisp source files.  Use module objects directly as
     # outputs.
     lisp = [src for src in srcs if src.short_path.endswith(".el")]
-    mods = [src for src in srcs if src.short_path.endswith(".so")]
+    mods = [
+        src
+        for src in srcs
+        if src.short_path.endswith(".so") or src.short_path.endswith(".dylib")
+    ]
     outs = mods
 
     # If any file comes for a different package, we can’t place the compiled
