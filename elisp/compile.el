@@ -60,6 +60,7 @@ treat warnings as errors."
          (byte-compile-error-on-warn elisp/fatal--warnings)
          (success (byte-compile-file src)))
     (when success (copy-file temp out :overwrite))
+    (delete-file temp)
     (kill-emacs (if success 0 1))))
 
 (defun elisp/fatal-warnings (_arg)
