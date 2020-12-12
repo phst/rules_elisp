@@ -15,7 +15,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include <emacs-module.h>
+#include "emacs-module.h"
 
 static emacs_value module_func(emacs_env* env, ptrdiff_t nargs,
                                emacs_value* args, void* data) {
