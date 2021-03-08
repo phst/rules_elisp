@@ -53,7 +53,7 @@ func Example() {
 	// directory that’s hopefully writable, to avoid logspam when running
 	// with “bazel coverage”.
 	cmd.Dir = "/"
-	cmd.Env = append(env, "PATH="+os.Getenv("PATH"), "GCOV_PREFIX="+os.TempDir())
+	cmd.Env = append(env, "EMACS="+os.Getenv("EMACS"), "PATH="+os.Getenv("PATH"), "GCOV_PREFIX="+os.TempDir())
 	if err := cmd.Run(); err != nil {
 		panic(err)
 	}
