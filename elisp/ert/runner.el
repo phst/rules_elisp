@@ -134,21 +134,22 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
              (when (memq name instrumented-names)
                (error "Symbol ‘%s’ instrumented twice" name))
              (push name instrumented-names))))
-        ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
-        ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
-        ;; the Edebug symbols for ‘cl-flet’ (and ‘cl-labels’, which defers to
-        ;; ‘cl-flet’).
-        (put :unique 'edebug-form-spec #'elisp/ert/edebug--unique)
-        (put #'cl-flet 'edebug-form-spec
-             ;; This is the expansion of the Edebug specification for
-             ;; ‘cl-flet’, plus a ‘:unique’ specifier to uniquify the name.
-             '((&rest [&or (&define name :unique "cl-flet@" function-form)
-                           (&define name :unique "cl-flet@"
-                                    cl-lambda-list
-                                    cl-declarations-or-string
-                                    [&optional ("interactive" interactive)]
-                                    def-body)])
-               cl-declarations body))))
+        (when (version< emacs-version "28.1")
+          ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
+          ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
+          ;; the Edebug symbols for ‘cl-flet’ (and ‘cl-labels’, which defers to
+          ;; ‘cl-flet’).
+          (put :unique 'edebug-form-spec #'elisp/ert/edebug--unique)
+          (put #'cl-flet 'edebug-form-spec
+               ;; This is the expansion of the Edebug specification for
+               ;; ‘cl-flet’, plus a ‘:unique’ specifier to uniquify the name.
+               '((&rest [&or (&define name :unique "cl-flet@" function-form)
+                             (&define name :unique "cl-flet@"
+                                      cl-lambda-list
+                                      cl-declarations-or-string
+                                      [&optional ("interactive" interactive)]
+                                      def-body)])
+                 cl-declarations body)))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
