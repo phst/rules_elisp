@@ -41,9 +41,9 @@ def rules_elisp_dependencies():
     )
     http_archive(
         name = "com_google_absl",
-        sha256 = "306639352ec60dcbfc695405e989e1f63d0e55001582a5185b0a8caf2e8ea9ca",
-        strip_prefix = "abseil-cpp-20200923.2",
-        urls = ["https://github.com/abseil/abseil-cpp/archive/20200923.2.zip"],
+        sha256 = "6622893ab117501fc23268a2936e0d46ee6cb0319dcf2275e33a708cd9634ea6",
+        strip_prefix = "abseil-cpp-20200923.3",
+        urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20200923.3.zip"],
     )
     http_archive(
         name = "nlohmann_json",
