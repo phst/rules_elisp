@@ -24,11 +24,11 @@ def rules_elisp_dependencies():
     http_archive(
         name = "gnu_emacs_stable",
         build_file = "@phst_rules_elisp//emacs:emacs.BUILD",
-        sha256 = "4a4c128f915fc937d61edfc273c98106711b540c9be3cd5d2e2b9b5b2f172e41",
-        strip_prefix = "emacs-27.1/",
+        sha256 = "b4a7cc4e78e63f378624e0919215b910af5bb2a0afc819fad298272e9f40c1b9",
+        strip_prefix = "emacs-27.2/",
         urls = [
-            "https://ftpmirror.gnu.org/emacs/emacs-27.1.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-27.1.tar.xz",
+            "https://ftpmirror.gnu.org/emacs/emacs-27.2.tar.xz",
+            "https://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.xz",
         ],
     )
     http_archive(
