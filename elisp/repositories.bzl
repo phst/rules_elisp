@@ -47,10 +47,10 @@ def rules_elisp_dependencies():
     )
     http_archive(
         name = "nlohmann_json",
-        urls = ["https://github.com/nlohmann/json/releases/download/v3.9.1/include.zip"],
+        build_file = "@phst_rules_elisp//:json.BUILD",
         sha256 = "6bea5877b1541d353bd77bdfbdb2696333ae5ed8f9e8cc22df657192218cad91",
         strip_prefix = "single_include",
-        build_file = "@phst_rules_elisp//:json.BUILD",
+        urls = ["https://github.com/nlohmann/json/releases/download/v3.9.1/include.zip"],
     )
 
 def rules_elisp_toolchains():
