@@ -303,13 +303,22 @@ absl::StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
   const auto libexec = JoinPath(install, "libexec");
-  ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
+  std::vector<std::string> args;
+  switch (opts.dump_mode) {
+    case DumpMode::kPortable: {
+      ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
+      args.push_back("--dump-file=" + dump);
+      break;
+    }
+    case DumpMode::kUnexec:
+      break;
+  }
   Environment map;
   map.emplace("EMACSDATA", etc);
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
   map.emplace("EMACSPATH", libexec);
-  return this->Run(emacs, {"--dump-file=" + dump}, map);
+  return this->Run(emacs, args, map);
 }
 
 absl::StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {

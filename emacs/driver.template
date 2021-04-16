@@ -17,6 +17,7 @@
 int main(int argc, char** argv) {
   phst_rules_elisp::EmacsOptions opts;
   opts.install_rel = [[install]];
+  opts.dump_mode = phst_rules_elisp::DumpMode::[[dump_mode]];
   opts.argv.assign(argv, argv + argc);
   return phst_rules_elisp::RunEmacs(opts);
 }

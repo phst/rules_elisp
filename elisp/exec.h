@@ -30,9 +30,11 @@
 namespace phst_rules_elisp {
 
 enum class Mode { kDirect, kWrap };
+enum class DumpMode { kPortable, kUnexec };
 
 struct EmacsOptions {
   std::string install_rel;
+  DumpMode dump_mode;
   std::vector<std::string> argv;
 };
 
