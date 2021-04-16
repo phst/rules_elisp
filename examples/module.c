@@ -42,7 +42,7 @@ static void provide(emacs_env* env, const char* feature) {
 int emacs_module_init(struct emacs_runtime* rt) {
   if (rt->size < sizeof *rt) return 1;
   emacs_env* env = rt->get_environment(rt);
-  if (env->size < sizeof(struct emacs_env_27)) return 2;
+  if (env->size < sizeof(struct emacs_env_26)) return 2;
   defun(env, "module-func", 0, 0, module_func);
   provide(env, "examples/module");
   return 0;
