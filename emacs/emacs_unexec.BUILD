@@ -18,7 +18,6 @@ emacs_binary(
     name = "emacs",
     srcs = glob(["**"]),
     dump_mode = "unexec",
-    module_header = "emacs-module.h",
     readme = "README",
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )

@@ -74,9 +74,8 @@ emacs_binary = rule(
 This is necessary to determine the source root directory.""",
         ),
         "module_header": attr.output(
-            mandatory = True,
             doc = """Label for a file target that will receive the
-`emacs-module.h` header.""",
+`emacs-module.h` header.  If not provided, don’t install the header.""",
         ),
         "dump_mode": attr.string(
             default = "portable",
@@ -163,21 +162,25 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
     install = ctx.actions.declare_directory(
         "_{}_install".format(ctx.label.name),
     )
+    args = [
+        "--source=" + source,
+        "--install=" + install.path,
+        "--cc=" + cc,
+        "--cflags=" + " ".join(cflags),
+        "--ldflags=" + " ".join(ldflags),
+    ]
+    outs = [install]
+    if ctx.outputs.module_header:
+        args.append("--module-header=" + ctx.outputs.module_header.path)
+        outs.append(ctx.outputs.module_header)
     ctx.actions.run(
-        outputs = [install, ctx.outputs.module_header],
+        outputs = outs,
         inputs = depset(
             direct = ctx.files.srcs,
             transitive = [cc_toolchain.all_files],
         ),
         executable = ctx.executable._build,
-        arguments = [
-            "--source=" + source,
-            "--install=" + install.path,
-            "--cc=" + cc,
-            "--cflags=" + " ".join(cflags),
-            "--ldflags=" + " ".join(ldflags),
-            "--module-header=" + ctx.outputs.module_header.path,
-        ],
+        arguments = args,
         mnemonic = "EmacsInstall",
         progress_message = (
             "Installing Emacs into {}".format(install.short_path)
