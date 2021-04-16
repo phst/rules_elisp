@@ -45,6 +45,25 @@ elisp_toolchain(
     use_default_shell_env = True,
 )
 
+_VERSIONS = "26.1", "26.2", "26.3", "27.1", "27.2"
+
+[
+    toolchain(
+        name = "emacs_{}_toolchain".format(version),
+        toolchain = "emacs_{}".format(version),
+        toolchain_type = ":toolchain_type",
+    )
+    for version in _VERSIONS
+]
+
+[
+    elisp_toolchain(
+        name = "emacs_{}".format(version),
+        emacs = "//emacs:emacs_{}".format(version),
+    )
+    for version in _VERSIONS
+]
+
 exports_files([
     "compile.el",
     "binary.template",

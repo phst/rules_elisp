@@ -16,7 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 alias(
     name = "emacs",
-    actual = "@gnu_emacs_stable//:emacs",
+    actual = ":emacs_27.2",
     visibility = ["//visibility:public"],
 )
 
@@ -28,9 +28,20 @@ sh_test(
 
 alias(
     name = "module_header",
-    actual = "@gnu_emacs_stable//:module_header",
+    actual = "@gnu_emacs_27.2//:module_header",
     visibility = ["//visibility:public"],
 )
+
+_VERSIONS = "26.1", "26.2", "26.3", "27.1", "27.2"
+
+[
+    alias(
+        name = "emacs_{}".format(version),
+        actual = "@gnu_emacs_{}//:emacs".format(version),
+        visibility = ["//visibility:public"],
+    )
+    for version in _VERSIONS
+]
 
 py_binary(
     name = "build",

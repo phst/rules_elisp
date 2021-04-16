@@ -16,4 +16,4 @@
 
 set -eu
 
-"${TEST_SRCDIR}/gnu_emacs_stable/emacs" --version
+"${TEST_SRCDIR}/gnu_emacs_27.2/emacs" --version

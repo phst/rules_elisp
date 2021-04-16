@@ -28,3 +28,8 @@ if (($? != 1)); then
 fi
 
 bazel test //... || exit
+
+# Test versioned toolchains.
+for version in 26.{1,2,3} 27.{1,2}; do
+  bazel test --extra_toolchains="//elisp:emacs_${version:?}_toolchain" //... || exit
+done
