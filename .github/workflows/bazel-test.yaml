@@ -26,5 +26,7 @@ jobs:
         # TODO: Switch to Bazel-owned action once
         # https://github.com/bazelbuild/bazelisk/issues/134 is fixed.
         uses: mishas/setup-bazelisk-action@v1
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
       - name: Run Bazel tests
         run: bazel test --test_output=all -- //...
