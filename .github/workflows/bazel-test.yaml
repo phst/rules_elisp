@@ -52,3 +52,23 @@ jobs:
             --test_output=errors \
             --extra_toolchains=//elisp:emacs_${{matrix.version}}_toolchain \
             -- //...
+
+  bazel-versions:
+    name: Run Bazel tests under all supported Bazel versions
+    strategy:
+      matrix:
+        version: [3.4, 3.5, 3.6, 3.7, 4.0, latest]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Install Bazelisk
+        # TODO: Switch to Bazel-owned action once
+        # https://github.com/bazelbuild/bazelisk/issues/134 is fixed.
+        uses: mishas/setup-bazelisk-action@v1
+      - name: Install xmllint
+        run: sudo apt-get install libxml2-utils
+      - name: Run Bazel tests
+        run: bazel test --test_output=errors -- //...
+        env:
+          USE_BAZEL_VERSION: ${{matrix.version}}
