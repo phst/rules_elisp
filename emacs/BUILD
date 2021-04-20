@@ -32,16 +32,35 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-_VERSIONS = "26.1", "26.2", "26.3", "27.1", "27.2"
+alias(
+    name = "emacs_26.1",
+    actual = "@gnu_emacs_26.1//:emacs",
+    visibility = ["//visibility:public"],
+)
 
-[
-    alias(
-        name = "emacs_{}".format(version),
-        actual = "@gnu_emacs_{}//:emacs".format(version),
-        visibility = ["//visibility:public"],
-    )
-    for version in _VERSIONS
-]
+alias(
+    name = "emacs_26.2",
+    actual = "@gnu_emacs_26.2//:emacs",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "emacs_26.3",
+    actual = "@gnu_emacs_26.3//:emacs",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "emacs_27.1",
+    actual = "@gnu_emacs_27.1//:emacs",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "emacs_27.2",
+    actual = "@gnu_emacs_27.2//:emacs",
+    visibility = ["//visibility:public"],
+)
 
 py_binary(
     name = "build",

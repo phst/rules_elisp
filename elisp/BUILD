@@ -29,6 +29,36 @@ toolchain(
 )
 
 toolchain(
+    name = "emacs_26.1_toolchain",
+    toolchain = "emacs_26.1",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_26.2_toolchain",
+    toolchain = "emacs_26.2",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_26.3_toolchain",
+    toolchain = "emacs_26.3",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_27.1_toolchain",
+    toolchain = "emacs_27.1",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_27.2_toolchain",
+    toolchain = "emacs_27.2",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
     name = "local_toolchain",
     toolchain = ":local",
     toolchain_type = ":toolchain_type",
@@ -45,24 +75,30 @@ elisp_toolchain(
     use_default_shell_env = True,
 )
 
-_VERSIONS = "26.1", "26.2", "26.3", "27.1", "27.2"
+elisp_toolchain(
+    name = "emacs_26.1",
+    emacs = "//emacs:emacs_26.1",
+)
 
-[
-    toolchain(
-        name = "emacs_{}_toolchain".format(version),
-        toolchain = "emacs_{}".format(version),
-        toolchain_type = ":toolchain_type",
-    )
-    for version in _VERSIONS
-]
+elisp_toolchain(
+    name = "emacs_26.2",
+    emacs = "//emacs:emacs_26.2",
+)
 
-[
-    elisp_toolchain(
-        name = "emacs_{}".format(version),
-        emacs = "//emacs:emacs_{}".format(version),
-    )
-    for version in _VERSIONS
-]
+elisp_toolchain(
+    name = "emacs_26.3",
+    emacs = "//emacs:emacs_26.3",
+)
+
+elisp_toolchain(
+    name = "emacs_27.1",
+    emacs = "//emacs:emacs_27.1",
+)
+
+elisp_toolchain(
+    name = "emacs_27.2",
+    emacs = "//emacs:emacs_27.2",
+)
 
 exports_files([
     "compile.el",
