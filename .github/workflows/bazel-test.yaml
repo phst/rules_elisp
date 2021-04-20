@@ -17,7 +17,7 @@ on: [push, pull_request]
 
 jobs:
   emacs-stable:
-    name: Run Bazel tests under the latest stable GNU Emacs release
+    name: Latest stable GNU Emacs release
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -32,7 +32,7 @@ jobs:
         run: bazel test --test_output=errors -- //...
 
   emacs-versions:
-    name: Run Bazel tests under all supported GNU Emacs versions
+    name: All supported GNU Emacs versions
     strategy:
       matrix:
         version: [26.1, 26.2, 26.3, 27.1, 27.2]
@@ -54,7 +54,7 @@ jobs:
             -- //...
 
   bazel-versions:
-    name: Run Bazel tests under all supported Bazel versions
+    name: All supported Bazel versions
     strategy:
       matrix:
         version: [3.4.0, 3.4.1, 3.5.0, 3.5.1, 3.6.0, 3.7.0, 3.7.1, 3.7.2,
