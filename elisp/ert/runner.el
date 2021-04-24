@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2021 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -422,8 +422,17 @@ file that has been instrumented with Edebug."
                    ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
                    for freq across frequencies
                    for position = (+ begin offset)
-                   for line = (line-number-at-pos position)
-                   do (cl-callf max (gethash line lines 0) freq))
+                   do
+                   ;; Edebug adds two elements per form to the frequency and
+                   ;; offset tables, one for the beginning of the form and one
+                   ;; for the end.  The end position will typically contain a
+                   ;; closing parenthesis or space.  We don’t consider this a
+                   ;; covered line since it typically only contains unimportant
+                   ;; pieces of the form.
+                   (unless (memql (char-syntax (char-after position))
+                                  '(?\) ?\s))
+                     (let ((line (line-number-at-pos position)))
+                       (cl-callf max (gethash line lines 0) freq))))
           (push (list (line-number-at-pos begin)
                       (elisp/ert/sanitize--string (symbol-name name))
                       calls)

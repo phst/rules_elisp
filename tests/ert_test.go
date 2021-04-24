@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -215,8 +215,8 @@ func Test(t *testing.T) {
 	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
 	const wantCoverage = `SF:tests/test-lib.el
 FN:26,tests/test-function
-FN:32,foo@cl-flet@1
-FN:34,foo@cl-flet@3
+FN:35,foo@cl-flet@1
+FN:37,foo@cl-flet@3
 FNDA:1,tests/test-function
 FNDA:0,foo@cl-flet@1
 FNDA:0,foo@cl-flet@3
@@ -225,12 +225,15 @@ FNH:1
 DA:28,1
 DA:29,0
 DA:30,1
+DA:31,1
 DA:32,1
-DA:33,1
-DA:34,1
+DA:33,0
 DA:35,1
-LH:6
-LF:7
+DA:36,1
+DA:37,1
+DA:38,1
+LH:8
+LF:10
 end_of_record
 `
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
