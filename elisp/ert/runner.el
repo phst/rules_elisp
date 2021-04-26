@@ -67,6 +67,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (coverage-dir (getenv "COVERAGE_DIR"))
          (selector (elisp/ert/make--selector
                     (and coverage-enabled '(:nocover))))
+         (original-load-suffixes load-suffixes)
          ;; If coverage is enabled, check for a file with a well-known
          ;; extension first.  The Bazel runfiles machinery is expected to
          ;; generate these files for source files that should be instrumented.
@@ -188,9 +189,12 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (unless expected
             (cl-incf unexpected)
             ;; Print a nice error message that should point back to the source
-            ;; file in a compilation buffer.
-            (elisp/ert/log--error name
-                                  (format-message "Test %s %s" name status)))
+            ;; file in a compilation buffer.  We don’t want to find the
+            ;; “.el.instrument” files when printing the error message, so bind
+            ;; ‘load-suffixes’ temporarily to its original value.
+            (let ((load-suffixes original-load-suffixes))
+              (elisp/ert/log--error name
+                                    (format-message "Test %s %s" name status))))
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
