@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -265,6 +265,10 @@ elisp_library = rule(
 files ending in `.el`, or module objects ending in `.so` or `.dylib`.""",
             allow_files = [".el", ".so", ".dylib"],
             mandatory = True,
+            # Undocumented flag to make these rules work with
+            # “bazel build --compile_one_dependency”.  See
+            # https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
+            flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
@@ -386,6 +390,10 @@ elisp_test = rule(
             doc = "List of source files to load.",
             allow_files = [".el"],
             mandatory = True,
+            # Undocumented flag to make these rules work with
+            # “bazel build --compile_one_dependency”.  See
+            # https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
+            flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         _cc_toolchain = attr.label(
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
