@@ -22,6 +22,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 	"testing"
 	"time"
 
@@ -233,7 +234,7 @@ func Test(t *testing.T) {
 	// doesn’t work yet for nested functions.  The jump in the suffix index
 	// for the nested functions is due to
 	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
-	const wantCoverage = `SF:tests/test-lib.el
+	wantCoverage := `SF:tests/test-lib.el
 FN:26,tests/test-function
 FN:38,foo@cl-flet@1
 FN:40,foo@cl-flet@3
@@ -242,6 +243,23 @@ FNDA:0,foo@cl-flet@1
 FNDA:0,foo@cl-flet@3
 FNF:3
 FNH:1
+BRDA:29,0,0,0
+BRDA:29,0,1,1
+BRDA:33,0,0,1
+BRDA:33,0,1,0
+BRDA:43,0,0,0
+BRDA:43,0,1,1
+BRDA:43,0,2,0
+BRDA:45,0,0,0
+BRDA:45,0,1,1
+BRDA:45,0,2,1
+BRDA:45,0,3,0
+BRDA:45,1,0,1
+BRDA:45,1,1,0
+BRDA:47,0,0,1
+BRDA:47,0,1,0
+BRF:15
+BRH:7
 DA:29,1
 DA:30,1
 DA:31,0
@@ -254,10 +272,21 @@ DA:38,1
 DA:39,1
 DA:40,1
 DA:41,1
-LH:10
-LF:12
+DA:43,1
+DA:44,1
+DA:45,1
+DA:46,0
+DA:47,1
+DA:48,1
+DA:49,0
+LH:15
+LF:19
 end_of_record
 `
+	if strings.HasPrefix(emacsVersion, "26.") {
+		// No branch coverage under Emacs 26 expected.
+		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
+	}
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
 		t.Error("coverage report (-got +want):\n", diff)
 	}

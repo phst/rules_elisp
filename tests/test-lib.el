@@ -38,7 +38,15 @@
   (cl-flet ((foo () 1))
     (message "%d" (foo)))
   (cl-flet ((foo () 2))
-    (message "%d" (foo))))
+    (message "%d" (foo)))
+  ;; More branch coverage examples.
+  (cond
+   (arg)
+   ((or (eq arg 'foo) (and (not arg) 77) (memq arg '(1 2 3))) arg)
+   ((not arg)))
+  (condition-case nil
+      (message "%S" arg)
+    (error arg)))
 
 (provide 'tests/test-lib)
 ;;; test-lib.el ends here
