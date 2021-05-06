@@ -46,6 +46,11 @@
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
 
+;; Customizable Edebug behavior only appeared in Emacs 27.
+(defvar edebug-behavior-alist)
+(defvar edebug-after-instrumentation-function)
+(defvar edebug-new-definition-function)
+
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -54,6 +59,13 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
   (let* ((attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
+         ;; If possible, we perform our own coverage instrumentation, but that’s
+         ;; only possible in Emacs 27.
+         (edebug-behavior-alist (cons '(elisp/ert/coverage
+                                        elisp/ert/edebug--enter
+                                        elisp/ert/edebug--before
+                                        elisp/ert/edebug--after)
+                                      (bound-and-true-p edebug-behavior-alist)))
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory (concat "/:" temp-dir))
@@ -94,8 +106,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             ;; The coverage manifest uses ISO-8859-1, see
             ;; https://github.com/bazelbuild/bazel/blob/3.1.0/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L68.
             (coding-system-for-read 'iso-8859-1-unix)
-            (instrumented-files ())
-            (instrumented-names ()))
+            (instrumented-files ()))
         (with-temp-buffer
           (insert-file-contents (concat "/:" coverage-manifest))
           (while (not (eobp))
@@ -125,16 +136,6 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                  :test #'file-equal-p))
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
-        ;; Check for duplicate names, if possible.  Duplicates cause subtle
-        ;; errors that are otherwise very hard to debug,
-        ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41853.
-        (when (boundp 'edebug-new-definition-function)  ; new in Emacs 27
-          (add-function
-           :before edebug-new-definition-function
-           (lambda (name)
-             (when (memq name instrumented-names)
-               (error "Symbol ‘%s’ instrumented twice" name))
-             (push name instrumented-names))))
         (when (version< emacs-version "28.1")
           ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
           ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
@@ -363,7 +364,10 @@ visiting the file."
         (load-file-name fullname)
         (set-auto-coding-for-load t)
         (inhibit-file-name-operation nil)
-        (edebug-all-defs t))
+        (edebug-all-defs t)
+        (edebug-new-definition-function #'elisp/ert/new--definition)
+        (edebug-after-instrumentation-function
+         #'elisp/ert/after--instrumentation))
     (with-current-buffer buffer
       (insert-file-contents fullname :visit)
       ;; The file buffer needs to be current for Edebug
@@ -379,6 +383,89 @@ visiting the file."
     (do-after-load-evaluation fullname)
     (progress-reporter-done reporter)
     buffer))
+
+(defun elisp/ert/new--definition (name)
+  "Enable line coverage collection for NAME.
+This can be used as ‘edebug-new-definition-function’."
+  (cl-check-type name symbol)
+  ;; Check for duplicate names, if possible.  Duplicates cause subtle errors
+  ;; that are otherwise very hard to debug,
+  ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41853.
+  (when (get name 'edebug-behavior)
+    (error "Symbol ‘%s’ instrumented twice" name))
+  (put name 'edebug-behavior 'elisp/ert/coverage)
+  (let ((offsets (caddr (get name 'edebug))))
+    ;; Unlike Edebug, we initialize the frequencies to nil and only set the
+    ;; “before” entry to a non-nil value so that we can easily distinguish
+    ;; between “before” and “after” positions later.
+    (put name 'elisp/ert/frequencies (make-vector (length offsets) nil))))
+
+(defun elisp/ert/after--instrumentation (form)
+  "Instrument FORM to collect line coverage information.
+This can be used as ‘edebug-after-instrumentation-function’.
+Return FORM."
+  (elisp/ert/instrument--form nil form)
+  form)
+
+(defun elisp/ert/instrument--form (vector form)
+  "Instrument FORM to collect line coverage information.
+VECTOR is either nil (for a toplevel definition) or a frequency
+vector with the same length as the offset vector.  The vector is
+attached to the ‘elisp/ert/frequencies’ property of the symbol
+being defined."
+  (cl-check-type vector (or null vector))
+  (pcase form
+    (`(edebug-enter ',func ,_args ,body)
+     (let ((vector (get func 'elisp/ert/frequencies)))
+       (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
+       (elisp/ert/instrument--form vector body)))
+    (`(edebug-after (edebug-before ,before-index) ,after-index ,form)
+     (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
+     (cl-check-type before-index natnum)  ; not yet prepared
+     (cl-check-type after-index natnum)
+     (cl-check-type (aref vector before-index) null)
+     (cl-check-type (aref vector after-index) null)
+     ;; We only set the “before” entry to a non-nil value so that we can easily
+     ;; distinguish between “before” and “after” positions later.  We have to do
+     ;; this in ‘edebug-after-instrumentation-function’ because otherwise we
+     ;; couldn’t distinguish between forms that aren’t instrumented and forms
+     ;; that are instrumented but not executed.
+     (aset vector before-index 0)
+     (elisp/ert/instrument--form vector form))
+    ((pred elisp/ert/proper--list-p)
+     (dolist (element form)
+       (elisp/ert/instrument--form vector element)))))
+
+;; Current frequency vector, dynamically bound by ‘elisp/ert/edebug--enter’.
+(defvar elisp/ert/frequency--vector)
+
+(defun elisp/ert/edebug--enter (func args body)
+  "Implementation of ‘edebug-enter’ for ERT coverage instrumentation.
+See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
+  (cl-check-type func symbol)
+  (cl-check-type args list)
+  (cl-check-type body function)
+  (let ((elisp/ert/frequency--vector (get func 'elisp/ert/frequencies)))
+    (funcall body)))
+
+(defun elisp/ert/edebug--before (before-index)
+  "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
+BEFORE-INDEX is the index into ‘elisp/ert/frequency--vector’ for
+the beginning of the form.  Return BEFORE-INDEX."
+  (cl-check-type before-index natnum)
+  ;; Increment hit count.
+  (cl-incf (aref elisp/ert/frequency--vector before-index))
+  before-index)
+
+(defun elisp/ert/edebug--after (before-index after-index value)
+  "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
+BEFORE-INDEX and AFTER-INDEX are the indices into
+‘elisp/ert/frequency--vector’ for the beginning and end of the
+form, respectively.  VALUE is the value of the form.  Return
+VALUE."
+  (cl-check-type before-index natnum)
+  (cl-check-type after-index natnum)
+  value)
 
 (defun elisp/ert/write--coverage-report (coverage-dir buffers)
   "Write a coverage report to a file in COVERAGE-DIR.
@@ -409,7 +496,9 @@ file that has been instrumented with Edebug."
       ;; Yuck!  More messing around with Edebug internals.
       (dolist (data edebug-form-data)
         (let* ((name (edebug--form-data-name data))
-               (frequencies (get name 'edebug-freq-count))
+               (ours (eq (get name 'edebug-behavior) 'elisp/ert/coverage))
+               (frequencies
+                (get name (if ours 'elisp/ert/frequencies 'edebug-freq-count)))
                ;; We don’t really know the number of function calls,
                ;; so assume it’s the same as the hit count of the
                ;; first breakpoint.
@@ -433,8 +522,14 @@ file that has been instrumented with Edebug."
                    ;; closing parenthesis or space.  We don’t consider this a
                    ;; covered line since it typically only contains unimportant
                    ;; pieces of the form.
-                   (unless (memql (char-syntax (char-after position))
-                                  '(?\) ?\s))
+                   (when (if ours
+                             ;; If we added our own coverage instrumentation,
+                             ;; the frequency is set only for form beginnings.
+                             freq
+                           ;; Otherwise, check whether we are probably at a form
+                           ;; beginning.
+                           (not (memql (char-syntax (char-after position))
+                                       '(?\) ?\s))))
                      (let ((line (line-number-at-pos position)))
                        (cl-callf max (gethash line lines 0) freq))))
           (push (list (line-number-at-pos begin)
