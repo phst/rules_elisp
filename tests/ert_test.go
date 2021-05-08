@@ -21,6 +21,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"testing"
 	"time"
 
@@ -114,6 +115,13 @@ func Test(t *testing.T) {
 		f, ok := p.Last().(cmp.StructField)
 		return ok && f.Name() == "Description"
 	}
+	type property struct {
+		Name  string `xml:"name,attr"`
+		Value string `xml:"value,attr"`
+	}
+	type properties struct {
+		Properties []property `xml:"property"`
+	}
 	type testCase struct {
 		Name      string    `xml:"name,attr"`
 		ClassName string    `xml:"classname,attr"`
@@ -123,19 +131,30 @@ func Test(t *testing.T) {
 		Failure   message   `xml:"failure"`
 	}
 	type report struct {
-		XMLName   xml.Name
-		Name      string     `xml:"name,attr"`
-		Tests     int        `xml:"tests,attr"`
-		Errors    int        `xml:"errors,attr"`
-		Failures  int        `xml:"failures,attr"`
-		Skipped   int        `xml:"skipped,attr"`
-		Time      float64    `xml:"time,attr"`
-		Timestamp timestamp  `xml:"timestamp,attr"`
-		TestCases []testCase `xml:"testcase"`
+		XMLName    xml.Name
+		Name       string     `xml:"name,attr"`
+		Tests      int        `xml:"tests,attr"`
+		Errors     int        `xml:"errors,attr"`
+		Failures   int        `xml:"failures,attr"`
+		Skipped    int        `xml:"skipped,attr"`
+		Time       float64    `xml:"time,attr"`
+		Timestamp  timestamp  `xml:"timestamp,attr"`
+		Properties properties `xml:"properties"`
+		TestCases  []testCase `xml:"testcase"`
 	}
 	var gotReport report
 	if err := xml.Unmarshal(b, &gotReport); err != nil {
 		t.Error(err)
+	}
+	var emacsVersion string
+	for _, prop := range gotReport.Properties.Properties {
+		if prop.Name == "emacs-version" {
+			emacsVersion = prop.Value
+			break
+		}
+	}
+	if !regexp.MustCompile(`^\d+\.\d+`).MatchString(emacsVersion) {
+		t.Errorf("invalid Emacs version %q", emacsVersion)
 	}
 	// Margin for time comparisons.  One hour is excessive, but we only
 	// care about catching obvious bugs here.
@@ -144,14 +163,15 @@ func Test(t *testing.T) {
 	// time is nonnegative and below the margin.
 	wantElapsed := margin.Seconds() / 2
 	wantReport := report{
-		XMLName:   xml.Name{"", "testsuite"},
-		Name:      "ERT",
-		Tests:     12,
-		Errors:    0,
-		Failures:  7,
-		Skipped:   1,
-		Time:      wantElapsed,
-		Timestamp: timestamp(time.Now()),
+		XMLName:    xml.Name{"", "testsuite"},
+		Name:       "ERT",
+		Tests:      12,
+		Errors:     0,
+		Failures:   7,
+		Skipped:    1,
+		Time:       wantElapsed,
+		Timestamp:  timestamp(time.Now()),
+		Properties: properties{[]property{{"emacs-version", emacsVersion}}},
 		TestCases: []testCase{
 			{
 				Name: "abort", ClassName: "ERT", Time: wantElapsed,

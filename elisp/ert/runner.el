@@ -249,7 +249,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                              (time-subtract nil start-time)))
                 ;; No timezone or fractional seconds allowed.
                 (timestamp . ,(format-time-string "%FT%T" start-time)))
-               (properties)  ; required
+               (properties () (property ((name . "emacs-version")
+                                         (value . ,emacs-version))))
                ,@(nreverse test-reports)
                (system-out) (system-err)))))
           (let ((coding-system-for-write 'utf-8-unix))
