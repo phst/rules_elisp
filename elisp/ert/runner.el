@@ -422,8 +422,8 @@ being defined."
     ((or `(edebug-after (edebug-before ,index) ,_after-index ,form)
          `(edebug-after ,_ ,index ,form))
      (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
-     (cl-check-type index natnum)  ; not yet prepared
-     (cl-check-type (aref vector index) null)
+     (cl-check-type index natnum)
+     (cl-check-type (aref vector index) null)  ; not yet prepared
      ;; We prefer setting the “before” entry to a non-nil value so that we can
      ;; easily distinguish between “before” and “after” positions later.  We
      ;; have to do this in ‘edebug-after-instrumentation-function’ because
