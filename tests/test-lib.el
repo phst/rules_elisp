@@ -24,11 +24,14 @@
 (require 'cl-lib)
 
 (defun tests/test-function (arg)
-  ;; The two branches should be on separate lines, for line coverage testing.
-  (if arg
+  ;; The condition and the two branches should be on separate lines, for line
+  ;; coverage testing.
+  (if
+      arg
       (message "Foo")
     (message "Bar"))
-  (if (not arg)
+  (if
+      (not arg)
       (message "Bar")
     (message "Foo"))
   ;; Multiple local functions with the same name should work.

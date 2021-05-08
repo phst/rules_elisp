@@ -419,18 +419,19 @@ being defined."
      (let ((vector (get func 'elisp/ert/frequencies)))
        (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
        (elisp/ert/instrument--form vector body)))
-    (`(edebug-after (edebug-before ,before-index) ,after-index ,form)
+    ((or `(edebug-after (edebug-before ,index) ,_after-index ,form)
+         `(edebug-after ,_ ,index ,form))
      (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
-     (cl-check-type before-index natnum)  ; not yet prepared
-     (cl-check-type after-index natnum)
-     (cl-check-type (aref vector before-index) null)
-     (cl-check-type (aref vector after-index) null)
-     ;; We only set the “before” entry to a non-nil value so that we can easily
-     ;; distinguish between “before” and “after” positions later.  We have to do
-     ;; this in ‘edebug-after-instrumentation-function’ because otherwise we
-     ;; couldn’t distinguish between forms that aren’t instrumented and forms
-     ;; that are instrumented but not executed.
-     (aset vector before-index 0)
+     (cl-check-type index natnum)  ; not yet prepared
+     (cl-check-type (aref vector index) null)
+     ;; We prefer setting the “before” entry to a non-nil value so that we can
+     ;; easily distinguish between “before” and “after” positions later.  We
+     ;; have to do this in ‘edebug-after-instrumentation-function’ because
+     ;; otherwise we couldn’t distinguish between forms that aren’t instrumented
+     ;; and forms that are instrumented but not executed.  The second branch of
+     ;; the ‘or’ above is chosen for forms without a “before” entry, in which
+     ;; case we have to fall back to the “after” entry.
+     (aset vector index 0)
      (elisp/ert/instrument--form vector form))
     ((pred elisp/ert/proper--list-p)
      (dolist (element form)
@@ -451,11 +452,14 @@ See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
 (defun elisp/ert/edebug--before (before-index)
   "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
 BEFORE-INDEX is the index into ‘elisp/ert/frequency--vector’ for
-the beginning of the form.  Return BEFORE-INDEX."
+the beginning of the form.  Return t."
   (cl-check-type before-index natnum)
-  ;; Increment hit count.
+  ;; Increment hit count.  We prefer doing that here because the beginning of a
+  ;; form tends to be more interesting and the end, and we’d like to increment
+  ;; the hit count for the first line of a form instead of the last.  See
+  ;; ‘elisp/ert/edebug--after’ for a case where this isn’t possible.
   (cl-incf (aref elisp/ert/frequency--vector before-index))
-  before-index)
+  t)
 
 (defun elisp/ert/edebug--after (before-index after-index value)
   "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
@@ -463,8 +467,16 @@ BEFORE-INDEX and AFTER-INDEX are the indices into
 ‘elisp/ert/frequency--vector’ for the beginning and end of the
 form, respectively.  VALUE is the value of the form.  Return
 VALUE."
-  (cl-check-type before-index natnum)
   (cl-check-type after-index natnum)
+  ;; Edebug uses two different forms for instrumentation: For list forms it
+  ;; emits (edebug-after (edebug-before BEFORE-INDEX) AFTER-INDEX form), but for
+  ;; variables it just emits (edebug-after 0 AFTER-INDEX form).  We prefer
+  ;; incrementing the hit count for the beginning of the form, see
+  ;; ‘elisp/ert/edebug--before’.  However, where this isn’t possible, increment
+  ;; the hit count for the end of them form.  This should only happen for
+  ;; variables that rarely span more than one line.
+  (unless (eq before-index t)
+    (cl-incf (aref elisp/ert/frequency--vector after-index)))
   value)
 
 (defun elisp/ert/write--coverage-report (coverage-dir buffers)
@@ -521,15 +533,19 @@ file that has been instrumented with Edebug."
                    ;; for the end.  The end position will typically contain a
                    ;; closing parenthesis or space.  We don’t consider this a
                    ;; covered line since it typically only contains unimportant
-                   ;; pieces of the form.
+                   ;; pieces of the form.  An exception is a plain variable; see
+                   ;; the discussion in ‘elisp/ert/edebug--after’.
                    (when (if ours
                              ;; If we added our own coverage instrumentation,
-                             ;; the frequency is set only for form beginnings.
+                             ;; the frequency is set only for form beginnings
+                             ;; and variables.
                              freq
                            ;; Otherwise, check whether we are probably at a form
-                           ;; beginning.
-                           (not (memql (char-syntax (char-after position))
-                                       '(?\) ?\s))))
+                           ;; beginning or after a variable.
+                           (or (not (memql (char-syntax (char-after position))
+                                           '(?\) ?\s)))
+                               (memql (char-syntax (char-before position))
+                                      '(?w ?_))))
                      (let ((line (line-number-at-pos position)))
                        (cl-callf max (gethash line lines 0) freq))))
           (push (list (line-number-at-pos begin)

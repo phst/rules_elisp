@@ -215,25 +215,27 @@ func Test(t *testing.T) {
 	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
 	const wantCoverage = `SF:tests/test-lib.el
 FN:26,tests/test-function
-FN:35,foo@cl-flet@1
-FN:37,foo@cl-flet@3
+FN:38,foo@cl-flet@1
+FN:40,foo@cl-flet@3
 FNDA:1,tests/test-function
 FNDA:0,foo@cl-flet@1
 FNDA:0,foo@cl-flet@3
 FNF:3
 FNH:1
-DA:28,1
-DA:29,0
+DA:29,1
 DA:30,1
-DA:31,1
+DA:31,0
 DA:32,1
-DA:33,0
+DA:33,1
+DA:34,1
 DA:35,1
-DA:36,1
-DA:37,1
+DA:36,0
 DA:38,1
-LH:8
-LF:10
+DA:39,1
+DA:40,1
+DA:41,1
+LH:10
+LF:12
 end_of_record
 `
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
