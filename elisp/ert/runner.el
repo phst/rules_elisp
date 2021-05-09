@@ -735,24 +735,25 @@ file that has been instrumented with Edebug."
            for cov across coverage
            for freq = (funcall frequency cov)
            for position = (+ begin offset)
-           do
            ;; Edebug adds two elements per form to the frequency and offset
            ;; tables, one for the beginning of the form and one for the end.
            ;; The end position will typically contain a closing parenthesis or
            ;; space.  We don’t consider this a covered line since it typically
            ;; only contains unimportant pieces of the form.  An exception is a
            ;; plain variable; see the discussion in ‘elisp/ert/edebug--after’.
-           (when (if ours
-                     ;; If we added our own coverage instrumentation, the
-                     ;; coverage data is set only for form beginnings and
-                     ;; variables.
-                     cov
-                   ;; Otherwise, check whether we are probably at a form
-                   ;; beginning or after a variable.
-                   (or (not (memql (char-syntax (char-after position))
-                                   '(?\) ?\s)))
-                       (memql (char-syntax (char-before position))
-                              '(?w ?_))))
+           for ok = (if ours
+                        ;; If we added our own coverage instrumentation, the
+                        ;; coverage data is set only for form beginnings and
+                        ;; variables.
+                        cov
+                      ;; Otherwise, check whether we are probably at a form
+                      ;; beginning or after a variable.
+                      (or (not (memql (char-syntax (char-after position))
+                                      '(?\) ?\s)))
+                          (memql (char-syntax (char-before position))
+                                 '(?w ?_))))
+           do
+           (when ok
              (let ((line (line-number-at-pos position)))
                (cl-callf max (gethash line lines 0) freq)
                (when ours
