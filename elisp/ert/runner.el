@@ -784,33 +784,33 @@ file that has been instrumented with Edebug."
       (insert (format "FNDA:%d,%s\n" (caddr func) (cadr func))))
     (insert (format "FNF:%d\n" (length functions)))
     (insert (format "FNH:%d\n" functions-hit))
-    ;; Convert branch table into list used for BRDA lines.
-    (let ((list ())
+    ;; Convert branch table into a vector used for BRDA lines.
+    (let ((vector (make-vector (hash-table-count branches) nil))
           (branches-hit 0)
           (branches-found 0))
       (cl-loop
        for line hash-keys of branches using (hash-values branches)
+       and elem across-ref vector
        do
        (cl-check-type line natnum)
        (cl-check-type branches hash-table)
        ;; Generate one block per branching form for this line.
-       (let ((blocks ()))
+       (let ((blocks (make-vector (hash-table-count branches) nil)))
          (cl-loop
           for offset hash-keys of branches using (hash-values branches)
+          and block across-ref blocks
           do
           (cl-check-type offset natnum)
           (cl-check-type branches vector)
-          (push (cons offset branches) blocks)
+          (setf block (cons offset branches))
           (cl-incf branches-found (length branches))
           (cl-incf branches-hit (cl-count 0 branches :test-not #'eql)))
-         ;; Sort block list for stability by offset.
-         (cl-callf sort blocks #'car-less-than-car)
-         (push (cons line blocks) list)))
-      (cl-callf sort list #'car-less-than-car)
+         (setf elem (cons line blocks))))
       (cl-loop
-       for (line . blocks) in list
+       for (line . blocks) across (sort vector #'car-less-than-car)
        do (cl-loop
-           for (_offset . frequencies) in blocks
+           ;; Sort block list for stability by offset.
+           for (_offset . frequencies) across (sort blocks #'car-less-than-car)
            and block-index from 0
            do (cl-loop
                for frequency across frequencies
@@ -820,17 +820,18 @@ file that has been instrumented with Edebug."
       ;; Only print branch summary if there were any branches at all.
       (unless (eql branches-found 0)
         (insert (format "BRF:%d\nBRH:%d\n" branches-found branches-hit))))
-    ;; Convert line frequency table into list used for DA lines.
-    (let ((list (cl-loop for line hash-keys of lines using (hash-values freq)
-                         collect (cons line freq)))
+    ;; Convert line frequency table into a vector used for DA lines.
+    (let ((vector (make-vector (hash-table-count lines) nil))
           (lines-hit 0))
-      (cl-callf sort list #'car-less-than-car)
-      (cl-loop for (line . freq) in list
+      (cl-loop for line hash-keys of lines using (hash-values freq)
+               and elem across-ref vector
+               do (setf elem (cons line freq)))
+      (cl-loop for (line . freq) across (sort vector #'car-less-than-car)
                do
                (cl-incf lines-hit (min freq 1))
                (insert (format "DA:%d,%d\n" line freq)))
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
-                      lines-hit (hash-table-count lines))))))
+                      lines-hit (length vector))))))
 
 (defun elisp/ert/log--error (test message)
   "Log an error for TEST.
