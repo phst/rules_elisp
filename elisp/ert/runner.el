@@ -709,14 +709,16 @@ file that has been instrumented with Edebug."
                (ours (eq (get name 'edebug-behavior) 'elisp/ert/coverage))
                (coverage
                 (get name (if ours 'elisp/ert/coverage 'edebug-freq-count)))
+               (frequency (if ours
+                              (lambda (cov)
+                                (and cov (elisp/ert/coverage--data-hits cov)))
+                            #'identity))
                ;; We don’t really know the number of function calls,
                ;; so assume it’s the same as the hit count of the
                ;; first breakpoint.
                (calls (cl-loop
                        for cov across coverage
-                       for hits = (if (and ours cov)
-                                      (elisp/ert/coverage--data-hits cov)
-                                    cov)
+                       for hits = (funcall frequency cov)
                        thereis (and (not (eql hits 0)) hits)
                        finally return 0))
                (stuff (get name 'edebug))
@@ -730,9 +732,7 @@ file that has been instrumented with Edebug."
                    ;; This can’t be ‘and’ due to
                    ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
                    for cov across coverage
-                   for freq = (if (and ours cov)
-                                  (elisp/ert/coverage--data-hits cov)
-                                cov)
+                   for freq = (funcall frequency cov)
                    for position = (+ begin offset)
                    do
                    ;; Edebug adds two elements per form to the frequency and
