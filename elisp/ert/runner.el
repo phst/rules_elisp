@@ -703,80 +703,77 @@ file that has been instrumented with Edebug."
         (branches (make-hash-table :test #'eql)))
     (with-current-buffer buffer
       (widen)
-      ;; Yuck!  More messing around with Edebug internals.
-      (dolist (data edebug-form-data)
-        (let* ((name (edebug--form-data-name data))
-               (ours (eq (get name 'edebug-behavior) 'elisp/ert/coverage))
-               (coverage
-                (get name (if ours 'elisp/ert/coverage 'edebug-freq-count)))
-               (frequency (if ours
-                              (lambda (cov)
-                                (and cov (elisp/ert/coverage--data-hits cov)))
-                            #'identity))
-               ;; We don’t really know the number of function calls,
-               ;; so assume it’s the same as the hit count of the
-               ;; first breakpoint.
-               (calls (cl-loop
-                       for cov across coverage
-                       for hits = (funcall frequency cov)
-                       thereis (and (not (eql hits 0)) hits)
-                       finally return 0))
-               (stuff (get name 'edebug))
-               (begin (car stuff))
-               (offsets (caddr stuff)))
-          (unless (eq (marker-buffer begin) buffer)
-            (error "Function %s got redefined in some other file" name))
-          (cl-incf functions-hit (min calls 1))
-          (cl-assert (eql (length coverage) (length offsets)) :show-args)
-          (cl-loop
-           for offset across offsets
-           ;; This can’t be ‘and’ due to
-           ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
-           for cov across coverage
-           for freq = (funcall frequency cov)
-           for position = (+ begin offset)
-           ;; Edebug adds two elements per form to the frequency and offset
-           ;; tables, one for the beginning of the form and one for the end.
-           ;; The end position will typically contain a closing parenthesis or
-           ;; space.  We don’t consider this a covered line since it typically
-           ;; only contains unimportant pieces of the form.  An exception is a
-           ;; plain variable; see the discussion in ‘elisp/ert/edebug--after’.
-           for ok = (if ours
-                        ;; If we added our own coverage instrumentation, the
-                        ;; coverage data is set only for form beginnings and
-                        ;; variables.
-                        cov
-                      ;; Otherwise, check whether we are probably at a form
-                      ;; beginning or after a variable.
-                      (or (not (memql (char-syntax (char-after position))
-                                      '(?\) ?\s)))
-                          (memql (char-syntax (char-before position))
-                                 '(?w ?_))))
-           do
-           (when ok
-             (let ((line (line-number-at-pos position)))
-               (cl-callf max (gethash line lines 0) freq)
-               (when ours
-                 ;; Collect branch coverage information if the form has multiple
-                 ;; branches.
-                 (when-let ((frequencies
-                             (elisp/ert/coverage--data-branches cov)))
-                   ;; Remove branches that Edebug didn’t instrument.
-                   (cl-callf2 cl-remove nil frequencies)
-                   ;; If fewer than two branches are left, we don’t really have
-                   ;; any meaningful branch coverage data.
-                   (when (> (length frequencies) 1)
-                     (let* ((u (elisp/ert/hash--get-or-put line branches
-                                 (make-hash-table :test #'eql)))
-                            (v (elisp/ert/hash--get-or-put offset u
-                                 (make-vector (length frequencies) 0))))
-                       (cl-loop for f across frequencies
-                                and n across-ref v
-                                do (cl-callf max n f)))))))))
-          (push (list (line-number-at-pos begin)
-                      (elisp/ert/sanitize--string (symbol-name name))
-                      calls)
-                functions))))
+      (cl-loop
+       for data in edebug-form-data
+       ;; Yuck!  More messing around with Edebug internals.
+       for name = (edebug--form-data-name data)
+       for ours = (eq (get name 'edebug-behavior) 'elisp/ert/coverage)
+       for coverage = (get name (if ours 'elisp/ert/coverage 'edebug-freq-count))
+       for frequency = (if ours
+                           (lambda (cov)
+                             (and cov (elisp/ert/coverage--data-hits cov)))
+                         #'identity)
+       ;; We don’t really know the number of function calls, so assume it’s the
+       ;; same as the hit count of the first breakpoint.
+       for calls = (cl-loop for cov across coverage
+                            for hits = (funcall frequency cov)
+                            thereis (and (not (eql hits 0)) hits)
+                            finally return 0)
+       for (begin _ offsets) = (get name 'edebug)
+       do
+       (unless (eq (marker-buffer begin) buffer)
+         (error "Function %s got redefined in some other file" name))
+       (cl-incf functions-hit (min calls 1))
+       (cl-assert (eql (length coverage) (length offsets)) :show-args)
+       (cl-loop
+        for offset across offsets
+        ;; This can’t be ‘and’ due to
+        ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
+        for cov across coverage
+        for freq = (funcall frequency cov)
+        for position = (+ begin offset)
+        ;; Edebug adds two elements per form to the frequency and offset tables,
+        ;; one for the beginning of the form and one for the end.  The end
+        ;; position will typically contain a closing parenthesis or space.  We
+        ;; don’t consider this a covered line since it typically only contains
+        ;; unimportant pieces of the form.  An exception is a plain variable;
+        ;; see the discussion in ‘elisp/ert/edebug--after’.
+        for ok = (if ours
+                     ;; If we added our own coverage instrumentation, the
+                     ;; coverage data is set only for form beginnings and
+                     ;; variables.
+                     cov
+                   ;; Otherwise, check whether we are probably at a form
+                   ;; beginning or after a variable.
+                   (or (not (memql (char-syntax (char-after position))
+                                   '(?\) ?\s)))
+                       (memql (char-syntax (char-before position))
+                              '(?w ?_))))
+        do
+        (when ok
+          (let ((line (line-number-at-pos position)))
+            (cl-callf max (gethash line lines 0) freq)
+            (when ours
+              ;; Collect branch coverage information if the form has multiple
+              ;; branches.
+              (when-let ((frequencies
+                          (elisp/ert/coverage--data-branches cov)))
+                ;; Remove branches that Edebug didn’t instrument.
+                (cl-callf2 cl-remove nil frequencies)
+                ;; If fewer than two branches are left, we don’t really have any
+                ;; meaningful branch coverage data.
+                (when (> (length frequencies) 1)
+                  (let* ((u (elisp/ert/hash--get-or-put line branches
+                              (make-hash-table :test #'eql)))
+                         (v (elisp/ert/hash--get-or-put offset u
+                              (make-vector (length frequencies) 0))))
+                    (cl-loop for f across frequencies
+                             and n across-ref v
+                             do (cl-callf max n f)))))))))
+       (push (list (line-number-at-pos begin)
+                   (elisp/ert/sanitize--string (symbol-name name))
+                   calls)
+             functions)))
     (cl-callf sort functions #'car-less-than-car)
     ;; The expected format is described to some extend in the
     ;; geninfo(1) man page.
@@ -791,24 +788,24 @@ file that has been instrumented with Edebug."
     (let ((list ())
           (branches-hit 0)
           (branches-found 0))
-      (maphash
-       (lambda (line branches)
-         (cl-check-type line natnum)
-         (cl-check-type branches hash-table)
-         ;; Generate one block per branching form for this line.
-         (let ((blocks ()))
-           (maphash
-            (lambda (offset branches)
-              (cl-check-type offset natnum)
-              (cl-check-type branches vector)
-              (push (cons offset branches) blocks)
-              (cl-incf branches-found (length branches))
-              (cl-incf branches-hit (cl-count 0 branches :test-not #'eql)))
-            branches)
-           ;; Sort block list for stability by offset.
-           (cl-callf sort blocks #'car-less-than-car)
-           (push (cons line blocks) list)))
-       branches)
+      (cl-loop
+       for line hash-keys of branches using (hash-values branches)
+       do
+       (cl-check-type line natnum)
+       (cl-check-type branches hash-table)
+       ;; Generate one block per branching form for this line.
+       (let ((blocks ()))
+         (cl-loop
+          for offset hash-keys of branches using (hash-values branches)
+          do
+          (cl-check-type offset natnum)
+          (cl-check-type branches vector)
+          (push (cons offset branches) blocks)
+          (cl-incf branches-found (length branches))
+          (cl-incf branches-hit (cl-count 0 branches :test-not #'eql)))
+         ;; Sort block list for stability by offset.
+         (cl-callf sort blocks #'car-less-than-car)
+         (push (cons line blocks) list)))
       (cl-callf sort list #'car-less-than-car)
       (cl-loop
        for (line . blocks) in list
@@ -824,13 +821,14 @@ file that has been instrumented with Edebug."
       (unless (eql branches-found 0)
         (insert (format "BRF:%d\nBRH:%d\n" branches-found branches-hit))))
     ;; Convert line frequency table into list used for DA lines.
-    (let ((list ())
+    (let ((list (cl-loop for line hash-keys of lines using (hash-values freq)
+                         collect (cons line freq)))
           (lines-hit 0))
-      (maphash (lambda (line freq) (push (cons line freq) list)) lines)
       (cl-callf sort list #'car-less-than-car)
-      (dolist (line list)
-        (cl-incf lines-hit (min (cdr line) 1))
-        (insert (format "DA:%d,%d\n" (car line) (cdr line))))
+      (cl-loop for (line . freq) in list
+               do
+               (cl-incf lines-hit (min freq 1))
+               (insert (format "DA:%d,%d\n" line freq)))
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (hash-table-count lines))))))
 
