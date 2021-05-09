@@ -840,55 +840,57 @@ If possible, format the message according to the
 GNU Coding Standards; see Info node ‘(standards) Errors’."
   (cl-check-type message string)
   (cl-check-type test symbol)
-  ;; Yuck!  ‘ert--test’ is an implementation detail.
-  (when-let ((file (symbol-file test 'ert--test)))
-    ;; The filename typically refers to a compiled file in the execution root.
-    ;; Try to resolve it to a source file.  See
-    ;; https://docs.bazel.build/versions/3.1.0/output_directories.html#layout-diagram.
-    (when (string-match (rx "/execroot/"
-                            (+ (not (any ?/))) ?/ ; workspace
-                            (+ (not (any ?/))) ?/ ; bazel-out
-                            (+ (not (any ?/))) ?/ ; configuration
-                            "bin/"
-                            (group (+ nonl)) ".elc" eos)
-                        file)
-      ;; We can use the filename relative to the Bazel binary directory since
-      ;; that corresponds to a source filename relative to some workspace root.
-      ;; ‘find-function-search-for-symbol’ will find the corresponding source
-      ;; file because all workspace roots are in the ‘load-path’.
-      (cl-callf2 match-string-no-properties 1 file))
-    (let ((buffers (buffer-list))
-          (directory default-directory)
-          ;; Try to print nice and short filenames.  We do this by using the
-          ;; filename relative to the test working directory
-          ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).  Prevent both ‘find-file’ and
-          ;; ‘vc-refresh-state’ from following symbolic links to the original
-          ;; source file.
-          (find-file-visit-truename nil)
-          (vc-handled-backends nil))
-      (when-let ((definition
-                   ;; ‘find-function-search-for-symbol’ signals errors if it
-                   ;; can’t find the library.  Since we’re only attempting to
-                   ;; print a log message here, ignore them and move on.
-                   (ignore-errors
-                     ;; Yuck!  ‘ert--test’ is an implementation detail.
-                     (find-function-search-for-symbol test 'ert--test file))))
-        (cl-destructuring-bind (buffer . point) definition
-          (with-current-buffer buffer
-            (message "%s:%d: %s"
-                     (file-relative-name buffer-file-name directory)
-                     (line-number-at-pos point :absolute)
-                     message)
-            ;; If ‘find-function-search-for-symbol’ has created a new buffer,
-            ;; kill it.
-            (unless (memq buffer buffers) (kill-buffer))))))))
+  (let ((case-fold-search nil))
+    ;; Yuck!  ‘ert--test’ is an implementation detail.
+    (when-let ((file (symbol-file test 'ert--test)))
+      ;; The filename typically refers to a compiled file in the execution root.
+      ;; Try to resolve it to a source file.  See
+      ;; https://docs.bazel.build/versions/3.1.0/output_directories.html#layout-diagram.
+      (when (string-match (rx "/execroot/"
+                              (+ (not (any ?/))) ?/ ; workspace
+                              (+ (not (any ?/))) ?/ ; bazel-out
+                              (+ (not (any ?/))) ?/ ; configuration
+                              "bin/"
+                              (group (+ nonl)) ".elc" eos)
+                          file)
+        ;; We can use the filename relative to the Bazel binary directory since
+        ;; that corresponds to a source filename relative to some workspace
+        ;; root.  ‘find-function-search-for-symbol’ will find the corresponding
+        ;; source file because all workspace roots are in the ‘load-path’.
+        (cl-callf2 match-string-no-properties 1 file))
+      (let ((buffers (buffer-list))
+            (directory default-directory)
+            ;; Try to print nice and short filenames.  We do this by using the
+            ;; filename relative to the test working directory
+            ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).  Prevent both ‘find-file’
+            ;; and ‘vc-refresh-state’ from following symbolic links to the
+            ;; original source file.
+            (find-file-visit-truename nil)
+            (vc-handled-backends nil))
+        (when-let ((definition
+                     ;; ‘find-function-search-for-symbol’ signals errors if it
+                     ;; can’t find the library.  Since we’re only attempting to
+                     ;; print a log message here, ignore them and move on.
+                     (ignore-errors
+                       ;; Yuck!  ‘ert--test’ is an implementation detail.
+                       (find-function-search-for-symbol test 'ert--test file))))
+          (cl-destructuring-bind (buffer . point) definition
+            (with-current-buffer buffer
+              (message "%s:%d: %s"
+                       (file-relative-name buffer-file-name directory)
+                       (line-number-at-pos point :absolute)
+                       message)
+              ;; If ‘find-function-search-for-symbol’ has created a new buffer,
+              ;; kill it.
+              (unless (memq buffer buffers) (kill-buffer)))))))))
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
   (cl-check-type string string)
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
-  (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string))
+  (let ((case-fold-search nil))
+    (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string)))
 
 ;; This polyfill needs to be defined before using it as type to prevent errors
 ;; during compilation.
@@ -934,14 +936,15 @@ Return SYMBOL."
 (defun elisp/ert/sanitize--xml-string (string)
   "Return a sanitized variant of STRING containing only valid XML characters."
   (cl-check-type string string)
-  (replace-regexp-in-string
-   ;; https://www.w3.org/TR/xml/#charsets
-   (rx (not (any #x9 #xA #xD (#x20 . #xD7FF) (#xE000 . #xFFFD)
-                 (#x10000 . #x10FFFF))))
-   (lambda (s)
-     (let ((c (string-to-char s)))
-       (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
-   string :fixedcase :literal))
+  (let ((case-fold-search nil))
+    (replace-regexp-in-string
+     ;; https://www.w3.org/TR/xml/#charsets
+     (rx (not (any #x9 #xA #xD (#x20 . #xD7FF) (#xE000 . #xFFFD)
+                   (#x10000 . #x10FFFF))))
+     (lambda (s)
+       (let ((c (string-to-char s)))
+         (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
+     string :fixedcase :literal)))
 
 (defun elisp/ert/edebug--unique (_cursor spec)
   "Handle the ‘:unique’ Edebug specification.
