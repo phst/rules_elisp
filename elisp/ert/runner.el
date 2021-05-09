@@ -728,50 +728,50 @@ file that has been instrumented with Edebug."
             (error "Function %s got redefined in some other file" name))
           (cl-incf functions-hit (min calls 1))
           (cl-assert (eql (length coverage) (length offsets)) :show-args)
-          (cl-loop for offset across offsets
-                   ;; This can’t be ‘and’ due to
-                   ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
-                   for cov across coverage
-                   for freq = (funcall frequency cov)
-                   for position = (+ begin offset)
-                   do
-                   ;; Edebug adds two elements per form to the frequency and
-                   ;; offset tables, one for the beginning of the form and one
-                   ;; for the end.  The end position will typically contain a
-                   ;; closing parenthesis or space.  We don’t consider this a
-                   ;; covered line since it typically only contains unimportant
-                   ;; pieces of the form.  An exception is a plain variable; see
-                   ;; the discussion in ‘elisp/ert/edebug--after’.
-                   (when (if ours
-                             ;; If we added our own coverage instrumentation,
-                             ;; the coverage data is set only for form
-                             ;; beginnings and variables.
-                             cov
-                           ;; Otherwise, check whether we are probably at a form
-                           ;; beginning or after a variable.
-                           (or (not (memql (char-syntax (char-after position))
-                                           '(?\) ?\s)))
-                               (memql (char-syntax (char-before position))
-                                      '(?w ?_))))
-                     (let ((line (line-number-at-pos position)))
-                       (cl-callf max (gethash line lines 0) freq)
-                       (when ours
-                         ;; Collect branch coverage information if the form has
-                         ;; multiple branches.
-                         (when-let ((frequencies
-                                     (elisp/ert/coverage--data-branches cov)))
-                           ;; Remove branches that Edebug didn’t instrument.
-                           (cl-callf2 cl-remove nil frequencies)
-                           ;; If fewer than two branches are left, we don’t
-                           ;; really have any meaningful branch coverage data.
-                           (when (> (length frequencies) 1)
-                             (let* ((u (elisp/ert/hash--get-or-put line branches
-                                         (make-hash-table :test #'eql)))
-                                    (v (elisp/ert/hash--get-or-put offset u
-                                         (make-vector (length frequencies) 0))))
-                               (cl-loop for f across frequencies
-                                        and n across-ref v
-                                        do (cl-callf max n f)))))))))
+          (cl-loop
+           for offset across offsets
+           ;; This can’t be ‘and’ due to
+           ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
+           for cov across coverage
+           for freq = (funcall frequency cov)
+           for position = (+ begin offset)
+           do
+           ;; Edebug adds two elements per form to the frequency and offset
+           ;; tables, one for the beginning of the form and one for the end.
+           ;; The end position will typically contain a closing parenthesis or
+           ;; space.  We don’t consider this a covered line since it typically
+           ;; only contains unimportant pieces of the form.  An exception is a
+           ;; plain variable; see the discussion in ‘elisp/ert/edebug--after’.
+           (when (if ours
+                     ;; If we added our own coverage instrumentation, the
+                     ;; coverage data is set only for form beginnings and
+                     ;; variables.
+                     cov
+                   ;; Otherwise, check whether we are probably at a form
+                   ;; beginning or after a variable.
+                   (or (not (memql (char-syntax (char-after position))
+                                   '(?\) ?\s)))
+                       (memql (char-syntax (char-before position))
+                              '(?w ?_))))
+             (let ((line (line-number-at-pos position)))
+               (cl-callf max (gethash line lines 0) freq)
+               (when ours
+                 ;; Collect branch coverage information if the form has multiple
+                 ;; branches.
+                 (when-let ((frequencies
+                             (elisp/ert/coverage--data-branches cov)))
+                   ;; Remove branches that Edebug didn’t instrument.
+                   (cl-callf2 cl-remove nil frequencies)
+                   ;; If fewer than two branches are left, we don’t really have
+                   ;; any meaningful branch coverage data.
+                   (when (> (length frequencies) 1)
+                     (let* ((u (elisp/ert/hash--get-or-put line branches
+                                 (make-hash-table :test #'eql)))
+                            (v (elisp/ert/hash--get-or-put offset u
+                                 (make-vector (length frequencies) 0))))
+                       (cl-loop for f across frequencies
+                                and n across-ref v
+                                do (cl-callf max n f)))))))))
           (push (list (line-number-at-pos begin)
                       (elisp/ert/sanitize--string (symbol-name name))
                       calls)
