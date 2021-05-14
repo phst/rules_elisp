@@ -487,8 +487,12 @@ as the offset vector.  The vector is attached to the
        (when-let ((branches (elisp/ert/instrument--branches vector form)))
          (setf (elisp/ert/coverage--data-branches data) branches))))
     ((pred elisp/ert/proper--list-p)
+    ;; Use ‘dolist’ where possible to avoid deep recursion.
      (dolist (element form)
-       (elisp/ert/instrument--form vector element)))))
+       (elisp/ert/instrument--form vector element)))
+    (`(,car . ,cdr)
+     (elisp/ert/instrument--form vector car)
+     (elisp/ert/instrument--form vector cdr))))
 
 (defun elisp/ert/instrument--branches (vector form)
   "Instrument a branching FORM.

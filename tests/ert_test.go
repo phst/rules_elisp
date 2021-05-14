@@ -279,8 +279,9 @@ DA:46,0
 DA:47,1
 DA:48,1
 DA:49,0
-LH:15
-LF:19
+DA:51,1
+LH:16
+LF:20
 end_of_record
 `
 	if strings.HasPrefix(emacsVersion, "26.") {

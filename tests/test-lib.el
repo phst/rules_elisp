@@ -46,7 +46,9 @@
    ((not arg)))
   (condition-case nil
       (message "%S" arg)
-    (error arg)))
+    (error arg))
+  ;; Dotted forms should also work.
+  (message "%S" `(,arg . q)))
 
 (provide 'tests/test-lib)
 ;;; test-lib.el ends here
