@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,12 @@ fi
 
 bazel test //... || exit
 
+case "$(uname -ms)" in
+  'Darwin arm64') versions=(27.2) ;;
+  *) versions=(26.{1,2,3} 27.{1,2}) ;;
+esac
+
 # Test versioned toolchains.
-for version in 26.{1,2,3} 27.{1,2}; do
+for version in "${versions[@]}"; do
   bazel test --extra_toolchains="//elisp:emacs_${version:?}_toolchain" //... || exit
 done
