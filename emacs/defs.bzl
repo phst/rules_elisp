@@ -20,17 +20,23 @@ load(
     "CPP_LINK_EXECUTABLE_ACTION_NAME",
     "C_COMPILE_ACTION_NAME",
 )
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     "//elisp:util.bzl",
     "cc_wrapper",
-    "configure_cc_toolchain",
     "cpp_string",
     "runfile_location",
 )
 
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
-    cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
+    cc_toolchain = find_cpp_toolchain(ctx)
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
@@ -150,6 +156,7 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,
         variables = vars,
     ) + fragment.linkopts
+
     # The build process needs to find some common binaries like “make” or the
     # GNU coreutils.
     env = {"PATH": "/usr/bin:/bin"}

@@ -17,7 +17,6 @@
 These functions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 
 def check_relative_filename(filename):
     """Returns `filename`, checking whether it is relative.
@@ -70,32 +69,12 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def configure_cc_toolchain(ctx):
-    """
-    Configures the C/C++ toolchain for use with the current rule.
-
-    Args:
-      ctx (ctx): the current rule context
-
-    Returns:
-      a pair (toolchain, config) of a `CcToolchainInfo` provider and a
-      `FeatureConfiguration` object appropriate for C and C++ compilation
-      actions
-    """
-    toolchain = find_cpp_toolchain(ctx)
-    config = cc_common.configure_features(
-        ctx = ctx,
-        cc_toolchain = toolchain,
-        requested_features = ctx.features,
-        unsupported_features = ctx.disabled_features,
-    )
-    return toolchain, config
-
 def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
     """Builds a wrapper executable that starts Emacs.
 
-    You can use `configure_cc_toolchain` to construct appropriate values for
-    `cc_toolchain` and `feature_configuration`.
+    You can use `find_cpp_toolchain` and `cc_common.configure_features` to
+    construct appropriate values for `cc_toolchain` and
+    `feature_configuration`.
 
     Args:
       ctx (ctx): rule context

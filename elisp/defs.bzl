@@ -17,11 +17,11 @@
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     ":util.bzl",
     "cc_wrapper",
     "check_relative_filename",
-    "configure_cc_toolchain",
     "cpp_ints",
     "cpp_string",
     "cpp_strings",
@@ -806,7 +806,13 @@ def _binary(ctx, srcs, tags, substitutions):
             "[[tags]]": cpp_strings(collections.uniq(ctx.attr.tags + tags)),
         }, substitutions),
     )
-    cc_toolchain, feature_configuration = configure_cc_toolchain(ctx)
+    cc_toolchain = find_cpp_toolchain(ctx)
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
     bin_runfiles = ctx.runfiles(
         files = (
