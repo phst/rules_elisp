@@ -31,7 +31,16 @@ load(
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
     cc_toolchain = find_cpp_toolchain(ctx)
-    feature_configuration = cc_common.configure_features(
+    install_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        # Never instrument Emacs itself for coverage collection.  It doesn’t
+        # hurt, but leads to needless reinstall actions when switching between
+        # “bazel test” and “bazel coverage”.
+        unsupported_features = ctx.disabled_features + ["coverage"],
+    )
+    wrapper_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
         requested_features = ctx.features,
@@ -42,7 +51,7 @@ def _emacs_binary_impl(ctx):
     # known file (README in the source root) instead.
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
-    install = _install(ctx, cc_toolchain, feature_configuration, source)
+    install = _install(ctx, cc_toolchain, install_configuration, source)
     driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
@@ -53,7 +62,7 @@ def _emacs_binary_impl(ctx):
         },
         is_executable = True,
     )
-    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
+    executable = cc_wrapper(ctx, cc_toolchain, wrapper_configuration, driver)
     return [DefaultInfo(
         executable = executable,
         files = depset(direct = [executable]),
