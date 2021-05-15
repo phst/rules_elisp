@@ -510,7 +510,7 @@ corresponding element in the return value will be nil."
        branches))
     (`(,(or 'and 'or) . ,conditions)
      ;; The last condition form won’t introduce a new branch.
-     (cl-callf nbutlast conditions)
+     (cl-callf butlast conditions)
      ;; Assume that each remaining condition introduces two branches.  This
      ;; isn’t quite correct, but should be good enough.
      (let ((branches (make-vector (* 2 (length conditions)) nil)))
