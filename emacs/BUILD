@@ -156,3 +156,18 @@ config_setting(
         "@platforms//cpu:arm64",
     ],
 )
+
+# https://docs.bazel.build/versions/4.0.0/platforms.html#more-expressive-constraints
+constraint_setting(name = "incompatible_setting")
+
+constraint_value(
+    name = "incompatible",
+    constraint_setting = ":incompatible_setting",
+    visibility = [
+        "@gnu_emacs_26.1//:__pkg__",
+        "@gnu_emacs_26.2//:__pkg__",
+        "@gnu_emacs_26.3//:__pkg__",
+        "@gnu_emacs_27.1//:__pkg__",
+        "@gnu_emacs_27.2//:__pkg__",
+    ],
+)

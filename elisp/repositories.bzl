@@ -101,7 +101,7 @@ def _build_file(portable, macos_arm):
     # The “target_compatible_with” attribute requires Bazel 4.
     major, dot, rest = native.bazel_version.partition(".")
     target_compatible_with = _TARGET_COMPATIBLE_WITH_TEMPLATE.format(
-        macos_arm = "" if macos_arm else '"@platforms//:incompatible"',
+        macos_arm = "" if macos_arm else '"@phst_rules_elisp//emacs:incompatible"',
     ) if int(major) >= 4 else ""
     return _BUILD_TEMPLATE.format(
         module_header = '"emacs-module.h"' if portable else "None",
@@ -133,6 +133,6 @@ _TARGET_COMPATIBLE_WITH_TEMPLATE = """
     target_compatible_with = select({{
         "@phst_rules_elisp//emacs:always_supported": [],
         "@phst_rules_elisp//emacs:macos_arm64": [{macos_arm}],
-        "//conditions:default": ["@platforms//:incompatible"],
+        "//conditions:default": ["@phst_rules_elisp//emacs:incompatible"],
     }}),
 """
