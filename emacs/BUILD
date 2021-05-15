@@ -102,6 +102,14 @@ selects.config_setting_group(
     ],
 )
 
+selects.config_setting_group(
+    name = "macos_arm",
+    match_any = [
+        ":macos_arm64",
+        ":macos_aarch64",
+    ],
+)
+
 config_setting(
     name = "linux",
     constraint_values = ["@platforms//os:linux"],
@@ -146,6 +154,14 @@ config_setting(
     constraint_values = [
         "@platforms//os:macos",
         "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "macos_aarch64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
     ],
 )
 
