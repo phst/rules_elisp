@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 
 alias(
     name = "emacs",
@@ -85,4 +86,73 @@ bzl_library(
 exports_files(
     ["defs.bzl"],
     visibility = ["//docs:__pkg__"],
+)
+
+# All versions of Emacs support these platforms.
+selects.config_setting_group(
+    name = "always_supported",
+    match_any = [
+        ":linux",
+        ":freebsd",
+        ":openbsd",
+        ":windows_x86_32",
+        ":windows_x86_64",
+        ":macos_x86_32",
+        ":macos_x86_64",
+    ],
+)
+
+config_setting(
+    name = "linux",
+    constraint_values = ["@platforms//os:linux"],
+)
+
+config_setting(
+    name = "freebsd",
+    constraint_values = ["@platforms//os:freebsd"],
+)
+
+config_setting(
+    name = "openbsd",
+    constraint_values = ["@platforms//os:openbsd"],
+)
+
+config_setting(
+    name = "windows_x86_32",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+config_setting(
+    name = "windows_x86_64",
+    constraint_values = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "macos_x86_32",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_32",
+    ],
+)
+
+config_setting(
+    name = "macos_x86_64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
+config_setting(
+    name = "macos_arm64",
+    constraint_values = [
+        "@platforms//os:macos",
+        "@platforms//cpu:arm64",
+    ],
 )

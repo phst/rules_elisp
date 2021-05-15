@@ -19,6 +19,10 @@ emacs_binary(
     srcs = glob(["**"]),
     dump_mode = "unexec",
     readme = "README",
+    target_compatible_with = select({
+        "@phst_rules_elisp//emacs:always_supported": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
 

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,19 +17,11 @@ load("@phst_rules_elisp//emacs:defs.bzl", "emacs_binary")
 emacs_binary(
     name = "emacs",
     srcs = glob(["**"]),
-    module_header = "emacs-module.h",
     readme = "README",
     target_compatible_with = select({
         "@phst_rules_elisp//emacs:always_supported": [],
-        "@phst_rules_elisp//emacs:macos_arm64": [],
         "//conditions:default": ["@platforms//:incompatible"],
     }),
-    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
-)
-
-cc_library(
-    name = "module_header",
-    srcs = ["emacs-module.h"],
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
 

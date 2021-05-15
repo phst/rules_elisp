@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ def rules_elisp_dependencies():
     )
     http_archive(
         name = "gnu_emacs_27.1",
-        build_file = "@phst_rules_elisp//emacs:emacs.BUILD",
+        build_file = "@phst_rules_elisp//emacs:emacs_noarm.BUILD",
         sha256 = "4a4c128f915fc937d61edfc273c98106711b540c9be3cd5d2e2b9b5b2f172e41",
         strip_prefix = "emacs-27.1/",
         urls = [
