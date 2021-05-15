@@ -48,11 +48,11 @@ def _emacs_binary_impl(ctx):
         is_executable = True,
     )
     executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
-    return DefaultInfo(
+    return [DefaultInfo(
         executable = executable,
         files = depset(direct = [executable]),
         runfiles = ctx.runfiles(files = [install]),
-    )
+    )]
 
 _DUMP_MODES = {
     "portable": "kPortable",

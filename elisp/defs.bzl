@@ -63,12 +63,12 @@ described in the provider documentation.""",
 
 def _elisp_toolchain_impl(ctx):
     """Rule implementation for the “elisp_toolchain” toolchain rule."""
-    return platform_common.ToolchainInfo(
+    return [platform_common.ToolchainInfo(
         emacs = ctx.attr.emacs,
         use_default_shell_env = ctx.attr.use_default_shell_env,
         execution_requirements = ctx.attr.execution_requirements,
         wrap = ctx.attr.wrap,
-    )
+    )]
 
 # Note: Toolchain names need to be fully qualified, otherwise external
 # workspaces won’t find them.
@@ -114,10 +114,10 @@ def _elisp_binary_impl(ctx):
             "[[output_args]]": cpp_ints(ctx.attr.output_args),
         },
     )
-    return DefaultInfo(
+    return [DefaultInfo(
         executable = executable,
         runfiles = runfiles,
-    )
+    )]
 
 def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
