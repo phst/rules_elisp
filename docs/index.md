@@ -19,10 +19,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "phst_rules_elisp",
-    sha256 = "a5047f3731b739c055b97598d2bf3ca5a1839af5b441a4957f30606093004b4f",
-    strip_prefix = "rules_elisp-7ef8f69dfcc7ea80e2dca14f526883205e1d0fcd",
+    sha256 = "967d703006005300833c98dd4ce3b1cfc19eeebf468f2c56010c6bd65b08943a",
+    strip_prefix = "rules_elisp-8d045b3a114f16c2589de7264be90d5d02a6e562",
     urls = [
-        "https://github.com/phst/rules_elisp/archive/7ef8f69dfcc7ea80e2dca14f526883205e1d0fcd.zip",  # 2021-05-15
+        "https://github.com/phst/rules_elisp/archive/8d045b3a114f16c2589de7264be90d5d02a6e562.zip",  # 2021-05-15
     ],
 )
 
