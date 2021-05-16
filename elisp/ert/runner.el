@@ -513,7 +513,7 @@ corresponding element in the return value will be nil."
      (let ((branches (vector nil nil)))
        (elisp/ert/instrument--branch vector branches (list cond) nil 0 1)
        branches))
-    (`(,(or 'and 'or) . ,conditions)
+    (`(,(or 'and 'or) . ,(and (pred elisp/ert/proper--list-p) conditions))
      ;; The last condition form won’t introduce a new branch.
      (cl-callf butlast conditions)
      ;; Assume that each remaining condition introduces two branches.  This
@@ -528,7 +528,7 @@ corresponding element in the return value will be nil."
             'cl-case 'cl-ecase
             'cl-typecase 'cl-etypecase
             'pcase 'pcase-exhaustive)
-       . ,clauses)
+       . ,(and (pred elisp/ert/proper--list-p) clauses))
      (let ((branches (make-vector (length clauses) nil)))
        (cl-loop for clause in clauses
                 and index from 0
@@ -543,7 +543,7 @@ corresponding element in the return value will be nil."
                                                  index nil nil))
        branches))
     (`(,(or 'condition-case 'condition-case-unless-debug)
-       ,_var ,bodyform . ,clauses)
+       ,_var ,bodyform . ,(and (pred elisp/ert/proper--list-p) clauses))
      ;; Similar to the ‘cond’ case, but here we have one branch for each handler
      ;; as well as one branch for a successful exit.
      (let ((branches (make-vector (1+ (length clauses)) nil)))
