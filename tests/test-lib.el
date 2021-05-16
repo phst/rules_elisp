@@ -47,8 +47,8 @@
   (condition-case nil
       (message "%S" arg)
     (error arg))
-  ;; Dotted forms should also work.
-  (message "%S" `(,arg . q)))
+  ;; Improper lists should also work.
+  (message "%S %S" `(,arg . q) #1='(a . #1#)))
 
 (provide 'tests/test-lib)
 ;;; test-lib.el ends here

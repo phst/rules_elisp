@@ -405,7 +405,8 @@ This can be used as ‘edebug-new-definition-function’."
   "Instrument FORM to collect line and branch coverage information.
 This can be used as ‘edebug-after-instrumentation-function’.
 Return FORM."
-  (elisp/ert/instrument--form nil form)
+  (let ((seen (make-hash-table :test #'eq)))
+    (elisp/ert/instrument--form seen nil form))
   form)
 
 (cl-defstruct (elisp/ert/coverage--data
@@ -456,43 +457,47 @@ specifying the element that should be incremented whenever the
 underlying form finishes successfully with a non-nil value.  Nil
 if no branch element should be incremented."))
 
-(defun elisp/ert/instrument--form (vector form)
+(defun elisp/ert/instrument--form (seen vector form)
   "Instrument FORM to collect line coverage information.
+SEEN is a hashtable used to prevent infinite recursion.
 VECTOR is either nil (for a toplevel definition) or a vector of
 optional ‘elisp/ert/coverage--data’ objects with the same length
 as the offset vector.  The vector is attached to the
 ‘elisp/ert/coverage’ property of the symbol being defined."
+  (cl-check-type seen hash-table)
   (cl-check-type vector (or null vector))
-  (pcase form
-    (`(edebug-enter ',func ,_args ,body)
-     (let ((vector (get func 'elisp/ert/coverage)))
+  (unless (gethash form seen)
+    (puthash form t seen)
+    (pcase form
+      (`(edebug-enter ',func ,_args ,body)
+       (let ((vector (get func 'elisp/ert/coverage)))
+         (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
+         (elisp/ert/instrument--form seen vector body)))
+      ((or `(edebug-after (edebug-before ,index) ,_after-index ,form)
+           `(edebug-after ,_ ,index ,form))
        (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
-       (elisp/ert/instrument--form vector body)))
-    ((or `(edebug-after (edebug-before ,index) ,_after-index ,form)
-         `(edebug-after ,_ ,index ,form))
-     (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
-     (cl-check-type index natnum)
-     (cl-check-type (aref vector index) null)  ; not yet prepared
-     ;; We prefer setting the “before” entry to a non-nil value so that we can
-     ;; easily distinguish between “before” and “after” positions later.  We
-     ;; have to do this in ‘edebug-after-instrumentation-function’ because
-     ;; otherwise we couldn’t distinguish between forms that aren’t instrumented
-     ;; and forms that are instrumented but not executed.  The second branch of
-     ;; the ‘or’ above is chosen for forms without a “before” entry, in which
-     ;; case we have to fall back to the “after” entry.
-     (let ((data (aset vector index (elisp/ert/make--coverage-data))))
-       (elisp/ert/instrument--form vector form)
-       ;; Determine whether this is a branching form.  If so, generate a branch
-       ;; frequency vector and attach it to DATA.
-       (when-let ((branches (elisp/ert/instrument--branches vector form)))
-         (setf (elisp/ert/coverage--data-branches data) branches))))
-    ((pred elisp/ert/proper--list-p)
-    ;; Use ‘dolist’ where possible to avoid deep recursion.
-     (dolist (element form)
-       (elisp/ert/instrument--form vector element)))
-    (`(,car . ,cdr)
-     (elisp/ert/instrument--form vector car)
-     (elisp/ert/instrument--form vector cdr))))
+       (cl-check-type index natnum)
+       (cl-check-type (aref vector index) null)  ; not yet prepared
+       ;; We prefer setting the “before” entry to a non-nil value so that we can
+       ;; easily distinguish between “before” and “after” positions later.  We
+       ;; have to do this in ‘edebug-after-instrumentation-function’ because
+       ;; otherwise we couldn’t distinguish between forms that aren’t
+       ;; instrumented and forms that are instrumented but not executed.  The
+       ;; second branch of the ‘or’ above is chosen for forms without a “before”
+       ;; entry, in which case we have to fall back to the “after” entry.
+       (let ((data (aset vector index (elisp/ert/make--coverage-data))))
+         (elisp/ert/instrument--form seen vector form)
+         ;; Determine whether this is a branching form.  If so, generate a
+         ;; branch frequency vector and attach it to DATA.
+         (when-let ((branches (elisp/ert/instrument--branches vector form)))
+           (setf (elisp/ert/coverage--data-branches data) branches))))
+      ((pred elisp/ert/proper--list-p)
+       ;; Use ‘dolist’ where possible to avoid deep recursion.
+       (dolist (element form)
+         (elisp/ert/instrument--form seen vector element)))
+      (`(,car . ,cdr)
+       (elisp/ert/instrument--form seen vector car)
+       (elisp/ert/instrument--form seen vector cdr)))))
 
 (defun elisp/ert/instrument--branches (vector form)
   "Instrument a branching FORM.
