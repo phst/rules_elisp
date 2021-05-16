@@ -145,7 +145,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (put #'cl-flet 'edebug-form-spec
                ;; This is the expansion of the Edebug specification for
                ;; ‘cl-flet’, plus a ‘:unique’ specifier to uniquify the name.
-               '((&rest [&or (&define name :unique "cl-flet@" function-form)
+               '((&rest [&or (&define name :unique "cl-flet@" def-form)
                              (&define name :unique "cl-flet@"
                                       cl-lambda-list
                                       cl-declarations-or-string
