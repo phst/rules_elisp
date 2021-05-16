@@ -497,7 +497,10 @@ as the offset vector.  The vector is attached to the
          (elisp/ert/instrument--form seen vector element)))
       (`(,car . ,cdr)
        (elisp/ert/instrument--form seen vector car)
-       (elisp/ert/instrument--form seen vector cdr)))))
+       (elisp/ert/instrument--form seen vector cdr))
+      ((pred vectorp)
+       (cl-loop for element across form
+                do (elisp/ert/instrument--form seen vector element))))))
 
 (defun elisp/ert/instrument--branches (vector form)
   "Instrument a branching FORM.

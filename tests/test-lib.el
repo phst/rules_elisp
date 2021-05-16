@@ -47,8 +47,8 @@
   (condition-case nil
       (message "%S" arg)
     (error arg))
-  ;; Improper lists should also work.
-  (message "%S %S" `(,arg . q) #1='(a . #1#)))
+  ;; Improper lists and vectors should also work.
+  (message "%S %S %S" `(,arg . q) #1='(a . #1#) `[,arg q]))
 
 (provide 'tests/test-lib)
 ;;; test-lib.el ends here
