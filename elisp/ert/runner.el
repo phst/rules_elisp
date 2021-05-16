@@ -500,7 +500,13 @@ as the offset vector.  The vector is attached to the
        (elisp/ert/instrument--form seen vector cdr))
       ((pred vectorp)
        (cl-loop for element across form
-                do (elisp/ert/instrument--form seen vector element))))))
+                do (elisp/ert/instrument--form seen vector element)))
+      ;; Literals that can’t be instrumented.
+      ((or (pred symbolp) (pred numberp) (pred stringp)))
+      ;; Everything else is unexpected.
+      (_ (signal 'elisp/ert/syntax-error (list form))))))
+
+(define-error 'elisp/ert/syntax-error "Syntax error" 'invalid-read-syntax)
 
 (defun elisp/ert/instrument--branches (vector form)
   "Instrument a branching FORM.
