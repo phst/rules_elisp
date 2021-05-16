@@ -43,7 +43,8 @@
   (cond
    (arg)
    ((or (eq arg 'foo) (and (not arg) 77) (memq arg '(1 2 3))) arg)
-   ((not arg)))
+   ((not arg))
+   ((and (not arg) 123) arg))
   (condition-case nil
       (message "%S" arg)
     (error arg))

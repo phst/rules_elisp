@@ -817,12 +817,14 @@ file that has been instrumented with Edebug."
          (cl-loop
           for offset hash-keys of branches using (hash-values branches)
           and block across-ref blocks
+          for hits = (cl-count 0 branches :test-not #'eq)
           do
           (cl-check-type offset natnum)
           (cl-check-type branches vector)
+          (when (eq hits 0) (fillarray branches '-))  ; block not executed
           (setf block (cons offset branches))
           (cl-incf branches-found (length branches))
-          (cl-incf branches-hit (cl-count 0 branches :test-not #'eql)))
+          (cl-incf branches-hit hits))
          (setf elem (cons line blocks))))
       (cl-loop
        for (line . blocks) across (sort vector #'car-less-than-car)
@@ -833,7 +835,7 @@ file that has been instrumented with Edebug."
            do (cl-loop
                for frequency across frequencies
                and branch-index from 0
-               do (insert (format "BRDA:%d,%d,%d,%d\n"
+               do (insert (format "BRDA:%d,%d,%d,%s\n"
                                   line block-index branch-index frequency)))))
       ;; Only print branch summary if there were any branches at all.
       (unless (eql branches-found 0)
