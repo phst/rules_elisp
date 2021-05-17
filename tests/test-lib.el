@@ -48,6 +48,8 @@
   (condition-case nil
       (message "%S" arg)
     (error arg))
+  (when-let (a arg) (message "%s" a))
+  (when-let ((a arg) (arg) a) (message "%s" a))
   ;; Improper lists and vectors should also work.
   (message "%S %S %S" `(,arg . q) #1='(a . #1#) `[,arg q]))
 

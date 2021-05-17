@@ -261,8 +261,12 @@ BRDA:47,0,0,-
 BRDA:47,0,1,-
 BRDA:48,0,0,1
 BRDA:48,0,1,0
-BRF:18
-BRH:7
+BRDA:52,0,0,0
+BRDA:52,0,1,1
+BRDA:52,0,2,0
+BRDA:52,0,3,0
+BRF:22
+BRH:8
 DA:29,1
 DA:30,1
 DA:31,0
@@ -283,9 +287,11 @@ DA:47,0
 DA:48,1
 DA:49,1
 DA:50,0
+DA:51,1
 DA:52,1
-LH:16
-LF:21
+DA:54,1
+LH:18
+LF:23
 end_of_record
 `
 	if strings.HasPrefix(emacsVersion, "26.") {

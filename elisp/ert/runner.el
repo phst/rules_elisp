@@ -565,6 +565,26 @@ corresponding element in the return value will be nil."
                 when (listp clause)  ; gently skip over syntax errors
                 do (elisp/ert/instrument--branch vector branches clause
                                                  index nil nil))
+       branches))
+    (`(,(or 'if-let 'when-let) (,(pred symbolp) ,expr) . ,_)
+     ;; This flavor doesn’t actually work right due to Bug#48489.
+     (let ((branches (vector nil nil)))
+       (elisp/ert/instrument--branch vector branches (list expr) nil 0 1)
+       branches))
+    (`(,(or 'if-let 'if-let* 'when-let 'when-let* 'and-let*)
+       ,(and (pred elisp/ert/proper--list-p) spec) . ,_)
+     (let ((branches (make-vector (* 2 (length spec)) nil)))
+       (cl-loop for binding in spec
+                and index from 0 by 2
+                do (pcase binding
+                     ((or `(,(pred symbolp) ,form)
+                          `(,form)
+                          ;; We accept a plain symbol, but this isn’t actually
+                          ;; instrumented because Edebug doesn’t instrument
+                          ;; symbols matched using ‘symbolp’.
+                          (and (pred symbolp) form))
+                      (elisp/ert/instrument--branch
+                       vector branches (list form) nil index (1+ index)))))
        branches))))
 
 (defun elisp/ert/instrument--branch
