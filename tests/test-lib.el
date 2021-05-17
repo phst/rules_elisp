@@ -22,6 +22,7 @@
 ;;; Code:
 
 (require 'cl-lib)
+(require 'subr-x)
 
 (defun tests/test-function (arg)
   ;; The condition and the two branches should be on separate lines, for line
