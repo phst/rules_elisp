@@ -585,7 +585,17 @@ corresponding element in the return value will be nil."
                           (and (pred symbolp) form))
                       (elisp/ert/instrument--branch
                        vector branches (list form) nil index (1+ index)))))
-       branches))))
+       branches))
+    (`(cl-loop . ,(and (pred elisp/ert/proper--list-p) rest))
+     (when-let ((conditions (cl-loop for (keyword form) on rest
+                                     when (memq keyword '(if when unless))
+                                     collect form)))
+       (let ((branches (make-vector (* 2 (length conditions)) nil)))
+         (cl-loop for form in conditions
+                  and index from 0 by 2
+                  do (elisp/ert/instrument--branch
+                      vector branches (list form) nil index (1+ index)))
+         branches)))))
 
 (defun elisp/ert/instrument--branch
     (vector branches forms branch-index then-index else-index)
