@@ -636,6 +636,10 @@ respectively."
          (when i (aset branches i 0)))
        (cl-return)))))
 
+;; Innermost function being executed, dynamically bound by
+;; ‘elisp/ert/edebug--enter’.
+(defvar elisp/ert/coverage--function)
+
 ;; Current coverage data vector, dynamically bound by ‘elisp/ert/edebug--enter’.
 (defvar elisp/ert/coverage--vector)
 
@@ -645,7 +649,8 @@ See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
   (cl-check-type func symbol)
   (cl-check-type args list)
   (cl-check-type body function)
-  (let ((elisp/ert/coverage--vector (get func 'elisp/ert/coverage)))
+  (let ((elisp/ert/coverage--function func)
+        (elisp/ert/coverage--vector (get func 'elisp/ert/coverage)))
     (funcall body)))
 
 (defun elisp/ert/edebug--before (before-index)
@@ -653,8 +658,7 @@ See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
 BEFORE-INDEX is the index into ‘elisp/ert/frequency--vector’ for
 the beginning of the form.  Return (before . BEFORE-INDEX)."
   (cl-check-type before-index natnum)
-  (let ((data (aref elisp/ert/coverage--vector before-index)))
-    (cl-check-type data elisp/ert/coverage--data)
+  (let ((data (elisp/ert/coverage--data before-index)))
     ;; Increment hit count.  We prefer doing that here because the beginning of
     ;; a form tends to be more interesting and the end, and we’d like to
     ;; increment the hit count for the first line of a form instead of the last.
@@ -691,8 +695,7 @@ VALUE."
       ;; yet.
       (`(before . ,before-index) (setq incrementp nil form-index before-index))
       (_ (setq incrementp t form-index after-index)))
-    (let ((data (aref elisp/ert/coverage--vector form-index)))
-      (cl-check-type data elisp/ert/coverage--data)
+    (let ((data (elisp/ert/coverage--data form-index)))
       (when incrementp
         ;; Increment line hit count, because that hasn’t happened yet in
         ;; ‘edebug-before’.
@@ -707,6 +710,25 @@ VALUE."
                                  (elisp/ert/coverage--data-else-index data))))
         (cl-incf (aref branches branch-index)))))
   value)
+
+(defun elisp/ert/coverage--data (index)
+  "Return INDEX’th element of the current coverage vector.
+The return value is of type ‘elisp/ert/coverage--data’."
+  (cl-check-type index natnum)
+  (let ((data (aref elisp/ert/coverage--vector index)))
+    (unless data
+      ;; This is typically an error in the Edebug specification of a macro being
+      ;; expanded, not a bug in this library.  Give the user a more helpful
+      ;; error message than “wrong type”.  To check which macro is the culprit,
+      ;; look through the body of the ‘edebug/coverage--function’.  The most
+      ;; common error is to use ‘form’ where ‘def-form’ would be required; see
+      ;; Info node ‘(elisp) Specification List’.
+      (signal 'elisp/ert/missing-coverage-data
+              (list elisp/ert/coverage--function
+                    elisp/ert/coverage--vector index)))
+    (cl-the elisp/ert/coverage--data data)))
+
+(define-error 'elisp/ert/missing-coverage-data "Missing coverage data")
 
 (defun elisp/ert/write--coverage-report (coverage-dir buffers)
   "Write a coverage report to a file in COVERAGE-DIR.
