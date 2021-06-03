@@ -93,6 +93,7 @@ def rules_elisp_dependencies():
         urls = ["https://github.com/nlohmann/json/releases/download/v3.9.0/include.zip"],
     )
 
+# buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")

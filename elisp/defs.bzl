@@ -662,7 +662,7 @@ def _compile(ctx, srcs, deps, load_path):
                 ).to_json(),
             )
             args += ["--manifest=" + manifest.path, "--"]
-            inputs = depset(direct = [manifest], transitive = [inputs])
+            inputs = depset(direct = [manifest], transitive = [inputs])  # buildifier: disable=overly-nested-depset
         args += [
             "--quick",
             "--batch",
