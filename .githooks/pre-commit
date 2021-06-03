@@ -16,6 +16,8 @@
 
 set -u
 
+buildifier --mode=check --lint=warn -r . || exit
+
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
 echo 'Looking for unwanted Go targets in public packages'
