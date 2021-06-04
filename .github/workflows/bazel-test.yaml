@@ -36,6 +36,7 @@ jobs:
           else
             args=(--extra_toolchains="//elisp:emacs_${version}_toolchain")
           fi
+          set -x
           bazel test --test_output=errors "${args[@]}" -- //...
         env:
           version: ${{matrix.version}}
