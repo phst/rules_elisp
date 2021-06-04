@@ -47,6 +47,7 @@ stardoc(
 
 go_test(
     name = "go_default_test",
+    size = "small",
     srcs = ["consistency_test.go"],
     args = ["$(locations :markdown)"],
     data = [":markdown"],

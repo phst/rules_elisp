@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ elisp_library(
 
 elisp_test(
     name = "lib_1_test",
+    size = "small",
     srcs = ["lib-1-test.el"],
     skip_tests = ["lib-1-broken-test"],
     deps = [":lib_1"],
@@ -51,6 +52,7 @@ elisp_library(
 
 elisp_test(
     name = "lib_2_test",
+    size = "small",
     srcs = ["lib-2-test.el"],
     skip_tags = ["skip"],
     deps = [":lib_2"],
@@ -64,6 +66,7 @@ elisp_library(
 
 elisp_test(
     name = "lib_3_test",
+    size = "small",
     srcs = ["subdir/lib-3-test.el"],
     deps = [":lib_3"],
 )
@@ -83,6 +86,8 @@ cc_binary(
 
 go_test(
     name = "go_default_test",
+    size = "medium",
+    timeout = "short",
     srcs = ["bin_test.go"],
     data = ["bin"],
     rundir = ".",

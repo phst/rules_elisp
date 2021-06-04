@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ elisp_test_suite(name = "elisp_test")
 
 go_test(
     name = "go_default_test",
+    size = "medium",
+    timeout = "short",
     srcs = ["ert_test.go"],
     data = [
         ":test_test",
@@ -39,6 +41,7 @@ go_test(
 
 elisp_test(
     name = "test_test",
+    size = "small",
     srcs = ["test.el"],
     data = [
         # We need to explicitly include the source file as data dependency,
