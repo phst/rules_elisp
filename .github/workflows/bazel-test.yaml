@@ -43,7 +43,11 @@ jobs:
             (set -x; bazel test --test_output=errors "$@" -- //...)
           }
           run || exit
-          for version in 26.{1,2,3} 27.{1,2}; do
+          if [[ "$(uname -s") == Linux ]]; then
+            versions=(26.{1,2,3})
+          fi
+          versions+=(27.{1,2})
+          for version in "${versions[@]}"; do
             run --extra_toolchains="//elisp:emacs_${version}_toolchain" || exit
           done
         env:

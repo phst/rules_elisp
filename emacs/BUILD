@@ -99,6 +99,12 @@ selects.config_setting_group(
         ":openbsd",
         ":windows_x86_32",
         ":windows_x86_64",
+    ],
+)
+
+selects.config_setting_group(
+    name = "macos_x86",
+    match_any = [
         ":macos_x86_32",
         ":macos_x86_64",
     ],
