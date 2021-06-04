@@ -33,9 +33,9 @@ jobs:
           run() {
             (set -x; bazel test --test_output=errors "$@" -- //...)
           }
-          run
+          run || exit
           for version in 26.{1,2,3} 27.{1,2}; do
-            run --extra_toolchains="//elisp:emacs_${version}_toolchain"
+            run --extra_toolchains="//elisp:emacs_${version}_toolchain" || exit
           done
 
   bazel-versions:
