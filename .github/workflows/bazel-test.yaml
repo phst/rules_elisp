@@ -43,7 +43,7 @@ jobs:
             (set -x; bazel test --test_output=errors "$@" -- //...)
           }
           run || exit
-          if [[ "$(uname -s") == Linux ]]; then
+          if [[ "$(uname -s)" == Linux ]]; then
             versions=(26.{1,2,3})
           fi
           versions+=(27.{1,2})
