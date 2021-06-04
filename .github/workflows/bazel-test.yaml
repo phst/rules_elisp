@@ -16,10 +16,14 @@ name: Run Bazel tests
 on: [push, pull_request]
 
 jobs:
-  emacs-versions:
-    # We don’t use the GitHub matrix support here to allow Bazel to cache
-    # intermediate results between the test runs.
-    name: All supported GNU Emacs versions
+  bazel-versions:
+    name: All supported Bazel versions
+    strategy:
+      matrix:
+        # We don’t use the GitHub matrix support for the Emacs toolchain to
+        # allow Bazel to cache intermediate results between the test runs.
+        bazel: [3.4.0, 3.4.1, 3.5.0, 3.5.1, 3.6.0, 3.7.0, 3.7.1, 3.7.2,
+                4.0.0, 4.1.0, latest, default]
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -30,6 +34,9 @@ jobs:
         run: sudo apt-get install libxml2-utils
       - name: Run Bazel tests
         run: |
+          if [[ "${bazel_version}" != 'default' ]]; then
+            export USE_BAZEL_VERSION="${bazel_version}"
+          fi
           run() {
             (set -x; bazel test --test_output=errors "$@" -- //...)
           }
@@ -37,22 +44,5 @@ jobs:
           for version in 26.{1,2,3} 27.{1,2}; do
             run --extra_toolchains="//elisp:emacs_${version}_toolchain" || exit
           done
-
-  bazel-versions:
-    name: All supported Bazel versions
-    strategy:
-      matrix:
-        version: [3.4.0, 3.4.1, 3.5.0, 3.5.1, 3.6.0, 3.7.0, 3.7.1, 3.7.2,
-                  4.0.0, 4.1.0, latest]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Install Bazelisk
-        uses: bazelbuild/setup-bazelisk@v1
-      - name: Install xmllint
-        run: sudo apt-get install libxml2-utils
-      - name: Run Bazel tests
-        run: bazel test --test_output=errors -- //...
         env:
-          USE_BAZEL_VERSION: ${{matrix.version}}
+          bazel_version: ${{matrix.bazel}}
