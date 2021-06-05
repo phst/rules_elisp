@@ -53,7 +53,8 @@ all: buildifier nogo check $(versions)
 
 buildifier:
   ifeq ($(buildifier_supported),yes)
-	bazel run -- @com_github_bazelbuild_buildtools//buildifier \
+	$(BAZEL) run $(BAZELFLAGS) -- \
+	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
   else
     $(warn Buildifier not supported on Bazel $(bazel_major))
