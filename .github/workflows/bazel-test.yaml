@@ -39,6 +39,6 @@ jobs:
           if [[ "${bazel_version}" != 'default' ]]; then
             export USE_BAZEL_VERSION="${bazel_version}"
           fi
-          ./test
+          make
         env:
           bazel_version: ${{matrix.bazel}}
