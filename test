@@ -17,7 +17,8 @@
 set -u
 
 # The Buildifier target doesn’t work well on old Bazel versions.
-if [[ "$(bazel --version)" == 'bazel 4'.* ]]; then
+bazel_major="$(bazel --version | sed -r -n -e 's/^bazel ([[:digit:]]+)\..*$/\1/p')"
+if ((bazel_major >= 4)); then
   bazel run -- @com_github_bazelbuild_buildtools//buildifier \
     --mode=check --lint=warn -r -- "${PWD}" || exit
 fi
