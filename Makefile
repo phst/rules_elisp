@@ -43,7 +43,7 @@ versions := $(filter-out $(unsupported),$(versions))
 # using “target_compatible_with”, but that requires Bazel 4.
 exclude := $(unsupported:%=-//emacs:emacs_%)
 
-bazel_major := $(shell $(BAZEL) --version | sed -r -n -e 's/^bazel ([[:digit:]]+)\..*$$/\1/p')
+bazel_major := $(shell $(BAZEL) --version | sed -E -n -e 's/^bazel ([[:digit:]]+)\..*$$/\1/p')
 
 # The Buildifier target doesn’t work well on old Bazel versions.
 buildifier_supported := $(shell test $(bazel_major) -ge 4 && echo yes)
