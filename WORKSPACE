@@ -68,10 +68,11 @@ http_file(
     urls = ["https://raw.githubusercontent.com/windyroad/JUnit-Schema/d6daa414c448da22b810c8562f9d6fca086983ba/JUnit.xsd"],
 )
 
-new_local_repository(
+load("@//:internal.bzl", "local_file")
+
+local_file(
     name = "xmllint",
-    build_file_content = 'exports_files(["xmllint"])',
-    path = "/usr/bin/",
+    filename = "/usr/bin/xmllint",
 )
 
 http_archive(
