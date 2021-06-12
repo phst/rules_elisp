@@ -54,9 +54,11 @@ local_repository(
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "54a139559cc46a68cf79e55d5c22dc9d48e647a66827342520ce0441402430fe",
-    strip_prefix = "googletest-1.10.x",
-    urls = ["https://github.com/google/googletest/archive/v1.10.x.zip"],
+    sha256 = "353571c2440176ded91c2de6d6cd88ddd41401d14692ec1f99e35d013feda55a",
+    strip_prefix = "googletest-release-1.11.0/",
+    urls = [
+        "https://github.com/google/googletest/archive/refs/tags/release-1.11.0.zip",  # 2021-06-11
+    ],
 )
 
 http_file(
