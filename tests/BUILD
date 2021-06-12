@@ -30,6 +30,7 @@ go_test(
     data = [
         ":test_test",
         "@junit_xsd//file",
+        "@xmllint",
     ],
     rundir = ".",
     deps = [

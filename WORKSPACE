@@ -68,6 +68,12 @@ http_file(
     urls = ["https://raw.githubusercontent.com/windyroad/JUnit-Schema/d6daa414c448da22b810c8562f9d6fca086983ba/JUnit.xsd"],
 )
 
+new_local_repository(
+    name = "xmllint",
+    build_file_content = 'exports_files(["xmllint"])',
+    path = "/usr/bin/",
+)
+
 http_archive(
     name = "io_bazel_rules_go",
     sha256 = "69de5c704a05ff37862f7e0f5534d4f479418afc21806c887db544a316f3cb6b",
