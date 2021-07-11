@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ func Test(t *testing.T) {
 		generated[k] = s
 	}
 	if diff := cmp.Diff(checkedIn, generated); diff != "" {
-		t.Error(`Generated and check-in documentations differ.  Please run docs.py.
+		t.Error(`Generated and check-in documentations differ.  Please run “make docs”.
 Diff (-checked-in +generated):
 `, diff)
 	}

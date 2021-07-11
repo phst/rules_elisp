@@ -40,7 +40,7 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier nogo check $(versions)
+all: buildifier nogo docs check $(versions)
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
@@ -65,4 +65,21 @@ check:
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
 
+doc_targets := $(shell $(BAZEL) query --output=label 'filter("_doc\.md$$", kind("generated file", //...:*))')
+doc_generated := $(addprefix bazel-bin/,$(subst :,/,$(doc_targets://%=%)))
+doc_sources := $(doc_generated:bazel-bin/%_doc.md=%.md)
+
+docs: $(doc_sources)
+
+$(doc_sources): %.md: bazel-bin/%_doc.md
+        # Bazel (including Stardoc) interprets all files as Latin-1,
+        # cf. https://docs.bazel.build/versions/3.0.0/build-ref.html#BUILD_files.
+        # However, our files all use UTF-8, leading to double encoding.  Reverse
+        # that effect here.
+	iconv --from-code=utf-8 --to-code=latin1 --output='$@' -- '$<'
+
+$(doc_generated) &:
+	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
+
 .PHONY: all buildifier nogo check $(versions)
+.PHONY: docs $(doc_sources) $(doc_generated)
