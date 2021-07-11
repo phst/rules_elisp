@@ -18,7 +18,7 @@
 
 ;; This library runs ERT tests under Bazel.  It provides support for the
 ;; --test_filter flag, as described in
-;; https://docs.bazel.build/versions/3.0.0/test-encyclopedia.html#initial-conditions.
+;; https://docs.bazel.build/test-encyclopedia.html#initial-conditions.
 
 ;;; Code:
 

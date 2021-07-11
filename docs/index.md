@@ -8,7 +8,7 @@ This is not an officially supported Google product.
 
 [Bazel]: https://bazel.build/
 [Emacs Lisp]: https://www.gnu.org/software/emacs/manual/html_node/elisp/
-[C++ rules]: https://docs.bazel.build/versions/3.0.0/be/c-cpp.html
+[C++ rules]: https://docs.bazel.build/be/c-cpp.html
 
 ## Usage
 
@@ -62,7 +62,7 @@ This repository also includes a library to access [runfiles][].  To use it, add
 a build dependency on `@phst_rules_elisp//elisp/runfiles`.  See the header
 comments in `runfiles.el` for further usage hints.
 
-[runfiles]: https://docs.bazel.build/versions/3.0.0/skylark/rules.html#runfiles
+[runfiles]: https://docs.bazel.build/skylark/rules.html#runfiles
 
 * * *
 
