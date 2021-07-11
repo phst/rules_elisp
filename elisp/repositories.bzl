@@ -99,16 +99,11 @@ def rules_elisp_toolchains():
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
 
 def _build_file(portable, macos_arm):
-    # The “target_compatible_with” attribute requires Bazel 4.
-    major, dot, rest = native.bazel_version.partition(".")
-    target_compatible_with = _TARGET_COMPATIBLE_WITH_TEMPLATE.format(
-        macos_x86 = "" if portable else '"@phst_rules_elisp//emacs:incompatible"',
-        macos_arm = "" if macos_arm else '"@phst_rules_elisp//emacs:incompatible"',
-    ) if int(major) >= 4 else ""
     return _BUILD_TEMPLATE.format(
         module_header = '"emacs-module.h"' if portable else "None",
         dump_mode = "portable" if portable else "unexec",
-        target_compatible_with = target_compatible_with,
+        macos_x86 = "" if portable else '"@phst_rules_elisp//emacs:incompatible"',
+        macos_arm = "" if macos_arm else '"@phst_rules_elisp//emacs:incompatible"',
     )
 
 _BUILD_TEMPLATE = """
@@ -120,7 +115,12 @@ emacs_binary(
     dump_mode = "{dump_mode}",
     module_header = {module_header},
     readme = "README",
-    {target_compatible_with}
+    target_compatible_with = select({{
+        "@phst_rules_elisp//emacs:always_supported": [],
+        "@phst_rules_elisp//emacs:macos_arm": [{macos_arm}],
+        "@phst_rules_elisp//emacs:macos_x86": [{macos_x86}],
+        "//conditions:default": ["@phst_rules_elisp//emacs:incompatible"],
+    }}),
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
 
@@ -129,13 +129,4 @@ cc_library(
     srcs = ["emacs-module.h"],
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
-"""
-
-_TARGET_COMPATIBLE_WITH_TEMPLATE = """
-    target_compatible_with = select({{
-        "@phst_rules_elisp//emacs:always_supported": [],
-        "@phst_rules_elisp//emacs:macos_arm": [{macos_arm}],
-        "@phst_rules_elisp//emacs:macos_x86": [{macos_x86}],
-        "//conditions:default": ["@phst_rules_elisp//emacs:incompatible"],
-    }}),
 """

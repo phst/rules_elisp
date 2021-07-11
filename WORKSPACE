@@ -32,7 +32,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 
 # Note that the versions library only works within a WORKSPACE file, see
 # https://github.com/bazelbuild/bazel/issues/8305.
-versions.check("3.4.0")
+versions.check("4.0.0")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
 

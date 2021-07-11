@@ -39,26 +39,13 @@ endif
 
 versions := $(filter-out $(unsupported),$(versions))
 
-# Explicitly exclude unsupported binaries.  We also mark them as incompatible
-# using “target_compatible_with”, but that requires Bazel 4.
-exclude := $(unsupported:%=-//emacs:emacs_%)
-
-bazel_major := $(shell $(BAZEL) --version | sed -E -n -e 's/^bazel ([[:digit:]]+)\..*$$/\1/p')
-
-# The Buildifier target doesn’t work well on old Bazel versions.
-buildifier_supported := $(shell test $(bazel_major) -ge 4 && echo yes)
-
 # Test both default toolchain and versioned toolchains.
 all: buildifier nogo check $(versions)
 
 buildifier:
-  ifeq ($(buildifier_supported),yes)
 	$(BAZEL) run $(BAZELFLAGS) -- \
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
-  else
-    $(warn Buildifier not supported on Bazel $(bazel_major))
-  endif
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
@@ -73,7 +60,7 @@ nogo:
 	fi
 
 check:
-	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //... $(exclude)
+	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
 
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
