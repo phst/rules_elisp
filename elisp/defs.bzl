@@ -127,7 +127,7 @@ def _elisp_test_impl(ctx):
         ctx,
         srcs = ctx.files.srcs,
         # “local = 1” is equivalent to adding a “local” tag,
-        # cf. https://docs.bazel.build/versions/3.1.0/be/common-definitions.html#test.local.
+        # cf. https://docs.bazel.build/versions/4.1.0/be/common-definitions.html#test.local.
         tags = ["local"] if ctx.attr.local else [],
         substitutions = {
             "[[skip_tests]]": cpp_strings(ctx.attr.skip_tests),
@@ -512,7 +512,7 @@ def _compile(ctx, srcs, deps, load_path):
 
     # If any file comes for a different package, we can’t place the compiled
     # files adjacent to the source files.  See
-    # https://docs.bazel.build/versions/3.1.0/skylark/lib/actions.html#declare_file.
+    # https://docs.bazel.build/versions/4.1.0/skylark/lib/actions.html#declare_file.
     relocate_output = any([
         src.owner.workspace_name != ctx.label.workspace_name or
         src.owner.package != ctx.label.package
@@ -554,10 +554,10 @@ def _compile(ctx, srcs, deps, load_path):
         # filenames relative to the (relocated) workspace root work.
         dir = check_relative_filename(paths.join(output_base, dir))
         resolved = struct(
-            # Actions should load byte-compiled files.  Since we place them
-            # into the bin directory, we need to start from there, append the
+            # Actions should load byte-compiled files.  Since we place them into
+            # the bin directory, we need to start from there, append the
             # workspace root (see
-            # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_root),
+            # https://docs.bazel.build/versions/4.1.0/skylark/lib/Label.html#workspace_root),
             # and then the directory name relative to the workspace root.  The
             # workspace root will only be nonempty if the current rule lives in
             # a different workspace than the one that Bazel is run from.  This
@@ -567,12 +567,11 @@ def _compile(ctx, srcs, deps, load_path):
                 paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
             ),
             # The runfiles tree looks different, see
-            # https://docs.bazel.build/versions/2.0.0/output_directories.html.
+            # https://docs.bazel.build/versions/4.1.0/output_directories.html.
             # The top-level directories in the runfiles root are always the
             # workspace names, and the load directories are relative to those.
-            # The workspace name is the workspace part of the lexical label,
-            # see
-            # https://docs.bazel.build/versions/2.0.0/skylark/lib/Label.html#workspace_name.
+            # The workspace name is the workspace part of the lexical label, see
+            # https://docs.bazel.build/versions/4.1.0/skylark/lib/Label.html#workspace_name.
             # Therefore, it can be empty, in which case we need to use the
             # current workspace.
             for_runfiles = check_relative_filename(
@@ -843,7 +842,7 @@ def _load_directory_for_actions(directory):
     # map_each above.
     return check_relative_filename(directory.for_actions)
 
-# Directory relative to the current package where to store compiled files.
-# This equivalent to _objs for C++ rules.  See
-# https://docs.bazel.build/versions/3.1.0/output_directories.html#layout-diagram.
+# Directory relative to the current package where to store compiled files.  This
+# is equivalent to _objs for C++ rules.  See
+# https://docs.bazel.build/versions/4.1.0/output_directories.html#layout-diagram.
 _OUTPUT_DIR = "_elisp"

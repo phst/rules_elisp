@@ -48,7 +48,7 @@ func Test(t *testing.T) {
 		}
 	}
 	// Bazel (including Stardoc) interprets all files as Latin-1,
-	// cf. https://docs.bazel.build/versions/3.0.0/build-ref.html#BUILD_files.
+	// cf. https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
 	// However, our files all use UTF-8, leading to double encoding.
 	// Reverse that effect here.
 	enc := encoding.Encoder{
