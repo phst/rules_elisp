@@ -76,7 +76,7 @@ $(doc_sources): %.md: bazel-bin/%_doc.md
         # cf. https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
         # However, our files all use UTF-8, leading to double encoding.  Reverse
         # that effect here.
-	iconv --from-code=utf-8 --to-code=latin1 --output='$@' -- '$<'
+	iconv -f utf-8 -t latin1 -- '$<' > '$@'
 
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
