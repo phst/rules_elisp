@@ -88,9 +88,9 @@ def rules_elisp_dependencies():
     http_archive(
         name = "nlohmann_json",
         build_file = "@phst_rules_elisp//:json.BUILD",
-        sha256 = "5b9b819aed31626aefe2eace23498cafafc1691890556cd36d2a8002f6905009",
+        sha256 = "b5e3bfad07feba218a26a4f809fbb0d1e33450524bf5d7244cabc92cf8178c69",
         strip_prefix = "single_include",
-        urls = ["https://github.com/nlohmann/json/releases/download/v3.9.0/include.zip"],
+        urls = ["https://github.com/nlohmann/json/releases/download/v3.10.0/include.zip"],
     )
 
 # buildifier: disable=unnamed-macro
