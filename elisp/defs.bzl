@@ -475,6 +475,48 @@ normally pass, but don’t work under coverage for some reason.""",
     implementation = _elisp_test_impl,
 )
 
+def _elisp_manual_impl(ctx):
+    """Rule implementation for the “elisp_manual” rule."""
+    src = ctx.file.src
+    out = ctx.outputs.out
+    if not out.basename.endswith(".texi"):
+        fail("Output filename {} doesn’t end in “.texi”".format(out.short_path))
+    ctx.actions.run(
+        outputs = [out],
+        inputs = [src],
+        executable = ctx.executable._export,
+        arguments = [src.path, out.path],
+        mnemonic = "Export",
+        progress_message = "Exporting {} into Texinfo file".format(src.short_path),
+    )
+
+elisp_manual = rule(
+    attrs = {
+        "src": attr.label(
+            doc = "Org-mode file to use as manual source; must end in `.org`.",
+            allow_single_file = [".org"],
+            mandatory = True,
+        ),
+        "out": attr.output(
+            doc = "Texinfo manual file to write; must end in `.texi`.",
+            mandatory = True,
+        ),
+        "_export": attr.label(
+            allow_single_file = True,
+            executable = True,
+            cfg = "exec",
+            default = Label("//elisp:export_org"),
+        ),
+    },
+    doc = """Generates a [GNU_Texinfo](https://www.gnu.org/software/texinfo/)
+manual from an [Org Mode file](https://orgmode.org/) using
+[Org’s exporting functionality](https://orgmode.org/manual/Exporting.html).
+You can then use
+[`texi2any`](https://www.gnu.org/software/texinfo/manual/texinfo/html_node/Generic-Translator-texi2any.html)
+to generate other document formats from the output file.""",
+    implementation = _elisp_manual_impl,
+)
+
 def _compile(ctx, srcs, deps, load_path):
     """Byte-compiles Emacs Lisp source files.
 

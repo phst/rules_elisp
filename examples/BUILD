@@ -17,6 +17,7 @@ load(
     "@phst_rules_elisp//elisp:defs.bzl",
     "elisp_binary",
     "elisp_library",
+    "elisp_manual",
     "elisp_test",
 )
 
@@ -82,6 +83,19 @@ cc_binary(
     srcs = ["module.c"],
     linkshared = True,
     deps = ["//emacs:module_header"],
+)
+
+elisp_manual(
+    name = "doc",
+    src = "doc.org",
+    out = "doc.texi",
+)
+
+genrule(
+    name = "makeinfo",
+    srcs = ["doc.texi"],
+    outs = ["doc.info"],
+    cmd = "makeinfo --no-split --output=$@ -- $<",
 )
 
 go_test(

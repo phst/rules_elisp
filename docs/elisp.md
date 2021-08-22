@@ -65,6 +65,31 @@ e.g. `cc_binary` with `linkshared = True` to create shared objects.
 | <a id="elisp_library-srcs"></a>srcs |  List of source files.  These must either be Emacs Lisp files ending in <code>.el</code>, or module objects ending in <code>.so</code> or <code>.dylib</code>.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
+<a id="#elisp_manual"></a>
+
+## elisp_manual
+
+<pre>
+elisp_manual(<a href="#elisp_manual-name">name</a>, <a href="#elisp_manual-out">out</a>, <a href="#elisp_manual-src">src</a>)
+</pre>
+
+Generates a [GNU_Texinfo](https://www.gnu.org/software/texinfo/)
+manual from an [Org Mode file](https://orgmode.org/) using
+[Org’s exporting functionality](https://orgmode.org/manual/Exporting.html).
+You can then use
+[`texi2any`](https://www.gnu.org/software/texinfo/manual/texinfo/html_node/Generic-Translator-texi2any.html)
+to generate other document formats from the output file.
+
+**ATTRIBUTES**
+
+
+| Name  | Description | Type | Mandatory | Default |
+| :------------- | :------------- | :------------- | :------------- | :------------- |
+| <a id="elisp_manual-name"></a>name |  A unique name for this target.   | <a href="https://bazel.build/docs/build-ref.html#name">Name</a> | required |  |
+| <a id="elisp_manual-out"></a>out |  Texinfo manual file to write; must end in <code>.texi</code>.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+| <a id="elisp_manual-src"></a>src |  Org-mode file to use as manual source; must end in <code>.org</code>.   | <a href="https://bazel.build/docs/build-ref.html#labels">Label</a> | required |  |
+
+
 <a id="#elisp_test"></a>
 
 ## elisp_test
