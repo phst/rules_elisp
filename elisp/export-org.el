@@ -28,13 +28,13 @@
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
-(let ((input (pop command-line-args-left))
-      (output (pop command-line-args-left))
+(let ((input (or (pop command-line-args-left)
+                 (user-error "No input file given")))
+      (output (or (pop command-line-args-left)
+                  (user-error "No output file given")))
       (coding-system-for-read 'utf-8-unix)
       (coding-system-for-write 'utf-8-unix))
   (when command-line-args-left (user-error "Too many command-line arguments"))
-  (unless input (user-error "No input file given"))
-  (unless output (user-error "No output file given"))
   (with-temp-buffer
     (insert-file-contents (file-name-quote input))
     (write-region (org-export-as 'texinfo) nil (file-name-quote output))))
