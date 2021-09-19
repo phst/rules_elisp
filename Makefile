@@ -22,6 +22,7 @@ BAZELFLAGS :=
 FIND := find
 GREP := grep
 PYLINT := pylint
+PYTYPE := pytype
 
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
@@ -43,7 +44,7 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier pylint nogo docs check $(versions)
+all: buildifier pylint pytype nogo docs check $(versions)
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
@@ -53,6 +54,9 @@ buildifier:
 pylint:
 	$(FIND) . -name '*.py' -type f \
 	  -exec $(PYLINT) --output-format=parseable -- '{}' '+'
+
+pytype:
+	$(FIND) . -name '*.py' -type f -exec $(PYTYPE) -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
@@ -84,5 +88,5 @@ $(doc_sources): %.md: bazel-bin/%_doc.md
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
 
-.PHONY: all buildifier pylint nogo check $(versions)
+.PHONY: all buildifier pylint pytype nogo check $(versions)
 .PHONY: docs $(doc_sources) $(doc_generated)
