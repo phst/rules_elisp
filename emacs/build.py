@@ -27,7 +27,7 @@ import tempfile
 
 def main() -> None:
     """Configures and builds Emacs."""
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--source', type=pathlib.Path, required=True)
     parser.add_argument('--install', type=pathlib.Path, required=True)
     parser.add_argument('--cc', type=pathlib.Path, required=True)
