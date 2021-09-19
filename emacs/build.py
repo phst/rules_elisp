@@ -23,7 +23,6 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-from typing import Text
 
 
 def main() -> None:
@@ -42,7 +41,7 @@ def main() -> None:
         install = args.install.resolve()
         shutil.copytree(args.source, build)
 
-        def run(*command: Text) -> None:
+        def run(*command: str) -> None:
             try:
                 subprocess.run(command, check=True, cwd=build,
                                stdin=subprocess.DEVNULL,
