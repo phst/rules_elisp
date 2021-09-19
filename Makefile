@@ -24,6 +24,13 @@ GREP := grep
 PYLINT := pylint
 PYTYPE := pytype
 
+srcdir := $(abspath .)
+
+# Set a fake PYTHONPATH so that Pylint can find imports for the external
+# workspaces.  We only import from the standard library and from external
+# workspaces, not from the main workspace.
+pythonpath := $(srcdir)/bazel-$(notdir $(srcdir))/external
+
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
 
@@ -52,11 +59,15 @@ buildifier:
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
 pylint:
-	$(FIND) . -name '*.py' -type f \
+	PYTHONPATH='$(pythonpath)' \
+	  $(FIND) . -name '*.py' -type f \
 	  -exec $(PYLINT) --output-format=parseable -- '{}' '+'
 
 pytype:
-	$(FIND) . -name '*.py' -type f -exec $(PYTYPE) -- '{}' '+'
+        # We’d want to set the Python path to only $(pythonpath), but for some
+        # reason that breaks Pytype.
+	$(FIND) . -name '*.py' -type f \
+	  -exec $(PYTYPE) --pythonpath='$(pythonpath):$(srcdir)' -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
