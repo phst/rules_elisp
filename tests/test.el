@@ -1,6 +1,6 @@
 ;;; test.el --- test to check the test runner        -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2021 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -68,8 +68,8 @@
   (throw 'unknown-tag 'hi))
 
 (ert-deftest special-chars ()
-  (error (concat "Error äöü \t \r\n \0 \uFFFD \uFFFE \uFFFF 𝑨 "
-                 "<![CDATA[ ]]> & < > \" ' <!-- -->")))
+  (error "%s" (concat "Error äöü \t \r\n \0 \uFFFD \uFFFE \uFFFF 𝑨 "
+                      "<![CDATA[ ]]> & < > \" ' <!-- -->")))
 
 (ert-deftest coverage ()
   (tests/test-function nil))
