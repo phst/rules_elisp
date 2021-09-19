@@ -19,6 +19,8 @@ SHELL := /bin/sh
 
 BAZEL := bazel
 BAZELFLAGS :=
+FIND := find
+PYLINT := pylint
 
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
@@ -40,12 +42,16 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier nogo docs check $(versions)
+all: buildifier pylint nogo docs check $(versions)
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
+
+pylint:
+	$(FIND) . -name '*.py' -type f \
+	  -exec $(PYLINT) --output-format=parseable -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
@@ -81,5 +87,5 @@ $(doc_sources): %.md: bazel-bin/%_doc.md
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
 
-.PHONY: all buildifier nogo check $(versions)
+.PHONY: all buildifier pylint nogo check $(versions)
 .PHONY: docs $(doc_sources) $(doc_generated)
