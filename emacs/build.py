@@ -48,11 +48,13 @@ def main() -> None:
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                encoding='utf-8', errors='backslashescape')
             except subprocess.CalledProcessError as ex:
-                print('command', ' '.join(map(shlex.quote, command)), 'failed, output follows:')
+                print('command', ' '.join(map(shlex.quote, command)),
+                      'failed, output follows:')
                 print(ex.stdout)
                 print()
                 print('config.log follows:')
-                print((build / 'config.log').read_text('utf-8', 'backslashescape'))
+                config_log = build / 'config.log'
+                print(config_log.read_text('utf-8', 'backslashescape'))
                 raise
 
         run('./configure', '--prefix=' + str(install),
