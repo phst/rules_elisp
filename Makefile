@@ -20,6 +20,7 @@ SHELL := /bin/sh
 BAZEL := bazel
 BAZELFLAGS :=
 FIND := find
+GREP := grep
 PYLINT := pylint
 
 # All potentially supported Emacs versions.
@@ -57,13 +58,9 @@ pylint:
 # depend on the Go rules then as well.
 nogo:
 	echo 'Looking for unwanted Go targets in public packages'
-        # Check explicitly for exit status 1, to detect grep errors.
-	grep --fixed-strings --regexp='@io_bazel_rules_go' \
-	  --line-number --context=3 --color=auto --recursive -- elisp emacs; \
-	if (($$? != 1)); then \
-	  echo 'Unwanted Go targets found'; \
-	  exit 1; \
-	fi
+	! $(FIND) elisp emacs -type f \
+	  -exec $(GREP) -F -e '@io_bazel_rules_go' -n -- '{}' '+' \
+	  || { echo 'Unwanted Go targets found'; exit 1; }
 
 check:
 	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
