@@ -37,7 +37,7 @@ jobs:
         run: brew install pylint
         if: runner.os == 'macOS'
       - name: Install Python packages
-        run: sudo pip install pytype
+        run: sudo pip3 install pytype
       - name: Run Bazel tests
         run: make
         env:
