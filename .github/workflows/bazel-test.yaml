@@ -34,7 +34,7 @@ jobs:
         run: sudo apt-get install libxml2-utils pylint
         if: runner.os == 'Linux'
       - name: Install Python packages
-        run: pip install pytype
+        run: sudo pip install pytype
       - name: Run Bazel tests
         run: make
         env:
