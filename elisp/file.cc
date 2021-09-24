@@ -70,7 +70,7 @@ absl::StatusOr<TempFile> TempFile::Create(const std::string& directory,
   for (int i = 0; i < 10; i++) {
     auto name = TempName(directory, tmpl, random);
     if (!FileExists(name)) {
-      int fd = -1;
+      int fd;
       do {
         fd = ::open(Pointer(name), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC,
                     S_IRUSR | S_IWUSR);
@@ -113,7 +113,7 @@ absl::Status TempFile::Close() {
 }
 
 absl::Status TempFile::Flush() {
-  int status = -1;
+  int status;
   do {
     status = ::fsync(fd_);
   } while (status != 0 && errno == EINTR);
