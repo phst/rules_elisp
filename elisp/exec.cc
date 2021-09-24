@@ -241,8 +241,8 @@ namespace {
 
 class Executor {
  public:
-  static absl::StatusOr<Executor> Create(std::vector<std::string> argv);
-  static absl::StatusOr<Executor> CreateForTest(std::vector<std::string> argv);
+  explicit Executor(std::vector<std::string> argv,
+                    std::unique_ptr<Runfiles> runfiles);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
@@ -254,9 +254,6 @@ class Executor {
   absl::StatusOr<int> RunTest(const TestOptions& opts);
 
  private:
-  explicit Executor(std::vector<std::string> argv,
-                    std::unique_ptr<Runfiles> runfiles);
-
   absl::StatusOr<std::string> Runfile(const std::string& rel) const;
   std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
@@ -281,17 +278,6 @@ class Executor {
   std::unique_ptr<Runfiles> runfiles_;
   absl::BitGen random_;
 };
-
-absl::StatusOr<Executor> Executor::Create(std::vector<std::string> argv) {
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(argv.at(0)));
-  return Executor(std::move(argv), std::move(runfiles));
-}
-
-absl::StatusOr<Executor> Executor::CreateForTest(
-    std::vector<std::string> argv) {
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  return Executor(std::move(argv), std::move(runfiles));
-}
 
 Executor::Executor(std::vector<std::string> argv,
                    std::unique_ptr<Runfiles> runfiles)
@@ -516,7 +502,8 @@ absl::StatusOr<std::vector<std::string>> Executor::ArgFiles(
 }  // namespace
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
-  ASSIGN_OR_RETURN(auto executor, Executor::Create(opts.argv));
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
+  Executor executor(opts.argv, std::move(runfiles));
   return executor.RunEmacs(opts);
 }
 
@@ -530,7 +517,8 @@ int RunEmacs(const EmacsOptions& opts) {
 }
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
-  ASSIGN_OR_RETURN(auto executor, Executor::Create(opts.argv));
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
+  Executor executor(opts.argv, std::move(runfiles));
   return executor.RunBinary(opts);
 }
 
@@ -544,7 +532,8 @@ int RunBinary(const BinaryOptions& opts) {
 }
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
-  ASSIGN_OR_RETURN(auto executor, Executor::CreateForTest(opts.argv));
+  ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
+  Executor executor(opts.argv, std::move(runfiles));
   return executor.RunTest(opts);
 }
 
