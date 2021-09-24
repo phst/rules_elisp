@@ -130,8 +130,8 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
   if (runfiles == nullptr) {
-    return absl::FailedPreconditionError("couldn’t create runfiles for test: " +
-                                         error);
+    return absl::FailedPreconditionError(
+        absl::StrCat("couldn’t create runfiles for test: ", error));
   }
   return std::move(runfiles);
 }
@@ -307,7 +307,7 @@ absl::StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
   switch (opts.dump_mode) {
     case DumpMode::kPortable: {
       ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
-      args.push_back("--dump-file=" + dump);
+      args.push_back(absl::StrCat("--dump-file=", dump));
       break;
     }
     case DumpMode::kUnexec:
