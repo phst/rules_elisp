@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -71,11 +71,10 @@ absl::StatusOr<TempFile> TempFile::Create(const std::string& directory,
     auto name = TempName(directory, tmpl, random);
     if (!FileExists(name)) {
       int fd = -1;
-      while (true) {
+      do {
         fd = ::open(Pointer(name), O_RDWR | O_CREAT | O_EXCL | O_CLOEXEC,
                     S_IRUSR | S_IWUSR);
-        if (fd >= 0 || errno != EINTR) break;
-      }
+      } while (fd < 0 && errno == EINTR);
       if (fd < 0) return ErrnoStatus("open", name);
       return TempFile(fd, std::move(name));
     }
@@ -115,10 +114,9 @@ absl::Status TempFile::Close() {
 
 absl::Status TempFile::Flush() {
   int status = -1;
-  while (true) {
+  do {
     status = ::fsync(fd_);
-    if (status == 0 || errno != EINTR) break;
-  }
+  } while (status != 0 && errno == EINTR);
   if (status != 0) return this->Fail("fsync");
   return absl::OkStatus();
 }
