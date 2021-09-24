@@ -515,29 +515,27 @@ absl::StatusOr<std::vector<std::string>> Executor::ArgFiles(
 
 }  // namespace
 
+static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
+  ASSIGN_OR_RETURN(auto executor, Executor::Create(opts.argv));
+  return executor.RunEmacs(opts);
+}
+
 int RunEmacs(const EmacsOptions& opts) {
-  auto status_or_executor = Executor::Create(opts.argv);
-  if (!status_or_executor.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
-    return EXIT_FAILURE;
-  }
-  auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunEmacs(opts);
+  const auto status_or_code = RunEmacsImpl(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
   }
   return status_or_code.value();
+}
+
+static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
+  ASSIGN_OR_RETURN(auto executor, Executor::Create(opts.argv));
+  return executor.RunBinary(opts);
 }
 
 int RunBinary(const BinaryOptions& opts) {
-  auto status_or_executor = Executor::Create(opts.argv);
-  if (!status_or_executor.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
-    return EXIT_FAILURE;
-  }
-  auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunBinary(opts);
+  const auto status_or_code = RunBinaryImpl(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
@@ -545,14 +543,13 @@ int RunBinary(const BinaryOptions& opts) {
   return status_or_code.value();
 }
 
+static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
+  ASSIGN_OR_RETURN(auto executor, Executor::CreateForTest(opts.argv));
+  return executor.RunTest(opts);
+}
+
 int RunTest(const TestOptions& opts) {
-  auto status_or_executor = Executor::CreateForTest(opts.argv);
-  if (!status_or_executor.ok()) {
-    std::clog << status_or_executor.status() << std::endl;
-    return EXIT_FAILURE;
-  }
-  auto& executor = status_or_executor.value();
-  const auto status_or_code = executor.RunTest(opts);
+  const auto status_or_code = RunTestImpl(opts);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
