@@ -337,11 +337,6 @@ elisp_binary = rule(
             default = "//elisp:binary",
             providers = [CcInfo],
         ),
-        _default_libs = attr.label_list(
-            default = ["//elisp/runfiles"],
-            allow_files = [".elc"],
-            allow_empty = False,
-        ),
         _template = attr.label(
             default = "//elisp:binary.template",
             allow_single_file = [".template"],
@@ -414,11 +409,6 @@ elisp_test = rule(
         _test_lib = attr.label(
             default = "//elisp:test",
             providers = [CcInfo],
-        ),
-        _default_libs = attr.label_list(
-            default = ["//elisp/runfiles", "//elisp/ert:runner"],
-            allow_files = [".elc"],
-            allow_empty = False,
         ),
         _template = attr.label(
             default = "//elisp:test.template",
@@ -861,19 +851,22 @@ def _binary(ctx, srcs, tags, substitutions, lib):
         requested_features = ctx.features,
         unsupported_features = ctx.disabled_features,
     )
-    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, lib)
+    executable, wrapper_runfiles = cc_wrapper(
+        ctx,
+        cc_toolchain,
+        feature_configuration,
+        driver,
+        lib,
+    )
     bin_runfiles = ctx.runfiles(
-        files = (
-            [emacs.files_to_run.executable] + ctx.files._default_libs +
-            result.outs
-        ),
+        files = [emacs.files_to_run.executable] + result.outs,
         transitive_files = depset(
             transitive = [transitive_files, result.runfiles.files],
         ),
         root_symlinks = links,
     )
     emacs_runfiles = emacs.default_runfiles
-    runfiles = bin_runfiles.merge(emacs_runfiles)
+    runfiles = bin_runfiles.merge(emacs_runfiles).merge(wrapper_runfiles)
     return executable, runfiles
 
 def _load_directory_for_actions(directory):

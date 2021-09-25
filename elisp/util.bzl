@@ -85,7 +85,9 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
       dep (Target): a `cc_library` target to add as dependency
 
     Returns:
-      a File representing the executable that starts Emacs
+      a pair `(executable, runfiles)` where `executable` is a `File` object
+      representing the executable that starts Emacs and `runfiles` is a
+      `runfiles` object for the runfiles that the executable will need
     """
     info = dep[CcInfo]
     _, objs = cc_common.compile(
@@ -106,7 +108,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
         linking_contexts = [info.linking_context],
         grep_includes = ctx.executable._grep_includes,
     )
-    return bin.executable
+    return bin.executable, dep[DefaultInfo].default_runfiles
 
 def cpp_strings(strings):
     """Formats the given string list as C++ initializer list.

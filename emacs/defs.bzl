@@ -61,11 +61,17 @@ def _emacs_binary_impl(ctx):
         },
         is_executable = True,
     )
-    executable = cc_wrapper(ctx, cc_toolchain, wrapper_configuration, driver, ctx.attr._emacs_lib)
+    executable, runfiles = cc_wrapper(
+        ctx,
+        cc_toolchain,
+        wrapper_configuration,
+        driver,
+        ctx.attr._emacs_lib,
+    )
     return [DefaultInfo(
         executable = executable,
         files = depset(direct = [executable]),
-        runfiles = ctx.runfiles(files = [install]),
+        runfiles = ctx.runfiles(files = [install]).merge(runfiles),
     )]
 
 _DUMP_MODES = {

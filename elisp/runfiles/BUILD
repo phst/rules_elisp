@@ -17,6 +17,7 @@ load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 elisp_library(
     name = "runfiles",
     srcs = ["runfiles.el"],
+    outs = ["runfiles.elc"],
     visibility = ["//visibility:public"],
 )
 

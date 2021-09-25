@@ -212,6 +212,7 @@ cc_library(
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
+    data = ["//elisp/ert:runner.elc"],
     visibility = ["//visibility:public"],
     deps = [
         ":algorithm",
@@ -264,6 +265,7 @@ cc_library(
     name = "load",
     srcs = ["load.cc"],
     hdrs = ["load.h"],
+    data = ["//elisp/runfiles:runfiles.elc"],
     deps = [
         ":process",
         ":status",
