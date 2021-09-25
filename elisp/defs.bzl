@@ -272,6 +272,10 @@ files ending in `.el`, or module objects ending in `.so` or `.dylib`.""",
             # https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
+        outs = attr.output_list(
+            doc = """List of byte-compiled Emacs Lisp files to be made available
+as targets.""",
+        ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,

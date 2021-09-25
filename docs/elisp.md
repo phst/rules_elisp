@@ -31,7 +31,7 @@ in batch mode.
 ## elisp_library
 
 <pre>
-elisp_library(<a href="#elisp_library-name">name</a>, <a href="#elisp_library-data">data</a>, <a href="#elisp_library-deps">deps</a>, <a href="#elisp_library-fatal_warnings">fatal_warnings</a>, <a href="#elisp_library-load_path">load_path</a>, <a href="#elisp_library-srcs">srcs</a>)
+elisp_library(<a href="#elisp_library-name">name</a>, <a href="#elisp_library-data">data</a>, <a href="#elisp_library-deps">deps</a>, <a href="#elisp_library-fatal_warnings">fatal_warnings</a>, <a href="#elisp_library-load_path">load_path</a>, <a href="#elisp_library-outs">outs</a>, <a href="#elisp_library-srcs">srcs</a>)
 </pre>
 
 Byte-compiles Emacs Lisp source files and makes the compiled output
@@ -62,6 +62,7 @@ e.g. `cc_binary` with `linkshared = True` to create shared objects.
 | <a id="elisp_library-deps"></a>deps |  List of <code>elisp_library</code> dependencies.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | optional | [] |
 | <a id="elisp_library-fatal_warnings"></a>fatal_warnings |  If <code>True</code> (the default), then byte compile warnings should be treated as errors.  If <code>False</code>, they still show up in the output, but don’t cause the compilation to fail.  Most targets should leave this attribute as <code>True</code>, because otherwise important issues might remain undetected.  Set this attribute to <code>False</code> only for integrating third-party libraries that don’t compile cleanly and that you don’t control.   | Boolean | optional | True |
 | <a id="elisp_library-load_path"></a>load_path |  List of additional load path elements. The elements are directory names, which can be either relative or absolute. Relative names are relative to the current package. Absolute names are relative to the workspace root. To add a load path entry for the current package, specify <code>.</code> here.   | List of strings | optional | [] |
+| <a id="elisp_library-outs"></a>outs |  List of byte-compiled Emacs Lisp files to be made available as targets.   | List of labels | optional |  |
 | <a id="elisp_library-srcs"></a>srcs |  List of source files.  These must either be Emacs Lisp files ending in <code>.el</code>, or module objects ending in <code>.so</code> or <code>.dylib</code>.   | <a href="https://bazel.build/docs/build-ref.html#labels">List of labels</a> | required |  |
 
 
