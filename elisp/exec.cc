@@ -249,11 +249,6 @@ class Executor {
   Executor& operator=(const Executor&) = delete;
   Executor& operator=(Executor&&) = default;
 
-  absl::StatusOr<int> RunEmacs(const EmacsOptions& opts);
-  absl::StatusOr<int> RunBinary(const BinaryOptions& opts);
-  absl::StatusOr<int> RunTest(const TestOptions& opts);
-
- private:
   absl::StatusOr<std::string> Runfile(const std::string& rel) const;
   std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
@@ -265,123 +260,23 @@ class Executor {
                           const std::vector<std::string>& args,
                           const Environment& env);
 
+  absl::StatusOr<std::vector<std::string>> ArgFiles(
+      const std::string& root, const absl::flat_hash_set<int>& indices) const;
+
+private:
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
 
   std::vector<std::string> BuildEnv(const Environment& other) const;
 
-  absl::StatusOr<std::vector<std::string>> ArgFiles(
-      const std::string& root, const absl::flat_hash_set<int>& indices) const;
-
   std::vector<std::string> orig_args_;
   Environment orig_env_ = CopyEnv();
   std::unique_ptr<Runfiles> runfiles_;
-  absl::BitGen random_;
 };
 
 Executor::Executor(std::vector<std::string> argv,
                    std::unique_ptr<Runfiles> runfiles)
     : orig_args_(std::move(argv)), runfiles_(std::move(runfiles)) {}
-
-absl::StatusOr<int> Executor::RunEmacs(const EmacsOptions& opts) {
-  ASSIGN_OR_RETURN(const auto install, this->Runfile(opts.install_rel));
-  const auto emacs = JoinPath(install, "bin", "emacs");
-  ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
-  const auto etc = JoinPath(shared, "etc");
-  const auto libexec = JoinPath(install, "libexec");
-  std::vector<std::string> args;
-  switch (opts.dump_mode) {
-    case DumpMode::kPortable: {
-      ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
-      args.push_back(absl::StrCat("--dump-file=", dump));
-      break;
-    }
-    case DumpMode::kUnexec:
-      break;
-  }
-  Environment map;
-  map.emplace("EMACSDATA", etc);
-  map.emplace("EMACSDOC", etc);
-  map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
-  map.emplace("EMACSPATH", libexec);
-  return this->Run(emacs, args, map);
-}
-
-absl::StatusOr<int> Executor::RunBinary(const BinaryOptions& opts) {
-  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
-  std::vector<std::string> args;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
-  args.push_back("--quick");
-  args.push_back("--batch");
-  RETURN_IF_ERROR(this->AddLoadPath(args, opts.load_path));
-  for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
-    args.push_back(absl::StrCat("--load=", abs));
-  }
-  if (manifest) {
-    const auto runfiles = this->RunfilesDir();
-    ASSIGN_OR_RETURN(auto input_files,
-                     this->ArgFiles(runfiles, opts.input_args));
-    ASSIGN_OR_RETURN(auto output_files,
-                     this->ArgFiles(runfiles, opts.output_args));
-    RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
-                                  std::move(output_files), manifest.value()));
-  }
-  ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
-  if (manifest) RETURN_IF_ERROR(manifest->Close());
-  return code;
-}
-
-absl::StatusOr<int> Executor::RunTest(const TestOptions& opts) {
-  ASSIGN_OR_RETURN(const auto emacs, this->Runfile(opts.wrapper));
-  std::vector<std::string> args;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random_));
-  args.push_back("--quick");
-  args.push_back("--batch");
-  args.push_back("--module-assertions");
-  RETURN_IF_ERROR(this->AddLoadPath(args, opts.load_path));
-  ASSIGN_OR_RETURN(const auto runner,
-                   this->Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
-  args.push_back(absl::StrCat("--load=", runner));
-  // Note that using equals signs for "--test-source, --skip-test, and
-  // --skip-tag doesn’t work.
-  for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, this->Runfile(file));
-    args.push_back("--test-source");
-    args.push_back(absl::StrCat("/:", abs));
-  }
-  for (const auto& test : Sort(opts.skip_tests)) {
-    args.push_back("--skip-test");
-    args.push_back(test);
-  }
-  for (const auto& tag : Sort(opts.skip_tags)) {
-    args.push_back("--skip-tag");
-    args.push_back(tag);
-  }
-  args.push_back("--funcall=elisp/ert/run-batch-and-exit");
-  if (manifest) {
-    std::vector<std::string> inputs, outputs;
-    const auto report_file = this->EnvVar("XML_OUTPUT_FILE");
-    if (!report_file.empty()) {
-      outputs.push_back(report_file);
-    }
-    if (this->EnvVar("COVERAGE") == "1") {
-      std::string coverage_manifest = this->EnvVar("COVERAGE_MANIFEST");
-      if (!coverage_manifest.empty()) {
-        inputs.push_back(std::move(coverage_manifest));
-      }
-      const auto coverage_dir = this->EnvVar("COVERAGE_DIR");
-      if (!coverage_dir.empty()) {
-        outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
-      }
-    }
-    RETURN_IF_ERROR(
-        WriteManifest(opts, std::move(inputs), outputs, manifest.value()));
-  }
-  ASSIGN_OR_RETURN(const auto code, this->Run(emacs, args, {}));
-  if (manifest) RETURN_IF_ERROR(manifest->Close());
-  return code;
-}
 
 absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
@@ -504,7 +399,27 @@ absl::StatusOr<std::vector<std::string>> Executor::ArgFiles(
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
   Executor executor(opts.argv, std::move(runfiles));
-  return executor.RunEmacs(opts);
+  ASSIGN_OR_RETURN(const auto install, executor.Runfile(opts.install_rel));
+  const auto emacs = JoinPath(install, "bin", "emacs");
+  ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
+  const auto etc = JoinPath(shared, "etc");
+  const auto libexec = JoinPath(install, "libexec");
+  std::vector<std::string> args;
+  switch (opts.dump_mode) {
+    case DumpMode::kPortable: {
+      ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
+      args.push_back(absl::StrCat("--dump-file=", dump));
+      break;
+    }
+    case DumpMode::kUnexec:
+      break;
+  }
+  Environment map;
+  map.emplace("EMACSDATA", etc);
+  map.emplace("EMACSDOC", etc);
+  map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
+  map.emplace("EMACSPATH", libexec);
+  return executor.Run(emacs, args, map);
 }
 
 int RunEmacs(const EmacsOptions& opts) {
@@ -519,7 +434,29 @@ int RunEmacs(const EmacsOptions& opts) {
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
   Executor executor(opts.argv, std::move(runfiles));
-  return executor.RunBinary(opts);
+  ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
+  std::vector<std::string> args;
+  absl::BitGen random;
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
+  args.push_back("--quick");
+  args.push_back("--batch");
+  RETURN_IF_ERROR(executor.AddLoadPath(args, opts.load_path));
+  for (const auto& file : opts.load_files) {
+    ASSIGN_OR_RETURN(const auto abs, executor.Runfile(file));
+    args.push_back(absl::StrCat("--load=", abs));
+  }
+  if (manifest) {
+    const auto runfiles = executor.RunfilesDir();
+    ASSIGN_OR_RETURN(auto input_files,
+                     executor.ArgFiles(runfiles, opts.input_args));
+    ASSIGN_OR_RETURN(auto output_files,
+                     executor.ArgFiles(runfiles, opts.output_args));
+    RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
+                                  std::move(output_files), manifest.value()));
+  }
+  ASSIGN_OR_RETURN(const auto code, executor.Run(emacs, args, {}));
+  if (manifest) RETURN_IF_ERROR(manifest->Close());
+  return code;
 }
 
 int RunBinary(const BinaryOptions& opts) {
@@ -534,7 +471,55 @@ int RunBinary(const BinaryOptions& opts) {
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
   Executor executor(opts.argv, std::move(runfiles));
-  return executor.RunTest(opts);
+  ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
+  std::vector<std::string> args;
+  absl::BitGen random;
+  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
+  args.push_back("--quick");
+  args.push_back("--batch");
+  args.push_back("--module-assertions");
+  RETURN_IF_ERROR(executor.AddLoadPath(args, opts.load_path));
+  ASSIGN_OR_RETURN(const auto runner,
+                   executor.Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
+  args.push_back(absl::StrCat("--load=", runner));
+  // Note that using equals signs for "--test-source, --skip-test, and
+  // --skip-tag doesn’t work.
+  for (const auto& file : opts.load_files) {
+    ASSIGN_OR_RETURN(const auto abs, executor.Runfile(file));
+    args.push_back("--test-source");
+    args.push_back(absl::StrCat("/:", abs));
+  }
+  for (const auto& test : Sort(opts.skip_tests)) {
+    args.push_back("--skip-test");
+    args.push_back(test);
+  }
+  for (const auto& tag : Sort(opts.skip_tags)) {
+    args.push_back("--skip-tag");
+    args.push_back(tag);
+  }
+  args.push_back("--funcall=elisp/ert/run-batch-and-exit");
+  if (manifest) {
+    std::vector<std::string> inputs, outputs;
+    const auto report_file = executor.EnvVar("XML_OUTPUT_FILE");
+    if (!report_file.empty()) {
+      outputs.push_back(report_file);
+    }
+    if (executor.EnvVar("COVERAGE") == "1") {
+      std::string coverage_manifest = executor.EnvVar("COVERAGE_MANIFEST");
+      if (!coverage_manifest.empty()) {
+        inputs.push_back(std::move(coverage_manifest));
+      }
+      const auto coverage_dir = executor.EnvVar("COVERAGE_DIR");
+      if (!coverage_dir.empty()) {
+        outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
+      }
+    }
+    RETURN_IF_ERROR(
+        WriteManifest(opts, std::move(inputs), outputs, manifest.value()));
+  }
+  ASSIGN_OR_RETURN(const auto code, executor.Run(emacs, args, {}));
+  if (manifest) RETURN_IF_ERROR(manifest->Close());
+  return code;
 }
 
 int RunTest(const TestOptions& opts) {
