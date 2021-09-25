@@ -279,15 +279,6 @@ absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   return MakeAbsolute(str);
 }
 
-static std::string RunfilesDir(const Executor& executor) {
-  const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
-  for (const auto& var : vars) {
-    auto value = executor.EnvVar(var);
-    if (!value.empty()) return value;
-  }
-  return std::string();
-}
-
 std::string Executor::EnvVar(const std::string& name) const noexcept {
   const auto it = orig_env_.find(name);
   return it == orig_env_.end() ? std::string() : it->second;
@@ -336,6 +327,15 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
 }
 
 }  // namespace
+
+static std::string RunfilesDir(const Executor& executor) {
+  const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
+  for (const auto& var : vars) {
+    auto value = executor.EnvVar(var);
+    if (!value.empty()) return value;
+  }
+  return std::string();
+}
 
 static absl::Status AddLoadPath(const Executor& executor,
                                 std::vector<std::string>& args,
