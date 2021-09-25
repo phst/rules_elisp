@@ -241,8 +241,7 @@ namespace {
 
 class Executor {
  public:
-  explicit Executor(std::vector<std::string> argv,
-                    std::unique_ptr<Runfiles> runfiles);
+  explicit Executor(const Argv& argv, std::unique_ptr<Runfiles> runfiles);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
@@ -271,9 +270,8 @@ private:
   std::unique_ptr<Runfiles> runfiles_;
 };
 
-Executor::Executor(std::vector<std::string> argv,
-                   std::unique_ptr<Runfiles> runfiles)
-    : orig_args_(std::move(argv)), runfiles_(std::move(runfiles)) {}
+Executor::Executor(const Argv& argv, std::unique_ptr<Runfiles> runfiles)
+    : orig_args_(argv.argv), runfiles_(std::move(runfiles)) {}
 
 absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
@@ -396,7 +394,7 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts.argv, std::move(runfiles));
+  Executor executor(opts, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto install, executor.Runfile(opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
@@ -431,7 +429,7 @@ int RunEmacs(const EmacsOptions& opts) {
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts.argv, std::move(runfiles));
+  Executor executor(opts, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
@@ -468,7 +466,7 @@ int RunBinary(const BinaryOptions& opts) {
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  Executor executor(opts.argv, std::move(runfiles));
+  Executor executor(opts, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;

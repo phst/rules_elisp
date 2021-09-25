@@ -29,24 +29,26 @@
 
 namespace phst_rules_elisp {
 
+struct Argv {
+  std::vector<std::string> argv;
+};
+
 enum class Mode { kDirect, kWrap };
 enum class DumpMode { kPortable, kUnexec };
 
-struct EmacsOptions {
+struct EmacsOptions : Argv {
   std::string install_rel;
   DumpMode dump_mode;
-  std::vector<std::string> argv;
 };
 
 ABSL_MUST_USE_RESULT int RunEmacs(const EmacsOptions& opts);
 
-struct CommonOptions {
+struct CommonOptions : Argv {
   std::string wrapper;
   Mode mode;
   absl::flat_hash_set<std::string> rule_tags;
   std::vector<std::string> load_path, load_files;
   absl::flat_hash_set<std::string> data_files;
-  std::vector<std::string> argv;
 };
 
 struct BinaryOptions : CommonOptions {
