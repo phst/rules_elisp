@@ -25,13 +25,13 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/base/casts.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/optional.h"
+#include "absl/utility/utility.h"
 #include "nlohmann/json.hpp"
 #pragma GCC diagnostic pop
 
@@ -44,13 +44,13 @@ namespace phst_rules_elisp {
 
 absl::StatusOr<absl::optional<TempFile>> AddManifest(
     const Mode mode, std::vector<std::string>& args, absl::BitGen& random) {
-  using Type = absl::optional<TempFile>;
-  if (mode == Mode::kDirect) return absl::implicit_cast<Type>(absl::nullopt);
+  using Type = absl::StatusOr<absl::optional<TempFile>>;
+  if (mode == Mode::kDirect) return Type(absl::in_place);
   ASSIGN_OR_RETURN(auto stream,
                    TempFile::Create(TempDir(), "manifest-*.json", random));
   args.push_back(absl::StrCat("--manifest=", stream.path()));
   args.push_back("--");
-  return absl::implicit_cast<Type>(std::move(stream));
+  return Type(absl::in_place, std::move(stream));
 }
 
 static void CheckRelative(const std::vector<std::string>& files) {
