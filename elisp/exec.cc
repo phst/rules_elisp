@@ -76,6 +76,12 @@ std::vector<T> Sort(const absl::flat_hash_set<T>& set) {
   return result;
 }
 
+template <typename T>
+typename T::mapped_type Find(const T& map, const typename T::key_type& key) {
+  const auto it = map.find(key);
+  return it == map.end() ? typename T::mapped_type() : it->second;
+}
+
 }  // namespace
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
@@ -241,7 +247,8 @@ namespace {
 
 class Executor {
  public:
-  explicit Executor(const Argv& argv, std::unique_ptr<Runfiles> runfiles);
+  explicit Executor(const Argv& argv, Environment env,
+                    std::unique_ptr<Runfiles> runfiles);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
@@ -249,7 +256,6 @@ class Executor {
   Executor& operator=(Executor&&) = default;
 
   absl::StatusOr<std::string> Runfile(const std::string& rel) const;
-  std::string EnvVar(const std::string& name) const noexcept;
 
   absl::StatusOr<int> Run(const std::string& binary,
                           const std::vector<std::string>& args,
@@ -262,12 +268,15 @@ private:
   std::vector<std::string> BuildEnv(const Environment& other) const;
 
   std::vector<std::string> orig_args_;
-  Environment orig_env_ = CopyEnv();
+  Environment orig_env_;
   std::unique_ptr<Runfiles> runfiles_;
 };
 
-Executor::Executor(const Argv& argv, std::unique_ptr<Runfiles> runfiles)
-    : orig_args_(argv.argv), runfiles_(std::move(runfiles)) {}
+Executor::Executor(const Argv& argv, Environment env,
+                   std::unique_ptr<Runfiles> runfiles)
+    : orig_args_(argv.argv),
+      orig_env_(std::move(env)),
+      runfiles_(std::move(runfiles)) {}
 
 absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   const std::string str = runfiles_->Rlocation(rel);
@@ -277,11 +286,6 @@ absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   // Note: Don’t canonicalize the filename here, because the Python stub looks
   // for the runfiles directory in the original filename.
   return MakeAbsolute(str);
-}
-
-std::string Executor::EnvVar(const std::string& name) const noexcept {
-  const auto it = orig_env_.find(name);
-  return it == orig_env_.end() ? std::string() : it->second;
 }
 
 absl::StatusOr<int> Executor::Run(const std::string& binary,
@@ -328,10 +332,10 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
 
 }  // namespace
 
-static std::string RunfilesDir(const Executor& executor) {
+static std::string RunfilesDir(const Environment& env) {
   const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
   for (const auto& var : vars) {
-    auto value = executor.EnvVar(var);
+    auto value = Find(env, var);
     if (!value.empty()) return value;
   }
   return std::string();
@@ -389,8 +393,9 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
 }
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
+  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, std::move(runfiles));
+  Executor executor(opts, orig_env, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto install, executor.Runfile(opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
@@ -424,8 +429,9 @@ int RunEmacs(const EmacsOptions& opts) {
 }
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
+  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, std::move(runfiles));
+  Executor executor(opts, orig_env, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
@@ -438,7 +444,7 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
-    const auto runfiles = RunfilesDir(executor);
+    const auto runfiles = RunfilesDir(orig_env);
     ASSIGN_OR_RETURN(auto input_files,
                      ArgFiles(opts, runfiles, opts.input_args));
     ASSIGN_OR_RETURN(auto output_files,
@@ -461,8 +467,9 @@ int RunBinary(const BinaryOptions& opts) {
 }
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
+  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  Executor executor(opts, std::move(runfiles));
+  Executor executor(opts, orig_env, std::move(runfiles));
   ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
@@ -492,16 +499,16 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   args.push_back("--funcall=elisp/ert/run-batch-and-exit");
   if (manifest) {
     std::vector<std::string> inputs, outputs;
-    const auto report_file = executor.EnvVar("XML_OUTPUT_FILE");
+    const auto report_file = Find(orig_env, "XML_OUTPUT_FILE");
     if (!report_file.empty()) {
       outputs.push_back(report_file);
     }
-    if (executor.EnvVar("COVERAGE") == "1") {
-      std::string coverage_manifest = executor.EnvVar("COVERAGE_MANIFEST");
+    if (Find(orig_env, "COVERAGE") == "1") {
+      std::string coverage_manifest = Find(orig_env, "COVERAGE_MANIFEST");
       if (!coverage_manifest.empty()) {
         inputs.push_back(std::move(coverage_manifest));
       }
-      const auto coverage_dir = executor.EnvVar("COVERAGE_DIR");
+      const auto coverage_dir = Find(orig_env, "COVERAGE_DIR");
       if (!coverage_dir.empty()) {
         outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
       }
