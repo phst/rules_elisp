@@ -254,43 +254,21 @@ static absl::Status WriteManifest(const CommonOptions& opts,
   return file.Write(json.dump());
 }
 
-namespace {
-
-class Executor {
- public:
-  explicit Executor(const Argv& argv, Environment env,
-                    const Runfiles* runfiles);
-
-  Executor(const Executor&) = delete;
-  Executor(Executor&&) = default;
-  Executor& operator=(const Executor&) = delete;
-  Executor& operator=(Executor&&) = default;
-
-  absl::StatusOr<int> Run(const std::string& binary,
-                          const std::vector<std::string>& args,
-                          const Environment& env);
-
-private:
-  std::vector<std::string> orig_args_;
-  Environment orig_env_;
-  const Runfiles* runfiles_;
-};
-
-Executor::Executor(const Argv& argv, Environment env, const Runfiles* runfiles)
-    : orig_args_(argv.argv), orig_env_(std::move(env)), runfiles_(runfiles) {}
-
-absl::StatusOr<int> Executor::Run(const std::string& binary,
-                                  const std::vector<std::string>& args,
-                                  const Environment& env) {
-  std::vector<std::string> final_args{orig_args_.at(0)};
+static absl::StatusOr<int> Run(const Argv& orig_args,
+                               const Environment& orig_env,
+                               const Runfiles& runfiles,
+                               const std::string& binary,
+                               const std::vector<std::string>& args,
+                               const Environment& env) {
+  std::vector<std::string> final_args{orig_args.argv.at(0)};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  final_args.insert(final_args.end(), std::next(orig_args_.begin()),
-                    orig_args_.end());
+  final_args.insert(final_args.end(), std::next(orig_args.argv.begin()),
+                    orig_args.argv.end());
   const auto argv = Pointers(final_args);
-  const auto& pairs = runfiles_->EnvVars();
+  const auto& pairs = runfiles.EnvVars();
   Environment map(pairs.begin(), pairs.end());
   map.insert(env.begin(), env.end());
-  map.insert(orig_env_.begin(), orig_env_.end());
+  map.insert(orig_env.begin(), orig_env.end());
   std::vector<std::string> final_env;
   for (const auto& p : map) {
     final_env.push_back(absl::StrCat(p.first, "=", p.second));
@@ -310,8 +288,6 @@ absl::StatusOr<int> Executor::Run(const std::string& binary,
   if (status != pid) return ErrnoStatus("waitpid", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 }
-
-}  // namespace
 
 static std::string RunfilesDir(const Environment& env) {
   const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
@@ -376,7 +352,6 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, orig_env, runfiles.get());
   ASSIGN_OR_RETURN(const auto install, Runfile(*runfiles, opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
@@ -397,7 +372,7 @@ static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   map.emplace("EMACSDOC", etc);
   map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
   map.emplace("EMACSPATH", libexec);
-  return executor.Run(emacs, args, map);
+  return Run(opts, orig_env, *runfiles, emacs, args, map);
 }
 
 int RunEmacs(const EmacsOptions& opts) {
@@ -412,7 +387,6 @@ int RunEmacs(const EmacsOptions& opts) {
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, orig_env, runfiles.get());
   ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
@@ -433,7 +407,8 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
     RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
                                   std::move(output_files), manifest.value()));
   }
-  ASSIGN_OR_RETURN(const auto code, executor.Run(emacs, args, {}));
+  ASSIGN_OR_RETURN(const auto code,
+                   Run(opts, orig_env, *runfiles, emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
   return code;
 }
@@ -450,7 +425,6 @@ int RunBinary(const BinaryOptions& opts) {
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
-  Executor executor(opts, orig_env, runfiles.get());
   ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
@@ -497,7 +471,8 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
     RETURN_IF_ERROR(
         WriteManifest(opts, std::move(inputs), outputs, manifest.value()));
   }
-  ASSIGN_OR_RETURN(const auto code, executor.Run(emacs, args, {}));
+  ASSIGN_OR_RETURN(const auto code,
+                   Run(opts, orig_env, *runfiles, emacs, args, {}));
   if (manifest) RETURN_IF_ERROR(manifest->Close());
   return code;
 }
