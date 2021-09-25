@@ -252,9 +252,6 @@ class Executor {
   std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
 
-  absl::Status AddLoadPath(std::vector<std::string>& args,
-                           const std::vector<std::string>& load_path) const;
-
   absl::StatusOr<int> Run(const std::string& binary,
                           const std::vector<std::string>& args,
                           const Environment& env);
@@ -297,19 +294,19 @@ std::string Executor::EnvVar(const std::string& name) const noexcept {
   return it == orig_env_.end() ? std::string() : it->second;
 }
 
-absl::Status Executor::AddLoadPath(
-    std::vector<std::string>& args,
-    const std::vector<std::string>& load_path) const {
+static absl::Status AddLoadPath(const Executor& executor,
+                                std::vector<std::string>& args,
+                                const std::vector<std::string>& load_path) {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
   for (const auto& dir : load_path) {
-    const auto status_or_dir = this->Runfile(dir);
+    const auto status_or_dir = executor.Runfile(dir);
     if (status_or_dir.ok()) {
       args.push_back(absl::StrCat("--directory=", status_or_dir.value()));
     } else if (absl::IsNotFound(status_or_dir.status())) {
       if (!absl::exchange(runfile_handler_installed, true)) {
-        ASSIGN_OR_RETURN(const auto file, this->Runfile(runfiles_elc));
+        ASSIGN_OR_RETURN(const auto file, executor.Runfile(runfiles_elc));
         args.push_back(absl::StrCat("--load=", file));
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
@@ -436,7 +433,7 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
   args.push_back("--quick");
   args.push_back("--batch");
-  RETURN_IF_ERROR(executor.AddLoadPath(args, opts.load_path));
+  RETURN_IF_ERROR(AddLoadPath(executor, args, opts.load_path));
   for (const auto& file : opts.load_files) {
     ASSIGN_OR_RETURN(const auto abs, executor.Runfile(file));
     args.push_back(absl::StrCat("--load=", abs));
@@ -474,7 +471,7 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   args.push_back("--quick");
   args.push_back("--batch");
   args.push_back("--module-assertions");
-  RETURN_IF_ERROR(executor.AddLoadPath(args, opts.load_path));
+  RETURN_IF_ERROR(AddLoadPath(executor, args, opts.load_path));
   ASSIGN_OR_RETURN(const auto runner,
                    executor.Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
