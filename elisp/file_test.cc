@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -164,11 +164,11 @@ TEST(JoinPath, FinalSlash) {
 
 TEST(TempName, Create) {
   absl::BitGen rnd;
-  const auto a = TempName("/", "temp-*.json", rnd);
-  const auto b = TempName("/", "temp-*.json", rnd);
-  EXPECT_THAT(a, StartsWith("/temp-"));
+  const auto a = TempName("temp-*.json", rnd);
+  const auto b = TempName("temp-*.json", rnd);
+  EXPECT_THAT(a, StartsWith("temp-"));
   EXPECT_THAT(a, EndsWith(".json"));
-  EXPECT_THAT(b, StartsWith("/temp-"));
+  EXPECT_THAT(b, StartsWith("temp-"));
   EXPECT_THAT(b, EndsWith(".json"));
   EXPECT_THAT(b, StrNe(a));
 }

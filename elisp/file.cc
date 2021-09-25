@@ -69,7 +69,7 @@ absl::StatusOr<TempFile> TempFile::Create(const std::string& directory,
                                           const absl::string_view tmpl,
                                           absl::BitGen& random) {
   for (int i = 0; i < 10; i++) {
-    auto name = TempName(directory, tmpl, random);
+    auto name = JoinPath(directory, TempName(tmpl, random));
     if (!FileExists(name)) {
       int fd;
       do {
@@ -208,8 +208,7 @@ ABSL_MUST_USE_RESULT std::string TempDir() {
   return "/tmp";
 }
 
-ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view dir,
-                                          const absl::string_view tmpl,
+ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view tmpl,
                                           absl::BitGen& random) {
   const auto pos = tmpl.rfind('*');
   if (pos == tmpl.npos) {
@@ -219,9 +218,8 @@ ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view dir,
   const auto prefix = tmpl.substr(0, pos);
   const auto suffix = tmpl.substr(pos + 1);
   std::uniform_int_distribution<std::uint64_t> distribution;
-  const std::string name = absl::StrCat(
-      prefix, absl::Hex(distribution(random), absl::kZeroPad16), suffix);
-  return JoinPath(dir, name);
+  return absl::StrCat(prefix, absl::Hex(distribution(random), absl::kZeroPad16),
+                      suffix);
 }
 
 absl::StatusOr<std::string> GlobUnique(const std::string& pattern) {

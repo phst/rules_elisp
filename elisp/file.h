@@ -78,8 +78,7 @@ absl::StatusOr<std::string> MakeRelative(absl::string_view name,
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 absl::Status RemoveFile(const std::string& name) noexcept;
 ABSL_MUST_USE_RESULT std::string TempDir();
-ABSL_MUST_USE_RESULT std::string TempName(absl::string_view dir,
-                                          absl::string_view tmpl,
+ABSL_MUST_USE_RESULT std::string TempName(absl::string_view tmpl,
                                           absl::BitGen& random);
 
 absl::StatusOr<std::string> GlobUnique(const std::string& pattern);
