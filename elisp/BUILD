@@ -150,18 +150,77 @@ bzl_library(
 )
 
 cc_library(
-    name = "exec",
-    srcs = ["exec.cc"],
-    hdrs = ["exec.h"],
-    copts = COPTS,
+    name = "emacs",
+    srcs = ["emacs.cc"],
+    hdrs = ["emacs.h"],
     visibility = ["//visibility:public"],
     deps = [
         ":file",
+        ":options",
+        ":process",
         ":status",
-        ":str",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "binary",
+    srcs = ["binary.cc"],
+    hdrs = ["binary.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":algorithm",
+        ":file",
+        ":load",
+        ":manifest",
+        ":options",
+        ":process",
+        ":status",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/algorithm:container",
-        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/base:core_headers",
+        "@com_google_absl//absl/container:flat_hash_set",
+        "@com_google_absl//absl/random",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_test(
+    name = "binary_test",
+    size = "small",
+    srcs = ["binary_test.cc"],
+    copts = COPTS,
+    data = [
+        "binary.cc",
+        "binary.h",
+        "//tests/wrap",
+    ],
+    deps = [
+        ":binary",
+        ":options",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_library(
+    name = "test",
+    srcs = ["test.cc"],
+    hdrs = ["test.h"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":algorithm",
+        ":file",
+        ":load",
+        ":manifest",
+        ":options",
+        ":process",
+        ":status",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
@@ -169,25 +228,67 @@ cc_library(
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "options",
+    hdrs = ["options.h"],
+    copts = COPTS,
+    deps = ["@com_google_absl//absl/container:flat_hash_set"],
+)
+
+cc_library(
+    name = "manifest",
+    srcs = ["manifest.cc"],
+    hdrs = ["manifest.h"],
+    deps = [
+        ":algorithm",
+        ":file",
+        ":options",
+        ":status",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/base",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/random",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
         "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/utility",
         "@nlohmann_json//:json",
     ],
 )
 
-cc_test(
-    name = "exec_test",
-    size = "small",
-    srcs = ["exec_test.cc"],
-    copts = COPTS,
-    data = [
-        "exec.cc",
-        "exec.h",
-        "//tests/wrap",
-    ],
+cc_library(
+    name = "load",
+    srcs = ["load.cc"],
+    hdrs = ["load.h"],
     deps = [
-        ":exec",
-        "@com_google_googletest//:gtest_main",
+        ":process",
+        ":status",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/utility",
+    ],
+)
+
+cc_library(
+    name = "process",
+    srcs = ["process.cc"],
+    hdrs = ["process.h"],
+    deps = [
+        ":file",
+        ":options",
+        ":status",
+        ":str",
+        "@bazel_tools//tools/cpp/runfiles",
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:flat_hash_map",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
+        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -230,6 +331,16 @@ cc_library(
     name = "str",
     hdrs = ["str.h"],
     copts = COPTS,
+)
+
+cc_library(
+    name = "algorithm",
+    hdrs = ["algorithm.h"],
+    copts = COPTS,
+    deps = [
+        "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/container:flat_hash_set",
+    ],
 )
 
 cc_library(

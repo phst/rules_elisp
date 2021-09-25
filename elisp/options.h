@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_ELISP_EXEC_H
-#define PHST_RULES_ELISP_ELISP_EXEC_H
+#ifndef PHST_RULES_ELISP_ELISP_OPTIONS_H
+#define PHST_RULES_ELISP_ELISP_OPTIONS_H
 
 #include <string>
 #include <vector>
@@ -23,7 +23,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/base/attributes.h"
 #include "absl/container/flat_hash_set.h"
 #pragma GCC diagnostic pop
 
@@ -34,14 +33,6 @@ struct Argv {
 };
 
 enum class Mode { kDirect, kWrap };
-enum class DumpMode { kPortable, kUnexec };
-
-struct EmacsOptions : Argv {
-  std::string install_rel;
-  DumpMode dump_mode;
-};
-
-ABSL_MUST_USE_RESULT int RunEmacs(const EmacsOptions& opts);
 
 struct CommonOptions : Argv {
   std::string wrapper;
@@ -50,18 +41,6 @@ struct CommonOptions : Argv {
   std::vector<std::string> load_path, load_files;
   absl::flat_hash_set<std::string> data_files;
 };
-
-struct BinaryOptions : CommonOptions {
-  absl::flat_hash_set<int> input_args, output_args;
-};
-
-ABSL_MUST_USE_RESULT int RunBinary(const BinaryOptions& opts);
-
-struct TestOptions : CommonOptions {
-  absl::flat_hash_set<std::string> skip_tests, skip_tags;
-};
-
-ABSL_MUST_USE_RESULT int RunTest(const TestOptions& opts);
 
 }  // namespace phst_rules_elisp
 

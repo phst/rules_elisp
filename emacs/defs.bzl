@@ -61,7 +61,7 @@ def _emacs_binary_impl(ctx):
         },
         is_executable = True,
     )
-    executable = cc_wrapper(ctx, cc_toolchain, wrapper_configuration, driver)
+    executable = cc_wrapper(ctx, cc_toolchain, wrapper_configuration, driver, ctx.attr._emacs_lib)
     return [DefaultInfo(
         executable = executable,
         files = depset(direct = [executable]),
@@ -114,8 +114,8 @@ recommended.""",
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        "_exec": attr.label(
-            default = "//elisp:exec",
+        "_emacs_lib": attr.label(
+            default = "//elisp:emacs",
             providers = [CcInfo],
         ),
         "_template": attr.label(

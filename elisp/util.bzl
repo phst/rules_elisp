@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
+def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
     """Builds a wrapper executable that starts Emacs.
 
     You can use `find_cpp_toolchain` and `cc_common.configure_features` to
@@ -82,18 +82,19 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
       feature_configuration (FeatureConfiguration): the features to use to
           compile the wrapper
       driver (File): C++ driver file to compile
+      dep (Target): a `cc_library` target to add as dependency
 
     Returns:
       a File representing the executable that starts Emacs
     """
-    exec = ctx.attr._exec[CcInfo]
+    info = dep[CcInfo]
     _, objs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         srcs = [driver],
-        compilation_contexts = [exec.compilation_context],
+        compilation_contexts = [info.compilation_context],
         user_compile_flags = COPTS,
     )
     bin = cc_common.link(
@@ -102,7 +103,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
-        linking_contexts = [exec.linking_context],
+        linking_contexts = [info.linking_context],
         grep_includes = ctx.executable._grep_includes,
     )
     return bin.executable

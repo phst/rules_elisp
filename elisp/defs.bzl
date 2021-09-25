@@ -113,6 +113,7 @@ def _elisp_binary_impl(ctx):
             "[[input_args]]": cpp_ints(ctx.attr.input_args),
             "[[output_args]]": cpp_ints(ctx.attr.output_args),
         },
+        lib = ctx.attr._binary_lib,
     )
     return [DefaultInfo(
         executable = executable,
@@ -133,6 +134,7 @@ def _elisp_test_impl(ctx):
             "[[skip_tests]]": cpp_strings(ctx.attr.skip_tests),
             "[[skip_tags]]": cpp_strings(ctx.attr.skip_tags),
         },
+        lib = ctx.attr._test_lib,
     )
 
     # We include the original source files in the runfiles so that error
@@ -327,8 +329,8 @@ elisp_binary = rule(
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        _exec = attr.label(
-            default = "//elisp:exec",
+        _binary_lib = attr.label(
+            default = "//elisp:binary",
             providers = [CcInfo],
         ),
         _default_libs = attr.label_list(
@@ -405,8 +407,8 @@ elisp_test = rule(
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        _exec = attr.label(
-            default = "//elisp:exec",
+        _test_lib = attr.label(
+            default = "//elisp:test",
             providers = [CcInfo],
         ),
         _default_libs = attr.label_list(
@@ -751,7 +753,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, srcs, tags, substitutions):
+def _binary(ctx, srcs, tags, substitutions, lib):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
@@ -762,6 +764,7 @@ def _binary(ctx, srcs, tags, substitutions):
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
       substitutions: a dictionary of rule-specific template substitutions
+      lib (Target): a `cc_library` target to be added as dependency
 
     Returns:
       a pair (executable, runfiles) containing the compiled binary and the
@@ -854,7 +857,7 @@ def _binary(ctx, srcs, tags, substitutions):
         requested_features = ctx.features,
         unsupported_features = ctx.disabled_features,
     )
-    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver)
+    executable = cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, lib)
     bin_runfiles = ctx.runfiles(
         files = (
             [emacs.files_to_run.executable] + ctx.files._default_libs +

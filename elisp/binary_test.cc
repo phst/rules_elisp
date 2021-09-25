@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/exec.h"
+#include "elisp/binary.h"
 
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
+
+#include "elisp/options.h"
 
 namespace phst_rules_elisp {
 namespace {
@@ -28,10 +30,10 @@ TEST(Executor, RunBinaryWrap) {
   opts.mode = Mode::kWrap;
   opts.rule_tags = {"local", "mytag"};
   opts.load_path = {"phst_rules_elisp"};
-  opts.data_files = {"phst_rules_elisp/elisp/exec.h"};
+  opts.data_files = {"phst_rules_elisp/elisp/binary.h"};
   opts.input_args = {2};
   opts.output_args = {-1};
-  opts.argv = {"unused", "--option", "elisp/exec.cc", "/:/tmp/output.dat"};
+  opts.argv = {"unused", "--option", "elisp/binary.cc", "/:/tmp/output.dat"};
   EXPECT_THAT(RunBinary(opts), Eq(0));
 }
 

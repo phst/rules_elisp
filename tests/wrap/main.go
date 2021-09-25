@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Binary wrap is a test helper program for //elisp:exec_test, which see.
+// Binary wrap is a test helper program for //elisp:binary_test, which see.
 package main
 
 import (
@@ -48,7 +48,7 @@ func main() {
 		"root":        "RUNFILES_ROOT",
 		"tags":        []interface{}{"local", "mytag"},
 		"loadPath":    []interface{}{"phst_rules_elisp"},
-		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/exec.cc", "phst_rules_elisp/elisp/exec.h"},
+		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/binary.cc", "phst_rules_elisp/elisp/binary.h"},
 		"outputFiles": []interface{}{"/tmp/output.dat"},
 	}
 	if diff := cmp.Diff(got, want); diff != "" {
