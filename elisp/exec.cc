@@ -365,6 +365,8 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
   return vec;
 }
 
+}  // namespace
+
 static absl::StatusOr<std::vector<std::string>> ArgFiles(
     const BinaryOptions& opts, const std::string& root,
     const absl::flat_hash_set<int>& indices) {
@@ -391,8 +393,6 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
   }
   return result;
 }
-
-}  // namespace
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
