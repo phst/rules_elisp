@@ -142,6 +142,17 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   return std::move(runfiles);
 }
 
+static absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
+                                           const std::string& rel) {
+  const std::string str = runfiles.Rlocation(rel);
+  if (str.empty()) {
+    return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
+  }
+  // Note: Don’t canonicalize the filename here, because the Python stub looks
+  // for the runfiles directory in the original filename.
+  return MakeAbsolute(str);
+}
+
 static absl::StatusOr<std::string> GetSharedDir(const std::string& install) {
   const auto emacs = JoinPath(install, "share", "emacs");
   ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
@@ -272,17 +283,6 @@ private:
 
 Executor::Executor(const Argv& argv, Environment env, const Runfiles* runfiles)
     : orig_args_(argv.argv), orig_env_(std::move(env)), runfiles_(runfiles) {}
-
-static absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
-                                           const std::string& rel) {
-  const std::string str = runfiles.Rlocation(rel);
-  if (str.empty()) {
-    return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
-  }
-  // Note: Don’t canonicalize the filename here, because the Python stub looks
-  // for the runfiles directory in the original filename.
-  return MakeAbsolute(str);
-}
 
 absl::StatusOr<int> Executor::Run(const std::string& binary,
                                   const std::vector<std::string>& args,
