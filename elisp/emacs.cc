@@ -17,7 +17,6 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include <regex>
 #include <string>
 #include <vector>
 
@@ -30,7 +29,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
 #pragma GCC diagnostic pop
 
 #include "elisp/file.h"
@@ -40,63 +38,11 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<std::string> GetSharedDir(const std::string& install) {
-  const auto emacs = JoinPath(install, "share", "emacs");
-  ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
-  absl::flat_hash_set<std::string> dirs;
-  while (true) {
-    ASSIGN_OR_RETURN(const auto entry, dir.Read());
-    if (entry.empty()) break;
-    if (std::regex_match(entry, std::regex("[0-9][.0-9]*"))) {
-      dirs.insert(entry);
-    }
-  }
-  RETURN_IF_ERROR(dir.Close());
-  if (dirs.empty()) return absl::NotFoundError("no shared directory found");
-  if (dirs.size() != 1) {
-    return absl::FailedPreconditionError(
-        absl::StrCat("expected exactly one shared directory, got [",
-                     absl::StrJoin(dirs, ", "), "]"));
-  }
-  return JoinPath(emacs, *dirs.begin());
+  return GlobUnique(JoinPath(install, "share", "emacs", "[0-9]*"));
 }
 
 static absl::StatusOr<std::string> FindDumpFile(const std::string& libexec) {
-  const auto emacs = JoinPath(libexec, "emacs");
-  ASSIGN_OR_RETURN(auto dir, Directory::Open(emacs));
-  absl::flat_hash_set<std::string> files;
-  while (true) {
-    ASSIGN_OR_RETURN(const auto entry, dir.Read());
-    if (entry.empty()) break;
-    if (entry.front() != '.') {
-      const auto version = JoinPath(emacs, entry);
-      ASSIGN_OR_RETURN(auto dir, Directory::Open(version));
-      while (true) {
-        ASSIGN_OR_RETURN(const auto entry, dir.Read());
-        if (entry.empty()) break;
-        if (entry.front() != '.') {
-          const auto arch = JoinPath(version, entry);
-          ASSIGN_OR_RETURN(auto dir, Directory::Open(arch));
-          while (true) {
-            ASSIGN_OR_RETURN(const auto entry, dir.Read());
-            if (entry.empty()) break;
-            if (entry == "emacs.pdmp") {
-              files.insert(JoinPath(arch, entry));
-            }
-          }
-          RETURN_IF_ERROR(dir.Close());
-        }
-      }
-      RETURN_IF_ERROR(dir.Close());
-    }
-  }
-  RETURN_IF_ERROR(dir.Close());
-  if (files.empty()) return absl::NotFoundError("no portable dump file found");
-  if (files.size() != 1) {
-    return absl::FailedPreconditionError(
-        absl::StrCat("expected exactly one dump file, got [",
-                     absl::StrJoin(files, ", "), "]"));
-  }
-  return *files.begin();
+  return GlobUnique(JoinPath(libexec, "emacs", "*", "*", "emacs.pdmp"));
 }
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {

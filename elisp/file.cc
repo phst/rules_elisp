@@ -16,8 +16,8 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <dirent.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <unistd.h>
 
 #include <array>
@@ -38,6 +38,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/meta/type_traits.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
@@ -223,39 +224,37 @@ ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view dir,
   return JoinPath(dir, name);
 }
 
-absl::StatusOr<Directory> Directory::Open(const std::string& name) {
-  const auto dir = ::opendir(Pointer(name));
-  if (dir == nullptr) return ErrnoStatus("opendir", name);
-  return Directory(dir);
-}
-
-Directory& Directory::operator=(Directory&& other) {
-  const auto status = this->Close();
-  if (!status.ok()) std::clog << status << std::endl;
-  dir_ = absl::exchange(other.dir_, nullptr);
-  return *this;
-}
-
-Directory::~Directory() noexcept {
-  const auto status = this->Close();
-  if (!status.ok()) std::clog << status << std::endl;
-}
-
-absl::Status Directory::Close() noexcept {
-  if (dir_ == nullptr) return absl::OkStatus();
-  if (::closedir(dir_) != 0) return ErrnoStatus("closedir");
-  dir_ = nullptr;
-  return absl::OkStatus();
-}
-
-absl::StatusOr<std::string> Directory::Read() {
-  errno = 0;
-  const auto entry = ::readdir(dir_);
-  if (entry == nullptr) {
-    if (errno != 0) return ErrnoStatus("readdir");
-    return std::string();  // end of stream
+absl::StatusOr<std::string> GlobUnique(const std::string& pattern) {
+  ::glob_t data;
+  const int error =
+      ::glob(Pointer(pattern), GLOB_ERR | GLOB_NOSORT, nullptr, &data);
+  const auto free = absl::MakeCleanup([&data] { ::globfree(&data); });
+  switch (error) {
+  case 0:
+    switch (data.gl_pathc) {
+      case 0:
+        return absl::NotFoundError(
+            absl::StrCat(pattern, " didn’t match any files"));
+      case 1:
+        return data.gl_pathv[0];
+      default:
+        return absl::FailedPreconditionError(absl::StrCat(
+            "expected exactly one match for pattern ", pattern, ", got [",
+            absl::StrJoin(data.gl_pathv, data.gl_pathv + data.gl_pathc, ", "),
+            "]"));
+    }
+  case GLOB_ABORTED:
+    return absl::AbortedError(absl::StrCat("glob(", pattern, ") aborted"));
+  case GLOB_NOMATCH:
+    return absl::NotFoundError(
+        absl::StrCat(pattern, " didn’t match any files"));
+  case GLOB_NOSPACE:
+    return absl::UnavailableError(
+        absl::StrCat("glob(", pattern, ") couldn’t allocate memory"));
+  default:
+    return absl::UnknownError(
+        absl::StrCat("glob(", pattern, ") failed with an unknown error"));
   }
-  return absl::implicit_cast<std::string>(entry->d_name);
 }
 
 }  // phst_rules_elisp

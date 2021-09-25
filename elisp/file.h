@@ -15,11 +15,6 @@
 #ifndef PHST_RULES_ELISP_ELISP_FILE_H
 #define PHST_RULES_ELISP_ELISP_FILE_H
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <fcntl.h>
-
 #include <initializer_list>
 #include <string>
 #include <utility>
@@ -34,7 +29,6 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
-#include "absl/utility/utility.h"
 #pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
@@ -88,22 +82,7 @@ ABSL_MUST_USE_RESULT std::string TempName(absl::string_view dir,
                                           absl::string_view tmpl,
                                           absl::BitGen& random);
 
-class Directory {
- public:
-  static absl::StatusOr<Directory> Open(const std::string& name);
-  Directory(const Directory&) = delete;
-  Directory(Directory&& other) : dir_(absl::exchange(other.dir_, nullptr)) {}
-  Directory& operator=(const Directory&) = delete;
-  Directory& operator=(Directory&& other);
-  ~Directory() noexcept;
-  absl::Status Close() noexcept;
-  absl::StatusOr<std::string> Read();
-
- private:
-  explicit Directory(::DIR* const dir) : dir_(dir) {}
-
-  ::DIR* dir_;
-};
+absl::StatusOr<std::string> GlobUnique(const std::string& pattern);
 
 }  // phst_rules_elisp
 
