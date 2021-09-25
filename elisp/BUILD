@@ -209,6 +209,7 @@ cc_test(
 
 cc_library(
     name = "test",
+    testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
     visibility = ["//visibility:public"],
