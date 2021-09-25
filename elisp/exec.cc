@@ -260,9 +260,6 @@ class Executor {
                           const std::vector<std::string>& args,
                           const Environment& env);
 
-  absl::StatusOr<std::vector<std::string>> ArgFiles(
-      const std::string& root, const absl::flat_hash_set<int>& indices) const;
-
 private:
   std::vector<std::string> BuildArgs(
       const std::vector<std::string>& prefix) const;
@@ -368,18 +365,19 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
   return vec;
 }
 
-absl::StatusOr<std::vector<std::string>> Executor::ArgFiles(
-    const std::string& root, const absl::flat_hash_set<int>& indices) const {
-  // The assertion holds because orig_args_ was constructed from argc and argv,
+static absl::StatusOr<std::vector<std::string>> ArgFiles(
+    const BinaryOptions& opts, const std::string& root,
+    const absl::flat_hash_set<int>& indices) {
+  // The assertion holds because opts.argv was constructed from argc and argv,
   // so it necessarily has fewer than std::numeric_limits<int>::max() elements.
-  assert(orig_args_.size() <
+  assert(opts.argv.size() <
          static_cast<unsigned int>(std::numeric_limits<int>::max()));
-  const int argc = static_cast<int>(orig_args_.size());
+  const int argc = static_cast<int>(opts.argv.size());
   std::vector<std::string> result;
   for (int i : Sort(indices)) {
     if (i < 0) i += argc;
     if (i >= 0 && i < argc) {
-      absl::string_view arg = orig_args_[static_cast<unsigned int>(i)];
+      absl::string_view arg = opts.argv[static_cast<unsigned int>(i)];
       // File arguments are often quoted so that Emacs doesn’t interpret them as
       // special filenames.  Unquote them first.
       absl::ConsumePrefix(&arg, "/:");
@@ -448,9 +446,9 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   if (manifest) {
     const auto runfiles = executor.RunfilesDir();
     ASSIGN_OR_RETURN(auto input_files,
-                     executor.ArgFiles(runfiles, opts.input_args));
+                     ArgFiles(opts, runfiles, opts.input_args));
     ASSIGN_OR_RETURN(auto output_files,
-                     executor.ArgFiles(runfiles, opts.output_args));
+                     ArgFiles(opts, runfiles, opts.output_args));
     RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
                                   std::move(output_files), manifest.value()));
   }
