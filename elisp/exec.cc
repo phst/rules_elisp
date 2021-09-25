@@ -249,7 +249,6 @@ class Executor {
   Executor& operator=(Executor&&) = default;
 
   absl::StatusOr<std::string> Runfile(const std::string& rel) const;
-  std::string RunfilesDir() const;
   std::string EnvVar(const std::string& name) const noexcept;
 
   absl::StatusOr<int> Run(const std::string& binary,
@@ -280,10 +279,10 @@ absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
   return MakeAbsolute(str);
 }
 
-std::string Executor::RunfilesDir() const {
+static std::string RunfilesDir(const Executor& executor) {
   const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
   for (const auto& var : vars) {
-    auto value = this->EnvVar(var);
+    auto value = executor.EnvVar(var);
     if (!value.empty()) return value;
   }
   return std::string();
@@ -439,7 +438,7 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
-    const auto runfiles = executor.RunfilesDir();
+    const auto runfiles = RunfilesDir(executor);
     ASSIGN_OR_RETURN(auto input_files,
                      ArgFiles(opts, runfiles, opts.input_args));
     ASSIGN_OR_RETURN(auto output_files,
