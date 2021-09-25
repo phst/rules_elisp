@@ -294,30 +294,6 @@ std::string Executor::EnvVar(const std::string& name) const noexcept {
   return it == orig_env_.end() ? std::string() : it->second;
 }
 
-static absl::Status AddLoadPath(const Executor& executor,
-                                std::vector<std::string>& args,
-                                const std::vector<std::string>& load_path) {
-  constexpr const char* const runfiles_elc =
-      "phst_rules_elisp/elisp/runfiles/runfiles.elc";
-  bool runfile_handler_installed = false;
-  for (const auto& dir : load_path) {
-    const auto status_or_dir = executor.Runfile(dir);
-    if (status_or_dir.ok()) {
-      args.push_back(absl::StrCat("--directory=", status_or_dir.value()));
-    } else if (absl::IsNotFound(status_or_dir.status())) {
-      if (!absl::exchange(runfile_handler_installed, true)) {
-        ASSIGN_OR_RETURN(const auto file, executor.Runfile(runfiles_elc));
-        args.push_back(absl::StrCat("--load=", file));
-        args.push_back("--funcall=elisp/runfiles/install-handler");
-      }
-      args.push_back(absl::StrCat("--directory=/bazel-runfile:", dir));
-    } else {
-      return status_or_dir.status();
-    }
-  }
-  return absl::OkStatus();
-}
-
 absl::StatusOr<int> Executor::Run(const std::string& binary,
                                   const std::vector<std::string>& args,
                                   const Environment& env) {
@@ -361,6 +337,30 @@ std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
 }
 
 }  // namespace
+
+static absl::Status AddLoadPath(const Executor& executor,
+                                std::vector<std::string>& args,
+                                const std::vector<std::string>& load_path) {
+  constexpr const char* const runfiles_elc =
+      "phst_rules_elisp/elisp/runfiles/runfiles.elc";
+  bool runfile_handler_installed = false;
+  for (const auto& dir : load_path) {
+    const auto status_or_dir = executor.Runfile(dir);
+    if (status_or_dir.ok()) {
+      args.push_back(absl::StrCat("--directory=", status_or_dir.value()));
+    } else if (absl::IsNotFound(status_or_dir.status())) {
+      if (!absl::exchange(runfile_handler_installed, true)) {
+        ASSIGN_OR_RETURN(const auto file, executor.Runfile(runfiles_elc));
+        args.push_back(absl::StrCat("--load=", file));
+        args.push_back("--funcall=elisp/runfiles/install-handler");
+      }
+      args.push_back(absl::StrCat("--directory=/bazel-runfile:", dir));
+    } else {
+      return status_or_dir.status();
+    }
+  }
+  return absl::OkStatus();
+}
 
 static absl::StatusOr<std::vector<std::string>> ArgFiles(
     const BinaryOptions& opts, const std::string& root,
