@@ -248,14 +248,12 @@ namespace {
 class Executor {
  public:
   explicit Executor(const Argv& argv, Environment env,
-                    std::unique_ptr<Runfiles> runfiles);
+                    const Runfiles* runfiles);
 
   Executor(const Executor&) = delete;
   Executor(Executor&&) = default;
   Executor& operator=(const Executor&) = delete;
   Executor& operator=(Executor&&) = default;
-
-  absl::StatusOr<std::string> Runfile(const std::string& rel) const;
 
   absl::StatusOr<int> Run(const std::string& binary,
                           const std::vector<std::string>& args,
@@ -269,17 +267,15 @@ private:
 
   std::vector<std::string> orig_args_;
   Environment orig_env_;
-  std::unique_ptr<Runfiles> runfiles_;
+  const Runfiles* runfiles_;
 };
 
-Executor::Executor(const Argv& argv, Environment env,
-                   std::unique_ptr<Runfiles> runfiles)
-    : orig_args_(argv.argv),
-      orig_env_(std::move(env)),
-      runfiles_(std::move(runfiles)) {}
+Executor::Executor(const Argv& argv, Environment env, const Runfiles* runfiles)
+    : orig_args_(argv.argv), orig_env_(std::move(env)), runfiles_(runfiles) {}
 
-absl::StatusOr<std::string> Executor::Runfile(const std::string& rel) const {
-  const std::string str = runfiles_->Rlocation(rel);
+static absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
+                                           const std::string& rel) {
+  const std::string str = runfiles.Rlocation(rel);
   if (str.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
   }
@@ -341,19 +337,19 @@ static std::string RunfilesDir(const Environment& env) {
   return std::string();
 }
 
-static absl::Status AddLoadPath(const Executor& executor,
+static absl::Status AddLoadPath(const Runfiles& runfiles,
                                 std::vector<std::string>& args,
                                 const std::vector<std::string>& load_path) {
   constexpr const char* const runfiles_elc =
       "phst_rules_elisp/elisp/runfiles/runfiles.elc";
   bool runfile_handler_installed = false;
   for (const auto& dir : load_path) {
-    const auto status_or_dir = executor.Runfile(dir);
+    const auto status_or_dir = Runfile(runfiles, dir);
     if (status_or_dir.ok()) {
       args.push_back(absl::StrCat("--directory=", status_or_dir.value()));
     } else if (absl::IsNotFound(status_or_dir.status())) {
       if (!absl::exchange(runfile_handler_installed, true)) {
-        ASSIGN_OR_RETURN(const auto file, executor.Runfile(runfiles_elc));
+        ASSIGN_OR_RETURN(const auto file, Runfile(runfiles, runfiles_elc));
         args.push_back(absl::StrCat("--load=", file));
         args.push_back("--funcall=elisp/runfiles/install-handler");
       }
@@ -394,9 +390,9 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   const auto orig_env = CopyEnv();
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, orig_env, std::move(runfiles));
-  ASSIGN_OR_RETURN(const auto install, executor.Runfile(opts.install_rel));
+  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
+  Executor executor(opts, orig_env, runfiles.get());
+  ASSIGN_OR_RETURN(const auto install, Runfile(*runfiles, opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
   ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
   const auto etc = JoinPath(shared, "etc");
@@ -430,17 +426,17 @@ int RunEmacs(const EmacsOptions& opts) {
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   const auto orig_env = CopyEnv();
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  Executor executor(opts, orig_env, std::move(runfiles));
-  ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
+  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
+  Executor executor(opts, orig_env, runfiles.get());
+  ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
   args.push_back("--quick");
   args.push_back("--batch");
-  RETURN_IF_ERROR(AddLoadPath(executor, args, opts.load_path));
+  RETURN_IF_ERROR(AddLoadPath(*runfiles, args, opts.load_path));
   for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, executor.Runfile(file));
+    ASSIGN_OR_RETURN(const auto abs, Runfile(*runfiles, file));
     args.push_back(absl::StrCat("--load=", abs));
   }
   if (manifest) {
@@ -468,23 +464,23 @@ int RunBinary(const BinaryOptions& opts) {
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   const auto orig_env = CopyEnv();
-  ASSIGN_OR_RETURN(auto runfiles, CreateRunfilesForTest());
-  Executor executor(opts, orig_env, std::move(runfiles));
-  ASSIGN_OR_RETURN(const auto emacs, executor.Runfile(opts.wrapper));
+  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
+  Executor executor(opts, orig_env, runfiles.get());
+  ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
   std::vector<std::string> args;
   absl::BitGen random;
   ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
   args.push_back("--quick");
   args.push_back("--batch");
   args.push_back("--module-assertions");
-  RETURN_IF_ERROR(AddLoadPath(executor, args, opts.load_path));
+  RETURN_IF_ERROR(AddLoadPath(*runfiles, args, opts.load_path));
   ASSIGN_OR_RETURN(const auto runner,
-                   executor.Runfile("phst_rules_elisp/elisp/ert/runner.elc"));
+                   Runfile(*runfiles, "phst_rules_elisp/elisp/ert/runner.elc"));
   args.push_back(absl::StrCat("--load=", runner));
   // Note that using equals signs for "--test-source, --skip-test, and
   // --skip-tag doesn’t work.
   for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, executor.Runfile(file));
+    ASSIGN_OR_RETURN(const auto abs, Runfile(*runfiles, file));
     args.push_back("--test-source");
     args.push_back(absl::StrCat("/:", abs));
   }
