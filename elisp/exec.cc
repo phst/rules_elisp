@@ -271,11 +271,6 @@ class Executor {
                           const Environment& env);
 
 private:
-  std::vector<std::string> BuildArgs(
-      const std::vector<std::string>& prefix) const;
-
-  std::vector<std::string> BuildEnv(const Environment& other) const;
-
   std::vector<std::string> orig_args_;
   Environment orig_env_;
   const Runfiles* runfiles_;
@@ -287,9 +282,21 @@ Executor::Executor(const Argv& argv, Environment env, const Runfiles* runfiles)
 absl::StatusOr<int> Executor::Run(const std::string& binary,
                                   const std::vector<std::string>& args,
                                   const Environment& env) {
-  auto final_args = this->BuildArgs(args);
+  std::vector<std::string> final_args{orig_args_.at(0)};
+  final_args.insert(final_args.end(), args.begin(), args.end());
+  final_args.insert(final_args.end(), std::next(orig_args_.begin()),
+                    orig_args_.end());
   const auto argv = Pointers(final_args);
-  auto final_env = this->BuildEnv(env);
+  const auto& pairs = runfiles_->EnvVars();
+  Environment map(pairs.begin(), pairs.end());
+  map.insert(env.begin(), env.end());
+  map.insert(orig_env_.begin(), orig_env_.end());
+  std::vector<std::string> final_env;
+  for (const auto& p : map) {
+    final_env.push_back(absl::StrCat(p.first, "=", p.second));
+  }
+  // Sort entries for hermeticity.
+  absl::c_sort(final_env);
   const auto envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, Pointer(binary), nullptr, nullptr,
@@ -302,28 +309,6 @@ absl::StatusOr<int> Executor::Run(const std::string& binary,
   const pid_t status = waitpid(pid, &wstatus, 0);
   if (status != pid) return ErrnoStatus("waitpid", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
-}
-
-std::vector<std::string> Executor::BuildArgs(
-    const std::vector<std::string>& prefix) const {
-  std::vector<std::string> vec{orig_args_.at(0)};
-  vec.insert(vec.end(), prefix.begin(), prefix.end());
-  vec.insert(vec.end(), std::next(orig_args_.begin()), orig_args_.end());
-  return vec;
-}
-
-std::vector<std::string> Executor::BuildEnv(const Environment& other) const {
-  const auto& pairs = runfiles_->EnvVars();
-  Environment map(pairs.begin(), pairs.end());
-  map.insert(other.begin(), other.end());
-  map.insert(orig_env_.begin(), orig_env_.end());
-  std::vector<std::string> vec;
-  for (const auto& p : map) {
-    vec.push_back(absl::StrCat(p.first, "=", p.second));
-  }
-  // Sort entries for hermeticity.
-  absl::c_sort(vec);
-  return vec;
 }
 
 }  // namespace
