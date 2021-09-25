@@ -249,7 +249,6 @@ cc_library(
         ":file",
         ":options",
         ":status",
-        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/random",
         "@com_google_absl//absl/status",
