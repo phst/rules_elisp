@@ -340,10 +340,7 @@ cc_library(
     name = "algorithm",
     hdrs = ["algorithm.h"],
     copts = COPTS,
-    deps = [
-        "@com_google_absl//absl/algorithm:container",
-        "@com_google_absl//absl/container:flat_hash_set",
-    ],
+    deps = ["@com_google_absl//absl/algorithm:container"],
 )
 
 cc_library(

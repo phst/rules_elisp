@@ -23,14 +23,13 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/algorithm/container.h"
-#include "absl/container/flat_hash_set.h"
 #pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
 
 template <typename T>
-std::vector<T> Sort(const absl::flat_hash_set<T>& set) {
-  std::vector<T> result(set.begin(), set.end());
+std::vector<typename T::value_type> Sort(const T& set) {
+  std::vector<typename T::value_type> result(set.begin(), set.end());
   absl::c_sort(result);
   return result;
 }
