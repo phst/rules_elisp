@@ -64,8 +64,7 @@ pylint:
 	trap '$(RM) -r -- "$${tempdir}"' EXIT && \
 	$(LN) -s -- '$(srcdir)' "$${tempdir:?}/$(workspace_name)" && \
 	PYTHONPATH="$(external_repos):$${tempdir:?}" \
-	  $(FIND) . -name '*.py' -type f \
-	  -exec $(PYLINT) --output-format=parseable -- '{}' '+'
+	  $(FIND) . -name '*.py' -type f -exec $(PYLINT) -- '{}' '+'
 
 pytype:
         # Set a fake PYTHONPATH so that Pytype can find imports for the main and
