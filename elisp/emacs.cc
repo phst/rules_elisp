@@ -37,26 +37,21 @@
 
 namespace phst_rules_elisp {
 
-static absl::StatusOr<std::string> GetSharedDir(const std::string& install) {
-  return GlobUnique(JoinPath(install, "share", "emacs", "[0-9]*"));
-}
-
-static absl::StatusOr<std::string> FindDumpFile(const std::string& libexec) {
-  return GlobUnique(JoinPath(libexec, "emacs", "*", "*", "emacs.pdmp"));
-}
-
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
   ASSIGN_OR_RETURN(const auto install, Runfile(*runfiles, opts.install_rel));
   const auto emacs = JoinPath(install, "bin", "emacs");
-  ASSIGN_OR_RETURN(const auto shared, GetSharedDir(install));
+  ASSIGN_OR_RETURN(const auto shared,
+                   GlobUnique(JoinPath(install, "share", "emacs", "[0-9]*")));
   const auto etc = JoinPath(shared, "etc");
   const auto libexec = JoinPath(install, "libexec");
   std::vector<std::string> args;
   switch (opts.dump_mode) {
     case DumpMode::kPortable: {
-      ASSIGN_OR_RETURN(const auto dump, FindDumpFile(libexec));
+      ASSIGN_OR_RETURN(
+          const auto dump,
+          GlobUnique(JoinPath(libexec, "emacs", "*", "*", "emacs.pdmp")));
       args.push_back(absl::StrCat("--dump-file=", dump));
       break;
     }
