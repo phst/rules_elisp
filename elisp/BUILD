@@ -153,18 +153,26 @@ cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
+    data = [":emacs_py"],
     visibility = ["//visibility:public"],
     deps = [
-        ":file",
         ":options",
         ":process",
         ":status",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],
+)
+
+py_binary(
+    name = "emacs_py",
+    srcs = ["emacs.py"],
+    main = "emacs.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = ["@bazel_tools//tools/python/runfiles"],
 )
 
 cc_library(
@@ -304,7 +312,6 @@ cc_library(
         ":str",
         "@com_google_absl//absl/base",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/cleanup",
         "@com_google_absl//absl/meta:type_traits",
         "@com_google_absl//absl/random",
         "@com_google_absl//absl/status",

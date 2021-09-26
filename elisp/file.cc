@@ -17,7 +17,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <glob.h>
 #include <unistd.h>
 
 #include <array>
@@ -38,7 +37,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
-#include "absl/cleanup/cleanup.h"
 #include "absl/meta/type_traits.h"
 #include "absl/random/random.h"
 #include "absl/status/status.h"
@@ -220,39 +218,6 @@ ABSL_MUST_USE_RESULT std::string TempName(const absl::string_view tmpl,
   std::uniform_int_distribution<std::uint64_t> distribution;
   return absl::StrCat(prefix, absl::Hex(distribution(random), absl::kZeroPad16),
                       suffix);
-}
-
-absl::StatusOr<std::string> GlobUnique(const std::string& pattern) {
-  ::glob_t data;
-  const int error =
-      ::glob(Pointer(pattern), GLOB_ERR | GLOB_NOSORT, nullptr, &data);
-  const auto free = absl::MakeCleanup([&data] { ::globfree(&data); });
-  switch (error) {
-  case 0:
-    switch (data.gl_pathc) {
-      case 0:
-        return absl::NotFoundError(
-            absl::StrCat(pattern, " didn’t match any files"));
-      case 1:
-        return data.gl_pathv[0];
-      default:
-        return absl::FailedPreconditionError(absl::StrCat(
-            "expected exactly one match for pattern ", pattern, ", got [",
-            absl::StrJoin(data.gl_pathv, data.gl_pathv + data.gl_pathc, ", "),
-            "]"));
-    }
-  case GLOB_ABORTED:
-    return absl::AbortedError(absl::StrCat("glob(", pattern, ") aborted"));
-  case GLOB_NOMATCH:
-    return absl::NotFoundError(
-        absl::StrCat(pattern, " didn’t match any files"));
-  case GLOB_NOSPACE:
-    return absl::UnavailableError(
-        absl::StrCat("glob(", pattern, ") couldn’t allocate memory"));
-  default:
-    return absl::UnknownError(
-        absl::StrCat("glob(", pattern, ") failed with an unknown error"));
-  }
 }
 
 }  // phst_rules_elisp

@@ -25,13 +25,11 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/container/flat_hash_set.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/file.h"
 #include "elisp/process.h"
 #include "elisp/status.h"
 
@@ -40,30 +38,23 @@ namespace phst_rules_elisp {
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  ASSIGN_OR_RETURN(const auto install, Runfile(*runfiles, opts.install_rel));
-  const auto emacs = JoinPath(install, "bin", "emacs");
-  ASSIGN_OR_RETURN(const auto shared,
-                   GlobUnique(JoinPath(install, "share", "emacs", "[0-9]*")));
-  const auto etc = JoinPath(shared, "etc");
-  const auto libexec = JoinPath(install, "libexec");
-  std::vector<std::string> args;
+  ASSIGN_OR_RETURN(const auto program,
+                   Runfile(*runfiles, "phst_rules_elisp/elisp/emacs_py"));
+  std::vector<std::string> args = {
+      absl::StrCat("--install=" + opts.install_rel),
+  };
   switch (opts.dump_mode) {
-    case DumpMode::kPortable: {
-      ASSIGN_OR_RETURN(
-          const auto dump,
-          GlobUnique(JoinPath(libexec, "emacs", "*", "*", "emacs.pdmp")));
-      args.push_back(absl::StrCat("--dump-file=", dump));
+    case DumpMode::kPortable:
+      args.push_back("--dump-mode=portable");
       break;
-    }
     case DumpMode::kUnexec:
+      args.push_back("--dump-mode=unexec");
       break;
   }
+  args.push_back("--");
+  args.push_back(opts.argv.at(0));
   Environment map;
-  map.emplace("EMACSDATA", etc);
-  map.emplace("EMACSDOC", etc);
-  map.emplace("EMACSLOADPATH", JoinPath(shared, "lisp"));
-  map.emplace("EMACSPATH", libexec);
-  return Run(opts, orig_env, *runfiles, emacs, args, map);
+  return Run(opts, orig_env, *runfiles, program, args, map);
 }
 
 int RunEmacs(const EmacsOptions& opts) {

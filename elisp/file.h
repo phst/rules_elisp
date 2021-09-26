@@ -81,8 +81,6 @@ ABSL_MUST_USE_RESULT std::string TempDir();
 ABSL_MUST_USE_RESULT std::string TempName(absl::string_view tmpl,
                                           absl::BitGen& random);
 
-absl::StatusOr<std::string> GlobUnique(const std::string& pattern);
-
 }  // phst_rules_elisp
 
 #endif
