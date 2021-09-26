@@ -57,25 +57,25 @@ buildifier:
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
+set_up_pythonpath := \
+  tempdir="$$($(MKTEMP) -d)" && \
+  trap '$(RM) -r -- "$${tempdir}"' EXIT && \
+  $(LN) -s -- '$(srcdir)' "$${tempdir:?}/$(workspace_name)" && \
+  export PYTHONPATH="$(external_repos):$${tempdir:?}"
+
 pylint:
         # Set a fake PYTHONPATH so that Pylint can find imports for the main and
         # external workspaces.
-	tempdir="$$($(MKTEMP) -d)" && \
-	trap '$(RM) -r -- "$${tempdir}"' EXIT && \
-	$(LN) -s -- '$(srcdir)' "$${tempdir:?}/$(workspace_name)" && \
-	PYTHONPATH="$(external_repos):$${tempdir:?}" \
-	  $(FIND) . -name '*.py' -type f -exec $(PYLINT) -- '{}' '+'
+	$(set_up_pythonpath) && \
+	$(FIND) . -name '*.py' -type f -exec $(PYLINT) -- '{}' '+'
 
 pytype:
         # Set a fake PYTHONPATH so that Pytype can find imports for the main and
         # external workspaces.  We’d want to set the Python path to only
         # $(external_repos):${tempdir}, but for some reason that breaks Pytype.
-	tempdir="$$($(MKTEMP) -d)" && \
-	trap '$(RM) -r -- "$${tempdir}"' EXIT && \
-	$(LN) -s -- '$(srcdir)' "$${tempdir:?}/$(workspace_name)" && \
+	$(set_up_pythonpath) && \
 	$(FIND) . -name '*.py' -type f \
-	  -exec $(PYTYPE) \
-	  --pythonpath="$(external_repos):$${tempdir:?}:$(srcdir)" -- '{}' '+'
+	  -exec $(PYTYPE) --pythonpath="$${PYTHONPATH:?}:$(srcdir)" -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
