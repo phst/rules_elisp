@@ -85,30 +85,38 @@ static absl::StatusOr<std::vector<std::string>> ArgFiles(
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
-  std::vector<std::string> args;
-  absl::BitGen random;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
-  args.push_back("--quick");
-  args.push_back("--batch");
-  RETURN_IF_ERROR(AddLoadPath(*runfiles, args, opts.load_path));
-  for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, Runfile(*runfiles, file));
-    args.push_back(absl::StrCat("--load=", abs));
+  ASSIGN_OR_RETURN(const auto program,
+                   Runfile(*runfiles, "phst_rules_elisp/elisp/binary_py"));
+  std::vector<std::string> args = {absl::StrCat("--wrapper=", opts.wrapper)};
+  switch (opts.mode) {
+  case Mode::kDirect:
+    args.push_back("--mode=direct");
+    break;
+  case Mode::kWrap:
+    args.push_back("--mode=wrap");
+    break;
   }
-  if (manifest) {
-    const auto runfiles = RunfilesDir(orig_env);
-    ASSIGN_OR_RETURN(auto input_files,
-                     ArgFiles(opts, runfiles, opts.input_args));
-    ASSIGN_OR_RETURN(auto output_files,
-                     ArgFiles(opts, runfiles, opts.output_args));
-    RETURN_IF_ERROR(WriteManifest(opts, std::move(input_files),
-                                  std::move(output_files), manifest.value()));
+  for (const std::string& tag : Sort(opts.rule_tags)) {
+    args.push_back(absl::StrCat("--rule-tag=", tag));
   }
-  ASSIGN_OR_RETURN(const auto code,
-                   Run(opts, orig_env, *runfiles, emacs, args, {}));
-  if (manifest) RETURN_IF_ERROR(manifest->Close());
-  return code;
+  for (const std::string& dir : opts.load_path) {
+    args.push_back(absl::StrCat("--load-directory=", dir));
+  }
+  for (const std::string& file : opts.load_files) {
+    args.push_back(absl::StrCat("--load-file=", file));
+  }
+  for (const std::string& file : Sort(opts.data_files)) {
+    args.push_back(absl::StrCat("--data-file=", file));
+  }
+  for (int i : Sort(opts.input_args)) {
+    args.push_back(absl::StrCat("--input-arg=", i));
+  }
+  for (int i : Sort(opts.output_args)) {
+    args.push_back(absl::StrCat("--output-arg=", i));
+  }
+  args.push_back("--");
+  args.push_back(opts.argv.at(0));
+  return Run(opts, orig_env, *runfiles, program, args, {});
 }
 
 int RunBinary(const BinaryOptions& opts) {

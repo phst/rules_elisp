@@ -179,6 +179,7 @@ cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
+    data = [":binary_py"],
     visibility = ["//visibility:public"],
     deps = [
         ":algorithm",
@@ -212,6 +213,19 @@ cc_test(
         ":binary",
         ":options",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+py_binary(
+    name = "binary_py",
+    srcs = ["binary.py"],
+    main = "binary.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":load_py",
+        ":manifest_py",
+        "@bazel_tools//tools/python/runfiles",
     ],
 )
 
@@ -268,6 +282,12 @@ cc_library(
     ],
 )
 
+py_library(
+    name = "manifest_py",
+    srcs = ["manifest.py"],
+    srcs_version = "PY3",
+)
+
 cc_library(
     name = "load",
     srcs = ["load.cc"],
@@ -282,6 +302,14 @@ cc_library(
         "@com_google_absl//absl/strings",
         "@com_google_absl//absl/utility",
     ],
+)
+
+py_library(
+    name = "load_py",
+    srcs = ["load.py"],
+    data = ["//elisp/runfiles:runfiles.elc"],
+    srcs_version = "PY3",
+    deps = ["@bazel_tools//tools/python/runfiles"],
 )
 
 cc_library(
