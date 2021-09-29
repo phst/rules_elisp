@@ -44,7 +44,7 @@ static absl::StatusOr<int> RunTestImpl(const std::vector<std::string>& args) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles for test: ", error));
   }
-  return Run(*runfiles, "phst_rules_elisp/elisp/test_py", args);
+  return Run(*runfiles, "phst_rules_elisp/elisp/run_test", args);
 }
 
 int RunTest(const std::vector<std::string>& args) {

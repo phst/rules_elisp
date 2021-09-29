@@ -153,7 +153,7 @@ cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
-    data = [":emacs_py"],
+    data = [":run_emacs"],
     visibility = ["//visibility:public"],
     deps = [
         ":process",
@@ -165,9 +165,8 @@ cc_library(
 )
 
 py_binary(
-    name = "emacs_py",
-    srcs = ["emacs.py"],
-    main = "emacs.py",
+    name = "run_emacs",
+    srcs = ["run_emacs.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = ["@bazel_tools//tools/python/runfiles"],
@@ -177,7 +176,7 @@ cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
-    data = [":binary_py"],
+    data = [":run_binary"],
     visibility = ["//visibility:public"],
     deps = [
         ":process",
@@ -206,9 +205,8 @@ cc_test(
 )
 
 py_binary(
-    name = "binary_py",
-    srcs = ["binary.py"],
-    main = "binary.py",
+    name = "run_binary",
+    srcs = ["run_binary.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
@@ -223,7 +221,7 @@ cc_library(
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
-    data = [":test_py"],
+    data = [":run_test"],
     visibility = ["//visibility:public"],
     deps = [
         ":process",
@@ -237,11 +235,10 @@ cc_library(
 )
 
 py_binary(
-    name = "test_py",
+    name = "run_test",
     testonly = 1,
-    srcs = ["test.py"],
+    srcs = ["run_test.py"],
     data = ["//elisp/ert:runner.elc"],
-    main = "test.py",
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
