@@ -24,7 +24,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
@@ -32,9 +31,6 @@
 namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
-using Environment = absl::flat_hash_map<std::string, std::string>;
-
-Environment CopyEnv();
 
 absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
     const std::string& argv0);
@@ -42,8 +38,7 @@ absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
 absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
                                     const std::string& rel);
 
-absl::StatusOr<int> Run(const Environment& orig_env, const Runfiles& runfiles,
-                        const std::string& binary,
+absl::StatusOr<int> Run(const Runfiles& runfiles, const std::string& binary,
                         const std::vector<std::string>& args);
 
 }  // namespace phst_rules_elisp

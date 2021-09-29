@@ -48,6 +48,8 @@
 
 namespace phst_rules_elisp {
 
+using Environment = absl::flat_hash_map<std::string, std::string>;
+
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (auto& s : strings) {
@@ -65,7 +67,7 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   return ptrs;
 }
 
-Environment CopyEnv() {
+static Environment CopyEnv() {
   const char* const* const envp =
 #ifdef __APPLE__
       // See environ(7) why this is necessary.
@@ -105,9 +107,9 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
   return str;
 }
 
-absl::StatusOr<int> Run(const Environment& orig_env, const Runfiles& runfiles,
-                        const std::string& binary,
+absl::StatusOr<int> Run(const Runfiles& runfiles, const std::string& binary,
                         const std::vector<std::string>& args) {
+  const Environment orig_env = CopyEnv();
   std::vector<std::string> final_args{binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
   const auto argv = Pointers(final_args);

@@ -36,7 +36,6 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
-  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
   ASSIGN_OR_RETURN(const auto program,
                    Runfile(*runfiles, "phst_rules_elisp/elisp/emacs_py"));
@@ -53,7 +52,7 @@ static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   }
   args.push_back("--");
   args.insert(args.end(), opts.argv.begin(), opts.argv.end());
-  return Run(orig_env, *runfiles, program, args);
+  return Run(*runfiles, program, args);
 }
 
 int RunEmacs(const EmacsOptions& opts) {

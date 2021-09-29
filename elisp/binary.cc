@@ -38,7 +38,6 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
-  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
   ASSIGN_OR_RETURN(const auto program,
                    Runfile(*runfiles, "phst_rules_elisp/elisp/binary_py"));
@@ -71,7 +70,7 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   }
   args.push_back("--");
   args.insert(args.end(), opts.argv.begin(), opts.argv.end());
-  return Run(orig_env, *runfiles, program, args);
+  return Run(*runfiles, program, args);
 }
 
 int RunBinary(const BinaryOptions& opts) {

@@ -49,7 +49,6 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
 }
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
-  const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
   ASSIGN_OR_RETURN(const auto program,
                    Runfile(*runfiles, "phst_rules_elisp/elisp/test_py"));
@@ -82,7 +81,7 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   }
   args.push_back("--");
   args.insert(args.end(), opts.argv.begin(), opts.argv.end());
-  return Run(orig_env, *runfiles, program, args);
+  return Run(*runfiles, program, args);
 }
 
 int RunTest(const TestOptions& opts) {
