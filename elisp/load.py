@@ -20,11 +20,9 @@ on it in any way outside the rule implementation."""
 import os
 import os.path
 import pathlib
-from typing import Iterable, List
+from typing import Any, Iterable, List
 
-from bazel_tools.tools.python.runfiles import runfiles
-
-def add_path(run_files: runfiles._Runfiles, args: List[str],
+def add_path(run_files: Any, args: List[str],
              load_path: Iterable[pathlib.Path]) -> None:
     """Add load path elements to the given args list."""
     runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'

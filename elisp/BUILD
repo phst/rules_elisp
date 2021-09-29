@@ -259,7 +259,6 @@ py_library(
     srcs = ["load.py"],
     data = ["//elisp/runfiles:runfiles.elc"],
     srcs_version = "PY3",
-    deps = ["@bazel_tools//tools/python/runfiles"],
 )
 
 cc_library(
