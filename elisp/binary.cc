@@ -14,13 +14,10 @@
 
 #include "elisp/binary.h"
 
-#include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <limits>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -29,58 +26,16 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/container/flat_hash_set.h"
-#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
-#include "absl/strings/string_view.h"
-#include "absl/strings/strip.h"
 #pragma GCC diagnostic pop
 
 #include "elisp/algorithm.h"
-#include "elisp/file.h"
-#include "elisp/load.h"
-#include "elisp/manifest.h"
 #include "elisp/process.h"
 #include "elisp/status.h"
 
 namespace phst_rules_elisp {
-
-static std::string RunfilesDir(const Environment& env) {
-  const std::string vars[] = {"RUNFILES_DIR", "TEST_SRCDIR"};
-  for (const auto& var : vars) {
-    auto value = Find(env, var);
-    if (!value.empty()) return value;
-  }
-  return std::string();
-}
-
-static absl::StatusOr<std::vector<std::string>> ArgFiles(
-    const BinaryOptions& opts, const std::string& root,
-    const absl::flat_hash_set<int>& indices) {
-  // The assertion holds because opts.argv was constructed from argc and argv,
-  // so it necessarily has fewer than std::numeric_limits<int>::max() elements.
-  assert(opts.argv.size() <
-         static_cast<unsigned int>(std::numeric_limits<int>::max()));
-  const int argc = static_cast<int>(opts.argv.size());
-  std::vector<std::string> result;
-  for (int i : Sort(indices)) {
-    if (i < 0) i += argc;
-    if (i >= 0 && i < argc) {
-      absl::string_view arg = opts.argv[static_cast<unsigned int>(i)];
-      // File arguments are often quoted so that Emacs doesn’t interpret them as
-      // special filenames.  Unquote them first.
-      absl::ConsumePrefix(&arg, "/:");
-      ASSIGN_OR_RETURN(auto file, MakeAbsolute(arg));
-      // Make filenames relative if possible.
-      if (!root.empty()) {
-        ASSIGN_OR_RETURN(file, MakeRelative(file, root));
-      }
-      result.push_back(std::move(file));
-    }
-  }
-  return result;
-}
 
 static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   const auto orig_env = CopyEnv();
