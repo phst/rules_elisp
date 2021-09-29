@@ -43,13 +43,23 @@
 
 #include "elisp/options.h"
 #include "elisp/status.h"
-#include "elisp/str.h"
 
 #ifdef __APPLE__
 #include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
 namespace phst_rules_elisp {
+
+static const char* Pointer(const std::string& s) {
+  if (s.find('\0') != s.npos) {
+    std::clog << s << " contains null character" << std::endl;
+    std::abort();
+  }
+  return s.c_str();
+}
+
+// Don’t allow passing a temporary.
+static void Pointer(const std::string&&) = delete;
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;

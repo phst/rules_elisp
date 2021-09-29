@@ -289,7 +289,6 @@ cc_library(
     deps = [
         ":options",
         ":status",
-        ":str",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -297,12 +296,6 @@ cc_library(
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],
-)
-
-cc_library(
-    name = "str",
-    hdrs = ["str.h"],
-    copts = COPTS,
 )
 
 cc_library(
