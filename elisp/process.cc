@@ -41,7 +41,6 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/file.h"
 #include "elisp/options.h"
 #include "elisp/status.h"
 #include "elisp/str.h"
@@ -106,9 +105,7 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
   if (str.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
   }
-  // Note: Don’t canonicalize the filename here, because the Python stub looks
-  // for the runfiles directory in the original filename.
-  return MakeAbsolute(str);
+  return str;
 }
 
 absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,

@@ -287,7 +287,6 @@ cc_library(
     srcs = ["process.cc"],
     hdrs = ["process.h"],
     deps = [
-        ":file",
         ":options",
         ":status",
         ":str",
