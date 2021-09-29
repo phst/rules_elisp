@@ -210,8 +210,8 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
-        ":load_py",
-        ":manifest_py",
+        ":load",
+        ":manifest",
         "@bazel_tools//tools/python/runfiles",
     ],
 )
@@ -242,20 +242,20 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
-        ":load_py",
-        ":manifest_py",
+        ":load",
+        ":manifest",
         "@bazel_tools//tools/python/runfiles",
     ],
 )
 
 py_library(
-    name = "manifest_py",
+    name = "manifest",
     srcs = ["manifest.py"],
     srcs_version = "PY3",
 )
 
 py_library(
-    name = "load_py",
+    name = "load",
     srcs = ["load.py"],
     data = ["//elisp/runfiles:runfiles.elc"],
     srcs_version = "PY3",
