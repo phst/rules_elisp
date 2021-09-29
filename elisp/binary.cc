@@ -71,7 +71,7 @@ static absl::StatusOr<int> RunBinaryImpl(const BinaryOptions& opts) {
   }
   args.push_back("--");
   args.push_back(opts.argv.at(0));
-  return Run(opts, orig_env, *runfiles, program, args, {});
+  return Run(opts, orig_env, *runfiles, program, args);
 }
 
 int RunBinary(const BinaryOptions& opts) {

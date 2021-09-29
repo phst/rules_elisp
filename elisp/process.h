@@ -46,8 +46,7 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
 
 absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
                         const Runfiles& runfiles, const std::string& binary,
-                        const std::vector<std::string>& args,
-                        const Environment& env);
+                        const std::vector<std::string>& args);
 
 }  // namespace phst_rules_elisp
 

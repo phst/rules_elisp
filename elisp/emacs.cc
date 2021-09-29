@@ -53,8 +53,7 @@ static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   }
   args.push_back("--");
   args.push_back(opts.argv.at(0));
-  Environment map;
-  return Run(opts, orig_env, *runfiles, program, args, map);
+  return Run(opts, orig_env, *runfiles, program, args);
 }
 
 int RunEmacs(const EmacsOptions& opts) {

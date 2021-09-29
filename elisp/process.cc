@@ -120,8 +120,7 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
 
 absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
                         const Runfiles& runfiles, const std::string& binary,
-                        const std::vector<std::string>& args,
-                        const Environment& env) {
+                        const std::vector<std::string>& args) {
   std::vector<std::string> final_args{orig_args.argv.at(0)};
   final_args.insert(final_args.end(), args.begin(), args.end());
   final_args.insert(final_args.end(), std::next(orig_args.argv.begin()),
@@ -129,7 +128,6 @@ absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
   const auto argv = Pointers(final_args);
   const auto& pairs = runfiles.EnvVars();
   Environment map(pairs.begin(), pairs.end());
-  map.insert(env.begin(), env.end());
   map.insert(orig_env.begin(), orig_env.end());
   std::vector<std::string> final_env;
   for (const auto& p : map) {
