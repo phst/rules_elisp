@@ -274,22 +274,6 @@ py_library(
     srcs_version = "PY3",
 )
 
-cc_library(
-    name = "load",
-    srcs = ["load.cc"],
-    hdrs = ["load.h"],
-    data = ["//elisp/runfiles:runfiles.elc"],
-    deps = [
-        ":process",
-        ":status",
-        "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/utility",
-    ],
-)
-
 py_library(
     name = "load_py",
     srcs = ["load.py"],
