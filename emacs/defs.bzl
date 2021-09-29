@@ -23,7 +23,7 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     "//elisp:util.bzl",
     "cc_wrapper",
-    "cpp_string",
+    "cpp_strings",
     "runfile_location",
 )
 
@@ -56,8 +56,10 @@ def _emacs_binary_impl(ctx):
         template = ctx.file._template,
         output = driver,
         substitutions = {
-            "[[install]]": cpp_string(runfile_location(ctx, install)),
-            "[[dump_mode]]": cpp_string(ctx.attr.dump_mode),
+            "[[args]]": cpp_strings([
+                "--install=" + runfile_location(ctx, install),
+                "--dump-mode=" + ctx.attr.dump_mode,
+            ]),
         },
         is_executable = True,
     )

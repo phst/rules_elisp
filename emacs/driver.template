@@ -18,11 +18,7 @@
 #include "elisp/emacs.h"
 
 int main(int argc, char** argv) {
-  std::vector<std::string> args = {
-      "--install=" [[install]],
-      "--dump-mode=" [[dump_mode]],
-      "--",
-  };
+  std::vector<std::string> args = {[[args]], "--"};
   args.insert(args.end(), argv, argv + argc);
   return phst_rules_elisp::RunEmacs(argv[0], args);
 }
