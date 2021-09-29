@@ -37,18 +37,13 @@
 
 namespace phst_rules_elisp {
 
-static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
+static absl::StatusOr<int> RunTestImpl(const std::vector<std::string>& args) {
   std::string error;
   std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
   if (runfiles == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles for test: ", error));
   }
-  return std::move(runfiles);
-}
-
-static absl::StatusOr<int> RunTestImpl(const std::vector<std::string>& args) {
-  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
   return Run(*runfiles, "phst_rules_elisp/elisp/test_py", args);
 }
 
