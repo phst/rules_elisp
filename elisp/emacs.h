@@ -16,6 +16,7 @@
 #define PHST_RULES_ELISP_ELISP_EMACS_H
 
 #include <string>
+#include <vector>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -25,18 +26,10 @@
 #include "absl/base/attributes.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/options.h"
-
 namespace phst_rules_elisp {
 
-enum class DumpMode { kPortable, kUnexec };
-
-struct EmacsOptions : Argv {
-  std::string install_rel;
-  DumpMode dump_mode;
-};
-
-ABSL_MUST_USE_RESULT int RunEmacs(const EmacsOptions& opts);
+ABSL_MUST_USE_RESULT int RunEmacs(const std::string& argv0,
+                                  const std::vector<std::string>& args);
 
 }  // namespace phst_rules_elisp
 

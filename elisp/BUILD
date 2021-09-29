@@ -156,7 +156,6 @@ cc_library(
     data = [":emacs_py"],
     visibility = ["//visibility:public"],
     deps = [
-        ":options",
         ":process",
         ":status",
         "@com_google_absl//absl/base:core_headers",

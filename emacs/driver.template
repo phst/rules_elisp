@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <vector>
+
 #include "elisp/emacs.h"
 
 int main(int argc, char** argv) {
-  phst_rules_elisp::EmacsOptions opts;
-  opts.install_rel = [[install]];
-  opts.dump_mode = phst_rules_elisp::DumpMode::[[dump_mode]];
-  opts.argv.assign(argv, argv + argc);
-  return phst_rules_elisp::RunEmacs(opts);
+  std::vector<std::string> args = {
+      "--install=" [[install]],
+      "--dump-mode=" [[dump_mode]],
+      "--",
+  };
+  args.insert(args.end(), argv, argv + argc);
+  return phst_rules_elisp::RunEmacs(argv[0], args);
 }
 
 // Local Variables:

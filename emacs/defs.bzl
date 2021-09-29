@@ -57,7 +57,7 @@ def _emacs_binary_impl(ctx):
         output = driver,
         substitutions = {
             "[[install]]": cpp_string(runfile_location(ctx, install)),
-            "[[dump_mode]]": _DUMP_MODES[ctx.attr.dump_mode],
+            "[[dump_mode]]": cpp_string(ctx.attr.dump_mode),
         },
         is_executable = True,
     )
@@ -73,11 +73,6 @@ def _emacs_binary_impl(ctx):
         files = depset(direct = [executable]),
         runfiles = ctx.runfiles(files = [install]).merge(runfiles),
     )]
-
-_DUMP_MODES = {
-    "portable": "kPortable",
-    "unexec": "kUnexec",
-}
 
 emacs_binary = rule(
     attrs = {
@@ -99,7 +94,7 @@ This is necessary to determine the source root directory.""",
         ),
         "dump_mode": attr.string(
             default = "portable",
-            values = _DUMP_MODES.keys(),
+            values = ["portable", "unexec"],
             doc = """Dumping mode that Emacs will use.  This can be either
  `portable` to use the portable dumper introduced in Emacs 27, or `unexec` to
 use the legacy “unexec” dumper.  Starting with Emacs 27, `portable` is strongly

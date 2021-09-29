@@ -35,26 +35,14 @@
 
 namespace phst_rules_elisp {
 
-static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
-  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  std::vector<std::string> args = {
-      absl::StrCat("--install=" + opts.install_rel),
-  };
-  switch (opts.dump_mode) {
-    case DumpMode::kPortable:
-      args.push_back("--dump-mode=portable");
-      break;
-    case DumpMode::kUnexec:
-      args.push_back("--dump-mode=unexec");
-      break;
-  }
-  args.push_back("--");
-  args.insert(args.end(), opts.argv.begin(), opts.argv.end());
+static absl::StatusOr<int> RunEmacsImpl(const std::string& argv0,
+                                        const std::vector<std::string>& args) {
+  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(argv0));
   return Run(*runfiles, "phst_rules_elisp/elisp/emacs_py", args);
 }
 
-int RunEmacs(const EmacsOptions& opts) {
-  const auto status_or_code = RunEmacsImpl(opts);
+int RunEmacs(const std::string& argv0, const std::vector<std::string>& args) {
+  const auto status_or_code = RunEmacsImpl(argv0, args);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
