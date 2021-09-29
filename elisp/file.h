@@ -22,7 +22,6 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#include "absl/base/attributes.h"
 #include "absl/base/casts.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
@@ -43,8 +42,6 @@ std::string JoinPath(Ts&&... pieces) {
 }
 
 absl::StatusOr<std::string> MakeAbsolute(absl::string_view name);
-
-ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 
 }  // phst_rules_elisp
 

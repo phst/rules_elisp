@@ -14,8 +14,6 @@
 
 #include "elisp/file.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 
 #include <cassert>
@@ -30,7 +28,6 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#include "absl/base/attributes.h"
 #include "absl/meta/type_traits.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -41,7 +38,6 @@
 #pragma GCC diagnostic pop
 
 #include "elisp/status.h"
-#include "elisp/str.h"
 
 namespace phst_rules_elisp {
 
@@ -78,11 +74,6 @@ absl::StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   const std::unique_ptr<char, free> dir(::getcwd(nullptr, 0));
   if (dir == nullptr) return ErrnoStatus("getcwd");
   return JoinPath(dir.get(), name);
-}
-
-ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
-  struct stat info;
-  return ::lstat(Pointer(name), &info) == 0;
 }
 
 }  // phst_rules_elisp
