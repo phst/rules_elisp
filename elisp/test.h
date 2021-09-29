@@ -16,6 +16,7 @@
 #define PHST_RULES_ELISP_ELISP_TEST_H
 
 #include <string>
+#include <vector>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -23,18 +24,11 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/base/attributes.h"
-#include "absl/container/flat_hash_set.h"
 #pragma GCC diagnostic pop
-
-#include "elisp/options.h"
 
 namespace phst_rules_elisp {
 
-struct TestOptions : CommonOptions {
-  absl::flat_hash_set<std::string> skip_tests, skip_tags;
-};
-
-ABSL_MUST_USE_RESULT int RunTest(const TestOptions& opts);
+ABSL_MUST_USE_RESULT int RunTest(const std::vector<std::string>& args);
 
 }  // namespace phst_rules_elisp
 

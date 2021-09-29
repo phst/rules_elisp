@@ -14,10 +14,11 @@
 
 #include "elisp/binary.h"
 
+#include <string>
+#include <vector>
+
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
-
-#include "elisp/options.h"
 
 namespace phst_rules_elisp {
 namespace {
@@ -25,16 +26,23 @@ namespace {
 using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
-  BinaryOptions opts;
-  opts.wrapper = "phst_rules_elisp/tests/wrap/wrap";
-  opts.mode = Mode::kWrap;
-  opts.rule_tags = {"local", "mytag"};
-  opts.load_path = {"phst_rules_elisp"};
-  opts.data_files = {"phst_rules_elisp/elisp/binary.h"};
-  opts.input_args = {2};
-  opts.output_args = {-1};
-  opts.argv = {"unused", "--option", "elisp/binary.cc", "/:/tmp/output.dat"};
-  EXPECT_THAT(RunBinary(opts), Eq(0));
+  const std::string argv0 = "unused";
+  const std::vector<std::string> args = {
+      "--wrapper=phst_rules_elisp/tests/wrap/wrap",
+      "--mode=wrap",
+      "--rule-tag=local",
+      "--rule-tag=mytag",
+      "--load-directory=phst_rules_elisp",
+      "--data-file=phst_rules_elisp/elisp/binary.h",
+      "--input-arg=2",
+      "--output-arg=-1",
+      "--",
+      argv0,
+      "--option",
+      "elisp/binary.cc",
+      "/:/tmp/output.dat",
+  };
+  EXPECT_THAT(RunBinary(argv0, args), Eq(0));
 }
 
 }  // namespace

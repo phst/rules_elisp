@@ -12,20 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <vector>
+
 #include "elisp/binary.h"
 
 int main(int argc, char** argv) {
-  phst_rules_elisp::BinaryOptions opts;
-  opts.wrapper = [[emacs]];
-  opts.mode = phst_rules_elisp::Mode::[[mode]];
-  opts.rule_tags = {[[tags]]};
-  opts.load_path = {[[directory]]};
-  opts.load_files = {[[load]]};
-  opts.data_files = {[[data]]};
-  opts.input_args = {[[input_args]]};
-  opts.output_args = {[[output_args]]};
-  opts.argv.assign(argv, argv + argc);
-  return phst_rules_elisp::RunBinary(opts);
+  std::vector<std::string> args = {[[args]], "--"};
+  args.insert(args.end(), argv, argv + argc);
+  return phst_rules_elisp::RunBinary(argv[0], args);
 }
 
 // Local Variables:

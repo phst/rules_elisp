@@ -12,20 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+#include <vector>
+
 #include "elisp/test.h"
 
 int main(int argc, char** argv) {
-  phst_rules_elisp::TestOptions opts;
-  opts.wrapper = [[emacs]];
-  opts.mode = phst_rules_elisp::Mode::[[mode]];
-  opts.rule_tags = {[[tags]]};
-  opts.load_path = {[[directory]]};
-  opts.load_files = {[[load]]};
-  opts.data_files = {[[data]]};
-  opts.skip_tests = {[[skip_tests]]};
-  opts.skip_tags = {[[skip_tags]]};
-  opts.argv.assign(argv, argv + argc);
-  return phst_rules_elisp::RunTest(opts);
+  std::vector<std::string> args = {[[args]], "--"};
+  args.insert(args.end(), argv, argv + argc);
+  return phst_rules_elisp::RunTest(args);
 }
 
 // Local Variables:

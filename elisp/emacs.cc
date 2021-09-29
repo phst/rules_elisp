@@ -27,7 +27,6 @@
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
 #pragma GCC diagnostic pop
 
 #include "elisp/process.h"

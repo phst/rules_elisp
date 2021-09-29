@@ -32,7 +32,6 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/algorithm.h"
 #include "elisp/process.h"
 #include "elisp/status.h"
 
@@ -48,42 +47,13 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
   return std::move(runfiles);
 }
 
-static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
+static absl::StatusOr<int> RunTestImpl(const std::vector<std::string>& args) {
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
-  std::vector<std::string> args = {absl::StrCat("--wrapper=", opts.wrapper)};
-  switch (opts.mode) {
-  case Mode::kDirect:
-    args.push_back("--mode=direct");
-    break;
-  case Mode::kWrap:
-    args.push_back("--mode=wrap");
-    break;
-  }
-  for (const std::string& tag : Sort(opts.rule_tags)) {
-    args.push_back(absl::StrCat("--rule-tag=", tag));
-  }
-  for (const std::string& dir : opts.load_path) {
-    args.push_back(absl::StrCat("--load-directory=", dir));
-  }
-  for (const std::string& file : opts.load_files) {
-    args.push_back(absl::StrCat("--load-file=", file));
-  }
-  for (const std::string& file : Sort(opts.data_files)) {
-    args.push_back(absl::StrCat("--data-file=", file));
-  }
-  for (const std::string& test : Sort(opts.skip_tests)) {
-    args.push_back(absl::StrCat("--skip-test=", test));
-  }
-  for (const std::string& tag : Sort(opts.skip_tags)) {
-    args.push_back(absl::StrCat("--skip-tag=", tag));
-  }
-  args.push_back("--");
-  args.insert(args.end(), opts.argv.begin(), opts.argv.end());
   return Run(*runfiles, "phst_rules_elisp/elisp/test_py", args);
 }
 
-int RunTest(const TestOptions& opts) {
-  const auto status_or_code = RunTestImpl(opts);
+int RunTest(const std::vector<std::string>& args) {
+  const auto status_or_code = RunTestImpl(args);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;

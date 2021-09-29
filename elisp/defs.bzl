@@ -15,15 +15,12 @@
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
-load("@bazel_skylib//lib:dicts.bzl", "dicts")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     ":util.bzl",
     "cc_wrapper",
     "check_relative_filename",
-    "cpp_ints",
-    "cpp_string",
     "cpp_strings",
     "runfile_location",
 )
@@ -109,10 +106,13 @@ def _elisp_binary_impl(ctx):
         ctx,
         srcs = ctx.files.src,
         tags = [],
-        substitutions = {
-            "[[input_args]]": cpp_ints(ctx.attr.input_args),
-            "[[output_args]]": cpp_ints(ctx.attr.output_args),
-        },
+        args = [
+            "--input-arg=" + str(i)
+            for i in ctx.attr.input_args
+        ] + [
+            "--output-arg=" + str(i)
+            for i in ctx.attr.output_args
+        ],
         lib = ctx.attr._binary_lib,
     )
     return [DefaultInfo(
@@ -130,10 +130,13 @@ def _elisp_test_impl(ctx):
         # “local = 1” is equivalent to adding a “local” tag,
         # cf. https://docs.bazel.build/versions/4.1.0/be/common-definitions.html#test.local.
         tags = ["local"] if ctx.attr.local else [],
-        substitutions = {
-            "[[skip_tests]]": cpp_strings(ctx.attr.skip_tests),
-            "[[skip_tags]]": cpp_strings(ctx.attr.skip_tags),
-        },
+        args = [
+            "--skip-test=" + test
+            for test in ctx.attr.skip_tests
+        ] + [
+            "--skip-tag=" + tag
+            for tag in ctx.attr.skip_tags
+        ],
         lib = ctx.attr._test_lib,
     )
 
@@ -747,7 +750,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, srcs, tags, substitutions, lib):
+def _binary(ctx, srcs, tags, args, lib):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
@@ -757,7 +760,7 @@ def _binary(ctx, srcs, tags, substitutions, lib):
       ctx: rule context
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
-      substitutions: a dictionary of rule-specific template substitutions
+      args: a list of rule-specific program arguments
       lib (Target): a `cc_library` target to be added as dependency
 
     Returns:
@@ -825,24 +828,24 @@ def _binary(ctx, srcs, tags, substitutions, lib):
     ctx.actions.expand_template(
         template = ctx.file._template,
         output = driver,
-        substitutions = dicts.add({
-            "[[directory]]": cpp_strings([
-                check_relative_filename(dir.for_runfiles)
+        substitutions = {
+            "[[args]]": cpp_strings([
+                "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
+                "--mode=" + ("wrap" if toolchain.wrap else "direct"),
+            ] + [
+                "--rule-tag=" + tag
+                for tag in collections.uniq(ctx.attr.tags + tags)
+            ] + [
+                "--load-directory=" + check_relative_filename(dir.for_runfiles)
                 for dir in result.transitive_load_path.to_list()
-            ]),
-            "[[emacs]]": cpp_string(
-                runfile_location(ctx, emacs.files_to_run.executable),
-            ),
-            "[[load]]": cpp_strings(
-                [runfile_location(ctx, src) for src in result.outs],
-            ),
-            "[[data]]": cpp_strings([
-                runfile_location(ctx, file)
+            ] + [
+                "--load-file=" + runfile_location(ctx, src)
+                for src in result.outs
+            ] + [
+                "--data-file=" + runfile_location(ctx, file)
                 for file in data_files_for_manifest
-            ] + links.keys()),
-            "[[mode]]": "kWrap" if toolchain.wrap else "kDirect",
-            "[[tags]]": cpp_strings(collections.uniq(ctx.attr.tags + tags)),
-        }, substitutions),
+            ] + args),
+        },
     )
     cc_toolchain = find_cpp_toolchain(ctx)
     feature_configuration = cc_common.configure_features(

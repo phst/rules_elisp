@@ -161,7 +161,6 @@ cc_library(
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -181,16 +180,12 @@ cc_library(
     data = [":binary_py"],
     visibility = ["//visibility:public"],
     deps = [
-        ":algorithm",
-        ":options",
         ":process",
         ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -206,7 +201,6 @@ cc_test(
     ],
     deps = [
         ":binary",
-        ":options",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -232,13 +226,10 @@ cc_library(
     data = [":test_py"],
     visibility = ["//visibility:public"],
     deps = [
-        ":algorithm",
-        ":options",
         ":process",
         ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/container:flat_hash_set",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
@@ -258,13 +249,6 @@ py_binary(
         ":manifest_py",
         "@bazel_tools//tools/python/runfiles",
     ],
-)
-
-cc_library(
-    name = "options",
-    hdrs = ["options.h"],
-    copts = COPTS,
-    deps = ["@com_google_absl//absl/container:flat_hash_set"],
 )
 
 py_library(
