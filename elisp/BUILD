@@ -281,13 +281,6 @@ cc_library(
 )
 
 cc_library(
-    name = "algorithm",
-    hdrs = ["algorithm.h"],
-    copts = COPTS,
-    deps = ["@com_google_absl//absl/algorithm:container"],
-)
-
-cc_library(
     name = "status",
     srcs = ["status.cc"],
     hdrs = ["status.h"],
