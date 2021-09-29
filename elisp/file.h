@@ -17,7 +17,6 @@
 
 #include <initializer_list>
 #include <string>
-#include <utility>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -25,39 +24,12 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #include "absl/base/attributes.h"
 #include "absl/base/casts.h"
-#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/string_view.h"
 #pragma GCC diagnostic pop
 
 namespace phst_rules_elisp {
-
-class TempFile {
- public:
-  static absl::StatusOr<TempFile> Create(const std::string& directory,
-                                         absl::string_view tmpl,
-                                         absl::BitGen& random);
-
-  ~TempFile() noexcept;
-  TempFile(const TempFile&) = delete;
-  TempFile(TempFile&&);
-  TempFile& operator=(const TempFile&) = delete;
-  TempFile& operator=(TempFile&&);
-  const std::string& path() const noexcept { return path_; }
-  absl::Status Close();
-  absl::Status Write(absl::string_view data);
-
- private:
-  explicit TempFile(const int fd, std::string path)
-      : fd_(fd), path_(std::move(path)) {}
-  absl::Status CloseHandle();
-  absl::Status Flush();
-  absl::Status Fail(absl::string_view function) const;
-
-  int fd_ = -1;
-  std::string path_;
-};
 
 constexpr bool IsAbsolute(absl::string_view name) noexcept {
   return !name.empty() && name.front() == '/';
@@ -77,9 +49,6 @@ absl::StatusOr<std::string> MakeRelative(absl::string_view name,
 
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept;
 absl::Status RemoveFile(const std::string& name) noexcept;
-ABSL_MUST_USE_RESULT std::string TempDir();
-ABSL_MUST_USE_RESULT std::string TempName(absl::string_view tmpl,
-                                          absl::BitGen& random);
 
 }  // phst_rules_elisp
 
