@@ -80,16 +80,6 @@ absl::StatusOr<std::string> MakeAbsolute(const absl::string_view name) {
   return JoinPath(dir.get(), name);
 }
 
-absl::StatusOr<std::string> MakeRelative(const absl::string_view name,
-                                         std::string root) {
-  ASSIGN_OR_RETURN(const auto abs, MakeAbsolute(name));
-  assert(!root.empty());
-  if (root.back() != '/') root += '/';
-  absl::string_view result = abs;
-  absl::ConsumePrefix(&result, root);
-  return std::string(result);
-}
-
 ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
   struct stat info;
   return ::lstat(Pointer(name), &info) == 0;
