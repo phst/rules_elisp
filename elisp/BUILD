@@ -300,32 +300,6 @@ cc_library(
 )
 
 cc_library(
-    name = "file",
-    srcs = ["file.cc"],
-    hdrs = ["file.h"],
-    copts = COPTS,
-    deps = [
-        ":status",
-        "@com_google_absl//absl/base",
-        "@com_google_absl//absl/meta:type_traits",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
-    ],
-)
-
-cc_test(
-    name = "file_test",
-    size = "small",
-    srcs = ["file_test.cc"],
-    copts = COPTS,
-    deps = [
-        ":file",
-        "@com_google_googletest//:gtest_main",
-    ],
-)
-
-cc_library(
     name = "str",
     hdrs = ["str.h"],
     copts = COPTS,
