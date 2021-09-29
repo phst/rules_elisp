@@ -50,8 +50,6 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
 
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
-  ASSIGN_OR_RETURN(const auto program,
-                   Runfile(*runfiles, "phst_rules_elisp/elisp/test_py"));
   std::vector<std::string> args = {absl::StrCat("--wrapper=", opts.wrapper)};
   switch (opts.mode) {
   case Mode::kDirect:
@@ -81,7 +79,7 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   }
   args.push_back("--");
   args.insert(args.end(), opts.argv.begin(), opts.argv.end());
-  return Run(*runfiles, program, args);
+  return Run(*runfiles, "phst_rules_elisp/elisp/test_py", args);
 }
 
 int RunTest(const TestOptions& opts) {

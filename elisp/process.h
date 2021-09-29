@@ -35,9 +35,6 @@ using bazel::tools::cpp::runfiles::Runfiles;
 absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
     const std::string& argv0);
 
-absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
-                                    const std::string& rel);
-
 absl::StatusOr<int> Run(const Runfiles& runfiles, const std::string& binary,
                         const std::vector<std::string>& args);
 

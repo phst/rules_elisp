@@ -37,8 +37,6 @@ namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(opts.argv.at(0)));
-  ASSIGN_OR_RETURN(const auto program,
-                   Runfile(*runfiles, "phst_rules_elisp/elisp/emacs_py"));
   std::vector<std::string> args = {
       absl::StrCat("--install=" + opts.install_rel),
   };
@@ -52,7 +50,7 @@ static absl::StatusOr<int> RunEmacsImpl(const EmacsOptions& opts) {
   }
   args.push_back("--");
   args.insert(args.end(), opts.argv.begin(), opts.argv.end());
-  return Run(*runfiles, program, args);
+  return Run(*runfiles, "phst_rules_elisp/elisp/emacs_py", args);
 }
 
 int RunEmacs(const EmacsOptions& opts) {
