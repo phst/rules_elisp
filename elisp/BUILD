@@ -268,26 +268,6 @@ cc_library(
     deps = ["@com_google_absl//absl/container:flat_hash_set"],
 )
 
-cc_library(
-    name = "manifest",
-    srcs = ["manifest.cc"],
-    hdrs = ["manifest.h"],
-    deps = [
-        ":algorithm",
-        ":file",
-        ":options",
-        ":status",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/random",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:optional",
-        "@com_google_absl//absl/utility",
-        "@nlohmann_json//:json",
-    ],
-)
-
 py_library(
     name = "manifest_py",
     srcs = ["manifest.py"],
