@@ -17,7 +17,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <iterator>
 #include <memory>
 #include <string>
 #include <system_error>
@@ -41,7 +40,6 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/options.h"
 #include "elisp/status.h"
 
 #ifdef __APPLE__
@@ -107,13 +105,11 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
   return str;
 }
 
-absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
-                        const Runfiles& runfiles, const std::string& binary,
+absl::StatusOr<int> Run(const Environment& orig_env, const Runfiles& runfiles,
+                        const std::string& binary,
                         const std::vector<std::string>& args) {
   std::vector<std::string> final_args{binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  final_args.insert(final_args.end(), std::next(orig_args.argv.begin()),
-                    orig_args.argv.end());
   const auto argv = Pointers(final_args);
   const auto& pairs = runfiles.EnvVars();
   Environment map(pairs.begin(), pairs.end());

@@ -29,8 +29,6 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
-#include "elisp/options.h"
-
 namespace phst_rules_elisp {
 
 using bazel::tools::cpp::runfiles::Runfiles;
@@ -44,8 +42,8 @@ absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
 absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
                                     const std::string& rel);
 
-absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
-                        const Runfiles& runfiles, const std::string& binary,
+absl::StatusOr<int> Run(const Environment& orig_env, const Runfiles& runfiles,
+                        const std::string& binary,
                         const std::vector<std::string>& args);
 
 }  // namespace phst_rules_elisp

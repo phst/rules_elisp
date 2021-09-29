@@ -287,7 +287,6 @@ cc_library(
     srcs = ["process.cc"],
     hdrs = ["process.h"],
     deps = [
-        ":options",
         ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",

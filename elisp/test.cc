@@ -81,8 +81,8 @@ static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
     args.push_back(absl::StrCat("--skip-tag=", tag));
   }
   args.push_back("--");
-  args.push_back(opts.argv.at(0));
-  return Run(opts, orig_env, *runfiles, program, args);
+  args.insert(args.end(), opts.argv.begin(), opts.argv.end());
+  return Run(orig_env, *runfiles, program, args);
 }
 
 int RunTest(const TestOptions& opts) {
