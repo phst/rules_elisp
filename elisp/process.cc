@@ -121,7 +121,7 @@ absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
 absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
                         const Runfiles& runfiles, const std::string& binary,
                         const std::vector<std::string>& args) {
-  std::vector<std::string> final_args{orig_args.argv.at(0)};
+  std::vector<std::string> final_args{binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
   final_args.insert(final_args.end(), std::next(orig_args.argv.begin()),
                     orig_args.argv.end());
