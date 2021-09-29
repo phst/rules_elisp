@@ -85,9 +85,4 @@ ABSL_MUST_USE_RESULT bool FileExists(const std::string& name) noexcept {
   return ::lstat(Pointer(name), &info) == 0;
 }
 
-absl::Status RemoveFile(const std::string& name) noexcept {
-  return ::unlink(Pointer(name)) == 0 ? absl::OkStatus()
-                                      : ErrnoStatus("unlink", name);
-}
-
 }  // phst_rules_elisp
