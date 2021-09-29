@@ -98,20 +98,13 @@ absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
   return std::move(runfiles);
 }
 
-static absl::StatusOr<std::string> Runfile(const Runfiles& runfiles,
-                                           const std::string& rel) {
-  const std::string str = runfiles.Rlocation(rel);
-  if (str.empty()) {
-    return absl::NotFoundError(absl::StrCat("runfile not found: ", rel));
-  }
-  return str;
-}
-
 absl::StatusOr<int> Run(const Runfiles& runfiles, const std::string& binary,
                         const std::vector<std::string>& args) {
   const Environment orig_env = CopyEnv();
-  ASSIGN_OR_RETURN(const std::string resolved_binary,
-                   Runfile(runfiles, binary));
+  const std::string resolved_binary = runfiles.Rlocation(binary);
+  if (resolved_binary.empty()) {
+    return absl::NotFoundError(absl::StrCat("runfile not found: ", binary));
+  }
   std::vector<std::string> final_args{resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
   const auto argv = Pointers(final_args);
