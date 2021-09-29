@@ -26,9 +26,6 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/container/flat_hash_map.h"
-#include "absl/container/flat_hash_set.h"
-#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -36,9 +33,6 @@
 #pragma GCC diagnostic pop
 
 #include "elisp/algorithm.h"
-#include "elisp/file.h"
-#include "elisp/load.h"
-#include "elisp/manifest.h"
 #include "elisp/process.h"
 #include "elisp/status.h"
 
@@ -57,56 +51,38 @@ static absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfilesForTest() {
 static absl::StatusOr<int> RunTestImpl(const TestOptions& opts) {
   const auto orig_env = CopyEnv();
   ASSIGN_OR_RETURN(const auto runfiles, CreateRunfilesForTest());
-  ASSIGN_OR_RETURN(const auto emacs, Runfile(*runfiles, opts.wrapper));
-  std::vector<std::string> args;
-  absl::BitGen random;
-  ASSIGN_OR_RETURN(auto manifest, AddManifest(opts.mode, args, random));
-  args.push_back("--quick");
-  args.push_back("--batch");
-  args.push_back("--module-assertions");
-  RETURN_IF_ERROR(AddLoadPath(*runfiles, args, opts.load_path));
-  ASSIGN_OR_RETURN(const auto runner,
-                   Runfile(*runfiles, "phst_rules_elisp/elisp/ert/runner.elc"));
-  args.push_back(absl::StrCat("--load=", runner));
-  // Note that using equals signs for "--test-source, --skip-test, and
-  // --skip-tag doesn’t work.
-  for (const auto& file : opts.load_files) {
-    ASSIGN_OR_RETURN(const auto abs, Runfile(*runfiles, file));
-    args.push_back("--test-source");
-    args.push_back(absl::StrCat("/:", abs));
+  ASSIGN_OR_RETURN(const auto program,
+                   Runfile(*runfiles, "phst_rules_elisp/elisp/test_py"));
+  std::vector<std::string> args = {absl::StrCat("--wrapper=", opts.wrapper)};
+  switch (opts.mode) {
+  case Mode::kDirect:
+    args.push_back("--mode=direct");
+    break;
+  case Mode::kWrap:
+    args.push_back("--mode=wrap");
+    break;
   }
-  for (const auto& test : Sort(opts.skip_tests)) {
-    args.push_back("--skip-test");
-    args.push_back(test);
+  for (const std::string& tag : Sort(opts.rule_tags)) {
+    args.push_back(absl::StrCat("--rule-tag=", tag));
   }
-  for (const auto& tag : Sort(opts.skip_tags)) {
-    args.push_back("--skip-tag");
-    args.push_back(tag);
+  for (const std::string& dir : opts.load_path) {
+    args.push_back(absl::StrCat("--load-directory=", dir));
   }
-  args.push_back("--funcall=elisp/ert/run-batch-and-exit");
-  if (manifest) {
-    std::vector<std::string> inputs, outputs;
-    const auto report_file = Find(orig_env, "XML_OUTPUT_FILE");
-    if (!report_file.empty()) {
-      outputs.push_back(report_file);
-    }
-    if (Find(orig_env, "COVERAGE") == "1") {
-      std::string coverage_manifest = Find(orig_env, "COVERAGE_MANIFEST");
-      if (!coverage_manifest.empty()) {
-        inputs.push_back(std::move(coverage_manifest));
-      }
-      const auto coverage_dir = Find(orig_env, "COVERAGE_DIR");
-      if (!coverage_dir.empty()) {
-        outputs.push_back(JoinPath(coverage_dir, "emacs-lisp.dat"));
-      }
-    }
-    RETURN_IF_ERROR(
-        WriteManifest(opts, std::move(inputs), outputs, manifest.value()));
+  for (const std::string& file : opts.load_files) {
+    args.push_back(absl::StrCat("--load-file=", file));
   }
-  ASSIGN_OR_RETURN(const auto code,
-                   Run(opts, orig_env, *runfiles, emacs, args, {}));
-  if (manifest) RETURN_IF_ERROR(manifest->Close());
-  return code;
+  for (const std::string& file : Sort(opts.data_files)) {
+    args.push_back(absl::StrCat("--data-file=", file));
+  }
+  for (const std::string& test : Sort(opts.skip_tests)) {
+    args.push_back(absl::StrCat("--skip-test=", test));
+  }
+  for (const std::string& tag : Sort(opts.skip_tags)) {
+    args.push_back(absl::StrCat("--skip-tag=", tag));
+  }
+  args.push_back("--");
+  args.push_back(opts.argv.at(0));
+  return Run(opts, orig_env, *runfiles, program, args, {});
 }
 
 int RunTest(const TestOptions& opts) {

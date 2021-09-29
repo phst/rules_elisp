@@ -15,12 +15,15 @@
 [REPORTS]
 output-format=parseable
 
+[DESIGN]
+max-locals=20
+
 [FORMAT]
 max-line-length=80
 
 [SIMILARITIES]
 ignore-imports=yes
-min-similarity-lines=8
+min-similarity-lines=15
 
 [STRING]
 check-quote-consistency=yes

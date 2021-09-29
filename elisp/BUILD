@@ -234,24 +234,34 @@ cc_library(
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
-    data = ["//elisp/ert:runner.elc"],
+    data = [":test_py"],
     visibility = ["//visibility:public"],
     deps = [
         ":algorithm",
-        ":file",
-        ":load",
-        ":manifest",
         ":options",
         ":process",
         ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/container:flat_hash_set",
-        "@com_google_absl//absl/random",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
+    ],
+)
+
+py_binary(
+    name = "test_py",
+    testonly = 1,
+    srcs = ["test.py"],
+    data = ["//elisp/ert:runner.elc"],
+    main = "test.py",
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":load_py",
+        ":manifest_py",
+        "@bazel_tools//tools/python/runfiles",
     ],
 )
 
