@@ -50,17 +50,6 @@
 
 namespace phst_rules_elisp {
 
-static const char* Pointer(const std::string& s) {
-  if (s.find('\0') != s.npos) {
-    std::clog << s << " contains null character" << std::endl;
-    std::abort();
-  }
-  return s.c_str();
-}
-
-// Don’t allow passing a temporary.
-static void Pointer(const std::string&&) = delete;
-
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (auto& s : strings) {
@@ -137,7 +126,7 @@ absl::StatusOr<int> Run(const Argv& orig_args, const Environment& orig_env,
   absl::c_sort(final_env);
   const auto envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, Pointer(binary), nullptr, nullptr,
+  const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
