@@ -85,13 +85,6 @@ def rules_elisp_dependencies():
         strip_prefix = "abseil-cpp-20210324.2/",
         urls = ["https://github.com/abseil/abseil-cpp/archive/refs/tags/20210324.2.tar.gz"],
     )
-    http_archive(
-        name = "nlohmann_json",
-        build_file = "@phst_rules_elisp//:json.BUILD",
-        sha256 = "61e605be15e88deeac4582aaf01c09d616f8302edde7adcaba9261ddc3b4ceca",
-        strip_prefix = "single_include",
-        urls = ["https://github.com/nlohmann/json/releases/download/v3.10.2/include.zip"],
-    )
 
 # buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():
