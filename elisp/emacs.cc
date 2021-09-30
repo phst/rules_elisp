@@ -30,14 +30,14 @@
 #pragma GCC diagnostic pop
 
 #include "elisp/process.h"
-#include "elisp/status.h"
 
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(const std::string& argv0,
                                         const std::vector<std::string>& args) {
-  ASSIGN_OR_RETURN(const auto runfiles, CreateRunfiles(argv0));
-  return Run(*runfiles, "phst_rules_elisp/elisp/run_emacs", args);
+  const auto runfiles = CreateRunfiles(argv0);
+  if (!runfiles.ok()) return runfiles.status();
+  return Run(**runfiles, "phst_rules_elisp/elisp/run_emacs", args);
 }
 
 int RunEmacs(const std::string& argv0, const std::vector<std::string>& args) {

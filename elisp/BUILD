@@ -157,7 +157,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":process",
-        ":status",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
@@ -180,7 +179,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":process",
-        ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
@@ -272,12 +270,6 @@ cc_library(
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],
-)
-
-cc_library(
-    name = "status",
-    hdrs = ["status.h"],
-    copts = COPTS,
 )
 
 exports_files(
