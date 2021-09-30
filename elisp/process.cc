@@ -14,18 +14,21 @@
 
 #include "elisp/process.h"
 
+#include <cerrno>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <memory>
 #include <string>
 #include <system_error>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include <spawn.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <unistd.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -37,10 +40,10 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_join.h"
+#include "absl/strings/string_view.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
-
-#include "elisp/status.h"
 
 #ifdef __APPLE__
 #include <crt_externs.h>  // for _NSGetEnviron
@@ -85,6 +88,55 @@ static Environment CopyEnv() {
     }
   }
   return map;
+}
+
+static absl::StatusCode MapErrorCode(const std::error_code& code) {
+  const auto condition = code.default_error_condition();
+  if (condition.category() != std::generic_category()) {
+    return absl::StatusCode::kUnknown;
+  }
+  switch (static_cast<std::errc>(condition.value())) {
+    case std::errc::file_exists:
+      return absl::StatusCode::kAlreadyExists;
+    case std::errc::function_not_supported:
+      return absl::StatusCode::kUnimplemented;
+    case std::errc::no_space_on_device:
+      return absl::StatusCode::kResourceExhausted;
+    case std::errc::no_such_file_or_directory:
+      return absl::StatusCode::kNotFound;
+    case std::errc::operation_canceled:
+      return absl::StatusCode::kCancelled;
+    case std::errc::permission_denied:
+      return absl::StatusCode::kPermissionDenied;
+    case std::errc::timed_out:
+      return absl::StatusCode::kDeadlineExceeded;
+    default:
+      return absl::StatusCode::kUnknown;
+  }
+}
+
+static absl::Status MakeErrorStatus(const std::error_code& code,
+                                    const absl::string_view function,
+                                    const absl::string_view args) {
+  if (!code) return absl::OkStatus();
+  return absl::Status(
+      MapErrorCode(code),
+      absl::StrCat(function, args.empty() ? args : absl::StrCat("(", args, ")"),
+                   ": ", code.category().name(), "/", code.value(), ": ",
+                   code.message()));
+}
+
+template <typename... Ts>
+absl::Status ErrorStatus(const std::error_code& code,
+                         const absl::string_view function, Ts&&... args) {
+  return MakeErrorStatus(code, function,
+                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
+}
+
+template <typename... Ts>
+absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
+  return ErrorStatus(std::error_code(errno, std::system_category()), function,
+                     std::forward<Ts>(args)...);
 }
 
 absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(

@@ -265,7 +265,6 @@ cc_library(
     srcs = ["process.cc"],
     hdrs = ["process.h"],
     deps = [
-        ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -277,13 +276,8 @@ cc_library(
 
 cc_library(
     name = "status",
-    srcs = ["status.cc"],
     hdrs = ["status.h"],
     copts = COPTS,
-    deps = [
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/strings",
-    ],
 )
 
 exports_files(
