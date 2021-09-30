@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,12 +49,6 @@ absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
 }
 
 }  // phst_google_elisp
-
-#define RETURN_IF_ERROR(expr)          \
-  do {                                 \
-    const auto _status = (expr);       \
-    if (!_status.ok()) return _status; \
-  } while (false)
 
 #define ASSIGN_OR_RETURN(lhs, rhs) ASSIGN_OR_RETURN_1(lhs, (rhs), __COUNTER__)
 
