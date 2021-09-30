@@ -18,7 +18,6 @@
 #include <iostream>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -33,7 +32,6 @@
 #pragma GCC diagnostic pop
 
 #include "elisp/process.h"
-#include "elisp/status.h"
 
 namespace phst_rules_elisp {
 

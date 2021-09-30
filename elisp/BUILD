@@ -225,7 +225,6 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         ":process",
-        ":status",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
