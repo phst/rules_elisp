@@ -20,9 +20,17 @@ on it in any way outside the rule implementation."""
 import os
 import os.path
 import pathlib
-from typing import Any, Iterable, List
+from typing import Dict, Iterable, List, Protocol
 
-def add_path(run_files: Any, args: List[str],
+class _Runfiles(Protocol):
+    # pylint: disable=invalid-name,missing-function-docstring
+    def Rlocation(self, path: str) -> str:
+        ...
+
+    def EnvVars(self) -> Dict[str, str]:
+        ...
+
+def add_path(run_files: _Runfiles, args: List[str],
              load_path: Iterable[pathlib.Path]) -> None:
     """Add load path elements to the given args list."""
     runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'
