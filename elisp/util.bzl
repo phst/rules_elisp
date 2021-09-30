@@ -69,7 +69,7 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
+def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
     """Builds a wrapper executable that starts Emacs.
 
     You can use `find_cpp_toolchain` and `cc_common.configure_features` to
@@ -82,21 +82,21 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
       feature_configuration (FeatureConfiguration): the features to use to
           compile the wrapper
       driver (File): C++ driver file to compile
-      dep (Target): a `cc_library` target to add as dependency
+      deps (list of Targets): `cc_library` targets to add as dependencies
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
       representing the executable that starts Emacs and `runfiles` is a
       `runfiles` object for the runfiles that the executable will need
     """
-    info = dep[CcInfo]
+    infos = [dep[CcInfo] for dep in deps]
     _, objs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         srcs = [driver],
-        compilation_contexts = [info.compilation_context],
+        compilation_contexts = [info.compilation_context for info in infos],
         user_compile_flags = COPTS,
     )
     bin = cc_common.link(
@@ -105,10 +105,13 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, dep):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
-        linking_contexts = [info.linking_context],
+        linking_contexts = [info.linking_context for info in infos],
         grep_includes = ctx.executable._grep_includes,
     )
-    return bin.executable, dep[DefaultInfo].default_runfiles
+    runfiles = ctx.runfiles()
+    for dep in deps:
+        runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
+    return bin.executable, runfiles
 
 def cpp_strings(strings):
     """Formats the given string list as C++ initializer list.

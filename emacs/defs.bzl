@@ -68,7 +68,7 @@ def _emacs_binary_impl(ctx):
         cc_toolchain,
         wrapper_configuration,
         driver,
-        ctx.attr._emacs_lib,
+        ctx.attr._emacs_libs,
     )
     return [DefaultInfo(
         executable = executable,
@@ -117,8 +117,8 @@ recommended.""",
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        "_emacs_lib": attr.label(
-            default = "//elisp:emacs",
+        "_emacs_libs": attr.label_list(
+            default = ["//elisp:emacs"],
             providers = [CcInfo],
         ),
         "_template": attr.label(

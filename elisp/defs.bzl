@@ -113,7 +113,7 @@ def _elisp_binary_impl(ctx):
             "--output-arg=" + str(i)
             for i in ctx.attr.output_args
         ],
-        lib = ctx.attr._binary_lib,
+        libs = ctx.attr._binary_libs,
     )
     return [DefaultInfo(
         executable = executable,
@@ -137,7 +137,7 @@ def _elisp_test_impl(ctx):
             "--skip-tag=" + tag
             for tag in ctx.attr.skip_tags
         ],
-        lib = ctx.attr._test_lib,
+        libs = ctx.attr._test_libs,
     )
 
     # We include the original source files in the runfiles so that error
@@ -336,8 +336,8 @@ elisp_binary = rule(
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        _binary_lib = attr.label(
-            default = "//elisp:binary",
+        _binary_libs = attr.label_list(
+            default = ["//elisp:binary"],
             providers = [CcInfo],
         ),
         _template = attr.label(
@@ -409,8 +409,8 @@ elisp_test = rule(
             cfg = "host",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        _test_lib = attr.label(
-            default = "//elisp:test",
+        _test_libs = attr.label_list(
+            default = ["//elisp:test"],
             providers = [CcInfo],
         ),
         _template = attr.label(
@@ -750,7 +750,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, srcs, tags, args, lib):
+def _binary(ctx, srcs, tags, args, libs):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
@@ -761,7 +761,7 @@ def _binary(ctx, srcs, tags, args, lib):
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
       args: a list of rule-specific program arguments
-      lib (Target): a `cc_library` target to be added as dependency
+      libs (list of Targets): `cc_library` targets to be added as dependencies
 
     Returns:
       a pair (executable, runfiles) containing the compiled binary and the
@@ -859,7 +859,7 @@ def _binary(ctx, srcs, tags, args, lib):
         cc_toolchain,
         feature_configuration,
         driver,
-        lib,
+        libs,
     )
     bin_runfiles = ctx.runfiles(
         files = [emacs.files_to_run.executable] + result.outs,
