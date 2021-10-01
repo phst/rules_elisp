@@ -150,8 +150,9 @@ absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
   return std::move(runfiles);
 }
 
-absl::StatusOr<int> Run(const Runfiles& runfiles, const std::string& binary,
-                        const std::vector<std::string>& args) {
+absl::StatusOr<int> Run(const std::string& binary,
+                        const std::vector<std::string>& args,
+                        const Runfiles& runfiles) {
   const Environment orig_env = CopyEnv();
   const std::string resolved_binary = runfiles.Rlocation(binary);
   if (resolved_binary.empty()) {

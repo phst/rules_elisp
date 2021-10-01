@@ -37,7 +37,7 @@ static absl::StatusOr<int> RunEmacsImpl(const std::string& argv0,
                                         const std::vector<std::string>& args) {
   const auto runfiles = CreateRunfiles(argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run(**runfiles, "phst_rules_elisp/elisp/run_emacs", args);
+  return Run("phst_rules_elisp/elisp/run_emacs", args, **runfiles);
 }
 
 int RunEmacs(const std::string& argv0, const std::vector<std::string>& args) {
