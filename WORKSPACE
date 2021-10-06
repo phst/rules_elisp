@@ -38,9 +38,11 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file"
 
 http_archive(
     name = "io_bazel_stardoc",
-    sha256 = "87eab53c2f1378ebec022f89097e56351e8b008a10433a0e1db660bd27aa46a9",
-    strip_prefix = "stardoc-8275ced1b6952f5ad17ec579a5dd16e102479b72",
-    urls = ["https://github.com/bazelbuild/stardoc/archive/8275ced1b6952f5ad17ec579a5dd16e102479b72.zip"],
+    sha256 = "c9794dcc8026a30ff67cf7cf91ebe245ca294b20b071845d12c192afe243ad72",
+    urls = [
+        "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+        "https://github.com/bazelbuild/stardoc/releases/download/0.5.0/stardoc-0.5.0.tar.gz",
+    ],
 )
 
 load("@io_bazel_stardoc//:setup.bzl", "stardoc_repositories")

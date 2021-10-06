@@ -1,5 +1,7 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
+Contains workspace functions to use Emacs Lisp rules.
+
 <a id="#rules_elisp_dependencies"></a>
 
 ## rules_elisp_dependencies

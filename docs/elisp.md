@@ -1,5 +1,7 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
+Defines rules to work with Emacs Lisp files in Bazel.
+
 <a id="#elisp_binary"></a>
 
 ## elisp_binary
