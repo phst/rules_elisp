@@ -94,10 +94,10 @@ go_register_toolchains(version = "1.17.1")
 
 http_archive(
     name = "com_google_protobuf",
-    sha256 = "528927e398f4e290001886894dac17c5c6a2e5548f3fb68004cfb01af901b53a",
-    strip_prefix = "protobuf-3.17.3/",
+    sha256 = "c5671570ec5fbe0651b735b26879649ac9561eb49335dda5aaafbe627b4fcfa5",
+    strip_prefix = "protobuf-3.19.0/",
     urls = [
-        "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.17.3.zip",  # 2021-06-04
+        "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.19.0.zip",  # 2021-10-20
     ],
 )
 
