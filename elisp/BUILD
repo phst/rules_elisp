@@ -266,6 +266,17 @@ py_library(
     srcs_version = "PY3",
 )
 
+py_test(
+    name = "load_test",
+    srcs = ["load_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":load",
+        "@bazel_tools//tools/python/runfiles",
+    ],
+)
+
 cc_library(
     name = "process",
     srcs = ["process.cc"],
