@@ -251,6 +251,14 @@ py_library(
     srcs_version = "PY3",
 )
 
+py_test(
+    name = "manifest_test",
+    srcs = ["manifest_test.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [":manifest"],
+)
+
 py_library(
     name = "load",
     srcs = ["load.py"],
