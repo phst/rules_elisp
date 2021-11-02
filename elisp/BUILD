@@ -153,6 +153,7 @@ cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
+    copts = COPTS,
     data = [":run_emacs"],
     visibility = ["//visibility:public"],
     deps = [
@@ -175,6 +176,7 @@ cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
+    copts = COPTS,
     data = [":run_binary"],
     visibility = ["//visibility:public"],
     deps = [
@@ -219,6 +221,7 @@ cc_library(
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
+    copts = COPTS,
     data = [":run_test"],
     visibility = ["//visibility:public"],
     deps = [
@@ -281,6 +284,7 @@ cc_library(
     name = "process",
     srcs = ["process.cc"],
     hdrs = ["process.h"],
+    copts = COPTS,
     deps = [
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",
