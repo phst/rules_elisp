@@ -14,7 +14,7 @@
 
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load(
-    "@phst_rules_elisp//elisp:defs.bzl",
+    "//elisp:defs.bzl",
     "elisp_binary",
     "elisp_library",
     "elisp_manual",
