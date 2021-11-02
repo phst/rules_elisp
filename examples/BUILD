@@ -13,13 +13,7 @@
 # limitations under the License.
 
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
-load(
-    "//elisp:defs.bzl",
-    "elisp_binary",
-    "elisp_library",
-    "elisp_manual",
-    "elisp_test",
-)
+load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_test")
 
 elisp_library(
     name = "lib_1",
