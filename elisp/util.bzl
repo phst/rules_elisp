@@ -137,15 +137,18 @@ def cpp_string(string):
     Returns:
       a string containing a properly escaped C++ string literal
     """
-
-    # Use raw strings and choose a delimiter that’s extremely unlikely to occur
-    # in real-world code.
-    delim = "#*?&"
-    open = 'R"' + delim + "("
-    close = ")" + delim + '"'
-    if close in string or "\000" in string:
+    if "\000" in string:
         fail("String {} can’t be transferred to C++".format(string))
-    return open + string + close
+    string = (
+        string
+            .replace("\\", "\\\\")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+    )
+    for char in ("?", "'", '"'):
+        string = string.replace(char, "\\" + char)
+    return '"' + string + '"'
 
 def cpp_ints(ints):
     """Formats the given integer list as C++ initializer list.
