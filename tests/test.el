@@ -51,11 +51,11 @@
   :tags '(skip)
   (should (= 0 1)))
 
-(ert-deftest filter-via-skip-tests-attribute ()
+(ert-deftest filter-via-skip-tests-attribute-äα𝐴🐈 ()
   (should (= 0 1)))
 
 (ert-deftest filter-via-skip-tags-attribute ()
-  :tags '(skip-from-attribute)
+  :tags (list (intern "skip-from-attribute \t\n\r\f äα𝐴🐈'\\\""))
   (should (= 0 1)))
 
 (ert-deftest error ()

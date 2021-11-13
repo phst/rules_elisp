@@ -44,7 +44,7 @@ func main() {
 		"--directory=" + workspaceDir,
 		"--option",
 		"elisp/binary.cc",
-		" \t\n\r\f ä α",
+		" \t\n\r\f äα𝐴🐈'\\\"",
 		"/:/tmp/output.dat",
 	}
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {

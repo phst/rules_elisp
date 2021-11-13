@@ -60,8 +60,8 @@ elisp_test(
         ":coverage": [],
         "//conditions:default": ["test-lib.el.instrument"],
     }),
-    skip_tags = ["skip-from-attribute"],
-    skip_tests = ["filter-via-skip-tests-attribute"],
+    skip_tags = ["skip-from-attribute \t\n\r\014 äα𝐴🐈'\\\""],
+    skip_tests = ["filter-via-skip-tests-attribute-äα𝐴🐈"],
     tags = ["manual"],
     deps = [":test_lib"],
 )

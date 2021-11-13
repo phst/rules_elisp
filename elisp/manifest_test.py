@@ -41,11 +41,11 @@ class ManifestTest(unittest.TestCase):
         opts.load_directory = [pathlib.Path('load-dir')]
         opts.load_file = [pathlib.Path('load-file')]
         opts.data_file = [pathlib.Path('data-file')]
-        opts.rule_tag = ['tag-1', 'tag-2']
+        opts.rule_tag = ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"']
         with io.StringIO() as file:
             manifest.write(opts,
                            [pathlib.Path('in-1'), pathlib.Path('in-2')],
-                           [pathlib.Path('out')],
+                           [pathlib.Path('out \t\n\r\f äα𝐴🐈\'\0\\"')],
                            file)
             self.assertDictEqual(
                 json.loads(file.getvalue()),
@@ -53,8 +53,8 @@ class ManifestTest(unittest.TestCase):
                     'root': 'RUNFILES_ROOT',
                     'loadPath': ['load-dir'],
                     'inputFiles': ['in-1', 'in-2', 'load-file', 'data-file'],
-                    'outputFiles': ['out'],
-                    'tags': ['tag-1', 'tag-2'],
+                    'outputFiles': ['out \t\n\r\f äα𝐴🐈\'\0\\"'],
+                    'tags': ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"'],
                 })
 
 if __name__ == '__main__':

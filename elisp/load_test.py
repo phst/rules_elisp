@@ -30,11 +30,13 @@ class AddPathTest(unittest.TestCase):
         args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
             load.add_path(runfiles.CreateDirectoryBased(directory), args,
-                          [pathlib.Path('foo'), pathlib.Path('bar')])
-        self.assertListEqual(args,
-                             ['--foo',
-                              f'--directory={directory}/foo',
-                              f'--directory={directory}/bar'])
+                          [pathlib.Path('foo'),
+                           pathlib.Path('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+        self.assertListEqual(
+            args,
+            ['--foo',
+             f'--directory={directory}/foo',
+             f'--directory={directory}/bar \t\n\r\f äα𝐴🐈\'\0\\"'])
 
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
@@ -44,14 +46,15 @@ class AddPathTest(unittest.TestCase):
                            '/runfiles/runfiles.elc\n')
             manifest.flush()
             load.add_path(runfiles.CreateManifestBased(manifest.name), args,
-                          [pathlib.Path('foo'), pathlib.Path('bar')])
+                          [pathlib.Path('foo'),
+                           pathlib.Path('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
             args,
             ['--foo',
              '--load=/runfiles/runfiles.elc',
              '--funcall=elisp/runfiles/install-handler',
              '--directory=/bazel-runfile:foo',
-             '--directory=/bazel-runfile:bar'])
+             '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2021 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
          (filename (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test.txt" runfiles))
+                    "phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'\".txt"
+                    runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (object-of-class-p runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
