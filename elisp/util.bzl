@@ -143,7 +143,7 @@ def cpp_string(string):
     delim = "#*?&"
     open = 'R"' + delim + "("
     close = ")" + delim + '"'
-    if close in string:
+    if close in string or "\000" in string:
         fail("String {} can’t be transferred to C++".format(string))
     return open + string + close
 
