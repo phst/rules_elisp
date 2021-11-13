@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/phst/runfiles"
 )
 
 func main() {
@@ -33,8 +34,20 @@ func main() {
 	if manifestFile == "" {
 		log.Fatal("--manifest is empty")
 	}
-	if flag.NArg() == 0 {
-		log.Fatal("no positional arguments")
+	workspaceDir, err := runfiles.Path("phst_rules_elisp")
+	if err != nil {
+		log.Fatal(err)
+	}
+	gotArgs := flag.Args()
+	wantArgs := []string{
+		"--quick", "--batch",
+		"--directory=" + workspaceDir,
+		"--option",
+		"elisp/binary.cc",
+		"/:/tmp/output.dat",
+	}
+	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
+		log.Fatalf("positional arguments: -git +want:\n%s", diff)
 	}
 	jsonData, err := ioutil.ReadFile(manifestFile)
 	if err != nil {

@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,10 @@ go_library(
     srcs = ["main.go"],
     importpath = "github.com/phst/rules_elisp/tests/wrap",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_google_go_cmp//cmp:go_default_library"],
+    deps = [
+        "@com_github_google_go_cmp//cmp:go_default_library",
+        "@com_github_phst_runfiles//:go_default_library",
+    ],
 )
 
 go_binary(
