@@ -53,18 +53,18 @@ func main() {
 	if err != nil {
 		log.Fatalf("can’t read manifest: %s", err)
 	}
-	var got map[string]interface{}
-	if err := json.Unmarshal(jsonData, &got); err != nil {
+	var gotManifest map[string]interface{}
+	if err := json.Unmarshal(jsonData, &gotManifest); err != nil {
 		log.Fatalf("can’t decode manifest: %s", err)
 	}
-	want := map[string]interface{}{
+	wantManifest := map[string]interface{}{
 		"root":        "RUNFILES_ROOT",
 		"tags":        []interface{}{"local", "mytag"},
 		"loadPath":    []interface{}{"phst_rules_elisp"},
 		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/binary.cc", "phst_rules_elisp/elisp/binary.h"},
 		"outputFiles": []interface{}{"/tmp/output.dat"},
 	}
-	if diff := cmp.Diff(got, want); diff != "" {
+	if diff := cmp.Diff(gotManifest, wantManifest); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)
 	}
 }
