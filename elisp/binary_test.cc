@@ -40,6 +40,7 @@ TEST(Executor, RunBinaryWrap) {
       argv0,
       "--option",
       "elisp/binary.cc",
+      " \t\n\r\f ä α",
       "/:/tmp/output.dat",
   };
   EXPECT_THAT(RunBinary(argv0, args), Eq(0));
