@@ -57,7 +57,7 @@ def main() -> None:
                 print(config_log.read_text('utf-8', 'backslashescape'))
                 raise
 
-        run('./configure', '--prefix=' + str(install),
+        run(str(build / 'configure'), '--prefix=' + str(install),
             '--without-all', '--without-ns', '--with-x-toolkit=no',
             # Enable threads explicitly to work around
             # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older
@@ -74,11 +74,11 @@ def main() -> None:
     for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
         compiled.with_suffix('.el').unlink()
     # Sanity check to verify that the resulting binary works.
-    subprocess.run([install / 'bin/emacs', '--quick', '--batch'],
+    subprocess.run([install / 'bin' / 'emacs', '--quick', '--batch'],
                    check=True, stdin=subprocess.DEVNULL)
     if args.module_header:
         # Copy emacs-module.h to the desired location.
-        shutil.copy(install / 'include/emacs-module.h', args.module_header)
+        shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
 
 
 if __name__ == '__main__':
