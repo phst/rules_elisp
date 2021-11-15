@@ -66,7 +66,7 @@ pylint:
         # external workspaces.
 	$(set_up_pythonpath) && \
 	$(FIND) '$(srcdir)' -name '*.py' -type f \
-	  -exec $(BAZEL) run -- \
+	  -exec $(BAZEL) run $(BAZELFLAGS) -- \
 	  //:pylint --rcfile='$(srcdir)/.pylintrc' -- '{}' '+'
 
 pytype:
@@ -75,7 +75,7 @@ pytype:
         # $(external_repos):${tempdir}, but for some reason that breaks Pytype.
 	$(set_up_pythonpath) && \
 	$(FIND) '$(srcdir)' -name '*.py' -type f \
-	  -exec $(BAZEL) run -- \
+	  -exec $(BAZEL) run $(BAZELFLAGS) -- \
 	  //:pytype --pythonpath="$${PYTHONPATH:?}:$(srcdir)" -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
