@@ -23,8 +23,6 @@ FIND := find
 GREP := grep
 LN := ln
 MKTEMP := mktemp
-PYLINT := pylint
-PYTYPE := pytype
 
 srcdir := $(abspath .)
 external_repos := $(srcdir)/bazel-$(notdir $(srcdir))/external
@@ -67,15 +65,18 @@ pylint:
         # Set a fake PYTHONPATH so that Pylint can find imports for the main and
         # external workspaces.
 	$(set_up_pythonpath) && \
-	$(FIND) . -name '*.py' -type f -exec $(PYLINT) -- '{}' '+'
+	$(FIND) '$(srcdir)' -name '*.py' -type f \
+	  -exec $(BAZEL) run -- \
+	  //:pylint --rcfile='$(srcdir)/.pylintrc' -- '{}' '+'
 
 pytype:
         # Set a fake PYTHONPATH so that Pytype can find imports for the main and
         # external workspaces.  We’d want to set the Python path to only
         # $(external_repos):${tempdir}, but for some reason that breaks Pytype.
 	$(set_up_pythonpath) && \
-	$(FIND) . -name '*.py' -type f \
-	  -exec $(PYTYPE) --pythonpath="$${PYTHONPATH:?}:$(srcdir)" -- '{}' '+'
+	$(FIND) '$(srcdir)' -name '*.py' -type f \
+	  -exec $(BAZEL) run -- \
+	  //:pytype --pythonpath="$${PYTHONPATH:?}:$(srcdir)" -- '{}' '+'
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.

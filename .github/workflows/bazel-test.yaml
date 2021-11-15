@@ -31,13 +31,8 @@ jobs:
       - name: Install Bazelisk
         uses: bazelbuild/setup-bazelisk@v1
       - name: Install APT packages
-        run: sudo apt-get install libxml2-utils pylint
+        run: sudo apt-get install libxml2-utils
         if: runner.os == 'Linux'
-      - name: Install Homebrew packages
-        run: brew install pylint
-        if: runner.os == 'macOS'
-      - name: Install Python packages
-        run: sudo pip3 install pytype
       - name: Run Bazel tests
         run: make
         env:
