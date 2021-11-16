@@ -52,9 +52,13 @@ def main() -> None:
                       'failed, output follows:')
                 print(ex.stdout)
                 print()
-                print('config.log follows:')
-                config_log = build / 'config.log'
-                print(config_log.read_text('utf-8', 'backslashescape'))
+                try:
+                    config_log = build / 'config.log'
+                    content = config_log.read_text('utf-8', 'backslashescape')
+                    print('config.log follows:')
+                    print(content)
+                except FileNotFoundError:
+                    print('config.log not found')
                 raise
 
         run(str(build / 'configure'), '--prefix=' + str(install),
