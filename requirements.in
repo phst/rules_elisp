@@ -13,4 +13,7 @@
 # limitations under the License.
 
 pylint == 2.11.1
-pytype == 2021.11.12
+
+# Pytype isn’t supported on Windows,
+# cf. https://github.com/google/pytype/tree/2021.11.12#requirements.
+pytype == 2021.11.12 ; sys_platform == 'linux' or sys_platform == 'darwin'
