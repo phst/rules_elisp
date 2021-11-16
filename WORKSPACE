@@ -42,9 +42,13 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/releases/download/0.5.0/rules_python-0.5.0.tar.gz",
 )
 
+load("@//:internal.bzl", "local_file", "requirements_txt")
+
+requirements_txt(name = "requirements_txt")
+
 load("@rules_python//python:pip.bzl", "pip_install")
 
-pip_install(requirements = "//:requirements.txt")
+pip_install(requirements = "@requirements_txt//:requirements.txt")
 
 http_archive(
     name = "io_bazel_stardoc",
@@ -79,8 +83,6 @@ http_file(
     sha256 = "cfc8bc26da1794da8c3f4c4c4de9d24a671b232076d4e61d92fa72834e28230e",
     urls = ["https://raw.githubusercontent.com/windyroad/JUnit-Schema/d6daa414c448da22b810c8562f9d6fca086983ba/JUnit.xsd"],
 )
-
-load("@//:internal.bzl", "local_file")
 
 local_file(
     name = "xmllint",

@@ -22,7 +22,25 @@ compile_pip_requirements(
         "--allow-unsafe",  # for setuptools
     ],
     requirements_in = "requirements.in",
-    requirements_txt = "requirements.txt",
+    requirements_txt = ":requirements_txt",
+)
+
+alias(
+    name = "requirements_txt",
+    actual = select({
+        ":linux": "linux-requirements.txt",
+        ":macos": "macos-requirements.txt",
+    }),
+)
+
+config_setting(
+    name = "linux",
+    constraint_values = ["@platforms//os:linux"],
+)
+
+config_setting(
+    name = "macos",
+    constraint_values = ["@platforms//os:macos"],
 )
 
 alias(
