@@ -21,6 +21,8 @@ compile_pip_requirements(
     extra_args = [
         "--allow-unsafe",  # for setuptools
     ],
+    requirements_in = "requirements.in",
+    requirements_txt = "requirements.txt",
 )
 
 alias(
