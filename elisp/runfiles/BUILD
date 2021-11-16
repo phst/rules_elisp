@@ -25,6 +25,6 @@ elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    data = ['testäα𝐴🐈\'".txt'],
+    data = ["testäα𝐴🐈'.txt"],
     deps = [":runfiles"],
 )
