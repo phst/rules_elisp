@@ -38,7 +38,8 @@ def main() -> None:
     run_files = runfiles.Create()
     install = pathlib.Path(os.path.abspath(
         run_files.Rlocation(str(opts.install))))
-    emacs = install / 'bin' / 'emacs'
+    exe_suffix = '.exe' if os.name == 'nt' else ''
+    emacs = install / 'bin' / ('emacs' + exe_suffix)
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
     libexec = install / 'libexec'
