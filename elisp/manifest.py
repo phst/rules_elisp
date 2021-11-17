@@ -54,9 +54,9 @@ def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
                        tuple(data_files))
     json_data = {
         'root': 'RUNFILES_ROOT',
-        'loadPath': tuple(map(os.fspath, opts.load_directory)),
-        'inputFiles': tuple(map(os.fspath, all_input_files)),
-        'outputFiles': tuple(map(os.fspath, output_files)),
+        'loadPath': tuple(map(str, opts.load_directory)),
+        'inputFiles': tuple(map(str, all_input_files)),
+        'outputFiles': tuple(map(str, output_files)),
         'tags': sorted(opts.rule_tag),
     }
     json.dump(json_data, file)

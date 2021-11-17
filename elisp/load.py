@@ -28,7 +28,7 @@ def add_path(run_files: Any, args: List[str],
     runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'
     runfile_handler_installed = False
     for directory in load_path:
-        resolved_dir = run_files.Rlocation(os.fspath(directory))
+        resolved_dir = run_files.Rlocation(str(directory))
         if resolved_dir:
             args.append('--directory=' + os.path.abspath(resolved_dir))
         else:
@@ -39,4 +39,4 @@ def add_path(run_files: Any, args: List[str],
                     '--funcall=elisp/runfiles/install-handler',
                 ]
                 runfile_handler_installed = True
-            args.append('--directory=/bazel-runfile:' + os.fspath(directory))
+            args.append('--directory=/bazel-runfile:' + str(directory))

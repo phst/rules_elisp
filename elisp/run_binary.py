@@ -49,13 +49,13 @@ def main() -> None:
     orig_env = dict(os.environ)
     run_files = runfiles.Create()
     emacs = pathlib.Path(os.path.abspath(
-        run_files.Rlocation(os.fspath(opts.wrapper))))
+        run_files.Rlocation(str(opts.wrapper))))
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch']
         load.add_path(run_files, args, opts.load_directory)
         for file in opts.load_file:
-            abs_name = os.path.abspath(run_files.Rlocation(os.fspath(file)))
+            abs_name = os.path.abspath(run_files.Rlocation(str(file)))
             args.append('--load=' + abs_name)
         if manifest_file:
             runfiles_dir = _runfiles_dir(orig_env)

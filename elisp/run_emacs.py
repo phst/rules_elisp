@@ -37,7 +37,7 @@ def main() -> None:
     opts = parser.parse_args()
     run_files = runfiles.Create()
     install = pathlib.Path(os.path.abspath(
-        run_files.Rlocation(os.fspath(opts.install))))
+        run_files.Rlocation(str(opts.install))))
     emacs = install / 'bin' / 'emacs'
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
@@ -45,7 +45,7 @@ def main() -> None:
     args = [opts.argv[0]]
     if opts.dump_mode == 'portable':
         dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
-        args.append('--dump-file=' + os.fspath(dump))
+        args.append('--dump-file=' + str(dump))
     args.extend(opts.argv[1:])
     env = dict(os.environ,
                EMACSDATA=etc,
@@ -64,7 +64,7 @@ def main() -> None:
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
-    files = glob.glob(os.fspath(pattern))
+    files = glob.glob(str(pattern))
     if not files:
         raise FileNotFoundError(f'no file matches {pattern}')
     if len(files) > 1:
