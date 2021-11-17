@@ -33,15 +33,15 @@ from phst_rules_elisp.elisp import manifest
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--wrapper', type=pathlib.Path, required=True)
+    parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
-    parser.add_argument('--load-directory', action='append', type=pathlib.Path,
-                        default=[])
-    parser.add_argument('--load-file', action='append', type=pathlib.Path,
-                        default=[])
-    parser.add_argument('--data-file', action='append', type=pathlib.Path,
-                        default=[])
+    parser.add_argument('--load-directory', action='append',
+                        type=pathlib.PurePosixPath, default=[])
+    parser.add_argument('--load-file', action='append',
+                        type=pathlib.PurePosixPath, default=[])
+    parser.add_argument('--data-file', action='append',
+                        type=pathlib.PurePosixPath, default=[])
     parser.add_argument('--skip-test', action='append', default=[])
     parser.add_argument('--skip-tag', action='append', default=[])
     parser.add_argument('argv', nargs='+')

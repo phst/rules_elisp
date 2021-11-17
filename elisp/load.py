@@ -23,7 +23,7 @@ import pathlib
 from typing import Any, Iterable, List
 
 def add_path(run_files: Any, args: List[str],
-             load_path: Iterable[pathlib.Path]) -> None:
+             load_path: Iterable[pathlib.PurePosixPath]) -> None:
     """Add load path elements to the given args list."""
     runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'
     runfile_handler_installed = False

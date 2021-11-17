@@ -30,8 +30,8 @@ class AddPathTest(unittest.TestCase):
         args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
             load.add_path(runfiles.CreateDirectoryBased(directory), args,
-                          [pathlib.Path('foo'),
-                           pathlib.Path('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+                          [pathlib.PurePosixPath('foo'),
+                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
             args,
             ['--foo',
@@ -46,8 +46,8 @@ class AddPathTest(unittest.TestCase):
                            '/runfiles/runfiles.elc\n')
             manifest.flush()
             load.add_path(runfiles.CreateManifestBased(manifest.name), args,
-                          [pathlib.Path('foo'),
-                           pathlib.Path('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+                          [pathlib.PurePosixPath('foo'),
+                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
             args,
             ['--foo',

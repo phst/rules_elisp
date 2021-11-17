@@ -30,7 +30,7 @@ from bazel_tools.tools.python.runfiles import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--install', type=pathlib.Path, required=True)
+    parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--dump-mode', choices=('portable', 'unexec'),
                         required=True)
     parser.add_argument('argv', nargs='+')
