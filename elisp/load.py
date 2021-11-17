@@ -30,12 +30,14 @@ def add_path(run_files: Any, args: List[str],
     for directory in load_path:
         resolved_dir = run_files.Rlocation(str(directory))
         if resolved_dir:
-            args.append('--directory=' + os.path.abspath(resolved_dir))
+            resolved_dir = pathlib.Path(os.path.abspath(resolved_dir))
+            args.append('--directory=' + str(resolved_dir))
         else:
             if not runfile_handler_installed:
-                file = os.path.abspath(run_files.Rlocation(runfiles_elc))
+                file = pathlib.Path(
+                    os.path.abspath(run_files.Rlocation(runfiles_elc)))
                 args += [
-                    '--load=' + file,
+                    '--load=' + str(file),
                     '--funcall=elisp/runfiles/install-handler',
                 ]
                 runfile_handler_installed = True
