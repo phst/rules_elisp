@@ -62,7 +62,7 @@ def main() -> None:
             sys.exit(ex.returncode)
         raise
 
-def _glob_unique(pattern: pathlib.Path) -> pathlib.Path:
+def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
     files = glob.glob(os.fspath(pattern))
     if not files:
