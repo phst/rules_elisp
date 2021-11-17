@@ -37,4 +37,11 @@
     (should (> (file-attribute-size (file-attributes filename)) 0))
     (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
 
+(ert-deftest elisp/runfiles/make/empty-file ()
+  (let* ((manifest (elisp/runfiles/rlocation
+                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+         (runfiles (elisp/runfiles/make :manifest manifest :directory nil)))
+    (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
+                  :type 'elisp/runfiles/empty)))
+
 ;;; runfiles-test.el ends here

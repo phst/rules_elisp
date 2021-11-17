@@ -83,7 +83,10 @@ the global instance is initialized."
 RUNFILES must be an object of the class
 ‘elisp/runfiles/runfiles’; it defaults to a global instance.
 Signal an error of type ‘elisp/runfiles/not-found’ if FILENAME
-wasn’t found in the runfiles tree."
+wasn’t found in the runfiles tree.  Signal an error of type
+‘elisp/runfiles/empty’ if FILENAME is present in the runfiles
+manifest, but doesn’t map to a real file on the filesystem; this
+indicates that an empty file should be used in its place."
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles elisp/runfiles/runfiles)
   (concat "/:" (elisp/runfiles/rlocation--internal runfiles filename)))
@@ -123,6 +126,7 @@ to a global instance."
 (define-error 'elisp/runfiles/not-found "Runfiles not found" 'file-missing)
 (define-error 'elisp/runfiles/read-only "Runfiles are read-only" 'file-error)
 (define-error 'elisp/runfiles/syntax-error "Syntax error in runfiles manifest")
+(define-error 'elisp/runfiles/empty "Empty runfile")
 
 
 ;;;; File name handler:
@@ -390,6 +394,8 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
           ((rx bol (let key (+ (not (any ?\n ?\s))))
                ?\s (let value (+ nonl)) eol)
            (puthash key value manifest))
+          ((rx bol (let key (+ (not (any ?\n ?\s)))) ?\s eol)
+           (puthash key :empty manifest))
           (other (signal 'elisp/runfiles/syntax-error (list filename other))))
         (forward-line)))
     (elisp/runfiles/runfiles--manifest :filename filename
@@ -399,9 +405,15 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
   ((runfiles elisp/runfiles/runfiles--manifest) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (or (gethash filename (oref runfiles manifest))
-      (signal 'elisp/runfiles/not-found
-              (list filename (oref runfiles filename)))))
+  (let ((result (gethash filename (oref runfiles manifest))))
+    (cond
+      ((not result)
+       (signal 'elisp/runfiles/not-found
+               (list filename (oref runfiles filename))))
+      ((eq result :empty)
+       (signal 'elisp/runfiles/empty
+               (list filename (oref runfiles filename))))
+      (t result))))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
   ((runfiles elisp/runfiles/runfiles--manifest))
