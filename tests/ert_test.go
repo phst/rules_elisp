@@ -16,7 +16,6 @@ package runner_test
 
 import (
 	"encoding/xml"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -41,33 +40,13 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tempDir := os.Getenv("TEST_TMPDIR")
-	reportFile, err := ioutil.TempFile(tempDir, "report-*.xml")
-	if err != nil {
-		t.Fatal(err)
-	}
-	reportName := reportFile.Name()
-	// The test recreates the file in exclusive mode, so delete it now.
-	if err := os.Remove(reportName); err != nil {
+	tempDir := t.TempDir()
+	reportName := filepath.Join(tempDir, "report.xml")
+	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
+	if err := os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
 		t.Error(err)
 	}
-	if err := reportFile.Close(); err != nil {
-		t.Error(err)
-	}
-	coverageManifest, err := ioutil.TempFile(tempDir, "coverage-manifest-*.txt")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer coverageManifest.Close()
-	defer os.Remove(coverageManifest.Name())
-	if _, err := io.WriteString(coverageManifest, "tests/test-lib.el\nunrelated.el\n"); err != nil {
-		t.Error(err)
-	}
-	coverageDir, err := ioutil.TempDir(tempDir, "coverage-")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer os.RemoveAll(coverageDir)
+	coverageDir := t.TempDir()
 
 	cmd := exec.Command(bin, "arg 1", "arg\n2")
 	// See
@@ -76,7 +55,7 @@ func Test(t *testing.T) {
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"COVERAGE=1",
-		"COVERAGE_MANIFEST="+coverageManifest.Name(),
+		"COVERAGE_MANIFEST="+coverageManifest,
 		"COVERAGE_DIR="+coverageDir)...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
