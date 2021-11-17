@@ -48,10 +48,10 @@ def main() -> None:
         args.append('--dump-file=' + str(dump))
     args.extend(opts.argv[1:])
     env = dict(os.environ,
-               EMACSDATA=etc,
-               EMACSDOC=etc,
-               EMACSLOADPATH=shared / 'lisp',
-               EMACSPATH=libexec)
+               EMACSDATA=str(etc),
+               EMACSDOC=str(etc),
+               EMACSLOADPATH=str(shared / 'lisp'),
+               EMACSPATH=str(libexec))
     env.update(run_files.EnvVars())
     try:
         subprocess.run(executable=emacs, args=args, env=env, check=True)
