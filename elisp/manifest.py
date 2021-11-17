@@ -36,11 +36,11 @@ If a file was created, appropriate arguments are added to args."""
     if mode == 'direct':
         yield None
     else:
-        with tempfile.NamedTemporaryFile(
-                mode='wt', encoding='utf-8',
-                prefix='manifest-', suffix='.json') as file:
-            args += ['--manifest=' + os.path.abspath(file.name), '--']
-            yield file.file
+        with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
+            name = pathlib.Path(directory) / 'manifest.json'
+            args += ['--manifest=' + os.path.abspath(name), '--']
+            with name.open(mode='xt', encoding='utf-8') as file:
+                yield file
 
 def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
           output_files: Iterable[pathlib.PurePath], file: IO[str]) -> None:

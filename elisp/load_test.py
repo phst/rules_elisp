@@ -41,11 +41,12 @@ class AddPathTest(unittest.TestCase):
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
         args = ['--foo']
-        with tempfile.NamedTemporaryFile('wt', encoding='ascii') as manifest:
-            manifest.write('phst_rules_elisp/elisp/runfiles/runfiles.elc '
-                           '/runfiles/runfiles.elc\n')
-            manifest.flush()
-            load.add_path(runfiles.CreateManifestBased(manifest.name), args,
+        with tempfile.TemporaryDirectory() as directory:
+            manifest = pathlib.Path(directory) / 'manifest'
+            manifest.write_text('phst_rules_elisp/elisp/runfiles/runfiles.elc '
+                                '/runfiles/runfiles.elc\n',
+                                encoding='ascii')
+            load.add_path(runfiles.CreateManifestBased(str(manifest)), args,
                           [pathlib.PurePosixPath('foo'),
                            pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
