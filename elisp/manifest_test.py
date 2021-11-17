@@ -38,14 +38,14 @@ class ManifestTest(unittest.TestCase):
     def test_write(self) -> None:
         """Unit test for manifest.write."""
         opts = argparse.Namespace()
-        opts.load_directory = [pathlib.Path('load-dir')]
-        opts.load_file = [pathlib.Path('load-file')]
-        opts.data_file = [pathlib.Path('data-file')]
+        opts.load_directory = [pathlib.PurePath('load-dir')]
+        opts.load_file = [pathlib.PurePath('load-file')]
+        opts.data_file = [pathlib.PurePath('data-file')]
         opts.rule_tag = ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"']
         with io.StringIO() as file:
             manifest.write(opts,
-                           [pathlib.Path('in-1'), pathlib.Path('in-2')],
-                           [pathlib.Path('out \t\n\r\f äα𝐴🐈\'\0\\"')],
+                           [pathlib.PurePath('in-1'), pathlib.PurePath('in-2')],
+                           [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')],
                            file)
             self.assertDictEqual(
                 json.loads(file.getvalue()),

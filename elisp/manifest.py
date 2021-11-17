@@ -42,8 +42,8 @@ If a file was created, appropriate arguments are added to args."""
             args += ['--manifest=' + os.path.abspath(file.name), '--']
             yield file.file
 
-def write(opts: argparse.Namespace, input_files: Iterable[pathlib.Path],
-          output_files: Iterable[pathlib.Path], file: IO[str]) -> None:
+def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
+          output_files: Iterable[pathlib.PurePath], file: IO[str]) -> None:
     """Write manifest file contents to the given file object."""
     _check_relative(opts.load_directory)
     _check_relative(opts.load_file)
