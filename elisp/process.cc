@@ -56,6 +56,7 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/algorithm/container.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -72,6 +73,85 @@
 
 namespace phst_rules_elisp {
 
+#ifdef PHST_RULES_ELISP_WINDOWS
+// Build a command line that follows the Windows conventions.  See
+// https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
+// and
+// https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw.
+static std::wstring BuildCommandLine(const std::vector<std::wstring>& args) {
+  std::wstring result;
+  bool first = true;
+  for (const std::wstring& arg : args) {
+    if (!absl::exchange(first, false)) {
+      result.push_back(L' ');
+    }
+    if (!arg.empty() && arg.find_first_of(L" \t\n\v\"") == arg.npos) {
+      // No quoting needed.
+      result.append(arg);
+    } else {
+      result.push_back(L'"');
+      const auto end = arg.end();
+      for (auto it = arg.begin(); it != end; ++it) {
+        const auto begin = it;
+        // Find current run of backslashes.
+        it = std::find_if(it, end, [](wchar_t c) { return c != L'\\'; });
+        // In any case, we need to copy over the same number of backslashes at
+        // least once.
+        result.append(begin, it);
+        if (it == end || *it == L'"') {
+          // The current run of backslashes will be followed by a quotation
+          // mark, either the terminator or a character in the argument.  We
+          // have to double the backslashes in this case (first and second case
+          // in
+          // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
+          result.append(begin, it);
+        }
+        // If we’re at the end, only insert the trailing quotation mark (first
+        // case in
+        // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
+        if (it == end) break;
+        // If we have a quotation mark in the argument, we have to add yet
+        // another backslash (second case in
+        // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
+        if (*it == L'"') result.push_back(L'\\');
+        // Add the argument character itself.  This is correct even if it’s a
+        // quotation mark.
+        result.push_back(*it);
+      }
+      result.push_back(L'"');
+    }
+  }
+  return result;
+}
+// Build an environment block that CreateProcessW can use.  See
+// https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw.
+static std::wstring BuildEnvironmentBlock(
+    const std::vector<std::wstring>& vars) {
+  std::wstring result;
+  for (const std::wstring& var : vars) {
+    if (var.find(L'\0') != var.npos) {
+      std::wclog << L"Environment variable " << var
+                 << L" contains a null character" << std::endl;
+      std::abort();
+    }
+    result.append(var);
+    result.push_back(L'\0');
+  }
+  result.push_back(L'\0');
+  return result;
+}
+static wchar_t* Pointer(std::wstring& string) {
+  if (string.empty()) {
+    std::wclog << L"empty string" << std::endl;
+    std::abort();
+  }
+  if (string.find('\0') != string.npos) {
+    std::wclog << string << L" contains null character" << std::endl;
+    std::abort();
+  }
+  return &string.front();
+}
+#else
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (auto& s : strings) {
@@ -88,6 +168,7 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   ptrs.push_back(nullptr);
   return ptrs;
 }
+#endif
 
 static Environment CopyEnv() {
   Environment map;
@@ -309,11 +390,10 @@ absl::StatusOr<int> Run(std::string binary,
   binary += ".exe";
 #endif
   const Environment orig_env = CopyEnv();
-  const auto resolved_binary = runfiles.Resolve(binary);
+  auto resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  const auto argv = Pointers(final_args);
   absl::StatusOr<Environment> map = runfiles.Environment();
   if (!map.ok()) return map.status();
   map->insert(orig_env.begin(), orig_env.end());
@@ -324,6 +404,35 @@ absl::StatusOr<int> Run(std::string binary,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
+#ifdef PHST_RULES_ELISP_WINDOWS
+  std::wstring command_line = BuildCommandLine(final_args);
+  std::wstring envp = BuildEnvironmentBlock(final_env);
+  STARTUPINFOW startup_info;
+  startup_info.cb = sizeof startup_info;
+  startup_info.lpReserved = nullptr;
+  startup_info.lpDesktop = nullptr;
+  startup_info.lpTitle = nullptr;
+  startup_info.dwFlags = 0;
+  startup_info.cbReserved2 = 0;
+  startup_info.lpReserved2 = nullptr;
+  PROCESS_INFORMATION process_info;
+  BOOL success =
+      ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
+                       nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
+                       &envp.front(), nullptr, &startup_info, &process_info);
+  if (!success) return WindowsStatus("CreateProcessW", binary);
+  const auto close_handles = absl::MakeCleanup([&process_info] {
+    ::CloseHandle(process_info.hProcess);
+    ::CloseHandle(process_info.hThread);
+  });
+  const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
+  if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
+  DWORD code;
+  success = ::GetExitCodeProcess(process_info.hProcess, &code);
+  if (!success) return WindowsStatus("GetExitCodeProcess");
+  return code <= std::numeric_limits<int>::max() ? code : 0xFF;
+#else
+  const auto argv = Pointers(final_args);
   const auto envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
@@ -336,6 +445,7 @@ absl::StatusOr<int> Run(std::string binary,
   const pid_t status = waitpid(pid, &wstatus, 0);
   if (status != pid) return ErrnoStatus("waitpid", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
+#endif
 }
 
 }  // namespace phst_rules_elisp
