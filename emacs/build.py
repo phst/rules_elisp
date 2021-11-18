@@ -18,6 +18,7 @@ Itâ€™s an internal implementation detail of the Bazel rules for Emacs Lisp; donâ
 use it outside the rules or depend on its behavior."""
 
 import argparse
+import os
 import pathlib
 import shlex
 import shutil
@@ -35,6 +36,9 @@ def main() -> None:
     parser.add_argument('--ldflags', required=True)
     parser.add_argument('--module-header', type=pathlib.Path)
     args = parser.parse_args()
+    windows = os.name == 'nt'
+    if windows:
+        bash = _find_bash(args.cc)
     with tempfile.TemporaryDirectory() as temp:
         temp = pathlib.Path(temp)
         build = temp / 'build'
@@ -42,8 +46,15 @@ def main() -> None:
         shutil.copytree(args.source, build)
 
         def run(*command: str) -> None:
+            env = None
+            if windows:
+                # Building Emacs requires MinGW, see nt/INSTALL.W64.  Therefore
+                # we invoke commands through the MinGW shell, see
+                # https://www.msys2.org/wiki/Launchers/#the-idea.
+                env = dict(os.environ, MSYSTEM='MINGW64', CHERE_INVOKING='1')
+                command = [bash, '-l', '-c', shlex.join(command)]
             try:
-                subprocess.run(command, check=True, cwd=build,
+                subprocess.run(command, check=True, cwd=build, env=env,
                                stdin=subprocess.DEVNULL,
                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
                                encoding='utf-8', errors='backslashescape')
@@ -83,6 +94,16 @@ def main() -> None:
     if args.module_header:
         # Copy emacs-module.h to the desired location.
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
+
+
+def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
+    if c_compiler.parts[-2:] != ('mingw64', 'bin'):
+        raise ValueError(f'unsupported C compiler location {c_compiler}')
+    msys = c_compiler.parents[2]
+    bash = msys / 'bin' / 'bash.exe'
+    if not bash.is_file():
+        raise FileNotFoundError(f'no Bash program found in {msys}')
+    return bash
 
 
 if __name__ == '__main__':
