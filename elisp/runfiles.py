@@ -16,14 +16,14 @@
 
 import os
 import pathlib
-from typing import Mapping
+from typing import Mapping, Optional
 
 from bazel_tools.tools.python.runfiles import runfiles
 
 class Runfiles:
     """Represents a set of Bazel runfiles."""
 
-    def __init__(self, env: Mapping[str, str] = None):
+    def __init__(self, env: Optional[Mapping[str, str]] = None):
         impl = runfiles.Create(env)
         if not impl:
             raise ValueError(
