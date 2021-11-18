@@ -187,11 +187,25 @@ absl::Status ErrorStatus(const std::error_code& code,
                          absl::StrJoin(std::forward_as_tuple(args...), ", "));
 }
 
+#ifdef PHST_RULES_ELISP_WINDOWS
+template <typename... Ts>
+absl::Status WindowsStatus(const absl::string_view function, Ts&&... args) {
+  const DWORD error = ::GetLastError();
+  if (error > std::numeric_limits<int>::max()) {
+    return absl::InvalidArgumentError(
+        absl::StrCat("error code ", error, " too large"));
+  }
+  return ErrorStatus(
+      std::error_code(static_cast<int>(error), std::system_category()),
+      function, std::forward<Ts>(args)...);
+}
+#else
 template <typename... Ts>
 absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
   return ErrorStatus(std::error_code(errno, std::system_category()), function,
                      std::forward<Ts>(args)...);
 }
+#endif
 
 enum { kMaxASCII = 0x7F };
 
