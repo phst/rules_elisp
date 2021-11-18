@@ -48,7 +48,7 @@ class Runfiles final {
   std::unique_ptr<Impl> impl_;
 };
 
-absl::StatusOr<int> Run(const std::string& binary,
+absl::StatusOr<int> Run(std::string binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles);
 

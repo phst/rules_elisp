@@ -302,10 +302,12 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
   return map;
 }
 
-absl::StatusOr<int> Run(const std::string& binary,
-                        const std::vector<std::string>& args,
+absl::StatusOr<int> Run(std::string binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles) {
+#ifdef PHST_RULES_ELISP_WINDOWS
+  binary += ".exe";
+#endif
   const Environment orig_env = CopyEnv();
   const auto resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
