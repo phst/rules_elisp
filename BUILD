@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
-load("@pip//:requirements.bzl", "entry_point")
+load("@pip//:requirements.bzl", "requirement")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
 compile_pip_requirements(
@@ -51,15 +51,36 @@ config_setting(
 
 alias(
     name = "pylint",
-    actual = entry_point("pylint"),
+    actual = ":run_pylint",
+)
+
+py_binary(
+    name = "run_pylint",
+    srcs = ["run_pylint.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    visibility = ["//:__pkg__"],
+    deps = [requirement("pylint")],
 )
 
 alias(
     name = "pytype",
-    actual = entry_point("pytype"),
+    actual = ":run_pytype",
     # Pytype doesn’t work on Windows, so don’t build it when running
     # “bazel build //...”.
     tags = ["manual"],
+)
+
+py_binary(
+    name = "run_pytype",
+    srcs = ["run_pytype.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    # Pytype doesn’t work on Windows, so don’t build it when running
+    # “bazel build //...”.
+    tags = ["manual"],
+    visibility = ["//:__pkg__"],
+    deps = [requirement("pytype")],
 )
 
 # gazelle:prefix github.com/phst/rules_elisp
