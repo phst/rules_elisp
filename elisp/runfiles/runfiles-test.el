@@ -27,8 +27,7 @@
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
          (filename (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"
-                    runfiles))
+                    "phst_rules_elisp/elisp/runfiles/test.txt" runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (object-of-class-p runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
