@@ -23,8 +23,10 @@ namespace phst_rules_elisp {
 #define PHST_RULES_ELISP_WINDOWS
 using NativeChar = wchar_t;
 #define PHST_RULES_ELISP_NATIVE_LITERAL(literal) L##literal
+#define PHST_RULES_ELISP_MAIN wmain
 #else
 #define PHST_RULES_ELISP_NATIVE_LITERAL(literal) literal
+#define PHST_RULES_ELISP_MAIN main
 using NativeChar = char;
 #endif
 

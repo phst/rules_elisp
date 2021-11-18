@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,13 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <string>
 #include <vector>
 
 #include "elisp/binary.h"
 
-int main(int argc, char** argv) {
-  std::vector<std::string> args = {[[args]], "--"};
+int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
+  std::vector<phst_rules_elisp::NativeString> args = {
+    [[args]],
+    PHST_RULES_ELISP_NATIVE_LITERAL("--")
+  };
   args.insert(args.end(), argv, argv + argc);
   return phst_rules_elisp::RunBinary(argv[0], args);
 }
