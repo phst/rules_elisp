@@ -14,6 +14,30 @@
 
 #include "elisp/process.h"
 
+#ifdef PHST_RULES_ELISP_WINDOWS
+#ifndef UNICODE
+#define UNICODE
+#endif
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+#ifndef STRICT
+#define STRICT
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#else
+#include <spawn.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
+
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -25,11 +49,6 @@
 #include <tuple>
 #include <utility>
 #include <vector>
-
-#include <spawn.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
