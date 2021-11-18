@@ -19,6 +19,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     ":util.bzl",
+    "CcDefaultInfo",
     "cc_wrapper",
     "check_relative_filename",
     "cpp_strings",
@@ -344,6 +345,10 @@ elisp_binary = rule(
             default = "//elisp:binary.template",
             allow_single_file = [".template"],
         ),
+        _cc_defaults = attr.label(
+            default = "//elisp:cc_defaults",
+            providers = [CcDefaultInfo],
+        ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
@@ -416,6 +421,10 @@ elisp_test = rule(
         _template = attr.label(
             default = "//elisp:test.template",
             allow_single_file = [".template"],
+        ),
+        _cc_defaults = attr.label(
+            default = "//elisp:cc_defaults",
+            providers = [CcDefaultInfo],
         ),
         _lcov_merger = attr.label(
             default = "@bazel_tools//tools/test:lcov_merger",

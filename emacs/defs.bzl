@@ -22,6 +22,7 @@ load(
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     "//elisp:util.bzl",
+    "CcDefaultInfo",
     "cc_wrapper",
     "cpp_strings",
     "runfile_location",
@@ -124,6 +125,10 @@ recommended.""",
         "_template": attr.label(
             default = "//emacs:driver.template",
             allow_single_file = [".template"],
+        ),
+        "_cc_defaults": attr.label(
+            default = "//elisp:cc_defaults",
+            providers = [CcDefaultInfo],
         ),
     },
     doc = """Builds Emacs from a source repository.

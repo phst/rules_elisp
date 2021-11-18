@@ -90,6 +90,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
       `runfiles` object for the runfiles that the executable will need
     """
     infos = [dep[CcInfo] for dep in deps]
+    defaults = ctx.attr._cc_defaults[CcDefaultInfo]
     _, objs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,
@@ -97,7 +98,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
         cc_toolchain = cc_toolchain,
         srcs = [driver],
         compilation_contexts = [info.compilation_context for info in infos],
-        user_compile_flags = COPTS,
+        user_compile_flags = defaults.copts,
     )
     bin = cc_common.link(
         name = ctx.label.name,
@@ -190,3 +191,18 @@ COPTS = [
     "-Wno-redundant-move",
     "-D_GNU_SOURCE",
 ]
+
+CcDefaultInfo = provider(
+    doc = "Internal provider for default C++ flags",
+    fields = {"copts": "Default compiler flags"},
+)
+
+def _cc_defaults_impl(ctx):
+    return CcDefaultInfo(copts = ctx.attr.copts)
+
+cc_defaults = rule(
+    implementation = _cc_defaults_impl,
+    attrs = {"copts": attr.string_list(mandatory = True)},
+    doc = "Internal rule for default C++ flags",
+    provides = [CcDefaultInfo],
+)

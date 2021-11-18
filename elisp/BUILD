@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_binary", "elisp_library", "elisp_toolchain")
-load(":util.bzl", "COPTS")
+load(":util.bzl", "COPTS", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -339,5 +339,11 @@ elisp_binary(
     src = "export-org.el",
     input_args = [1],
     output_args = [2],
+    visibility = ["//visibility:public"],
+)
+
+cc_defaults(
+    name = "cc_defaults",
+    copts = COPTS,
     visibility = ["//visibility:public"],
 )
