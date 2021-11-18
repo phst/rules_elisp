@@ -25,7 +25,7 @@ import pathlib
 import subprocess
 import sys
 
-from bazel_tools.tools.python.runfiles import runfiles
+from phst_rules_elisp.elisp import runfiles
 
 def main() -> None:
     """Main function."""
@@ -35,9 +35,8 @@ def main() -> None:
                         required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
-    run_files = runfiles.Create()
-    install = pathlib.Path(os.path.abspath(
-        run_files.Rlocation(str(opts.install))))
+    run_files = runfiles.Runfiles()
+    install = run_files.resolve(opts.install)
     exe_suffix = '.exe' if os.name == 'nt' else ''
     emacs = install / 'bin' / ('emacs' + exe_suffix)
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
@@ -53,7 +52,7 @@ def main() -> None:
                EMACSDOC=str(etc),
                EMACSLOADPATH=str(shared / 'lisp'),
                EMACSPATH=str(libexec))
-    env.update(run_files.EnvVars())
+    env.update(run_files.environment())
     try:
         subprocess.run(executable=emacs, args=args, env=env, check=True)
     except subprocess.CalledProcessError as ex:

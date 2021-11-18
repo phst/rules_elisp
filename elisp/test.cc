@@ -36,12 +36,8 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunTestImpl(const std::vector<std::string>& args) {
-  std::string error;
-  std::unique_ptr<Runfiles> runfiles(Runfiles::CreateForTest(&error));
-  if (runfiles == nullptr) {
-    return absl::FailedPreconditionError(
-        absl::StrCat("couldn’t create runfiles for test: ", error));
-  }
+  const auto runfiles = Runfiles::CreateForTest();
+  if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_test", args, *runfiles);
 }
 

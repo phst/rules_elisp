@@ -36,7 +36,6 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #include "absl/algorithm/container.h"
-#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -50,8 +49,6 @@
 #endif
 
 namespace phst_rules_elisp {
-
-using Environment = absl::flat_hash_map<std::string, std::string>;
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
@@ -139,30 +136,51 @@ absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
                      std::forward<Ts>(args)...);
 }
 
-absl::StatusOr<std::unique_ptr<Runfiles>> CreateRunfiles(
-    const std::string& argv0) {
+absl::StatusOr<Runfiles> Runfiles::Create(const std::string& argv0) {
   std::string error;
-  std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv0, &error));
-  if (runfiles == nullptr) {
+  std::unique_ptr<Impl> impl(Impl::Create(argv0, &error));
+  if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
   }
-  return std::move(runfiles);
+  return Runfiles(std::move(impl));
+}
+
+absl::StatusOr<Runfiles> Runfiles::CreateForTest() {
+  std::string error;
+  std::unique_ptr<Impl> impl(Impl::CreateForTest(&error));
+  if (impl == nullptr) {
+    return absl::FailedPreconditionError(
+        absl::StrCat("couldn’t create runfiles for test: ", error));
+  }
+  return Runfiles(std::move(impl));
+}
+
+Runfiles::Runfiles(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
+
+absl::StatusOr<std::string> Runfiles::Resolve(const std::string& name) const {
+  std::string resolved = impl_->Rlocation(name);
+  if (resolved.empty()) {
+    return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
+  }
+  return resolved;
+}
+
+Environment Runfiles::Environment() const {
+  const auto& pairs = impl_->EnvVars();
+  return phst_rules_elisp::Environment(pairs.begin(), pairs.end());
 }
 
 absl::StatusOr<int> Run(const std::string& binary,
                         const std::vector<std::string>& args,
                         const Runfiles& runfiles) {
   const Environment orig_env = CopyEnv();
-  const std::string resolved_binary = runfiles.Rlocation(binary);
-  if (resolved_binary.empty()) {
-    return absl::NotFoundError(absl::StrCat("runfile not found: ", binary));
-  }
-  std::vector<std::string> final_args{resolved_binary};
+  const auto resolved_binary = runfiles.Resolve(binary);
+  if (!resolved_binary.ok()) return resolved_binary.status();
+  std::vector<std::string> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
   const auto argv = Pointers(final_args);
-  const auto& pairs = runfiles.EnvVars();
-  Environment map(pairs.begin(), pairs.end());
+  Environment map = runfiles.Environment();
   map.insert(orig_env.begin(), orig_env.end());
   std::vector<std::string> final_env;
   for (const auto& p : map) {

@@ -25,10 +25,9 @@ import subprocess
 import sys
 from typing import Iterable, Mapping, Optional, Sequence
 
-from bazel_tools.tools.python.runfiles import runfiles
-
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
+from phst_rules_elisp.elisp import runfiles
 
 def main() -> None:
     """Main function."""
@@ -47,16 +46,15 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     orig_env = dict(os.environ)
-    run_files = runfiles.Create()
-    emacs = pathlib.Path(os.path.abspath(
-        run_files.Rlocation(str(opts.wrapper))))
+    run_files = runfiles.Runfiles()
+    emacs = run_files.resolve(opts.wrapper)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch']
         load.add_path(run_files, args, opts.load_directory)
         for file in opts.load_file:
-            abs_name = os.path.abspath(run_files.Rlocation(str(file)))
-            args.append('--load=' + abs_name)
+            abs_name = run_files.resolve(file)
+            args.append('--load=' + str(abs_name))
         if manifest_file:
             runfiles_dir = _runfiles_dir(orig_env)
             input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
@@ -64,7 +62,7 @@ def main() -> None:
             manifest.write(opts, input_files, output_files, manifest_file)
         args.extend(opts.argv[1:])
         env = dict(orig_env)
-        env.update(run_files.EnvVars())
+        env.update(run_files.environment())
         try:
             subprocess.run(executable=emacs, args=args, env=env, check=True)
         except subprocess.CalledProcessError as ex:

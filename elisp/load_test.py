@@ -18,9 +18,8 @@ import pathlib
 import tempfile
 import unittest
 
-from bazel_tools.tools.python.runfiles import runfiles
-
 from phst_rules_elisp.elisp import load
+from phst_rules_elisp.elisp import runfiles
 
 class AddPathTest(unittest.TestCase):
     """Unit tests for the load.add_path function."""
@@ -29,7 +28,7 @@ class AddPathTest(unittest.TestCase):
         """Unit test for directory-based runfiles."""
         args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
-            load.add_path(runfiles.CreateDirectoryBased(directory), args,
+            load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
                           [pathlib.PurePosixPath('foo'),
                            pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
@@ -46,9 +45,11 @@ class AddPathTest(unittest.TestCase):
             manifest.write_text('phst_rules_elisp/elisp/runfiles/runfiles.elc '
                                 '/runfiles/runfiles.elc\n',
                                 encoding='ascii')
-            load.add_path(runfiles.CreateManifestBased(str(manifest)), args,
-                          [pathlib.PurePosixPath('foo'),
-                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+            load.add_path(
+                runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
+                args,
+                [pathlib.PurePosixPath('foo'),
+                 pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
         self.assertListEqual(
             args,
             ['--foo',

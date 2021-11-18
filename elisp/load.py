@@ -17,25 +17,22 @@
 This is an internal helper library for the Emacs Lisp Bazel rules.  Don’t rely
 on it in any way outside the rule implementation."""
 
-import os
-import os.path
 import pathlib
-from typing import Any, Iterable, List
+from typing import Iterable, List
 
-def add_path(run_files: Any, args: List[str],
+from phst_rules_elisp.elisp import runfiles
+
+def add_path(run_files: runfiles.Runfiles, args: List[str],
              load_path: Iterable[pathlib.PurePosixPath]) -> None:
     """Add load path elements to the given args list."""
     runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'
     runfile_handler_installed = False
     for directory in load_path:
-        resolved_dir = run_files.Rlocation(str(directory))
-        if resolved_dir:
-            resolved_dir = pathlib.Path(os.path.abspath(resolved_dir))
-            args.append('--directory=' + str(resolved_dir))
-        else:
+        try:
+            args.append('--directory=' + str(run_files.resolve(directory)))
+        except FileNotFoundError:
             if not runfile_handler_installed:
-                file = pathlib.Path(
-                    os.path.abspath(run_files.Rlocation(runfiles_elc)))
+                file = run_files.resolve(runfiles_elc)
                 args += [
                     '--load=' + str(file),
                     '--funcall=elisp/runfiles/install-handler',

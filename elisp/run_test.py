@@ -25,10 +25,9 @@ import subprocess
 import sys
 from typing import List
 
-from bazel_tools.tools.python.runfiles import runfiles
-
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
+from phst_rules_elisp.elisp import runfiles
 
 def main() -> None:
     """Main function."""
@@ -47,21 +46,19 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     orig_env = dict(os.environ)
-    run_files = runfiles.Create()
-    emacs = pathlib.Path(os.path.abspath(
-        run_files.Rlocation(str(opts.wrapper))))
+    run_files = runfiles.Runfiles()
+    emacs = run_files.resolve(opts.wrapper)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch', '--module-assertions']
         load.add_path(run_files, args, opts.load_directory)
-        runner = os.path.abspath(run_files.Rlocation(
-            'phst_rules_elisp/elisp/ert/runner.elc'))
-        args.append('--load=' + runner)
+        runner = run_files.resolve('phst_rules_elisp/elisp/ert/runner.elc')
+        args.append('--load=' + str(runner))
         # Note that using equals signs for --test-source, --skip-test, and
         # --skip-tag doesn’t work.
         for file in opts.load_file:
-            abs_name = os.path.abspath(run_files.Rlocation(str(file)))
-            args += ['--test-source', '/:' + abs_name]
+            abs_name = run_files.resolve(file)
+            args += ['--test-source', '/:' + str(abs_name)]
         for test in opts.skip_test:
             args += ['--skip-test', test]
         for tag in opts.skip_tag:
@@ -84,7 +81,7 @@ def main() -> None:
             manifest.write(opts, inputs, outputs, manifest_file)
         args.extend(opts.argv[1:])
         env = dict(orig_env)
-        env.update(run_files.EnvVars())
+        env.update(run_files.environment())
         try:
             subprocess.run(executable=emacs, args=args, env=env, check=True)
         except subprocess.CalledProcessError as ex:

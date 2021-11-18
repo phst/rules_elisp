@@ -35,9 +35,9 @@ namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunBinaryImpl(const std::string& argv0,
                                          const std::vector<std::string>& args) {
-  const auto runfiles = CreateRunfiles(argv0);
+  const auto runfiles = Runfiles::Create(argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run("phst_rules_elisp/elisp/run_binary", args, **runfiles);
+  return Run("phst_rules_elisp/elisp/run_binary", args, *runfiles);
 }
 
 int RunBinary(const std::string& argv0, const std::vector<std::string>& args) {

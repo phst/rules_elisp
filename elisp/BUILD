@@ -169,7 +169,7 @@ py_binary(
     srcs = ["run_emacs.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    deps = ["@bazel_tools//tools/python/runfiles"],
+    deps = [":runfiles"],
 )
 
 cc_library(
@@ -212,7 +212,7 @@ py_binary(
     deps = [
         ":load",
         ":manifest",
-        "@bazel_tools//tools/python/runfiles",
+        ":runfiles",
     ],
 )
 
@@ -244,7 +244,7 @@ py_binary(
     deps = [
         ":load",
         ":manifest",
-        "@bazel_tools//tools/python/runfiles",
+        ":runfiles",
     ],
 )
 
@@ -267,6 +267,7 @@ py_library(
     srcs = ["load.py"],
     data = ["//elisp/runfiles:runfiles.elc"],
     srcs_version = "PY3",
+    deps = [":runfiles"],
 )
 
 py_test(
@@ -276,8 +277,15 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":load",
-        "@bazel_tools//tools/python/runfiles",
+        ":runfiles",
     ],
+)
+
+py_library(
+    name = "runfiles",
+    srcs = ["runfiles.py"],
+    srcs_version = "PY3",
+    deps = ["@bazel_tools//tools/python/runfiles"],
 )
 
 cc_library(
