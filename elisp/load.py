@@ -25,7 +25,8 @@ from phst_rules_elisp.elisp import runfiles
 def add_path(run_files: runfiles.Runfiles, args: List[str],
              load_path: Iterable[pathlib.PurePosixPath]) -> None:
     """Add load path elements to the given args list."""
-    runfiles_elc = 'phst_rules_elisp/elisp/runfiles/runfiles.elc'
+    runfiles_elc = pathlib.PurePosixPath(
+        'phst_rules_elisp/elisp/runfiles/runfiles.elc')
     runfile_handler_installed = False
     for directory in load_path:
         try:

@@ -52,7 +52,8 @@ def main() -> None:
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch', '--module-assertions']
         load.add_path(run_files, args, opts.load_directory)
-        runner = run_files.resolve('phst_rules_elisp/elisp/ert/runner.elc')
+        runner = run_files.resolve(
+            pathlib.PurePosixPath('phst_rules_elisp/elisp/ert/runner.elc'))
         args.append('--load=' + str(runner))
         # Note that using equals signs for --test-source, --skip-test, and
         # --skip-tag doesn’t work.
