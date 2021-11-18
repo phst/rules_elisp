@@ -190,7 +190,15 @@ COPTS = [
     # GCC appears to treat some moves as redundant that are in fact necessary.
     "-Wno-redundant-move",
     "-D_GNU_SOURCE",
-]
+] + select({
+    "@//:linux": [],
+    "@//:macos": [],
+    "@//:windows": [
+        "-mwin32",
+        "-municode",
+        "-mconsole",
+    ],
+})
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
