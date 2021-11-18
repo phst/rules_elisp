@@ -72,7 +72,7 @@ def main() -> None:
                     print('config.log not found')
                 raise
 
-        run(str(build / 'configure'), '--prefix=' + str(install),
+        run('./configure', '--prefix=' + str(install),
             '--without-all', '--without-ns', '--with-x-toolkit=no',
             # Enable threads explicitly to work around
             # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older
