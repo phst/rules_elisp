@@ -57,6 +57,9 @@ alias(
 alias(
     name = "pytype",
     actual = entry_point("pytype"),
+    # Pytype doesn’t work on Windows, so don’t build it when running
+    # “bazel build //...”.
+    tags = ["manual"],
 )
 
 # gazelle:prefix github.com/phst/rules_elisp
