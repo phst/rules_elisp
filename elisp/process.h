@@ -40,7 +40,7 @@ class Runfiles final {
   static absl::StatusOr<Runfiles> Create(const NativeString& argv0);
   static absl::StatusOr<Runfiles> CreateForTest();
   absl::StatusOr<NativeString> Resolve(const std::string& name) const;
-  absl::StatusOr<Environment> Environment() const;
+  absl::StatusOr<phst_rules_elisp::Environment> Environment() const;
 
  private:
   using Impl = bazel::tools::cpp::runfiles::Runfiles;
