@@ -19,7 +19,7 @@ import pathlib
 import sys
 import tempfile
 
-from pytype.tools.analyze_project import main
+from pytype.tools.analyze_project import main  # pylint: disable=import-error
 
 def _main() -> None:
     # https://docs.bazel.build/user-manual.html#run
