@@ -71,6 +71,41 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
 }
 
 static Environment CopyEnv() {
+  Environment map;
+#ifdef PHST_RULES_ELISP_WINDOWS
+  struct Free {
+    void operator()(wchar_t* p) const noexcept { ::FreeEnvironmentStrings(p); }
+  };
+  const std::unique_ptr<wchar_t, Free> envp(::GetEnvironmentStringsW());
+  if (envp == nullptr) {
+    // This cannot really happen in practice.
+    std::wclog << L"GetEnvironmentStringsW failed" << std::endl;
+    std::abort();
+  }
+  const wchar_t* p = envp.get();
+  while (*p != L'\0') {
+    // Skip over the first character to properly deal with the magic “per-drive
+    // current directory” variables,
+    // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
+    // Their names start with an equals sign.
+    const wchar_t* const q = std::wcschr(p + 1, L'=');
+    if (q == nullptr) {
+      std::wclog << "Invalid environment block entry " << p << std::endl;
+      std::abort();
+    }
+    map.emplace(std::wstring(p, q), std::wstring(q + 1));
+    p = std::wcschr(p, L'\0');
+    if (p == nullptr) {
+      // This can’t happen because the environment block is terminated by a
+      // double null character.
+      std::wclog
+          << L"GetEnvironmentStringsW returned an invalid environment block"
+          << std::endl;
+      std::abort();
+    }
+    ++p;
+  }
+#else
   const char* const* const envp =
 #ifdef __APPLE__
       // See environ(7) why this is necessary.
@@ -79,7 +114,6 @@ static Environment CopyEnv() {
       environ
 #endif
       ;
-  Environment map;
   for (const char* const* pp = envp; *pp != nullptr; ++pp) {
     const char* p = *pp;
     const char* q = std::strchr(p, '=');
@@ -87,6 +121,7 @@ static Environment CopyEnv() {
       map.emplace(std::string(p, q), std::string(q + 1));
     }
   }
+#endif
   return map;
 }
 
