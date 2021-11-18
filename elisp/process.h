@@ -29,16 +29,18 @@
 #include "tools/cpp/runfiles/runfiles.h"
 #pragma GCC diagnostic pop
 
+#include "elisp/platform.h"
+
 namespace phst_rules_elisp {
 
-using Environment = absl::flat_hash_map<std::string, std::string>;
+using Environment = absl::flat_hash_map<NativeString, NativeString>;
 
 class Runfiles final {
  public:
-  static absl::StatusOr<Runfiles> Create(const std::string& argv0);
+  static absl::StatusOr<Runfiles> Create(const NativeString& argv0);
   static absl::StatusOr<Runfiles> CreateForTest();
-  absl::StatusOr<std::string> Resolve(const std::string& name) const;
-  Environment Environment() const;
+  absl::StatusOr<NativeString> Resolve(const std::string& name) const;
+  absl::StatusOr<Environment> Environment() const;
 
  private:
   using Impl = bazel::tools::cpp::runfiles::Runfiles;
@@ -47,7 +49,7 @@ class Runfiles final {
 };
 
 absl::StatusOr<int> Run(const std::string& binary,
-                        const std::vector<std::string>& args,
+                        const std::vector<NativeString>& args,
                         const Runfiles& runfiles);
 
 }  // namespace phst_rules_elisp

@@ -1,4 +1,4 @@
-// Copyright 2020, 2021 Google LLC
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,26 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_ELISP_BINARY_H
-#define PHST_RULES_ELISP_ELISP_BINARY_H
+#ifndef PHST_RULES_ELISP_ELISP_PLATFORM_H
+#define PHST_RULES_ELISP_ELISP_PLATFORM_H
 
 #include <string>
-#include <vector>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Woverflow"
-#include "absl/base/attributes.h"
-#pragma GCC diagnostic pop
-
-#include "elisp/platform.h"  // IWYU pragma: export
 
 namespace phst_rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunBinary(const NativeString& argv0,
-                                   const std::vector<NativeString>& args);
+#define PHST_RULES_ELISP_NATIVE_LITERAL(literal) literal
+using NativeChar = char;
+using NativeString = std::basic_string<NativeChar>;
 
 }  // namespace phst_rules_elisp
 

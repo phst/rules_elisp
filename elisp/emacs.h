@@ -26,10 +26,12 @@
 #include "absl/base/attributes.h"
 #pragma GCC diagnostic pop
 
+#include "elisp/platform.h"  // IWYU pragma: export
+
 namespace phst_rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunEmacs(const std::string& argv0,
-                                  const std::vector<std::string>& args);
+ABSL_MUST_USE_RESULT int RunEmacs(const NativeString& argv0,
+                                  const std::vector<NativeString>& args);
 
 }  // namespace phst_rules_elisp
 

@@ -26,9 +26,11 @@
 #include "absl/base/attributes.h"
 #pragma GCC diagnostic pop
 
+#include "elisp/platform.h"  // IWYU pragma: export
+
 namespace phst_rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunTest(const std::vector<std::string>& args);
+ABSL_MUST_USE_RESULT int RunTest(const std::vector<NativeString>& args);
 
 }  // namespace phst_rules_elisp
 

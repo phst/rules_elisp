@@ -48,6 +48,8 @@
 #include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
+#include "elisp/platform.h"
+
 namespace phst_rules_elisp {
 
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
@@ -136,9 +138,19 @@ absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
                      std::forward<Ts>(args)...);
 }
 
-absl::StatusOr<Runfiles> Runfiles::Create(const std::string& argv0) {
+static absl::StatusOr<std::string> ToNarrow(const NativeString& string) {
+  return string;
+}
+
+static absl::StatusOr<NativeString> ToNative(const std::string& string) {
+  return string;
+}
+
+absl::StatusOr<Runfiles> Runfiles::Create(const NativeString& argv0) {
+  const auto narrow_argv0 = ToNarrow(argv0);
+  if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  std::unique_ptr<Impl> impl(Impl::Create(argv0, &error));
+  std::unique_ptr<Impl> impl(Impl::Create(*narrow_argv0, &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
@@ -158,33 +170,46 @@ absl::StatusOr<Runfiles> Runfiles::CreateForTest() {
 
 Runfiles::Runfiles(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
 
-absl::StatusOr<std::string> Runfiles::Resolve(const std::string& name) const {
+absl::StatusOr<NativeString> Runfiles::Resolve(const std::string& name) const {
+  const absl::Status status = CheckASCII(name);
+  if (!status.ok()) return status;
   std::string resolved = impl_->Rlocation(name);
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-  return resolved;
+  return ToNative(resolved);
 }
 
-Environment Runfiles::Environment() const {
+absl::StatusOr<Environment> Runfiles::Environment() const {
   const auto& pairs = impl_->EnvVars();
-  return phst_rules_elisp::Environment(pairs.begin(), pairs.end());
+  phst_rules_elisp::Environment map;
+  for (const auto& p : pairs) {
+    const auto key = ToNative(p.first);
+    if (!key.ok()) return key.status();
+    const auto value = ToNative(p.second);
+    if (!value.ok()) return value.status();
+    map.emplace(*key, *value);
+  }
+  return map;
 }
 
 absl::StatusOr<int> Run(const std::string& binary,
                         const std::vector<std::string>& args,
+                        const std::vector<NativeString>& args,
                         const Runfiles& runfiles) {
   const Environment orig_env = CopyEnv();
   const auto resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
-  std::vector<std::string> final_args{*resolved_binary};
+  std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
   const auto argv = Pointers(final_args);
-  Environment map = runfiles.Environment();
-  map.insert(orig_env.begin(), orig_env.end());
-  std::vector<std::string> final_env;
-  for (const auto& p : map) {
-    final_env.push_back(absl::StrCat(p.first, "=", p.second));
+  absl::StatusOr<Environment> map = runfiles.Environment();
+  if (!map.ok()) return map.status();
+  map->insert(orig_env.begin(), orig_env.end());
+  std::vector<NativeString> final_env;
+  for (const auto& p : *map) {
+    final_env.push_back(p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
+                        p.second);
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);

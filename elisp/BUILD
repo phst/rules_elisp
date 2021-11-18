@@ -157,6 +157,7 @@ cc_library(
     data = [":run_emacs"],
     visibility = ["//visibility:public"],
     deps = [
+        ":platform",
         ":process",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
@@ -180,6 +181,7 @@ cc_library(
     data = [":run_binary"],
     visibility = ["//visibility:public"],
     deps = [
+        ":platform",
         ":process",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
@@ -225,6 +227,7 @@ cc_library(
     data = [":run_test"],
     visibility = ["//visibility:public"],
     deps = [
+        ":platform",
         ":process",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
@@ -294,6 +297,7 @@ cc_library(
     hdrs = ["process.h"],
     copts = COPTS,
     deps = [
+        ":platform",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",
         "@com_google_absl//absl/container:flat_hash_map",
@@ -301,6 +305,12 @@ cc_library(
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/strings",
     ],
+)
+
+cc_library(
+    name = "platform",
+    hdrs = ["platform.h"],
+    copts = COPTS,
 )
 
 exports_files(

@@ -148,7 +148,7 @@ def cpp_string(string):
     )
     for char in ("?", "'", '"'):
         string = string.replace(char, "\\" + char)
-    return '"' + string + '"'
+    return 'PHST_RULES_ELISP_NATIVE_LITERAL("' + string + '")'
 
 def cpp_ints(ints):
     """Formats the given integer list as C++ initializer list.
