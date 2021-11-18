@@ -38,7 +38,7 @@ class Runfiles final {
   static absl::StatusOr<Runfiles> Create(const std::string& argv0);
   static absl::StatusOr<Runfiles> CreateForTest();
   absl::StatusOr<std::string> Resolve(const std::string& name) const;
-  absl::flat_hash_map<std::string, std::string> Environment() const;
+  Environment Environment() const;
 
  private:
   using Impl = bazel::tools::cpp::runfiles::Runfiles;
