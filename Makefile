@@ -21,12 +21,6 @@ BAZEL := bazel
 BAZELFLAGS :=
 FIND := find
 GREP := grep
-LN := ln
-MKTEMP := mktemp
-
-srcdir := $(abspath .)
-external_repos := $(srcdir)/bazel-$(notdir $(srcdir))/external
-workspace_name := phst_rules_elisp
 
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
@@ -55,28 +49,11 @@ buildifier:
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
-set_up_pythonpath := \
-  tempdir="$$($(MKTEMP) -d)" && \
-  trap '$(RM) -r -- "$${tempdir}"' EXIT && \
-  $(LN) -s -- '$(srcdir)' "$${tempdir:?}/$(workspace_name)" && \
-  export PYTHONPATH="$(external_repos):$${tempdir:?}"
-
 pylint:
-        # Set a fake PYTHONPATH so that Pylint can find imports for the main and
-        # external workspaces.
-	$(set_up_pythonpath) && \
-	$(FIND) '$(srcdir)' -name '*.py' -type f \
-	  -exec $(BAZEL) run $(BAZELFLAGS) -- \
-	  //:pylint --rcfile='$(srcdir)/.pylintrc' -- '{}' '+'
+	$(BAZEL) run $(BAZELFLAGS) -- //:pylint
 
 pytype:
-        # Set a fake PYTHONPATH so that Pytype can find imports for the main and
-        # external workspaces.  We’d want to set the Python path to only
-        # $(external_repos):${tempdir}, but for some reason that breaks Pytype.
-	$(set_up_pythonpath) && \
-	$(FIND) '$(srcdir)' -name '*.py' -type f \
-	  -exec $(BAZEL) run $(BAZELFLAGS) -- \
-	  //:pytype --pythonpath="$${PYTHONPATH:?}:$(srcdir)" -- '{}' '+'
+	$(BAZEL) run $(BAZELFLAGS) -- //:pytype
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
