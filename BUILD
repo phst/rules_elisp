@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,11 +49,6 @@ config_setting(
     constraint_values = ["@platforms//os:windows"],
 )
 
-alias(
-    name = "pylint",
-    actual = ":run_pylint",
-)
-
 py_binary(
     name = "run_pylint",
     srcs = ["run_pylint.py"],
@@ -61,14 +56,6 @@ py_binary(
     srcs_version = "PY3",
     visibility = ["//:__pkg__"],
     deps = [requirement("pylint")],
-)
-
-alias(
-    name = "pytype",
-    actual = ":run_pytype",
-    # Pytype doesn’t work on Windows, so don’t build it when running
-    # “bazel build //...”.
-    tags = ["manual"],
 )
 
 py_binary(

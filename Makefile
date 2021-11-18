@@ -50,10 +50,10 @@ buildifier:
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
 pylint:
-	$(BAZEL) run $(BAZELFLAGS) -- //:pylint
+	$(BAZEL) run $(BAZELFLAGS) -- //:run_pylint
 
 pytype:
-	$(BAZEL) run $(BAZELFLAGS) -- //:pytype
+	$(BAZEL) run $(BAZELFLAGS) -- //:run_pytype
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
