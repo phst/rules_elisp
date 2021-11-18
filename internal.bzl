@@ -21,6 +21,7 @@ def _requirements_txt_impl(repository_ctx):
     prefixes = {
         "linux": "linux",
         "mac os x": "macos",
+        "windows server 2019": "windows",
     }
     prefix = prefixes.get(repository_ctx.os.name, None)
     if not prefix:

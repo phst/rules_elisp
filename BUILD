@@ -30,6 +30,7 @@ alias(
     actual = select({
         ":linux": "linux-requirements.txt",
         ":macos": "macos-requirements.txt",
+        ":windows": "windows-requirements.txt",
     }),
 )
 
@@ -41,6 +42,11 @@ config_setting(
 config_setting(
     name = "macos",
     constraint_values = ["@platforms//os:macos"],
+)
+
+config_setting(
+    name = "windows",
+    constraint_values = ["@platforms//os:windows"],
 )
 
 alias(
