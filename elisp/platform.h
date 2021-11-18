@@ -19,8 +19,15 @@
 
 namespace phst_rules_elisp {
 
+#if defined _WIN32 || defined _WIN64
+#define PHST_RULES_ELISP_WINDOWS
+using NativeChar = wchar_t;
+#define PHST_RULES_ELISP_NATIVE_LITERAL(literal) L##literal
+#else
 #define PHST_RULES_ELISP_NATIVE_LITERAL(literal) literal
 using NativeChar = char;
+#endif
+
 using NativeString = std::basic_string<NativeChar>;
 
 }  // namespace phst_rules_elisp

@@ -18,6 +18,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
+#include <limits>
 #include <memory>
 #include <string>
 #include <system_error>
@@ -138,12 +139,52 @@ absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
                      std::forward<Ts>(args)...);
 }
 
+enum { kMaxASCII = 0x7F };
+
+template <typename String>
+absl::Status CheckASCII(const String& string) {
+  using Traits = typename String::traits_type;
+  using Char = typename Traits::char_type;
+  const auto it = absl::c_find_if(string, [](const Char& ch) {
+    return Traits::lt(ch, 0) || Traits::lt(kMaxASCII, ch);
+  });
+  if (it != string.end()) {
+    return absl::InvalidArgumentError(absl::StrCat(
+        "non-ASCII character U+",
+        absl::Hex(Traits::to_int_type(*it), absl::kZeroPad4), " in string"));
+  }
+  return absl::OkStatus();
+}
+
+// Convert ASCII strings between std::string and std::wstring.  This is only
+// useful on Windows, where the native string type is std::wstring.  Only pure
+// ASCII strings are supported so that we don’t have to deal with codepages.
+// All Windows codepages should be ASCII-compatible;
+// cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
+template <typename ToString, typename FromString>
+absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
+  using ToChar = typename ToString::traits_type::char_type;
+  static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
+                "destination character type too small");
+  const absl::Status status = CheckASCII(string);
+  if (!status.ok()) return status;
+  return ToString(string.begin(), string.end());
+}
+
 static absl::StatusOr<std::string> ToNarrow(const NativeString& string) {
+#ifdef PHST_RULES_ELISP_WINDOWS
+  return ConvertASCII<std::string>(string);
+#else
   return string;
+#endif
 }
 
 static absl::StatusOr<NativeString> ToNative(const std::string& string) {
+#ifdef PHST_RULES_ELISP_WINDOWS
+  return ConvertASCII<std::wstring>(string);
+#else
   return string;
+#endif
 }
 
 absl::StatusOr<Runfiles> Runfiles::Create(const NativeString& argv0) {
