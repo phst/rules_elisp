@@ -176,7 +176,14 @@ COPTS = [
     ],
 })
 
-LINKOPTS = []
+LINKOPTS = select({
+    "@//:windows": [
+        "-mwin32",
+        "-municode",
+        "-mconsole",
+    ],
+    "//conditions:default": [],
+})
 
 cc_library(
     name = "emacs",
