@@ -89,7 +89,7 @@ manifest, but doesn’t map to a real file on the filesystem; this
 indicates that an empty file should be used in its place."
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles elisp/runfiles/runfiles)
-  (concat "/:" (elisp/runfiles/rlocation--internal runfiles filename)))
+  (elisp/runfiles/rlocation--internal runfiles filename))
 
 (cl-defun elisp/runfiles/env-vars (&optional (runfiles (elisp/runfiles/get)))
   "Return a list of environmental variable for subprocesses.
@@ -393,7 +393,8 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
                 (line-beginning-position) (line-end-position))
           ((rx bol (let key (+ (not (any ?\n ?\s))))
                ?\s (let value (+ nonl)) eol)
-           (puthash key value manifest))
+           ;; Runfiles are always local, so quote them unconditionally.
+           (puthash key (concat "/:" value) manifest))
           ((rx bol (let key (+ (not (any ?\n ?\s)))) ?\s eol)
            (puthash key :empty manifest))
           (other (signal 'elisp/runfiles/syntax-error (list filename other))))
