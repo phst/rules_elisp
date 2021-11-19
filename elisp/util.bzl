@@ -197,6 +197,11 @@ COPTS = [
         "-mwin32",
         "-municode",
         "-mconsole",
+        "-D_UNICODE",
+        "-DUNICODE",
+        "-DSTRICT",
+        "-DNOMINMAX",
+        "-DWIN32_LEAN_AND_MEAN",
     ],
 })
 
