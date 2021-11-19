@@ -39,7 +39,7 @@ def main() -> None:
     windows = os.name == 'nt'
     if windows:
         bash = _find_bash(args.cc)
-    temp = pathlib.Path(tempfile.mkdtemp())
+    temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
     install = args.install.resolve()
     shutil.copytree(args.source, build)
