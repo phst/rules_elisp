@@ -98,7 +98,7 @@ def main() -> None:
 
 
 def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
-    if c_compiler.parts[-2:] != ('mingw64', 'bin'):
+    if c_compiler.parts[-3:-1] != ('mingw64', 'bin'):
         raise ValueError(f'unsupported C compiler location {c_compiler}')
     msys = c_compiler.parents[2]
     bash = msys / 'bin' / 'bash.exe'
