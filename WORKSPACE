@@ -46,9 +46,16 @@ load("@//:internal.bzl", "requirements_txt")
 
 requirements_txt(name = "requirements_txt")
 
-load("@rules_python//python:pip.bzl", "pip_install")
+load("@rules_python//python:pip.bzl", "pip_parse")
 
-pip_install(requirements = "@requirements_txt//:requirements.txt")
+pip_parse(
+    name = "pip",
+    requirements_lock = "@requirements_txt//:requirements.txt",
+)
+
+load("@pip//:requirements.bzl", "install_deps")
+
+install_deps()
 
 http_archive(
     name = "io_bazel_stardoc",
