@@ -107,6 +107,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
         linking_contexts = [info.linking_context for info in infos],
+        user_link_flags = defaults.linkopts,
         grep_includes = ctx.executable._grep_includes,
     )
     runfiles = ctx.runfiles()
@@ -180,15 +181,24 @@ def cpp_int(int):
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
-    fields = {"copts": "Default compiler flags"},
+    fields = {
+        "copts": "Default compiler flags",
+        "linkopts": "Default linker flags",
+    },
 )
 
 def _cc_defaults_impl(ctx):
-    return CcDefaultInfo(copts = ctx.attr.copts)
+    return CcDefaultInfo(
+        copts = ctx.attr.copts,
+        linkopts = ctx.attr.linkopts,
+    )
 
 cc_defaults = rule(
     implementation = _cc_defaults_impl,
-    attrs = {"copts": attr.string_list(mandatory = True)},
+    attrs = {
+        "copts": attr.string_list(mandatory = True),
+        "linkopts": attr.string_list(mandatory = True),
+    },
     doc = "Internal rule for default C++ flags",
     provides = [CcDefaultInfo],
 )

@@ -176,12 +176,15 @@ COPTS = [
     ],
 })
 
+LINKOPTS = []
+
 cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
     copts = COPTS,
     data = [":run_emacs"],
+    linkopts = LINKOPTS,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -206,6 +209,7 @@ cc_library(
     hdrs = ["binary.h"],
     copts = COPTS,
     data = [":run_binary"],
+    linkopts = LINKOPTS,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -227,6 +231,7 @@ cc_test(
         "binary.h",
         "//tests/wrap",
     ],
+    linkopts = LINKOPTS,
     deps = [
         ":binary",
         "@com_google_googletest//:gtest_main",
@@ -252,6 +257,7 @@ cc_library(
     hdrs = ["test.h"],
     copts = COPTS,
     data = [":run_test"],
+    linkopts = LINKOPTS,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -323,6 +329,7 @@ cc_library(
     srcs = ["process.cc"],
     hdrs = ["process.h"],
     copts = COPTS,
+    linkopts = LINKOPTS,
     deps = [
         ":platform",
         "@bazel_tools//tools/cpp/runfiles",
@@ -339,6 +346,7 @@ cc_library(
     name = "platform",
     hdrs = ["platform.h"],
     copts = COPTS,
+    linkopts = LINKOPTS,
 )
 
 exports_files(
@@ -372,5 +380,6 @@ elisp_binary(
 cc_defaults(
     name = "cc_defaults",
     copts = COPTS,
+    linkopts = LINKOPTS,
     visibility = ["//visibility:public"],
 )
