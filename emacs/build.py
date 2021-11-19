@@ -75,6 +75,7 @@ def main() -> None:
 
     run('./configure', '--prefix=' + str(install.as_posix()),
         '--without-all', '--without-ns', '--with-x-toolkit=no',
+        '--without-libgmp',
         # Enable threads explicitly to work around
         # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older Emacs
         # versions.  Enable toolkit scrollbars to work around
