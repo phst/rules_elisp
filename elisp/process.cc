@@ -154,7 +154,7 @@ static wchar_t* Pointer(std::wstring& string) {
 #else
 static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
-  for (auto& s : strings) {
+  for (std::string& s : strings) {
     if (s.empty()) {
       std::clog << "empty string" << std::endl;
       std::abort();
@@ -226,7 +226,7 @@ static Environment CopyEnv() {
 }
 
 static absl::StatusCode MapErrorCode(const std::error_code& code) {
-  const auto condition = code.default_error_condition();
+  const std::error_condition condition = code.default_error_condition();
   if (condition.category() != std::generic_category()) {
     return absl::StatusCode::kUnknown;
   }
@@ -337,7 +337,7 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 }
 
 absl::StatusOr<Runfiles> Runfiles::Create(const NativeString& argv0) {
-  const auto narrow_argv0 = ToNarrow(argv0);
+  const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
   std::unique_ptr<Impl> impl(Impl::Create(*narrow_argv0, &error));
@@ -377,9 +377,9 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
   const auto& pairs = impl_->EnvVars();
   phst_rules_elisp::Environment map;
   for (const auto& p : pairs) {
-    const auto key = ToNative(p.first);
+    const absl::StatusOr<NativeString> key = ToNative(p.first);
     if (!key.ok()) return key.status();
-    const auto value = ToNative(p.second);
+    const absl::StatusOr<NativeString> value = ToNative(p.second);
     if (!value.ok()) return value.status();
     map.emplace(*key, *value);
   }
@@ -393,7 +393,7 @@ absl::StatusOr<int> Run(std::string binary,
   binary += ".exe";
 #endif
   const Environment orig_env = CopyEnv();
-  auto resolved_binary = runfiles.Resolve(binary);
+  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
@@ -435,8 +435,8 @@ absl::StatusOr<int> Run(std::string binary,
   if (!success) return WindowsStatus("GetExitCodeProcess");
   return code <= std::numeric_limits<int>::max() ? code : 0xFF;
 #else
-  const auto argv = Pointers(final_args);
-  const auto envp = Pointers(final_env);
+  const std::vector<char*> argv = Pointers(final_args);
+  const std::vector<char*> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());

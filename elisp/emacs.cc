@@ -35,13 +35,13 @@ namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(const NativeString& argv0,
                                         const std::vector<NativeString>& args) {
-  const auto runfiles = Runfiles::Create(argv0);
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(argv0);
   if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_emacs", args, *runfiles);
 }
 
 int RunEmacs(const NativeString& argv0, const std::vector<NativeString>& args) {
-  const auto status_or_code = RunEmacsImpl(argv0, args);
+  const absl::StatusOr<int> status_or_code = RunEmacsImpl(argv0, args);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;

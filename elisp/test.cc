@@ -36,13 +36,13 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
-  const auto runfiles = Runfiles::CreateForTest();
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_test", args, *runfiles);
 }
 
 int RunTest(const std::vector<NativeString>& args) {
-  const auto status_or_code = RunTestImpl(args);
+  const absl::StatusOr<int> status_or_code = RunTestImpl(args);
   if (!status_or_code.ok()) {
     std::clog << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
