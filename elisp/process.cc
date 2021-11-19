@@ -367,6 +367,9 @@ absl::StatusOr<NativeString> Runfiles::Resolve(const std::string& name) const {
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
+#ifdef PHST_RULES_ELISP_WINDOWS
+  absl::c_replace(resolved, '/', '\\');
+#endif
   return ToNative(resolved);
 }
 
