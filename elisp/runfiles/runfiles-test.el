@@ -36,6 +36,24 @@
     (should (> (file-attribute-size (file-attributes filename)) 0))
     (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
 
+(ert-deftest elisp/runfiles/special-chars/directory ()
+  (let ((directory (make-temp-file "runfiles-test-" :directory)))
+    (unwind-protect
+        (let ((filename (expand-file-name "testäα𝐴🐈'.txt" directory))
+              (runfiles (elisp/runfiles/make :manifest nil
+                                             :directory directory)))
+          (write-region "contents\n" nil filename nil nil nil 'excl)
+          (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
+                         filename)))
+      (delete-directory directory :recursive))))
+
+(ert-deftest elisp/runfiles/special-chars/manifest ()
+  (let* ((manifest (elisp/runfiles/rlocation
+                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+         (runfiles (elisp/runfiles/make :manifest manifest :directory nil)))
+    (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
+                   "/:/runfiles/testäα𝐴🐈'.txt"))))
+
 (ert-deftest elisp/runfiles/make/empty-file ()
   (let* ((manifest (elisp/runfiles/rlocation
                     "phst_rules_elisp/elisp/runfiles/test-manifest"))
