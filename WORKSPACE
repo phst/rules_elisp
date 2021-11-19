@@ -49,11 +49,11 @@ requirements_txt(name = "requirements_txt")
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 pip_parse(
-    name = "pip",
+    name = "pip_deps",
     requirements_lock = "@requirements_txt//:requirements.txt",
 )
 
-load("@pip//:requirements.bzl", "install_deps")
+load("@pip_deps//:requirements.bzl", "install_deps")
 
 install_deps()
 
