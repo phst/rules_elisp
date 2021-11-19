@@ -14,8 +14,6 @@
 
 """Internal-only rules."""
 
-load("@bazel_skylib//lib:paths.bzl", "paths")
-
 def _requirements_txt_impl(repository_ctx):
     """Implementation of the “copy_requirements_txt” repository rule."""
     prefixes = {
@@ -40,26 +38,4 @@ requirements_txt = repository_rule(
     implementation = _requirements_txt_impl,
     local = True,
     doc = "Generates requirements.txt for the current platform.",
-)
-
-def _local_file_impl(repository_ctx):
-    """Implementation of the “local_file” repository rule."""
-    basename = paths.basename(repository_ctx.attr.filename)
-    repository_ctx.symlink(repository_ctx.attr.filename, basename)
-    repository_ctx.file(
-        "BUILD",
-        "exports_files([{}])".format(repr(basename)),
-        executable = False,
-    )
-
-local_file = repository_rule(
-    implementation = _local_file_impl,
-    attrs = {
-        "filename": attr.string(
-            doc = "Name of the local file to expose.",
-            mandatory = True,
-        ),
-    },
-    local = True,
-    doc = "Exposes a single local file as a repository.",
 )

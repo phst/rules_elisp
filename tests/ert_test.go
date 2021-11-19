@@ -71,15 +71,11 @@ func Test(t *testing.T) {
 		t.Error(err)
 	}
 
-	xmllint, err := runfiles.Path("xmllint/xmllint")
-	if err != nil {
-		t.Fatal(err)
-	}
 	schema, err := runfiles.Path("junit_xsd/file/JUnit.xsd")
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmd = exec.Command(xmllint, "--nonet", "--noout", "--schema", schema, reportName)
+	cmd = exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
