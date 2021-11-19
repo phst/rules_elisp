@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_binary", "elisp_library", "elisp_toolchain")
-load(":util.bzl", "COPTS", "cc_defaults")
+load(":util.bzl", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -148,6 +148,33 @@ bzl_library(
         "//emacs:__pkg__",
     ],
 )
+
+# Shared C++ compilation options.
+COPTS = [
+    "-fno-exceptions",
+    "-Werror",
+    "-Wall",
+    "-Wextra",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-pedantic-errors",
+    # GCC appears to treat some moves as redundant that are in fact necessary.
+    "-Wno-redundant-move",
+    "-D_GNU_SOURCE",
+] + select({
+    "@//:linux": [],
+    "@//:macos": [],
+    "@//:windows": [
+        "-mwin32",
+        "-municode",
+        "-mconsole",
+        "-D_UNICODE",
+        "-DUNICODE",
+        "-DSTRICT",
+        "-DNOMINMAX",
+        "-DWIN32_LEAN_AND_MEAN",
+    ],
+})
 
 cc_library(
     name = "emacs",

@@ -178,33 +178,6 @@ def cpp_int(int):
         fail("integer {} out of range".format(int))
     return str(int)
 
-# Shared C++ compilation options.
-COPTS = [
-    "-fno-exceptions",
-    "-Werror",
-    "-Wall",
-    "-Wextra",
-    "-Wconversion",
-    "-Wsign-conversion",
-    "-pedantic-errors",
-    # GCC appears to treat some moves as redundant that are in fact necessary.
-    "-Wno-redundant-move",
-    "-D_GNU_SOURCE",
-] + select({
-    "@//:linux": [],
-    "@//:macos": [],
-    "@//:windows": [
-        "-mwin32",
-        "-municode",
-        "-mconsole",
-        "-D_UNICODE",
-        "-DUNICODE",
-        "-DSTRICT",
-        "-DNOMINMAX",
-        "-DWIN32_LEAN_AND_MEAN",
-    ],
-})
-
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {"copts": "Default compiler flags"},
