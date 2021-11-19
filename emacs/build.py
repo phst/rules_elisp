@@ -80,7 +80,7 @@ def main() -> None:
             # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=37042.
             '--with-modules', '--with-threads', '--with-toolkit-scroll-bars',
             '--disable-build-details',
-            'CC=' + str(args.cc.resolve()),
+            'CC=' + str(args.cc.resolve().as_posix()),
             'CFLAGS=' + args.cflags,
             'LDFLAGS=' + args.ldflags)
         run('make', 'install')
