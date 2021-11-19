@@ -90,7 +90,7 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
       `runfiles` object for the runfiles that the executable will need
     """
     infos = [dep[CcInfo] for dep in deps]
-    defaults = ctx.attr._cc_defaults[CcDefaultInfo]
+    defaults = ctx.attr._wrapper_defaults[CcDefaultInfo]
     _, objs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,

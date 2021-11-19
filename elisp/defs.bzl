@@ -345,8 +345,8 @@ elisp_binary = rule(
             default = "//elisp:binary.template",
             allow_single_file = [".template"],
         ),
-        _cc_defaults = attr.label(
-            default = "//elisp:cc_defaults",
+        _wrapper_defaults = attr.label(
+            default = "//elisp:wrapper_defaults",
             providers = [CcDefaultInfo],
         ),
         data = attr.label_list(
@@ -422,8 +422,8 @@ elisp_test = rule(
             default = "//elisp:test.template",
             allow_single_file = [".template"],
         ),
-        _cc_defaults = attr.label(
-            default = "//elisp:cc_defaults",
+        _wrapper_defaults = attr.label(
+            default = "//elisp:wrapper_defaults",
             providers = [CcDefaultInfo],
         ),
         _lcov_merger = attr.label(

@@ -126,8 +126,8 @@ recommended.""",
             default = "//emacs:driver.template",
             allow_single_file = [".template"],
         ),
-        "_cc_defaults": attr.label(
-            default = "//elisp:cc_defaults",
+        "_wrapper_defaults": attr.label(
+            default = "//elisp:wrapper_defaults",
             providers = [CcDefaultInfo],
         ),
     },

@@ -165,9 +165,6 @@ COPTS = [
     "@//:linux": [],
     "@//:macos": [],
     "@//:windows": [
-        "-mwin32",
-        "-municode",
-        "-mconsole",
         "-D_UNICODE",
         "-DUNICODE",
         "-DSTRICT",
@@ -176,7 +173,18 @@ COPTS = [
     ],
 })
 
-LINKOPTS = select({
+WRAPPER_COPTS = COPTS + select({
+    "@//:windows": [
+        "-mwin32",
+        "-municode",
+        "-mconsole",
+    ],
+    "//conditions:default": [],
+})
+
+LINKOPTS = []
+
+WRAPPER_LINKOPTS = LINKOPTS + select({
     "@//:windows": [
         "-mwin32",
         "-municode",
@@ -385,8 +393,8 @@ elisp_binary(
 )
 
 cc_defaults(
-    name = "cc_defaults",
-    copts = COPTS,
-    linkopts = LINKOPTS,
+    name = "wrapper_defaults",
+    copts = WRAPPER_COPTS,
+    linkopts = WRAPPER_LINKOPTS,
     visibility = ["//visibility:public"],
 )
