@@ -39,51 +39,52 @@ def main() -> None:
     windows = os.name == 'nt'
     if windows:
         bash = _find_bash(args.cc)
-    with tempfile.TemporaryDirectory() as temp:
-        temp = pathlib.Path(temp)
-        build = temp / 'build'
-        install = args.install.resolve()
-        shutil.copytree(args.source, build)
+    temp = pathlib.Path(tempfile.mkdtemp())
+    build = temp / 'build'
+    install = args.install.resolve()
+    shutil.copytree(args.source, build)
 
-        def run(*command: str) -> None:
-            env = None
-            if windows:
-                # Building Emacs requires MinGW, see nt/INSTALL.W64.  Therefore
-                # we invoke commands through the MinGW shell, see
-                # https://www.msys2.org/wiki/Launchers/#the-idea.
-                env = dict(os.environ, MSYSTEM='MINGW64', CHERE_INVOKING='1')
-                command = [str(bash), '-l', '-c', shlex.join(command)]
+    def run(*command: str) -> None:
+        env = None
+        if windows:
+            # Building Emacs requires MinGW, see nt/INSTALL.W64.  Therefore we
+            # invoke commands through the MinGW shell, see
+            # https://www.msys2.org/wiki/Launchers/#the-idea.
+            env = dict(os.environ, MSYSTEM='MINGW64', CHERE_INVOKING='1')
+            command = [str(bash), '-l', '-c', shlex.join(command)]
+        try:
+            subprocess.run(command, check=True, cwd=build, env=env,
+                           stdin=subprocess.DEVNULL,
+                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                           encoding='utf-8', errors='backslashescape')
+        except subprocess.CalledProcessError as ex:
+            print('command', ' '.join(map(shlex.quote, command)),
+                  'failed, output follows:')
+            print(ex.stdout)
+            print()
             try:
-                subprocess.run(command, check=True, cwd=build, env=env,
-                               stdin=subprocess.DEVNULL,
-                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                               encoding='utf-8', errors='backslashescape')
-            except subprocess.CalledProcessError as ex:
-                print('command', ' '.join(map(shlex.quote, command)),
-                      'failed, output follows:')
-                print(ex.stdout)
-                print()
-                try:
-                    config_log = build / 'config.log'
-                    content = config_log.read_text('utf-8', 'backslashescape')
-                    print('config.log follows:')
-                    print(content)
-                except FileNotFoundError:
-                    print('config.log not found')
-                raise
+                config_log = build / 'config.log'
+                content = config_log.read_text('utf-8', 'backslashescape')
+                print('config.log follows:')
+                print(content)
+            except FileNotFoundError:
+                print('config.log not found')
+            raise
 
-        run('./configure', '--prefix=' + str(install.as_posix()),
-            '--without-all', '--without-ns', '--with-x-toolkit=no',
-            # Enable threads explicitly to work around
-            # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older Emacs
-            # versions.  Enable toolkit scrollbars to work around
-            # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=37042.
-            '--with-modules', '--with-threads', '--with-toolkit-scroll-bars',
-            '--disable-build-details',
-            'CC=' + str(args.cc.resolve().as_posix()),
-            'CFLAGS=' + args.cflags,
-            'LDFLAGS=' + args.ldflags)
-        run('make', 'install')
+    run('./configure', '--prefix=' + str(install.as_posix()),
+        '--without-all', '--without-ns', '--with-x-toolkit=no',
+        # Enable threads explicitly to work around
+        # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older Emacs
+        # versions.  Enable toolkit scrollbars to work around
+        # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=37042.
+        '--with-modules', '--with-threads', '--with-toolkit-scroll-bars',
+        '--disable-build-details',
+        'CC=' + str(args.cc.resolve().as_posix()),
+        'CFLAGS=' + args.cflags,
+        'LDFLAGS=' + args.ldflags)
+    run('make', 'install')
+    # Build directory no longer needed, delete it.
+    shutil.rmtree(temp, ignore_errors=True)
     # Delete source files that have a corresponding compiled file, as these
     # files don’t work well with Coverage (see
     # e.g. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40766).
