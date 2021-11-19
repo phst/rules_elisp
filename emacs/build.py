@@ -69,6 +69,8 @@ def main() -> None:
                 print(content)
             except FileNotFoundError:
                 print('config.log not found')
+            print()
+            print('temporary build directory is ', temp)
             raise
 
     run('./configure', '--prefix=' + str(install.as_posix()),
