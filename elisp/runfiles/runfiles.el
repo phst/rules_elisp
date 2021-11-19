@@ -385,7 +385,12 @@ unchanged."
 Return an object of class ‘elisp/runfiles/runfiles--manifest’."
   (let ((manifest (make-hash-table :test #'equal)))
     (with-temp-buffer
-      (insert-file-contents-literally filename)
+      ;; At least Java hard-codes UTF-8 for runfiles manifest, see
+      ;; https://github.com/bazelbuild/bazel/blob/4.2.1/tools/java/runfiles/Runfiles.java#L204.
+      (let ((coding-system-for-read 'utf-8-unix)
+            (format-alist nil)
+            (after-insert-file-functions nil))
+        (insert-file-contents filename))
       ;; Perform the same parsing as
       ;; https://github.com/bazelbuild/bazel/blob/2.2.0/tools/cpp/runfiles/runfiles_src.cc#L191.
       (while (not (eobp))
