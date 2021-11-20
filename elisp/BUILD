@@ -395,6 +395,14 @@ elisp_binary(
 cc_defaults(
     name = "wrapper_defaults",
     copts = WRAPPER_COPTS,
+    features = select({
+        "//:windows": [
+            # keep sorted
+            "fully_static_link",
+            "static_linking_mode",
+        ],
+        "//conditions:default": [],
+    }),
     linkopts = WRAPPER_LINKOPTS,
     visibility = ["//visibility:public"],
 )
