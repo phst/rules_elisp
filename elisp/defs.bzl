@@ -268,8 +268,9 @@ elisp_library = rule(
         srcs = attr.label_list(
             allow_empty = False,
             doc = """List of source files.  These must either be Emacs Lisp
-files ending in `.el`, or module objects ending in `.so` or `.dylib`.""",
-            allow_files = [".el", ".so", ".dylib"],
+files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
+`.dll`.""",
+            allow_files = [".el", ".so", ".dylib", ".dll"],
             mandatory = True,
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
@@ -556,7 +557,7 @@ def _compile(ctx, srcs, deps, load_path):
     mods = [
         src
         for src in srcs
-        if src.short_path.endswith(".so") or src.short_path.endswith(".dylib")
+        if src.short_path.endswith(".so") or src.short_path.endswith(".dylib") or src.short_path.endswith(".dll")
     ]
     outs = mods
 
