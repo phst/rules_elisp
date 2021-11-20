@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"reflect"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/phst/runfiles"
@@ -85,7 +86,30 @@ func main() {
 		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/binary.cc", "phst_rules_elisp/elisp/binary.h"},
 		"outputFiles": []interface{}{outputFile},
 	}
-	if diff := cmp.Diff(gotManifest, wantManifest); diff != "" {
+	if diff := cmp.Diff(
+		gotManifest, wantManifest,
+		cmp.FilterPath(isInputFile, cmp.Transformer("", resolveRunfile)),
+	); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)
 	}
+}
+
+func isInputFile(p cmp.Path) bool {
+	if len(p) < 2 {
+		return false
+	}
+	m, ok := p[1].(cmp.MapIndex)
+	if !ok {
+		return false
+	}
+	k := m.Key()
+	return k.Kind() == reflect.String && k.String() == "inputFiles"
+}
+
+func resolveRunfile(s string) string {
+	r, err := runfiles.Path(s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return r
 }
