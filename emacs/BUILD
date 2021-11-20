@@ -97,6 +97,12 @@ selects.config_setting_group(
         ":linux",
         ":freebsd",
         ":openbsd",
+    ],
+)
+
+selects.config_setting_group(
+    name = "windows",
+    match_any = [
         ":windows_x86_32",
         ":windows_x86_64",
     ],
