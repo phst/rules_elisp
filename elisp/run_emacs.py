@@ -53,6 +53,14 @@ def main() -> None:
                EMACSLOADPATH=str(shared / 'lisp'),
                EMACSPATH=str(libexec))
     env.update(run_files.environment())
+    if os.name == 'nt':
+        # On Windows, Emacs doesn’t support Unicode arguments or environment
+        # variables.  Check here rather than sending over garbage.
+        for arg in args:
+            arg.encode('ansi')
+        for key, value in env.items():
+            key.encode('ansi')
+            value.encode('ansi')
     try:
         subprocess.run(executable=emacs, args=args, env=env, check=True)
     except subprocess.CalledProcessError as ex:
