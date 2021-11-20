@@ -179,47 +179,50 @@ ARGS are the arguments to the operation."
      ;; Attempt to handle everything else in a generic way.
      (t (elisp/runfiles/handle--generic operation args)))))
 
-(defun elisp/runfiles/handle--directory-files (directory full match nosort)
+(defun elisp/runfiles/handle--directory-files
+    (directory full-name match-regexp nosort)
   "Implementation of ‘directory-files’ for Bazel runfiles.
-See ‘directory-files’ for the meaning of DIRECTORY, FULL, MATCH,
-and NOSORT."
+See Info node ‘(elisp) Contents of Directories’ for the meaning
+of DIRECTORY, FULL-NAME, MATCH-REGEXP, and NOSORT."
   (let ((files (directory-files (elisp/runfiles/transform--name directory) nil
-                                match nosort)))
-    (if full
+                                match-regexp nosort)))
+    (if full-name
         (mapcar (lambda (file) (expand-file-name file directory)) files)
       files)))
 
 (defun elisp/runfiles/handle--directory-files-and-attributes
-    (directory full match nosort id-format)
+    (directory full-name match-regexp nosort id-format)
   "Implementation of ‘directory-files-and-attributes’ for Bazel runfiles.
-See ‘directory-files’ for the meaning of DIRECTORY, FULL, MATCH,
-NOSORT, and ID-FORMAT."
+See Info node ‘(elisp) Contents of Directories’ for the meaning
+of DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and ID-FORMAT."
   (let ((files (directory-files-and-attributes
                 (elisp/runfiles/transform--name directory) nil
-                match nosort id-format)))
-    (if full
+                match-regexp nosort id-format)))
+    (if full-name
         (mapcar (lambda (info)
                   (setcar info (expand-file-name (car info) directory)))
                 files)
       files)))
 
-(defun elisp/runfiles/handle--expand-file-name (name &optional directory)
+(defun elisp/runfiles/handle--expand-file-name (filename &optional directory)
   "Implementation of ‘expand-file-name’ for Bazel runfiles.
-See ‘expand-file-name’ for the meaning of NAME and DIRECTORY."
-  (cond ((string-prefix-p "/bazel-runfile:" name)
+See Info node ‘(elisp) File Name Expansion’ for the meaning of
+FILENAME and DIRECTORY."
+  (cond ((string-prefix-p "/bazel-runfile:" filename)
          ;; Bazel runfile names are always canonical (or invalid), so return the
          ;; name as-is.
-         name)
-        ((file-name-absolute-p name)
-         (expand-file-name name "/"))
+         filename)
+        ((file-name-absolute-p filename)
+         (expand-file-name filename "/"))
         (t (let ((directory (or directory default-directory)))
              (if (string-prefix-p "/bazel-runfile:" directory)
-                 (concat (file-name-as-directory directory) name)
-               (expand-file-name name directory))))))
+                 (concat (file-name-as-directory directory) filename)
+               (expand-file-name filename directory))))))
 
 (defun elisp/runfiles/handle--file-remote-p (file identification _connected)
   "Implementation of ‘file-remote-p’ for Bazel runfiles.
-See ‘file-remote-p’ for the meaning of FILE and IDENTIFICATION."
+See Info node ‘(elisp) Magic File Names’ for the meaning of FILE
+and IDENTIFICATION."
   (pcase-exhaustive file
     ((rx bos "/bazel-runfile:" (let name (* anything)) eos)
      (cl-ecase identification
@@ -230,7 +233,8 @@ See ‘file-remote-p’ for the meaning of FILE and IDENTIFICATION."
 
 (defun elisp/runfiles/handle--get-file-buffer (filename)
   "Implementation of ‘get-file-buffer’ for Bazel runfiles.
-See ‘get-file-buffer’ for the meaning of FILENAME."
+See Info node ‘(elisp) Buffer File Name’ for the meaning of
+FILENAME."
   ;; We accept both buffers visiting FILENAME directly as well as the
   ;; transformed filename.
   (or (get-file-buffer filename)
@@ -239,8 +243,8 @@ See ‘get-file-buffer’ for the meaning of FILENAME."
 (defun elisp/runfiles/handle--process-file
     (program infile buffer display &rest args)
   "Implementation of ‘process-file’ for Bazel runfiles.
-See ‘process-file’ for the meaning of PROGRAM, INFILE, BUFFER,
-DISPLAY, and ARGS."
+See Info node ‘(elisp) Synchronous Processes’ for the meaning of
+PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
   (let ((default-directory (elisp/runfiles/transform--name default-directory)))
     (apply #'process-file
            (elisp/runfiles/transform--name program)
@@ -258,17 +262,18 @@ DISPLAY, and ARGS."
            args)))
 
 (defun elisp/runfiles/handle--start-file-process
-    (name buffer program &rest args)
+    (name buffer-or-name program &rest args)
   "Implementation of ‘start-file-process’ for Bazel runfiles.
-See ‘start-file-process’ for the meaning of NAME, BUFFER,
-PROGRAM, and ARGS."
+See Info node ‘(elisp) Asynchronous Processes’ for the meaning of
+NAME, BUFFER-OR-NAME, PROGRAM, and ARGS."
   (let ((default-directory (elisp/runfiles/transform--name default-directory)))
     (apply #'start-file-process
-           name buffer (elisp/runfiles/transform--name program) args)))
+           name buffer-or-name (elisp/runfiles/transform--name program) args)))
 
 (defun elisp/runfiles/handle--unhandled-file-name-directory (filename)
   "Implementation of ‘unhandled-file-name-directory’ for Bazel runfiles.
-See ‘unhandled-file-name-directory’ for the meaning of FILENAME."
+See Info node ‘(elisp) Magic File Names’ for the meaning of
+FILENAME."
   (file-name-as-directory
    (condition-case nil
        (elisp/runfiles/transform--name filename)
