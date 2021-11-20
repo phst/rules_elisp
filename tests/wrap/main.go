@@ -72,12 +72,18 @@ func main() {
 	if err := json.Unmarshal(jsonData, &gotManifest); err != nil {
 		log.Fatalf("can’t decode manifest: %s", err)
 	}
+	var outputFile string
+	if os.PathSeparator == '/' {
+		outputFile = "/tmp/output.dat"
+	} else {
+		outputFile = `C:\Temp\output.dat`
+	}
 	wantManifest := map[string]interface{}{
 		"root":        "RUNFILES_ROOT",
 		"tags":        []interface{}{"local", "mytag"},
 		"loadPath":    []interface{}{"phst_rules_elisp"},
 		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/binary.cc", "phst_rules_elisp/elisp/binary.h"},
-		"outputFiles": []interface{}{"/tmp/output.dat"},
+		"outputFiles": []interface{}{outputFile},
 	}
 	if diff := cmp.Diff(gotManifest, wantManifest); diff != "" {
 		log.Fatalf("manifest: -got +want:\n%s", diff)

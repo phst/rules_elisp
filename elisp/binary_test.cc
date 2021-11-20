@@ -44,7 +44,11 @@ TEST(Executor, RunBinaryWrap) {
       PHST_RULES_ELISP_NATIVE_LITERAL("--option"),
       PHST_RULES_ELISP_NATIVE_LITERAL("elisp/binary.cc"),
       PHST_RULES_ELISP_NATIVE_LITERAL(" \t\n\r\f äα𝐴🐈'\\\""),
-      PHST_RULES_ELISP_NATIVE_LITERAL("/:/tmp/output.dat"),
+#ifdef PHST_RULES_ELISP_WINDOWS
+      L"/:C:\\Temp\\output.dat",
+#else
+      "/:/tmp/output.dat",
+#endif
   };
   EXPECT_THAT(RunBinary(argv0, args), Eq(0));
 }
