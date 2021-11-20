@@ -24,6 +24,7 @@ import os.path
 import pathlib
 import subprocess
 import sys
+from typing import Iterable
 
 from phst_rules_elisp.elisp import runfiles
 
@@ -56,11 +57,9 @@ def main() -> None:
     if os.name == 'nt':
         # On Windows, Emacs doesn’t support Unicode arguments or environment
         # variables.  Check here rather than sending over garbage.
-        for arg in args:
-            arg.encode('ansi')
-        for key, value in env.items():
-            key.encode('ansi')
-            value.encode('ansi')
+        _check_codepage('argument', args)
+        _check_codepage('environment variable name', env.keys())
+        _check_codepage('environment variable value', env.values())
     try:
         subprocess.run(executable=emacs, args=args, env=env, check=True)
     except subprocess.CalledProcessError as ex:
@@ -78,6 +77,14 @@ def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     if len(files) > 1:
         raise OSError(f'multiple files match {pattern}: {files}')
     return pathlib.Path(files[0])
+
+def _check_codepage(description: str, values: Iterable[str]) -> None:
+    for value in values:
+        try:
+            value.encode('ansi')
+        except UnicodeEncodeError as ex:
+            raise ValueError(
+                f'can’t encode {description} “{value}” for Windows') from ex
 
 if __name__ == '__main__':
     main()
