@@ -14,6 +14,7 @@
 
 """Unit tests for elisp.load."""
 
+import os
 import pathlib
 import tempfile
 import unittest
@@ -39,11 +40,15 @@ class AddPathTest(unittest.TestCase):
 
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
+        runfiles_dir = pathlib.Path(
+            r'C:\Runfiles' if os.name == 'nt' else '/runfiles')
+        runfiles_elc = runfiles_dir / 'runfiles.elc'
         args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
             manifest = pathlib.Path(directory) / 'manifest'
+            # Runfiles manifests contain POSIX-style filenames even on Windows.
             manifest.write_text('phst_rules_elisp/elisp/runfiles/runfiles.elc '
-                                '/runfiles/runfiles.elc\n',
+                                + str(runfiles_elc.as_posix()) + '\n',
                                 encoding='ascii')
             load.add_path(
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
@@ -53,7 +58,7 @@ class AddPathTest(unittest.TestCase):
         self.assertListEqual(
             args,
             ['--foo',
-             '--load=/runfiles/runfiles.elc',
+             '--load=' + str(runfiles_elc),
              '--funcall=elisp/runfiles/install-handler',
              '--directory=/bazel-runfile:foo',
              '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])
