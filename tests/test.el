@@ -25,9 +25,7 @@
 (require 'tests/test-lib)
 
 ;; Ensure that command-line arguments are passed on correctly.
-(cl-assert (equal-including-properties command-line-args-left
-                                       '("arg 1" "arg\n2"))
-           :show-args)
+(cl-assert (equal command-line-args-left '("arg 1" "arg\n2")) :show-args)
 
 (ert-deftest pass ()
   (should (= 0 0)))
