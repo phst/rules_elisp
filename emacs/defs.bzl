@@ -166,7 +166,9 @@ def _install(ctx, cc_toolchain, feature_configuration, source):
         feature_configuration = feature_configuration,
         action_name = C_COMPILE_ACTION_NAME,
         variables = vars,
-    ) + fragment.copts + fragment.conlyopts
+    ) + fragment.copts + fragment.conlyopts + [
+        "-DNO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
+    ]
     ldflags = cc_common.get_memory_inefficient_command_line(
         feature_configuration = feature_configuration,
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,
