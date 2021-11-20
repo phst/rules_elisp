@@ -32,11 +32,12 @@ class AddPathTest(unittest.TestCase):
             load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
                           [pathlib.PurePosixPath('foo'),
                            pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+        base = pathlib.Path(directory)
         self.assertListEqual(
             args,
             ['--foo',
-             f'--directory={directory}/foo',
-             f'--directory={directory}/bar \t\n\r\f äα𝐴🐈\'\0\\"'])
+             '--directory=' + str(base / 'foo'),
+             '--directory=' + str(base / 'bar \t\n\r\f äα𝐴🐈\'\0\\"')])
 
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
