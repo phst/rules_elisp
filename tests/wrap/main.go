@@ -49,7 +49,7 @@ func main() {
 		"/:/tmp/output.dat",
 	}
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
-		log.Fatalf("positional arguments: -git +want:\n%s", diff)
+		log.Fatalf("positional arguments: -got +want:\n%s", diff)
 	}
 	jsonData, err := ioutil.ReadFile(manifestFile)
 	if err != nil {
