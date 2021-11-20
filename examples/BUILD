@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_test")
 
@@ -39,8 +40,11 @@ elisp_library(
     srcs = [
         "lib-2-a.el",
         "lib-2-b.el",
-        "module.so",
-    ],
+    ] + select({
+        "//:linux": ["module.so"],
+        "//:macos": ["module.so"],
+        "//:windows": ["module.dll"],
+    }),
     fatal_warnings = False,
     load_path = ["."],
 )
@@ -77,6 +81,15 @@ cc_binary(
     srcs = ["module.c"],
     linkshared = True,
     deps = ["//emacs:module_header"],
+)
+
+# Make a copy with the proper suffix for Windows.
+copy_file(
+    name = "module_dll",
+    src = "module.so",
+    out = "module.dll",
+    allow_symlink = True,
+    is_executable = False,
 )
 
 elisp_manual(
