@@ -766,7 +766,7 @@ BUFFER must be a different buffer visiting an Emacs Lisp source
 file that has been instrumented with Edebug."
   (cl-check-type buffer buffer-live)
   (let ((file-name (elisp/ert/sanitize--string
-                    (file-relative-name (buffer-file-name buffer))))
+                    (elisp/ert/file--display-name (buffer-file-name buffer))))
         (functions ())
         (functions-hit 0)
         (lines (make-hash-table :test #'eql))
@@ -951,9 +951,7 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
           (cl-destructuring-bind (buffer . point) definition
             (with-current-buffer buffer
               (message "%s:%d: %s"
-                       (if (file-in-directory-p buffer-file-name directory)
-                           (file-relative-name buffer-file-name directory)
-                         buffer-file-name)
+                       (elisp/ert/file--display-name buffer-file-name directory)
                        (line-number-at-pos point :absolute)
                        message)
               ;; If ‘find-function-search-for-symbol’ has created a new buffer,
@@ -967,6 +965,20 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
   ;; newlines.
   (let ((case-fold-search nil))
     (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string)))
+
+(defun elisp/ert/file--display-name (filename &optional directory)
+  "Return a relative or absolute name for FILENAME, whichever is shorter.
+DIRECTORY is the directory that could contain FILENAME."
+  (cl-check-type filename string)
+  (cl-check-type directory (or null string))
+  (unless directory (setq directory default-directory))
+  ;; Work around Bug#46219.
+  (unless (file-remote-p filename)
+    (setq filename (file-name-quote (expand-file-name filename))))
+  (unless (file-remote-p directory)
+    (setq directory (file-name-quote (expand-file-name directory))))
+  (let ((relative (file-relative-name filename directory)))
+    (if (< (length relative) (length filename)) relative filename)))
 
 ;; This polyfill needs to be defined before using it as type to prevent errors
 ;; during compilation.
