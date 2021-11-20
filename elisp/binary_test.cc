@@ -25,29 +25,29 @@ namespace {
 
 using ::testing::Eq;
 
-  TEST(Executor, RunBinaryWrap) {
-    const phst_rules_elisp::NativeString argv0 =
+TEST(Executor, RunBinaryWrap) {
+  const phst_rules_elisp::NativeString argv0 =
       PHST_RULES_ELISP_NATIVE_LITERAL("unused");
-    const std::vector<phst_rules_elisp::NativeString> args = {
-        PHST_RULES_ELISP_NATIVE_LITERAL(
-            "--wrapper=phst_rules_elisp/tests/wrap/wrap"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp"),
-        PHST_RULES_ELISP_NATIVE_LITERAL(
-            "--data-file=phst_rules_elisp/elisp/binary.h"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("--"),
-        argv0,
-        PHST_RULES_ELISP_NATIVE_LITERAL("--option"),
-        PHST_RULES_ELISP_NATIVE_LITERAL("elisp/binary.cc"),
-        PHST_RULES_ELISP_NATIVE_LITERAL(" \t\n\r\f äα𝐴🐈'\\\""),
-        PHST_RULES_ELISP_NATIVE_LITERAL("/:/tmp/output.dat"),
-    };
-    EXPECT_THAT(RunBinary(argv0, args), Eq(0));
-  }
+  const std::vector<phst_rules_elisp::NativeString> args = {
+      PHST_RULES_ELISP_NATIVE_LITERAL(
+          "--wrapper=phst_rules_elisp/tests/wrap/wrap"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp"),
+      PHST_RULES_ELISP_NATIVE_LITERAL(
+          "--data-file=phst_rules_elisp/elisp/binary.h"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--"),
+      argv0,
+      PHST_RULES_ELISP_NATIVE_LITERAL("--option"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("elisp/binary.cc"),
+      PHST_RULES_ELISP_NATIVE_LITERAL(" \t\n\r\f äα𝐴🐈'\\\""),
+      PHST_RULES_ELISP_NATIVE_LITERAL("/:/tmp/output.dat"),
+  };
+  EXPECT_THAT(RunBinary(argv0, args), Eq(0));
+}
 
 }  // namespace
 }  // namespace phst_rules_elisp
