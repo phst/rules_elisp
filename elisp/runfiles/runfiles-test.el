@@ -73,6 +73,19 @@
           #o644))
     (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
                  "elisp/runfiles/file-handler")
+    (should (equal (expand-file-name
+                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
+                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (equal (expand-file-name
+                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
+                    "/foobar")
+                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (equal (expand-file-name "runfiles/test.txt"
+                                     "/bazel-runfile:phst_rules_elisp/elisp/")
+                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (equal (expand-file-name "runfiles/test.txt"
+                                     "/bazel-runfile:phst_rules_elisp/elisp")
+                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 

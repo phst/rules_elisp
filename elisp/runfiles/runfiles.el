@@ -203,6 +203,20 @@ NOSORT, and ID-FORMAT."
                 files)
       files)))
 
+(defun elisp/runfiles/handle--expand-file-name (name &optional directory)
+  "Implementation of ‘expand-file-name’ for Bazel runfiles.
+See ‘expand-file-name’ for the meaning of NAME and DIRECTORY."
+  (cond ((string-prefix-p "/bazel-runfile:" name)
+         ;; Bazel runfile names are always canonical (or invalid), so return the
+         ;; name as-is.
+         name)
+        ((file-name-absolute-p name)
+         (expand-file-name name "/"))
+        (t (let ((directory (or directory default-directory)))
+             (if (string-prefix-p "/bazel-runfile:" directory)
+                 (concat (file-name-as-directory directory) name)
+               (expand-file-name name directory))))))
+
 (defun elisp/runfiles/handle--file-remote-p (file identification _connected)
   "Implementation of ‘file-remote-p’ for Bazel runfiles.
 See ‘file-remote-p’ for the meaning of FILE and IDENTIFICATION."
@@ -271,7 +285,6 @@ See ‘unhandled-file-name-directory’ for the meaning of FILENAME."
     (directory-files file arg arg arg)
     (directory-files-and-attributes file arg arg arg arg)
     (dired-uncache file)
-    (expand-file-name arg arg)
     (file-accessible-directory-p file noerror)
     (file-attributes file arg)
     (file-acl file)
