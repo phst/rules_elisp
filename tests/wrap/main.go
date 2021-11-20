@@ -35,19 +35,32 @@ func main() {
 	if manifestFile == "" {
 		log.Fatal("--manifest is empty")
 	}
-	workspaceDir, err := runfiles.Path("phst_rules_elisp")
+	runfilesLib, err := runfiles.Path("phst_rules_elisp/elisp/runfiles/runfiles.elc")
 	if err != nil {
 		log.Fatal(err)
 	}
+	// The load path setup depends on whether we use manifest-based or
+	// directory-based runfiles.
+	var loadPathArgs []string
+	if dir, err := runfiles.Path("phst_rules_elisp"); err == nil {
+		// Directory-based runfiles.
+		loadPathArgs = []string{"--directory=" + dir}
+	} else {
+		// Manifest-based runfiles.
+		loadPathArgs = []string{
+			"--load=" + runfilesLib,
+			"--funcall=elisp/runfiles/install-handler",
+			"--directory=/bazel-runfile:phst_rules_elisp",
+		}
+	}
 	gotArgs := flag.Args()
-	wantArgs := []string{
-		"--quick", "--batch",
-		"--directory=" + workspaceDir,
+	wantArgs := append(
+		append([]string{"--quick", "--batch"}, loadPathArgs...),
 		"--option",
 		"elisp/binary.cc",
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		"/:/tmp/output.dat",
-	}
+	)
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
 		log.Fatalf("positional arguments: -got +want:\n%s", diff)
 	}
