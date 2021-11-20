@@ -27,7 +27,15 @@ elisp_test(
     srcs = ["runfiles-test.el"],
     data = [
         "test.txt",
+        "test-lib.elc",
         "test-manifest",
     ],
     deps = [":runfiles"],
+)
+
+elisp_library(
+    name = "test_lib",
+    testonly = 1,
+    srcs = ["test-lib.el"],
+    outs = ["test-lib.elc"],
 )

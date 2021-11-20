@@ -61,4 +61,19 @@
     (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
                   :type 'elisp/runfiles/empty)))
 
+(ert-deftest elisp/runfiles/file-handler ()
+  (let ((file-name-handler-alist file-name-handler-alist))
+    (elisp/runfiles/install-handler)
+    (should
+     (file-exists-p "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (file-readable-p
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should
+     (eql (file-modes "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
+          #o644))
+    (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
+                 "elisp/runfiles/file-handler")
+    (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
+      (require 'elisp/runfiles/test-lib))))
+
 ;;; runfiles-test.el ends here
