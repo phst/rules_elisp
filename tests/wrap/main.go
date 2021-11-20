@@ -28,7 +28,7 @@ import (
 
 func main() {
 	log.Println("Args:", os.Args)
-	log.Println("Environment:", os.Environ)
+	log.Println("Environment:", os.Environ())
 	var manifestFile string
 	flag.StringVar(&manifestFile, "manifest", "", "")
 	flag.Parse()
