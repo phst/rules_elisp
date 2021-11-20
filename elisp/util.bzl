@@ -69,7 +69,7 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
+def cc_wrapper(ctx, cc_toolchain, driver, deps):
     """Builds a wrapper executable that starts Emacs.
 
     You can use `find_cpp_toolchain` and `cc_common.configure_features` to
@@ -79,8 +79,6 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
     Args:
       ctx (ctx): rule context
       cc_toolchain (Provider): the C++ toolchain to use to compile the wrapper
-      feature_configuration (FeatureConfiguration): the features to use to
-          compile the wrapper
       driver (File): C++ driver file to compile
       deps (list of Targets): `cc_library` targets to add as dependencies
 
@@ -91,6 +89,12 @@ def cc_wrapper(ctx, cc_toolchain, feature_configuration, driver, deps):
     """
     infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._wrapper_defaults[CcDefaultInfo]
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        unsupported_features = ctx.disabled_features,
+    )
     _, objs = cc_common.compile(
         name = ctx.label.name,
         actions = ctx.actions,

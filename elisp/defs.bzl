@@ -857,16 +857,9 @@ def _binary(ctx, srcs, tags, args, libs):
         },
     )
     cc_toolchain = find_cpp_toolchain(ctx)
-    feature_configuration = cc_common.configure_features(
-        ctx = ctx,
-        cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
-        unsupported_features = ctx.disabled_features,
-    )
     executable, wrapper_runfiles = cc_wrapper(
         ctx,
         cc_toolchain,
-        feature_configuration,
         driver,
         libs,
     )

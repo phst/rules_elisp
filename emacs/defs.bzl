@@ -40,12 +40,6 @@ def _emacs_binary_impl(ctx):
         # “bazel test” and “bazel coverage”.
         unsupported_features = ctx.disabled_features + ["coverage"],
     )
-    wrapper_configuration = cc_common.configure_features(
-        ctx = ctx,
-        cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
-        unsupported_features = ctx.disabled_features,
-    )
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
@@ -67,7 +61,6 @@ def _emacs_binary_impl(ctx):
     executable, runfiles = cc_wrapper(
         ctx,
         cc_toolchain,
-        wrapper_configuration,
         driver,
         ctx.attr._emacs_libs,
     )
