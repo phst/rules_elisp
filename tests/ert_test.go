@@ -21,6 +21,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -43,7 +44,11 @@ func Test(t *testing.T) {
 		// the coverage report are correct.
 		workspace = filepath.Dir(filepath.Dir(source))
 	}
-	bin, err := runfiles.Path("phst_rules_elisp/tests/test_test")
+	bin := "phst_rules_elisp/tests/test_test"
+	if runtime.GOOS == "windows" {
+		bin += ".exe"
+	}
+	bin, err = runfiles.Path(bin)
 	if err != nil {
 		t.Fatal(err)
 	}
