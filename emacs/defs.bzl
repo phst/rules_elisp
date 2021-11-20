@@ -31,21 +31,12 @@ load(
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
     cc_toolchain = find_cpp_toolchain(ctx)
-    install_configuration = cc_common.configure_features(
-        ctx = ctx,
-        cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
-        # Never instrument Emacs itself for coverage collection.  It doesn’t
-        # hurt, but leads to needless reinstall actions when switching between
-        # “bazel test” and “bazel coverage”.
-        unsupported_features = ctx.disabled_features + ["coverage"],
-    )
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
-    install = _install(ctx, cc_toolchain, install_configuration, source)
+    install = _install(ctx, cc_toolchain, source)
     driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
@@ -133,19 +124,26 @@ The resulting executable can be used to run the compiled Emacs.""",
     implementation = _emacs_binary_impl,
 )
 
-def _install(ctx, cc_toolchain, feature_configuration, source):
+def _install(ctx, cc_toolchain, source):
     """Builds and install Emacs.
 
     Args:
       ctx (ctx): rule context
       cc_toolchain (Provider): the C toolchain to use to compile Emacs
-      feature_configuration (FeatureConfiguration): the features to use to
-          compile Emacs
       source (File): the directory containing the Emacs source tree
 
     Returns:
       a File representing the Emacs installation directory
     """
+    feature_configuration = cc_common.configure_features(
+        ctx = ctx,
+        cc_toolchain = cc_toolchain,
+        requested_features = ctx.features,
+        # Never instrument Emacs itself for coverage collection.  It doesn’t
+        # hurt, but leads to needless reinstall actions when switching between
+        # “bazel test” and “bazel coverage”.
+        unsupported_features = ctx.disabled_features + ["coverage"],
+    )
     fragment = ctx.fragments.cpp
     vars = cc_common.create_compile_variables(
         cc_toolchain = cc_toolchain,
