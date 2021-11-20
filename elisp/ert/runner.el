@@ -951,7 +951,9 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
           (cl-destructuring-bind (buffer . point) definition
             (with-current-buffer buffer
               (message "%s:%d: %s"
-                       (file-relative-name buffer-file-name directory)
+                       (if (file-in-directory-p buffer-file-name directory)
+                           (file-relative-name buffer-file-name directory)
+                         buffer-file-name)
                        (line-number-at-pos point :absolute)
                        message)
               ;; If ‘find-function-search-for-symbol’ has created a new buffer,
