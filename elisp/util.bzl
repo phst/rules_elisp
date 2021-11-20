@@ -92,7 +92,7 @@ def cc_wrapper(ctx, cc_toolchain, driver, deps):
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
+        requested_features = defaults.features + ctx.features,
         unsupported_features = ctx.disabled_features,
     )
     _, objs = cc_common.compile(
@@ -186,6 +186,7 @@ def cpp_int(int):
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {
+        "features": "Default features",
         "copts": "Default compiler flags",
         "linkopts": "Default linker flags",
     },
@@ -193,6 +194,7 @@ CcDefaultInfo = provider(
 
 def _cc_defaults_impl(ctx):
     return CcDefaultInfo(
+        features = ctx.attr.features,
         copts = ctx.attr.copts,
         linkopts = ctx.attr.linkopts,
     )
