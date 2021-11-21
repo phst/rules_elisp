@@ -39,6 +39,7 @@ else ifeq ($(kernel),Darwin)
 else ifeq ($(kernel:MINGW64_NT-%=mingw64),mingw64)
   # Windows only supports Emacs 27.
   unsupported := 26.1 26.2 26.3
+  BAZELFLAGS += --compiler=mingw-gcc
 else
   $(error Unsupported kernel $(kernel))
 endif
