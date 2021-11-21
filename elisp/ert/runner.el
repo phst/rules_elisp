@@ -37,6 +37,8 @@
 (require 'trampver)  ; load eagerly to work around Bug#11218
 (require 'xml)
 
+(require 'elisp/runfiles/runfiles)
+
 (add-to-list 'command-switch-alist
              (cons "--test-source" #'elisp/ert/test-source))
 (add-to-list 'command-switch-alist (cons "--skip-test" #'elisp/ert/skip-test))
@@ -68,6 +70,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                       (bound-and-true-p edebug-behavior-alist)))
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
+         (workspace (getenv "TEST_WORKSPACE"))
          (temporary-file-directory (concat "/:" temp-dir))
          (report-file (getenv "XML_OUTPUT_FILE"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
@@ -92,6 +95,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
     ;; cf. https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
     (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
     (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
+    (when (member workspace '(nil ""))
+      (setq workspace (file-name-nondirectory
+                       (directory-file-name source-dir))))
     (and coverage-enabled (member coverage-manifest '(nil ""))
          (error "Coverage requested but COVERAGE_MANIFEST not set"))
     (and coverage-enabled (member coverage-dir '(nil ""))
@@ -106,15 +112,21 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             ;; The coverage manifest uses ISO-8859-1, see
             ;; https://github.com/bazelbuild/bazel/blob/3.1.0/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L68.
             (coding-system-for-read 'iso-8859-1-unix)
-            (instrumented-files ()))
+            (instrumented-files ())
+            (runfiles (elisp/runfiles/get)))
         (with-temp-buffer
           (insert-file-contents (concat "/:" coverage-manifest))
           (while (not (eobp))
             ;; The filenames in the coverage manifest are typically relative to
-            ;; the current directory, so expand them here.
-            (push (expand-file-name
-                   (buffer-substring-no-properties (point) (line-end-position)))
-                  instrumented-files)
+            ;; the current directory, so expand them here.  But first, look them
+            ;; up as runfile, to deal with manifest-based runfiles.
+            (let ((line (buffer-substring-no-properties (point)
+                                                        (line-end-position))))
+              (push (condition-case nil
+                        (elisp/runfiles/rlocation (concat workspace "/" line)
+                                                  runfiles)
+                      (elisp/runfiles/not-found (expand-file-name line)))
+                    instrumented-files))
             (forward-line)))
         ;; We don’t bother removing the advises since we are going to kill
         ;; Emacs anyway.

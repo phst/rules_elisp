@@ -21,6 +21,7 @@ elisp_library(
     srcs = ["runner.el"],
     outs = ["runner.elc"],
     visibility = ["//visibility:public"],
+    deps = ["//elisp/runfiles"],
 )
 
 build_test(
