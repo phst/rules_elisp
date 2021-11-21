@@ -21,12 +21,14 @@ alias(
     visibility = ["//visibility:public"],
 )
 
-sh_test(
+py_test(
     name = "emacs_test",
     size = "medium",
     timeout = "short",
-    srcs = ["emacs_test.sh"],
+    srcs = ["emacs_test.py"],
     data = [":emacs"],
+    python_version = "PY3",
+    srcs_version = "PY3",
 )
 
 alias(
