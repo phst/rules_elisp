@@ -173,6 +173,15 @@ COPTS = [
     ],
 })
 
+WRAPPER_FEATURES = select({
+    "//:windows": [
+        # keep sorted
+        "fully_static_link",
+        "static_linking_mode",
+    ],
+    "//conditions:default": [],
+})
+
 WRAPPER_COPTS = COPTS + select({
     "@//:windows": [
         "-mwin32",
@@ -395,14 +404,7 @@ elisp_binary(
 cc_defaults(
     name = "wrapper_defaults",
     copts = WRAPPER_COPTS,
-    features = select({
-        "//:windows": [
-            # keep sorted
-            "fully_static_link",
-            "static_linking_mode",
-        ],
-        "//conditions:default": [],
-    }),
+    features = WRAPPER_FEATURES,
     linkopts = WRAPPER_LINKOPTS,
     visibility = ["//visibility:public"],
 )
