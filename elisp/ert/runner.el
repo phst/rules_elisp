@@ -984,8 +984,9 @@ DIRECTORY is the directory that could contain FILENAME."
     (setq filename (file-name-quote (expand-file-name filename))))
   (unless (file-remote-p directory)
     (setq directory (file-name-quote (expand-file-name directory))))
-  (let ((relative (file-relative-name filename directory)))
-    (if (< (length relative) (length filename)) relative filename)))
+  (let ((relative (file-relative-name filename directory))
+        (absolute (abbreviate-file-name (file-name-unquote filename))))
+    (if (< (length relative) (length absolute)) relative absolute)))
 
 ;; This polyfill needs to be defined before using it as type to prevent errors
 ;; during compilation.
