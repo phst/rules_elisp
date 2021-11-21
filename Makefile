@@ -53,7 +53,7 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier pylint $(pytype_target) nogo docs check $(versions)
+all: buildifier pylint $(pytype_target) nogo docs check $(versions) ext
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
@@ -80,6 +80,9 @@ check:
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
 
+ext:
+	cd examples/ext && $(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
+
 doc_targets := $(shell $(BAZEL) query --output=label 'filter("\.md\.generated$$", kind("generated file", //...:*))')
 doc_generated := $(addprefix bazel-bin/,$(subst :,/,$(doc_targets://%=%)))
 doc_sources := $(doc_generated:bazel-bin/%.generated=%)
@@ -92,5 +95,5 @@ $(doc_sources): %: bazel-bin/%.generated
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
 
-.PHONY: all buildifier pylint pytype nogo check $(versions)
+.PHONY: all buildifier pylint pytype nogo check $(versions) ext
 .PHONY: docs $(doc_sources) $(doc_generated)
