@@ -32,18 +32,13 @@ import (
 )
 
 func Test(t *testing.T) {
-	// Attempt to find workspace root in runfiles tree.
-	workspace, err := runfiles.Path("phst_rules_elisp")
+	source, err := runfiles.Path("phst_rules_elisp/tests/test.el")
 	if err != nil {
-		source, err := runfiles.Path("phst_rules_elisp/tests/test.el")
-		if err != nil {
-			t.Fatal(err)
-		}
-		// Assume that the source file comes from a runfiles manifest.
-		// Use its ancestor as workspace directory so that filenames in
-		// the coverage report are correct.
-		workspace = filepath.Dir(filepath.Dir(source))
+		t.Fatal(err)
 	}
+	// Use the ancestor of the source file as workspace directory so that
+	// filenames in the coverage report are correct.
+	workspace := filepath.Dir(filepath.Dir(source))
 	bin := "phst_rules_elisp/tests/test_test"
 	if runtime.GOOS == "windows" {
 		bin += ".exe"
