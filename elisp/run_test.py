@@ -24,6 +24,7 @@ import pathlib
 import subprocess
 import sys
 from typing import List
+import urllib.parse
 
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
@@ -59,11 +60,11 @@ def main() -> None:
         # --skip-tag doesn’t work.
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
-            args += ['--test-source', '/:' + str(abs_name)]
+            args += ['--test-source', '/:' + _quote(str(abs_name))]
         for test in opts.skip_test:
-            args += ['--skip-test', test]
+            args += ['--skip-test', _quote(test)]
         for tag in opts.skip_tag:
-            args += ['--skip-tag', tag]
+            args += ['--skip-tag', _quote(tag)]
         args.append('--funcall=elisp/ert/run-batch-and-exit')
         if manifest_file:
             inputs = []  # type: List[pathlib.Path]
@@ -91,6 +92,11 @@ def main() -> None:
                 # code.
                 sys.exit(ex.returncode)
             raise
+
+def _quote(arg: str) -> str:
+    return urllib.parse.quote(arg) if _WINDOWS else arg
+
+_WINDOWS = os.name == 'nt'
 
 if __name__ == '__main__':
     main()

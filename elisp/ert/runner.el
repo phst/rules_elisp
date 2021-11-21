@@ -274,18 +274,24 @@ This list is populated by --skip-tag command-line options.")
   "Handle the --test-source command-line argument."
   (let ((file (pop command-line-args-left)))
     (or file (error "Missing value for --test-source option"))
+    (when (memq system-type '(ms-dos windows-nt cygwin))
+      (cl-callf url-unhex-string file :allow-newlines))
     (push file elisp/ert/test--sources)))
 
 (defun elisp/ert/skip-test (_arg)
   "Handle the --skip-test command-line argument."
   (let ((test (pop command-line-args-left)))
     (or test (error "Missing value for --skip-test option"))
+    (when (memq system-type '(ms-dos windows-nt cygwin))
+      (cl-callf url-unhex-string test :allow-newlines))
     (push (intern test) elisp/ert/skip--tests)))
 
 (defun elisp/ert/skip-tag (_arg)
   "Handle the --skip-tag command-line argument."
   (let ((tag (pop command-line-args-left)))
     (or tag (error "Missing value for --skip-tag option"))
+    (when (memq system-type '(ms-dos windows-nt cygwin))
+      (cl-callf url-unhex-string tag :allow-newlines))
     (push (intern tag) elisp/ert/skip--tags)))
 
 (defun elisp/ert/make--selector (skip-tags)
