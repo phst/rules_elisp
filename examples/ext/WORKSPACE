@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,3 +13,24 @@
 # limitations under the License.
 
 workspace(name = "example")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+http_archive(
+    name = "phst_rules_elisp",
+    sha256 = "56929525dea4a1281ddec49aee6dc4824e2b59d3e3575930babd56186804d29d",
+    strip_prefix = "rules_elisp-8eee3f354e77d668d244c41828c055a078c52480",
+    urls = [
+        "https://github.com/phst/rules_elisp/archive/8eee3f354e77d668d244c41828c055a078c52480.zip",  # 2021-10-20
+    ],
+)
+
+load(
+    "@phst_rules_elisp//elisp:repositories.bzl",
+    "rules_elisp_dependencies",
+    "rules_elisp_toolchains",
+)
+
+rules_elisp_dependencies()
+
+rules_elisp_toolchains()
