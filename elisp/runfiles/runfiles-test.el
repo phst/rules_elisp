@@ -69,8 +69,8 @@
     (should (file-readable-p
              "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
     (should
-     (eql (file-modes "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
-          #o644))
+     (natnump
+      (file-modes "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")))
     (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
                  "elisp/runfiles/file-handler")
     (should (equal (expand-file-name
