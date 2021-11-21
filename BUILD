@@ -67,7 +67,10 @@ py_binary(
     # “bazel build //...”.
     tags = ["manual"],
     visibility = ["//:__pkg__"],
-    deps = [requirement("pytype")],
+    deps = [
+        requirement("pytype"),
+        ":run_pylint",
+    ],
 )
 
 # gazelle:prefix github.com/phst/rules_elisp
