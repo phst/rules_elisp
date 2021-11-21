@@ -46,7 +46,7 @@ jobs:
         if: "runner.os != 'Windows'"
       - name: Run Bazel tests on Windows
         run: make
-        shell: msys {0}
+        shell: msys2 {0}
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
         if: runner.os == 'Windows'
