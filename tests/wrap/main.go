@@ -54,6 +54,10 @@ func main() {
 			"--directory=/bazel-runfile:phst_rules_elisp",
 		}
 	}
+	inputFile, err := runfiles.Path("phst_rules_elisp/elisp/binary.cc")
+	if err != nil {
+		log.Fatal(err)
+	}
 	var outputFile string
 	if os.PathSeparator == '/' {
 		outputFile = "/tmp/output.dat"
@@ -64,7 +68,7 @@ func main() {
 	wantArgs := append(
 		append([]string{"--quick", "--batch"}, loadPathArgs...),
 		"--option",
-		"elisp/binary.cc",
+		inputFile,
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		"/:"+outputFile,
 	)

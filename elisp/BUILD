@@ -260,6 +260,7 @@ cc_test(
     linkstatic = True,
     deps = [
         ":binary",
+        ":process",
         "@com_google_googletest//:gtest_main",
     ],
 )

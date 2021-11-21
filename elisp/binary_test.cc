@@ -20,14 +20,21 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
+#include "elisp/process.h"
+
 namespace phst_rules_elisp {
 namespace {
 
 using ::testing::Eq;
 
 TEST(Executor, RunBinaryWrap) {
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
+  ASSERT_TRUE(runfiles.ok()) << runfiles.status();
   const phst_rules_elisp::NativeString argv0 =
       PHST_RULES_ELISP_NATIVE_LITERAL("unused");
+  const absl::StatusOr<NativeString> input_file =
+      runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
+  ASSERT_TRUE(input_file.ok()) << input_file.status();
   const std::vector<phst_rules_elisp::NativeString> args = {
       PHST_RULES_ELISP_NATIVE_LITERAL(
           "--wrapper=phst_rules_elisp/tests/wrap/wrap"),
@@ -42,7 +49,7 @@ TEST(Executor, RunBinaryWrap) {
       PHST_RULES_ELISP_NATIVE_LITERAL("--"),
       argv0,
       PHST_RULES_ELISP_NATIVE_LITERAL("--option"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("elisp/binary.cc"),
+      *input_file,
       PHST_RULES_ELISP_NATIVE_LITERAL(" \t\n\r\f äα𝐴🐈'\\\""),
 #ifdef PHST_RULES_ELISP_WINDOWS
       L"/:C:\\Temp\\output.dat",
