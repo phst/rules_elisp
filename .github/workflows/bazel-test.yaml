@@ -33,6 +33,8 @@ jobs:
       - name: Install APT packages
         run: sudo apt-get install libxml2-utils
         if: runner.os == 'Linux'
+      - name: Set search path
+        run: "sed -i.bak -e '1i\\\nC:\\MSYS2\\mingw64\\bin\\\n' \"${GITHUB_PATH:?}\""
       - name: Run Bazel tests
         run: make
         env:
