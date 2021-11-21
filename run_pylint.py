@@ -26,7 +26,14 @@ def _main() -> None:
     srcdir = pathlib.Path(os.getenv('BUILD_WORKSPACE_DIRECTORY'))
     external_repos = srcdir / f'bazel-{srcdir.name}' / 'external'
     workspace_name = 'phst_rules_elisp'
-    srcs = sorted(srcdir.glob('**/*.py'))
+    srcs = []
+    for dirpath, dirnames, filenames in os.walk(srcdir):
+        dirpath = pathlib.Path(dirpath)
+        if dirpath == srcdir:
+            # Filter out convenience symlinks on Windows.
+            dirnames[:] = [d for d in dirnames if not d.startswith('bazel-')]
+        srcs.extend(dirpath / f for f in filenames if f.endswith('.py'))
+    srcs.sort()
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external workspaces.
     with tempfile.TemporaryDirectory(prefix='pylint-') as tempdir_name:
