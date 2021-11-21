@@ -40,15 +40,22 @@ def set_up() -> Generator[Workspace, None, None]:
     external_repos = srcdir / f'bazel-{srcdir.name}' / 'external'
     workspace_name = 'phst_rules_elisp'
     srcs = []
-    for dirpath, dirnames, filenames in os.walk(srcdir):
-        dirpath = pathlib.Path(dirpath)
-        if dirpath == srcdir:
-            # Filter out convenience symlinks on Windows.
-            dirnames[:] = [d for d in dirnames if not d.startswith('bazel-')]
-        srcs.extend(dirpath / f for f in filenames if f.endswith('.py'))
     with tempfile.TemporaryDirectory(prefix='pylint-') as tempdir_name:
         tempdir = pathlib.Path(tempdir_name)
-        (tempdir / workspace_name).symlink_to(srcdir, target_is_directory=True)
+        for dirpath, dirnames, filenames in os.walk(srcdir):
+            dirpath = pathlib.Path(dirpath)
+            if dirpath == srcdir:
+                # Filter out convenience symlinks on Windows.
+                dirnames[:] = [d for d in dirnames
+                               if not d.startswith('bazel-')]
+            for file in filenames:
+                if file.endswith('.py'):
+                    src = dirpath / file
+                    rel = src.relative_to(srcdir)
+                    dest = tempdir / workspace_name / rel
+                    dest.parent.mkdir(parents=True, exist_ok=True)
+                    src.link_to(dest)
+                    srcs.append(dest)
         yield Workspace(tempdir=tempdir, srcdir=srcdir, srcs=frozenset(srcs),
                         external_repos=external_repos)
 
