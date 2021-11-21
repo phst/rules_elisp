@@ -38,6 +38,7 @@ jobs:
         with:
           update: false
           release: false
+          path-type: inherit
         if: runner.os == 'Windows'
       - name: Run Bazel tests
         run: make
