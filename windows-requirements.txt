@@ -56,6 +56,11 @@ toml==0.10.2 \
     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b \
     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f
     # via pylint
+typing-extensions==4.0.0 \
+    --hash=sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9
+    # via
+    #   astroid
+    #   pylint
 wrapt==1.13.3 \
     --hash=sha256:086218a72ec7d986a3eddb7707c8c4526d677c7b35e355875a0fe2918b059179 \
     --hash=sha256:0877fe981fd76b183711d767500e6b3111378ed2043c145e21816ee589d91096 \
