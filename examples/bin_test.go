@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,12 +21,17 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"runtime"
 
 	"github.com/phst/runfiles"
 )
 
 func Example() {
-	bin, err := runfiles.Path("phst_rules_elisp/examples/bin")
+	bin := "phst_rules_elisp/examples/bin"
+	if runtime.GOOS == "windows" {
+		bin += ".exe"
+	}
+	bin, err := runfiles.Path(bin)
 	if err != nil {
 		panic(err)
 	}
