@@ -162,9 +162,9 @@ COPTS = [
     "-Wno-redundant-move",
     "-D_GNU_SOURCE",
 ] + select({
-    "@//:linux": [],
-    "@//:macos": [],
-    "@//:windows": [
+    "//:linux": [],
+    "//:macos": [],
+    "//:windows": [
         "-D_UNICODE",
         "-DUNICODE",
         "-DSTRICT",
@@ -183,7 +183,7 @@ WRAPPER_FEATURES = select({
 })
 
 WRAPPER_COPTS = COPTS + select({
-    "@//:windows": [
+    "//:windows": [
         "-mwin32",
         "-municode",
         "-mconsole",
@@ -194,7 +194,7 @@ WRAPPER_COPTS = COPTS + select({
 LINKOPTS = []
 
 WRAPPER_LINKOPTS = LINKOPTS + select({
-    "@//:windows": [
+    "//:windows": [
         "-mwin32",
         "-municode",
         "-mconsole",
