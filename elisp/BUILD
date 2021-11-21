@@ -255,7 +255,9 @@ cc_test(
         "binary.h",
         "//tests/wrap",
     ],
+    features = WRAPPER_FEATURES,
     linkopts = LINKOPTS,
+    linkstatic = True,
     deps = [
         ":binary",
         "@com_google_googletest//:gtest_main",
