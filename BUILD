@@ -28,25 +28,10 @@ compile_pip_requirements(
 alias(
     name = "requirements_txt",
     actual = select({
-        ":linux": "linux-requirements.txt",
-        ":macos": "macos-requirements.txt",
-        ":windows": "windows-requirements.txt",
+        "//constraints:linux": "linux-requirements.txt",
+        "//constraints:macos": "macos-requirements.txt",
+        "//constraints:windows": "windows-requirements.txt",
     }),
-)
-
-config_setting(
-    name = "linux",
-    constraint_values = ["@platforms//os:linux"],
-)
-
-config_setting(
-    name = "macos",
-    constraint_values = ["@platforms//os:macos"],
-)
-
-config_setting(
-    name = "windows",
-    constraint_values = ["@platforms//os:windows"],
 )
 
 py_binary(

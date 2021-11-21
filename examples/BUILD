@@ -41,9 +41,9 @@ elisp_library(
         "lib-2-a.el",
         "lib-2-b.el",
     ] + select({
-        "//:linux": ["module.so"],
-        "//:macos": ["module.so"],
-        "//:windows": ["module.dll"],
+        "//constraints:linux": ["module.so"],
+        "//constraints:macos": ["module.so"],
+        "//constraints:windows": ["module.dll"],
     }),
     fatal_warnings = False,
     load_path = ["."],
