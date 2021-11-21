@@ -26,6 +26,8 @@ CP := cp
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
 
+pytype_target := pytype
+
 kernel := $(shell uname -s)
 ifeq ($(kernel),Linux)
   # GNU/Linux supports all Emacs versions.
@@ -40,6 +42,7 @@ else ifeq ($(kernel:MINGW64_NT-%=mingw64),mingw64)
   # Windows only supports Emacs 27.
   unsupported := 26.1 26.2 26.3
   BAZELFLAGS += --compiler=mingw-gcc
+  pytype_target :=
 else
   $(error Unsupported kernel $(kernel))
 endif
@@ -47,7 +50,7 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier pylint pytype nogo docs check $(versions)
+all: buildifier pylint $(pytype_target) nogo docs check $(versions)
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
