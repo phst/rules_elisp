@@ -35,6 +35,7 @@ jobs:
         if: runner.os == 'Linux'
       - name: Set search path
         run: "sed -i.bak -e '1i\\\nC:\\MSYS2\\mingw64\\bin\\\n' \"${GITHUB_PATH:?}\""
+        shell: bash
       - name: Run Bazel tests
         run: make
         env:
