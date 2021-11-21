@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"reflect"
 
 	"github.com/google/go-cmp/cmp"
@@ -111,6 +112,9 @@ func isInputFile(p cmp.Path) bool {
 }
 
 func resolveRunfile(s string) string {
+	if filepath.IsAbs(s) {
+		return s
+	}
 	r, err := runfiles.Path(s)
 	if err != nil {
 		log.Fatalf("error resolving runfile for comparison: %s", err)
