@@ -56,6 +56,8 @@ def set_up() -> Generator[Workspace, None, None]:
                     dest.parent.mkdir(parents=True, exist_ok=True)
                     src.link_to(dest)
                     srcs.append(dest)
+        if not srcs:
+            raise FileNotFoundError(f'no source files in {srcdir} found')
         yield Workspace(tempdir=tempdir, srcdir=srcdir, srcs=frozenset(srcs),
                         external_repos=external_repos)
 
