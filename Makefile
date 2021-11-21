@@ -43,6 +43,9 @@ else ifeq ($(kernel:MINGW64_NT-%=mingw64),mingw64)
   unsupported := 26.1 26.2 26.3
   BAZELFLAGS += --compiler=mingw-gcc
   pytype_target :=
+  # Don’t munge Bazel target labels.  See
+  # https://www.msys2.org/docs/filesystem-paths/#process-arguments.
+  export MSYS2_ARG_CONV_EXCL := //
 else
   $(error Unsupported kernel $(kernel))
 endif
