@@ -25,6 +25,7 @@ import subprocess
 import sys
 from typing import List
 import urllib.parse
+import warnings
 
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
@@ -75,7 +76,9 @@ def main() -> None:
             if orig_env.get('COVERAGE') == '1':
                 coverage_manifest = orig_env.get('COVERAGE_MANIFEST')
                 if coverage_manifest:
-                    inputs.append(pathlib.Path(coverage_manifest))
+                    coverage_manifest = pathlib.Path(coverage_manifest)
+                    _fix_coverage_manifest(coverage_manifest, run_files)
+                    inputs.append(coverage_manifest)
                 coverage_dir = orig_env.get('COVERAGE_DIR')
                 if coverage_dir:
                     outputs.append(
@@ -95,6 +98,29 @@ def main() -> None:
 
 def _quote(arg: str) -> str:
     return urllib.parse.quote(arg) if _WINDOWS else arg
+
+def _fix_coverage_manifest(manifest_file: pathlib.Path,
+                           run_files: runfiles.Runfiles) -> None:
+    """Try to look up inaccessible files in the coverage manifest as runfiles.
+
+    We do this here so that the Emacs Lisp code doesn’t have to depend on the
+    runfiles library.
+    """
+    files = manifest_file.read_text('iso-8859-1').splitlines()
+    edited = False
+    for i, file in enumerate(files):
+        file = pathlib.Path(file)
+        if not file.exists():
+            try:
+                files[i] = str(run_files.resolve(file).as_posix())
+                edited = True
+            except FileNotFoundError:
+                warnings.warn(f'instrumented file {file} not found')
+    if edited:
+        with manifest_file.open(mode='w', encoding='iso-8859-1',
+                                newline='\n') as stream:
+            for file in files:
+                stream.write(file + '\n')
 
 _WINDOWS = os.name == 'nt'
 
