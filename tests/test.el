@@ -73,8 +73,7 @@
   (tests/test-function nil))
 
 (ert-deftest command-line ()
-  (should (equal-including-properties command-line-args-left
-                                      '("arg 1" "arg\n2"))))
+  (should (equal command-line-args-left '("arg 1" "arg\n2"))))
 
 (ert-deftest nocover ()
   :tags '(:nocover)
