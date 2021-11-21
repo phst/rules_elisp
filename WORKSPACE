@@ -149,20 +149,6 @@ go_repository(
 )
 
 go_repository(
-    name = "org_golang_x_xerrors",
-    importpath = "golang.org/x/xerrors",
-    sum = "h1:go1bK/D/BFZV2I8cIQd1NKEZ+0owSTG1fDTci4IqFcE=",
-    version = "v0.0.0-20200804184101-5ec99f83aff1",
-)
-
-go_repository(
-    name = "org_golang_x_text",
-    importpath = "golang.org/x/text",
-    sum = "h1:olpwvP2KacW1ZWvsR7uQhoyTYvKAupfQrRGBFM352Gk=",
-    version = "v0.3.7",
-)
-
-go_repository(
     name = "com_github_phst_runfiles",
     importpath = "github.com/phst/runfiles",
     sum = "h1:DSMl4+LAErSE9M0OO9ILyqhQmXEAmTVazSQCBjCSCYg=",

@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 
 stardoc(
@@ -45,29 +46,39 @@ stardoc(
     deps = ["//elisp:builtin_bzl"],
 )
 
-go_test(
-    name = "go_default_test",
-    size = "small",
-    srcs = ["consistency_test.go"],
-    args = ["$(locations :markdown)"],
-    data = [":markdown"],
-    rundir = ".",
-    deps = [
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@org_golang_x_text//encoding:go_default_library",
-        "@org_golang_x_text//encoding/charmap:go_default_library",
-        "@org_golang_x_text//transform:go_default_library",
-    ],
-)
+DOCS = [
+    "elisp",
+    "emacs",
+    "repositories",
+]
 
-filegroup(
-    name = "markdown",
-    srcs = glob(
-        ["*.md"],
-        exclude = ["index.md"],
-    ) + [
-        "elisp_doc.md",
-        "emacs_doc.md",
-        "repositories_doc.md",
-    ],
+[
+    run_binary(
+        name = "reencode_" + doc,
+        srcs = [doc + "_doc.md"],
+        outs = [doc + ".md.generated"],
+        args = [
+            "--",
+            "$(location :{}_doc.md)".format(doc),
+            "$(location :{}.md.generated)".format(doc),
+        ],
+        tool = ":reencode",
+    )
+    for doc in DOCS
+]
+
+[
+    diff_test(
+        name = doc + "_test",
+        file1 = doc + ".md",
+        file2 = doc + ".md.generated",
+    )
+    for doc in DOCS
+]
+
+py_binary(
+    name = "reencode",
+    srcs = ["reencode.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
 )
