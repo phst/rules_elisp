@@ -272,27 +272,27 @@ This list is populated by --skip-tag command-line options.")
 
 (defun elisp/ert/test-source (_arg)
   "Handle the --test-source command-line argument."
-  (let ((file (pop command-line-args-left)))
-    (or file (error "Missing value for --test-source option"))
-    (when (memq system-type '(ms-dos windows-nt cygwin))
-      (cl-callf url-unhex-string file :allow-newlines))
+  (let ((file (elisp/ert/pop--argument 'test-source)))
     (push file elisp/ert/test--sources)))
 
 (defun elisp/ert/skip-test (_arg)
   "Handle the --skip-test command-line argument."
-  (let ((test (pop command-line-args-left)))
-    (or test (error "Missing value for --skip-test option"))
-    (when (memq system-type '(ms-dos windows-nt cygwin))
-      (cl-callf url-unhex-string test :allow-newlines))
+  (let ((test (elisp/ert/pop--argument 'skip-test)))
     (push (intern test) elisp/ert/skip--tests)))
 
 (defun elisp/ert/skip-tag (_arg)
   "Handle the --skip-tag command-line argument."
-  (let ((tag (pop command-line-args-left)))
-    (or tag (error "Missing value for --skip-tag option"))
-    (when (memq system-type '(ms-dos windows-nt cygwin))
-      (cl-callf url-unhex-string tag :allow-newlines))
+  (let ((tag (elisp/ert/pop--argument 'skip-tag)))
     (push (intern tag) elisp/ert/skip--tags)))
+
+(defun elisp/ert/pop--argument (option)
+  "Pop argument for OPTION from the command line."
+  (cl-check-type option symbol)
+  (let ((argument (pop command-line-args-left)))
+    (or argument (error "Missing value for --%s" option))
+    (if (memq system-type '(ms-dos windows-nt cygwin))
+        (url-unhex-string argument :allow-newlines)
+      argument)))
 
 (defun elisp/ert/make--selector (skip-tags)
   "Build an ERT selector from environment and command line.
