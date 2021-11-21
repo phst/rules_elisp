@@ -291,6 +291,9 @@ end_of_record
 		// No branch coverage under Emacs 26 expected.
 		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
 	}
+	// Depending on the exact runfiles layout, the test runner might have
+	// printed different representations of test filenames.
+	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
 		t.Error("coverage report (-got +want):\n", diff)
 	}
