@@ -1,4 +1,4 @@
-# Copyright 2020 Google LLC
+# Copyright 2020, 2021 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library")
+load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
 
 elisp_library(
     name = "lib_4",
     srcs = ["lib-4.el"],
     load_path = ["."],
     visibility = ["//visibility:public"],
+)
+
+elisp_test(
+    name = "lib_4_test",
+    srcs = ["lib-4-test.el"],
+    deps = [":lib_4"],
 )
