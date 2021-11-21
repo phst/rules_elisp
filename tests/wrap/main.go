@@ -113,7 +113,7 @@ func isInputFile(p cmp.Path) bool {
 func resolveRunfile(s string) string {
 	r, err := runfiles.Path(s)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("error resolving runfile for comparison: %s", err)
 	}
 	return r
 }
