@@ -21,6 +21,7 @@ BAZEL := bazel
 BAZELFLAGS :=
 FIND := find
 GREP := grep
+CP := cp
 
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
@@ -69,18 +70,14 @@ check:
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
 
-doc_targets := $(shell $(BAZEL) query --output=label 'filter("_doc\.md$$", kind("generated file", //...:*))')
+doc_targets := $(shell $(BAZEL) query --output=label 'filter("\.md\.generated$$", kind("generated file", //...:*))')
 doc_generated := $(addprefix bazel-bin/,$(subst :,/,$(doc_targets://%=%)))
-doc_sources := $(doc_generated:bazel-bin/%_doc.md=%.md)
+doc_sources := $(doc_generated:bazel-bin/%.generated=%)
 
 docs: $(doc_sources)
 
-$(doc_sources): %.md: bazel-bin/%_doc.md
-        # Bazel (including Stardoc) interprets all files as Latin-1,
-        # cf. https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
-        # However, our files all use UTF-8, leading to double encoding.  Reverse
-        # that effect here.
-	iconv -f utf-8 -t latin1 -- '$<' > '$@'
+$(doc_sources): %: bazel-bin/%.generated
+	$(CP) -- '$<' '$@'
 
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
