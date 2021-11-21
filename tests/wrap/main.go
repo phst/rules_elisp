@@ -54,13 +54,19 @@ func main() {
 			"--directory=/bazel-runfile:phst_rules_elisp",
 		}
 	}
+	var outputFile string
+	if os.PathSeparator == '/' {
+		outputFile = "/tmp/output.dat"
+	} else {
+		outputFile = `C:\Temp\output.dat`
+	}
 	gotArgs := flag.Args()
 	wantArgs := append(
 		append([]string{"--quick", "--batch"}, loadPathArgs...),
 		"--option",
 		"elisp/binary.cc",
 		" \t\n\r\f äα𝐴🐈'\\\"",
-		"/:/tmp/output.dat",
+		"/:"+outputFile,
 	)
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
 		log.Fatalf("positional arguments: -got +want:\n%s", diff)
@@ -72,12 +78,6 @@ func main() {
 	var gotManifest map[string]interface{}
 	if err := json.Unmarshal(jsonData, &gotManifest); err != nil {
 		log.Fatalf("can’t decode manifest: %s", err)
-	}
-	var outputFile string
-	if os.PathSeparator == '/' {
-		outputFile = "/tmp/output.dat"
-	} else {
-		outputFile = `C:\Temp\output.dat`
 	}
 	wantManifest := map[string]interface{}{
 		"root":        "RUNFILES_ROOT",
