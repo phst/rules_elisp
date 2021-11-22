@@ -14,6 +14,7 @@
 
 """Runs Pytype."""
 
+import logging
 import sys
 
 from pytype.tools.analyze_project import main  # pylint: disable=import-error
@@ -21,14 +22,20 @@ from pytype.tools.analyze_project import main  # pylint: disable=import-error
 from phst_rules_elisp import run_pylint
 
 def _main() -> None:
+    logging.getLogger('phst_rules_elisp').setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pytype can find imports for the main and
     # external workspaces.  We’d want to set the Python path to only
     # {external_repos}:{tempdir}, but for some reason that breaks Pytype.
-    with run_pylint.set_up() as workspace:
-        sys.path += [str(workspace.external_repos), str(workspace.tempdir),
-                     str(workspace.srcdir)]
-        sys.argv = [sys.argv[0], '--'] + sorted(map(str, workspace.srcs))
-        sys.exit(main.main())
+    workspace = run_pylint.Workspace()
+    sys.path += [str(workspace.external_repos), str(workspace.tempdir),
+                 str(workspace.srcdir)]
+    sys.argv = [sys.argv[0], '--'] + sorted(map(str, workspace.srcs))
+    code = main.main()
+    # Only clean up the workspace if we exited successfully, to help with
+    # debugging.
+    if code == 0:
+        workspace.clean()
+    sys.exit(code)
 
 if __name__ == '__main__':
     _main()

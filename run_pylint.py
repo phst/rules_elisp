@@ -14,34 +14,25 @@
 
 """Runs Pylint."""
 
-import contextlib
-import dataclasses
+import logging
 import os
 import pathlib
+import shutil
 import sys
 import tempfile
-from typing import FrozenSet, Generator
 
 from pylint import lint  # pytype: disable=import-error
 
-@dataclasses.dataclass(frozen=True)
 class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
-    tempdir: pathlib.Path
-    srcdir: pathlib.Path
-    srcs: FrozenSet[pathlib.Path]
-    external_repos: pathlib.Path
 
-@contextlib.contextmanager
-def set_up() -> Generator[Workspace, None, None]:
-    """Creates a temporary workspace for Pylint and Pytype."""
-    # https://docs.bazel.build/user-manual.html#run
-    srcdir = pathlib.Path(os.getenv('BUILD_WORKSPACE_DIRECTORY'))
-    external_repos = srcdir / f'bazel-{srcdir.name}' / 'external'
-    workspace_name = 'phst_rules_elisp'
-    srcs = []
-    with tempfile.TemporaryDirectory(prefix='pylint-') as tempdir_name:
-        tempdir = pathlib.Path(tempdir_name)
+    def __init__(self) -> None:
+        # https://docs.bazel.build/user-manual.html#run
+        srcdir = pathlib.Path(os.getenv('BUILD_WORKSPACE_DIRECTORY'))
+        external_repos = srcdir / f'bazel-{srcdir.name}' / 'external'
+        workspace_name = 'phst_rules_elisp'
+        srcs = []
+        tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
         for dirpath, dirnames, filenames in os.walk(srcdir):
             dirpath = pathlib.Path(dirpath)
             if dirpath == srcdir:
@@ -58,17 +49,34 @@ def set_up() -> Generator[Workspace, None, None]:
                     srcs.append(dest)
         if not srcs:
             raise FileNotFoundError(f'no source files in {srcdir} found')
-        yield Workspace(tempdir=tempdir, srcdir=srcdir, srcs=frozenset(srcs),
-                        external_repos=external_repos)
+        _logger.info('using temporary workspace: %s', tempdir)
+        self.tempdir = tempdir
+        self.srcdir = srcdir
+        self.srcs = frozenset(srcs)
+        self.external_repos = external_repos
 
+    def clean(self) -> None:
+        """Clean up the temporary directory."""
+        shutil.rmtree(self.tempdir)
+        self.tempdir = None
 
 def _main() -> None:
+    logging.getLogger('phst_rules_elisp').setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external workspaces.
-    with set_up() as workspace:
-        sys.path += [str(workspace.external_repos), str(workspace.tempdir)]
+    workspace = Workspace()
+    sys.path += [str(workspace.external_repos), str(workspace.tempdir)]
+    try:
         lint.Run(['--rcfile=' + str(workspace.srcdir / '.pylintrc'), '--']
                  + sorted(map(str, workspace.srcs)))
+    except SystemExit as ex:
+        # Only clean up the workspace if we exited successfully, to help with
+        # debugging.
+        if ex.code == 0:
+            workspace.clean()
+        raise
+
+_logger = logging.getLogger('phst_rules_elisp.run_pylint')
 
 if __name__ == '__main__':
     _main()

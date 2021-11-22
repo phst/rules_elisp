@@ -18,6 +18,7 @@ output-format=parseable
 [DESIGN]
 max-locals=20
 max-statements=80
+min-public-methods=1
 
 [FORMAT]
 max-line-length=80
