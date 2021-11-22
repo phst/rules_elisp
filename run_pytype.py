@@ -29,7 +29,9 @@ def _main() -> None:
     workspace = run_pylint.Workspace()
     sys.path += [str(workspace.external_repos), str(workspace.tempdir),
                  str(workspace.srcdir)]
-    sys.argv = [sys.argv[0], '--'] + sorted(map(str, workspace.srcs))
+    sys.argv = [sys.argv[0],
+                '--output=' + str(workspace.srcdir / '.pytype'),
+                '--'] + sorted(map(str, workspace.srcs))
     code = main.main()
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
