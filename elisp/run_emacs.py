@@ -22,8 +22,10 @@ import glob
 import os
 import os.path
 import pathlib
+import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Iterable
 
 from phst_rules_elisp.elisp import runfiles
@@ -32,12 +34,21 @@ def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
+    parser.add_argument('--archive', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--dump-mode', choices=('portable', 'unexec'),
                         required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     run_files = runfiles.Runfiles()
-    install = run_files.resolve(opts.install)
+    try:
+        install = run_files.resolve(opts.install)
+        remove = False
+    except FileNotFoundError:
+        # Need to unpack archive.
+        archive = run_files.resolve(opts.archive)
+        install = pathlib.Path(tempfile.mkdtemp(prefix='emacs-'))
+        shutil.unpack_archive(archive, install, 'tar')
+        remove = True
     exe_suffix = '.exe' if os.name == 'nt' else ''
     emacs = install / 'bin' / ('emacs' + exe_suffix)
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
@@ -68,6 +79,8 @@ def main() -> None:
             # code.
             sys.exit(ex.returncode)
         raise
+    if remove:
+        shutil.rmtree(install)
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
