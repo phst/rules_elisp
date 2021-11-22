@@ -51,7 +51,8 @@ def main() -> None:
             # invoke commands through the MinGW shell, see
             # https://www.msys2.org/wiki/Launchers/#the-idea.
             env = dict(os.environ, MSYSTEM='MINGW64', CHERE_INVOKING='1')
-            command = [str(bash), '-l', '-c', shlex.join(command)]
+            command = [str(bash), '-l',
+                       '-c', ' '.join(map(shlex.quote, command))]
         try:
             subprocess.run(command, check=True, cwd=build, env=env,
                            stdin=subprocess.DEVNULL,
