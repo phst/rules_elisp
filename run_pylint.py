@@ -45,6 +45,9 @@ class Workspace:
                     rel = src.relative_to(srcdir)
                     dest = tempdir / workspace_name / rel
                     dest.parent.mkdir(parents=True, exist_ok=True)
+                    # Mimic the Bazel behavior.  Also see
+                    # https://github.com/bazelbuild/bazel/issues/10076.
+                    (dest.parent / '__init__.py').touch()
                     src.link_to(dest)
                     srcs.append(dest)
         if not srcs:
