@@ -48,6 +48,13 @@ else ifeq ($(kernel),Windows)
   # Don’t munge Bazel target labels.  See
   # https://www.msys2.org/docs/filesystem-paths/#process-arguments.
   export MSYS2_ARG_CONV_EXCL := //;--extra_toolchains
+  # Try to prepend normal Python installation to search path.  The MinGW version
+  # won’t work with Bazel.
+  python_exe := $(shell which -a python | grep -m 1 -i -E '^/c/Program Files/')
+  ifneq ($(python_exe),)
+    python_dir := $(shell dirname '$(python_exe)')
+    export PATH := $(python_dir):$(PATH)
+  endif
 else
   $(error Unsupported kernel $(kernel))
 endif
