@@ -49,7 +49,7 @@ class AddPathTest(unittest.TestCase):
             manifest = pathlib.Path(directory) / 'manifest'
             # Runfiles manifests contain POSIX-style filenames even on Windows.
             manifest.write_text('phst_rules_elisp/elisp/runfiles/runfiles.elc '
-                                + str(runfiles_elc.as_posix()) + '\n',
+                                + runfiles_elc.as_posix() + '\n',
                                 encoding='ascii')
             load.add_path(
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),

@@ -112,8 +112,8 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
         file = pathlib.Path(file)
         if not file.is_absolute() and not file.exists():
             try:
-                files[i] = str(run_files.resolve(
-                    pathlib.PurePosixPath(file.as_posix())).as_posix())
+                files[i] = run_files.resolve(
+                    pathlib.PurePosixPath(file.as_posix())).as_posix()
                 edited = True
             except FileNotFoundError:
                 warnings.warn(f'instrumented file {file} not found')
