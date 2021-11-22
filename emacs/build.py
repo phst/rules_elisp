@@ -95,7 +95,7 @@ def main() -> None:
     for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
         compiled.with_suffix('.el').unlink()
     # Sanity check to verify that the resulting binary works.
-    subprocess.run([install / 'bin' / 'emacs', '--quick', '--batch'],
+    subprocess.run([str(install / 'bin' / 'emacs'), '--quick', '--batch'],
                    check=True, stdin=subprocess.DEVNULL)
     if args.module_header:
         # Copy emacs-module.h to the desired location.

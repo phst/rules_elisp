@@ -88,7 +88,8 @@ def main() -> None:
         env = dict(orig_env)
         env.update(run_files.environment())
         try:
-            subprocess.run(executable=emacs, args=args, env=env, check=True)
+            subprocess.run(executable=str(emacs), args=args, env=env,
+                           check=True)
         except subprocess.CalledProcessError as ex:
             if 0 < ex.returncode < 0x80:
                 # Don’t print a stacktrace if Emacs exited with a non-zero exit

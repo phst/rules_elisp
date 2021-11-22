@@ -61,7 +61,7 @@ def main() -> None:
         _check_codepage('environment variable name', env.keys())
         _check_codepage('environment variable value', env.values())
     try:
-        subprocess.run(executable=emacs, args=args, env=env, check=True)
+        subprocess.run(executable=str(emacs), args=args, env=env, check=True)
     except subprocess.CalledProcessError as ex:
         if 0 < ex.returncode < 0x80:
             # Don’t print a stacktrace if Emacs exited with a non-zero exit

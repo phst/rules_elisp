@@ -31,7 +31,8 @@ class EmacsTest(unittest.TestCase):
             'gnu_emacs_27.2/emacs' + ('.exe' if os.name == 'nt' else '')))
         env = dict(os.environ)
         env.update(run_files.environment())
-        process = subprocess.run([emacs, '--version'], env=env, check=False)
+        process = subprocess.run([str(emacs), '--version'], env=env,
+                                 check=False)
         self.assertEqual(process.returncode, 0)
 
 if __name__ == '__main__':
