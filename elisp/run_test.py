@@ -110,7 +110,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
     edited = False
     for i, file in enumerate(files):
         file = pathlib.Path(file)
-        if not file.exists():
+        if not file.is_absolute() and not file.exists():
             try:
                 files[i] = str(run_files.resolve(file).as_posix())
                 edited = True
