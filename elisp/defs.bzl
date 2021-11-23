@@ -741,7 +741,6 @@ def _compile(ctx, srcs, deps, load_path):
             outputs = [out],
             inputs = inputs,
             executable = emacs.files_to_run,
-            tools = [emacs.files_to_run],
             arguments = args,
             mnemonic = "ElispCompile",
             progress_message = (
