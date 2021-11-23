@@ -36,7 +36,7 @@ def _emacs_binary_impl(ctx):
     # known file (README in the source root) instead.
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
-    install, archive = _install(ctx, cc_toolchain, source)
+    install = _install(ctx, cc_toolchain, source)
     driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
@@ -44,7 +44,6 @@ def _emacs_binary_impl(ctx):
         substitutions = {
             "[[args]]": cpp_strings([
                 "--install=" + runfile_location(ctx, install),
-                "--archive=" + runfile_location(ctx, archive),
                 "--dump-mode=" + ctx.attr.dump_mode,
             ]),
         },
@@ -59,7 +58,7 @@ def _emacs_binary_impl(ctx):
     return [DefaultInfo(
         executable = executable,
         files = depset(direct = [executable]),
-        runfiles = ctx.runfiles(files = [install, archive]).merge(runfiles),
+        runfiles = ctx.runfiles(files = [install]).merge(runfiles),
     )]
 
 emacs_binary = rule(
@@ -134,8 +133,7 @@ def _install(ctx, cc_toolchain, source):
       source (File): the directory containing the Emacs source tree
 
     Returns:
-      a pair of File objects representing the Emacs installation directory and
-          a TAR archive version thereof
+      a File representing the Emacs installation directory
     """
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
@@ -180,16 +178,14 @@ def _install(ctx, cc_toolchain, source):
     install = ctx.actions.declare_directory(
         "_{}_install".format(ctx.label.name),
     )
-    archive = ctx.actions.declare_file("_{}.tar".format(ctx.label.name))
     args = [
         "--source=" + source,
         "--install=" + install.path,
-        "--archive=" + archive.path,
         "--cc=" + cc,
         "--cflags=" + " ".join(cflags),
         "--ldflags=" + " ".join(ldflags),
     ]
-    outs = [install, archive]
+    outs = [install]
     if ctx.outputs.module_header:
         args.append("--module-header=" + ctx.outputs.module_header.path)
         outs.append(ctx.outputs.module_header)
@@ -207,4 +203,4 @@ def _install(ctx, cc_toolchain, source):
         ),
         env = env,
     )
-    return install, archive
+    return install

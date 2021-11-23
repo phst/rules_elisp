@@ -31,7 +31,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--source', type=pathlib.Path, required=True)
     parser.add_argument('--install', type=pathlib.Path, required=True)
-    parser.add_argument('--archive', type=pathlib.Path, required=True)
     parser.add_argument('--cc', type=pathlib.Path, required=True)
     parser.add_argument('--cflags', required=True)
     parser.add_argument('--ldflags', required=True)
@@ -98,7 +97,6 @@ def main() -> None:
     # Sanity check to verify that the resulting binary works.
     subprocess.run([str(install / 'bin' / 'emacs'), '--quick', '--batch'],
                    check=True, stdin=subprocess.DEVNULL)
-    shutil.make_archive(args.archive.with_suffix(''), 'tar', install)
     if args.module_header:
         # Copy emacs-module.h to the desired location.
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
