@@ -23,6 +23,8 @@ def _main() -> None:
     parser.add_argument('output', type=pathlib.Path)
     opts = parser.parse_args()
     text = opts.input.read_text(encoding='utf-8')
+    # Force Unix-style line endings for consistent results.  See
+    # https://github.com/bazelbuild/stardoc/issues/110.
     with opts.output.open(mode='xt', encoding='latin-1', newline='\n') as file:
         file.write(text)
 
