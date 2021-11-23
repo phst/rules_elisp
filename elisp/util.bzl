@@ -72,9 +72,8 @@ def runfile_location(ctx, file):
 def cc_wrapper(ctx, cc_toolchain, driver, deps):
     """Builds a wrapper executable that starts Emacs.
 
-    You can use `find_cpp_toolchain` and `cc_common.configure_features` to
-    construct appropriate values for `cc_toolchain` and
-    `feature_configuration`.
+    You can use `find_cpp_toolchain` to construct an appropriate value for
+    `cc_toolchain`.
 
     Args:
       ctx (ctx): rule context
