@@ -396,9 +396,26 @@ absl::StatusOr<int> Run(std::string binary,
   absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
-  final_args.insert(final_args.end(), args.begin(), args.end());
   absl::StatusOr<Environment> map = runfiles.Environment();
   if (!map.ok()) return map.status();
+  std::vector<NativeString> runfiles_args;
+  // Pass the runfiles environment variables as separate arguments.  This is
+  // necessary because the binary launcher unconditionally sets the runfiles
+  // environment variables based on its own argv[0]; see
+  // https://github.com/bazelbuild/bazel/blob/6.0.0-pre.20211110.1/src/tools/launcher/launcher.cc.
+  // We also can’t set argv[0] to this binary because the launcher uses it to
+  // find and its own binary; see
+  // https://github.com/bazelbuild/bazel/blob/6.0.0-pre.20211110.1/src/tools/launcher/launcher_main.cc.
+  for (const auto& p : *map) {
+    runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles_env=") +
+                            p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
+                            p.second);
+  }
+  // Sort entries for hermeticity.
+  absl::c_sort(runfiles_args);
+  final_args.insert(final_args.end(), runfiles_args.begin(),
+                    runfiles_args.end());
+  final_args.insert(final_args.end(), args.begin(), args.end());
   map->insert(orig_env.begin(), orig_env.end());
   std::vector<NativeString> final_env;
   for (const auto& p : *map) {

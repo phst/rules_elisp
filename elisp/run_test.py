@@ -23,7 +23,7 @@ import os.path
 import pathlib
 import subprocess
 import sys
-from typing import List
+from typing import List, Tuple
 import urllib.parse
 import warnings
 
@@ -34,6 +34,8 @@ from phst_rules_elisp.elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--runfiles_env', action='append', type=_env_var,
+                        default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
@@ -48,7 +50,7 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     orig_env = dict(os.environ)
-    run_files = runfiles.Runfiles()
+    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
@@ -123,6 +125,10 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                                 newline='\n') as stream:
             for file in files:
                 stream.write(file + '\n')
+
+def _env_var(arg: str) -> Tuple[str, str]:
+    key, _, value = arg.partition('=')
+    return key, value
 
 _WINDOWS = os.name == 'nt'
 

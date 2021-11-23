@@ -23,7 +23,7 @@ import os.path
 import pathlib
 import subprocess
 import sys
-from typing import Iterable, Mapping, Optional, Sequence
+from typing import Iterable, Mapping, Optional, Sequence, Tuple
 
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
@@ -32,6 +32,8 @@ from phst_rules_elisp.elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--runfiles_env', action='append', type=_env_var,
+                        default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
@@ -46,7 +48,7 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     orig_env = dict(os.environ)
-    run_files = runfiles.Runfiles()
+    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
@@ -102,6 +104,10 @@ def _arg_files(argv: Sequence[str], root: pathlib.Path,
                     pass
             result.append(file)
     return tuple(result)
+
+def _env_var(arg: str) -> Tuple[str, str]:
+    key, _, value = arg.partition('=')
+    return key, value
 
 if __name__ == '__main__':
     main()

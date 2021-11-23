@@ -26,20 +26,22 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import Iterable
+from typing import Iterable, Tuple
 
 from phst_rules_elisp.elisp import runfiles
 
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--runfiles_env', action='append', type=_env_var,
+                        default=[])
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--archive', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--dump-mode', choices=('portable', 'unexec'),
                         required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
-    run_files = runfiles.Runfiles()
+    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     try:
         install = run_files.resolve(opts.install)
         remove = False
@@ -98,6 +100,10 @@ def _check_codepage(description: str, values: Iterable[str]) -> None:
         except UnicodeEncodeError as ex:
             raise ValueError(
                 f'can’t encode {description} “{value}” for Windows') from ex
+
+def _env_var(arg: str) -> Tuple[str, str]:
+    key, _, value = arg.partition('=')
+    return key, value
 
 if __name__ == '__main__':
     main()
