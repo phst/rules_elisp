@@ -117,7 +117,7 @@ def main() -> None:
                               **kwargs) as process:
             try:
                 process.communicate(timeout=timeout_secs)
-            except TimeoutError:
+            except subprocess.TimeoutExpired:
                 # Since we pass a None timeout on Unix systems, we should get
                 # here only on Windows.
                 assert _WINDOWS
