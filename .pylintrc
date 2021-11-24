@@ -16,7 +16,8 @@
 output-format=parseable
 
 [DESIGN]
-max-locals=20
+max-locals=25
+max-branches=15
 max-statements=80
 min-public-methods=1
 
