@@ -54,7 +54,8 @@ def main() -> None:
     opts = parser.parse_args()
     # Be a bit more verbose for tests, since Bazel will only show output on
     # explicit request.
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=logging.INFO,
+                        format='%(asctime)s %(levelname)s %(name)s %(message)s')
     orig_env = dict(os.environ)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
