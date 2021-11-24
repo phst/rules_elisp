@@ -18,6 +18,7 @@ This is an internal helper binary for the Emacs Lisp Bazel rules.  Don’t rely 
 it in any way outside the rule implementation."""
 
 import argparse
+import logging
 import os
 import os.path
 import pathlib
@@ -49,9 +50,13 @@ def main() -> None:
     parser.add_argument('--skip-tag', action='append', default=[])
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
+    # Be a bit more verbose for tests, since Bazel will only show output on
+    # explicit request.
+    logging.basicConfig(level=logging.INFO)
     orig_env = dict(os.environ)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
+    _logger.info('running test with Emacs binary %s', emacs)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch', '--module-assertions']
@@ -89,15 +94,18 @@ def main() -> None:
         args.extend(opts.argv[1:])
         env = dict(orig_env)
         env.update(run_files.environment())
+        _logger.info('running Emacs test command %s', args)
         try:
             subprocess.run(executable=str(emacs), args=args, env=env,
                            check=True)
         except subprocess.CalledProcessError as ex:
+            _logger.info('Emacs failed with exit code %s', ex.returncode)
             if 0 < ex.returncode < 0x80:
                 # Don’t print a stacktrace if Emacs exited with a non-zero exit
                 # code.
                 sys.exit(ex.returncode)
             raise
+        _logger.info('Emacs test finished successfully')
 
 def _quote(arg: str) -> str:
     return urllib.parse.quote(arg) if _WINDOWS else arg
@@ -131,6 +139,7 @@ def _env_var(arg: str) -> Tuple[str, str]:
     return key, value
 
 _WINDOWS = os.name == 'nt'
+_logger = logging.getLogger('phst_rules_elisp.elisp.run_test')
 
 if __name__ == '__main__':
     main()
