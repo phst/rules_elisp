@@ -937,8 +937,8 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
                           file)
         ;; We can use the filename relative to the Bazel binary directory since
         ;; that corresponds to a source filename relative to some workspace
-        ;; root.  ‘find-function-search-for-symbol’ will find the corresponding
-        ;; source file because all workspace roots are in the ‘load-path’.
+        ;; root.  ‘find-library-name’ will find the corresponding source file
+        ;; because all workspace roots are in the ‘load-path’.
         (cl-callf2 match-string-no-properties 1 file))
       ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
       ;; we’re only attempting to print a log message here, ignore them and move
