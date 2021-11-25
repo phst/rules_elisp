@@ -921,7 +921,8 @@ If possible, format the message according to the
 GNU Coding Standards; see Info node ‘(standards) Errors’."
   (cl-check-type message string)
   (cl-check-type test symbol)
-  (let ((case-fold-search nil))
+  (let ((case-fold-search nil)
+        (directory default-directory))
     ;; Yuck!  ‘ert--test’ is an implementation detail.
     (when-let ((file (symbol-file test 'ert--test)))
       ;; The filename typically refers to a compiled file in the execution root.
@@ -939,31 +940,27 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
         ;; root.  ‘find-function-search-for-symbol’ will find the corresponding
         ;; source file because all workspace roots are in the ‘load-path’.
         (cl-callf2 match-string-no-properties 1 file))
-      (let ((buffers (buffer-list))
-            (directory default-directory)
+      ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
+      ;; we’re only attempting to print a log message here, ignore them and move
+      ;; on.
+      (when-let ((file (ignore-errors (find-library-name file))))
+        (with-temp-buffer
+          (let ((coding-system-for-read 'utf-8-unix)
+                (format-alist nil)
+                (after-insert-file-functions nil))
+            (insert-file-contents file))
+          (emacs-lisp-mode)
+          (when (re-search-forward
+                 (rx-to-string `(seq bol (* space) "(ert-deftest" (+ space)
+                                     ,(symbol-name test) (or space eol)))
+                 nil t)
             ;; Try to print nice and short filenames.  We do this by using the
             ;; filename relative to the test working directory
-            ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).  Prevent both ‘find-file’
-            ;; and ‘vc-refresh-state’ from following symbolic links to the
-            ;; original source file.
-            (find-file-visit-truename nil)
-            (vc-handled-backends nil))
-        (when-let ((definition
-                     ;; ‘find-function-search-for-symbol’ signals errors if it
-                     ;; can’t find the library.  Since we’re only attempting to
-                     ;; print a log message here, ignore them and move on.
-                     (ignore-errors
-                       ;; Yuck!  ‘ert--test’ is an implementation detail.
-                       (find-function-search-for-symbol test 'ert--test file))))
-          (cl-destructuring-bind (buffer . point) definition
-            (with-current-buffer buffer
-              (message "%s:%d: %s"
-                       (elisp/ert/file--display-name buffer-file-name directory)
-                       (line-number-at-pos point :absolute)
-                       message)
-              ;; If ‘find-function-search-for-symbol’ has created a new buffer,
-              ;; kill it.
-              (unless (memq buffer buffers) (kill-buffer)))))))))
+            ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).
+            (message "%s:%d: %s"
+                     (elisp/ert/file--display-name file directory)
+                     (line-number-at-pos)
+                     message)))))))
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
