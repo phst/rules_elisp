@@ -86,6 +86,10 @@
     (should (equal (expand-file-name "runfiles/test.txt"
                                      "/bazel-runfile:phst_rules_elisp/elisp")
                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (equal (file-relative-name
+                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
+                    "/bazel-runfile:phst_rules_elisp/elisp/")
+                   "runfiles/test.txt"))
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 
