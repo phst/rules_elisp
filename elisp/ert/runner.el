@@ -87,6 +87,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (load-suffixes (if coverage-enabled
                             (cons ".el.instrument" load-suffixes)
                           load-suffixes))
+         (force-load-messages t)
          (load-buffers ()))
     ;; TEST_SRCDIR and TEST_TMPDIR are required,
     ;; cf. https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
@@ -123,6 +124,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
         (add-function
          :before-until load-source-file-function
          (lambda (fullname file _noerror _nomessage)
+           (message "Loading source file %s with full name %s" file fullname)
            ;; If we got a magic filename that tells us to instrument a file,
            ;; then instrument the corresponding source file if that exists.
            ;; See the commentary in //elisp:defs.bzl for details.  In all other

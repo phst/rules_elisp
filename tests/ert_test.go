@@ -39,6 +39,7 @@ func Test(t *testing.T) {
 	// Use the ancestor of the source file as workspace directory so that
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
+	t.Logf("running test in workspace directory %s", workspace)
 	bin := "phst_rules_elisp/tests/test_test"
 	if runtime.GOOS == "windows" {
 		bin += ".exe"
@@ -47,6 +48,7 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("using test binary %s", bin)
 	runfilesEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
@@ -54,6 +56,7 @@ func Test(t *testing.T) {
 	tempDir := t.TempDir()
 	reportName := filepath.Join(tempDir, "report.xml")
 	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
+	t.Logf("writing coverage manifest %s", coverageManifest)
 	if err := os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
 		t.Error(err)
 	}
@@ -81,18 +84,22 @@ func Test(t *testing.T) {
 	default:
 		t.Error(err)
 	}
+	t.Log("test process existed")
 
 	schema, err := runfiles.Path("junit_xsd/file/JUnit.xsd")
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Logf("validing XML report %s against schema %s", reportName, schema)
 	cmd = exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}
+	t.Log("XML validation complete")
 
+	t.Log("parsing XML report")
 	b, err := ioutil.ReadFile(reportName)
 	if err != nil {
 		t.Fatal(err)
@@ -147,6 +154,7 @@ func Test(t *testing.T) {
 	if !regexp.MustCompile(`^\d+\.\d+`).MatchString(emacsVersion) {
 		t.Errorf("invalid Emacs version %q", emacsVersion)
 	}
+	t.Logf("got Emacs version %s", emacsVersion)
 	// Margin for time comparisons.  One hour is excessive, but we only
 	// care about catching obvious bugs here.
 	const margin = time.Hour
@@ -208,6 +216,7 @@ func Test(t *testing.T) {
 		t.Error("XML test report (-got +want):\n", diff)
 	}
 
+	t.Logf("looking for coverage files in %s", coverageDir)
 	files, err := filepath.Glob(filepath.Join(coverageDir, "*.dat"))
 	if err != nil {
 		t.Error(err)
@@ -289,6 +298,7 @@ end_of_record
 `
 	if strings.HasPrefix(emacsVersion, "26.") {
 		// No branch coverage under Emacs 26 expected.
+		t.Log("not checking for branch coverage")
 		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
 	}
 	// Depending on the exact runfiles layout, the test runner might have
