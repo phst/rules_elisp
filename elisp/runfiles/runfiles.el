@@ -409,7 +409,8 @@ unchanged."
 (defun elisp/runfiles/make--manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
 Return an object of class ‘elisp/runfiles/runfiles--manifest’."
-  (let ((manifest (make-hash-table :test #'equal)))
+  (let ((manifest (make-hash-table :test #'equal))
+        (filename (expand-file-name filename)))
     (with-temp-buffer
       ;; At least Java hard-codes UTF-8 for runfiles manifest, see
       ;; https://github.com/bazelbuild/bazel/blob/4.2.1/tools/java/runfiles/Runfiles.java#L204.
@@ -463,7 +464,7 @@ RUNFILES is a runfiles object."
 Return an object of class ‘elisp/runfiles/runfiles--directory’."
   (cl-check-type directory (and string (not file-remote) file-name-absolute))
   (elisp/runfiles/runfiles--directory
-   :directory (file-name-as-directory directory)))
+   :directory (file-name-as-directory (expand-file-name directory))))
 
 (cl-defmethod elisp/runfiles/rlocation--internal
   ((runfiles elisp/runfiles/runfiles--directory) filename)
