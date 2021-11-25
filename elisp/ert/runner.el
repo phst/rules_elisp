@@ -133,7 +133,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                         ;; We still need to check whether Bazel wants us to
                         ;; instrument the file.
                         (cl-find fullname instrumented-files
-                                 :test #'file-equal-p))
+                                 :test #'elisp/ert/file--equal-p))
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
         (when (version< emacs-version "28.1")
@@ -992,6 +992,30 @@ DIRECTORY is the directory that could contain FILENAME."
   (let ((relative (file-relative-name filename directory))
         (absolute (abbreviate-file-name (file-name-unquote filename))))
     (if (< (length relative) (length absolute)) relative absolute)))
+
+(defun elisp/ert/file--equal-p (file-1 file-2)
+  "Return whether FILE-1 and FILE-2 are probably the same file.
+This is more lenient than ‘file-equal-p’ because it also treats
+exact copies as equal."
+  (cl-check-type file-1 string)
+  (cl-check-type file-2 string)
+  (or (file-equal-p file-1 file-2)
+      (when-let ((attributes-1 (file-attributes file-1))
+                 (attributes-2 (file-attributes file-2)))
+        (and (equal (file-attribute-type attributes-1)
+                    (file-attribute-type attributes-2))
+             (eql (file-attribute-size attributes-1)
+                  (file-attribute-size attributes-2))
+             (with-temp-buffer
+               (insert-file-contents-literally file-1)
+               (let ((buffer-1 (current-buffer)))
+                 (with-temp-buffer
+                   (insert-file-contents-literally file-2)
+                   (let ((buffer-2 (current-buffer))
+                         (case-fold-search nil))
+                     (eql (compare-buffer-substrings buffer-1 nil nil
+                                                     buffer-2 nil nil)
+                          0)))))))))
 
 ;; This polyfill needs to be defined before using it as type to prevent errors
 ;; during compilation.
