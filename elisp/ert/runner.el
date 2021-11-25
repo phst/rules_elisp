@@ -981,9 +981,7 @@ DIRECTORY is the directory that could contain FILENAME."
   (and (string-prefix-p "/bazel-runfile:" filename)
        (not (string-prefix-p "/bazel-runfile:" directory))
        (let ((workspace (file-name-nondirectory
-                         (directory-file-name
-                          (file-name-directory
-                           (directory-file-name directory))))))
+                         (directory-file-name directory))))
          (setq directory (concat "/bazel-runfile:" workspace
                                  (unless (string-empty-p workspace) "/")))))
   ;; Work around Bug#46219.
