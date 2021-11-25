@@ -976,6 +976,16 @@ DIRECTORY is the directory that could contain FILENAME."
   (cl-check-type filename string)
   (cl-check-type directory (or null string))
   (unless directory (setq directory default-directory))
+  ;; If we got a virtual runfile filename but a physical directory, make an
+  ;; educated guess about the location relative to the test working directory.
+  (and (string-prefix-p "/bazel-runfile:" filename)
+       (not (string-prefix-p "/bazel-runfile:" directory))
+       (let ((workspace (file-name-nondirectory
+                         (directory-file-name
+                          (file-name-directory
+                           (directory-file-name directory))))))
+         (setq directory (concat "/bazel-runfile:" workspace
+                                 (unless (string-empty-p workspace) "/")))))
   ;; Work around Bug#46219.
   (unless (file-remote-p filename)
     (setq filename (file-name-quote (expand-file-name filename))))
