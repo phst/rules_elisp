@@ -458,7 +458,7 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
 
 (cl-defmethod elisp/runfiles/env-vars--internal
   ((runfiles elisp/runfiles/runfiles--manifest) remote)
-  "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
+  "Implementation of ‘elisp/runfiles/env-vars’ for manifest-based runfiles.
 RUNFILES is a runfiles object, and REMOTE is the remote host
 identifier."
   (with-slots (filename) runfiles
