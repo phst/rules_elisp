@@ -84,7 +84,7 @@ func Test(t *testing.T) {
 	default:
 		t.Error(err)
 	}
-	t.Log("test process existed")
+	t.Log("test process exited")
 
 	schema, err := runfiles.Path("junit_xsd/file/JUnit.xsd")
 	if err != nil {
