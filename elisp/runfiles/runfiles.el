@@ -405,7 +405,7 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
     (with-temp-buffer
       ;; At least Java hard-codes UTF-8 for runfiles manifest, see
       ;; https://github.com/bazelbuild/bazel/blob/4.2.1/tools/java/runfiles/Runfiles.java#L204.
-      (let ((coding-system-for-read 'utf-8-unix)
+      (let ((coding-system-for-read 'utf-8)
             (format-alist nil)
             (after-insert-file-functions nil))
         (insert-file-contents filename))
