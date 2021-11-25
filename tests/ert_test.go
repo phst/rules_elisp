@@ -70,7 +70,11 @@ func Test(t *testing.T) {
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"COVERAGE=1",
 		"COVERAGE_MANIFEST="+coverageManifest,
-		"COVERAGE_DIR="+coverageDir)...)
+		"COVERAGE_DIR="+coverageDir,
+		// Don’t have the Python launcher change the current directory,
+		// otherwise our fake environment setup won’t work.  See
+		// https://github.com/bazelbuild/bazel/issues/7190.
+		"RUN_UNDER_RUNFILES=0")...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = workspace
