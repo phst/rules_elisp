@@ -40,7 +40,7 @@
   (let ((directory (make-temp-file "runfiles-test-" :directory)))
     (unwind-protect
         (let ((filename (expand-file-name "testäα𝐴🐈'.txt" directory))
-              (runfiles (elisp/runfiles/make :manifest nil
+              (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
                                              :directory directory)))
           (write-region "contents\n" nil filename nil nil nil 'excl)
           (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
@@ -50,14 +50,16 @@
 (ert-deftest elisp/runfiles/special-chars/manifest ()
   (let* ((manifest (elisp/runfiles/rlocation
                     "phst_rules_elisp/elisp/runfiles/test-manifest"))
-         (runfiles (elisp/runfiles/make :manifest manifest :directory nil)))
+         (runfiles (elisp/runfiles/make :manifest manifest
+                                        :directory "/invalid/")))
     (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
                    "/:/runfiles/testäα𝐴🐈'.txt"))))
 
 (ert-deftest elisp/runfiles/make/empty-file ()
   (let* ((manifest (elisp/runfiles/rlocation
                     "phst_rules_elisp/elisp/runfiles/test-manifest"))
-         (runfiles (elisp/runfiles/make :manifest manifest :directory nil)))
+         (runfiles (elisp/runfiles/make :manifest manifest
+                                        :directory "/invalid/")))
     (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
                   :type 'elisp/runfiles/empty)))
 
