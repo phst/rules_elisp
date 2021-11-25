@@ -33,6 +33,7 @@
 (require 'eieio)
 (require 'pcase)
 (require 'rx)
+(require 'subr-x)
 
 
 ;;;; Main interface:
@@ -43,8 +44,7 @@
 This class is abstract; use ‘elisp/runfiles/make’ to create
 instances or ‘elisp/runfiles/get’ access a global instance.")
 
-(cl-defun elisp/runfiles/make (&key (manifest (getenv "RUNFILES_MANIFEST_FILE"))
-                                    (directory (getenv "RUNFILES_DIR")))
+(cl-defun elisp/runfiles/make (&key manifest directory)
   "Return a new instance of a subclass of ‘elisp/runfiles/runfiles’.
 MANIFEST and DIRECTORY specify the location of the runfiles.  By
 default, use environmental variable to find the runfiles.
@@ -54,6 +54,14 @@ empty.  If the runfiles aren’t found at either location, signal
 an error of type ‘elisp/runfiles/not-found’."
   (cl-check-type manifest (or null string))
   (cl-check-type directory (or null string))
+  (unless manifest
+    (let ((value (getenv "RUNFILES_MANIFEST_FILE")))
+      (and value (not (string-empty-p value))
+           (setq manifest (concat "/:" value)))))
+  (unless directory
+    (let ((value (getenv "RUNFILES_DIR")))
+      (and value (not (string-empty-p value))
+           (setq directory (concat "/:" value)))))
   (or (and manifest (not (string-equal manifest ""))
            (file-regular-p manifest)
            (file-readable-p manifest)
