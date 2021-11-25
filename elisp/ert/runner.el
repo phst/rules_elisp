@@ -112,9 +112,11 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (while (not (eobp))
             ;; The filenames in the coverage manifest are typically relative to
             ;; the current directory, so expand them here.
-            (push (expand-file-name
-                   (buffer-substring-no-properties (point) (line-end-position)))
-                  instrumented-files)
+            (let ((filename (expand-file-name
+                             (buffer-substring-no-properties
+                              (point) (line-end-position)))))
+              (message "Marking file %s for instrumentation" filename)
+              (push filename instrumented-files))
             (forward-line)))
         ;; We don’t bother removing the advises since we are going to kill
         ;; Emacs anyway.
