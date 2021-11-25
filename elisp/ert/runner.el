@@ -1007,9 +1007,11 @@ exact copies as equal."
              (eql (file-attribute-size attributes-1)
                   (file-attribute-size attributes-2))
              (with-temp-buffer
+               (set-buffer-multibyte nil)
                (insert-file-contents-literally file-1)
                (let ((buffer-1 (current-buffer)))
                  (with-temp-buffer
+                   (set-buffer-multibyte nil)
                    (insert-file-contents-literally file-2)
                    (let ((buffer-2 (current-buffer))
                          (case-fold-search nil))
