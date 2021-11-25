@@ -99,14 +99,21 @@ indicates that an empty file should be used in its place."
   (cl-check-type runfiles elisp/runfiles/runfiles)
   (elisp/runfiles/rlocation--internal runfiles filename))
 
-(cl-defun elisp/runfiles/env-vars (&optional (runfiles (elisp/runfiles/get)))
+(cl-defun elisp/runfiles/env-vars
+    (&optional (runfiles (elisp/runfiles/get))
+               (remote (file-remote-p default-directory)))
   "Return a list of environmental variable for subprocesses.
 Prepend this list to ‘process-environment’ if you want to invoke
 a process that should have access to the runfiles.  RUNFILES must
 be an object of the class ‘elisp/runfiles/runfiles’; it defaults
-to a global instance."
+to a global instance.  REMOTE must be nil a remote host
+identifier (see Info node ‘(elisp) Magic File Names’); if the
+returned values are on the same remote host as REMOTE, return the
+local names on that host, otherwise signal an error of type
+‘elisp/runfiles/remote’."
   (cl-check-type runfiles elisp/runfiles/runfiles)
-  (elisp/runfiles/env-vars--internal runfiles))
+  (cl-check-type remote (or string null))
+  (elisp/runfiles/env-vars--internal runfiles remote))
 
 (defun elisp/runfiles/filename-p (string)
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
@@ -135,6 +142,7 @@ to a global instance."
 (define-error 'elisp/runfiles/read-only "Runfiles are read-only" 'file-error)
 (define-error 'elisp/runfiles/syntax-error "Syntax error in runfiles manifest")
 (define-error 'elisp/runfiles/empty "Empty runfile")
+(define-error 'elisp/runfiles/remote "Remote runfiles manifest or directory")
 
 
 ;;;; File name handler:
@@ -449,11 +457,16 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
       (t result))))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
-  ((runfiles elisp/runfiles/runfiles--manifest))
+  ((runfiles elisp/runfiles/runfiles--manifest) remote)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
-RUNFILES is a runfiles object."
-  (list (concat "RUNFILES_MANIFEST_FILE=" (oref runfiles filename))
-        "RUNFILES_DIR" "JAVA_RUNFILES"))
+RUNFILES is a runfiles object, and REMOTE is the remote host
+identifier."
+  (with-slots (filename) runfiles
+    (unless (equal (file-remote-p filename) remote)
+      (signal 'elisp/runfiles/remote (list filename remote)))
+    (list (concat "RUNFILES_MANIFEST_FILE="
+                  (file-name-unquote (file-local-name filename)))
+          "RUNFILES_DIR" "JAVA_RUNFILES")))
 
 (defclass elisp/runfiles/runfiles--directory (elisp/runfiles/runfiles)
   ((directory :initarg :directory :type string))
@@ -473,15 +486,19 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
   (expand-file-name filename (oref runfiles directory)))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
-  ((runfiles elisp/runfiles/runfiles--directory))
+  ((runfiles elisp/runfiles/runfiles--directory) remote)
   "Implementation of ‘elisp/runfiles/env-vars’ for directory-based runfiles.
-RUNFILES is a runfiles object."
+RUNFILES is a runfiles object, and REMOTE is the remote host
+identifier."
   (with-slots (directory) runfiles
-    (list "RUNFILES_MANIFEST_FILE"
-          (concat "RUNFILES_DIR=" directory)
-          ;; TODO(laszlocsomor): remove JAVA_RUNFILES once the Java launcher
-          ;; can pick up RUNFILES_DIR.
-          (concat "JAVA_RUNFILES=" directory))))
+    (unless (equal (file-remote-p directory) remote)
+      (signal 'elisp/runfiles/remote (list directory remote)))
+    (let ((directory (file-name-unquote (file-local-name directory))))
+      (list "RUNFILES_MANIFEST_FILE"
+            (concat "RUNFILES_DIR=" directory)
+            ;; TODO(laszlocsomor): remove JAVA_RUNFILES once the Java launcher
+            ;; can pick up RUNFILES_DIR.
+            (concat "JAVA_RUNFILES=" directory)))))
 
 (provide 'elisp/runfiles/runfiles)
 ;;; runfiles.el ends here
