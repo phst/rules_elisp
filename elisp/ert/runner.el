@@ -101,7 +101,11 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                  (< shard-index shard-count))
       (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
              shard-count shard-index))
+    (message "Current directory: %s" default-directory)
+    (message "Source directory: %s" source-dir)
+    (message "Temporary directory: %s" temp-dir)
     (when coverage-enabled
+      (message "Loading coverage manifest from %s" coverage-manifest)
       (let ((format-alist nil)
             (after-insert-file-functions nil)
             ;; The coverage manifest uses ISO-8859-1, see
@@ -1011,6 +1015,7 @@ exact copies as equal."
              (eql (file-attribute-size attributes-1)
                   (file-attribute-size attributes-2))
              (with-temp-buffer
+               (message "Comparing contents of %s and %s" file-1 file-2)
                (set-buffer-multibyte nil)
                (insert-file-contents-literally file-1)
                (let ((buffer-1 (current-buffer)))
