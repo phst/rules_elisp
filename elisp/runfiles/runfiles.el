@@ -475,7 +475,6 @@ identifier."
 (defun elisp/runfiles/make--directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
 Return an object of class ‘elisp/runfiles/runfiles--directory’."
-  (cl-check-type directory (and string (not file-remote) file-name-absolute))
   (elisp/runfiles/runfiles--directory
    :directory (file-name-as-directory (expand-file-name directory))))
 
