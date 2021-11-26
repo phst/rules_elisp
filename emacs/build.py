@@ -65,7 +65,8 @@ def main() -> None:
             print()
             try:
                 config_log = build / 'config.log'
-                content = config_log.read_text('utf-8', 'backslashescape')
+                content = config_log.read_text(encoding='utf-8',
+                                               errors='backslashescape')
                 print('config.log follows:')
                 print(content)
             except FileNotFoundError:
