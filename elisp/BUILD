@@ -348,6 +348,7 @@ py_library(
     name = "runfiles",
     srcs = ["runfiles.py"],
     srcs_version = "PY3",
+    visibility = ["//emacs:__pkg__"],
     deps = ["@bazel_tools//tools/python/runfiles"],
 )
 

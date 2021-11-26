@@ -29,6 +29,7 @@ py_test(
     data = [":emacs"],
     python_version = "PY3",
     srcs_version = "PY3",
+    deps = ["//elisp:runfiles"],
 )
 
 alias(
