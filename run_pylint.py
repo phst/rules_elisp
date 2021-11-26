@@ -50,13 +50,13 @@ class Workspace:
         _logger.info('using temporary workspace: %s', tempdir)
         self.srcs = frozenset(srcs)
         self.path = [str(tempdir)] + [str(tempdir / d) for d in params['path']]
-        self._tempdir = tempdir
+        self.tempdir = tempdir
         self._output = pathlib.Path(params['out'])
 
     def success(self) -> None:
         """Clean up the temporary directory."""
-        shutil.rmtree(self._tempdir)
-        self._tempdir = None
+        shutil.rmtree(self.tempdir)
+        self.tempdir = None
         self._output.touch()
 
 def _main() -> None:

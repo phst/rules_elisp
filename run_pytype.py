@@ -16,6 +16,7 @@
 
 import argparse
 import logging
+import os
 import pathlib
 import sys
 
@@ -32,6 +33,12 @@ def _main() -> None:
     # external workspaces.  We’d want to set the Python path to only
     # {external_repos}:{tempdir}, but for some reason that breaks Pytype.
     workspace = run_pylint.Workspace(args.params)
+    # Pytype wants a Python binary available under the name “python”.  See the
+    # function pytype.tools.environment.check_python_exe_or_die.
+    bindir = workspace.tempdir / 'bin'
+    bindir.mkdir()
+    (bindir / 'python').symlink_to(sys.executable)
+    os.environ['PATH'] = os.pathsep.join([str(bindir)] + os.get_exec_path())
     sys.path += workspace.path
     sys.argv = ([sys.argv[0], '--no-cache', '--']
                 + sorted(map(str, workspace.srcs)))
