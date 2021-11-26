@@ -39,7 +39,7 @@ py_binary(
     srcs = ["run_pylint.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = ["//:__pkg__"],
+    visibility = ["//:__subpackages__"],
     deps = [requirement("pylint")],
 )
 
@@ -51,11 +51,16 @@ py_binary(
     # Pytype doesn’t work on Windows, so don’t build it when running
     # “bazel build //...”.
     tags = ["manual"],
-    visibility = ["//:__pkg__"],
+    visibility = ["//:__subpackages__"],
     deps = [
         requirement("pytype"),
         ":run_pylint",
     ],
+)
+
+exports_files(
+    [".pylintrc"],
+    visibility = ["//:__subpackages__"],
 )
 
 # gazelle:prefix github.com/phst/rules_elisp

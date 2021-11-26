@@ -14,6 +14,8 @@
 
 """Runs Pylint."""
 
+import argparse
+import json
 import logging
 import os
 import pathlib
@@ -21,62 +23,60 @@ import shutil
 import sys
 import tempfile
 
-from pylint import lint  # pytype: disable=import-error
+from pylint import lint
 
 class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
 
-    def __init__(self) -> None:
-        # https://docs.bazel.build/user-manual.html#run
-        srcdir = pathlib.Path(os.getenv('BUILD_WORKSPACE_DIRECTORY'))
-        external_repos = srcdir / f'bazel-{srcdir.name}' / 'external'
+    def __init__(self, params_file: pathlib.Path) -> None:
+        params = json.loads(params_file.read_text(encoding='utf-8'))
         workspace_name = 'phst_rules_elisp'
         srcs = []
         tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
-        for dirpath, dirnames, filenames in os.walk(srcdir):
-            dirpath = pathlib.Path(dirpath)
-            if dirpath == srcdir:
-                # Filter out convenience symlinks on Windows.
-                dirnames[:] = [d for d in dirnames
-                               if not d.startswith('bazel-')]
-            for file in filenames:
-                if file.endswith('.py'):
-                    src = dirpath / file
-                    rel = src.relative_to(srcdir)
-                    dest = tempdir / workspace_name / rel
-                    dest.parent.mkdir(parents=True, exist_ok=True)
-                    # Mimic the Bazel behavior.  Also see
-                    # https://github.com/bazelbuild/bazel/issues/10076.
-                    (dest.parent / '__init__.py').touch()
-                    shutil.copy(src, dest)
-                    srcs.append(dest)
+        for file in params['srcs']:
+            dest = tempdir / workspace_name / file['rel']
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy(file['src'], dest)
+            if not file['ext']:
+                srcs.append(dest)
         if not srcs:
-            raise FileNotFoundError(f'no source files in {srcdir} found')
+            raise FileNotFoundError('no source files found')
+        for dirpath, _, _ in os.walk(tempdir):
+            dirpath = pathlib.Path(dirpath)
+            if dirpath != tempdir:
+                # Mimic the Bazel behavior.  Also see
+                # https://github.com/bazelbuild/bazel/issues/10076.
+                (dirpath / '__init__.py').touch()
         _logger.info('using temporary workspace: %s', tempdir)
-        self.tempdir = tempdir
-        self.srcdir = srcdir
         self.srcs = frozenset(srcs)
-        self.external_repos = external_repos
+        self.path = [str(tempdir)] + [str(tempdir / d) for d in params['path']]
+        self._tempdir = tempdir
+        self._output = pathlib.Path(params['out'])
 
-    def clean(self) -> None:
+    def success(self) -> None:
         """Clean up the temporary directory."""
-        shutil.rmtree(self.tempdir)
-        self.tempdir = None
+        shutil.rmtree(self._tempdir)
+        self._tempdir = None
+        self._output.touch()
 
 def _main() -> None:
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--params', type=pathlib.Path, required=True)
+    parser.add_argument('--rcfile', type=pathlib.Path, required=True)
+    args = parser.parse_args()
     logging.getLogger('phst_rules_elisp').setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external workspaces.
-    workspace = Workspace()
-    sys.path += [str(workspace.external_repos), str(workspace.tempdir)]
+    workspace = Workspace(args.params)
+    sys.path += workspace.path
     try:
-        lint.Run(['--rcfile=' + str(workspace.srcdir / '.pylintrc'), '--']
+        lint.Run(['--persistent=no', '--rcfile=' + str(args.rcfile), '--']
                  + sorted(map(str, workspace.srcs)))
     except SystemExit as ex:
         # Only clean up the workspace if we exited successfully, to help with
         # debugging.
         if ex.code == 0:
-            workspace.clean()
+            workspace.success()
         raise
 
 _logger = logging.getLogger('phst_rules_elisp.run_pylint')

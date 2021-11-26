@@ -39,3 +39,90 @@ requirements_txt = repository_rule(
     local = True,
     doc = "Generates requirements.txt for the current platform.",
 )
+
+def _pylint_impl(target, ctx):
+    info = target[PyInfo]
+    stem = "_{}.pytype".format(target.label.name)
+    params_file = ctx.actions.declare_file(stem + ".json")
+    output_file = ctx.actions.declare_file(stem + ".hash")
+    _write_params(ctx.actions, params_file, output_file, info)
+    rcfile = ctx.file._rcfile
+    ctx.actions.run(
+        outputs = [output_file],
+        inputs = depset(
+            direct = [params_file, rcfile],
+            transitive = [info.transitive_sources],
+        ),
+        executable = ctx.executable._pylint,
+        arguments = [
+            "--rcfile=" + rcfile.path,
+            "--params=" + params_file.path,
+        ],
+        mnemonic = "Pylint",
+        progress_message = "linting target {}".format(target.label),
+    )
+    return [OutputGroupInfo(pylint = depset([output_file]))]
+
+def _pytype_impl(target, ctx):
+    info = target[PyInfo]
+    stem = "_{}.pytype".format(target.label.name)
+    params_file = ctx.actions.declare_file(stem + ".json")
+    output_file = ctx.actions.declare_file(stem + ".hash")
+    _write_params(ctx.actions, params_file, output_file, info)
+    ctx.actions.run(
+        outputs = [output_file],
+        inputs = depset(
+            direct = [params_file],
+            transitive = [info.transitive_sources],
+        ),
+        executable = ctx.executable._pytype,
+        arguments = ["--params=" + params_file.path],
+        mnemonic = "Pytype",
+        progress_message = "type-checking target {}".format(target.label),
+    )
+    return [OutputGroupInfo(pytype = depset([output_file]))]
+
+pylint = aspect(
+    implementation = _pylint_impl,
+    attrs = {
+        "_pylint": attr.label(
+            default = "//:run_pylint",
+            executable = True,
+            cfg = "exec",
+        ),
+        "_rcfile": attr.label(
+            default = "//:.pylintrc",
+            allow_single_file = True,
+        ),
+    },
+    required_providers = [PyInfo],
+    provides = [OutputGroupInfo],
+)
+
+pytype = aspect(
+    implementation = _pytype_impl,
+    attrs = {
+        "_pytype": attr.label(
+            default = "//:run_pytype",
+            executable = True,
+            cfg = "exec",
+        ),
+    },
+    required_providers = [PyInfo],
+    provides = [OutputGroupInfo],
+)
+
+def _write_params(actions, params_file, output_file, info):
+    params = struct(
+        out = output_file.path,
+        srcs = [
+            struct(
+                rel = file.short_path,
+                src = file.path,
+                ext = bool(file.owner.workspace_name),
+            )
+            for file in info.transitive_sources.to_list()
+        ],
+        path = info.imports.to_list(),
+    )
+    actions.write(params_file, json.encode(params))
