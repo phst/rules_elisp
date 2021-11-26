@@ -48,7 +48,7 @@ class Workspace:
                     # Mimic the Bazel behavior.  Also see
                     # https://github.com/bazelbuild/bazel/issues/10076.
                     (dest.parent / '__init__.py').touch()
-                    src.link_to(dest)
+                    shutil.copy(src, dest)
                     srcs.append(dest)
         if not srcs:
             raise FileNotFoundError(f'no source files in {srcdir} found')
