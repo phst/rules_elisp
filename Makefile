@@ -27,7 +27,6 @@ CP := cp
 versions := 26.1 26.2 26.3 27.1 27.2
 
 pytype_target := pytype
-run_pytype_target := //:run_pytype
 
 kernel := $(shell uname -s)
 kernel := $(kernel:MINGW64_NT-%=Windows)
@@ -46,7 +45,6 @@ else ifeq ($(kernel),Windows)
   unsupported := 26.1 26.2 26.3
   BAZELFLAGS += --compiler=mingw-gcc
   pytype_target :=
-  run_pytype_target :=
   # Don’t munge Bazel target labels.  See
   # https://www.msys2.org/docs/filesystem-paths/#process-arguments.
   export MSYS2_ARG_CONV_EXCL := //;--extra_toolchains
@@ -71,19 +69,15 @@ buildifier:
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
-# For Pylint and Pytype, we include the manual target //:run_pytype on Unix
-# systems.
 pylint:
 	$(BAZEL) build \
 	  --aspects='//:internal.bzl%pylint' --output_groups=pylint \
-	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target)
+	  $(BAZELFLAGS) -- //...
 
 pytype:
 	$(BAZEL) build \
 	  --aspects='//:internal.bzl%pytype' --output_groups=pytype \
-	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target)
+	  $(BAZELFLAGS) -- //...
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.

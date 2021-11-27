@@ -56,7 +56,11 @@ py_binary(
     srcs_version = "PY3",
     # Pytype doesn’t work on Windows, so don’t build it when running
     # “bazel build //...”.
-    tags = ["manual"],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
     visibility = ["//:__subpackages__"],
     deps = [
         requirement("pytype"),
