@@ -29,8 +29,7 @@ def _main() -> None:
     args = parser.parse_args()
     logging.getLogger('phst_rules_elisp').setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pytype can find imports for the main and
-    # external workspaces.  We’d want to set the Python path to only
-    # {external_repos}:{tempdir}, but for some reason that breaks Pytype.
+    # external workspaces.
     workspace = run_pylint.Workspace(args.params)
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
