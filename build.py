@@ -88,7 +88,10 @@ def buildifier() -> None:
 
 @target
 def nogo() -> None:
-    """Checks that there are no unwanted Go targets in public packages."""
+    """Checks that there are no unwanted Go targets in public packages.
+
+    We don’t want any Go rules in the public packages, as our users would have
+    to depend on the Go rules then as well."""
     print('looking for unwanted Go targets in public packages', flush=True)
     cwd = pathlib.Path(os.getcwd())
     for directory in ('elisp', 'emacs'):
