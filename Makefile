@@ -26,7 +26,7 @@ CP := cp
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
 
-pytype_target := pytype
+has_pytype := true
 run_pytype_target := //:run_pytype
 
 kernel := $(shell uname -s)
@@ -45,7 +45,7 @@ else ifeq ($(kernel),Windows)
   # Windows only supports Emacs 27.
   unsupported := 26.1 26.2 26.3
   BAZELFLAGS += --compiler=mingw-gcc
-  pytype_target :=
+  has_pytype := false
   run_pytype_target :=
   # Don’t munge Bazel target labels.  See
   # https://www.msys2.org/docs/filesystem-paths/#process-arguments.
@@ -63,20 +63,21 @@ endif
 
 versions := $(filter-out $(unsupported),$(versions))
 
+output_groups := pylint
+aspects := //:internal.bzl%pylint
+
+ifeq ($(has_pytype),true)
+  output_groups := $(output_groups),pytype
+  aspects := $(aspects),//:internal.bzl%pytype
+endif
+
 # Test both default toolchain and versioned toolchains.
-all: buildifier $(pytype_target) nogo docs check $(versions) ext
+all: buildifier nogo docs check $(versions) ext
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
-
-# For Pytype, we include the manual target //:run_pytype on Unix systems.
-pytype:
-	$(BAZEL) build \
-	  --aspects='//:internal.bzl%pytype' --output_groups=pytype \
-	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target)
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
@@ -86,9 +87,10 @@ nogo:
 	  -exec $(GREP) -F -e '@io_bazel_rules_go' -n -- '{}' '+' \
 	  || { echo 'Unwanted Go targets found'; exit 1; }
 
+# We include the manual target //:run_pytype on Unix systems.
 check:
 	$(BAZEL) test \
-	  --aspects='//:internal.bzl%pylint' --output_groups='+pylint' \
+	  --aspects='$(aspects)' --output_groups='+$(output_groups)' \
 	  --test_output=errors $(BAZELFLAGS) -- //... $(run_pytype_target)
 
 $(versions):
@@ -109,5 +111,5 @@ $(doc_sources): %: bazel-bin/%.generated
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
 
-.PHONY: all buildifier pytype nogo check $(versions) ext
+.PHONY: all buildifier nogo check $(versions) ext
 .PHONY: docs $(doc_sources) $(doc_generated)
