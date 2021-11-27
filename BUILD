@@ -23,6 +23,12 @@ compile_pip_requirements(
     ],
     requirements_in = "requirements.in",
     requirements_txt = ":requirements_txt",
+    tags = [
+        # Don’t try to run Pylint or Pytype.  This target doesn’t contain any of
+        # our source files.
+        "nolint",
+        "notype",
+    ],
 )
 
 alias(

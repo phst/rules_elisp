@@ -41,6 +41,8 @@ requirements_txt = repository_rule(
 )
 
 def _pylint_impl(target, ctx):
+    if "nolint" in ctx.rule.attr.tags:
+        return []
     info = target[PyInfo]
     stem = "_{}.pytype".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
@@ -64,6 +66,8 @@ def _pylint_impl(target, ctx):
     return [OutputGroupInfo(pylint = depset([output_file]))]
 
 def _pytype_impl(target, ctx):
+    if "notype" in ctx.rule.attr.tags:
+        return []
     info = target[PyInfo]
     stem = "_{}.pytype".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
@@ -96,7 +100,6 @@ pylint = aspect(
         ),
     },
     required_providers = [PyInfo],
-    provides = [OutputGroupInfo],
 )
 
 pytype = aspect(
@@ -109,7 +112,6 @@ pytype = aspect(
         ),
     },
     required_providers = [PyInfo],
-    provides = [OutputGroupInfo],
 )
 
 def _write_params(actions, params_file, output_file, info):

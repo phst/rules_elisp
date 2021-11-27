@@ -72,20 +72,18 @@ buildifier:
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
 # For Pylint and Pytype, we include the manual target //:run_pytype on Unix
-# systems, but exclude targets that only contain external source files.
+# systems.
 pylint:
 	$(BAZEL) build \
 	  --aspects='//:internal.bzl%pylint' --output_groups=pylint \
 	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target) \
-	  -//:requirements.update -//:requirements_test
+	  //... $(run_pytype_target)
 
 pytype:
 	$(BAZEL) build \
 	  --aspects='//:internal.bzl%pytype' --output_groups=pytype \
 	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target) \
-	  -//:requirements.update -//:requirements_test
+	  //... $(run_pytype_target)
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
