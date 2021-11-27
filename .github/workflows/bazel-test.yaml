@@ -28,6 +28,10 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
+      - name: Install Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '>=3.7'
       - name: Install Bazelisk
         uses: bazelbuild/setup-bazelisk@v1
       - name: Install APT packages
@@ -38,16 +42,8 @@ jobs:
         with:
           update: false
           release: false
-          path-type: inherit
         if: runner.os == 'Windows'
       - name: Run Bazel tests
-        run: make
+        run: python build.py
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
-        if: "runner.os != 'Windows'"
-      - name: Run Bazel tests on Windows
-        run: make
-        shell: msys2 {0}
-        env:
-          USE_BAZEL_VERSION: ${{matrix.bazel}}
-        if: runner.os == 'Windows'
