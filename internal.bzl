@@ -44,7 +44,7 @@ def _pylint_impl(target, ctx):
     if "nolint" in ctx.rule.attr.tags:
         return []
     info = target[PyInfo]
-    stem = "_{}.pytype".format(target.label.name)
+    stem = "_{}.pylint".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".hash")
     _write_params(ctx.actions, params_file, output_file, info)
