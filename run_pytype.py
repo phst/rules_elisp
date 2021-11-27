@@ -18,9 +18,8 @@ import argparse
 import logging
 import os
 import pathlib
+import subprocess
 import sys
-
-from pytype.tools.analyze_project import main
 
 from phst_rules_elisp import run_pylint
 
@@ -38,16 +37,20 @@ def _main() -> None:
     bindir = workspace.tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
-    os.environ['PATH'] = os.pathsep.join([str(bindir)] + os.get_exec_path())
-    sys.path += workspace.path
-    sys.argv = ([sys.argv[0], '--no-cache', '--']
-                + sorted(map(str, workspace.srcs)))
-    code = main.main()
+    env = dict(os.environ,
+               PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
+               PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
+    result = subprocess.run(
+        [sys.executable, '-m', 'pytype',
+         '--no-cache', '--'] + sorted(map(str, workspace.srcs)),
+        check=False, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        encoding='utf-8', errors='backslashreplace')
+    if result.returncode:
+        print(result.stdout)
+        sys.exit(result.returncode)
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
-    if code == 0:
-        workspace.success()
-    sys.exit(code)
+    workspace.success()
 
 if __name__ == '__main__':
     _main()

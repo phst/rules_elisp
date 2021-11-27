@@ -21,9 +21,8 @@ import os
 import pathlib
 import shutil
 import sys
+import subprocess
 import tempfile
-
-from pylint import lint
 
 class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
@@ -68,16 +67,20 @@ def _main() -> None:
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external workspaces.
     workspace = Workspace(args.params)
-    sys.path += workspace.path
-    try:
-        lint.Run(['--persistent=no', '--rcfile=' + str(args.rcfile), '--']
-                 + sorted(map(str, workspace.srcs)))
-    except SystemExit as ex:
-        # Only clean up the workspace if we exited successfully, to help with
-        # debugging.
-        if ex.code == 0:
-            workspace.success()
-        raise
+    env = dict(os.environ,
+               PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
+    result = subprocess.run(
+        [sys.executable, '-m', 'pylint',
+         '--persistent=no', '--rcfile=' + str(args.rcfile), '--' ]
+        + sorted(map(str, workspace.srcs)),
+        check=False, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        encoding='utf-8', errors='backslashreplace')
+    if result.returncode:
+        print(result.stdout)
+        sys.exit(result.returncode)
+    # Only clean up the workspace if we exited successfully, to help with
+    # debugging.
+    workspace.success()
 
 _logger = logging.getLogger('phst_rules_elisp.run_pylint')
 
