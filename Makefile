@@ -63,11 +63,11 @@ endif
 
 versions := $(filter-out $(unsupported),$(versions))
 
-output_groups := pylint
+output_groups := +pylint
 aspects := //:internal.bzl%pylint
 
 ifeq ($(has_pytype),true)
-  output_groups := $(output_groups),pytype
+  output_groups := $(output_groups),+pytype
   aspects := $(aspects),//:internal.bzl%pytype
 endif
 
@@ -90,7 +90,7 @@ nogo:
 # We include the manual target //:run_pytype on Unix systems.
 check:
 	$(BAZEL) test \
-	  --aspects='$(aspects)' --output_groups='+$(output_groups)' \
+	  --aspects='$(aspects)' --output_groups='$(output_groups)' \
 	  --test_output=errors $(BAZELFLAGS) -- //... $(run_pytype_target)
 
 $(versions):
