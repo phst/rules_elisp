@@ -64,21 +64,14 @@ endif
 versions := $(filter-out $(unsupported),$(versions))
 
 # Test both default toolchain and versioned toolchains.
-all: buildifier pylint $(pytype_target) nogo docs check $(versions) ext
+all: buildifier $(pytype_target) nogo docs check $(versions) ext
 
 buildifier:
 	$(BAZEL) run $(BAZELFLAGS) -- \
 	  @com_github_bazelbuild_buildtools//buildifier \
 	  --mode=check --lint=warn -r -- "$${PWD}"
 
-# For Pylint and Pytype, we include the manual target //:run_pytype on Unix
-# systems.
-pylint:
-	$(BAZEL) build \
-	  --aspects='//:internal.bzl%pylint' --output_groups=pylint \
-	  $(BAZELFLAGS) -- \
-	  //... $(run_pytype_target)
-
+# For Pytype, we include the manual target //:run_pytype on Unix systems.
 pytype:
 	$(BAZEL) build \
 	  --aspects='//:internal.bzl%pytype' --output_groups=pytype \
@@ -94,7 +87,9 @@ nogo:
 	  || { echo 'Unwanted Go targets found'; exit 1; }
 
 check:
-	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
+	$(BAZEL) test \
+	  --aspects='//:internal.bzl%pylint' --output_groups='+pylint' \
+	  --test_output=errors $(BAZELFLAGS) -- //... $(run_pytype_target)
 
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
@@ -114,5 +109,5 @@ $(doc_sources): %: bazel-bin/%.generated
 $(doc_generated) &:
 	$(BAZEL) build $(BAZELFLAGS) -- $(doc_targets)
 
-.PHONY: all buildifier pylint pytype nogo check $(versions) ext
+.PHONY: all buildifier pytype nogo check $(versions) ext
 .PHONY: docs $(doc_sources) $(doc_generated)
