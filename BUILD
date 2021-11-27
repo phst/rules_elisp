@@ -16,6 +16,13 @@ load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
+py_binary(
+    name = "build",
+    srcs = ["build.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+)
+
 compile_pip_requirements(
     name = "requirements",
     extra_args = [
