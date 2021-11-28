@@ -41,20 +41,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	// The load path setup depends on whether we use manifest-based or
-	// directory-based runfiles.
-	var loadPathArgs []string
-	if dir, err := runfiles.Path("phst_rules_elisp"); err == nil {
-		// Directory-based runfiles.
-		loadPathArgs = []string{"--directory=" + dir}
-	} else {
-		// Manifest-based runfiles.
-		loadPathArgs = []string{
-			"--load=" + runfilesLib,
-			"--funcall=elisp/runfiles/install-handler",
-			"--directory=/bazel-runfile:phst_rules_elisp",
-		}
-	}
 	inputFile, err := runfiles.Path("phst_rules_elisp/elisp/binary.cc")
 	if err != nil {
 		log.Fatal(err)
@@ -66,8 +52,21 @@ func main() {
 		outputFile = `C:\Temp\output.dat`
 	}
 	gotArgs := flag.Args()
-	wantArgs := append(
-		append([]string{"--quick", "--batch"}, loadPathArgs...),
+	wantArgs := []string{"--quick", "--batch"}
+	// The load path setup depends on whether we use manifest-based or
+	// directory-based runfiles.
+	if dir, err := runfiles.Path("phst_rules_elisp"); err == nil {
+		// Directory-based runfiles.
+		wantArgs = append(wantArgs, "--directory="+dir)
+	} else {
+		// Manifest-based runfiles.
+		wantArgs = append(wantArgs,
+			"--load="+runfilesLib,
+			"--funcall=elisp/runfiles/install-handler",
+			"--directory=/bazel-runfile:phst_rules_elisp",
+		)
+	}
+	wantArgs = append(wantArgs,
 		"--option",
 		inputFile,
 		" \t\n\r\f äα𝐴🐈'\\\"",
