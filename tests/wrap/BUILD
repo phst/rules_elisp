@@ -29,7 +29,10 @@ go_library(
 go_binary(
     name = "wrap",
     testonly = 1,
-    out = "wrap",
+    out = select({
+        "@platforms//os:windows": "wrap.exe",
+        "//conditions:default": "wrap",
+    }),
     embed = [":go_default_library"],
     visibility = ["//elisp:__pkg__"],
 )
