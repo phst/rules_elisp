@@ -12,31 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-
-go_library(
-    name = "go_default_library",
-    testonly = 1,
-    srcs = ["main.go"],
-    data = [
-        "//elisp:binary.cc",
-        "//elisp/runfiles:runfiles.elc",
-    ],
-    importpath = "github.com/phst/rules_elisp/tests/wrap",
-    visibility = ["//visibility:private"],
-    deps = [
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@com_github_phst_runfiles//:go_default_library",
-    ],
-)
-
-go_binary(
+py_binary(
     name = "wrap",
     testonly = 1,
-    out = select({
-        "@platforms//os:windows": "wrap.exe",
-        "//conditions:default": "wrap",
-    }),
-    embed = [":go_default_library"],
+    srcs = ["wrap.py"],
+    data = [
+        "//elisp:binary.cc",
+        "//elisp:binary.h",
+        "//elisp/runfiles:runfiles.elc",
+    ],
+    python_version = "PY3",
+    srcs_version = "PY3",
     visibility = ["//elisp:__pkg__"],
+    deps = ["//elisp:runfiles"],
 )

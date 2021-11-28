@@ -31,7 +31,7 @@ TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
   NativeString wrapper =
-      PHST_RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/tests/wrap/wrap");
+      PHST_RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/elisp/wrap");
 #ifdef PHST_RULES_ELISP_WINDOWS
   wrapper += L".exe";
 #endif

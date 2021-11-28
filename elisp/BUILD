@@ -258,7 +258,7 @@ cc_test(
     data = [
         "binary.cc",
         "binary.h",
-        "//tests/wrap",
+        ":wrap",
     ],
     features = WRAPPER_FEATURES,
     linkopts = LINKOPTS,
@@ -267,6 +267,21 @@ cc_test(
         ":binary",
         ":process",
         "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_binary(
+    name = "wrap",
+    testonly = 1,
+    srcs = ["wrap.cc"],
+    copts = WRAPPER_COPTS,
+    data = ["//tests/wrap"],
+    features = WRAPPER_FEATURES,
+    linkopts = WRAPPER_LINKOPTS,
+    linkstatic = True,
+    deps = [
+        ":platform",
+        ":process",
     ],
 )
 
@@ -355,7 +370,10 @@ py_library(
     name = "runfiles",
     srcs = ["runfiles.py"],
     srcs_version = "PY3",
-    visibility = ["//emacs:__pkg__"],
+    visibility = [
+        "//emacs:__pkg__",
+        "//tests/wrap:__pkg__",
+    ],
     deps = ["@bazel_tools//tools/python/runfiles"],
 )
 
@@ -421,6 +439,9 @@ cc_defaults(
 )
 
 exports_files(
-    ["binary.cc"],
+    [
+        "binary.cc",
+        "binary.h",
+    ],
     visibility = ["//tests/wrap:__pkg__"],
 )
