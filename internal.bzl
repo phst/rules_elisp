@@ -40,75 +40,42 @@ requirements_txt = repository_rule(
     doc = "Generates requirements.txt for the current platform.",
 )
 
-def _pylint_impl(target, ctx):
-    if "nolint" in ctx.rule.attr.tags:
+def _check_python_impl(target, ctx):
+    if "no-python-check" in ctx.rule.attr.tags:
         return []
     info = target[PyInfo]
-    stem = "_{}.pylint".format(target.label.name)
+    stem = "_{}.python-check".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".hash")
     _write_params(ctx.actions, params_file, output_file, info)
-    rcfile = ctx.file._rcfile
+    pylintrc = ctx.file._pylintrc
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
-            direct = [params_file, rcfile],
+            direct = [params_file, pylintrc],
             transitive = [info.transitive_sources],
         ),
-        executable = ctx.executable._pylint,
+        executable = ctx.executable._check,
         arguments = [
-            "--rcfile=" + rcfile.path,
+            "--pylintrc=" + pylintrc.path,
             "--params=" + params_file.path,
         ],
-        mnemonic = "Pylint",
-        progress_message = "linting target {}".format(target.label),
+        mnemonic = "PythonCheck",
+        progress_message = "performing static analysis of target {}".format(target.label),
     )
-    return [OutputGroupInfo(pylint = depset([output_file]))]
+    return [OutputGroupInfo(check_python = depset([output_file]))]
 
-def _pytype_impl(target, ctx):
-    if "notype" in ctx.rule.attr.tags:
-        return []
-    info = target[PyInfo]
-    stem = "_{}.pytype".format(target.label.name)
-    params_file = ctx.actions.declare_file(stem + ".json")
-    output_file = ctx.actions.declare_file(stem + ".hash")
-    _write_params(ctx.actions, params_file, output_file, info)
-    ctx.actions.run(
-        outputs = [output_file],
-        inputs = depset(
-            direct = [params_file],
-            transitive = [info.transitive_sources],
-        ),
-        executable = ctx.executable._pytype,
-        arguments = ["--params=" + params_file.path],
-        mnemonic = "Pytype",
-        progress_message = "type-checking target {}".format(target.label),
-    )
-    return [OutputGroupInfo(pytype = depset([output_file]))]
-
-pylint = aspect(
-    implementation = _pylint_impl,
+check_python = aspect(
+    implementation = _check_python_impl,
     attrs = {
-        "_pylint": attr.label(
-            default = "//:run_pylint",
+        "_check": attr.label(
+            default = "//:check_python",
             executable = True,
             cfg = "exec",
         ),
-        "_rcfile": attr.label(
+        "_pylintrc": attr.label(
             default = "//:.pylintrc",
             allow_single_file = True,
-        ),
-    },
-    required_providers = [PyInfo],
-)
-
-pytype = aspect(
-    implementation = _pytype_impl,
-    attrs = {
-        "_pytype": attr.label(
-            default = "//:run_pytype",
-            executable = True,
-            cfg = "exec",
         ),
     },
     required_providers = [PyInfo],
