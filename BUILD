@@ -26,8 +26,7 @@ compile_pip_requirements(
     tags = [
         # Don’t try to run Pylint or Pytype.  This target doesn’t contain any of
         # our source files.
-        "nolint",
-        "notype",
+        "no-python-check",
     ],
 )
 
@@ -41,32 +40,18 @@ alias(
 )
 
 py_binary(
-    name = "run_pylint",
-    srcs = ["run_pylint.py"],
+    name = "check_python",
+    srcs = ["check_python.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     visibility = ["//:__subpackages__"],
-    deps = [requirement("pylint")],
-)
-
-py_binary(
-    name = "run_pytype",
-    srcs = ["run_pytype.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    tags = ["manual"],
-    # Pytype doesn’t work on Windows, so don’t build it when running
-    # “bazel build //...”.
-    target_compatible_with = select({
-        "@platforms//os:linux": [],
-        "@platforms//os:macos": [],
-        "//conditions:default": ["@platforms//:incompatible"],
+    deps = [requirement("pylint")] + select({
+        # Pytype doesn’t work on Windows, so don’t build it when running
+        # “bazel build //...”.
+        "@platforms//os:linux": [requirement("pytype")],
+        "@platforms//os:macos": [requirement("pytype")],
+        "//conditions:default": [],
     }),
-    visibility = ["//:__subpackages__"],
-    deps = [
-        requirement("pytype"),
-        ":run_pylint",
-    ],
 )
 
 exports_files(

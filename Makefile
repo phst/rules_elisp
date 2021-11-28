@@ -26,9 +26,6 @@ CP := cp
 # All potentially supported Emacs versions.
 versions := 26.1 26.2 26.3 27.1 27.2
 
-has_pytype := true
-run_pytype_target := //:run_pytype
-
 kernel := $(shell uname -s)
 kernel := $(kernel:MINGW64_NT-%=Windows)
 kernel := $(kernel:MSYS_NT-%=Windows)
@@ -45,8 +42,6 @@ else ifeq ($(kernel),Windows)
   # Windows only supports Emacs 27.
   unsupported := 26.1 26.2 26.3
   BAZELFLAGS += --compiler=mingw-gcc
-  has_pytype := false
-  run_pytype_target :=
   # Don’t munge Bazel target labels.  See
   # https://www.msys2.org/docs/filesystem-paths/#process-arguments.
   export MSYS2_ARG_CONV_EXCL := //;--extra_toolchains
@@ -62,14 +57,6 @@ else
 endif
 
 versions := $(filter-out $(unsupported),$(versions))
-
-output_groups := +pylint
-aspects := //:internal.bzl%pylint
-
-ifeq ($(has_pytype),true)
-  output_groups := $(output_groups),+pytype
-  aspects := $(aspects),//:internal.bzl%pytype
-endif
 
 # Test both default toolchain and versioned toolchains.
 all: buildifier nogo docs check $(versions) ext
@@ -87,12 +74,8 @@ nogo:
 	  -exec $(GREP) -F -e '@io_bazel_rules_go' -n -- '{}' '+' \
 	  || { echo 'Unwanted Go targets found'; exit 1; }
 
-# We include the manual target //:run_pytype on Unix systems.  Don’t load
-# .bazelrc to avoid a “duplicate aspects” error.
 check:
-	$(BAZEL) --noworkspace_rc test \
-	  --aspects='$(aspects)' --output_groups='$(output_groups)' \
-	  --test_output=errors $(BAZELFLAGS) -- //... $(run_pytype_target)
+	$(BAZEL) test --test_output=errors $(BAZELFLAGS) -- //...
 
 $(versions):
 	$(MAKE) check BAZELFLAGS='$(BAZELFLAGS) --extra_toolchains=//elisp:emacs_$@_toolchain'
