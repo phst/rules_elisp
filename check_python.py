@@ -72,14 +72,17 @@ def _main() -> None:
     bindir = workspace.tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
+    cwd = workspace.tempdir / 'phst_rules_elisp'
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
                PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
-         '--persistent=no', '--rcfile=' + str(args.pylintrc), '--']
-        + sorted(map(str, workspace.srcs)),
-        check=False, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()), '--']
+        + [str(file.relative_to(cwd))
+           for file in sorted(workspace.srcs)],
+        check=False, cwd=cwd, env=env,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
     if result.returncode:
         print(result.stdout)
@@ -87,8 +90,9 @@ def _main() -> None:
     if os.name == 'posix':
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
-             '--no-cache', '--'] + sorted(map(str, workspace.srcs)),
-            check=False, env=env,
+             '--no-cache', '--'] + [str(file.relative_to(cwd))
+                                    for file in sorted(workspace.srcs)],
+            check=False, cwd=cwd, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
         if result.returncode:
