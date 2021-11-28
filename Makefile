@@ -87,9 +87,10 @@ nogo:
 	  -exec $(GREP) -F -e '@io_bazel_rules_go' -n -- '{}' '+' \
 	  || { echo 'Unwanted Go targets found'; exit 1; }
 
-# We include the manual target //:run_pytype on Unix systems.
+# We include the manual target //:run_pytype on Unix systems.  Don’t load
+# .bazelrc to avoid a “duplicate aspects” error.
 check:
-	$(BAZEL) test \
+	$(BAZEL) --noworkspace_rc test \
 	  --aspects='$(aspects)' --output_groups='$(output_groups)' \
 	  --test_output=errors $(BAZELFLAGS) -- //... $(run_pytype_target)
 
