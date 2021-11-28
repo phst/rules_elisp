@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +16,6 @@ py_binary(
     name = "wrap",
     testonly = 1,
     srcs = ["wrap.py"],
-    data = [
-        "//elisp:binary.cc",
-        "//elisp:binary.h",
-        "//elisp/runfiles:runfiles.elc",
-    ],
     python_version = "PY3",
     srcs_version = "PY3",
     visibility = ["//elisp:__pkg__"],

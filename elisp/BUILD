@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -377,7 +377,6 @@ py_library(
     srcs_version = "PY3",
     visibility = [
         "//emacs:__pkg__",
-        "//examples:__pkg__",
         "//tests/wrap:__pkg__",
     ],
     deps = ["@bazel_tools//tools/python/runfiles"],
