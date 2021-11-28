@@ -30,13 +30,17 @@ using ::testing::Eq;
 TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
+  NativeString wrapper =
+      PHST_RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/tests/wrap/wrap");
+#ifdef PHST_RULES_ELISP_WINDOWS
+  wrapper += L".exe";
+#endif
   const NativeString argv0 = PHST_RULES_ELISP_NATIVE_LITERAL("unused");
   const absl::StatusOr<NativeString> input_file =
       runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
   ASSERT_TRUE(input_file.ok()) << input_file.status();
   const std::vector<NativeString> args = {
-      PHST_RULES_ELISP_NATIVE_LITERAL(
-          "--wrapper=phst_rules_elisp/tests/wrap/wrap"),
+      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=") + wrapper,
       PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
