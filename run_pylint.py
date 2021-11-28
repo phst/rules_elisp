@@ -71,7 +71,7 @@ def _main() -> None:
                PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
-         '--persistent=no', '--rcfile=' + str(args.rcfile), '--' ]
+         '--persistent=no', '--rcfile=' + str(args.rcfile), '--']
         + sorted(map(str, workspace.srcs)),
         check=False, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
