@@ -45,10 +45,7 @@ def main() -> None:
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
     libexec = install / 'libexec'
-    # We need to set argv[0] to the original argv[0] because the binary will use
-    # it to find its runfiles.  See
-    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
-    args = [opts.argv[0]]
+    args = [str(emacs)]  # List[str]
     if opts.dump_mode == 'portable':
         dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
         args.append('--dump-file=' + str(dump))
@@ -70,7 +67,7 @@ def main() -> None:
         _check_codepage('environment variable name', env.keys())
         _check_codepage('environment variable value', env.values())
     try:
-        subprocess.run(executable=str(emacs), args=args, env=env, check=True)
+        subprocess.run(args, env=env, check=True)
     except subprocess.CalledProcessError as ex:
         if 0 < ex.returncode < 0x100:
             # Don’t print a stacktrace if Emacs exited with a non-zero exit
