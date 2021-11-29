@@ -58,7 +58,6 @@ def main() -> None:
     orig_env = dict(os.environ)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
-    _logger.info('running test with Emacs binary %s', emacs)
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch', '--module-assertions']
@@ -109,7 +108,6 @@ def main() -> None:
                 timeout_secs = int(timeout_str) - 2
             flags = subprocess.CREATE_NEW_PROCESS_GROUP  # pylint: disable=line-too-long  # pytype: disable=module-attr
             kwargs['creationflags'] = flags
-        _logger.info('running Emacs test command %s', args)
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
@@ -134,11 +132,9 @@ def main() -> None:
                 sys.exit(0xFF)
             returncode = process.wait()
         if returncode:
-            _logger.info('Emacs failed with exit code %s', returncode)
             # Don’t print a stacktrace if Emacs exited with a non-zero exit
             # code.
             sys.exit(returncode)
-        _logger.info('Emacs test finished successfully')
 
 def _quote(arg: str) -> str:
     return urllib.parse.quote(arg) if _WINDOWS else arg
