@@ -98,6 +98,8 @@ def _main() -> None:
         if result.returncode:
             print(result.stdout)
             sys.exit(result.returncode)
+    else:
+        _logger.warning('not running Pytype on operating system %r', os.name)
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
     workspace.success()
