@@ -64,10 +64,7 @@ def main() -> None:
     orig_env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
-    # We need to set argv[0] to the original argv[0] because the binary will use
-    # it to find its runfiles.  See
-    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
-    args = [opts.argv[0]]
+    args = [str(emacs)]  # List[str]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch']
         if opts.module_assertions:
@@ -122,8 +119,7 @@ def main() -> None:
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
-        with subprocess.Popen(executable=str(emacs), args=args, env=env,
-                              **kwargs) as process:
+        with subprocess.Popen(args, env=env, **kwargs) as process:
             try:
                 process.communicate(timeout=timeout_secs)
             except subprocess.TimeoutExpired:

@@ -55,10 +55,7 @@ def main() -> None:
     orig_env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
-    # We need to set argv[0] to the original argv[0] because the binary will use
-    # it to find its runfiles.  See
-    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.
-    args = [opts.argv[0]]
+    args = [str(emacs)]  # List[str]
     with manifest.add(opts.mode, args) as manifest_file:
         args.append('--quick')
         if not opts.interactive:
@@ -76,8 +73,7 @@ def main() -> None:
         env = dict(orig_env)
         env.update(run_files.environment())
         try:
-            subprocess.run(executable=str(emacs), args=args, env=env,
-                           check=True)
+            subprocess.run(args, env=env, check=True)
         except subprocess.CalledProcessError as ex:
             if 0 < ex.returncode < 0x100:
                 # Don’t print a stacktrace if Emacs exited with a non-zero exit
