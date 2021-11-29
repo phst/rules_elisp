@@ -102,7 +102,7 @@ def _main() -> None:
     # debugging.
     workspace.success()
 
-_logger = logging.getLogger('phst_rules_elisp.run_pylint')
+_logger = logging.getLogger('phst_rules_elisp.check_python')
 
 if __name__ == '__main__':
     _main()
