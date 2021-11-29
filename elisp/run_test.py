@@ -112,7 +112,7 @@ def main() -> None:
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
         with subprocess.Popen(executable=str(emacs), args=args, env=env,
-                              stdin=subprocess.DEVNULL, **kwargs) as process:
+                              **kwargs) as process:
             try:
                 process.communicate(timeout=timeout_secs)
             except subprocess.TimeoutExpired:
