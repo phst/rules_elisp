@@ -151,7 +151,6 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
     for i, file in enumerate(files):
         file = pathlib.Path(file)
         if not file.is_absolute() and not file.exists():
-            _logger.info('resolving relative runfile filename %s', file)
             try:
                 file = run_files.resolve(
                     pathlib.PurePosixPath(file.as_posix()))
@@ -161,7 +160,6 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
             except FileNotFoundError:
                 _logger.warning('instrumented file %s not found', file)
     if edited:
-        _logger.info('updating coverage manifest file %s', manifest_file)
         with manifest_file.open(mode='w', encoding='iso-8859-1',
                                 newline='\n') as stream:
             for file in files:
