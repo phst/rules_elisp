@@ -63,7 +63,7 @@ def _main() -> None:
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     args = parser.parse_args()
-    logging.getLogger('phst_rules_elisp').setLevel(logging.INFO)
+    _logger.setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
     workspace = Workspace(args.params)
