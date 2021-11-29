@@ -38,7 +38,6 @@ namespace phst_rules_elisp {
 static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   if (!runfiles.ok()) return runfiles.status();
-  std::clog << "Running Emacs Lisp test" << std::endl;
   return Run("phst_rules_elisp/elisp/run_test", args, *runfiles);
 }
 
