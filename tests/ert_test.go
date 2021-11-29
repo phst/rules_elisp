@@ -63,9 +63,11 @@ func Test(t *testing.T) {
 	coverageDir := t.TempDir()
 
 	cmd := exec.Command(bin, "arg 1", "arg\n2")
+	env := os.Environ()
+	env = append(env, runfilesEnv...)
 	// See
 	// https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
-	cmd.Env = append(os.Environ(), append(runfilesEnv,
+	env = append(env,
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"COVERAGE=1",
@@ -74,7 +76,9 @@ func Test(t *testing.T) {
 		// Don’t have the Python launcher change the current directory,
 		// otherwise our fake environment setup won’t work.  See
 		// https://github.com/bazelbuild/bazel/issues/7190.
-		"RUN_UNDER_RUNFILES=0")...)
+		"RUN_UNDER_RUNFILES=0",
+	)
+	cmd.Env = env
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = workspace
