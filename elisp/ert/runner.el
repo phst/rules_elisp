@@ -793,7 +793,8 @@ file that has been instrumented with Edebug."
        ;; Yuck!  More messing around with Edebug internals.
        for name = (edebug--form-data-name data)
        for ours = (eq (get name 'edebug-behavior) 'elisp/ert/coverage)
-       for coverage = (get name (if ours 'elisp/ert/coverage 'edebug-freq-count))
+       for coverage = (get name
+                           (if ours 'elisp/ert/coverage 'edebug-freq-count))
        for frequency = (if ours
                            (lambda (cov)
                              (and cov (elisp/ert/coverage--data-hits cov)))
