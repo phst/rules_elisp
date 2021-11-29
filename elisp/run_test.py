@@ -28,7 +28,6 @@ import sys
 import time
 from typing import List, Tuple
 import urllib.parse
-import warnings
 
 from phst_rules_elisp.elisp import load
 from phst_rules_elisp.elisp import manifest
@@ -164,7 +163,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                 files[i] = file.as_posix()
                 edited = True
             except FileNotFoundError:
-                warnings.warn(f'instrumented file {file} not found')
+                _logger.warning('instrumented file %s not found', file)
     if edited:
         _logger.info('updating coverage manifest file %s', manifest_file)
         with manifest_file.open(mode='w', encoding='iso-8859-1',
