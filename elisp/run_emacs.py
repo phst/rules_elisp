@@ -55,6 +55,10 @@ def main() -> None:
                EMACSDOC=str(etc),
                EMACSLOADPATH=str(shared / 'lisp'),
                EMACSPATH=str(libexec))
+    # We don’t want the Python launcher to change the current working directory,
+    # otherwise relative filenames will be all messed up.  See
+    # https://github.com/bazelbuild/bazel/issues/7190.
+    env.pop('RUN_UNDER_RUNFILES', None)
     env.update(run_files.environment())
     if os.name == 'nt':
         # On Windows, Emacs doesn’t support Unicode arguments or environment

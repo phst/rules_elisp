@@ -392,7 +392,11 @@ absl::StatusOr<int> Run(std::string binary,
 #ifdef PHST_RULES_ELISP_WINDOWS
   binary += ".exe";
 #endif
-  const Environment orig_env = CopyEnv();
+  Environment orig_env = CopyEnv();
+  // We don’t want the Python launcher to change the current working directory,
+  // otherwise relative filenames will be all messed up.  See
+  // https://github.com/bazelbuild/bazel/issues/7190.
+  orig_env.erase(PHST_RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
   absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
