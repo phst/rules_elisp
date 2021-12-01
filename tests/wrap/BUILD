@@ -18,6 +18,10 @@ go_library(
     name = "go_default_library",
     testonly = 1,
     srcs = ["main.go"],
+    data = [
+        "//elisp:binary.cc",
+        "//elisp/runfiles:runfiles.elc",
+    ],
     importpath = "github.com/phst/rules_elisp/tests/wrap",
     visibility = ["//visibility:private"],
     deps = [

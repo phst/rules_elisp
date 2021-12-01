@@ -412,3 +412,8 @@ cc_defaults(
     linkopts = WRAPPER_LINKOPTS,
     visibility = ["//visibility:public"],
 )
+
+exports_files(
+    ["binary.cc"],
+    visibility = ["//tests/wrap:__pkg__"],
+)
