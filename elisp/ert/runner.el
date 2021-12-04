@@ -136,7 +136,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                  :test #'elisp/ert/file--equal-p))
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
-        (when (version< emacs-version "28.1")
+        (when (< emacs-major-version 28)
           ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
           ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
           ;; the Edebug symbols for ‘cl-flet’ (and ‘cl-labels’, which defers to
