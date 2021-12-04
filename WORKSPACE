@@ -121,10 +121,10 @@ protobuf_deps()
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "c1d5de8802be326300f7a481c2530cf7bfa911e52f46252c71351f9dd305535d",
-    strip_prefix = "buildtools-4.2.3/",
+    sha256 = "97eb2b241da89b50a0a28a45ae4408661ab740c682db550ea611e8b57334ea9e",
+    strip_prefix = "buildtools-4.2.4/",
     urls = [
-        "https://github.com/bazelbuild/buildtools/archive/refs/tags/4.2.3.zip",  # 2021-10-26
+        "https://github.com/bazelbuild/buildtools/archive/refs/tags/4.2.4.zip",  # 2021-11-29
     ],
 )
 
