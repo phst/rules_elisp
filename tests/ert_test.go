@@ -272,14 +272,16 @@ BRDA:48,0,0,-
 BRDA:48,0,1,-
 BRDA:49,0,0,1
 BRDA:49,0,1,0
+BRDA:52,0,0,0
+BRDA:52,0,1,1
 BRDA:53,0,0,0
 BRDA:53,0,1,1
 BRDA:53,0,2,0
 BRDA:53,0,3,0
 BRDA:54,0,0,3
 BRDA:54,0,1,0
-BRF:24
-BRH:9
+BRF:26
+BRH:10
 DA:30,1
 DA:31,1
 DA:32,0
@@ -322,6 +324,25 @@ end_of_record
 				t.Errorf("invalid suffix in coverage manifest: %s", err)
 			}
 			return strconv.Itoa(2*i + 1)
+		})
+		// In Emacs 27, the special when-let form on line 52 of
+		// test-lib.el isn’t properly instrumented, so remove the
+		// branches for that line, and decrement the branch counts
+		// accordingly.
+		wantCoverage = regexp.MustCompile(`(?m)^BRDA:52,.+\n`).ReplaceAllLiteralString(wantCoverage, "")
+		wantCoverage = replaceSubmatch(wantCoverage, `(?m)^BRF:(\d+)$`, func(s string) string {
+			i, err := strconv.Atoi(s)
+			if err != nil {
+				t.Errorf("invalid branch count in coverage manifest: %s", err)
+			}
+			return strconv.Itoa(i - 2)
+		})
+		wantCoverage = replaceSubmatch(wantCoverage, `(?m)^BRH:(\d+)$`, func(s string) string {
+			i, err := strconv.Atoi(s)
+			if err != nil {
+				t.Errorf("invalid branch hit count in coverage manifest: %s", err)
+			}
+			return strconv.Itoa(i - 1)
 		})
 	}
 	// Depending on the exact runfiles layout, the test runner might have
