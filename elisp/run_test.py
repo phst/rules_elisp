@@ -62,6 +62,9 @@ def main() -> None:
     orig_env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
+    # We need to set argv[0] to the original argv[0] because the binary will use
+    # it to find its runfiles.  See
+    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch', '--module-assertions']

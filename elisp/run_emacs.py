@@ -45,6 +45,9 @@ def main() -> None:
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
     libexec = install / 'libexec'
+    # We need to set argv[0] to the original argv[0] because the binary will use
+    # it to find its runfiles.  See
+    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
     args = [opts.argv[0]]
     if opts.dump_mode == 'portable':
         dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
