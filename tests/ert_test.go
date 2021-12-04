@@ -16,6 +16,7 @@ package runner_test
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -243,16 +244,14 @@ func Test(t *testing.T) {
 	}
 	gotCoverage := string(b)
 	// See geninfo(1) for the coverage file format.  The function hit count
-	// doesn’t work yet for nested functions.  The jump in the suffix index
-	// for the nested functions is due to
-	// https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
+	// doesn’t work yet for nested functions.
 	wantCoverage := `SF:tests/test-lib.el
 FN:27,tests/test-function
-FN:39,foo@cl-flet@1
-FN:41,foo@cl-flet@3
+FN:39,foo@cl-flet@0
+FN:41,foo@cl-flet@1
 FNDA:1,tests/test-function
+FNDA:0,foo@cl-flet@0
 FNDA:0,foo@cl-flet@1
-FNDA:0,foo@cl-flet@3
 FNF:3
 FNH:1
 BRDA:30,0,0,0
@@ -314,6 +313,17 @@ end_of_record
 		t.Log("not checking for branch coverage")
 		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
 	}
+	if emacsMajor < 28 {
+		// Account for a jump in the suffix index for nested functions
+		// due to https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
+		wantCoverage = replaceSubmatch(wantCoverage, `@cl-flet@(\d+)`, func(s string) string {
+			i, err := strconv.Atoi(s)
+			if err != nil {
+				t.Errorf("invalid suffix in coverage manifest: %s", err)
+			}
+			return strconv.Itoa(2*i + 1)
+		})
+	}
 	// Depending on the exact runfiles layout, the test runner might have
 	// printed different representations of test filenames.
 	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
@@ -335,3 +345,20 @@ func (t *timestamp) UnmarshalText(b []byte) error {
 func toTime(t timestamp) time.Time { return time.Time(t) }
 
 func bothEmpty(a, b string) bool { return (a == "") == (b == "") }
+
+// replaceSubmatch transforms the strings matched by the first subgroup in the
+// given regular expression through the given function.
+func replaceSubmatch(text string, rgx string, fun func(string) string) string {
+	r := regexp.MustCompile(rgx)
+	if r.NumSubexp() != 1 {
+		panic(fmt.Errorf("want exactly one subexpression in regular expression %q, got %d", r, r.NumSubexp()))
+	}
+	return r.ReplaceAllStringFunc(text, func(match string) string {
+		indices := r.FindStringSubmatchIndex(match)
+		if len(indices) != 4 || indices[0] != 0 || indices[1] != len(match) {
+			panic(fmt.Errorf("invalid regular expression %q for match %q", r, match))
+		}
+		i, j := indices[2], indices[3]
+		return match[:i] + fun(match[i:j]) + match[j:]
+	})
+}
