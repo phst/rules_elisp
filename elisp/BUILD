@@ -59,6 +59,12 @@ toolchain(
 )
 
 toolchain(
+    name = "emacs_28.1_toolchain",
+    toolchain = "emacs_28.1",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
     name = "local_toolchain",
     toolchain = ":local",
     toolchain_type = ":toolchain_type",
@@ -98,6 +104,11 @@ elisp_toolchain(
 elisp_toolchain(
     name = "emacs_27.2",
     emacs = "//emacs:emacs_27.2",
+)
+
+elisp_toolchain(
+    name = "emacs_28.1",
+    emacs = "//emacs:emacs_28.1",
 )
 
 exports_files([

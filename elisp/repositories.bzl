@@ -72,6 +72,16 @@ def rules_elisp_dependencies():
         ],
     )
     http_archive(
+        name = "gnu_emacs_28.1",
+        build_file_content = _build_file(macos_arm = True, portable = True),
+        sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
+        strip_prefix = "emacs-28.1/",
+        urls = [
+            "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
+            "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
+        ],
+    )
+    http_archive(
         name = "bazel_skylib",
         sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
         urls = [
@@ -173,6 +183,7 @@ alias(
         "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
+        "@gnu_emacs_28.1//:__pkg__",
     ],
 )
 """
@@ -190,6 +201,7 @@ cc_toolchain_suite(
         "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
+        "@gnu_emacs_28.1//:__pkg__",
     ],
 )
 """

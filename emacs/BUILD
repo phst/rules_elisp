@@ -75,6 +75,12 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "emacs_28.1",
+    actual = "@gnu_emacs_28.1//:emacs",
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "build",
     srcs = ["build.py"],
@@ -209,6 +215,7 @@ constraint_value(
         "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
+        "@gnu_emacs_28.1//:__pkg__",
     ],
 )
 
@@ -234,5 +241,6 @@ cc_defaults(
         "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
+        "@gnu_emacs_28.1//:__pkg__",
     ],
 )
