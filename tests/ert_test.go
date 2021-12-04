@@ -22,7 +22,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"runtime"
-	"strings"
+	"strconv"
 	"testing"
 	"time"
 
@@ -159,7 +159,12 @@ func Test(t *testing.T) {
 			break
 		}
 	}
-	if !regexp.MustCompile(`^\d+\.\d+`).MatchString(emacsVersion) {
+	match := regexp.MustCompile(`^(\d+)\.\d+`).FindStringSubmatch(emacsVersion)
+	if match == nil {
+		t.Fatalf("invalid Emacs version %q", emacsVersion)
+	}
+	emacsMajor, err := strconv.Atoi(match[1])
+	if err != nil {
 		t.Errorf("invalid Emacs version %q", emacsVersion)
 	}
 	t.Logf("got Emacs version %s", emacsVersion)
@@ -304,7 +309,7 @@ LH:19
 LF:24
 end_of_record
 `
-	if strings.HasPrefix(emacsVersion, "26.") {
+	if emacsMajor == 26 {
 		// No branch coverage under Emacs 26 expected.
 		t.Log("not checking for branch coverage")
 		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
