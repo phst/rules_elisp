@@ -35,6 +35,7 @@
 (require 'rx)
 (require 'subr-x)
 (require 'trampver)  ; load eagerly to work around Bug#11218
+(require 'warnings)
 (require 'xml)
 
 (add-to-list 'command-switch-alist
@@ -51,6 +52,8 @@ This list is populated by --test-source command-line options.")
 (defvar edebug-after-instrumentation-function)
 (defvar edebug-new-definition-function)
 
+(defvar warning-fill-column)  ; only in Emacs 27 and later
+
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -66,6 +69,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                         elisp/ert/edebug--before
                                         elisp/ert/edebug--after)
                                       (bound-and-true-p edebug-behavior-alist)))
+         (warning-fill-column 1000)  ; Bug#52281
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory (concat "/:" temp-dir))

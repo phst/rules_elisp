@@ -28,9 +28,12 @@
 ;;; Code:
 
 (require 'bytecomp)
+(require 'warnings)
 
 (add-to-list 'command-switch-alist
              (cons "--fatal-warnings" #'elisp/fatal-warnings))
+
+(defvar warning-fill-column)  ; only in Emacs 27 and later
 
 (defvar elisp/fatal--warnings nil
   "Whether byte compilation warnings should be treated as errors.
@@ -54,6 +57,7 @@ treat warnings as errors."
          ;; Ensure filenames in the output are relative to the current
          ;; directory.
          (byte-compile-root-dir default-directory)
+         (warning-fill-column 1000)  ; Bug#52281
          ;; Write output to a temporary file (Bug#44631).
          (temp (make-temp-file "compile-" nil ".elc"))
          (byte-compile-dest-file-function (lambda (_) temp))
