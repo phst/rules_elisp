@@ -29,6 +29,7 @@
 (require 'debug)
 (require 'edebug)
 (require 'ert)
+(require 'ert-x)
 (require 'format)
 (require 'nadvice)
 (require 'pp)
@@ -54,6 +55,10 @@ This list is populated by --test-source command-line options.")
 
 (defvar warning-fill-column)  ; only in Emacs 27 and later
 
+;; ERT resource variables only appeared in Emacs 28.
+(defvar ert-resource-directory-trim-left-regexp)
+(defvar ert-resource-directory-format)
+
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -73,6 +78,25 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory (concat "/:" temp-dir))
+         ;; We could get the workspace name from the TEST_WORKSPACE environment
+         ;; variable, but that one’s optional
+         ;; (cf. https://docs.bazel.build/versions/4.2.2/test-encyclopedia.html#initial-conditions).
+         (workspace-name (file-name-nondirectory
+                          (directory-file-name default-directory)))
+         ;; Best-effort support for ‘ert-resource-directory’ and
+         ;; ‘ert-resource-file’.  The directory returned by
+         ;; ‘ert-resource-directory’ will typically be in the execution root and
+         ;; no longer be valid when the test runs.  Therefore, strip out
+         ;; everything up to the workspace directory in the execution root
+         ;; (cf. https://docs.bazel.build/versions/4.2.2/output_directories.html#layout-diagram),
+         ;; and replace it with the default directory.  Robust tests should use
+         ;; the ‘elisp/runfiles’ library to find their data files.
+         (ert-resource-directory-trim-left-regexp
+          (rx-to-string `(seq (* nonl) ?/ ,workspace-name ?/) :no-group))
+         (ert-resource-directory-format
+          (concat (replace-regexp-in-string (rx ?%) "%%" default-directory
+                                            :fixedcase :literal)
+                  "/%s-resources/"))
          (report-file (getenv "XML_OUTPUT_FILE"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
          (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
