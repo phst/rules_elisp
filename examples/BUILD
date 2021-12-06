@@ -31,6 +31,7 @@ elisp_test(
     name = "lib_1_test",
     size = "small",
     srcs = ["lib-1-test.el"],
+    data = ["lib-1-resources/test.txt"],
     skip_tests = ["lib-1-broken-test"],
     deps = [":lib_1"],
 )
