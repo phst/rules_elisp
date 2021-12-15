@@ -140,7 +140,7 @@ static std::wstring BuildEnvironmentBlock(
   result.push_back(L'\0');
   return result;
 }
-static wchar_t* Pointer(std::wstring& string) {
+static wchar_t* Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   if (string.empty()) {
     std::wcerr << L"empty string" << std::endl;
     std::abort();
@@ -152,7 +152,8 @@ static wchar_t* Pointer(std::wstring& string) {
   return &string.front();
 }
 #else
-static std::vector<char*> Pointers(std::vector<std::string>& strings) {
+static std::vector<char*> Pointers(
+    std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<char*> ptrs;
   for (std::string& s : strings) {
     if (s.empty()) {
