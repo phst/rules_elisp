@@ -1,4 +1,4 @@
-;;; lib-4-test.el --- unit tests for lib-4           -*- lexical-binding: t; -*-
+;;; lib-4-test.el --- unit tests for lib-4 -*- lexical-binding: t; -*-
 
 ;; Copyright 2021 Google LLC
 ;;

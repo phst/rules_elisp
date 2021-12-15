@@ -1,6 +1,6 @@
-;;; lib-2.el --- example library 2                   -*- lexical-binding: t; -*-
+;;; lib-3.el --- example library 3 -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2021 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -24,4 +24,4 @@
   (message "hi from lib-3"))
 
 (provide 'lib-3)
-;;; lib-2.el ends here
+;;; lib-3.el ends here
