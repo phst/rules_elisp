@@ -191,7 +191,12 @@ WRAPPER_COPTS = COPTS + select({
     "//conditions:default": [],
 })
 
-LINKOPTS = []
+LINKOPTS = select({
+    "//constraints:windows": [
+        "-limagehlp",  # https://stackoverflow.com/a/26513179
+    ],
+    "//conditions:default": [],
+})
 
 WRAPPER_LINKOPTS = LINKOPTS + select({
     "//constraints:windows": [
