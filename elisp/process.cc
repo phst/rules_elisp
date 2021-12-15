@@ -415,11 +415,22 @@ absl::StatusOr<int> Run(std::string binary,
   final_args.insert(final_args.end(), runfiles_args.begin(),
                     runfiles_args.end());
   final_args.insert(final_args.end(), args.begin(), args.end());
+  return Run(final_args, runfiles);
+}
+
+absl::StatusOr<int> Run(std::vector<NativeString> args,
+                        const Runfiles& runfiles) {
+  if (args.empty()) {
+    std::cerr << "empty argument list" << std::endl;
+    std::abort();
+  }
   Environment orig_env = CopyEnv();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
   orig_env.erase(PHST_RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
+  absl::StatusOr<Environment> map = runfiles.Environment();
+  if (!map.ok()) return map.status();
   map->insert(orig_env.begin(), orig_env.end());
   std::vector<NativeString> final_env;
   for (const auto& p : *map) {
@@ -429,7 +440,8 @@ absl::StatusOr<int> Run(std::string binary,
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
 #ifdef PHST_RULES_ELISP_WINDOWS
-  std::wstring command_line = BuildCommandLine(final_args);
+  std::wstring binary = args.front();
+  std::wstring command_line = BuildCommandLine(args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
   STARTUPINFOW startup_info;
   startup_info.cb = sizeof startup_info;
@@ -441,10 +453,13 @@ absl::StatusOr<int> Run(std::string binary,
   startup_info.lpReserved2 = nullptr;
   PROCESS_INFORMATION process_info;
   BOOL success =
-      ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
-                       nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
-                       &envp.front(), nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", binary);
+      ::CreateProcessW(Pointer(binary), Pointer(command_line), nullptr, nullptr,
+                       FALSE, CREATE_UNICODE_ENVIRONMENT, &envp.front(),
+                       nullptr, &startup_info, &process_info);
+  if (!success) {
+    return WindowsStatus("CreateProcessW",
+                         std::string(binary.begin(), binary.end()));
+  }
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
     ::CloseHandle(process_info.hThread);
@@ -456,14 +471,14 @@ absl::StatusOr<int> Run(std::string binary,
   if (!success) return WindowsStatus("GetExitCodeProcess");
   return code <= std::numeric_limits<int>::max() ? code : 0xFF;
 #else
-  const std::vector<char*> argv = Pointers(final_args);
+  const std::vector<char*> argv = Pointers(args);
   const std::vector<char*> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", binary);
+                       "posix_spawn", argv.front());
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);

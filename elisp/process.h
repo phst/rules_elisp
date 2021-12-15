@@ -52,6 +52,9 @@ absl::StatusOr<int> Run(std::string binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles);
 
+absl::StatusOr<int> Run(std::vector<NativeString> args,
+                        const Runfiles& runfiles);
+
 }  // namespace phst_rules_elisp
 
 #endif
