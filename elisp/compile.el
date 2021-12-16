@@ -48,24 +48,26 @@ code.  If the command line option --fatal-warnings is given,
 treat warnings as errors."
   (unless noninteractive
     (error "This function works only in batch mode"))
-  (let* ((src (pop command-line-args-left))
-         (out (pop command-line-args-left))
-         ;; Leaving these enabled leads to undefined behavior and doesn’t make
-         ;; sense in batch mode.
-         (attempt-stack-overflow-recovery nil)
-         (attempt-orderly-shutdown-on-fatal-signal nil)
-         ;; Ensure filenames in the output are relative to the current
-         ;; directory.
-         (byte-compile-root-dir default-directory)
-         (warning-fill-column 1000)  ; Bug#52281
-         ;; Write output to a temporary file (Bug#44631).
-         (temp (make-temp-file "compile-" nil ".elc"))
-         (byte-compile-dest-file-function (lambda (_) temp))
-         (byte-compile-error-on-warn elisp/fatal--warnings)
-         (success (byte-compile-file src)))
-    (when success (copy-file temp out :overwrite))
-    (delete-file temp)
-    (kill-emacs (if success 0 1))))
+  (pcase command-line-args-left
+    (`(,src ,out)
+     (setq command-line-args-left nil)
+     ;; Leaving these enabled leads to undefined behavior and doesn’t make sense
+     ;; in batch mode.
+     (let* ((attempt-stack-overflow-recovery nil)
+            (attempt-orderly-shutdown-on-fatal-signal nil)
+            ;; Ensure filenames in the output are relative to the current
+            ;; directory.
+            (byte-compile-root-dir default-directory)
+            (warning-fill-column 1000)  ; Bug#52281
+            ;; Write output to a temporary file (Bug#44631).
+            (temp (make-temp-file "compile-" nil ".elc"))
+            (byte-compile-dest-file-function (lambda (_) temp))
+            (byte-compile-error-on-warn elisp/fatal--warnings)
+            (success (byte-compile-file src)))
+       (when success (copy-file temp out :overwrite))
+       (delete-file temp)
+       (kill-emacs (if success 0 1))))
+    (_ (error "Usage: emacs elisp/compile.el SRC OUT"))))
 
 (defun elisp/fatal-warnings (_arg)
   "Process the --fatal-warnings command-line option."

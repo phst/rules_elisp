@@ -31,16 +31,15 @@
 
 (defvar warning-fill-column)  ; only in Emacs 27 and later
 
-(let ((input (file-name-quote (or (pop command-line-args-left)
-                                  (user-error "No input file given"))))
-      (output (file-name-quote (or (pop command-line-args-left)
-                                   (user-error "No output file given"))))
-      (warning-fill-column 1000)  ; Bug#52281
-      (coding-system-for-read 'utf-8-unix)
-      (coding-system-for-write 'utf-8-unix))
-  (when command-line-args-left (user-error "Too many command-line arguments"))
-  (with-temp-buffer
-    (insert-file-contents input)
-    (write-region (org-export-as 'texinfo) nil output)))
+(pcase command-line-args-left
+  (`(,input ,output)
+   (setq command-line-args-left nil)
+   (let ((warning-fill-column 1000)  ; Bug#52281
+         (coding-system-for-read 'utf-8-unix)
+         (coding-system-for-write 'utf-8-unix))
+     (with-temp-buffer
+       (insert-file-contents input)
+       (write-region (org-export-as 'texinfo) nil output))))
+  (_ (user-error "Usage: elisp/export-org INPUT OUTPUT")))
 
 ;;; export-org.el ends here
