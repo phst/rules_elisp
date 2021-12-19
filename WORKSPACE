@@ -120,6 +120,20 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
+    name = "com_grail_bazel_compdb",
+    build_file = "@//:compdb.BUILD",
+    sha256 = "32483ad5aef7496bf338454d851fb63f7a7c72c6b62c40fd74af4f5a5c3749a4",
+    strip_prefix = "bazel-compilation-database-0.5.2/",
+    urls = [
+        "https://github.com/grailbio/bazel-compilation-database/archive/refs/tags/0.5.2.zip",  # 2021-09-10
+    ],
+)
+
+load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
+
+bazel_compdb_deps()
+
+http_archive(
     name = "com_github_bazelbuild_buildtools",
     sha256 = "97eb2b241da89b50a0a28a45ae4408661ab740c682db550ea611e8b57334ea9e",
     strip_prefix = "buildtools-4.2.4/",
