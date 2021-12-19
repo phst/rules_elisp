@@ -51,7 +51,10 @@ py_binary(
     srcs = ["check_python.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = ["//:__subpackages__"],
+    visibility = [
+        "//:__subpackages__",
+        "@com_grail_bazel_compdb//:__pkg__",
+    ],
     deps = [requirement("pylint")] + select({
         # Pytype doesn’t work on Windows, so don’t build it when running
         # “bazel build //...”.

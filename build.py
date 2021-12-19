@@ -77,6 +77,7 @@ def check() -> None:
 def generate() -> None:
     """Generates files to be checked in."""
     docs()
+    compdb()
 
 @target
 def buildifier() -> None:
@@ -134,6 +135,15 @@ def docs() -> None:
         gen = bazel_bin / tgt.lstrip('/').replace(':', os.sep)
         src = cwd / gen.with_suffix('').relative_to(bazel_bin)
         shutil.copyfile(gen, src)
+
+@target
+def compdb() -> None:
+    """Generates a compilation database for clangd."""
+    _bazel('build', ['@com_grail_bazel_compdb//:files'])
+    output = _run(['bazel', 'info', 'execution_root'], capture_stdout=True)
+    execroot = pathlib.Path(output.rstrip('\n'))
+    generator = execroot / 'external' / 'com_grail_bazel_compdb' / 'generate.py'
+    _run([sys.executable, str(generator)])
 
 def _bazel(command: str, targets: Iterable[str], *,
            options: Iterable[str] = (), postfix_options: Iterable[str] = (),
