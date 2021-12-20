@@ -60,13 +60,23 @@ def target(func: _Target) -> _Target:
 @target
 def default() -> None:
     """Builds all targets."""
+    generate()
+    check()
+
+@target
+def check() -> None:
+    """Builds and tests the project."""
     buildifier()
     nogo()
-    docs()
     # Test both default toolchain and versioned toolchains.
-    check()
+    test()
     versions()
     ext()
+
+@target
+def generate() -> None:
+    """Generates files to be checked in."""
+    docs()
 
 @target
 def buildifier() -> None:
@@ -89,17 +99,17 @@ def nogo() -> None:
                     raise ValueError('unwanted Go targets in {file} found')
 
 @target
-def check() -> None:
+def test() -> None:
     """Runs the Bazel tests."""
-    _check()
+    _test()
 
 @target
 def versions() -> None:
     """Runs the Bazel tests for all supported Emacs versions."""
     for version in sorted(_versions()):
-        _check(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
+        _test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
-def _check(*args: str) -> None:
+def _test(*args: str) -> None:
     _bazel('test', ['//...'], options=['--test_output=errors'],
            postfix_options=args)
 
