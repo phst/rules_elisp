@@ -44,7 +44,7 @@ jobs:
           release: false
         if: runner.os == 'Windows'
       - name: Run Bazel tests
-        run: python build.py
+        run: python build.py check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
           # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
