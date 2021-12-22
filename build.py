@@ -27,6 +27,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import time
 from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
                     Sequence)
 
@@ -147,6 +148,7 @@ def _bazel(command: str, targets: Iterable[str], *,
     args.append('--')
     args.extend(targets)
     env = dict(os.environ)
+    attempts = 1
     if env.get('CI') == 'true':
         # Hacks so that Bazel finds the right binaries on GitHub.  See
         # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
@@ -161,7 +163,20 @@ def _bazel(command: str, targets: Iterable[str], *,
                     d for d in path if not d.startswith(prefix))
         elif kernel == 'Windows':
             env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
-    _run(args, cwd=cwd, env=env)
+        # GitHub workflows are very flaky.  Retry a couple of times.
+        attempts = 5
+    for attempt in range(1, attempts + 1):
+        try:
+            _run(args, cwd=cwd, env=env)
+            break
+        except subprocess.CalledProcessError:
+            if attempt < attempts:
+                time.sleep(60)
+                print('retrying failed Bazel process',
+                      f'(attempt {attempt} of {attempts})',
+                      flush=True)
+            else:
+                raise
 
 def _run(args: Sequence[str], *,
          cwd: Optional[pathlib.Path] = None,
