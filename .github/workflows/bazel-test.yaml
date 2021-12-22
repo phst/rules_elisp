@@ -47,3 +47,5 @@ jobs:
         run: python build.py
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
+          # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
+          BAZELISK_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
