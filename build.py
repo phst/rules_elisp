@@ -159,6 +159,11 @@ def _bazel(command: str, targets: Iterable[str], *,
     args.extend(targets)
     env = dict(os.environ)
     attempts = 1
+    if kernel == 'Darwin':
+        # We don’t need XCode, and using the Unix toolchain tends to be less
+        # flaky.  See
+        # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
+        env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
     if env.get('CI') == 'true':
         # Hacks so that Bazel finds the right binaries on GitHub.  See
         # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.

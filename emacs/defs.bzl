@@ -114,6 +114,10 @@ recommended.""",
             default = "//elisp:wrapper_defaults",
             providers = [CcDefaultInfo],
         ),
+        "_emacs_defaults": attr.label(
+            default = ":defaults",
+            providers = [CcDefaultInfo],
+        ),
     },
     doc = """Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.""",
@@ -135,10 +139,11 @@ def _install(ctx, cc_toolchain, source):
     Returns:
       a File representing the Emacs installation directory
     """
+    defaults = ctx.attr._emacs_defaults[CcDefaultInfo]
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
-        requested_features = ctx.features,
+        requested_features = defaults.features + ctx.features,
         # Never instrument Emacs itself for coverage collection.  It doesn’t
         # hurt, but leads to needless reinstall actions when switching between
         # “bazel test” and “bazel coverage”.
@@ -157,14 +162,14 @@ def _install(ctx, cc_toolchain, source):
         feature_configuration = feature_configuration,
         action_name = C_COMPILE_ACTION_NAME,
         variables = vars,
-    ) + fragment.copts + fragment.conlyopts + [
+    ) + fragment.copts + fragment.conlyopts + defaults.copts + [
         "-DNO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
     ]
     ldflags = cc_common.get_memory_inefficient_command_line(
         feature_configuration = feature_configuration,
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,
         variables = vars,
-    ) + fragment.linkopts
+    ) + fragment.linkopts + defaults.linkopts
 
     # The build process needs to find some common binaries like “make” or the
     # GNU coreutils.

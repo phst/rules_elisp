@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("//elisp:util.bzl", "cc_defaults")
 
 alias(
     name = "emacs",
@@ -196,6 +197,28 @@ constraint_setting(name = "incompatible_setting")
 constraint_value(
     name = "incompatible",
     constraint_setting = ":incompatible_setting",
+    visibility = [
+        "@gnu_emacs_26.1//:__pkg__",
+        "@gnu_emacs_26.2//:__pkg__",
+        "@gnu_emacs_26.3//:__pkg__",
+        "@gnu_emacs_27.1//:__pkg__",
+        "@gnu_emacs_27.2//:__pkg__",
+    ],
+)
+
+cc_defaults(
+    name = "defaults",
+    copts = [],
+    linkopts = select({
+        "//constraints:macos": [
+            # Override the toolchain’s “-undefined dynamic” option so that the
+            # configure script doesn’t incorrectly detect absent functions as
+            # present.
+            "-undefined",
+            "error",
+        ],
+        "//conditions:default": [],
+    }),
     visibility = [
         "@gnu_emacs_26.1//:__pkg__",
         "@gnu_emacs_26.2//:__pkg__",
