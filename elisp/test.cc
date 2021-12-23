@@ -44,7 +44,7 @@ static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
 int RunTest(const std::vector<NativeString>& args) {
   const absl::StatusOr<int> status_or_code = RunTestImpl(args);
   if (!status_or_code.ok()) {
-    std::clog << status_or_code.status() << std::endl;
+    std::cerr << status_or_code.status() << std::endl;
     return EXIT_FAILURE;
   }
   return status_or_code.value();

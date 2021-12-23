@@ -130,7 +130,7 @@ static std::wstring BuildEnvironmentBlock(
   std::wstring result;
   for (const std::wstring& var : vars) {
     if (var.find(L'\0') != var.npos) {
-      std::wclog << L"Environment variable " << var
+      std::wcerr << L"Environment variable " << var
                  << L" contains a null character" << std::endl;
       std::abort();
     }
@@ -142,11 +142,11 @@ static std::wstring BuildEnvironmentBlock(
 }
 static wchar_t* Pointer(std::wstring& string) {
   if (string.empty()) {
-    std::wclog << L"empty string" << std::endl;
+    std::wcerr << L"empty string" << std::endl;
     std::abort();
   }
   if (string.find('\0') != string.npos) {
-    std::wclog << string << L" contains null character" << std::endl;
+    std::wcerr << string << L" contains null character" << std::endl;
     std::abort();
   }
   return &string.front();
@@ -156,11 +156,11 @@ static std::vector<char*> Pointers(std::vector<std::string>& strings) {
   std::vector<char*> ptrs;
   for (std::string& s : strings) {
     if (s.empty()) {
-      std::clog << "empty string" << std::endl;
+      std::cerr << "empty string" << std::endl;
       std::abort();
     }
     if (s.find('\0') != s.npos) {
-      std::clog << s << " contains null character" << std::endl;
+      std::cerr << s << " contains null character" << std::endl;
       std::abort();
     }
     ptrs.push_back(&s.front());
@@ -179,7 +179,7 @@ static Environment CopyEnv() {
   const std::unique_ptr<wchar_t, Free> envp(::GetEnvironmentStringsW());
   if (envp == nullptr) {
     // This cannot really happen in practice.
-    std::wclog << L"GetEnvironmentStringsW failed" << std::endl;
+    std::wcerr << L"GetEnvironmentStringsW failed" << std::endl;
     std::abort();
   }
   const wchar_t* p = envp.get();
@@ -190,7 +190,7 @@ static Environment CopyEnv() {
     // Their names start with an equals sign.
     const wchar_t* const q = std::wcschr(p + 1, L'=');
     if (q == nullptr) {
-      std::wclog << "Invalid environment block entry " << p << std::endl;
+      std::wcerr << "Invalid environment block entry " << p << std::endl;
       std::abort();
     }
     map.emplace(std::wstring(p, q), std::wstring(q + 1));
@@ -198,7 +198,7 @@ static Environment CopyEnv() {
     if (p == nullptr) {
       // This can’t happen because the environment block is terminated by a
       // double null character.
-      std::wclog
+      std::wcerr
           << L"GetEnvironmentStringsW returned an invalid environment block"
           << std::endl;
       std::abort();
