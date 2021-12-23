@@ -149,8 +149,13 @@ def _bazel(command: str, targets: Iterable[str], *,
            options: Iterable[str] = (), postfix_options: Iterable[str] = (),
            cwd: Optional[pathlib.Path] = None) -> None:
     kernel = platform.system()
+    env = dict(os.environ)
+    github = env.get('CI') == 'true'
     args = ['bazel', command]
     args.extend(options)
+    if github:
+        # Use disk cache to speed up runs.
+        args.append('--disk_cache=' + str(pathlib.Path.home() / 'bazel-cache'))
     if kernel == 'Windows':
         # We only support compilation using MinGW-64 at the moment.  Binaries
         # linked with the MinGW-64 linker will depend on a few libraries that
@@ -167,14 +172,13 @@ def _bazel(command: str, targets: Iterable[str], *,
     args.extend(postfix_options)
     args.append('--')
     args.extend(targets)
-    env = dict(os.environ)
     attempts = 1
     if kernel == 'Darwin':
         # We don’t need XCode, and using the Unix toolchain tends to be less
         # flaky.  See
         # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
         env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
-    if env.get('CI') == 'true':
+    if github:
         # Hacks so that Bazel finds the right binaries on GitHub.  See
         # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
         if kernel in ('Linux', 'Darwin'):
