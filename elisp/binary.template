@@ -17,12 +17,14 @@
 #include "elisp/binary.h"
 
 int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
-  std::vector<phst_rules_elisp::NativeString> args = {
+  using phst_rules_elisp::NativeString;
+  using phst_rules_elisp::RunBinary;
+  std::vector<NativeString> args = {
     [[args]],
     PHST_RULES_ELISP_NATIVE_LITERAL("--")
   };
   args.insert(args.end(), argv, argv + argc);
-  return phst_rules_elisp::RunBinary(argv[0], args);
+  return RunBinary(argc == 0 ? NativeString() : argv[0], args);
 }
 
 // Local Variables:
