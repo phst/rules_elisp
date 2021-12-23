@@ -47,7 +47,11 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/bazel-cache
-          key: bazel-${{runner.os}}-${{matrix.bazel}}
+          key: bazel-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
+          restore-keys: |
+            bazel-${{runner.os}}-${{matrix.bazel}}-
+            bazel-${{runner.os}}-
+            bazel-
       - name: Run Bazel tests
         run: python build.py check
         env:
