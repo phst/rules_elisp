@@ -61,7 +61,7 @@ def _check_python_impl(target, ctx):
             "--params=" + params_file.path,
         ],
         mnemonic = "PythonCheck",
-        progress_message = "performing static analysis of target {}".format(target.label),
+        progress_message = "Performing static analysis of target {}".format(target.label),
     )
     return [OutputGroupInfo(check_python = depset([output_file]))]
 
