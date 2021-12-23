@@ -43,6 +43,11 @@ jobs:
           update: false
           release: false
         if: runner.os == 'Windows'
+      - name: Cache Bazel results
+        uses: actions/cache@v2
+        with:
+          path: ~/bazel-cache
+          key: bazel-${{runner.os}}-${{matrix.bazel}}
       - name: Run Bazel tests
         run: python build.py check
         env:
