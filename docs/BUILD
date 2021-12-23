@@ -74,6 +74,7 @@ DOCS = [
 [
     diff_test(
         name = doc + "_test",
+        size = "small",
         file1 = doc + ".md",
         file2 = doc + ".md.generated",
     )

@@ -23,6 +23,7 @@ elisp_library(
 
 elisp_test(
     name = "lib_4_test",
+    size = "small",
     srcs = ["lib-4-test.el"],
     deps = [":lib_4"],
 )
