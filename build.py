@@ -127,7 +127,7 @@ def ext() -> None:
 def docs() -> None:
     """Build the generated documentation files."""
     output = _run(
-        ['bazel', 'query', '--output=label',
+        [str(_bazel_program()), 'query', '--output=label',
          r'filter("\.md\.generated$", kind("generated file", //...:*))'],
         capture_stdout=True)
     targets = output.splitlines()
@@ -143,7 +143,8 @@ def docs() -> None:
 def compdb() -> None:
     """Generates a compilation database for clangd."""
     _bazel('build', ['@com_grail_bazel_compdb//:files'])
-    output = _run(['bazel', 'info', 'execution_root'], capture_stdout=True)
+    output = _run([str(_bazel_program()), 'info', 'execution_root'],
+                  capture_stdout=True)
     execroot = pathlib.Path(output.rstrip('\n'))
     generator = execroot / 'external' / 'com_grail_bazel_compdb' / 'generate.py'
     _run([sys.executable, str(generator)])
@@ -154,7 +155,7 @@ def _bazel(command: str, targets: Iterable[str], *,
     kernel = platform.system()
     env = dict(os.environ)
     github = env.get('CI') == 'true'
-    args = ['bazel', command]
+    args = [str(_bazel_program()), command]
     args.extend(options)
     if github:
         # Use disk cache to speed up runs.
@@ -243,6 +244,14 @@ def _versions() -> FrozenSet[str]:
     else:
         raise ValueError(f'unsupported kernel {uname.system}')
     return frozenset(ret)
+
+@functools.lru_cache
+def _bazel_program() -> pathlib.Path:
+    for program in ('bazelisk', 'bazel'):
+        filename = shutil.which(program)
+        if filename:
+            return pathlib.Path(filename)
+    raise ValueError('no Bazel program found')
 
 def main() -> None:
     """Builds the project."""
