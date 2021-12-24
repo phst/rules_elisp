@@ -43,15 +43,22 @@ jobs:
           update: false
           release: false
         if: runner.os == 'Windows'
+      - name: Cache Bazel repositories
+        uses: actions/cache@v2
+        with:
+          path: ~/bazel-repository-cache
+          key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
+          restore-keys: |
+            bazel-repositories-
       - name: Cache Bazel results
         uses: actions/cache@v2
         with:
-          path: ~/bazel-cache
-          key: bazel-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
+          path: ~/bazel-action-cache
+          key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
           restore-keys: |
-            bazel-${{runner.os}}-${{matrix.bazel}}-
-            bazel-${{runner.os}}-
-            bazel-
+            bazel-actions-${{runner.os}}-${{matrix.bazel}}-
+            bazel-actions-${{runner.os}}-
+            bazel-actions-
       - name: Run Bazel tests
         run: python build.py check
         env:

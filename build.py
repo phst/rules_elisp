@@ -158,9 +158,11 @@ def _bazel(command: str, targets: Iterable[str], *,
     args.extend(options)
     if github:
         # Use disk cache to speed up runs.
-        cache = pathlib.Path.home() / 'bazel-cache'
-        args += ['--disk_cache=' + str(cache / 'actions'),
-                 '--repository_cache=' + str(cache / 'repositories')]
+        home = pathlib.Path.home()
+        action_cache = home / 'bazel-action-cache'
+        repository_cache = home / 'bazel-repository-cache'
+        args += ['--disk_cache=' + str(action_cache),
+                 '--repository_cache=' + str(repository_cache)]
     if kernel == 'Windows':
         # We only support compilation using MinGW-64 at the moment.  Binaries
         # linked with the MinGW-64 linker will depend on a few libraries that
