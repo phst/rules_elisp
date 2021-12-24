@@ -32,8 +32,6 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: '>=3.7'
-      - name: Install Bazelisk
-        uses: bazelbuild/setup-bazelisk@v1
       - name: Install APT packages
         run: sudo apt-get install libxml2-utils
         if: runner.os == 'Linux'
