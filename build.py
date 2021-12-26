@@ -48,7 +48,7 @@ def _bazel_program() -> pathlib.Path:
         filename = shutil.which(program)
         if filename:
             return pathlib.Path(filename)
-    raise ValueError('no Bazel program found')
+    raise FileNotFoundError('no Bazel program found')
 
 class Builder:
     """Builds the project."""
