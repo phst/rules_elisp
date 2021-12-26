@@ -27,7 +27,6 @@ import shlex
 import shutil
 import subprocess
 import sys
-import time
 from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
                     Sequence)
 
@@ -180,7 +179,6 @@ def _bazel(command: str, targets: Iterable[str], *,
     args.extend(postfix_options)
     args.append('--')
     args.extend(targets)
-    attempts = 1
     if kernel == 'Darwin':
         # We don’t need XCode, and using the Unix toolchain tends to be less
         # flaky.  See
@@ -200,20 +198,7 @@ def _bazel(command: str, targets: Iterable[str], *,
                     d for d in path if not d.startswith(prefix))
         elif kernel == 'Windows':
             env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
-        # GitHub workflows are very flaky.  Retry a couple of times.
-        attempts = 5
-    for attempt in range(1, attempts + 1):
-        try:
-            _run(args, cwd=cwd, env=env)
-            break
-        except subprocess.CalledProcessError:
-            if attempt < attempts:
-                time.sleep(60)
-                print('retrying failed Bazel process',
-                      f'(attempt {attempt} of {attempts})',
-                      flush=True)
-            else:
-                raise
+    _run(args, cwd=cwd, env=env)
 
 def _run(args: Sequence[str], *,
          cwd: Optional[pathlib.Path] = None,
