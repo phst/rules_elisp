@@ -392,7 +392,7 @@ absl::StatusOr<int> Run(std::string binary,
 #ifdef PHST_RULES_ELISP_WINDOWS
   binary += ".exe";
 #endif
-  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
+  const absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   absl::StatusOr<Environment> map = runfiles.Environment();
