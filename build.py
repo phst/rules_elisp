@@ -43,8 +43,23 @@ def target(func: _Target) -> _Target:
     _targets[name] = wrapper
     return wrapper
 
+def _bazel_program() -> pathlib.Path:
+    for program in ('bazelisk', 'bazel'):
+        filename = shutil.which(program)
+        if filename:
+            return pathlib.Path(filename)
+    raise ValueError('no Bazel program found')
+
 class Builder:
     """Builds the project."""
+
+    def __init__(self) -> None:
+        self._kernel = platform.system()
+        self._cwd = pathlib.Path(os.getcwd())
+        self._env = dict(os.environ)
+        self._github = self._env.get('CI') == 'true'
+        self._home = pathlib.Path.home()
+        self._bazel_program = _bazel_program()
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -86,19 +101,18 @@ class Builder:
         """Checks that all BUILD files are formatted correctly."""
         self._bazel('run',
                     ['@com_github_bazelbuild_buildtools//buildifier',
-                     '--mode=check', '--lint=warn', '-r', '--', os.getcwd()])
+                     '--mode=check', '--lint=warn', '-r', '--', str(self._cwd)])
 
     @target
-    def nogo(self) -> None:  # pylint: disable=no-self-use
+    def nogo(self) -> None:
         """Checks that there are no unwanted Go targets in public packages.
 
         We don’t want any Go rules in the public packages, as our users would
         have to depend on the Go rules then as well.
         """
         print('looking for unwanted Go targets in public packages', flush=True)
-        cwd = pathlib.Path(os.getcwd())
         for directory in ('elisp', 'emacs'):
-            for dirpath, _, filenames in os.walk(cwd / directory):
+            for dirpath, _, filenames in os.walk(self._cwd / directory):
                 for file in filenames:
                     file = pathlib.Path(dirpath) / file
                     text = file.read_text(encoding='utf-8')
@@ -124,51 +138,46 @@ class Builder:
     def ext(self) -> None:
         """Run the tests in the example workspace."""
         self._bazel('test', ['//...'], options=['--test_output=errors'],
-                    cwd=pathlib.Path(os.getcwd()) / 'examples' / 'ext')
+                    cwd=self._cwd / 'examples' / 'ext')
 
     @target
     def docs(self) -> None:
         """Build the generated documentation files."""
-        output = _run(
-            [str(_bazel_program()), 'query', '--output=label',
+        output = self._run(
+            [str(self._bazel_program), 'query', '--output=label',
              r'filter("\.md\.generated$", kind("generated file", //...:*))'],
             capture_stdout=True)
         targets = output.splitlines()
-        cwd = pathlib.Path(os.getcwd())
-        bazel_bin = cwd / 'bazel-bin'
+        bazel_bin = self._cwd / 'bazel-bin'
         self._bazel('build', targets)
         for tgt in targets:
             gen = bazel_bin / tgt.lstrip('/').replace(':', os.sep)
-            src = cwd / gen.with_suffix('').relative_to(bazel_bin)
+            src = self._cwd / gen.with_suffix('').relative_to(bazel_bin)
             shutil.copyfile(gen, src)
 
     @target
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
         self._bazel('build', ['@com_grail_bazel_compdb//:files'])
-        output = _run([str(_bazel_program()), 'info', 'execution_root'],
-                      capture_stdout=True)
+        output = self._run([str(self._bazel_program), 'info', 'execution_root'],
+                           capture_stdout=True)
         execroot = pathlib.Path(output.rstrip('\n'))
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
-        _run([sys.executable, str(generator)])
+        self._run([sys.executable, str(generator)])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None) -> None:
-        kernel = platform.system()
-        env = dict(os.environ)
-        github = env.get('CI') == 'true'
-        args = [str(_bazel_program()), command]
+        args = [str(self._bazel_program), command]
         args.extend(options)
-        if github:
+        if self._github:
             # Use disk cache to speed up runs.
-            home = pathlib.Path.home()
-            action_cache = home / 'bazel-action-cache'
-            repository_cache = home / 'bazel-repository-cache'
+            action_cache = self._home / 'bazel-action-cache'
+            repository_cache = self._home / 'bazel-repository-cache'
             args += ['--disk_cache=' + str(action_cache),
                      '--repository_cache=' + str(repository_cache)]
-        if kernel == 'Windows':
+        if self._kernel == 'Windows':
             # We only support compilation using MinGW-64 at the moment.
             # Binaries linked with the MinGW-64 linker will depend on a few
             # libraries that reside in C:\msys64\mingw64\bin, e.g.,
@@ -185,15 +194,16 @@ class Builder:
         args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
-        if kernel == 'Darwin':
+        env = dict(self._env)
+        if self._kernel == 'Darwin':
             # We don’t need XCode, and using the Unix toolchain tends to be less
             # flaky.  See
             # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
             env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
-        if github:
+        if self._github:
             # Hacks so that Bazel finds the right binaries on GitHub.  See
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
-            if kernel in ('Linux', 'Darwin'):
+            if self._kernel in ('Linux', 'Darwin'):
                 tool_cache = pathlib.Path(os.getenv('RUNNER_TOOL_CACHE'))
                 # Remove Python versions set up by the setup-python action.  For
                 # some reason they don’t work.
@@ -202,17 +212,17 @@ class Builder:
                     prefix = str(tool_cache / 'Python') + '/'
                     env[var] = os.pathsep.join(
                         d for d in path if not d.startswith(prefix))
-            elif kernel == 'Windows':
+            elif self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
         self._run(args, cwd=cwd, env=env)
 
-    def _run(self, args: Sequence[str], *,  # pylint: disable=no-self-use
+    def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
              env: Optional[Mapping[str, str]] = None,
              capture_stdout: bool = False) -> Optional[str]:
         print(*map(shlex.quote, args), flush=True)
         result = subprocess.run(
-            args, check=True, cwd=cwd, env=env,
+            args, check=True, cwd=cwd or self._cwd, env=env or self._env,
             stdout=subprocess.PIPE if capture_stdout else None,
             encoding='utf-8')
         return result.stdout
@@ -236,14 +246,6 @@ def _versions() -> FrozenSet[str]:
     else:
         raise ValueError(f'unsupported kernel {uname.system}')
     return frozenset(ret)
-
-@functools.lru_cache
-def _bazel_program() -> pathlib.Path:
-    for program in ('bazelisk', 'bazel'):
-        filename = shutil.which(program)
-        if filename:
-            return pathlib.Path(filename)
-    raise ValueError('no Bazel program found')
 
 def main() -> None:
     """Builds the project."""
