@@ -31,7 +31,7 @@ from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
                     Sequence)
 
 _Target = Callable[['Builder'], None]
-_targets = {}  # type: Dict[str, _Target]
+_targets: Dict[str, _Target] = {}
 
 def target(func: _Target) -> _Target:
     """Decorator to mark a function as a build target."""
