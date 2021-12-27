@@ -53,13 +53,16 @@ def _bazel_program() -> pathlib.Path:
 class Builder:
     """Builds the project."""
 
-    def __init__(self) -> None:
+    def __init__(self, *,
+                 action_cache: Optional[pathlib.Path] = None,
+                 repository_cache: Optional[pathlib.Path] = None) -> None:
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
-        self._home = pathlib.Path.home()
         self._bazel_program = _bazel_program()
+        self._action_cache = action_cache
+        self._repository_cache = repository_cache
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -171,12 +174,10 @@ class Builder:
                cwd: Optional[pathlib.Path] = None) -> None:
         args = [str(self._bazel_program), command]
         args.extend(options)
-        if self._github:
-            # Use disk cache to speed up runs.
-            action_cache = self._home / 'bazel-action-cache'
-            repository_cache = self._home / 'bazel-repository-cache'
-            args += ['--disk_cache=' + str(action_cache),
-                     '--repository_cache=' + str(repository_cache)]
+        if self._action_cache:
+            args.append('--disk_cache=' + str(self._action_cache))
+        if self._repository_cache:
+            args.append('--repository_cache=' + str(self._repository_cache))
         if self._kernel == 'Windows':
             # We only support compilation using MinGW-64 at the moment.
             # Binaries linked with the MinGW-64 linker will depend on a few
@@ -250,15 +251,21 @@ def _versions() -> FrozenSet[str]:
 def main() -> None:
     """Builds the project."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--action_cache', type=_cache_directory)
+    parser.add_argument('--repository_cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
     args = parser.parse_args(sys.argv[1:] or ['default'])
-    builder = Builder()
+    builder = Builder(action_cache=args.action_cache,
+                      repository_cache=args.repository_cache)
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
         print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode,
               flush=True)
         sys.exit(ex.returncode)
+
+def _cache_directory(arg: str) -> pathlib.Path:
+    return pathlib.Path(arg).expanduser()
 
 if __name__ == '__main__':
     main()
