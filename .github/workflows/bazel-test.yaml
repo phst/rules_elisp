@@ -61,6 +61,7 @@ jobs:
         # Use disk cache to speed up runs.
         run: >
           python build.py
+          --bazel=bazelisk
           --action_cache=~/bazel-action-cache
           --repository_cache=~/bazel-repository-cache
           -- check
