@@ -44,24 +44,18 @@ def target(func: _Target) -> _Target:
     _targets[name] = wrapper
     return wrapper
 
-def _bazel_program() -> pathlib.Path:
-    for program in ('bazelisk', 'bazel'):
-        filename = shutil.which(program)
-        if filename:
-            return pathlib.Path(filename)
-    raise FileNotFoundError('no Bazel program found')
-
 class Builder:
     """Builds the project."""
 
     def __init__(self, *,
+                 bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
-        self._bazel_program = _bazel_program()
+        self._bazel_program = bazel
         self._action_cache = action_cache
         self._repository_cache = repository_cache
 
@@ -254,17 +248,25 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action_cache', type=_cache_directory)
     parser.add_argument('--repository_cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
     args = parser.parse_args(sys.argv[1:] or ['default'])
-    builder = Builder(action_cache=args.action_cache,
+    builder = Builder(bazel=args.bazel,
+                      action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
         print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
+
+def _program(name: str) -> pathlib.Path:
+    file = shutil.which(name)
+    if not file:
+        raise FileNotFoundError(f'program {name} not found')
+    return pathlib.Path(file)
 
 def _cache_directory(arg: str) -> pathlib.Path:
     return pathlib.Path(arg).expanduser()
