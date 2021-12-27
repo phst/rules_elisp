@@ -73,7 +73,7 @@ class Builder:
             func(self)
 
     @target
-    def default(self) -> None:
+    def all(self) -> None:
         """Builds all targets."""
         self.generate()
         self.check()
@@ -252,7 +252,7 @@ def main() -> None:
     parser.add_argument('--action_cache', type=_cache_directory)
     parser.add_argument('--repository_cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
-    args = parser.parse_args(sys.argv[1:] or ['default'])
+    args = parser.parse_args(sys.argv[1:] or ['all'])
     builder = Builder(bazel=args.bazel,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
