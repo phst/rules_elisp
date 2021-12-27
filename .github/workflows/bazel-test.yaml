@@ -58,7 +58,12 @@ jobs:
             bazel-actions-${{runner.os}}-
             bazel-actions-
       - name: Run Bazel tests
-        run: python build.py check
+        # Use disk cache to speed up runs.
+        run: >
+          python build.py
+          --action_cache=~/bazel-action-cache
+          --repository_cache=~/bazel-repository-cache
+          -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
           # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
