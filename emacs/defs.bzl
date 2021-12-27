@@ -31,12 +31,13 @@ load(
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
     cc_toolchain = find_cpp_toolchain(ctx)
+    emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
-    install = _install(ctx, cc_toolchain, source)
+    install = _install(ctx, emacs_cc_toolchain, source)
     driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
@@ -87,6 +88,12 @@ This is necessary to determine the source root directory.""",
 use the legacy “unexec” dumper.  Starting with Emacs 27, `portable` is strongly
 recommended.""",
         ),
+        "cc_toolchain": attr.label(
+            providers = [cc_common.CcToolchainInfo],
+            doc = """C/C++ toolchain to use for compiling Emacs.  On Unix
+systems, this is normally the default C/C++ toolchain.  On Windows, it must be a
+MinGW/GCC toolchain because Emacs doesn’t support building with Visual C++.""",
+        ),
         "_build": attr.label(
             default = "//emacs:build",
             executable = True,
@@ -94,6 +101,10 @@ recommended.""",
         ),
         "_cc_toolchain": attr.label(
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            providers = [cc_common.CcToolchainInfo],
+        ),
+        "_emacs_cc_toolchain": attr.label(
+            default = "@phst_rules_elisp_toolchains//:emacs_cc_toolchain",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_grep_includes": attr.label(
