@@ -80,6 +80,11 @@ This is necessary to determine the source root directory.""",
             doc = """Label for a file target that will receive the
 `emacs-module.h` header.  If not provided, don’t install the header.""",
         ),
+        "builtin_features": attr.output(
+            doc = """Label for a file into which to write the list
+of builtin features.  If not provided, don’t write such a file.
+This is used by Gazelle.""",
+        ),
         "dump_mode": attr.string(
             default = "portable",
             values = ["portable", "unexec"],
@@ -199,6 +204,9 @@ def _install(ctx, cc_toolchain, source):
     if ctx.outputs.module_header:
         args.append("--module-header=" + ctx.outputs.module_header.path)
         outs.append(ctx.outputs.module_header)
+    if ctx.outputs.builtin_features:
+        args.append("--builtin-features=" + ctx.outputs.builtin_features.path)
+        outs.append(ctx.outputs.builtin_features)
     ctx.actions.run(
         outputs = outs,
         inputs = depset(

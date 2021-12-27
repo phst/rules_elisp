@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ alias(
     name = "module_header",
     actual = "@gnu_emacs_27.2//:module_header",
     visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "builtin_features",
+    actual = "@gnu_emacs_27.2//:builtin_features",
+    visibility = ["//gazelle:__pkg__"],
 )
 
 alias(
