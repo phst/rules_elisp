@@ -20,6 +20,7 @@ Mimics a trivial version of Make."""
 
 import argparse
 import functools
+import io
 import os
 import pathlib
 import platform
@@ -38,7 +39,7 @@ def target(func: _Target) -> _Target:
     name = func.__name__
     @functools.wraps(func)
     def wrapper(self: 'Builder') -> None:
-        print(f'building target {name}', flush=True)
+        print(f'building target {name}')
         func(self)
     _targets[name] = wrapper
     return wrapper
@@ -113,7 +114,7 @@ class Builder:
         We don’t want any Go rules in the public packages, as our users would
         have to depend on the Go rules then as well.
         """
-        print('looking for unwanted Go targets in public packages', flush=True)
+        print('looking for unwanted Go targets in public packages')
         for directory in ('elisp', 'emacs'):
             for dirpath, _, filenames in os.walk(self._cwd / directory):
                 for file in filenames:
@@ -221,7 +222,7 @@ class Builder:
              cwd: Optional[pathlib.Path] = None,
              env: Optional[Mapping[str, str]] = None,
              capture_stdout: bool = False) -> Optional[str]:
-        print(*map(shlex.quote, args), flush=True)
+        print(*map(shlex.quote, args))
         result = subprocess.run(
             args, check=True, cwd=cwd or self._cwd, env=env or self._env,
             stdout=subprocess.PIPE if capture_stdout else None,
@@ -250,6 +251,8 @@ def _versions() -> FrozenSet[str]:
 
 def main() -> None:
     """Builds the project."""
+    if isinstance(sys.stdout, io.TextIOWrapper):
+        sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--action_cache', type=_cache_directory)
     parser.add_argument('--repository_cache', type=_cache_directory)
@@ -260,8 +263,7 @@ def main() -> None:
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
-        print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode,
-              flush=True)
+        print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
 
 def _cache_directory(arg: str) -> pathlib.Path:
