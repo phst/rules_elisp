@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -120,6 +120,7 @@ load("@phst_rules_elisp//emacs:defs.bzl", "emacs_binary")
 emacs_binary(
     name = "emacs",
     srcs = glob(["**"]),
+    builtin_features = "builtin_features.json",
     dump_mode = "{dump_mode}",
     module_header = {module_header},
     readme = "README",
@@ -136,6 +137,12 @@ emacs_binary(
 cc_library(
     name = "module_header",
     srcs = ["emacs-module.h"],
+    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
+)
+
+filegroup(
+    name = "builtin_features",
+    srcs = ["builtin_features.json"],
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
 """

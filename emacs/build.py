@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ Itâ€™s an internal implementation detail of the Bazel rules for Emacs Lisp; donâ
 use it outside the rules or depend on its behavior."""
 
 import argparse
+import json
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import subprocess
@@ -35,6 +37,7 @@ def main() -> None:
     parser.add_argument('--cflags', required=True)
     parser.add_argument('--ldflags', required=True)
     parser.add_argument('--module-header', type=pathlib.Path)
+    parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
     windows = os.name == 'nt'
     if windows:
@@ -88,6 +91,20 @@ def main() -> None:
         'CFLAGS=' + args.cflags,
         'LDFLAGS=' + args.ldflags)
     run('make', 'install')
+
+    if args.builtin_features:
+        lisp = build / 'lisp'
+        features = set()
+        for source in lisp.glob('**/*.el'):
+            with source.open('rt', encoding='ascii', errors='replace') as file:
+                for line in file:
+                    match = re.match(r"\(provide '([-/\w]+)\)", line, re.ASCII)
+                    if match:
+                        features.add(match.group(1))
+        data = {'builtinFeatures': sorted(features)}
+        with args.builtin_features.open('wt', encoding='utf-8') as file:
+            json.dump(data, file)
+
     # Build directory no longer needed, delete it.
     shutil.rmtree(temp, ignore_errors=True)
     # Delete source files that have a corresponding compiled file, as these
