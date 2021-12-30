@@ -46,7 +46,7 @@ def _check_python_impl(target, ctx):
     info = target[PyInfo]
     stem = "_{}.python-check".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
-    output_file = ctx.actions.declare_file(stem + ".hash")
+    output_file = ctx.actions.declare_file(stem + ".stamp")
     _write_params(ctx.actions, params_file, output_file, info)
     pylintrc = ctx.file._pylintrc
     ctx.actions.run(
