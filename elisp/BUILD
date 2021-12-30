@@ -270,6 +270,11 @@ cc_test(
     ],
 )
 
+# I think this wrapper is only necessary because of the changes made in
+# https://github.com/bazelbuild/bazel/commit/bfdfa6ebfd21b388f1c91f512291c848e1a92a96.
+# See https://github.com/bazelbuild/bazel/issues/14500.
+# TODO(phst): Remove this wrapper once
+# https://github.com/bazelbuild/bazel/issues/14500 is fixed.
 cc_binary(
     name = "wrap",
     testonly = 1,
