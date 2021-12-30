@@ -173,7 +173,7 @@ COPTS = [
     ],
 })
 
-WRAPPER_FEATURES = select({
+LAUNCHER_FEATURES = select({
     "//constraints:windows": [
         # keep sorted
         "fully_static_link",
@@ -182,7 +182,7 @@ WRAPPER_FEATURES = select({
     "//conditions:default": [],
 })
 
-WRAPPER_COPTS = COPTS + select({
+LAUNCHER_COPTS = COPTS + select({
     "//constraints:windows": [
         "-mwin32",
         "-municode",
@@ -198,7 +198,7 @@ LINKOPTS = select({
     "//conditions:default": [],
 })
 
-WRAPPER_LINKOPTS = LINKOPTS + select({
+LAUNCHER_LINKOPTS = LINKOPTS + select({
     "//constraints:windows": [
         "-mwin32",
         "-municode",
@@ -258,9 +258,9 @@ cc_test(
     data = [
         "binary.cc",
         "binary.h",
-        ":wrap",
+        ":test_wrap_launcher",
     ],
-    features = WRAPPER_FEATURES,
+    features = LAUNCHER_FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     deps = [
@@ -276,13 +276,13 @@ cc_test(
 # TODO(phst): Remove this wrapper once
 # https://github.com/bazelbuild/bazel/issues/14500 is fixed.
 cc_binary(
-    name = "wrap",
+    name = "test_wrap_launcher",
     testonly = 1,
-    srcs = ["wrap.cc"],
-    copts = WRAPPER_COPTS,
+    srcs = ["test_wrap_launcher.cc"],
+    copts = LAUNCHER_COPTS,
     data = ["//tests/wrap"],
-    features = WRAPPER_FEATURES,
-    linkopts = WRAPPER_LINKOPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
     deps = [
         ":platform",
@@ -436,10 +436,10 @@ elisp_binary(
 )
 
 cc_defaults(
-    name = "wrapper_defaults",
-    copts = WRAPPER_COPTS,
-    features = WRAPPER_FEATURES,
-    linkopts = WRAPPER_LINKOPTS,
+    name = "launcher_defaults",
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
     visibility = ["//visibility:public"],
 )
 

@@ -23,7 +23,7 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     "//elisp:util.bzl",
     "CcDefaultInfo",
-    "cc_wrapper",
+    "cc_launcher",
     "cpp_strings",
     "runfile_location",
 )
@@ -38,10 +38,10 @@ def _emacs_binary_impl(ctx):
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
     install = _install(ctx, emacs_cc_toolchain, source)
-    driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
+    launcher_src = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
-        output = driver,
+        output = launcher_src,
         substitutions = {
             "[[args]]": cpp_strings([
                 "--install=" + runfile_location(ctx, install),
@@ -50,10 +50,10 @@ def _emacs_binary_impl(ctx):
         },
         is_executable = True,
     )
-    executable, runfiles = cc_wrapper(
+    executable, runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        driver,
+        launcher_src,
         ctx.attr._emacs_libs,
     )
     return [DefaultInfo(
@@ -118,11 +118,11 @@ MinGW/GCC toolchain because Emacs doesn’t support building with Visual C++.""
             providers = [CcInfo],
         ),
         "_template": attr.label(
-            default = "//emacs:driver.template",
+            default = "//emacs:launcher.template",
             allow_single_file = [".template"],
         ),
-        "_wrapper_defaults": attr.label(
-            default = "//elisp:wrapper_defaults",
+        "_launcher_defaults": attr.label(
+            default = "//elisp:launcher_defaults",
             providers = [CcDefaultInfo],
         ),
         "_emacs_defaults": attr.label(

@@ -77,7 +77,7 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
-exports_files(srcs = ["driver.template"])
+exports_files(srcs = ["launcher.template"])
 
 bzl_library(
     name = "defs_bzl",
