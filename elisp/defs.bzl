@@ -20,7 +20,7 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
     ":util.bzl",
     "CcDefaultInfo",
-    "cc_wrapper",
+    "cc_launcher",
     "check_relative_filename",
     "cpp_strings",
     "runfile_location",
@@ -346,8 +346,8 @@ elisp_binary = rule(
             default = "//elisp:binary.template",
             allow_single_file = [".template"],
         ),
-        _wrapper_defaults = attr.label(
-            default = "//elisp:wrapper_defaults",
+        _launcher_defaults = attr.label(
+            default = "//elisp:launcher_defaults",
             providers = [CcDefaultInfo],
         ),
         data = attr.label_list(
@@ -423,8 +423,8 @@ elisp_test = rule(
             default = "//elisp:test.template",
             allow_single_file = [".template"],
         ),
-        _wrapper_defaults = attr.label(
-            default = "//elisp:wrapper_defaults",
+        _launcher_defaults = attr.label(
+            default = "//elisp:launcher_defaults",
             providers = [CcDefaultInfo],
         ),
         _lcov_merger = attr.label(
@@ -828,16 +828,16 @@ def _binary(ctx, srcs, tags, args, libs):
         for src in result.transitive_srcs.to_list()
     } if ctx.configuration.coverage_enabled else {}
 
-    # We use a C++ driver because the C++ toolchain framework exposes
+    # We use a C++ launcher because the C++ toolchain framework exposes
     # individual actions (unlike Python), and the runfiles implementation
     # doesn’t have bugs (unlike Go).  We use raw strings to minimize the risk
     # of misinterpreting special characters in a filename.
     # check_relative_filename should already reject all special characters, but
     # better be sure.
-    driver = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
+    launcher_src = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
     ctx.actions.expand_template(
         template = ctx.file._template,
-        output = driver,
+        output = launcher_src,
         substitutions = {
             "[[args]]": cpp_strings([
                 "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
@@ -858,10 +858,10 @@ def _binary(ctx, srcs, tags, args, libs):
         },
     )
     cc_toolchain = find_cpp_toolchain(ctx)
-    executable, wrapper_runfiles = cc_wrapper(
+    executable, launcher_runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        driver,
+        launcher_src,
         libs,
     )
     bin_runfiles = ctx.runfiles(
@@ -872,7 +872,7 @@ def _binary(ctx, srcs, tags, args, libs):
         root_symlinks = links,
     )
     emacs_runfiles = emacs.default_runfiles
-    runfiles = bin_runfiles.merge(emacs_runfiles).merge(wrapper_runfiles)
+    runfiles = bin_runfiles.merge(emacs_runfiles).merge(launcher_runfiles)
     return executable, runfiles
 
 def _load_directory_for_actions(directory):

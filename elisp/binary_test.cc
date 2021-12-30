@@ -30,8 +30,8 @@ using ::testing::Eq;
 TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
-  NativeString wrapper =
-      PHST_RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/elisp/wrap");
+  NativeString wrapper = PHST_RULES_ELISP_NATIVE_LITERAL(
+      "phst_rules_elisp/elisp/test_wrap_launcher");
 #ifdef PHST_RULES_ELISP_WINDOWS
   wrapper += L".exe";
 #endif

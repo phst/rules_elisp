@@ -69,16 +69,16 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def cc_wrapper(ctx, cc_toolchain, driver, deps):
-    """Builds a wrapper executable that starts Emacs.
+def cc_launcher(ctx, cc_toolchain, src, deps):
+    """Builds a launcher executable that starts Emacs.
 
     You can use `find_cpp_toolchain` to construct an appropriate value for
     `cc_toolchain`.
 
     Args:
       ctx (ctx): rule context
-      cc_toolchain (Provider): the C++ toolchain to use to compile the wrapper
-      driver (File): C++ driver file to compile
+      cc_toolchain (Provider): the C++ toolchain to use to compile the launcher
+      src (File): C++ source file to compile; should contain a `main` function
       deps (list of Targets): `cc_library` targets to add as dependencies
 
     Returns:
@@ -87,7 +87,7 @@ def cc_wrapper(ctx, cc_toolchain, driver, deps):
       `runfiles` object for the runfiles that the executable will need
     """
     infos = [dep[CcInfo] for dep in deps]
-    defaults = ctx.attr._wrapper_defaults[CcDefaultInfo]
+    defaults = ctx.attr._launcher_defaults[CcDefaultInfo]
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
         cc_toolchain = cc_toolchain,
@@ -99,7 +99,7 @@ def cc_wrapper(ctx, cc_toolchain, driver, deps):
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
-        srcs = [driver],
+        srcs = [src],
         compilation_contexts = [info.compilation_context for info in infos],
         user_compile_flags = defaults.copts,
     )
