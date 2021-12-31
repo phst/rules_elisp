@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_test")
 
 elisp_library(
@@ -106,12 +105,13 @@ genrule(
     cmd = "makeinfo --no-split --output=$@ -- $<",
 )
 
-go_test(
-    name = "go_default_test",
+py_test(
+    name = "bin_test",
     size = "medium",
     timeout = "short",
-    srcs = ["bin_test.go"],
+    srcs = ["bin_test.py"],
     data = ["bin"],
-    rundir = ".",
-    deps = ["@com_github_phst_runfiles//:go_default_library"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = ["//elisp:runfiles"],
 )
