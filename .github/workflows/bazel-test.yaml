@@ -13,7 +13,11 @@
 # limitations under the License.
 
 name: Run Bazel tests
-on: [push, pull_request]
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 
 jobs:
   bazel-versions:
