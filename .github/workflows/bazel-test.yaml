@@ -56,7 +56,6 @@ jobs:
           restore-keys: |
             bazel-actions-${{runner.os}}-${{matrix.bazel}}-
             bazel-actions-${{runner.os}}-
-            bazel-actions-
       - name: Run Bazel tests
         # Use disk cache to speed up runs.
         run: >
