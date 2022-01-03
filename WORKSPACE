@@ -165,6 +165,6 @@ go_repository(
 go_repository(
     name = "com_github_phst_runfiles",
     importpath = "github.com/phst/runfiles",
-    sum = "h1:DSMl4+LAErSE9M0OO9ILyqhQmXEAmTVazSQCBjCSCYg=",
-    version = "v0.0.0-20211120165631-32dd168538b7",
+    sum = "h1:B0CrzpfUkDAR73lrWPhLob7zvD5e5t70NVoJcig7JZ8=",
+    version = "v0.0.0-20220103114429-bafe238f62cc",
 )
