@@ -179,7 +179,7 @@ func Test(t *testing.T) {
 	// time is nonnegative and below the margin.
 	wantElapsed := margin.Seconds() / 2
 	wantReport := report{
-		XMLName:    xml.Name{"", "testsuite"},
+		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
 		Tests:      12,
 		Errors:     0,
