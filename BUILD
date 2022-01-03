@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 
@@ -67,6 +68,13 @@ py_binary(
 exports_files(
     [".pylintrc"],
     visibility = ["//:__subpackages__"],
+)
+
+nogo(
+    name = "nogo",
+    config = "nogo.json",
+    visibility = ["//visibility:public"],
+    deps = TOOLS_NOGO,
 )
 
 # gazelle:prefix github.com/phst/rules_elisp
