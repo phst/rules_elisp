@@ -1,4 +1,4 @@
-// Copyright 2020, 2021 Google LLC
+// Copyright 2020, 2021, 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,7 +58,8 @@ func Test(t *testing.T) {
 	reportName := filepath.Join(tempDir, "report.xml")
 	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
 	t.Logf("writing coverage manifest %s", coverageManifest)
-	if err := os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
+	err = os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400)
+	if err != nil {
 		t.Error(err)
 	}
 	coverageDir := t.TempDir()
@@ -103,7 +104,8 @@ func Test(t *testing.T) {
 	cmd = exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	err = cmd.Run()
+	if err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}
 	t.Log("XML validation complete")
@@ -150,7 +152,8 @@ func Test(t *testing.T) {
 		TestCases  []testCase `xml:"testcase"`
 	}
 	var gotReport report
-	if err := xml.Unmarshal(b, &gotReport); err != nil {
+	err = xml.Unmarshal(b, &gotReport)
+	if err != nil {
 		t.Error(err)
 	}
 	var emacsVersion string
