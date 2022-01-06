@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,12 +87,6 @@ This is necessary to determine the source root directory.""",
  `portable` to use the portable dumper introduced in Emacs 27, or `unexec` to
 use the legacy “unexec” dumper.  Starting with Emacs 27, `portable` is strongly
 recommended.""",
-        ),
-        "cc_toolchain": attr.label(
-            providers = [cc_common.CcToolchainInfo],
-            doc = """C/C++ toolchain to use for compiling Emacs.  On Unix
-systems, this is normally the default C/C++ toolchain.  On Windows, it must be a
-MinGW/GCC toolchain because Emacs doesn’t support building with Visual C++.""",
         ),
         "_build": attr.label(
             default = "//emacs:build",
