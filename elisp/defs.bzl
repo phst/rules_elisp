@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -488,7 +488,7 @@ def _elisp_manual_impl(ctx):
     """Rule implementation for the “elisp_manual” rule."""
     src = ctx.file.src
     out = ctx.outputs.out
-    if not out.basename.endswith(".texi"):
+    if out.extension != "texi":
         fail("Output filename {} doesn’t end in “.texi”".format(out.short_path))
     ctx.actions.run(
         outputs = [out],
@@ -553,12 +553,8 @@ def _compile(ctx, srcs, deps, load_path):
 
     # Only byte-compile Lisp source files.  Use module objects directly as
     # outputs.
-    lisp = [src for src in srcs if src.short_path.endswith(".el")]
-    mods = [
-        src
-        for src in srcs
-        if src.short_path.endswith(".so") or src.short_path.endswith(".dylib") or src.short_path.endswith(".dll")
-    ]
+    lisp = [src for src in srcs if src.extension == "el"]
+    mods = [src for src in srcs if src.extension in ("so", "dylib", "dll")]
     outs = mods
 
     # If any file comes for a different package, we can’t place the compiled
