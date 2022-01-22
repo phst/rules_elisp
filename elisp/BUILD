@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -258,7 +258,7 @@ cc_test(
     data = [
         "binary.cc",
         "binary.h",
-        ":test_wrap_launcher",
+        "//tests/wrap",
     ],
     features = LAUNCHER_FEATURES,
     linkopts = LINKOPTS,
@@ -267,26 +267,6 @@ cc_test(
         ":binary",
         ":process",
         "@com_google_googletest//:gtest_main",
-    ],
-)
-
-# I think this wrapper is only necessary because of the changes made in
-# https://github.com/bazelbuild/bazel/commit/bfdfa6ebfd21b388f1c91f512291c848e1a92a96.
-# See https://github.com/bazelbuild/bazel/issues/14500.
-# TODO(phst): Remove this wrapper once
-# https://github.com/bazelbuild/bazel/issues/14500 is fixed.
-cc_binary(
-    name = "test_wrap_launcher",
-    testonly = 1,
-    srcs = ["test_wrap_launcher.cc"],
-    copts = LAUNCHER_COPTS,
-    data = ["//tests/wrap"],
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    deps = [
-        ":platform",
-        ":process",
     ],
 )
 
