@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ def main() -> None:
     emacs = run_files.resolve(opts.wrapper)
     # We need to set argv[0] to the original argv[0] because the binary will use
     # it to find its runfiles.  See
-    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
+    # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
         args += ['--quick', '--batch']
