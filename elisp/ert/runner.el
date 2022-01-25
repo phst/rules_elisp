@@ -101,6 +101,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                             :fixedcase :literal)
                   "/%s-resources/"))
          (report-file (getenv "XML_OUTPUT_FILE"))
+         (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
          (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
          (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
@@ -188,6 +189,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
       (write-region "" nil (concat "/:" shard-status-file) :append))
     (mapc #'load (reverse elisp/ert/test--sources))
     (let ((tests (ert-select-tests selector t))
+          (total 0)
           (unexpected 0)
           (errors 0)
           (failures 0)
@@ -202,9 +204,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                              collect test))
         (or tests (message "Empty shard with index %d" shard-index)))
       (message "Running %d tests" (length tests))
-      (dolist (test tests)
-        (message "Running test %s" (ert-test-name test))
-        (let* ((name (ert-test-name test))
+      (while tests
+        (message "Running test %s" (ert-test-name (car tests)))
+        (let* ((test (pop tests))
+               (name (ert-test-name test))
                (start-time (current-time))
                (result (ert-run-test test))
                (duration (time-subtract nil start-time))
@@ -218,6 +221,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                (report nil))
           (message "Test %s %s and took %d ms" name status
                    (* (float-time duration) 1000))
+          (cl-incf total)
           (unless expected
             (cl-incf unexpected)
             ;; Print a nice error message that should point back to the source
@@ -226,7 +230,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             ;; ‘load-suffixes’ temporarily to its original value.
             (let ((load-suffixes original-load-suffixes))
               (elisp/ert/log--error name
-                                    (format-message "Test %s %s" name status))))
+                                    (format-message "Test %s %s" name status)))
+            (and fail-fast (setq tests nil)))
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
@@ -258,7 +263,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                            ,@report)
                 test-reports)))
       (message "Running %d tests finished, %d results unexpected"
-               (length tests) unexpected)
+               total unexpected)
       (unless (member report-file '(nil ""))
         (with-temp-buffer
           ;; The expected format of the XML output file isn’t well-documented.
@@ -274,7 +279,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             `((testsuite
                ((name . "ERT")  ; required
                 (hostname . "localhost")  ; required
-                (tests . ,(number-to-string (length tests)))
+                (tests . ,(number-to-string total))
                 (errors . ,(number-to-string errors))
                 (failures . ,(number-to-string failures))
                 (skipped . ,(number-to-string skipped))
