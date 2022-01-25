@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,7 +72,7 @@ def main() -> None:
     try:
         subprocess.run(executable=str(emacs), args=args, env=env, check=True)
     except subprocess.CalledProcessError as ex:
-        if 0 < ex.returncode < 0x80:
+        if 0 < ex.returncode < 0x100:
             # Don’t print a stacktrace if Emacs exited with a non-zero exit
             # code.
             sys.exit(ex.returncode)

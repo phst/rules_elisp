@@ -76,7 +76,7 @@ def main() -> None:
             subprocess.run(executable=str(emacs), args=args, env=env,
                            check=True)
         except subprocess.CalledProcessError as ex:
-            if 0 < ex.returncode < 0x80:
+            if 0 < ex.returncode < 0x100:
                 # Don’t print a stacktrace if Emacs exited with a non-zero exit
                 # code.
                 sys.exit(ex.returncode)
