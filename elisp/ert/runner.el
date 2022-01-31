@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -48,8 +48,6 @@
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
 
-(defvar inhibit-interaction)  ; only in Emacs 28 and later
-
 ;; Customizable Edebug behavior only appeared in Emacs 27.
 (defvar edebug-behavior-alist)
 (defvar edebug-after-instrumentation-function)
@@ -68,7 +66,6 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
   (or noninteractive (error "This function works only in batch mode"))
   (let* ((attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
-         (inhibit-interaction t)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
          ;; If possible, we perform our own coverage instrumentation, but that’s
          ;; only possible in Emacs 27.
