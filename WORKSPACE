@@ -139,10 +139,10 @@ bazel_compdb_deps()
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",
-    sha256 = "c8dc27e609ded5279702546103f65a1eacd08292713c9ddf97fdbbb1ac5e3f20",
-    strip_prefix = "buildtools-4.2.5/",
+    sha256 = "518b2ce90b1f8ad7c9a319ca84fd7de9a0979dd91e6d21648906ea68faa4f37a",
+    strip_prefix = "buildtools-5.0.1/",
     urls = [
-        "https://github.com/bazelbuild/buildtools/archive/refs/tags/4.2.5.zip",  # 2022-01-13
+        "https://github.com/bazelbuild/buildtools/archive/refs/tags/5.0.1.zip",  # 2022-02-11
     ],
 )
 
