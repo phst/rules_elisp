@@ -658,7 +658,6 @@ def _compile(ctx, srcs, deps, load_path):
     )
 
     toolchain = _toolchain(ctx)
-    emacs = toolchain.emacs
 
     # Expand load path only if needed.  It’s important that the expanded load
     # path is equivalent to the --directory arguments below.
@@ -685,33 +684,13 @@ def _compile(ctx, srcs, deps, load_path):
                 sibling = src,
             )
         )
-        args = []
         inputs = depset(
             # Add all source files as input files so they can load each other
             # if necessary.
             direct = srcs + [ctx.file._compile],
             transitive = indirect_outs + [transitive_data],
         )
-        if toolchain.wrap:
-            manifest = ctx.actions.declare_file(
-                out.basename + ".manifest.json",
-                sibling = out,
-            )
-            ctx.actions.write(
-                output = manifest,
-                content = struct(
-                    root = "EXECUTION_ROOT",
-                    loadPath = flat_load_path,
-                    inputFiles = [f.path for f in inputs.to_list()],
-                    outputFiles = [out.path],
-                    tags = ctx.attr.tags,
-                ).to_json(),
-            )
-            args += ["--manifest=" + manifest.path, "--"]
-            inputs = depset(direct = [manifest], transitive = [inputs])  # buildifier: disable=overly-nested-depset
-        args += [
-            "--quick",
-            "--batch",
+        args = [
             "--load=" + ctx.file._compile.path,
             ctx.actions.args().add_all(
                 # We don’t add the full transitive load path here because the
@@ -733,17 +712,18 @@ def _compile(ctx, srcs, deps, load_path):
             src.path,
             out.path,
         ]
-        ctx.actions.run(
+        _run_emacs(
+            ctx = ctx,
             outputs = [out],
             inputs = inputs,
-            executable = emacs.files_to_run,
             arguments = args,
             mnemonic = "ElispCompile",
             progress_message = (
                 "Compiling Emacs Lisp library {}".format(out.short_path)
             ),
-            use_default_shell_env = toolchain.use_default_shell_env,
-            execution_requirements = toolchain.execution_requirements,
+            manifest_basename = out.basename,
+            manifest_sibling = out,
+            manifest_load_path = flat_load_path,
         )
         outs.append(out)
 
@@ -870,6 +850,65 @@ def _binary(ctx, srcs, tags, args, libs):
     emacs_runfiles = emacs.default_runfiles
     runfiles = bin_runfiles.merge(emacs_runfiles).merge(launcher_runfiles)
     return executable, runfiles
+
+def _run_emacs(
+        ctx,
+        arguments,
+        inputs,
+        outputs,
+        mnemonic,
+        progress_message,
+        manifest_basename,
+        manifest_sibling = None,
+        manifest_load_path = None):
+    """Runs Emacs with the default toolchain, wrapping it if necessary.
+
+    Most parameters are mostly passed directly to ctx.actions.run.  The
+    command-line arguments are prefixed with `--quick --batch` and `--wrap` as
+    necessary.
+
+    Args:
+      ctx (ctx): rule context
+      arguments (list of strings or Args objects): command-line arguments
+      inputs (list or depset of File objects): input files
+      outputs (list of File objects): output files
+      mnemonic (str): one-word action mnemonic
+      progress_message (str): progress message
+      manifest_basename (str): base name of the manifest file without extension
+      manifest_sibling (File or None): file to use as sibling for the manifest
+      manifest_load_path: (list of strings or None): additional load path for
+          manifest with directories relative to the execution root
+    """
+    toolchain = _toolchain(ctx)
+    emacs = toolchain.emacs
+    arguments = ["--quick", "--batch"] + arguments
+    if toolchain.wrap:
+        manifest = ctx.actions.declare_file(
+            manifest_basename + ".manifest.json",
+            sibling = manifest_sibling,
+        )
+        ctx.actions.write(
+            output = manifest,
+            content = struct(
+                root = "EXECUTION_ROOT",
+                loadPath = manifest_load_path,
+                inputFiles = [f.path for f in inputs.to_list()],
+                outputFiles = [f.path for f in outputs],
+                tags = ctx.attr.tags,
+            ).to_json(),
+        )
+        arguments = ["--manifest=" + manifest.path, "--"] + arguments
+        inputs = depset(direct = [manifest], transitive = [inputs])  # buildifier: disable=overly-nested-depset
+    ctx.actions.run(
+        outputs = outputs,
+        inputs = inputs,
+        executable = emacs.files_to_run,
+        arguments = arguments,
+        mnemonic = mnemonic,
+        progress_message = progress_message,
+        use_default_shell_env = toolchain.use_default_shell_env,
+        execution_requirements = toolchain.execution_requirements,
+    )
 
 def _load_directory_for_actions(directory):
     """Returns the load directory to be used for build-time actions.
