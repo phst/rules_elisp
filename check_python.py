@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 
 import argparse
 import json
-import logging
 import os
 import pathlib
 import shutil
@@ -46,7 +45,6 @@ class Workspace:
                 # Mimic the Bazel behavior.  Also see
                 # https://github.com/bazelbuild/bazel/issues/10076.
                 (dirpath / '__init__.py').touch()
-        _logger.info('using temporary workspace: %s', tempdir)
         self.srcs = frozenset(srcs)
         self.path = [str(tempdir)] + [str(tempdir / d) for d in params['path']]
         self.tempdir = tempdir
@@ -63,7 +61,6 @@ def _main() -> None:
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     args = parser.parse_args()
-    _logger.setLevel(logging.INFO)
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
     workspace = Workspace(args.params)
@@ -98,13 +95,9 @@ def _main() -> None:
         if result.returncode:
             print(result.stdout)
             sys.exit(result.returncode)
-    else:
-        _logger.warning('not running Pytype on operating system %r', os.name)
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
     workspace.success()
-
-_logger = logging.getLogger('phst_rules_elisp.check_python')
 
 if __name__ == '__main__':
     _main()
