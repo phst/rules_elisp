@@ -1,4 +1,4 @@
-// Copyright 2020 Google LLC
+// Copyright 2020, 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,16 +17,16 @@
 
 #include "emacs-module.h"
 
-static emacs_value module_func(emacs_env* env, ptrdiff_t nargs,
-                               emacs_value* args, void* data) {
+static emacs_value ModuleFunc(emacs_env* env, ptrdiff_t nargs,
+                              emacs_value* args, void* data) {
   const char* message = "hi from module";
   return env->make_string(env, message, strlen(message));
 }
 
-typedef emacs_value (*function)(emacs_env*, ptrdiff_t, emacs_value*, void*);
+typedef emacs_value (*Function)(emacs_env*, ptrdiff_t, emacs_value*, void*);
 
-static void defun(emacs_env* env, const char* name, ptrdiff_t min_arity,
-                  ptrdiff_t max_arity, function func) {
+static void Defun(emacs_env* env, const char* name, ptrdiff_t min_arity,
+                  ptrdiff_t max_arity, Function func) {
   emacs_value args[] = {
       env->intern(env, name),
       env->make_function(env, min_arity, max_arity, func, NULL, NULL),
@@ -34,7 +34,7 @@ static void defun(emacs_env* env, const char* name, ptrdiff_t min_arity,
   env->funcall(env, env->intern(env, "defalias"), 2, args);
 }
 
-static void provide(emacs_env* env, const char* feature) {
+static void Provide(emacs_env* env, const char* feature) {
   emacs_value symbol = env->intern(env, feature);
   env->funcall(env, env->intern(env, "provide"), 1, &symbol);
 }
@@ -43,8 +43,8 @@ int emacs_module_init(struct emacs_runtime* rt) {
   if (rt->size < sizeof *rt) return 1;
   emacs_env* env = rt->get_environment(rt);
   if (env->size < sizeof(struct emacs_env_26)) return 2;
-  defun(env, "module-func", 0, 0, module_func);
-  provide(env, "examples/module");
+  Defun(env, "module-func", 0, 0, ModuleFunc);
+  Provide(env, "examples/module");
   return 0;
 }
 
