@@ -162,19 +162,17 @@ class Builder:
         execroot = pathlib.Path(output.rstrip('\n'))
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
-        self._run([sys.executable, str(generator)],
-                  # Need to compile with Clang for clangd to work.
-                  env=dict(self._env, CC='clang'))
+        args = [sys.executable, str(generator), '--'] + self._cache_options()
+        # Need to compile with Clang for clangd to work.
+        env = dict(self._env, CC='clang')
+        self._run(args, env=env)
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None) -> None:
         args = [str(self._bazel_program), command]
         args.extend(options)
-        if self._action_cache:
-            args.append('--disk_cache=' + str(self._action_cache))
-        if self._repository_cache:
-            args.append('--repository_cache=' + str(self._repository_cache))
+        args.extend(self._cache_options())
         if self._kernel == 'Windows':
             # We only support compilation using MinGW-64 at the moment.
             # Binaries linked with the MinGW-64 linker will depend on a few
@@ -213,6 +211,14 @@ class Builder:
             elif self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
         self._run(args, cwd=cwd, env=env)
+
+    def _cache_options(self) -> Sequence[str]:
+        opts = []
+        if self._action_cache:
+            opts.append('--disk_cache=' + str(self._action_cache))
+        if self._repository_cache:
+            opts.append('--repository_cache=' + str(self._repository_cache))
+        return opts
 
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
