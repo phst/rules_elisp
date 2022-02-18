@@ -70,8 +70,8 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
-          --action_cache=~/bazel-action-cache
-          --repository_cache=~/bazel-repository-cache
+          --action-cache=~/bazel-action-cache
+          --repository-cache=~/bazel-repository-cache
           -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}

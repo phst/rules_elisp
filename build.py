@@ -251,8 +251,8 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--action_cache', type=_cache_directory)
-    parser.add_argument('--repository_cache', type=_cache_directory)
+    parser.add_argument('--action-cache', type=_cache_directory)
+    parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
     args = parser.parse_args(sys.argv[1:] or ['all'])
     builder = Builder(bazel=args.bazel,
