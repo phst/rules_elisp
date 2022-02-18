@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -162,7 +162,9 @@ class Builder:
         execroot = pathlib.Path(output.rstrip('\n'))
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
-        self._run([sys.executable, str(generator)])
+        self._run([sys.executable, str(generator)],
+                  # Need to compile with Clang for clangd to work.
+                  env=dict(self._env, CC='clang'))
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
