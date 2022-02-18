@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,6 +49,8 @@ def main() -> None:
                         type=pathlib.PurePosixPath, default=[])
     parser.add_argument('--skip-test', action='append', default=[])
     parser.add_argument('--skip-tag', action='append', default=[])
+    parser.add_argument('--module-assertions', action='store_true',
+                        default=False)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     # Be a bit more verbose for tests, since Bazel will only show output on
@@ -67,7 +69,9 @@ def main() -> None:
     # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.ñ
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
-        args += ['--quick', '--batch', '--module-assertions']
+        args += ['--quick', '--batch']
+        if opts.module_assertions:
+            args.append('--module-assertions')
         load.add_path(run_files, args, opts.load_directory)
         runner = run_files.resolve(
             pathlib.PurePosixPath('phst_rules_elisp/elisp/ert/runner.elc'))

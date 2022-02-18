@@ -125,19 +125,22 @@ def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
     toolchain = _toolchain(ctx)
 
+    args = [
+        "--skip-test=" + test
+        for test in ctx.attr.skip_tests
+    ] + [
+        "--skip-tag=" + tag
+        for tag in ctx.attr.skip_tags
+    ]
+    if ctx.var["COMPILATION_MODE"] != "opt":
+        args.append("--module-assertions")
     executable, runfiles = _binary(
         ctx,
         srcs = ctx.files.srcs,
         # “local = 1” is equivalent to adding a “local” tag,
         # cf. https://docs.bazel.build/versions/4.1.0/be/common-definitions.html#test.local.
         tags = ["local"] if ctx.attr.local else [],
-        args = [
-            "--skip-test=" + test
-            for test in ctx.attr.skip_tests
-        ] + [
-            "--skip-tag=" + tag
-            for tag in ctx.attr.skip_tags
-        ],
+        args = args,
         libs = ctx.attr._test_libs,
     )
 
