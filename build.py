@@ -255,14 +255,10 @@ def main() -> None:
     """Builds the project."""
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
-    cache_dir = pathlib.Path(
-        os.getenv('XDG_CACHE_HOME') or os.path.expanduser('~/.cache')) / 'bazel'
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--action-cache', type=_cache_directory,
-                        default=cache_dir / 'actions')
-    parser.add_argument('--repository-cache', type=_cache_directory,
-                        default=cache_dir / 'repositories')
+    parser.add_argument('--action-cache', type=_cache_directory)
+    parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
     args = parser.parse_args(sys.argv[1:] or ['all'])
     builder = Builder(bazel=args.bazel,
