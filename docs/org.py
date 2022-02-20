@@ -19,7 +19,7 @@ import html.parser
 import io
 import pathlib
 import textwrap
-from typing import List, Tuple
+from typing import List, Sequence, Tuple
 
 import marko
 import marko.block
@@ -41,18 +41,7 @@ def _main() -> None:
         for rule in module.rule_info:
             file.write(f'* ~{rule.rule_name}~ rule\n\n')
             _markdown(file, rule.doc_string)
-            for attr in rule.attribute:
-                file.write(f'** ~{attr.name}~ attribute\n\n')
-                _markdown(file, attr.doc_string + _MANDATORY[attr.mandatory])
-                file.write(f'- Type :: {_ATTRIBUTE_TYPE[attr.type]}\n')
-                if attr.default_value:
-                    file.write(f'- Default :: ~{attr.default_value}~\n')
-                if attr.provider_name_group:
-                    group, = attr.provider_name_group
-                    names = ', '.join(
-                        f'~{name}~' for name in group.provider_name)
-                    file.write(f'- Required providers :: {names}\n')
-                file.write('\n')
+            _attributes(file, rule.attribute)
         for provider in module.provider_info:
             file.write(f'* ~{provider.provider_name}~ provider\n\n')
             _markdown(file, provider.doc_string)
@@ -73,8 +62,28 @@ def _main() -> None:
             if func.deprecated.doc_string:
                 raise ValueError(
                     f'unsupported deprecated function {func.function_name}')
-        if module.aspect_info:
-            raise ValueError('aspects are not yet supported')
+        for aspect in module.aspect_info:
+            file.write(f'* ~{aspect.aspect_name}~ aspect\n\n')
+            _markdown(file, aspect.doc_string)
+            if aspect.aspect_attribute:
+                attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
+                file.write(f'This aspect propagates along the following '
+                           f'attributes: {attrs}\n')
+            _attributes(file, aspect.attribute)
+
+def _attributes(file: io.TextIOBase,
+                attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
+    for attr in attributes:
+        file.write(f'** ~{attr.name}~ attribute\n\n')
+        _markdown(file, attr.doc_string + _MANDATORY[attr.mandatory])
+        file.write(f'- Type :: {_ATTRIBUTE_TYPE[attr.type]}\n')
+        if attr.default_value:
+            file.write(f'- Default :: ~{attr.default_value}~\n')
+        if attr.provider_name_group:
+            group, = attr.provider_name_group
+            names = ', '.join(f'~{name}~' for name in group.provider_name)
+            file.write(f'- Required providers :: {names}\n')
+        file.write('\n')
 
 _ATTRIBUTE_TYPE = {
     stardoc_output_pb2.NAME: 'name',
