@@ -34,7 +34,7 @@ class Workspace:
         for file in params['srcs']:
             dest = tempdir / workspace_name / file['rel']
             dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy(file['src'], dest)
+            shutil.copyfile(file['src'], dest)
             # Don’t attempt to check generated protocol buffer files.
             if not file['ext'] and not dest.name.endswith('_pb2.py'):
                 srcs.append(dest)
