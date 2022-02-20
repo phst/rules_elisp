@@ -35,7 +35,8 @@ class Workspace:
             dest = tempdir / workspace_name / file['rel']
             dest.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(file['src'], dest)
-            if not file['ext']:
+            # Don’t attempt to check generated protocol buffer files.
+            if not file['ext'] and not dest.name.endswith('_pb2.py'):
                 srcs.append(dest)
         if not srcs:
             raise FileNotFoundError('no source files found')
