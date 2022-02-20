@@ -61,6 +61,7 @@ def _main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
+    parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
@@ -85,7 +86,7 @@ def _main() -> None:
     if result.returncode:
         print(result.stdout)
         sys.exit(result.returncode)
-    if os.name == 'posix':
+    if os.name == 'posix' and args.pytype:
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
              '--no-cache', '--'] + [str(file.relative_to(cwd))

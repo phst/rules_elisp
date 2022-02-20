@@ -41,7 +41,8 @@ requirements_txt = repository_rule(
 )
 
 def _check_python_impl(target, ctx):
-    if "no-python-check" in ctx.rule.attr.tags:
+    tags = ctx.rule.attr.tags
+    if "no-python-check" in tags:
         return []
     info = target[PyInfo]
     stem = "_{}.python-check".format(target.label.name)
@@ -49,6 +50,12 @@ def _check_python_impl(target, ctx):
     output_file = ctx.actions.declare_file(stem + ".stamp")
     _write_params(ctx.actions, params_file, output_file, info)
     pylintrc = ctx.file._pylintrc
+    args = [
+        "--pylintrc=" + pylintrc.path,
+        "--params=" + params_file.path,
+    ]
+    if "no-pytype" not in tags:
+        args.append("--pytype")
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
@@ -56,10 +63,7 @@ def _check_python_impl(target, ctx):
             transitive = [info.transitive_sources],
         ),
         executable = ctx.executable._check,
-        arguments = [
-            "--pylintrc=" + pylintrc.path,
-            "--params=" + params_file.path,
-        ],
+        arguments = args,
         mnemonic = "PythonCheck",
         progress_message = "Performing static analysis of target {}".format(target.label),
     )
