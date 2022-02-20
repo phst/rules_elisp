@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_test")
 
 elisp_library(
@@ -98,11 +99,17 @@ elisp_manual(
     out = "doc.texi",
 )
 
-genrule(
+run_binary(
     name = "makeinfo",
     srcs = ["doc.texi"],
     outs = ["doc.info"],
-    cmd = "makeinfo --no-split --output=$@ -- $<",
+    args = [
+        "--no-split",
+        "--output=$(location doc.info)",
+        "--",
+        "$(location doc.texi)",
+    ],
+    tool = "@texinfo//:texi2any",
 )
 
 py_test(

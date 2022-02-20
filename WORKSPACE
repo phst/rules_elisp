@@ -124,6 +124,32 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 protobuf_deps()
 
 http_archive(
+    name = "rules_perl",
+    sha256 = "52c4e6cdd35afb7318fd6e2ef342dc6f411626aa97e1fd1b813a8b97ba712f86",
+    strip_prefix = "rules_perl-e288d228930c83081a697076f7fa8e7f08b52a3a/",
+    urls = [
+        "https://github.com/bazelbuild/rules_perl/archive/e288d228930c83081a697076f7fa8e7f08b52a3a.zip",  # 2022-02-07
+    ],
+)
+
+load("@rules_perl//perl:deps.bzl", "perl_register_toolchains", "perl_rules_dependencies")
+
+perl_rules_dependencies()
+
+perl_register_toolchains()
+
+http_archive(
+    name = "texinfo",
+    build_file = "@//:texinfo.BUILD",
+    sha256 = "8eb753ed28bca21f8f56c1a180362aed789229bd62fff58bf8368e9beb59fec4",
+    strip_prefix = "texinfo-6.8/",
+    urls = [
+        "https://ftpmirror.gnu.org/texinfo/texinfo-6.8.tar.xz",  # 2021-07-03
+        "https://ftp.gnu.org/gnu/texinfo/texinfo-6.8.tar.xz",  # 2021-07-03
+    ],
+)
+
+http_archive(
     name = "com_grail_bazel_compdb",
     build_file = "@//:compdb.BUILD",
     sha256 = "32483ad5aef7496bf338454d851fb63f7a7c72c6b62c40fd74af4f5a5c3749a4",
