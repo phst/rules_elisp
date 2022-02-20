@@ -143,7 +143,7 @@ class Builder:
         """Build the generated documentation files."""
         output = self._run(
             [str(self._bazel_program), 'query', '--output=label',
-             r'filter("\.md\.generated$", kind("generated file", //...:*))'],
+             r'filter("\.org\.generated$", kind("generated file", //...:*))'],
             capture_stdout=True)
         targets = output.splitlines()
         bazel_bin = self._cwd / 'bazel-bin'

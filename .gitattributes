@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,4 +20,4 @@ WORKSPACE     text eol=lf
 
 # We enforce Unix-style line endings for the Stardoc files to address
 # https://github.com/bazelbuild/stardoc/issues/110.
-/docs/*.md    text eol=lf
+/docs/*.org   text eol=lf
