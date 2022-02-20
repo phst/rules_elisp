@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,3 +17,5 @@ pylint == 2.11.1
 # Pytype isn’t supported on Windows,
 # cf. https://github.com/google/pytype/tree/2021.11.12#requirements.
 pytype == 2021.11.24 ; sys_platform == 'linux' or sys_platform == 'darwin'
+
+marko == 1.2.0
