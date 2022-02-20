@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the rule “emacs_binary”, which compiles Emacs for use in Bazel."""
+"""Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel."""
 
 load(
     "@bazel_tools//tools/build_defs/cc:action_names.bzl",

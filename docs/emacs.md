@@ -1,6 +1,6 @@
 <!-- Generated with Stardoc: http://skydoc.bazel.build -->
 
-Defines the rule “emacs_binary”, which compiles Emacs for use in Bazel.
+Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel.
 
 <a id="#emacs_binary"></a>
 
