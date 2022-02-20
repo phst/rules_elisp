@@ -30,6 +30,7 @@ from phst_rules_elisp.docs import stardoc_output_pb2
 
 def _main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('label')
     parser.add_argument('input', type=pathlib.Path)
     parser.add_argument('output', type=pathlib.Path)
     opts = parser.parse_args()
@@ -39,25 +40,26 @@ def _main() -> None:
     with opts.output.open(mode='xt', encoding='utf-8', newline='\n') as file:
         file.write(_LICENSE)
         file.write('\n')
+        file.write(f'* Symbols defined in ={opts.label}=\n\n')
         _markdown(file, module.module_docstring)
         for rule in module.rule_info:
-            file.write(f'* ~{rule.rule_name}~ rule\n')
+            file.write(f'** ~{rule.rule_name}~ rule\n')
             file.write(f'#+findex: {rule.rule_name}\n\n')
             _markdown(file, rule.doc_string)
             _attributes(file, rule.attribute)
         for provider in module.provider_info:
-            file.write(f'* ~{provider.provider_name}~ provider\n')
+            file.write(f'** ~{provider.provider_name}~ provider\n')
             file.write(f'#+findex: {provider.provider_name}\n\n')
             _markdown(file, provider.doc_string)
             for field in provider.field_info:
-                file.write(f'** ~{field.name}~ field\n\n')
+                file.write(f'*** ~{field.name}~ field\n\n')
                 _markdown(file, field.doc_string)
         for func in module.func_info:
-            file.write(f'* ~{func.function_name}~ function\n')
+            file.write(f'** ~{func.function_name}~ function\n')
             file.write(f'#+findex: {func.function_name}\n\n')
             _markdown(file, func.doc_string)
             for param in func.parameter:
-                file.write(f'** ~{param.name}~ parameter\n\n')
+                file.write(f'*** ~{param.name}~ parameter\n\n')
                 _markdown(file, func.doc_string + _MANDATORY[param.mandatory])
                 if param.default_value:
                     file.write(f'- Default :: ~{param.default_value}~\n')
@@ -68,7 +70,7 @@ def _main() -> None:
                 raise ValueError(
                     f'unsupported deprecated function {func.function_name}')
         for aspect in module.aspect_info:
-            file.write(f'* ~{aspect.aspect_name}~ aspect\n')
+            file.write(f'** ~{aspect.aspect_name}~ aspect\n')
             file.write(f'#+findex: {aspect.aspect_name}\n\n')
             _markdown(file, aspect.doc_string)
             if aspect.aspect_attribute:
@@ -95,7 +97,7 @@ _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
 def _attributes(file: io.TextIOBase,
                 attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
     for attr in attributes:
-        file.write(f'** ~{attr.name}~ attribute\n\n')
+        file.write(f'*** ~{attr.name}~ attribute\n\n')
         _markdown(file, attr.doc_string + _MANDATORY[attr.mandatory])
         file.write(f'- Type :: {_ATTRIBUTE_TYPE[attr.type]}\n')
         if attr.default_value:

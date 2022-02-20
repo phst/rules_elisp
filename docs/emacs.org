@@ -12,21 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+* Symbols defined in =//emacs:defs.bzl=
+
 Defines the rule ~emacs_binary~, which compiles Emacs for use in Bazel.
 
-* ~emacs_binary~ rule
+** ~emacs_binary~ rule
 #+findex: emacs_binary
 
 Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.
 
-** ~name~ attribute
+*** ~name~ attribute
 
 A unique name for this target.  Mandatory.
 
 - Type :: name
 
-** ~builtin_features~ attribute
+*** ~builtin_features~ attribute
 
 Label for a file into which to write the list
 of builtin features.  If not provided, don’t write such a file.
@@ -34,7 +36,7 @@ This is used by Gazelle.  Optional.
 
 - Type :: output file
 
-** ~dump_mode~ attribute
+*** ~dump_mode~ attribute
 
 Dumping mode that Emacs will use.  This can be either
 ~portable~ to use the portable dumper introduced in Emacs 27, or ~unexec~ to
@@ -44,21 +46,21 @@ recommended.  Optional.
 - Type :: string
 - Default :: ~"portable"~
 
-** ~module_header~ attribute
+*** ~module_header~ attribute
 
 Label for a file target that will receive the
 ~emacs-module.h~ header.  If not provided, don’t install the header.  Optional.
 
 - Type :: output file
 
-** ~readme~ attribute
+*** ~readme~ attribute
 
 The README file in the root of the Emacs repository.
 This is necessary to determine the source root directory.  Mandatory.
 
 - Type :: label
 
-** ~srcs~ attribute
+*** ~srcs~ attribute
 
 All Emacs source files.  Mandatory.
 

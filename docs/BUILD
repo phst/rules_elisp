@@ -19,11 +19,17 @@ load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 
+DOCS = {
+    "elisp": "//elisp:defs.bzl",
+    "emacs": "//emacs:defs.bzl",
+    "repositories": "//elisp:repositories.bzl",
+}
+
 stardoc(
     name = "elisp_doc",
     out = "elisp_doc.bin",
     format = "proto",
-    input = "//elisp:defs.bzl",
+    input = DOCS["elisp"],
     deps = [
         "//elisp:util_bzl",
         "@bazel_skylib//lib:collections",
@@ -36,7 +42,7 @@ stardoc(
     name = "emacs_doc",
     out = "emacs_doc.bin",
     format = "proto",
-    input = "//emacs:defs.bzl",
+    input = DOCS["emacs"],
     deps = [
         "//elisp:builtin_bzl",
         "//elisp:util_bzl",
@@ -48,15 +54,9 @@ stardoc(
     name = "repositories_doc",
     out = "repositories_doc.bin",
     format = "proto",
-    input = "//elisp:repositories.bzl",
+    input = DOCS["repositories"],
     deps = ["//elisp:builtin_bzl"],
 )
-
-DOCS = [
-    "elisp",
-    "emacs",
-    "repositories",
-]
 
 [
     run_binary(
@@ -65,12 +65,13 @@ DOCS = [
         outs = [doc + ".org.generated"],
         args = [
             "--",
+            label,
             "$(location :{}_doc.bin)".format(doc),
             "$(location :{}.org.generated)".format(doc),
         ],
         tool = ":org",
     )
-    for doc in DOCS
+    for doc, label in DOCS.items()
 ]
 
 [
