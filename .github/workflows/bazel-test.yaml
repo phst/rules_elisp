@@ -39,6 +39,10 @@ jobs:
       - name: Install APT packages
         run: sudo apt-get install libxml2-utils
         if: runner.os == 'Linux'
+      - name: Install Homebrew packages
+        # The Protocol Buffer rules need ‘realpath’ from the GNU coreutils.
+        run: brew install coreutils
+        if: runner.os == 'macOS'
       - name: Install MSYS2
         uses: msys2/setup-msys2@v2
         with:
