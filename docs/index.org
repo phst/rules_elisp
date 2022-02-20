@@ -9,7 +9,7 @@ This is not an officially supported Google product.
 
 ** Usage
 
-Add a snippet like the following to your Bazel `WORKSPACE` file:
+Add a snippet like the following to your Bazel ~WORKSPACE~ file:
 
 #+BEGIN_SRC bazel-workspace
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
