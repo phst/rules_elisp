@@ -1,0 +1,12 @@
+Contains workspace functions to use Emacs Lisp rules.
+
+* ~rules_elisp_dependencies~ function
+
+Installs necessary dependencies for Emacs Lisp rules.
+
+Call this function in your ~WORKSPACE~ file.
+
+* ~rules_elisp_toolchains~ function
+
+Registers the default toolchains for Emacs Lisp.
+

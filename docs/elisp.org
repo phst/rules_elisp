@@ -1,0 +1,431 @@
+Defines rules to work with Emacs Lisp files in Bazel.
+
+* ~elisp_binary~ rule
+
+Binary rule that loads a single Emacs Lisp file.
+The source file is byte-compiled.  At runtime, the compiled version is loaded
+in batch mode unless ~interactive~ is ~True~.
+
+** ~name~ attribute
+
+A unique name for this target.
+Mandatory.
+
+- Type :: name
+
+** ~data~ attribute
+
+List of files to be made available at runtime.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+
+** ~deps~ attribute
+
+List of ~elisp_library~ dependencies.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+- Required providers :: ~EmacsLispInfo~
+
+** ~fatal_warnings~ attribute
+
+If ~True~ (the default), then byte compile warnings should be
+treated as errors.  If ~False~, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+~True~, because otherwise important issues might remain undetected.  Set this
+attribute to ~False~ only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.
+Optional.
+
+- Type :: Boolean
+- Default :: ~True~
+
+** ~input_args~ attribute
+
+Indices of command-line arguments that represent input
+filenames.  These number specify indices into the ~argv~ array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index ~2~ stands for ~argv[2]~, and the index ~-2~ stands for
+~argv[argc - 2]~.  When passing arguments to an ~emacs_binary~ program on the
+command line, the corresponding arguments are treated as filenames for input
+files and added to the ~inputFiles~ field of the manifest.  This only has an
+effect for toolchains that specify ~wrap = True~.
+Optional.
+
+- Type :: list of integers
+- Default :: ~[]~
+
+** ~interactive~ attribute
+
+Run Emacs in interactive instead of batch mode.
+Optional.
+
+- Type :: Boolean
+- Default :: ~False~
+
+** ~output_args~ attribute
+
+Indices of command-line arguments that represent output
+filenames.  These number specify indices into the ~argv~ array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index ~2~ stands for ~argv[2]~, and the index ~-2~ stands for
+~argv[argc - 2]~.  When passing arguments to an ~emacs_binary~ program on the
+command line, the corresponding arguments are treated as filenames for output
+files and added to the ~outputFiles~ field of the manifest.  This only has an
+effect for toolchains that specify ~wrap = True~.
+Optional.
+
+- Type :: list of integers
+- Default :: ~[]~
+
+** ~src~ attribute
+
+Source file to load.
+Mandatory.
+
+- Type :: label
+
+* ~elisp_library~ rule
+
+Byte-compiles Emacs Lisp source files and makes the compiled output
+available to dependencies. All sources are byte-compiled.
+~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules depending on this binary
+can then use ~load~ or ~require~ to load them.
+
+By default, libraries need to be loaded using a filename relative to the
+workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
+further elements to the load path, use the ~load_path~ attribute.
+
+If there are multiple source files specified in ~srcs~, these source files can
+also load each other.  However, it’s often preferable to only have one
+~elisp_library~ target per source file to make dependencies more obvious and
+ensure that files get only loaded in their byte-compiled form.
+
+The source files in ~srcs~ can also list shared objects.  The rule treats them
+as Emacs modules and doesn’t try to byte-compile them.  You can use
+e.g. ~cc_binary~ with ~linkshared = True~ to create shared objects.
+
+** ~name~ attribute
+
+A unique name for this target.
+Mandatory.
+
+- Type :: name
+
+** ~data~ attribute
+
+List of files to be made available at runtime.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+
+** ~deps~ attribute
+
+List of ~elisp_library~ dependencies.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+- Required providers :: ~EmacsLispInfo~
+
+** ~fatal_warnings~ attribute
+
+If ~True~ (the default), then byte compile warnings should be
+treated as errors.  If ~False~, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+~True~, because otherwise important issues might remain undetected.  Set this
+attribute to ~False~ only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.
+Optional.
+
+- Type :: Boolean
+- Default :: ~True~
+
+** ~load_path~ attribute
+
+List of additional load path elements.
+The elements are directory names, which can be either relative or absolute.
+Relative names are relative to the current package.
+Absolute names are relative to the workspace root.
+To add a load path entry for the current package, specify ~.~ here.
+Optional.
+
+- Type :: list of strings
+- Default :: ~[]~
+
+** ~outs~ attribute
+
+List of byte-compiled Emacs Lisp files to be made available
+as targets.
+Optional.
+
+- Type :: list of output files
+
+** ~srcs~ attribute
+
+List of source files.  These must either be Emacs Lisp
+files ending in ~.el~, or module objects ending in ~.so~, ~.dylib~, or
+~.dll~.
+Mandatory.
+
+- Type :: list of labels
+
+* ~elisp_manual~ rule
+
+Generates a [[https://www.gnu.org/software/texinfo/][GNU_Texinfo]]
+manual from an [[https://orgmode.org/][Org Mode file]] using
+[[https://orgmode.org/manual/Exporting.html][Org’s exporting functionality]].
+You can then use
+[[https://www.gnu.org/software/texinfo/manual/texinfo/html_node/Generic-Translator-texi2any.html][~texi2any~]]
+to generate other document formats from the output file.
+
+** ~name~ attribute
+
+A unique name for this target.
+Mandatory.
+
+- Type :: name
+
+** ~out~ attribute
+
+Texinfo manual file to write; must end in ~.texi~.
+Mandatory.
+
+- Type :: output file
+
+** ~src~ attribute
+
+Org-mode file to use as manual source; must end in ~.org~.
+Mandatory.
+
+- Type :: label
+
+* ~elisp_test~ rule
+
+Runs ERT tests that are defined in the source files.
+The given source files should contain ERT tests defined with ~ert-deftest~.
+See the [[https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html][ERT
+manual]]
+for details.  The generated test binary loads all source files and executes all
+tests like ~ert-run-tests-batch-and-exit~.
+
+You can restrict the tests to be run using the ~--test_filter~ option.  If set,
+the value of ~--test_filter~ must be a Lisp expression usable as an [[https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html][ERT test
+selector]].
+You can also restrict the tests to be run using the ~skip_tests~ and
+~skip_tags~ rule attributes.  These restrictions are additive, i.e., a test
+only runs if it’s not suppressed by either facility.
+
+In coverage mode (i.e., when run under ~bazel coverage~), all tests tagged with
+the ~:nocover~ tag are also skipped.  You can use this tag to skip tests that
+normally pass, but don’t work under coverage for some reason.
+
+** ~name~ attribute
+
+A unique name for this target.
+Mandatory.
+
+- Type :: name
+
+** ~data~ attribute
+
+List of files to be made available at runtime.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+
+** ~deps~ attribute
+
+List of ~elisp_library~ dependencies.
+Optional.
+
+- Type :: list of labels
+- Default :: ~[]~
+- Required providers :: ~EmacsLispInfo~
+
+** ~fatal_warnings~ attribute
+
+If ~True~ (the default), then byte compile warnings should be
+treated as errors.  If ~False~, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+~True~, because otherwise important issues might remain undetected.  Set this
+attribute to ~False~ only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.
+Optional.
+
+- Type :: Boolean
+- Default :: ~True~
+
+** ~skip_tags~ attribute
+
+List of test tags to skip.  This attribute contains a list
+of tag names; if a test is tagged with one of the tags from this list, it is
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+interactive mode.  Use the ~:tags~ keyword argument to ~ert-deftest~ to tag
+tests.
+Optional.
+
+- Type :: list of strings
+- Default :: ~[]~
+
+** ~skip_tests~ attribute
+
+List of tests to skip.  This attribute contains a list of
+ERT test symbols; when running the test rule, these tests are skipped.
+
+Most of the time, you should use [[https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html][the ~skip-unless~
+macro]]
+instead.  The ~skip_tests~ attribute is mainly useful for third-party code that
+you don’t control.
+Optional.
+
+- Type :: list of strings
+- Default :: ~[]~
+
+** ~srcs~ attribute
+
+List of source files to load.
+Mandatory.
+
+- Type :: list of labels
+
+* ~elisp_toolchain~ rule
+
+Toolchain rule for Emacs Lisp.
+This toolchain configures how to run Emacs.
+The executable passed to the ~emacs~ attribute must be a binary
+that behaves like Emacs.
+If ~wrap~ is ~False~, Bazel calls it as is, passing arguments
+that a normal Emacs binary would accept.
+If ~wrap~ is ~True~, Bazel calls the binary with a special ~--manifest~ option.
+The value of the option is the filename of a JSON file containing a manifest.
+The manifest specifies which files should be readable and/or writable by Emacs.
+Toolchains can use this to sandbox Emacs, if desired.
+
+If ~wrap~ is ~True~, the format of the command line is as follows:
+
+#+BEGIN_SRC bash
+emacs --manifest=MANIFEST -- ARGS…
+#+END_SRC
+
+That is, the original arguments for Emacs are separated by a double hyphen
+(~--~) so that argument parsers can distinguish between the ~--manifest~ option
+and Emacs arguments.
+
+The manifest is a JSON object with the following keys:
+- ~root~ can be either ~EXECUTION_ROOT~ or ~RUNFILES_ROOT~ and specifies
+  the root directory for relative file names.
+- ~loadPath~ is a list of directory names making up the load path.
+- ~inputFiles~ is a list of files that should be readable.
+- ~outputFiles~ is a list of files that should be writable.
+- ~tags~ is the list of tags for the current rule.
+
+When executing an action, file names are relative to the execution root.
+Otherwise, file names are relative to the runfiles root.  File names in
+~inputFiles~ or ~outputFiles~ can also be absolute; in this case they specify
+temporary files that are deleted after the action completes, or files passed on
+the command line interpreted according to the ~input_args~ and ~output_args~
+attributes of the ~elisp_binary~ rule.
+
+** ~name~ attribute
+
+A unique name for this target.
+Mandatory.
+
+- Type :: name
+
+** ~emacs~ attribute
+
+An executable file that behaves like the Emacs binary.
+Depending on whether ~wrap~ is ~True~, Bazel invokes this executable
+with a command line like ~emacs --manifest=MANIFEST -- ARGS…~ or ~emacs ARGS…~.
+The ~--manifest~ flag is only present if ~wrap~ is ~True~.
+See the rule documentation for details.
+Mandatory.
+
+- Type :: label
+
+** ~execution_requirements~ attribute
+
+Execution requirements for compilation and test actions.
+Optional.
+
+- Type :: dictionary string → string
+- Default :: ~{}~
+
+** ~use_default_shell_env~ attribute
+
+Whether actions should inherit the external shell environment.
+Optional.
+
+- Type :: Boolean
+- Default :: ~False~
+
+** ~wrap~ attribute
+
+Whether the binary given in the ~emacs~ attribute is a
+wrapper around Emacs proper.
+If ~True~, Bazel passes a manifest file using the ~--manifest~ option.
+See the rule documentation for details.
+Optional.
+
+- Type :: Boolean
+- Default :: ~False~
+
+* ~EmacsLispInfo~ provider
+
+Provider for Emacs Lisp libraries.
+The ~elisp_library~ rule produces this provider.
+
+Load path directory entries are structures with the following fields:
+- ~for_actions~ is a string specifying the load directory to use for actions,
+  relative to the execution root.
+- ~for_runfiles~ is a string specifying the load directory to use at runtime,
+  relative to the runfiles root.
+
+** ~source_files~ field
+
+A list of ~File~ objects containing
+the Emacs Lisp source files of this library.
+
+** ~compiled_files~ field
+
+A list of ~File~ objects containing
+the byte-compiled Emacs Lisp files and module objects of this library.
+
+** ~load_path~ field
+
+A list containing necessary load path
+additions for this library.  The list elements are structures as
+described in the provider documentation.
+
+** ~data_files~ field
+
+A list of ~File~ objects that this library requires
+at runtime.
+
+** ~transitive_source_files~ field
+
+A ~depset~ of ~File~ objects containing
+the Emacs Lisp source files of this library
+and all its transitive dependencies.
+
+** ~transitive_compiled_files~ field
+
+A ~depset~ of ~File~ objects containing
+the byte-compiled Emacs Lisp files and module objects of this library
+and all its transitive dependencies.
+
+** ~transitive_load_path~ field
+
+A ~depset~ containing necessary load path
+additions for this library and all its transitive dependencies.
+The ~depset~ uses preorder traversal: entries for libraries closer to the root
+of the dependency graph come first.  The ~depset~ elements are structures as
+described in the provider documentation.
+
