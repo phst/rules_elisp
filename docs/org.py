@@ -41,17 +41,20 @@ def _main() -> None:
         file.write('\n')
         _markdown(file, module.module_docstring)
         for rule in module.rule_info:
-            file.write(f'* ~{rule.rule_name}~ rule\n\n')
+            file.write(f'* ~{rule.rule_name}~ rule\n')
+            file.write(f'#+findex: {rule.rule_name}\n\n')
             _markdown(file, rule.doc_string)
             _attributes(file, rule.attribute)
         for provider in module.provider_info:
-            file.write(f'* ~{provider.provider_name}~ provider\n\n')
+            file.write(f'* ~{provider.provider_name}~ provider\n')
+            file.write(f'#+findex: {provider.provider_name}\n\n')
             _markdown(file, provider.doc_string)
             for field in provider.field_info:
                 file.write(f'** ~{field.name}~ field\n\n')
                 _markdown(file, field.doc_string)
         for func in module.func_info:
-            file.write(f'* ~{func.function_name}~ function\n\n')
+            file.write(f'* ~{func.function_name}~ function\n')
+            file.write(f'#+findex: {func.function_name}\n\n')
             _markdown(file, func.doc_string)
             for param in func.parameter:
                 file.write(f'** ~{param.name}~ parameter\n\n')
@@ -65,7 +68,8 @@ def _main() -> None:
                 raise ValueError(
                     f'unsupported deprecated function {func.function_name}')
         for aspect in module.aspect_info:
-            file.write(f'* ~{aspect.aspect_name}~ aspect\n\n')
+            file.write(f'* ~{aspect.aspect_name}~ aspect\n')
+            file.write(f'#+findex: {aspect.aspect_name}\n\n')
             _markdown(file, aspect.doc_string)
             if aspect.aspect_attribute:
                 attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)

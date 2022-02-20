@@ -15,6 +15,7 @@
 Defines the rule ~emacs_binary~, which compiles Emacs for use in Bazel.
 
 * ~emacs_binary~ rule
+#+findex: emacs_binary
 
 Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.

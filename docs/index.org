@@ -12,7 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-* Bazel rules for Emacs Lisp
+#+title: Bazel rules for Emacs Lisp
+#+language: en
+#+options: author:nil date:nil
+#+export_file_name: rules_elisp.texi
+#+texinfo_filename: rules_elisp.info
+#+texinfo_dir_category: Emacs
+#+texinfo_dir_title: rules_elisp: (rules_elisp)
+#+texinfo_dir_desc: Compilation and testing support for Emacs Lisp in Bazel
+
+* Introduction
 
 This repository provides a [[https://bazel.build/][Bazel]] integration for
 [[https://www.gnu.org/software/emacs/manual/html_node/elisp/][Emacs Lisp]].  It
@@ -21,7 +30,7 @@ is modeled after the rules definitions for other languages, like the
 
 This is not an officially supported Google product.
 
-** Usage
+* Usage
 
 Add a snippet like the following to your Bazel ~WORKSPACE~ file:
 
@@ -52,7 +61,8 @@ Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
 See the [[file:elisp.org][generated documentation]] and the examples in the
 ~examples~ directory for details.
 
-** Load path management
+* Load path management
+#+cindex: Load path
 
 The Emacs Lisp rules by default only add the workspace root directories to the
 [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][load
@@ -64,21 +74,39 @@ directories are relative to the Bazel package directory; absolute directories
 are relative to the workspace root.  A typical use case is to specify
 ~load_path = ["."]~ to add the current package to the load path.
 
-** Runfiles
+* Runfiles
+#+cindex: Runfiles
 
 This repository also includes a library to access
 [[https://docs.bazel.build/skylark/rules.html#runfiles][runfiles]].  To use it,
 add a build dependency on ~@phst_rules_elisp//elisp/runfiles~.  See the header
 comments in ~runfiles.el~ for further usage hints.
 
-** Symbols defined in =//elisp:defs.bzl=
+* Symbols defined in =//elisp:defs.bzl=
 
 #+INCLUDE: elisp.org
 
-** Symbols defined in =//elisp:repositories.bzl=
+* Symbols defined in =//elisp:repositories.bzl=
 
 #+INCLUDE: repositories.org
 
-** Symbols defined in =//emacs:defs.bzl=
+* Symbols defined in =//emacs:defs.bzl=
 
 #+INCLUDE: emacs.org
+
+* Indices
+
+** Concept index
+:PROPERTIES:
+:index: cp
+:END:
+
+** Symbol index
+:PROPERTIES:
+:index: fn
+:END:
+
+# Local Variables:
+# org-adapt-indentation: nil
+# org-edit-src-content-indentation: 0
+# End:

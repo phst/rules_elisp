@@ -15,6 +15,7 @@
 Defines rules to work with Emacs Lisp files in Bazel.
 
 * ~elisp_binary~ rule
+#+findex: elisp_binary
 
 Binary rule that loads a single Emacs Lisp file.
 The source file is byte-compiled.  At runtime, the compiled version is loaded
@@ -95,6 +96,7 @@ Source file to load.  Mandatory.
 - Type :: label
 
 * ~elisp_library~ rule
+#+findex: elisp_library
 
 Byte-compiles Emacs Lisp source files and makes the compiled output
 available to dependencies. All sources are byte-compiled.
@@ -174,6 +176,7 @@ files ending in ~.el~, or module objects ending in ~.so~, ~.dylib~, or
 - Type :: list of labels
 
 * ~elisp_manual~ rule
+#+findex: elisp_manual
 
 Generates a [[https://www.gnu.org/software/texinfo/][GNU_Texinfo]]
 manual from an [[https://orgmode.org/][Org Mode file]] using
@@ -201,6 +204,7 @@ Org-mode file to use as manual source; must end in ~.org~.  Mandatory.
 - Type :: label
 
 * ~elisp_test~ rule
+#+findex: elisp_test
 
 Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with ~ert-deftest~.
@@ -284,6 +288,7 @@ List of source files to load.  Mandatory.
 - Type :: list of labels
 
 * ~elisp_toolchain~ rule
+#+findex: elisp_toolchain
 
 Toolchain rule for Emacs Lisp.
 This toolchain configures how to run Emacs.
@@ -367,6 +372,7 @@ See the rule documentation for details.  Optional.
 - Default :: ~False~
 
 * ~EmacsLispInfo~ provider
+#+findex: EmacsLispInfo
 
 Provider for Emacs Lisp libraries.
 The ~elisp_library~ rule produces this provider.
