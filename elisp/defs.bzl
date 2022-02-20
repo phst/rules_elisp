@@ -103,17 +103,16 @@ def _elisp_library_impl(ctx):
 
 def _elisp_binary_impl(ctx):
     """Rule implementation for the “elisp_binary” rules."""
+    args = []
+    if ctx.attr.interactive:
+        args.append("--interactive")
+    args += ["--input-arg=" + str(i) for i in ctx.attr.input_args]
+    args += ["--output-arg=" + str(i) for i in ctx.attr.output_args]
     executable, runfiles = _binary(
         ctx,
         srcs = ctx.files.src,
         tags = [],
-        args = [
-            "--input-arg=" + str(i)
-            for i in ctx.attr.input_args
-        ] + [
-            "--output-arg=" + str(i)
-            for i in ctx.attr.output_args
-        ],
+        args = args,
         libs = ctx.attr._binary_libs,
     )
     return [DefaultInfo(
@@ -361,6 +360,9 @@ elisp_binary = rule(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
         ),
+        interactive = attr.bool(
+            doc = "Run Emacs in interactive instead of batch mode.",
+        ),
         input_args = attr.int_list(
             doc = """Indices of command-line arguments that represent input
 filenames.  These number specify indices into the `argv` array.  Negative
@@ -384,7 +386,7 @@ effect for toolchains that specify `wrap = True`.""",
     ),
     doc = """Binary rule that loads a single Emacs Lisp file.
 The source file is byte-compiled.  At runtime, the compiled version is loaded
-in batch mode.""",
+in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = [
