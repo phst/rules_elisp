@@ -115,3 +115,11 @@ py_test(
     srcs_version = "PY3",
     deps = ["//elisp:runfiles"],
 )
+
+# You can run this binary interactively: bazel run //examples:interactive
+elisp_binary(
+    name = "interactive",
+    src = "interactive.el",
+    interactive = True,
+    deps = ["//elisp/runfiles"],
+)

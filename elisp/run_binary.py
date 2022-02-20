@@ -43,6 +43,7 @@ def main() -> None:
                         type=pathlib.PurePosixPath, default=[])
     parser.add_argument('--data-file', action='append',
                         type=pathlib.PurePosixPath, default=[])
+    parser.add_argument('--interactive', action='store_true', default=False)
     parser.add_argument('--input-arg', action='append', type=int, default=[])
     parser.add_argument('--output-arg', action='append', type=int, default=[])
     parser.add_argument('argv', nargs='+')
@@ -59,7 +60,9 @@ def main() -> None:
     # https://docs.google.com/document/d/e/2PACX-1vSDIrFnFvEYhKsCMdGdD40wZRBX3m3aZ5HhVj4CtHPmiXKDCxioTUbYsDydjKtFDAzER5eg7OjJWs3V/pub.
     args = [opts.argv[0]]
     with manifest.add(opts.mode, args) as manifest_file:
-        args += ['--quick', '--batch']
+        args.append('--quick')
+        if not opts.interactive:
+            args.append('--batch')
         load.add_path(run_files, args, opts.load_directory)
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
