@@ -78,7 +78,14 @@ def _toolchain(ctx):
 
 def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
-    result = _compile(ctx, ctx.files.srcs, ctx.attr.deps, ctx.attr.load_path)
+    result = _compile(
+        ctx = ctx,
+        srcs = ctx.files.srcs,
+        deps = ctx.attr.deps,
+        load_path = ctx.attr.load_path,
+        data = ctx.files.data,
+        fatal_warnings = ctx.attr.fatal_warnings,
+    )
     return [
         DefaultInfo(
             files = depset(direct = result.outs),
@@ -535,7 +542,7 @@ to generate other document formats from the output file.""",
     implementation = _elisp_manual_impl,
 )
 
-def _compile(ctx, srcs, deps, load_path):
+def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
     """Byte-compiles Emacs Lisp source files.
 
     Args:
@@ -545,6 +552,9 @@ def _compile(ctx, srcs, deps, load_path):
       deps (list of targets): Emacs Lisp libraries that the sources depend on
       load_path (list of strings): additional load path directories, relative
           to the current package
+      data (list of Files): data files to be made available at runtime
+      fatal_warnings (bool): whether compilation warnings should be treated as
+          errors
 
     Returns:
       A structure with the following fields:
@@ -659,7 +669,7 @@ def _compile(ctx, srcs, deps, load_path):
         transitive = indirect_load_path,
     )
     transitive_data = depset(
-        direct = ctx.files.data,
+        direct = data,
         transitive = [
             dep[DefaultInfo].default_runfiles.files
             for dep in ctx.attr.deps
@@ -715,7 +725,7 @@ def _compile(ctx, srcs, deps, load_path):
                 uniquify = True,
                 expand_directories = False,
             ).add_all(
-                ["--fatal-warnings"] if ctx.attr.fatal_warnings else [],
+                ["--fatal-warnings"] if fatal_warnings else [],
             ),
             "--funcall=elisp/compile-batch-and-exit",
             src.path,
@@ -762,7 +772,14 @@ def _binary(ctx, srcs, tags, args, libs):
       a pair (executable, runfiles) containing the compiled binary and the
           runfiles it needs.
     """
-    result = _compile(ctx, srcs, ctx.attr.deps, [])
+    result = _compile(
+        ctx = ctx,
+        srcs = srcs,
+        deps = ctx.attr.deps,
+        load_path = [],
+        data = ctx.files.data,
+        fatal_warnings = ctx.attr.fatal_warnings,
+    )
     toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
 
