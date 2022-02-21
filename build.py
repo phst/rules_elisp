@@ -56,6 +56,7 @@ class Builder:
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
         self._bazel_program = bazel
+        self._workspace = self._info('workspace')
         self._action_cache = action_cache
         self._repository_cache = repository_cache
 
@@ -99,7 +100,8 @@ class Builder:
         """Checks that all BUILD files are formatted correctly."""
         self._bazel('run',
                     ['@com_github_bazelbuild_buildtools//buildifier',
-                     '--mode=check', '--lint=warn', '-r', '--', str(self._cwd)])
+                     '--mode=check', '--lint=warn', '-r', '--',
+                     str(self._workspace)])
 
     @target
     def nogo(self) -> None:
@@ -110,7 +112,7 @@ class Builder:
         """
         print('looking for unwanted Go targets in public packages')
         for directory in ('elisp', 'emacs'):
-            for dirpath, _, filenames in os.walk(self._cwd / directory):
+            for dirpath, _, filenames in os.walk(self._workspace / directory):
                 for file in filenames:
                     file = pathlib.Path(dirpath) / file
                     text = file.read_text(encoding='utf-8')
@@ -136,7 +138,7 @@ class Builder:
     def ext(self) -> None:
         """Run the tests in the example workspace."""
         self._bazel('test', ['//...'], options=['--test_output=errors'],
-                    cwd=self._cwd / 'examples' / 'ext')
+                    cwd=self._workspace / 'examples' / 'ext')
 
     @target
     def docs(self) -> None:
@@ -146,26 +148,24 @@ class Builder:
              r'filter("\.org\.generated$", kind("generated file", //...:*))'],
             capture_stdout=True)
         targets = output.splitlines()
-        bazel_bin = self._cwd / 'bazel-bin'
         self._bazel('build', targets)
+        bazel_bin = self._info('bazel-bin')
         for tgt in targets:
             gen = bazel_bin / tgt.lstrip('/').replace(':', os.sep)
-            src = self._cwd / gen.with_suffix('').relative_to(bazel_bin)
+            src = self._workspace / gen.with_suffix('').relative_to(bazel_bin)
             shutil.copyfile(gen, src)
 
     @target
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
         self._bazel('build', ['@com_grail_bazel_compdb//:files'])
-        output = self._run([str(self._bazel_program), 'info', 'execution_root'],
-                           capture_stdout=True)
-        execroot = pathlib.Path(output.rstrip('\n'))
+        execroot = self._info('execution_root')
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
         args = [sys.executable, str(generator), '--'] + self._cache_options()
         # Need to compile with Clang for clangd to work.
         env = dict(self._env, CC='clang')
-        self._run(args, env=env)
+        self._run(args, cwd=self._workspace, env=env)
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
@@ -219,6 +219,12 @@ class Builder:
         if self._repository_cache:
             opts.append('--repository_cache=' + str(self._repository_cache))
         return opts
+
+    def _info(self, key: str) -> pathlib.Path:
+        output = self._run([str(self._bazel_program), 'info', '--', key],
+                           capture_stdout=True)
+        assert output is not None
+        return pathlib.Path(output.rstrip('\n'))
 
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,

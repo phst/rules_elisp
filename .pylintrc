@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ output-format=parseable
 max-locals=25
 max-branches=15
 max-statements=80
+max-attributes=10
 min-public-methods=1
 
 [FORMAT]
