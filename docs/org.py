@@ -164,7 +164,12 @@ class _Generator:
         prefix = level * '*'
         self._write(f'{prefix} {heading}\n')
         self._write(':PROPERTIES:\n')
-        self._write(f':ALT_TITLE: {node}\n' if node else ':UNNUMBERED: notoc\n')
+        if node is not None:
+            # Work around apparent Org Mode bug.
+            node = node.replace('_', r'\under{}')
+            self._write(f':ALT_TITLE: {node}\n')
+        else:
+            self._write(':UNNUMBERED: notoc\n')
         self._write(':END:\n')
 
     def _findex(self, entry: str) -> None:
