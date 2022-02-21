@@ -56,6 +56,7 @@ rules_elisp_dependencies()
 rules_elisp_toolchains()
 #+END_SRC
 
+#+TEXINFO: @noindent
 Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
 See the [[*Symbols defined in =//emacs:defs.bzl=][generated documentation]] and
 the examples in the ~examples~ directory for details.
