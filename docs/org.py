@@ -41,6 +41,43 @@ def _main() -> None:
         generator.run(module)
 
 class _Generator:
+    _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+
+    _ATTRIBUTE_TYPE = {
+        stardoc_output_pb2.NAME: 'name',
+        stardoc_output_pb2.INT: 'integer',
+        stardoc_output_pb2.LABEL: 'label',
+        stardoc_output_pb2.STRING: 'string',
+        stardoc_output_pb2.STRING_LIST: 'list of strings',
+        stardoc_output_pb2.INT_LIST: 'list of integers',
+        stardoc_output_pb2.LABEL_LIST: 'list of labels',
+        stardoc_output_pb2.BOOLEAN: 'Boolean',
+        stardoc_output_pb2.LABEL_STRING_DICT: 'dictionary string → label',
+        stardoc_output_pb2.STRING_DICT: 'dictionary string → string',
+        stardoc_output_pb2.STRING_LIST_DICT:
+            'dictionary string → list of strings',
+        stardoc_output_pb2.OUTPUT: 'output file',
+        stardoc_output_pb2.OUTPUT_LIST: 'list of output files',
+    }
+
+    _MANDATORY = {
+        False: '  Optional.',
+        True: '  Mandatory.',
+    }
+
     def __init__(self, file: io.TextIOBase):
         self._file = file
 
@@ -87,21 +124,6 @@ class _Generator:
                            f'attributes: {attrs}\n')
             self._attributes(aspect.attribute)
 
-    _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""
-
     def _attributes(
         self, attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
         for attr in attributes:
@@ -115,28 +137,6 @@ class _Generator:
                 names = ', '.join(f'~{name}~' for name in group.provider_name)
                 self._write(f'- Required providers :: {names}\n')
             self._write('\n')
-
-    _ATTRIBUTE_TYPE = {
-        stardoc_output_pb2.NAME: 'name',
-        stardoc_output_pb2.INT: 'integer',
-        stardoc_output_pb2.LABEL: 'label',
-        stardoc_output_pb2.STRING: 'string',
-        stardoc_output_pb2.STRING_LIST: 'list of strings',
-        stardoc_output_pb2.INT_LIST: 'list of integers',
-        stardoc_output_pb2.LABEL_LIST: 'list of labels',
-        stardoc_output_pb2.BOOLEAN: 'Boolean',
-        stardoc_output_pb2.LABEL_STRING_DICT: 'dictionary string → label',
-        stardoc_output_pb2.STRING_DICT: 'dictionary string → string',
-        stardoc_output_pb2.STRING_LIST_DICT:
-            'dictionary string → list of strings',
-        stardoc_output_pb2.OUTPUT: 'output file',
-        stardoc_output_pb2.OUTPUT_LIST: 'list of output files',
-    }
-
-    _MANDATORY = {
-        False: '  Optional.',
-        True: '  Mandatory.',
-    }
 
     def _markdown(self, text: str):
         """Convert a Markdown snippet to Org-mode."""
