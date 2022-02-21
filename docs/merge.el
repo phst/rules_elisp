@@ -39,7 +39,8 @@
         (let ((default-directory temp-dir)  ; so that relative includes work
               (org-export-headline-levels 10)
               (org-export-preserve-breaks t)
-              (org-export-with-properties t))
+              (org-export-with-properties t)
+              (org-export-coding-system 'utf-8-unix))
           (insert-file-contents (file-name-nondirectory main))
           (org-export-as 'org)))
       nil output)
