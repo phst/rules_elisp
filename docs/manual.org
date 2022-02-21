@@ -14,8 +14,7 @@
 
 #+title: Bazel rules for Emacs Lisp
 #+language: en
-#+OPTIONS: ^:nil
-#+options: author:nil date:nil
+#+options: author:nil date:nil ^:nil
 #+export_file_name: rules_elisp.texi
 #+texinfo_filename: rules_elisp.info
 #+texinfo_dir_category: Emacs
