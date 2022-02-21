@@ -36,7 +36,10 @@
        (copy-file file temp-dir))
      (write-region
       (with-temp-buffer
-        (let ((default-directory temp-dir))  ; so that relative includes work
+        (let ((default-directory temp-dir)  ; so that relative includes work
+              (org-export-headline-levels 10)
+              (org-export-preserve-breaks t)
+              (org-export-with-properties t))
           (insert-file-contents (file-name-nondirectory main))
           (org-export-as 'org)))
       nil output)
