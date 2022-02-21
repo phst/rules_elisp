@@ -672,7 +672,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
         direct = data,
         transitive = [
             dep[DefaultInfo].default_runfiles.files
-            for dep in ctx.attr.deps
+            for dep in deps
         ],
     )
 
