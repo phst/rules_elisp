@@ -57,8 +57,8 @@ rules_elisp_toolchains()
 #+END_SRC
 
 Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
-See the [[file:elisp.org][generated documentation]] and the examples in the
-~examples~ directory for details.
+See the [[*Symbols defined in =//emacs:defs.bzl=][generated documentation]] and
+the examples in the ~examples~ directory for details.
 
 * Load path management
 #+CINDEX: Load path
