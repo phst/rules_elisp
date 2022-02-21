@@ -153,6 +153,18 @@ class Builder:
                    CC='clang')
         self._run(args, cwd=self._workspace, env=env)
 
+    @target
+    def install(self) -> None:
+        """Installs the Info manual."""
+        self._bazel('build', ['//docs:rules_elisp.info'])
+        bin_dir = self._info('bazel-bin')
+        info_dir = pathlib.Path('/usr/local/share/info')
+        src = bin_dir / 'docs' / 'rules_elisp.info'
+        dest = info_dir / 'rules_elisp.info'
+        self._run(['install', '-d', '--', str(info_dir)])
+        self._run(['install', '-m', '0644', '--', str(src), str(dest)])
+        self._run(['install-info', '--', str(dest), str(info_dir / 'dir')])
+
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None) -> None:
