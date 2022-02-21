@@ -12,14 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-#+title: Bazel rules for Emacs Lisp
-#+language: en
-#+options: author:nil date:nil ^:nil
-#+export_file_name: rules_elisp.texi
-#+texinfo_filename: rules_elisp.info
-#+texinfo_dir_category: Emacs
-#+texinfo_dir_title: rules_elisp: (rules_elisp)
-#+texinfo_dir_desc: Compilation and testing support for Emacs Lisp in Bazel
+#+TITLE: Bazel rules for Emacs Lisp
+#+LANGUAGE: en
+#+OPTIONS: author:nil date:nil ^:nil
+#+EXPORT_FILE_NAME: rules_elisp.texi
+#+TEXINFO_FILENAME: rules_elisp.info
+#+TEXINFO_DIR_CATEGORY: Emacs
+#+TEXINFO_DIR_TITLE: rules_elisp: (rules_elisp)
+#+TEXINFO_DIR_DESC: Compilation and testing support for Emacs Lisp in Bazel
 
 * Introduction
 
@@ -62,7 +62,7 @@ See the [[file:elisp.org][generated documentation]] and the examples in the
 ~examples~ directory for details.
 
 * Load path management
-#+cindex: Load path
+#+CINDEX: Load path
 
 The Emacs Lisp rules by default only add the workspace root directories to the
 [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][load
@@ -75,7 +75,7 @@ are relative to the workspace root.  A typical use case is to specify
 ~load_path = ["."]~ to add the current package to the load path.
 
 * Runfiles
-#+cindex: Runfiles
+#+CINDEX: Runfiles
 
 This repository also includes a library to access
 [[https://docs.bazel.build/skylark/rules.html#runfiles][runfiles]].  To use it,
@@ -107,12 +107,12 @@ comments in ~runfiles.el~ for further usage hints.
 
 ** Concept index
 :PROPERTIES:
-:index: cp
+:INDEX: cp
 :END:
 
 ** Symbol index
 :PROPERTIES:
-:index: fn
+:INDEX: fn
 :END:
 
 # Local Variables:

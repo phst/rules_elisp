@@ -173,7 +173,7 @@ class _Generator:
         self._write(':END:\n')
 
     def _findex(self, entry: str) -> None:
-        self._write(f'#+findex: {entry}\n')
+        self._write(f'#+FINDEX: {entry}\n')
 
     def _markdown(self, text: str):
         """Convert a Markdown snippet to Org-mode."""
