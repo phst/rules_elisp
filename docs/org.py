@@ -37,47 +37,57 @@ def _main() -> None:
     # Force Unix-style line endings for consistent results.  See
     # https://github.com/bazelbuild/stardoc/issues/110.
     with opts.output.open(mode='xt', encoding='utf-8', newline='\n') as file:
-        file.write(_LICENSE)
-        file.write('\n')
-        _markdown(file, module.module_docstring)
+        generator = _Generator(file)
+        generator.run(module)
+
+class _Generator:
+    def __init__(self, file: io.TextIOBase):
+        self._file = file
+
+    def run(self, module: stardoc_output_pb2.ModuleInfo) -> None:
+        """Writes the generated Org Mode output."""
+        self._write(self._LICENSE)
+        self._write('\n')
+        self._markdown(module.module_docstring)
         for rule in module.rule_info:
-            file.write(f'* ~{rule.rule_name}~ rule\n')
-            file.write(f'#+findex: {rule.rule_name}\n\n')
-            _markdown(file, rule.doc_string)
-            _attributes(file, rule.attribute)
+            self._write(f'* ~{rule.rule_name}~ rule\n')
+            self._write(f'#+findex: {rule.rule_name}\n\n')
+            self._markdown(rule.doc_string)
+            self._attributes(rule.attribute)
         for provider in module.provider_info:
-            file.write(f'* ~{provider.provider_name}~ provider\n')
-            file.write(f'#+findex: {provider.provider_name}\n\n')
-            _markdown(file, provider.doc_string)
+            self._write(f'* ~{provider.provider_name}~ provider\n')
+            self._write(f'#+findex: {provider.provider_name}\n\n')
+            self._markdown(provider.doc_string)
             for field in provider.field_info:
-                file.write(f'** ~{field.name}~ field\n\n')
-                _markdown(file, field.doc_string)
+                self._write(f'** ~{field.name}~ field\n\n')
+                self._markdown(field.doc_string)
         for func in module.func_info:
-            file.write(f'* ~{func.function_name}~ function\n')
-            file.write(f'#+findex: {func.function_name}\n\n')
-            _markdown(file, func.doc_string)
+            self._write(f'* ~{func.function_name}~ function\n')
+            self._write(f'#+findex: {func.function_name}\n\n')
+            self._markdown(func.doc_string)
             for param in func.parameter:
-                file.write(f'** ~{param.name}~ parameter\n\n')
-                _markdown(file, func.doc_string + _MANDATORY[param.mandatory])
+                self._write(f'** ~{param.name}~ parameter\n\n')
+                self._markdown(
+                    func.doc_string + self._MANDATORY[param.mandatory])
                 if param.default_value:
-                    file.write(f'- Default :: ~{param.default_value}~\n')
+                    self._write(f'- Default :: ~{param.default_value}~\n')
             returns = getattr(func, 'return').doc_string
             if returns:
-                file.write(f'- Returns :: {returns}\n\n')
+                self._write(f'- Returns :: {returns}\n\n')
             if func.deprecated.doc_string:
                 raise ValueError(
                     f'unsupported deprecated function {func.function_name}')
         for aspect in module.aspect_info:
-            file.write(f'* ~{aspect.aspect_name}~ aspect\n')
-            file.write(f'#+findex: {aspect.aspect_name}\n\n')
-            _markdown(file, aspect.doc_string)
+            self._write(f'* ~{aspect.aspect_name}~ aspect\n')
+            self._write(f'#+findex: {aspect.aspect_name}\n\n')
+            self._markdown(aspect.doc_string)
             if aspect.aspect_attribute:
                 attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
-                file.write(f'This aspect propagates along the following '
+                self._write(f'This aspect propagates along the following '
                            f'attributes: {attrs}\n')
-            _attributes(file, aspect.attribute)
+            self._attributes(aspect.attribute)
 
-_LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
+    _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,50 +102,54 @@ _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
 # limitations under the License.
 """
 
-def _attributes(file: io.TextIOBase,
-                attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
-    for attr in attributes:
-        file.write(f'** ~{attr.name}~ attribute\n\n')
-        _markdown(file, attr.doc_string + _MANDATORY[attr.mandatory])
-        file.write(f'- Type :: {_ATTRIBUTE_TYPE[attr.type]}\n')
-        if attr.default_value:
-            file.write(f'- Default :: ~{attr.default_value}~\n')
-        if attr.provider_name_group:
-            group, = attr.provider_name_group
-            names = ', '.join(f'~{name}~' for name in group.provider_name)
-            file.write(f'- Required providers :: {names}\n')
-        file.write('\n')
+    def _attributes(
+        self, attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
+        for attr in attributes:
+            self._write(f'** ~{attr.name}~ attribute\n\n')
+            self._markdown(attr.doc_string + self._MANDATORY[attr.mandatory])
+            self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
+            if attr.default_value:
+                self._write(f'- Default :: ~{attr.default_value}~\n')
+            if attr.provider_name_group:
+                group, = attr.provider_name_group
+                names = ', '.join(f'~{name}~' for name in group.provider_name)
+                self._write(f'- Required providers :: {names}\n')
+            self._write('\n')
 
-_ATTRIBUTE_TYPE = {
-    stardoc_output_pb2.NAME: 'name',
-    stardoc_output_pb2.INT: 'integer',
-    stardoc_output_pb2.LABEL: 'label',
-    stardoc_output_pb2.STRING: 'string',
-    stardoc_output_pb2.STRING_LIST: 'list of strings',
-    stardoc_output_pb2.INT_LIST: 'list of integers',
-    stardoc_output_pb2.LABEL_LIST: 'list of labels',
-    stardoc_output_pb2.BOOLEAN: 'Boolean',
-    stardoc_output_pb2.LABEL_STRING_DICT: 'dictionary string → label',
-    stardoc_output_pb2.STRING_DICT: 'dictionary string → string',
-    stardoc_output_pb2.STRING_LIST_DICT: 'dictionary string → list of strings',
-    stardoc_output_pb2.OUTPUT: 'output file',
-    stardoc_output_pb2.OUTPUT_LIST: 'list of output files',
-}
+    _ATTRIBUTE_TYPE = {
+        stardoc_output_pb2.NAME: 'name',
+        stardoc_output_pb2.INT: 'integer',
+        stardoc_output_pb2.LABEL: 'label',
+        stardoc_output_pb2.STRING: 'string',
+        stardoc_output_pb2.STRING_LIST: 'list of strings',
+        stardoc_output_pb2.INT_LIST: 'list of integers',
+        stardoc_output_pb2.LABEL_LIST: 'list of labels',
+        stardoc_output_pb2.BOOLEAN: 'Boolean',
+        stardoc_output_pb2.LABEL_STRING_DICT: 'dictionary string → label',
+        stardoc_output_pb2.STRING_DICT: 'dictionary string → string',
+        stardoc_output_pb2.STRING_LIST_DICT:
+            'dictionary string → list of strings',
+        stardoc_output_pb2.OUTPUT: 'output file',
+        stardoc_output_pb2.OUTPUT_LIST: 'list of output files',
+    }
 
-_MANDATORY = {
-    False: '  Optional.',
-    True: '  Mandatory.',
-}
+    _MANDATORY = {
+        False: '  Optional.',
+        True: '  Mandatory.',
+    }
 
-def _markdown(writer: io.TextIOBase, text: str):
-    """Convert a Markdown snippet to Org-mode."""
-    # Bazel (including Stardoc) interprets all files as Latin-1,
-    # cf. https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
-    # However, our files all use UTF-8, leading to double encoding.  Reverse
-    # that effect here.
-    text = text.strip().encode('latin-1').decode('utf-8')
-    text = marko.Markdown(renderer=_OrgRenderer).convert(text)
-    writer.write(text)
+    def _markdown(self, text: str):
+        """Convert a Markdown snippet to Org-mode."""
+        # Bazel (including Stardoc) interprets all files as Latin-1,
+        # https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
+        # However, our files all use UTF-8, leading to double encoding.  Reverse
+        # that effect here.
+        text = text.strip().encode('latin-1').decode('utf-8')
+        text = marko.Markdown(renderer=_OrgRenderer).convert(text)
+        self._write(text)
+
+    def _write(self, text: str) -> None:
+        self._file.write(text)
 
 class _OrgRenderer(marko.Renderer):
     _LANGUAGE = {'bash': 'sh'}
