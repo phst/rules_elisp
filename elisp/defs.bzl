@@ -37,7 +37,7 @@ Load path directory entries are structures with the following fields:
   relative to the runfiles root.""",
     fields = {
         "source_files": """A list of `File` objects containing
-the Emacs Lisp source files of this library.""",
+the Emacs Lisp source files of this library.""",
         "compiled_files": """A list of `File` objects containing
 the byte-compiled Emacs Lisp files and module objects of this library.""",
         "load_path": """A list containing necessary load path
@@ -46,7 +46,7 @@ described in the provider documentation.""",
         "data_files": """A list of `File` objects that this library requires
 at runtime.""",
         "transitive_source_files": """A `depset` of `File` objects containing
-the Emacs Lisp source files of this library
+the Emacs Lisp source files of this library
 and all its transitive dependencies.""",
         "transitive_compiled_files": """A `depset` of `File` objects containing
 the byte-compiled Emacs Lisp files and module objects of this library
@@ -273,7 +273,7 @@ elisp_library = rule(
         _COMPILE_ATTRS,
         srcs = attr.label_list(
             allow_empty = False,
-            doc = """List of source files.  These must either be Emacs Lisp
+            doc = """List of source files.  These must either be Emacs Lisp
 files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
 `.dll`.""",
             allow_files = [".el", ".so", ".dylib", ".dll"],
@@ -284,7 +284,7 @@ files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         outs = attr.output_list(
-            doc = """List of byte-compiled Emacs Lisp files to be made available
+            doc = """List of byte-compiled Emacs Lisp files to be made available
 as targets.""",
         ),
         data = attr.label_list(
@@ -372,20 +372,20 @@ elisp_binary = rule(
 filenames.  These number specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
 the index `2` stands for `argv[2]`, and the index `-2` stands for
-`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
+`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
 command line, the corresponding arguments are treated as filenames for input
 files and added to the `inputFiles` field of the manifest.  This only has an
-effect for toolchains that specify `wrap = True`.""",
+effect for toolchains that specify `wrap = True`.""",
         ),
         output_args = attr.int_list(
             doc = """Indices of command-line arguments that represent output
 filenames.  These number specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
 the index `2` stands for `argv[2]`, and the index `-2` stands for
-`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
+`argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
 command line, the corresponding arguments are treated as filenames for output
 files and added to the `outputFiles` field of the manifest.  This only has an
-effect for toolchains that specify `wrap = True`.""",
+effect for toolchains that specify `wrap = True`.""",
         ),
     ),
     doc = """Binary rule that loads a single Emacs Lisp file.
