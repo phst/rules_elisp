@@ -19,11 +19,11 @@ load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//elisp:defs.bzl", "elisp_binary")
 
-DOCS = {
-    "elisp": "//elisp:defs.bzl",
-    "emacs": "//emacs:defs.bzl",
-    "repositories": "//elisp:repositories.bzl",
-}
+DOCS = [
+    "elisp",
+    "emacs",
+    "repositories",
+]
 
 run_binary(
     name = "run_merge",
@@ -50,7 +50,7 @@ stardoc(
     name = "elisp_doc",
     out = "elisp_doc.bin",
     format = "proto",
-    input = DOCS["elisp"],
+    input = "//elisp:defs.bzl",
     deps = [
         "//elisp:util_bzl",
         "@bazel_skylib//lib:collections",
@@ -63,7 +63,7 @@ stardoc(
     name = "emacs_doc",
     out = "emacs_doc.bin",
     format = "proto",
-    input = DOCS["emacs"],
+    input = "//emacs:defs.bzl",
     deps = [
         "//elisp:builtin_bzl",
         "//elisp:util_bzl",
@@ -75,7 +75,7 @@ stardoc(
     name = "repositories_doc",
     out = "repositories_doc.bin",
     format = "proto",
-    input = DOCS["repositories"],
+    input = "//elisp:repositories.bzl",
     deps = ["//elisp:builtin_bzl"],
 )
 
@@ -86,13 +86,12 @@ stardoc(
         outs = [doc + ".org"],
         args = [
             "--",
-            label,
             "$(location :{}_doc.bin)".format(doc),
             "$(location :{}.org)".format(doc),
         ],
         tool = ":org",
     )
-    for doc, label in DOCS.items()
+    for doc in DOCS
 ]
 
 py_binary(

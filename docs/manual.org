@@ -82,9 +82,17 @@ This repository also includes a library to access
 add a build dependency on ~@phst_rules_elisp//elisp/runfiles~.  See the header
 comments in ~runfiles.el~ for further usage hints.
 
-#+INCLUDE: elisp.org :minlevel 1
-#+INCLUDE: repositories.org :minlevel 1
-#+INCLUDE: emacs.org :minlevel 1
+* Symbols defined in =//elisp:defs.bzl=
+
+#+INCLUDE: elisp.org
+
+* Symbols defined in =//elisp:repositories.bzl=
+
+#+INCLUDE: repositories.org
+
+* Symbols defined in =//emacs:defs.bzl=
+
+#+INCLUDE: emacs.org
 
 * Indices
 
