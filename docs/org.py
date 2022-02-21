@@ -105,7 +105,7 @@ class _Generator:
             for param in func.parameter:
                 self._write(f'** ~{param.name}~ parameter\n\n')
                 self._markdown(
-                    func.doc_string + self._MANDATORY[param.mandatory])
+                    param.doc_string + self._MANDATORY[param.mandatory])
                 if param.default_value:
                     self._write(f'- Default :: ~{param.default_value}~\n')
             returns = getattr(func, 'return').doc_string
