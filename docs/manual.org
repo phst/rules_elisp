@@ -82,6 +82,16 @@ This repository also includes a library to access
 add a build dependency on ~@phst_rules_elisp//elisp/runfiles~.  See the header
 comments in ~runfiles.el~ for further usage hints.
 
+#+FINDEX: elisp/runfiles/rlocation
+#+TINDEX: elisp/runfiles/runfiles
+Use the function ~elisp/runfiles/rlocation~ to map a runfile name to a
+filename in the local filesystem.  For more advanced use cases, see the
+class ~elisp/runfiles/runfiles~.
+
+#+FINDEX: elisp/runfiles/file-handler
+The library also provides a file name handler for runfiles,
+~elisp/runfiles/file-handler~.  It uses the prefix =/bazel-runfile:=.
+
 * Symbols defined in =//elisp:defs.bzl=
 :PROPERTIES:
 :ALT_TITLE: Emacs Lisp Starlark symbols
@@ -113,6 +123,11 @@ comments in ~runfiles.el~ for further usage hints.
 ** Symbol index
 :PROPERTIES:
 :INDEX: fn
+:END:
+
+** Type index
+:PROPERTIES:
+:INDEX: tp
 :END:
 
 # Local Variables:

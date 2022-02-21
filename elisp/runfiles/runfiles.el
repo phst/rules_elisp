@@ -1,6 +1,6 @@
 ;;; runfiles.el --- access to Bazel runfiles  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2022 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -16,16 +16,9 @@
 
 ;;; Commentary:
 
-;; This library implements support for Bazel runfiles.  See
-;; https://docs.bazel.build/skylark/rules.html#runfiles for some background
-;; about runfiles.
-;;
-;; Use the function ‘elisp/runfiles/rlocation’ to map a runfile name to a
-;; filename in the local filesystem.  For more advanced use cases, see the
-;; class ‘elisp/runfiles/runfiles’.
-;;
-;; This library also provides a file name handler for runfiles,
-;; ‘elisp/runfiles/file-handler’.  It uses the prefix "/bazel-runfile:".
+;; This library implements support for Bazel runfiles.
+;; See Info node ‘(rules_elisp) Runfiles’ for more information and usage
+;; instructions.
 
 ;;; Code:
 
