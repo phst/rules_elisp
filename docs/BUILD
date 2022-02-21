@@ -17,12 +17,34 @@ load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//elisp:defs.bzl", "elisp_binary")
 
 DOCS = {
     "elisp": "//elisp:defs.bzl",
     "emacs": "//emacs:defs.bzl",
     "repositories": "//elisp:repositories.bzl",
 }
+
+run_binary(
+    name = "run_merge",
+    srcs = ["manual.org"] + [f + ".org" for f in DOCS],
+    outs = ["merged.org"],
+    args = [
+        "$(location :merged.org)",
+        "$(location :manual.org)",
+    ] + ["$(location :{}.org)".format(f) for f in DOCS],
+    tool = ":merge",
+)
+
+elisp_binary(
+    name = "merge",
+    src = "merge.el",
+    input_args = list(range(
+        2,
+        len(DOCS) + 2,
+    )),
+    output_args = [1],
+)
 
 stardoc(
     name = "elisp_doc",
