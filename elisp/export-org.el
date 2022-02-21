@@ -37,7 +37,8 @@
    (let ((warning-fill-column 1000)  ; Bug#52281
          (coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
-         (org-export-coding-system 'utf-8-unix))
+         (org-export-coding-system 'utf-8-unix)
+         (org-export-time-stamp-file nil))
      (with-temp-buffer
        (insert-file-contents input)
        (write-region (org-export-as 'texinfo) nil output))))
