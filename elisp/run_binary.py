@@ -99,7 +99,7 @@ def _arg_files(argv: Sequence[str], root: pathlib.Path,
     for i in sorted(indices):
         if i < 0:
             i += argc
-        if 0 <= i < argc:
+        if 0 < i < argc:
             arg = argv[i]
             # File arguments are often quoted so that Emacs doesn’t interpret
             # them as special filenames.  Unquote them first.
