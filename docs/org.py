@@ -19,7 +19,7 @@ import html.parser
 import io
 import pathlib
 import textwrap
-from typing import List, Sequence, Tuple
+from typing import List, Tuple
 
 import marko
 import marko.block
@@ -87,56 +87,70 @@ class _Generator:
         self._write('\n')
         self._markdown(module.module_docstring)
         for rule in module.rule_info:
-            self._write(f'* ~{rule.rule_name}~ rule\n')
-            self._write(f'#+findex: {rule.rule_name}\n\n')
-            self._markdown(rule.doc_string)
-            self._attributes(rule.attribute)
+            self._rule(rule)
         for provider in module.provider_info:
-            self._write(f'* ~{provider.provider_name}~ provider\n')
-            self._write(f'#+findex: {provider.provider_name}\n\n')
-            self._markdown(provider.doc_string)
-            for field in provider.field_info:
-                self._write(f'** ~{field.name}~ field\n\n')
-                self._markdown(field.doc_string)
+            self._provider(provider)
         for func in module.func_info:
-            self._write(f'* ~{func.function_name}~ function\n')
-            self._write(f'#+findex: {func.function_name}\n\n')
-            self._markdown(func.doc_string)
-            for param in func.parameter:
-                self._write(f'** ~{param.name}~ parameter\n\n')
-                self._markdown(
-                    param.doc_string + self._MANDATORY[param.mandatory])
-                if param.default_value:
-                    self._write(f'- Default :: ~{param.default_value}~\n')
-            returns = getattr(func, 'return').doc_string
-            if returns:
-                self._write(f'- Returns :: {returns}\n\n')
-            if func.deprecated.doc_string:
-                raise ValueError(
-                    f'unsupported deprecated function {func.function_name}')
+            self._function(func)
         for aspect in module.aspect_info:
-            self._write(f'* ~{aspect.aspect_name}~ aspect\n')
-            self._write(f'#+findex: {aspect.aspect_name}\n\n')
-            self._markdown(aspect.doc_string)
-            if aspect.aspect_attribute:
-                attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
-                self._write(f'This aspect propagates along the following '
-                           f'attributes: {attrs}\n')
-            self._attributes(aspect.attribute)
+            self._aspect(aspect)
 
-    def _attributes(
-        self, attributes: Sequence[stardoc_output_pb2.AttributeInfo]) -> None:
-        for attr in attributes:
-            self._write(f'** ~{attr.name}~ attribute\n\n')
-            self._markdown(attr.doc_string + self._MANDATORY[attr.mandatory])
-            self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
-            if attr.default_value:
-                self._write(f'- Default :: ~{attr.default_value}~\n')
-            if attr.provider_name_group:
-                group, = attr.provider_name_group
-                names = ', '.join(f'~{name}~' for name in group.provider_name)
-                self._write(f'- Required providers :: {names}\n')
-            self._write('\n')
+    def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
+        self._write(f'* ~{rule.rule_name}~ rule\n')
+        self._write(f'#+findex: {rule.rule_name}\n\n')
+        self._markdown(rule.doc_string)
+        for attr in rule.attribute:
+            self._attribute(attr)
+
+    def _function(self, func: stardoc_output_pb2.StarlarkFunctionInfo) -> None:
+        self._write(f'* ~{func.function_name}~ function\n')
+        self._write(f'#+findex: {func.function_name}\n\n')
+        self._markdown(func.doc_string)
+        for param in func.parameter:
+            self._parameter(param)
+        returns = getattr(func, 'return').doc_string
+        if returns:
+            self._write(f'- Returns :: {returns}\n\n')
+        if func.deprecated.doc_string:
+            raise ValueError(
+                f'unsupported deprecated function {func.function_name}')
+
+    def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
+        self._write(f'** ~{param.name}~ parameter\n\n')
+        self._markdown(param.doc_string + self._MANDATORY[param.mandatory])
+        if param.default_value:
+            self._write(f'- Default :: ~{param.default_value}~\n')
+
+    def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
+        self._write(f'* ~{provider.provider_name}~ provider\n')
+        self._write(f'#+findex: {provider.provider_name}\n\n')
+        self._markdown(provider.doc_string)
+        for field in provider.field_info:
+            self._write(f'** ~{field.name}~ field\n\n')
+            self._markdown(field.doc_string)
+
+    def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
+        self._write(f'* ~{aspect.aspect_name}~ aspect\n')
+        self._write(f'#+findex: {aspect.aspect_name}\n\n')
+        self._markdown(aspect.doc_string)
+        if aspect.aspect_attribute:
+            attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
+            self._write(f'This aspect propagates along the following '
+                        f'attributes: {attrs}\n')
+        for attr in aspect.attribute:
+            self._attribute(attr)
+
+    def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
+        self._write(f'** ~{attr.name}~ attribute\n\n')
+        self._markdown(attr.doc_string + self._MANDATORY[attr.mandatory])
+        self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
+        if attr.default_value:
+            self._write(f'- Default :: ~{attr.default_value}~\n')
+        if attr.provider_name_group:
+            group, = attr.provider_name_group
+            names = ', '.join(f'~{name}~' for name in group.provider_name)
+            self._write(f'- Required providers :: {names}\n')
+        self._write('\n')
 
     def _markdown(self, text: str):
         """Convert a Markdown snippet to Org-mode."""
