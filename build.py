@@ -92,7 +92,6 @@ class Builder:
     @target
     def generate(self) -> None:
         """Generates files to be checked in."""
-        self.docs()
         self.compdb()
 
     @target
@@ -139,21 +138,6 @@ class Builder:
         """Run the tests in the example workspace."""
         self._bazel('test', ['//...'], options=['--test_output=errors'],
                     cwd=self._workspace / 'examples' / 'ext')
-
-    @target
-    def docs(self) -> None:
-        """Build the generated documentation files."""
-        output = self._run(
-            [str(self._bazel_program), 'query', '--output=label',
-             r'filter("\.org\.generated$", kind("generated file", //...:*))'],
-            capture_stdout=True)
-        targets = output.splitlines()
-        self._bazel('build', targets)
-        bazel_bin = self._info('bazel-bin')
-        for tgt in targets:
-            gen = bazel_bin / tgt.lstrip('/').replace(':', os.sep)
-            src = self._workspace / gen.with_suffix('').relative_to(bazel_bin)
-            shutil.copyfile(gen, src)
 
     @target
     def compdb(self) -> None:
