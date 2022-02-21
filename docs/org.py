@@ -97,14 +97,16 @@ class _Generator:
 
     def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
         self._write(f'* ~{rule.rule_name}~ rule\n')
-        self._write(f'#+findex: {rule.rule_name}\n\n')
+        self._findex(rule.rule_name)
+        self._write('\n')
         self._markdown(rule.doc_string)
         for attr in rule.attribute:
             self._attribute(attr)
 
     def _function(self, func: stardoc_output_pb2.StarlarkFunctionInfo) -> None:
         self._write(f'* ~{func.function_name}~ function\n')
-        self._write(f'#+findex: {func.function_name}\n\n')
+        self._findex(func.function_name)
+        self._write('\n')
         self._markdown(func.doc_string)
         for param in func.parameter:
             self._parameter(param)
@@ -123,7 +125,8 @@ class _Generator:
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
         self._write(f'* ~{provider.provider_name}~ provider\n')
-        self._write(f'#+findex: {provider.provider_name}\n\n')
+        self._findex(provider.provider_name)
+        self._write('\n')
         self._markdown(provider.doc_string)
         for field in provider.field_info:
             self._write(f'** ~{field.name}~ field\n\n')
@@ -131,7 +134,8 @@ class _Generator:
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
         self._write(f'* ~{aspect.aspect_name}~ aspect\n')
-        self._write(f'#+findex: {aspect.aspect_name}\n\n')
+        self._findex(aspect.aspect_name)
+        self._write('\n')
         self._markdown(aspect.doc_string)
         if aspect.aspect_attribute:
             attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
@@ -151,6 +155,9 @@ class _Generator:
             names = ', '.join(f'~{name}~' for name in group.provider_name)
             self._write(f'- Required providers :: {names}\n')
         self._write('\n')
+
+    def _findex(self, entry: str) -> None:
+        self._write(f'#+findex: {entry}\n')
 
     def _markdown(self, text: str):
         """Convert a Markdown snippet to Org-mode."""
