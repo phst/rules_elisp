@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
@@ -62,26 +61,16 @@ stardoc(
     run_binary(
         name = "gen_" + doc,
         srcs = [doc + "_doc.bin"],
-        outs = [doc + ".org.generated"],
+        outs = [doc + ".org"],
         args = [
             "--",
             label,
             "$(location :{}_doc.bin)".format(doc),
-            "$(location :{}.org.generated)".format(doc),
+            "$(location :{}.org)".format(doc),
         ],
         tool = ":org",
     )
     for doc, label in DOCS.items()
-]
-
-[
-    diff_test(
-        name = doc + "_test",
-        size = "small",
-        file1 = doc + ".org",
-        file2 = doc + ".org.generated",
-    )
-    for doc in DOCS
 ]
 
 py_binary(
