@@ -24,9 +24,8 @@
 * Introduction
 
 This repository provides a [[https://bazel.build/][Bazel]] integration for
-[[https://www.gnu.org/software/emacs/manual/html_node/elisp/][Emacs Lisp]].  It
-is modeled after the rules definitions for other languages, like the
-[[https://docs.bazel.build/be/c-cpp.html][C++ rules]].
+[[info:elisp#Top][Emacs Lisp]].  It is modeled after the rules definitions for
+other languages, like the [[https://docs.bazel.build/be/c-cpp.html][C++ rules]].
 
 This is not an officially supported Google product.
 
@@ -65,14 +64,14 @@ See the [[file:elisp.org][generated documentation]] and the examples in the
 #+CINDEX: Load path
 
 The Emacs Lisp rules by default only add the workspace root directories to the
-[[https://www.gnu.org/software/emacs/manual/html_node/elisp/Library-Search.html][load
-path]].  However, many Emacs Lisp libraries assume that their immediate parent
-directory is present in the load path.  To support such libraries, the
-~elisp_library~ rule supports an optional ~load_path~ attribute.  You can
-specify additional load path directories using this attribute.  Relative
-directories are relative to the Bazel package directory; absolute directories
-are relative to the workspace root.  A typical use case is to specify
-~load_path = ["."]~ to add the current package to the load path.
+[[info:elisp#Library Search][load path]].  However, many Emacs Lisp libraries
+assume that their immediate parent directory is present in the load path.  To
+support such libraries, the ~elisp_library~ rule supports an optional
+~load_path~ attribute.  You can specify additional load path directories using
+this attribute.  Relative directories are relative to the Bazel package
+directory; absolute directories are relative to the workspace root.  A typical
+use case is to specify ~load_path = ["."]~ to add the current package to the
+load path.
 
 * Runfiles
 #+CINDEX: Runfiles
