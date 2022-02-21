@@ -184,7 +184,7 @@ class _OrgRenderer(marko.Renderer):
 class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
     # Work around https://bugs.python.org/issue31844.
 
-    _TAGS = {'var': ('‘', '’')}
+    _TAGS = {'var': ('@@texinfo:@var{@@', '@@texinfo:}@@')}
 
     def __init__(self, writer: io.TextIOBase):
         super().__init__()

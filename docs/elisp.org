@@ -106,7 +106,7 @@ available to dependencies. All sources are byte-compiled.
 can then use ~load~ or ~require~ to load them.
 
 By default, libraries need to be loaded using a filename relative to the
-workspace root, i.e., ‘package’/‘file’.  If you want to add
+workspace root, i.e., @@texinfo:@var{@@package@@texinfo:}@@/@@texinfo:@var{@@file@@texinfo:}@@.  If you want to add
 further elements to the load path, use the ~load_path~ attribute.
 
 If there are multiple source files specified in ~srcs~, these source files can
