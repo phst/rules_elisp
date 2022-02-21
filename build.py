@@ -163,8 +163,10 @@ class Builder:
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
         args = [sys.executable, str(generator), '--'] + self._cache_options()
-        # Need to compile with Clang for clangd to work.
-        env = dict(self._env, CC='clang')
+        env = dict(self._env,
+                   BAZEL_COMPDB_BAZEL_PATH=str(self._bazel_program),
+                   # Need to compile with Clang for clangd to work.
+                   CC='clang')
         self._run(args, cwd=self._workspace, env=env)
 
     def _bazel(self, command: str, targets: Iterable[str], *,
