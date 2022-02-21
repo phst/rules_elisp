@@ -84,14 +84,23 @@ add a build dependency on ~@phst_rules_elisp//elisp/runfiles~.  See the header
 comments in ~runfiles.el~ for further usage hints.
 
 * Symbols defined in =//elisp:defs.bzl=
+:PROPERTIES:
+:ALT_TITLE: Emacs Lisp Starlark symbols
+:END:
 
 #+INCLUDE: elisp.org
 
 * Symbols defined in =//elisp:repositories.bzl=
+:PROPERTIES:
+:ALT_TITLE: Repository Starlark symbols
+:END:
 
 #+INCLUDE: repositories.org
 
 * Symbols defined in =//emacs:defs.bzl=
+:PROPERTIES:
+:ALT_TITLE: Emacs Starlark symbols
+:END:
 
 #+INCLUDE: emacs.org
 
