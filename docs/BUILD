@@ -17,7 +17,21 @@ load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
-load("//elisp:defs.bzl", "elisp_binary")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
+
+elisp_manual(
+    name = "manual",
+    src = "merged.org",
+    out = "manual.texi",
+)
+
+# This rule assumes that Texinfo is installed locally.
+genrule(
+    name = "info",
+    srcs = ["manual.texi"],
+    outs = ["rules_elisp.info"],
+    cmd = "makeinfo --no-split --output=$@ -- $<",
+)
 
 DOCS = [
     "elisp",
