@@ -19,7 +19,7 @@ import html.parser
 import io
 import pathlib
 import textwrap
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import marko
 import marko.block
@@ -96,7 +96,7 @@ class _Generator:
             self._aspect(aspect)
 
     def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
-        self._heading(1, f'~{rule.rule_name}~ rule')
+        self._heading(1, f'~{rule.rule_name}~ rule', rule.rule_name)
         self._findex(rule.rule_name)
         self._write('\n')
         self._markdown(rule.doc_string)
@@ -104,7 +104,7 @@ class _Generator:
             self._attribute(attr)
 
     def _function(self, func: stardoc_output_pb2.StarlarkFunctionInfo) -> None:
-        self._heading(1, f'~{func.function_name}~ function')
+        self._heading(1, f'~{func.function_name}~ function', func.function_name)
         self._findex(func.function_name)
         self._write('\n')
         self._markdown(func.doc_string)
@@ -118,24 +118,25 @@ class _Generator:
                 f'unsupported deprecated function {func.function_name}')
 
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
-        self._heading(2, f'~{param.name}~ parameter')
+        self._heading(2, f'~{param.name}~ parameter', None)
         self._write('\n')
         self._markdown(param.doc_string + self._MANDATORY[param.mandatory])
         if param.default_value:
             self._write(f'- Default :: ~{param.default_value}~\n')
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
-        self._heading(1, f'~{provider.provider_name}~ provider')
+        self._heading(1, f'~{provider.provider_name}~ provider',
+                      provider.provider_name)
         self._findex(provider.provider_name)
         self._write('\n')
         self._markdown(provider.doc_string)
         for field in provider.field_info:
-            self._heading(2, f'~{field.name}~ field')
+            self._heading(2, f'~{field.name}~ field', None)
             self._write('\n')
             self._markdown(field.doc_string)
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
-        self._heading(1, f'~{aspect.aspect_name}~ aspect')
+        self._heading(1, f'~{aspect.aspect_name}~ aspect', aspect.aspect_name)
         self._findex(aspect.aspect_name)
         self._write('\n')
         self._markdown(aspect.doc_string)
@@ -147,7 +148,7 @@ class _Generator:
             self._attribute(attr)
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
-        self._heading(2, f'~{attr.name}~ attribute')
+        self._heading(2, f'~{attr.name}~ attribute', None)
         self._write('\n')
         self._markdown(attr.doc_string + self._MANDATORY[attr.mandatory])
         self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
@@ -159,9 +160,12 @@ class _Generator:
             self._write(f'- Required providers :: {names}\n')
         self._write('\n')
 
-    def _heading(self, level: int, heading: str) -> None:
+    def _heading(self, level: int, heading: str, node: Optional[str]) -> None:
         prefix = level * '*'
         self._write(f'{prefix} {heading}\n')
+        self._write(':PROPERTIES:\n')
+        self._write(f':ALT_TITLE: {node}\n' if node else ':UNNUMBERED: notoc\n')
+        self._write(':END:\n')
 
     def _findex(self, entry: str) -> None:
         self._write(f'#+findex: {entry}\n')
