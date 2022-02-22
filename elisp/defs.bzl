@@ -928,7 +928,7 @@ def _run_emacs(
             ).to_json(),
         )
         arguments = ["--manifest=" + manifest.path, "--"] + arguments
-        inputs = depset(direct = [manifest], transitive = [inputs])  # buildifier: disable=overly-nested-depset
+        inputs = depset(direct = [manifest], transitive = [inputs])
     ctx.actions.run(
         outputs = outputs,
         inputs = inputs,
