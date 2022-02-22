@@ -202,6 +202,9 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
     # errors.
     # pylint: disable=missing-function-docstring, unused-argument
 
+    def document(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.cr()
+
     def text(self, node: commonmark.node.Node, entering: bool) -> None:
         self.out(node.literal)
 
