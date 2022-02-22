@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,16 +56,18 @@ def _check_python_impl(target, ctx):
     ]
     if "no-pytype" not in tags:
         args.append("--pytype")
+    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._check])
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
             direct = [params_file, pylintrc],
-            transitive = [info.transitive_sources],
+            transitive = [info.transitive_sources, tool_inputs],
         ),
         executable = ctx.executable._check,
         arguments = args,
         mnemonic = "PythonCheck",
         progress_message = "Performing static analysis of target {}".format(target.label),
+        input_manifests = input_manifests,
     )
     return [OutputGroupInfo(check_python = depset([output_file]))]
 

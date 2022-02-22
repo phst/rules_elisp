@@ -506,13 +506,15 @@ def _elisp_manual_impl(ctx):
     out = ctx.outputs.out
     if out.extension != "texi":
         fail("Output filename {} doesn’t end in “.texi”".format(out.short_path))
+    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._export])
     ctx.actions.run(
         outputs = [out],
-        inputs = [src],
+        inputs = depset(direct = [src], transitive = [tool_inputs]),
         executable = ctx.executable._export,
         arguments = [src.path, out.path],
         mnemonic = "Export",
         progress_message = "Exporting {} into Texinfo file".format(src.short_path),
+        input_manifests = input_manifests,
     )
 
 elisp_manual = rule(
@@ -908,6 +910,8 @@ def _run_emacs(
     toolchain = _toolchain(ctx)
     emacs = toolchain.emacs
     arguments = ["--quick", "--batch"] + arguments
+    tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
+    inputs = depset(transitive = [inputs, tool_inputs])
     if toolchain.wrap:
         manifest = ctx.actions.declare_file(
             manifest_basename + ".manifest.json",
@@ -934,6 +938,7 @@ def _run_emacs(
         progress_message = progress_message,
         use_default_shell_env = toolchain.use_default_shell_env,
         execution_requirements = toolchain.execution_requirements,
+        input_manifests = input_manifests,
     )
 
 def _load_directory_for_actions(directory):
