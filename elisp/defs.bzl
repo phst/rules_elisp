@@ -533,7 +533,7 @@ elisp_manual = rule(
             default = Label("//elisp:export_org"),
         ),
     },
-    doc = """Generates a [GNU_Texinfo](https://www.gnu.org/software/texinfo/)
+    doc = """Generates a [GNU Texinfo](https://www.gnu.org/software/texinfo/)
 manual from an [Org Mode file](https://orgmode.org/) using
 [Org’s exporting functionality](https://orgmode.org/manual/Exporting.html).
 You can then use
