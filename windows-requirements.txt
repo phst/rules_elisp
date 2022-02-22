@@ -12,6 +12,10 @@ colorama==0.4.4 \
     --hash=sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b \
     --hash=sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2
     # via pylint
+commonmark==0.9.1 \
+    --hash=sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60 \
+    --hash=sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9
+    # via -r requirements.in
 isort==5.10.1 \
     --hash=sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7 \
     --hash=sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951
@@ -40,10 +44,6 @@ lazy-object-proxy==1.6.0 \
     --hash=sha256:ed361bb83436f117f9917d282a456f9e5009ea12fd6de8742d1a4752c3017e93 \
     --hash=sha256:f5144c75445ae3ca2057faac03fda5a902eff196702b0a24daf1d6ce0650514b
     # via astroid
-marko==1.2.0 \
-    --hash=sha256:0befa554da3d14b7a38ac7473ffde60f1916fd1d0aaf67181ae70bfe00fdba18 \
-    --hash=sha256:aa9fd81b02f64ab192404cbae5dfe812e337d3d04cefff8800a079c9dc9e5d28
-    # via -r requirements.in
 mccabe==0.6.1 \
     --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42 \
     --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f

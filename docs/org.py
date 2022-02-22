@@ -18,13 +18,11 @@ import argparse
 import html.parser
 import io
 import pathlib
-import textwrap
 from typing import List, Optional, Tuple
 
-import marko
-import marko.block
-import marko.element
-import marko.inline
+import commonmark
+import commonmark.node
+import commonmark.render.renderer
 
 from phst_rules_elisp.docs import stardoc_output_pb2
 
@@ -182,52 +180,72 @@ class _Generator:
         # However, our files all use UTF-8, leading to double encoding.  Reverse
         # that effect here.
         text = text.strip().encode('latin-1').decode('utf-8')
-        text = marko.Markdown(renderer=_OrgRenderer).convert(text)
-        self._write(text)
+        document = commonmark.Parser().parse(text)
+        text = _OrgRenderer().render(document)
+        self._write(text + '\n')
 
     def _write(self, text: str) -> None:
         self._file.write(text)
 
-class _OrgRenderer(marko.Renderer):
+class _OrgRenderer(commonmark.render.renderer.Renderer):
     _LANGUAGE = {'bash': 'sh'}
 
-    # The interface is mandated by Marko.  Silence false-positive lint errors.
-    # pylint: disable=missing-function-docstring, no-self-use
+    def __init__(self):
+        super().__init__()
+        self._indent = ''
 
-    def render_raw_text(self, element: marko.inline.RawText) -> str:
-        return element.children
+    def out(self, s) -> None:
+        indent = self._indent if self.last_out.endswith('\n') else ''
+        self.lit(indent + s)
 
-    def render_blank_line(self, element: marko.block.BlankLine) -> str:
-        del element
-        return ''
+    # The interface is mandated by CommonMark.  Silence false-positive lint
+    # errors.
+    # pylint: disable=missing-function-docstring, unused-argument
 
-    def render_line_break(self, element: marko.inline.LineBreak) -> str:
-        return '\n' if element.soft else '\\\\\n'
+    def text(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.out(node.literal)
 
-    def render_paragraph(self, element: marko.block.Paragraph) -> str:
-        return self.render_children(element) + '\n\n'
+    def softbreak(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.cr()
 
-    def render_list_item(self, element: marko.block.ListItem) -> str:
-        text = textwrap.indent(self.render_children(element), '  ').lstrip()
-        return f'- {text}'
+    def linebreak(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.out(r'\\')
+        self.cr()
 
-    def render_code_span(self, element: marko.inline.CodeSpan) -> str:
-        return f'~{element.children}~'
+    def paragraph(self, node: commonmark.node.Node, entering: bool) -> None:
+        if node.parent.t != 'item':
+            self.out('\n')
 
-    def render_fenced_code(self, element: marko.block.FencedCode) -> str:
-        lang = self._LANGUAGE[element.lang]
-        code = self.render_children(element)
-        return f'#+BEGIN_SRC {lang}\n{code}#+END_SRC\n\n'
+    def list(self, node: commonmark.node.Node, entering: bool) -> None:
+        if entering:
+            self.cr()
 
-    def render_link(self, element: marko.inline.Link) -> str:
-        text = self.render_children(element)
-        return f'[[{element.dest}][{text}]]'
+    def item(self, node: commonmark.node.Node, entering: bool) -> None:
+        if entering:
+            assert not self._indent  # no support for nested lists
+            self.out('- ')
+            self._indent = '  '
+        else:
+            assert self._indent == '  '  # no support for nested lists
+            self._indent = ''
+            self.cr()
 
-    def render_inline_html(self, element: marko.inline.InlineHTML) -> str:
+    def code(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.out(f'~{node.literal}~')
+
+    def code_block(self, node: commonmark.node.Node, entering: bool) -> None:
+        lang = self._LANGUAGE[node.info]
+        self.out(f'#+BEGIN_SRC {lang}\n{node.literal}#+END_SRC\n\n')
+        self.out('#+TEXINFO: @noindent')
+
+    def link(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.out(f'[[{node.destination}][' if entering else ']]')
+
+    def html_inline(self, node: commonmark.node.Node, entering: bool) -> None:
         writer = io.StringIO()
         parser = _HTMLParser(writer)
-        parser.feed(element.children)
-        return writer.getvalue()
+        parser.feed(node.literal)
+        self.out(writer.getvalue())
 
 
 class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
