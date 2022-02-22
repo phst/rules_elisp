@@ -18,7 +18,7 @@ import argparse
 import html.parser
 import io
 import pathlib
-from typing import List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import commonmark
 import commonmark.node
@@ -249,6 +249,17 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
         parser = _HTMLParser(writer)
         parser.feed(node.literal)
         self.lit(writer.getvalue())
+
+    # Signal an error if we don’t implement something.
+    def __getattr__(self, name) -> Callable[
+        ['_OrgRenderer', commonmark.node.Node, bool], None]:
+        if not name or name.startswith('_'):
+            raise AttributeError(name)
+        # Assume this is supposed to be a rendering method.
+        return self._unknown
+
+    def _unknown(self, node: commonmark.node.Node, entering: bool) -> None:
+        raise NotImplementedError(f'unknown node type {node.t!r}')
 
 
 class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
