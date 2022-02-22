@@ -18,6 +18,7 @@ import argparse
 import html.parser
 import io
 import pathlib
+import re
 from typing import Callable, List, Optional, Tuple
 
 import commonmark
@@ -196,7 +197,12 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
 
     def out(self, s) -> None:
         indent = self._indent if self.last_out.endswith('\n') else ''
-        self.lit(indent + s)
+        self.lit(indent + self._escape(s))
+
+    @staticmethod
+    def _escape(string: str) -> str:
+        # See https://orgmode.org/manual/Escape-Character.html.
+        return re.sub(r'([\[\]*/_=~+])', '\\1\N{ZERO WIDTH SPACE}', string)
 
     # The interface is mandated by CommonMark.  Silence false-positive lint
     # errors.
