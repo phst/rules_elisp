@@ -209,12 +209,12 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
         self.cr()
 
     def linebreak(self, node: commonmark.node.Node, entering: bool) -> None:
-        self.out(r'\\')
+        self.lit(r'\\')
         self.cr()
 
     def paragraph(self, node: commonmark.node.Node, entering: bool) -> None:
         if node.parent.t != 'item':
-            self.out('\n')
+            self.lit('\n')
 
     def list(self, node: commonmark.node.Node, entering: bool) -> None:
         if entering:
@@ -223,7 +223,7 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
     def item(self, node: commonmark.node.Node, entering: bool) -> None:
         if entering:
             assert not self._indent  # no support for nested lists
-            self.out('- ')
+            self.lit('- ')
             self._indent = '  '
         else:
             assert self._indent == '  '  # no support for nested lists
@@ -231,21 +231,21 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
             self.cr()
 
     def code(self, node: commonmark.node.Node, entering: bool) -> None:
-        self.out(f'~{node.literal}~')
+        self.lit(f'~{node.literal}~')
 
     def code_block(self, node: commonmark.node.Node, entering: bool) -> None:
         lang = self._LANGUAGE[node.info]
-        self.out(f'#+BEGIN_SRC {lang}\n{node.literal}#+END_SRC\n\n')
-        self.out('#+TEXINFO: @noindent')
+        self.lit(f'#+BEGIN_SRC {lang}\n{node.literal}#+END_SRC\n\n')
+        self.lit('#+TEXINFO: @noindent')
 
     def link(self, node: commonmark.node.Node, entering: bool) -> None:
-        self.out(f'[[{node.destination}][' if entering else ']]')
+        self.lit(f'[[{node.destination}][' if entering else ']]')
 
     def html_inline(self, node: commonmark.node.Node, entering: bool) -> None:
         writer = io.StringIO()
         parser = _HTMLParser(writer)
         parser.feed(node.literal)
-        self.out(writer.getvalue())
+        self.lit(writer.getvalue())
 
 
 class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
