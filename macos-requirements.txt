@@ -12,6 +12,10 @@ attrs==21.2.0 \
     --hash=sha256:149e90d6d8ac20db7a955ad60cf0e6881a3f20d37096140088356da6c716b0b1 \
     --hash=sha256:ef6aaac3ca6cd92904cdd0d83f629a15f18053ec84e6432106f7a4d04ae4f5fb
     # via pytype
+commonmark==0.9.1 \
+    --hash=sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60 \
+    --hash=sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9
+    # via -r requirements.in
 importlab==0.6.1 \
     --hash=sha256:056503329df1ba8f6291a4b548042aa18620ad91d39388ba58044f0fd44ff83e
     # via pytype
@@ -47,10 +51,6 @@ libcst==0.3.21 \
     --hash=sha256:4302a8f09cd9e5ab5962f8e126d032bba98541893dd38cce6b4770969fed059d \
     --hash=sha256:a9c6fea4fa3bf92f87e40c6850dec099aaa7aaf963a934c763844544b32d3a1e
     # via pytype
-marko==1.2.0 \
-    --hash=sha256:0befa554da3d14b7a38ac7473ffde60f1916fd1d0aaf67181ae70bfe00fdba18 \
-    --hash=sha256:aa9fd81b02f64ab192404cbae5dfe812e337d3d04cefff8800a079c9dc9e5d28
-    # via -r requirements.in
 mccabe==0.6.1 \
     --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42 \
     --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f

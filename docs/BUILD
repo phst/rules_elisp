@@ -116,7 +116,7 @@ py_binary(
     tags = ["no-pytype"],  # FIXME
     deps = [
         ":stardoc_output_py_proto",
-        requirement("marko"),
+        requirement("commonmark"),
     ],
 )
 
