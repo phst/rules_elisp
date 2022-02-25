@@ -55,7 +55,7 @@ elisp_binary(
     src = "merge.el",
     input_args = list(range(
         2,
-        len(DOCS) + 2,
+        len(DOCS) + 3,
     )),
     output_args = [1],
 )
