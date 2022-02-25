@@ -922,7 +922,12 @@ def _run_emacs(
             content = struct(
                 root = "EXECUTION_ROOT",
                 loadPath = manifest_load_path,
-                inputFiles = [f.path for f in inputs.to_list()],
+                inputFiles = [
+                    f.path
+                    for f in inputs.to_list()
+                    # Exclude middlemen, which don’t exist in the filesystem.
+                    if not f.short_path.startswith("_middlemen/")
+                ],
                 outputFiles = [f.path for f in outputs],
                 tags = ctx.attr.tags,
             ).to_json(),
