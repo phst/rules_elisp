@@ -257,8 +257,7 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
         self.lit(writer.getvalue())
 
     # Signal an error if we don’t implement something.
-    def __getattr__(self, name) -> Callable[
-        ['_OrgRenderer', commonmark.node.Node, bool], None]:
+    def __getattr__(self, name) -> Callable[[commonmark.node.Node, bool], None]:
         if not name or name.startswith('_'):
             raise AttributeError(name)
         # Assume this is supposed to be a rendering method.
