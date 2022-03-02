@@ -22,7 +22,6 @@
 
 (require 'org)
 (require 'ox)
-(require 'ox-org)
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
@@ -32,19 +31,13 @@
    (let ((coding-system-for-read 'utf-8)
          (coding-system-for-write 'utf-8)
          (temp-dir (file-name-as-directory (make-temp-file "merge" :dir))))
-     (dolist (file (cons main includes))
+     (dolist (file includes)
        (copy-file file temp-dir))
-     (write-region
-      (with-temp-buffer
-        (let ((default-directory temp-dir)  ; so that relative includes work
-              (org-export-headline-levels 10)
-              (org-export-preserve-breaks t)
-              (org-export-with-properties t)
-              (org-export-coding-system 'utf-8-unix)
-              (org-export-time-stamp-file nil))
-          (insert-file-contents (file-name-nondirectory main))
-          (org-export-as 'org)))
-      nil output)
+     (with-temp-buffer
+       (insert-file-contents main :visit)
+       (org-mode)
+       (org-export-expand-include-keyword nil temp-dir)
+       (write-region nil nil output))
      (delete-directory temp-dir :recursive)))
   (_ (user-error "Usage: docs/merge OUTPUT.org MAIN.org INCLUDE.org…")))
 
