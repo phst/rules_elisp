@@ -84,7 +84,7 @@ class _Generator:
         """Writes the generated Org Mode output."""
         self._write(self._LICENSE)
         self._write('\n')
-        self._markdown(module.module_docstring)
+        self._write(_markdown(module.module_docstring))
         for rule in module.rule_info:
             self._rule(rule)
         for provider in module.provider_info:
@@ -98,7 +98,7 @@ class _Generator:
         self._heading(1, f'~{rule.rule_name}~ rule', rule.rule_name)
         self._findex(rule.rule_name)
         self._write('\n')
-        self._markdown(rule.doc_string)
+        self._write(_markdown(rule.doc_string))
         for attr in rule.attribute:
             self._attribute(attr)
 
@@ -106,7 +106,7 @@ class _Generator:
         self._heading(1, f'~{func.function_name}~ function', func.function_name)
         self._findex(func.function_name)
         self._write('\n')
-        self._markdown(func.doc_string)
+        self._write(_markdown(func.doc_string))
         for param in func.parameter:
             self._parameter(param)
         returns = getattr(func, 'return').doc_string
@@ -119,7 +119,8 @@ class _Generator:
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
         self._heading(2, f'~{param.name}~ parameter', None)
         self._write('\n')
-        self._markdown(param.doc_string + self._MANDATORY[param.mandatory])
+        self._write(
+            _markdown(param.doc_string + self._MANDATORY[param.mandatory]))
         if param.default_value:
             self._write(f'- Default :: ~{param.default_value}~\n')
 
@@ -128,17 +129,17 @@ class _Generator:
                       provider.provider_name)
         self._findex(provider.provider_name)
         self._write('\n')
-        self._markdown(provider.doc_string)
+        self._write(_markdown(provider.doc_string))
         for field in provider.field_info:
             self._heading(2, f'~{field.name}~ field', None)
             self._write('\n')
-            self._markdown(field.doc_string)
+            self._write(_markdown(field.doc_string))
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
         self._heading(1, f'~{aspect.aspect_name}~ aspect', aspect.aspect_name)
         self._findex(aspect.aspect_name)
         self._write('\n')
-        self._markdown(aspect.doc_string)
+        self._write(_markdown(aspect.doc_string))
         if aspect.aspect_attribute:
             attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
             self._write(f'This aspect propagates along the following '
@@ -149,7 +150,8 @@ class _Generator:
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         self._heading(2, f'~{attr.name}~ attribute', None)
         self._write('\n')
-        self._markdown(attr.doc_string + self._MANDATORY[attr.mandatory])
+        self._write(_markdown(
+            attr.doc_string + self._MANDATORY[attr.mandatory]))
         self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
         if attr.default_value:
             self._write(f'- Default :: ~{attr.default_value}~\n')
@@ -174,19 +176,19 @@ class _Generator:
     def _findex(self, entry: str) -> None:
         self._write(f'#+FINDEX: {entry}\n')
 
-    def _markdown(self, text: str):
-        """Convert a Markdown snippet to Org-mode."""
-        # Bazel (including Stardoc) interprets all files as Latin-1,
-        # https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
-        # However, our files all use UTF-8, leading to double encoding.  Reverse
-        # that effect here.
-        text = text.strip().encode('latin-1').decode('utf-8')
-        document = commonmark.Parser().parse(text)
-        text = _OrgRenderer().render(document)
-        self._write(text + '\n')
-
     def _write(self, text: str) -> None:
         self._file.write(text)
+
+def _markdown(text: str) -> str:
+    """Convert a Markdown snippet to Org-mode."""
+    # Bazel (including Stardoc) interprets all files as Latin-1,
+    # https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
+    # However, our files all use UTF-8, leading to double encoding.  Reverse
+    # that effect here.
+    text = text.strip().encode('latin-1').decode('utf-8')
+    document = commonmark.Parser().parse(text)
+    text = _OrgRenderer().render(document)
+    return text + '\n'
 
 class _OrgRenderer(commonmark.render.renderer.Renderer):
     _LANGUAGE = {'bash': 'sh'}
