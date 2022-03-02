@@ -19,6 +19,7 @@ import html.parser
 import io
 import pathlib
 import re
+import textwrap
 from typing import Callable, List, Optional, Tuple
 
 import commonmark
@@ -56,25 +57,25 @@ class _Generator:
 """
 
     _ATTRIBUTE_TYPE = {
-        stardoc_output_pb2.NAME: 'name',
-        stardoc_output_pb2.INT: 'integer',
-        stardoc_output_pb2.LABEL: 'label',
-        stardoc_output_pb2.STRING: 'string',
-        stardoc_output_pb2.STRING_LIST: 'list of strings',
-        stardoc_output_pb2.INT_LIST: 'list of integers',
-        stardoc_output_pb2.LABEL_LIST: 'list of labels',
+        stardoc_output_pb2.NAME: 'Name',
+        stardoc_output_pb2.INT: 'Integer',
+        stardoc_output_pb2.LABEL: 'Label',
+        stardoc_output_pb2.STRING: 'String',
+        stardoc_output_pb2.STRING_LIST: 'List of strings',
+        stardoc_output_pb2.INT_LIST: 'List of integers',
+        stardoc_output_pb2.LABEL_LIST: 'List of labels',
         stardoc_output_pb2.BOOLEAN: 'Boolean',
-        stardoc_output_pb2.LABEL_STRING_DICT: 'dictionary string → label',
-        stardoc_output_pb2.STRING_DICT: 'dictionary string → string',
+        stardoc_output_pb2.LABEL_STRING_DICT: 'Dictionary string → label',
+        stardoc_output_pb2.STRING_DICT: 'Dictionary string → string',
         stardoc_output_pb2.STRING_LIST_DICT:
-            'dictionary string → list of strings',
-        stardoc_output_pb2.OUTPUT: 'output file',
-        stardoc_output_pb2.OUTPUT_LIST: 'list of output files',
+            'Dictionary string → list of strings',
+        stardoc_output_pb2.OUTPUT: 'Output file',
+        stardoc_output_pb2.OUTPUT_LIST: 'List of output files',
     }
 
     _MANDATORY = {
-        False: '  Optional.',
-        True: '  Mandatory.',
+        False: 'optional',
+        True: 'mandatory',
     }
 
     def __init__(self, file: io.TextIOBase):
@@ -99,8 +100,11 @@ class _Generator:
         self._findex(rule.rule_name)
         self._write('\n')
         self._write(_markdown(rule.doc_string))
+        self._write(f'The ~{rule.rule_name}~ rule '
+                    f'supports the following attributes:\n\n')
         for attr in rule.attribute:
             self._attribute(attr)
+        self._write('\n')
 
     def _function(self, func: stardoc_output_pb2.StarlarkFunctionInfo) -> None:
         self._heading(1, f'~{func.function_name}~ function', func.function_name)
@@ -111,18 +115,22 @@ class _Generator:
             self._parameter(param)
         returns = getattr(func, 'return').doc_string
         if returns:
-            self._write(f'- Returns :: {returns}\n\n')
+            self._write(f'Returns: {returns}\n\n')
         if func.deprecated.doc_string:
             raise ValueError(
                 f'unsupported deprecated function {func.function_name}')
+        self._write('\n')
 
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
-        self._heading(2, f'~{param.name}~ parameter', None)
-        self._write('\n')
-        self._write(
-            _markdown(param.doc_string + self._MANDATORY[param.mandatory]))
+        doc = _markdown(param.doc_string).strip()
+        if not doc.endswith('.'):
+            raise ValueError(
+                f'documentation string {doc!r} should end with a period')
+        suffixes = [self._MANDATORY[param.mandatory]]
         if param.default_value:
-            self._write(f'- Default :: ~{param.default_value}~\n')
+            suffixes.append(f'default: ~{param.default_value}~')
+        suffix = '; '.join(suffixes)
+        self._item(f'{param.name} :: {doc}.  {suffix}.')
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
         self._heading(1, f'~{provider.provider_name}~ provider',
@@ -130,10 +138,15 @@ class _Generator:
         self._findex(provider.provider_name)
         self._write('\n')
         self._write(_markdown(provider.doc_string))
+        self._write(f'The ~{provider.provider_name}~ provider '
+                    f'has the following fields:\n\n')
         for field in provider.field_info:
-            self._heading(2, f'~{field.name}~ field', None)
-            self._write('\n')
-            self._write(_markdown(field.doc_string))
+            doc = _markdown(field.doc_string).strip()
+            if not doc.endswith('.'):
+                raise ValueError(
+                    f'documentation string {doc!r} should end with a period')
+            self._item(f'~{field.name}~ :: {doc}')
+        self._write('\n')
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
         self._heading(1, f'~{aspect.aspect_name}~ aspect', aspect.aspect_name)
@@ -146,20 +159,23 @@ class _Generator:
                         f'attributes: {attrs}\n')
         for attr in aspect.attribute:
             self._attribute(attr)
+        self._write('\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
-        self._heading(2, f'~{attr.name}~ attribute', None)
-        self._write('\n')
-        self._write(_markdown(
-            attr.doc_string + self._MANDATORY[attr.mandatory]))
-        self._write(f'- Type :: {self._ATTRIBUTE_TYPE[attr.type]}\n')
+        doc = _markdown(attr.doc_string).strip()
+        if not doc.endswith('.'):
+            raise ValueError(
+                f'documentation string {doc!r} should end with a period')
+        suffixes = [self._ATTRIBUTE_TYPE[attr.type],
+                    self._MANDATORY[attr.mandatory]]
         if attr.default_value:
-            self._write(f'- Default :: ~{attr.default_value}~\n')
+            suffixes.append(f'default: ~{attr.default_value}~')
         if attr.provider_name_group:
             group, = attr.provider_name_group
             names = ', '.join(f'~{name}~' for name in group.provider_name)
-            self._write(f'- Required providers :: {names}\n')
-        self._write('\n')
+            suffixes.append(f'required providers: {names}')
+        suffix = '; '.join(suffixes)
+        self._item(f'~{attr.name}~ :: {doc}  {suffix}.')
 
     def _heading(self, level: int, heading: str, node: Optional[str]) -> None:
         prefix = level * '*'
@@ -172,6 +188,10 @@ class _Generator:
         else:
             self._write(':UNNUMBERED: notoc\n')
         self._write(':END:\n')
+
+    def _item(self, text: str) -> None:
+        self._write(
+            _fill(text, initial_indent='- ', subsequent_indent='  ') + '\n')
 
     def _findex(self, entry: str) -> None:
         self._write(f'#+FINDEX: {entry}\n')
@@ -189,6 +209,13 @@ def _markdown(text: str) -> str:
     document = commonmark.Parser().parse(text)
     text = _OrgRenderer().render(document)
     return text + '\n'
+
+def _fill(text: str, *,
+          initial_indent: str = '', subsequent_indent: str = '') -> str:
+    return textwrap.fill(
+        text, width=80, tabsize=4, fix_sentence_endings=True,
+        initial_indent=initial_indent, subsequent_indent=subsequent_indent,
+        break_long_words=False, break_on_hyphens=False)
 
 class _OrgRenderer(commonmark.render.renderer.Renderer):
     _LANGUAGE = {'bash': 'sh'}
