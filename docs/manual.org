@@ -23,9 +23,11 @@
 
 * Introduction
 
-This repository provides a [[https://bazel.build/][Bazel]] integration for
-[[info:elisp#Top][Emacs Lisp]].  It is modeled after the rules definitions for
-other languages, like the [[https://docs.bazel.build/be/c-cpp.html][C++ rules]].
+This repository provides a Bazel integration for Emacs Lisp; see
+[[https://bazel.build/][the Bazel homepage]] for more information about Bazel,
+and see [[info:elisp#Top][the Emacs Lisp manual]].  It is modeled after the
+rules definitions for other languages, like the
+[[https://docs.bazel.build/be/c-cpp.html][C++ rules]].
 
 This is not an officially supported Google product.
 
@@ -58,16 +60,16 @@ rules_elisp_toolchains()
 
 #+TEXINFO: @noindent
 Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
-See the [[*Symbols defined in =//emacs:defs.bzl=][generated documentation]] and
-the examples in the ~examples~ directory for details.
+See [[*Symbols defined in =//emacs:defs.bzl=]] and the examples in the
+~examples~ directory for details.
 
 * Load path management
 #+CINDEX: Load path
 
 The Emacs Lisp rules by default only add the workspace root directories to the
-[[info:elisp#Library Search][load path]].  However, many Emacs Lisp libraries
-assume that their immediate parent directory is present in the load path.  To
-support such libraries, the ~elisp_library~ rule supports an optional
+load path; see [[info:elisp#Library Search]].  However, many Emacs Lisp
+libraries assume that their immediate parent directory is present in the load
+path.  To support such libraries, the ~elisp_library~ rule supports an optional
 ~load_path~ attribute.  You can specify additional load path directories using
 this attribute.  Relative directories are relative to the Bazel package
 directory; absolute directories are relative to the workspace root.  A typical
@@ -77,10 +79,11 @@ load path.
 * Runfiles
 #+CINDEX: Runfiles
 
-This repository also includes a library to access
-[[https://docs.bazel.build/skylark/rules.html#runfiles][runfiles]].  To use it,
-add a build dependency on ~@phst_rules_elisp//elisp/runfiles~.  See the header
-comments in ~runfiles.el~ for further usage hints.
+This repository also includes a library to access runfiles; see
+[[https://docs.bazel.build/skylark/rules.html#runfiles][the Bazel documentation
+on runfiles]].  To use it, add a build dependency on
+~@phst_rules_elisp//elisp/runfiles~.  See the header comments in ~runfiles.el~
+for further usage hints.
 
 #+FINDEX: elisp/runfiles/rlocation
 #+TINDEX: elisp/runfiles/runfiles
