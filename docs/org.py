@@ -20,7 +20,7 @@ import io
 import pathlib
 import re
 import textwrap
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Tuple
 
 import commonmark
 import commonmark.node
@@ -96,21 +96,25 @@ class _Generator:
             self._aspect(aspect)
 
     def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
-        self._heading(1, f'~{rule.rule_name}~ rule', rule.rule_name)
-        self._findex(rule.rule_name)
-        self._write('\n')
-        self._write(_markdown(rule.doc_string))
+        name = rule.rule_name
+        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                          for a in rule.attribute)
+        self._write(f'#+ATTR_TEXINFO: :options Rule {name} ({attrs})\n')
+        self._write('#+BEGIN_deffn\n')
+        self._write(_markdown(rule.doc_string).lstrip())
         self._write(f'The ~{rule.rule_name}~ rule '
                     f'supports the following attributes:\n\n')
         for attr in rule.attribute:
             self._attribute(attr)
-        self._write('\n')
+        self._write('#+END_deffn\n\n')
 
     def _function(self, func: stardoc_output_pb2.StarlarkFunctionInfo) -> None:
-        self._heading(1, f'~{func.function_name}~ function', func.function_name)
-        self._findex(func.function_name)
-        self._write('\n')
-        self._write(_markdown(func.doc_string))
+        name = func.function_name
+        params = ', '.join(p.name if p.mandatory else f'[{p.name}]'
+                           for p in func.parameter)
+        self._write(f'#+ATTR_TEXINFO: :options {name} ({params})\n')
+        self._write('#+BEGIN_defun\n')
+        self._write(_markdown(func.doc_string).lstrip())
         for param in func.parameter:
             self._parameter(param)
         returns = getattr(func, 'return').doc_string
@@ -119,7 +123,7 @@ class _Generator:
         if func.deprecated.doc_string:
             raise ValueError(
                 f'unsupported deprecated function {func.function_name}')
-        self._write('\n')
+        self._write('#+END_defun\n\n')
 
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
         doc = _markdown(param.doc_string).strip()
@@ -133,11 +137,11 @@ class _Generator:
         self._item(f'{param.name} :: {doc}.  {suffix}.')
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
-        self._heading(1, f'~{provider.provider_name}~ provider',
-                      provider.provider_name)
-        self._findex(provider.provider_name)
-        self._write('\n')
-        self._write(_markdown(provider.doc_string))
+        name = provider.provider_name
+        fields = ', '.join(f.name for f in provider.field_info)
+        self._write(f'#+ATTR_TEXINFO: :options Provider {name} ({fields})\n')
+        self._write('#+BEGIN_deffn\n')
+        self._write(_markdown(provider.doc_string).lstrip())
         self._write(f'The ~{provider.provider_name}~ provider '
                     f'has the following fields:\n\n')
         for field in provider.field_info:
@@ -146,20 +150,22 @@ class _Generator:
                 raise ValueError(
                     f'documentation string {doc!r} should end with a period')
             self._item(f'~{field.name}~ :: {doc}')
-        self._write('\n')
+        self._write('#+END_deffn\n\n')
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
-        self._heading(1, f'~{aspect.aspect_name}~ aspect', aspect.aspect_name)
-        self._findex(aspect.aspect_name)
-        self._write('\n')
-        self._write(_markdown(aspect.doc_string))
+        name = aspect.provider_name
+        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                          for a in aspect.attribute)
+        self._write(f'#+ATTR_TEXINFO: :options Aspect {name} ({attrs})\n')
+        self._write('#+BEGIN_deffn\n')
+        self._write(_markdown(aspect.doc_string).lstrip())
         if aspect.aspect_attribute:
             attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
             self._write(f'This aspect propagates along the following '
                         f'attributes: {attrs}\n')
         for attr in aspect.attribute:
             self._attribute(attr)
-        self._write('\n')
+        self._write('#+END_deffn\n\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         doc = _markdown(attr.doc_string).strip()
@@ -177,24 +183,9 @@ class _Generator:
         suffix = '; '.join(suffixes)
         self._item(f'~{attr.name}~ :: {doc}  {suffix}.')
 
-    def _heading(self, level: int, heading: str, node: Optional[str]) -> None:
-        prefix = level * '*'
-        self._write(f'{prefix} {heading}\n')
-        self._write(':PROPERTIES:\n')
-        if node is not None:
-            # Work around apparent Org Mode bug.
-            node = node.replace('_', r'\under{}')
-            self._write(f':ALT_TITLE: {node}\n')
-        else:
-            self._write(':UNNUMBERED: notoc\n')
-        self._write(':END:\n')
-
     def _item(self, text: str) -> None:
         self._write(
             _fill(text, initial_indent='- ', subsequent_indent='  ') + '\n')
-
-    def _findex(self, entry: str) -> None:
-        self._write(f'#+FINDEX: {entry}\n')
 
     def _write(self, text: str) -> None:
         self._file.write(text)
