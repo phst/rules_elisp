@@ -41,21 +41,6 @@ def _main() -> None:
         generator.run(module)
 
 class _Generator:
-    _LICENSE = """# Copyright 2020, 2021, 2022 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-"""
-
     _ATTRIBUTE_TYPE = {
         stardoc_output_pb2.NAME: 'Name',
         stardoc_output_pb2.INT: 'Integer',
@@ -83,8 +68,6 @@ class _Generator:
 
     def run(self, module: stardoc_output_pb2.ModuleInfo) -> None:
         """Writes the generated Org Mode output."""
-        self._write(self._LICENSE)
-        self._write('\n')
         self._write(_markdown(module.module_docstring))
         for rule in module.rule_info:
             self._rule(rule)
