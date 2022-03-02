@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -72,6 +72,7 @@ class BinaryTest(unittest.TestCase):
                               'hi from lib-4',
                               'hi from lib-1',
                               'hi from data dependency'])
+
 
 if __name__ == '__main__':
     unittest.main()

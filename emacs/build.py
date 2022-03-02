@@ -27,7 +27,6 @@ import shutil
 import subprocess
 import tempfile
 
-
 def main() -> None:
     """Configures and builds Emacs."""
     parser = argparse.ArgumentParser(allow_abbrev=False)

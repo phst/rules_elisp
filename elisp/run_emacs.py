@@ -78,6 +78,7 @@ def main() -> None:
             sys.exit(ex.returncode)
         raise
 
+
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
     files = glob.glob(str(pattern))
@@ -87,6 +88,7 @@ def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
         raise OSError(f'multiple files match {pattern}: {files}')
     return pathlib.Path(files[0])
 
+
 def _check_codepage(description: str, values: Iterable[str]) -> None:
     for value in values:
         try:
@@ -95,9 +97,11 @@ def _check_codepage(description: str, values: Iterable[str]) -> None:
             raise ValueError(
                 f'can’t encode {description} “{value}” for Windows') from ex
 
+
 def _env_var(arg: str) -> Tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
+
 
 if __name__ == '__main__':
     main()

@@ -147,8 +147,10 @@ def main() -> None:
             # code.
             sys.exit(returncode)
 
+
 def _quote(arg: str) -> str:
     return urllib.parse.quote(arg) if _WINDOWS else arg
+
 
 def _fix_coverage_manifest(manifest_file: pathlib.Path,
                            run_files: runfiles.Runfiles) -> None:
@@ -176,12 +178,15 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
             for file in files:
                 stream.write(file + '\n')
 
+
 def _env_var(arg: str) -> Tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
 
+
 _WINDOWS = os.name == 'nt'
 _logger = logging.getLogger('phst_rules_elisp.elisp.run_test')
+
 
 if __name__ == '__main__':
     main()

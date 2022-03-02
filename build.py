@@ -34,6 +34,7 @@ from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
 _Target = Callable[['Builder'], None]
 _targets: Dict[str, _Target] = {}
 
+
 def target(func: _Target) -> _Target:
     """Decorator to mark a function as a build target."""
     name = func.__name__
@@ -43,6 +44,7 @@ def target(func: _Target) -> _Target:
         func(self)
     _targets[name] = wrapper
     return wrapper
+
 
 class Builder:
     """Builds the project."""
@@ -235,6 +237,7 @@ class Builder:
             encoding='utf-8')
         return result.stdout
 
+
 def _versions() -> FrozenSet[str]:
     # All potentially supported Emacs versions.
     ret = {'26.1', '26.2', '26.3', '27.1', '27.2'}
@@ -255,6 +258,7 @@ def _versions() -> FrozenSet[str]:
         raise ValueError(f'unsupported kernel {uname.system}')
     return frozenset(ret)
 
+
 def main() -> None:
     """Builds the project."""
     if isinstance(sys.stdout, io.TextIOWrapper):
@@ -274,14 +278,17 @@ def main() -> None:
         print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
 
+
 def _program(name: str) -> pathlib.Path:
     file = shutil.which(name)
     if not file:
         raise FileNotFoundError(f'program {name} not found')
     return pathlib.Path(file)
 
+
 def _cache_directory(arg: str) -> pathlib.Path:
     return pathlib.Path(arg).expanduser()
+
 
 if __name__ == '__main__':
     main()

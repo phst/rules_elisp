@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,6 +63,7 @@ class AddPathTest(unittest.TestCase):
              '--funcall=elisp/runfiles/install-handler',
              '--directory=/bazel-runfile:foo',
              '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])
+
 
 if __name__ == '__main__':
     unittest.main()

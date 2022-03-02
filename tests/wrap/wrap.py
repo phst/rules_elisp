@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -96,9 +96,11 @@ def _main() -> None:
     if not unittest.TextTestRunner().run(tests).wasSuccessful():
         raise ValueError('incorrect arguments')
 
+
 def _env_var(arg: str) -> Tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
+
 
 if __name__ == '__main__':
     _main()

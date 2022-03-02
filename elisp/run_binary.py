@@ -85,12 +85,14 @@ def main() -> None:
                 sys.exit(ex.returncode)
             raise
 
+
 def _runfiles_dir(env: Mapping[str, str]) -> Optional[pathlib.Path]:
     for var in ('RUNFILES_DIR', 'TEST_SRCDIR'):
         value = env.get(var)
         if value:
             return pathlib.Path(os.path.abspath(value))
     return None
+
 
 def _arg_files(argv: Sequence[str], root: pathlib.Path,
                indices: Iterable[int]) -> Sequence[pathlib.PurePath]:
@@ -115,9 +117,11 @@ def _arg_files(argv: Sequence[str], root: pathlib.Path,
             result.append(file)
     return tuple(result)
 
+
 def _env_var(arg: str) -> Tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
+
 
 if __name__ == '__main__':
     main()

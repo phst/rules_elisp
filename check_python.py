@@ -57,6 +57,7 @@ class Workspace:
         self.tempdir = None
         self._output.touch()
 
+
 def _main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
@@ -100,6 +101,7 @@ def _main() -> None:
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
     workspace.success()
+
 
 if __name__ == '__main__':
     _main()

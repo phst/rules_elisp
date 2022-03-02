@@ -40,7 +40,9 @@ def _main() -> None:
         generator = _Generator(file)
         generator.run(module)
 
+
 class _Generator:
+
     _ATTRIBUTE_TYPE = {
         stardoc_output_pb2.NAME: 'Name',
         stardoc_output_pb2.INT: 'Integer',
@@ -173,6 +175,7 @@ class _Generator:
     def _write(self, text: str) -> None:
         self._file.write(text)
 
+
 def _markdown(text: str) -> str:
     """Convert a Markdown snippet to Org-mode."""
     # Bazel (including Stardoc) interprets all files as Latin-1,
@@ -184,6 +187,7 @@ def _markdown(text: str) -> str:
     text = _OrgRenderer().render(document)
     return text + '\n'
 
+
 def _fill(text: str, *,
           initial_indent: str = '', subsequent_indent: str = '') -> str:
     return textwrap.fill(
@@ -191,7 +195,9 @@ def _fill(text: str, *,
         initial_indent=initial_indent, subsequent_indent=subsequent_indent,
         break_long_words=False, break_on_hyphens=False)
 
+
 class _OrgRenderer(commonmark.render.renderer.Renderer):
+
     _LANGUAGE = {'bash': 'sh'}
 
     def __init__(self):

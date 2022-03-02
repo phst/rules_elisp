@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ If a file was created, appropriate arguments are added to args."""
             with name.open(mode='xt', encoding='utf-8') as file:
                 yield file
 
+
 def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
           output_files: Iterable[pathlib.PurePath], file: IO[str]) -> None:
     """Write manifest file contents to the given file object."""
@@ -61,6 +62,7 @@ def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
     }
     json.dump(json_data, file)
     file.flush()
+
 
 def _check_relative(files: Iterable[pathlib.PurePath]) -> None:
     for file in files:
