@@ -82,8 +82,7 @@ load path.
 This repository also includes a library to access runfiles; see
 [[https://docs.bazel.build/skylark/rules.html#runfiles][the Bazel documentation
 on runfiles]].  To use it, add a build dependency on
-~@phst_rules_elisp//elisp/runfiles~.  See the header comments in ~runfiles.el~
-for further usage hints.
+~@phst_rules_elisp//elisp/runfiles~.
 
 #+FINDEX: elisp/runfiles/rlocation
 #+TINDEX: elisp/runfiles/runfiles
