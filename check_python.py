@@ -58,7 +58,8 @@ class Workspace:
         self._output.touch()
 
 
-def _main() -> None:
+def main() -> None:
+    """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
@@ -104,4 +105,4 @@ def _main() -> None:
 
 
 if __name__ == '__main__':
-    _main()
+    main()

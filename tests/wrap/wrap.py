@@ -25,7 +25,8 @@ import unittest
 
 from phst_rules_elisp.elisp import runfiles
 
-def _main() -> None:
+def main() -> None:
+    """Main function."""
     if isinstance(sys.stdout, io.TextIOWrapper):  # typical case
         sys.stdout.reconfigure(encoding='utf-8', errors='backslashreplace',
                                line_buffering=True)
@@ -103,4 +104,4 @@ def _env_var(arg: str) -> Tuple[str, str]:
 
 
 if __name__ == '__main__':
-    _main()
+    main()

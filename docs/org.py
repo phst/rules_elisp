@@ -28,7 +28,8 @@ import commonmark.render.renderer
 
 from phst_rules_elisp.docs import stardoc_output_pb2
 
-def _main() -> None:
+def main() -> None:
+    """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('input', type=pathlib.Path)
     parser.add_argument('output', type=pathlib.Path)
@@ -300,4 +301,4 @@ class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
 
 
 if __name__ == '__main__':
-    _main()
+    main()
