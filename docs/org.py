@@ -139,7 +139,7 @@ class _Generator:
         self._write('#+END_deffn\n\n')
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
-        name = aspect.provider_name
+        name = aspect.aspect_name
         attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
                           for a in aspect.attribute)
         self._write(f'#+ATTR_TEXINFO: :options Aspect {name} ({attrs})\n')
