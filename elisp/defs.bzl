@@ -94,8 +94,7 @@ def _elisp_library_impl(ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps"],
-            extensions = ["el"],
+            dependency_attributes = ["deps", "srcs"],
         ),
         EmacsLispInfo(
             source_files = ctx.files.srcs,
@@ -186,8 +185,7 @@ def _elisp_test_impl(ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps"],
-            extensions = ["el"],
+            dependency_attributes = ["deps", "srcs"],
         ),
     ]
 
