@@ -180,7 +180,14 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                       cl-declarations-or-string
                                       [&optional ("interactive" interactive)]
                                       def-body)])
-                 cl-declarations body)))))
+                 cl-declarations body)))
+        ;; Work around another Edebug specification issue fixed with Emacs
+        ;; commit aeb25f9d3d12a18ef3881e23b32a34615355d4d0.
+        (when (< emacs-major-version 29)
+          (put #'cl-define-compiler-macro 'edebug-form-spec
+               `(&define name ([&optional "&whole" arg]
+                               ,@(car (get-edebug-spec 'cl-macro-list)))
+                         cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
       (write-region "" nil (concat "/:" shard-status-file) :append))
