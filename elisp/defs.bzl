@@ -173,6 +173,18 @@ def _elisp_test_impl(ctx):
         )
         test_env["LCOV_MERGER"] = ctx.executable._lcov_merger.path
 
+        # C/C++ coverage instrumentation needs another binary that wraps gcov;
+        # see
+        # https://github.com/bazelbuild/bazel/blob/5.0.0/tools/test/collect_coverage.sh#L199.
+        # This is normally set from a hidden “$collect_cc_coverage” attribute;
+        # see
+        # https://github.com/bazelbuild/bazel/blob/5.0.0/src/main/java/com/google/devtools/build/lib/analysis/test/TestActionBuilder.java#L253-L258.
+        # We also need to inject its location here, like above.
+        runfiles = runfiles.merge(
+            ctx.attr._collect_cc_coverage[DefaultInfo].default_runfiles,
+        )
+        test_env["CC_CODE_COVERAGE_SCRIPT"] = ctx.executable._collect_cc_coverage.path
+
     # The InstrumentedFilesInfo provider needs to be added here as well as in
     # the “elisp_library” rule for coverage collection to work.
     return [
@@ -443,6 +455,11 @@ elisp_test = rule(
         ),
         _lcov_merger = attr.label(
             default = "@bazel_tools//tools/test:lcov_merger",
+            executable = True,
+            cfg = "target",
+        ),
+        _collect_cc_coverage = attr.label(
+            default = "@bazel_tools//tools/test:collect_cc_coverage",
             executable = True,
             cfg = "target",
         ),
