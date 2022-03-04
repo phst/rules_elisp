@@ -18,3 +18,4 @@ flycheck_*.elc
 /compile_commands.json
 .gdb_history
 /.cache/
+/coverage-report/

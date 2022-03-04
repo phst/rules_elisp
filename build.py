@@ -24,6 +24,7 @@ import io
 import os
 import pathlib
 import platform
+import re
 import shlex
 import shutil
 import subprocess
@@ -95,6 +96,7 @@ class Builder:
     def generate(self) -> None:
         """Generates files to be checked in."""
         self.compdb()
+        self.coverage()
 
     @target
     def buildifier(self) -> None:
@@ -156,6 +158,21 @@ class Builder:
         self._run(args, cwd=self._workspace, env=env)
 
     @target
+    def coverage(self) -> None:
+        """Generates a coverage report."""
+        # Exclude Gazelle because the Go output format is incompatible with
+        # genhtml.
+        output = self._bazel('coverage', ['//...', '-//gazelle/...'],
+                             capture_stdout=True)
+        files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
+        if not files:
+            raise FileNotFoundError('no coverage files generated')
+        directory = self._workspace / 'coverage-report'
+        self._run(['genhtml', '--output-directory=' + str(directory),
+                   '--branch-coverage', '--'] + files)
+        print(f'coverage report written to {directory}')
+
+    @target
     def install(self) -> None:
         """Installs the Info manual."""
         self._bazel('build', ['//docs:rules_elisp.info'])
@@ -169,7 +186,8 @@ class Builder:
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (), postfix_options: Iterable[str] = (),
-               cwd: Optional[pathlib.Path] = None) -> None:
+               cwd: Optional[pathlib.Path] = None,
+               capture_stdout: bool = False) -> Optional[str]:
         args = [str(self._bazel_program), command]
         args.extend(options)
         args.extend(self._cache_options())
@@ -210,7 +228,7 @@ class Builder:
                         d for d in path if not d.startswith(prefix))
             elif self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
-        self._run(args, cwd=cwd, env=env)
+        return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
 
     def _cache_options(self) -> Sequence[str]:
         opts = []
