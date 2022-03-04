@@ -13,11 +13,11 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
+load(":defs.bzl", "merged_manual")
 
 elisp_manual(
     name = "manual",
@@ -39,15 +39,11 @@ DOCS = [
     "repositories",
 ]
 
-run_binary(
-    name = "run_merge",
-    srcs = ["manual.org"] + [f + ".org" for f in DOCS],
-    outs = ["merged.org"],
-    args = [
-        "$(location :merged.org)",
-        "$(location :manual.org)",
-    ] + ["$(location :{}.org)".format(f) for f in DOCS],
-    tool = ":merge",
+merged_manual(
+    name = "merged_manual",
+    out = "merged.org",
+    includes = DOCS,
+    main = "manual.org",
 )
 
 elisp_binary(
@@ -61,8 +57,8 @@ elisp_binary(
 )
 
 stardoc(
-    name = "elisp_doc",
-    out = "elisp_doc.bin",
+    name = "elisp",
+    out = "elisp.bin",
     format = "proto",
     input = "//elisp:defs.bzl",
     deps = [
@@ -74,8 +70,8 @@ stardoc(
 )
 
 stardoc(
-    name = "emacs_doc",
-    out = "emacs_doc.bin",
+    name = "emacs",
+    out = "emacs.bin",
     format = "proto",
     input = "//emacs:defs.bzl",
     deps = [
@@ -86,27 +82,12 @@ stardoc(
 )
 
 stardoc(
-    name = "repositories_doc",
-    out = "repositories_doc.bin",
+    name = "repositories",
+    out = "repositories.bin",
     format = "proto",
     input = "//elisp:repositories.bzl",
     deps = ["//elisp:builtin_bzl"],
 )
-
-[
-    run_binary(
-        name = "gen_" + doc,
-        srcs = [doc + "_doc.bin"],
-        outs = [doc + ".org"],
-        args = [
-            "--",
-            "$(location :{}_doc.bin)".format(doc),
-            "$(location :{}.org)".format(doc),
-        ],
-        tool = ":org",
-    )
-    for doc in DOCS
-]
 
 py_binary(
     name = "org",
