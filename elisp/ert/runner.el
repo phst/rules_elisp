@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2022 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -185,8 +185,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
         ;; commit aeb25f9d3d12a18ef3881e23b32a34615355d4d0.
         (when (< emacs-major-version 29)
           (put #'cl-define-compiler-macro 'edebug-form-spec
-               `(&define name ([&optional "&whole" arg]
-                               ,@(car (get-edebug-spec 'cl-macro-list)))
+               `(&define name
+                         ([&optional "&whole" arg]
+                          ,@(car (elisp/ert/edebug--get-spec 'cl-macro-list)))
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
@@ -1125,6 +1126,9 @@ SPEC is the prefix for ‘gensym’."
               (intern (format "%s@%s" edebug-def-name suffix))
             suffix)))
   nil)
+
+(defalias 'elisp/ert/edebug--get-spec
+  (if (fboundp 'edebug-get-spec) 'edebug-get-spec 'get-edebug-spec))
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here
