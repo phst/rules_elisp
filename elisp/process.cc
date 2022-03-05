@@ -1,4 +1,4 @@
-// Copyright 2020, 2021 Google LLC
+// Copyright 2020, 2021, 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -393,7 +393,7 @@ absl::StatusOr<int> Run(std::string binary,
 #ifdef PHST_RULES_ELISP_WINDOWS
   binary += ".exe";
 #endif
-  const absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
+  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   absl::StatusOr<Environment> map = runfiles.Environment();
