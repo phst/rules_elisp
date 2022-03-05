@@ -754,9 +754,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
             inputs = inputs,
             arguments = args,
             mnemonic = "ElispCompile",
-            progress_message = (
-                "Compiling Emacs Lisp library {}".format(out.short_path)
-            ),
+            progress_message = "Compiling {}".format(src.short_path),
             manifest_basename = out.basename,
             manifest_sibling = out,
             manifest_load_path = flat_load_path,
