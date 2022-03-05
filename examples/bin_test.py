@@ -38,10 +38,15 @@ class BinaryTest(unittest.TestCase):
         binary = run_files.resolve(binary)
         # Be sure to pass environment variables to find runfiles.  We also set
         # GCOV_PREFIX (see
-        # https://gcc.gnu.org/onlinedocs/gcc/Cross-profiling.html) to a
-        # directory that’s hopefully writable, to avoid logspam when running
-        # with “bazel coverage”.
-        env = dict(run_files.environment(), GCOV_PREFIX=tempfile.gettempdir())
+        # https://gcc.gnu.org/onlinedocs/gcc/Cross-profiling.html) and
+        # LLVM_PROFILE_FILE (see
+        # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html) to a
+        # directory/file that’s hopefully writable, to avoid logspam when
+        # running with “bazel coverage”.
+        temp_dir = pathlib.Path(tempfile.gettempdir())
+        env = dict(run_files.environment(),
+                   GCOV_PREFIX=str(temp_dir),
+                   LLVM_PROFILE_FILE=str(temp_dir / 'bazel.%p.profraw'))
         for var in ('EMACS', 'PATH', 'SYSTEMROOT'):
             value = os.getenv(var)
             if value:
