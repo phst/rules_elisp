@@ -29,6 +29,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
                     Sequence)
 
@@ -167,9 +168,26 @@ class Builder:
         files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
         if not files:
             raise FileNotFoundError('no coverage files generated')
+        temp_dir = None  # type: Optional[pathlib.Path]
+        if self._kernel == 'Darwin':
+            # Work around https://github.com/bazelbuild/bazel/issues/14969.  Run
+            # the LCov merger binary again, filtering out macOS system headers.
+            temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
+            report = temp_dir / 'report.txt'
+            output = temp_dir / 'coverage.dat'
+            with report.open('xt') as stream:
+                for file in files:
+                    stream.write(os.path.abspath(file) + '\n')
+            self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
+                                '--reports_file=' + str(report),
+                                '--output_file=' + str(output),
+                                '--filter_sources=/Applications/.+'])
+            files = [str(output)]
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml', '--output-directory=' + str(directory),
                    '--branch-coverage', '--'] + files)
+        if temp_dir:
+            shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
 
     @target
