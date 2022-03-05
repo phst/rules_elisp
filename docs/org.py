@@ -280,7 +280,10 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
 class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
     # Work around https://bugs.python.org/issue31844.
 
-    _TAGS = {'var': ('@@texinfo:@var{@@', '@@texinfo:}@@')}
+    _TAGS = {
+        'code': ('@@texinfo:@code{@@', '@@texinfo:}@@'),
+        'var': ('@@texinfo:@var{@@', '@@texinfo:}@@'),
+    }
 
     def __init__(self, writer: io.TextIOBase):
         super().__init__()
