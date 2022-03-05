@@ -38,7 +38,8 @@
          (coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
          (org-export-coding-system 'utf-8-unix)
-         (org-export-time-stamp-file nil))
+         (org-export-time-stamp-file nil)
+         (org-export-use-babel nil))
      (with-temp-buffer
        (insert-file-contents input)
        (write-region (org-export-as 'texinfo) nil output))))
