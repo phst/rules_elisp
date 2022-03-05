@@ -27,6 +27,8 @@ from phst_rules_elisp.elisp import runfiles
 class BinaryTest(unittest.TestCase):
     """Example test showing how to work with elisp_binary rules."""
 
+    maxDiff = 2000
+
     def test_run(self) -> None:
         """Runs the test binary and checks its output."""
         run_files = runfiles.Runfiles()
