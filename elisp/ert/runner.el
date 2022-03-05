@@ -764,6 +764,7 @@ VALUE."
 (defun elisp/ert/coverage--data (index)
   "Return INDEX’th element of the current coverage vector.
 The return value is of type ‘elisp/ert/coverage--data’."
+  (declare (side-effect-free t))
   (cl-check-type index natnum)
   (let ((data (aref elisp/ert/coverage--vector index)))
     (unless data
