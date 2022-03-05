@@ -321,7 +321,7 @@ To add a load path entry for the current package, specify `.` here.""",
         ),
     ),
     doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
-available to dependencies. All sources are byte-compiled.
+available to dependencies.  All sources are byte-compiled.
 `elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
 can then use `load` or `require` to load them.
 
