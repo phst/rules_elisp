@@ -279,3 +279,36 @@ cc_defaults = rule(
     doc = "Internal rule for default C++ flags",
     provides = [CcDefaultInfo],
 )
+
+def _bootstrap_impl(ctx):
+    src = ctx.file.src
+    out = ctx.outputs.out
+    compile = ctx.file._compile
+    run_emacs(
+        ctx,
+        arguments = [
+            "--load=" + compile.path,
+            "--fatal-warnings",
+            "--funcall=elisp/compile-batch-and-exit",
+            src.path,
+            out.path,
+        ],
+        inputs = depset([src, compile]),
+        outputs = [out],
+        mnemonic = "ElispCompile",
+        progress_message = "Compiling {}".format(src.short_path),
+        manifest_basename = out.basename,
+        manifest_sibling = out,
+    )
+
+bootstrap = rule(
+    implementation = _bootstrap_impl,
+    attrs = {
+        "src": attr.label(mandatory = True, allow_single_file = [".el"]),
+        "out": attr.output(mandatory = True),
+        "_compile": attr.label(allow_single_file = [".el"], default = "//elisp:compile.el"),
+    },
+    doc = "Primitive version of `elisp_library` used for bootstrapping",
+    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    incompatible_use_toolchain_transition = True,
+)

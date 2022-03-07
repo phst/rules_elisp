@@ -276,8 +276,8 @@ compile cleanly and that you don’t control.""",
         default = True,
     ),
     "_compile": attr.label(
-        default = "//elisp:compile.el",
-        allow_single_file = [".el"],
+        default = "//elisp:compile.elc",
+        allow_single_file = [".elc"],
     ),
 }
 
