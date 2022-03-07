@@ -70,11 +70,6 @@ def _elisp_toolchain_impl(ctx):
 
 # Note: Toolchain names need to be fully qualified, otherwise external
 # workspaces won’t find them.
-_TOOLCHAIN_TYPE = "@phst_rules_elisp//elisp:toolchain_type"
-
-def _toolchain(ctx):
-    """Return the Emacs Lisp toolchain for the given context."""
-    return ctx.toolchains[_TOOLCHAIN_TYPE]
 
 def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
@@ -132,7 +127,7 @@ def _elisp_binary_impl(ctx):
 
 def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
-    toolchain = _toolchain(ctx)
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
 
     args = [
         "--skip-test=" + test
@@ -338,7 +333,7 @@ The source files in `srcs` can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
-    toolchains = [_TOOLCHAIN_TYPE],
+    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
 )
@@ -412,7 +407,7 @@ in batch mode unless `interactive` is `True`.""",
     fragments = ["cpp"],
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        _TOOLCHAIN_TYPE,
+        "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_binary_impl,
@@ -509,7 +504,7 @@ normally pass, but don’t work under coverage for some reason.""",
     test = True,
     toolchains = [
         "@bazel_tools//tools/cpp:toolchain_type",
-        _TOOLCHAIN_TYPE,
+        "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_test_impl,
@@ -695,7 +690,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
         ],
     )
 
-    toolchain = _toolchain(ctx)
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
 
     # Expand load path only if needed.  It’s important that the expanded load
     # path is equivalent to the --directory arguments below.
@@ -797,7 +792,7 @@ def _binary(ctx, srcs, tags, args, libs):
         data = ctx.files.data,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
-    toolchain = _toolchain(ctx)
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
     emacs = toolchain.emacs
 
     # Only pass in data files when needed.
@@ -922,7 +917,7 @@ def _run_emacs(
       manifest_load_path: (list of strings or None): additional load path for
           manifest with directories relative to the execution root
     """
-    toolchain = _toolchain(ctx)
+    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
     emacs = toolchain.emacs
     arguments = ["--quick", "--batch"] + arguments
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
