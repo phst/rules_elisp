@@ -14,8 +14,8 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load(":defs.bzl", "elisp_binary", "elisp_library", "elisp_toolchain")
-load(":util.bzl", "cc_defaults")
+load(":defs.bzl", "elisp_binary", "elisp_toolchain")
+load(":util.bzl", "bootstrap", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -101,7 +101,6 @@ elisp_toolchain(
 )
 
 exports_files([
-    "compile.el",
     "binary.template",
     "test.template",
 ])
@@ -396,11 +395,12 @@ exports_files(
     visibility = ["//docs:__pkg__"],
 )
 
-# Make sure compile.el can itself be byte-compiled.  We don’t use the compiled
-# output for bootstrapping reasons.
-elisp_library(
+# We can’t use “elisp_library” here for bootstrapping reasons.
+bootstrap(
     name = "compile",
-    srcs = ["compile.el"],
+    src = "compile.el",
+    out = "compile.elc",
+    visibility = ["//visibility:public"],
 )
 
 build_test(
