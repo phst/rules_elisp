@@ -619,6 +619,8 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
     resolved_load_path = []
     source_load_path = []
     for dir in ["/"] + load_path:
+        if not dir:
+            fail("empty directory in load path")
         if paths.is_absolute(dir):
             dir = "." + dir
         else:
