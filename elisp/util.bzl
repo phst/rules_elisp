@@ -206,7 +206,7 @@ def run_emacs(
     Args:
       ctx (ctx): rule context
       arguments (list of strings or Args objects): command-line arguments
-      inputs (list or depset of File objects): input files
+      inputs (depset of File objects): input files
       outputs (list of File objects): output files
       mnemonic (str): one-word action mnemonic
       progress_message (str): progress message
