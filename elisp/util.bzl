@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,16 +21,15 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 def check_relative_filename(filename):
     """Returns `filename`, checking whether it is relative.
 
-    The file name must be relative and represent either the current directory
-    or an entry within the current directory or any of its subdirectories.  In
+    The file name must be relative and represent either the current directory or
+    an entry within the current directory or any of its subdirectories.  In
     other words, it may not point above the current directory.  To specify the
-    current directory, pass an empty string or a single dot (`.`).  This
-    function also checks whether the filename contains special characters.  If
-    the filename is invalid in any way (absolute, containing special
-    characters, or pointing above the current directory), this function calls
-    `fail` with a descriptive error message.  Otherwise, it returns the
-    normalized version of `filename`, using purely lexical simplifications (not
-    resolving symbolic links).
+    current directory, pass a single dot (`.`).  This function also checks
+    whether the filename contains special characters.  If the filename is
+    invalid in any way (absolute, containing special characters, or pointing
+    above the current directory), this function calls `fail` with a descriptive
+    error message.  Otherwise, it returns the normalized version of `filename`,
+    using purely lexical simplifications (not resolving symbolic links).
 
     Args:
       filename (string): the filename to check
@@ -38,6 +37,8 @@ def check_relative_filename(filename):
     Returns:
       the normalized version of the `filename` argument
     """
+    if not filename:
+        fail("empty filename")
     if paths.is_absolute(filename):
         fail("filename {} is absolute".format(filename))
     filename = paths.normalize(filename)
