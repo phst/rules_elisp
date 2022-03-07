@@ -26,7 +26,7 @@ def _merged_manual_impl(ctx):
             executable = ctx.executable._org,
             arguments = ["--", bin.path, org.path],
             mnemonic = "GenOrg",
-            progress_message = "Generating Org file %{output}",
+            progress_message = "Generating Org file {}".format(org.short_path),
         )
         orgs.append(org)
     ctx.actions.run(
@@ -35,7 +35,7 @@ def _merged_manual_impl(ctx):
         executable = ctx.executable._merge,
         arguments = [ctx.outputs.out.path, ctx.file.main.path] + [o.path for o in orgs],
         mnemonic = "MergeManual",
-        progress_message = "Generating merged manual %{output}",
+        progress_message = "Generating merged manual {}".format(ctx.outputs.out.short_path),
     )
 
 merged_manual = rule(
