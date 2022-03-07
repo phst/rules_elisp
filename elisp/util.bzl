@@ -200,8 +200,8 @@ def run_emacs(
     """Runs Emacs with the default toolchain, wrapping it if necessary.
 
     Most parameters are mostly passed directly to ctx.actions.run.  The
-    command-line arguments are prefixed with `--quick --batch` and `--wrap` as
-    necessary.
+    command-line arguments are prefixed with
+    `--quick --batch --no-build-details` and `--wrap` as necessary.
 
     Args:
       ctx (ctx): rule context
@@ -217,7 +217,7 @@ def run_emacs(
     """
     toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
     emacs = toolchain.emacs
-    arguments = ["--quick", "--batch"] + arguments
+    arguments = ["--quick", "--batch", "--no-build-details"] + arguments
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
     inputs = depset(transitive = [inputs, tool_inputs])
     if toolchain.wrap:
