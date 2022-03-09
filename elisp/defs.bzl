@@ -621,6 +621,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
             dir = "." + dir
         else:
             dir = paths.join(ctx.label.package, check_relative_filename(dir))
+        dir = check_relative_filename(dir)
         if len(srcs) > 1:
             # If we have more than one source file, we need to add the
             # respective source directory to the load path for this rule’s
