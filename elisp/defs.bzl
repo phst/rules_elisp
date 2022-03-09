@@ -630,6 +630,12 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
                 paths.join(ctx.label.workspace_root, dir),
             ))
 
+        # At least some of the sources must be reachable from the directory.
+        prefix = "./" if dir == "." else "./" + dir + "/"
+        if not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
+            fail("None of the files [{}] are reachable from load path directory {}"
+                .format(", ".join([src.short_path for src in srcs]), dir))
+
         # If we’re compiling source files from another package, we need to
         # insert the output base directory for this rule.  In that case, we
         # still have to append the workspace-relative directory, so that
