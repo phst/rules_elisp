@@ -133,6 +133,7 @@ cc_binary(
     linkopts = select({
         # Export only symbols that make up the module interface.
         "//constraints:linux": ["-Wl,--exclude-libs,ALL"],
+        "//constraints:windows": ["-Wl,--exclude-libs,ALL"],
         "//constraints:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
