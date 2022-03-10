@@ -18,6 +18,7 @@ import os
 import pathlib
 import platform
 import re
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -28,6 +29,12 @@ class BinaryTest(unittest.TestCase):
     """Example test showing how to work with elisp_binary rules."""
 
     maxDiff = 2000
+
+    def setUp(self) -> None:
+        super().setUp()
+        self._tempdir = pathlib.Path(tempfile.mkdtemp(
+            prefix='bin_test_', dir=os.getenv('TEST_TMPDIR') or None))
+        self.addCleanup(shutil.rmtree, self._tempdir)
 
     def test_run(self) -> None:
         """Runs the test binary and checks its output."""
@@ -43,10 +50,9 @@ class BinaryTest(unittest.TestCase):
         # https://clang.llvm.org/docs/SourceBasedCodeCoverage.html) to a
         # directory/file that’s hopefully writable, to avoid logspam when
         # running with “bazel coverage”.
-        temp_dir = pathlib.Path(tempfile.gettempdir())
         env = dict(run_files.environment(),
-                   GCOV_PREFIX=str(temp_dir),
-                   LLVM_PROFILE_FILE=str(temp_dir / 'bazel.%p.profraw'))
+                   GCOV_PREFIX=str(self._tempdir),
+                   LLVM_PROFILE_FILE=str(self._tempdir / 'bazel.%p.profraw'))
         for var in ('EMACS', 'PATH', 'SYSTEMROOT'):
             value = os.getenv(var)
             if value:
