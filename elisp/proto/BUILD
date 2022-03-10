@@ -121,7 +121,7 @@ cc_binary(
     copts = [
         "-std=c99",
         "-D_XOPEN_SOURCE=600",  # for ‘struct timespec’
-        "-D__USE_MINGW_ANSI_STDIO=1",  # for %zu format specifier
+        # "-D__USE_MINGW_ANSI_STDIO=1",  # for %zu format specifier
         "-fvisibility=hidden",
         "-Werror",
         "-Wall",

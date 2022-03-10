@@ -73,7 +73,6 @@
 #include <errno.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -909,7 +908,7 @@ static struct timespec ExtractTime(struct Context ctx, emacs_value value) {
   time_t low = ExtractRangedInteger(ctx, 0, 0xFFFF, Pop(ctx, &list));
   long picos[2] = {0, 0};
   for (int i = 0; i < 2 && IsNotNil(ctx, list); ++i) {
-    picos[i] = ExtractRangedInteger(ctx, 0, 999999, Pop(ctx, &list));
+    picos[i] = (long)ExtractRangedInteger(ctx, 0, 999999, Pop(ctx, &list));
   }
   if (!Success(ctx)) return null;
   struct timespec spec = {(high << 16) + low,
@@ -1059,28 +1058,6 @@ static void ReplaceChar(struct MutableString string, char from, char to) {
   for (size_t i = 0; i < string.size; ++i) {
     if (string.data[i] == from) string.data[i] = to;
   }
-}
-
-// Formats the arguments, like ‘snprintf’.  Uses the given buffer and returns a
-// view into it.
-ABSL_PRINTF_ATTRIBUTE(4, 5)
-static upb_StringView Format(struct Context ctx, char* buffer, size_t size,
-                             const char* format, ...) {
-  upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
-  va_list ap;
-  va_start(ap, format);
-  int written = vsnprintf(buffer, size, format, ap);
-  va_end(ap);
-  if (written < 0) {
-    Signal1(ctx, kFormatError,
-            MakeString(ctx, upb_StringView_FromString(format)));
-    return null;
-  }
-  if ((size_t)written >= size) {
-    OverflowError1(ctx, MakeInteger(ctx, written));
-    return null;
-  }
-  return upb_StringView_FromDataAndSize(buffer, (size_t)written);
 }
 
 /// Arenas
@@ -3304,19 +3281,14 @@ static emacs_value PrintArray(emacs_env* env, ptrdiff_t nargs,
   size_t print_length = PrintLength(ctx);
   bool abbreviate = array_length > print_length;
   size_t limit = abbreviate ? print_length : array_length;
-  enum { kBufferSize = 0x200 };
-  char buffer[kBufferSize];
-  upb_StringView head =
-      Format(ctx, buffer, kBufferSize, "#<protocol buffer array with %zu %s [",
-             array_length, array_length == 1 ? "element" : "elements");
-  PrincString(ctx, head, stream);
+  PrincLiteral(ctx, "#<protocol buffer array with ", stream);
+  Princ(ctx, MakeUInteger(ctx, array_length), stream);
+  PrincLiteral(ctx, array_length == 1 ? " element [" : " elements [", stream);
   for (size_t i = 0; i < limit; ++i) {
     if (i > 0) PrincLiteral(ctx, " ", stream);
     Prin1Singular(ctx, array.type, upb_Array_Get(array.value, i), stream);
   }
-  upb_StringView tail =
-      Format(ctx, buffer, kBufferSize, "%s]>", abbreviate ? "..." : "");
-  PrincString(ctx, tail, stream);
+  PrincLiteral(ctx, abbreviate ? "...]>" : "]>", stream);
   return Nil(ctx);
 }
 
@@ -3579,12 +3551,9 @@ static emacs_value PrintMap(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   size_t print_length = PrintLength(ctx);
   bool abbreviate = map_length > print_length;
   size_t limit = abbreviate ? print_length : map_length;
-  enum { kBufferSize = 0x200 };
-  char buffer[kBufferSize];
-  upb_StringView head =
-      Format(ctx, buffer, kBufferSize, "#<protocol buffer map with %zu %s [",
-             map_length, map_length == 1 ? "entry" : "entries");
-  PrincString(ctx, head, stream);
+  PrincLiteral(ctx, "#<protocol buffer map with ", stream);
+  Princ(ctx, MakeUInteger(ctx, map_length), stream);
+  PrincLiteral(ctx, map_length == 1 ? " entry [" : " entries [", stream);
   size_t iter = kUpb_Map_Begin;
   size_t i = 0;
   while (i < limit && upb_MapIterator_Next(map.value, &iter)) {
@@ -3597,9 +3566,7 @@ static emacs_value PrintMap(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
     PrincLiteral(ctx, ")", stream);
     ++i;
   }
-  upb_StringView tail =
-      Format(ctx, buffer, kBufferSize, "%s]>", abbreviate ? "..." : "");
-  PrincString(ctx, tail, stream);
+  PrincLiteral(ctx, abbreviate ? "...]>" : "]>", stream);
   return Nil(ctx);
 }
 
