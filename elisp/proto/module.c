@@ -2295,8 +2295,8 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
     }
     // The types are not the same, so we have to convert the entries.  We could
     // special-case this here, but the generic code below works just fine for
-    // this case.  However, in Emacs 27, ‘map-do’ is not yet a generic function,
-    // so be sure to use ‘elisp/proto/do-map’ instead.
+    // this case.  However, in Emacs 26, ‘map-do’ is not yet a generic function,
+    // so call ‘elisp/proto/do-map’ instead.
     map_do = kDoMap;
   }
   // Use generalized map functions to convert from an arbitrary map.
