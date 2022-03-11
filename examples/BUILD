@@ -80,6 +80,7 @@ cc_binary(
     name = "module.so",
     srcs = ["module.c"],
     linkshared = True,
+    win_def_file = "module.def",
     deps = ["//emacs:module_header"],
 )
 
