@@ -698,11 +698,17 @@
      (should (eql seconds -1))
      (should (eql nanos -500000000)))))
 
-(ert-deftest elisp/proto/duration/args-out-of-range ()
-  (should-error (elisp/proto/make-duration (encode-time 0 0 0 0 0 20000 t))
-                :type 'args-out-of-range)
-  (should-error (elisp/proto/make-duration (encode-time 0 0 0 0 0 -20000 t))
-                :type 'args-out-of-range))
+(ert-deftest elisp/proto/duration/args-out-of-range/future ()
+  (cl-flet ((do () (encode-time 0 0 0 0 0 20000 t)))
+    (skip-unless (ignore-errors (do)))  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-duration (do))
+                  :type 'args-out-of-range)))
+
+(ert-deftest elisp/proto/duration/args-out-of-range/past ()
+  (cl-flet ((do () (encode-time 0 0 0 0 0 -20000 t)))
+    (skip-unless (ignore-errors (do)))  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-duration (do))
+                  :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/unknown-field ()
   (let ((duration (google/protobuf/Duration-new)))
