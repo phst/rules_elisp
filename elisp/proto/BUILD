@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_reflection_library")
 
 elisp_library(
@@ -112,7 +113,11 @@ elisp_proto_library(
 
 elisp_library(
     name = "module",
-    srcs = ["module.so"],
+    srcs = select({
+        "//constraints:linux": ["module.so"],
+        "//constraints:macos": ["module.so"],
+        "//constraints:windows": ["module.dll"],
+    }),
 )
 
 cc_binary(
@@ -121,7 +126,6 @@ cc_binary(
     copts = [
         "-std=c99",
         "-D_XOPEN_SOURCE=600",  # for ‘struct timespec’
-        # "-D__USE_MINGW_ANSI_STDIO=1",  # for %zu format specifier
         "-fvisibility=hidden",
         "-Werror",
         "-Wall",
@@ -154,6 +158,15 @@ cc_binary(
         "@upb//:reflection",
         "@upb//:textformat",
     ],
+)
+
+# Make a copy with the proper suffix for Windows.
+copy_file(
+    name = "module_dll",
+    src = "module.so",
+    out = "module.dll",
+    allow_symlink = True,
+    is_executable = False,
 )
 
 elisp_binary(
