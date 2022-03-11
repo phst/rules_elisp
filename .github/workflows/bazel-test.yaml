@@ -54,6 +54,14 @@ jobs:
             mingw-w64-x86_64-toolchain
             mingw-w64-x86_64-xpm-nox
         if: runner.os == 'Windows'
+      - name: Install Visual C++ build tools
+        # Install the 2019 version because Bazel doesn’t support anything newer
+        # in most versions; see
+        # https://docs.bazel.build/versions/5.0.0/install-windows.html#installing-compilers-and-language-runtimes.
+        run: |
+          choco install visualstudio2019buildtools
+          choco install visualstudio2019-workload-vctools
+        if: runner.os == 'Windows'
       - name: Cache Bazel repositories
         uses: actions/cache@v2
         with:
