@@ -26,11 +26,17 @@
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
 #endif
+#ifdef _MSC_VER
+#pragma warning(push, 3)
+#endif
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 #include "elisp/platform.h"
