@@ -102,6 +102,7 @@ def cc_launcher(ctx, cc_toolchain, src, deps):
         cc_toolchain = cc_toolchain,
         srcs = [src],
         compilation_contexts = [info.compilation_context for info in infos],
+        local_defines = defaults.defines,
         user_compile_flags = defaults.copts,
     )
     bin = cc_common.link(
@@ -258,6 +259,7 @@ CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {
         "features": "Default features",
+        "defines": "Local preprocessor definitions",
         "copts": "Default compiler flags",
         "linkopts": "Default linker flags",
     },
@@ -266,6 +268,7 @@ CcDefaultInfo = provider(
 def _cc_defaults_impl(ctx):
     return CcDefaultInfo(
         features = ctx.attr.features,
+        defines = ctx.attr.defines,
         copts = ctx.attr.copts,
         linkopts = ctx.attr.linkopts,
     )
@@ -273,6 +276,7 @@ def _cc_defaults_impl(ctx):
 cc_defaults = rule(
     implementation = _cc_defaults_impl,
     attrs = {
+        "defines": attr.string_list(mandatory = True),
         "copts": attr.string_list(mandatory = True),
         "linkopts": attr.string_list(mandatory = True),
     },

@@ -215,6 +215,9 @@ constraint_value(
 cc_defaults(
     name = "defaults",
     copts = [],
+    defines = [
+        "NO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
+    ],
     linkopts = select({
         "//constraints:macos": [
             # Override the toolchain’s “-undefined dynamic” option so that the
