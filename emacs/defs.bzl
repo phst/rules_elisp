@@ -163,6 +163,7 @@ def _install(ctx, cc_toolchain, source):
     vars = cc_common.create_compile_variables(
         cc_toolchain = cc_toolchain,
         feature_configuration = feature_configuration,
+        preprocessor_defines = depset(defaults.defines),
     )
     cc = cc_common.get_tool_for_action(
         feature_configuration = feature_configuration,
@@ -172,9 +173,7 @@ def _install(ctx, cc_toolchain, source):
         feature_configuration = feature_configuration,
         action_name = C_COMPILE_ACTION_NAME,
         variables = vars,
-    ) + fragment.copts + fragment.conlyopts + defaults.copts + [
-        "-DNO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
-    ]
+    ) + fragment.copts + fragment.conlyopts + defaults.copts
     ldflags = cc_common.get_memory_inefficient_command_line(
         feature_configuration = feature_configuration,
         action_name = CPP_LINK_EXECUTABLE_ACTION_NAME,

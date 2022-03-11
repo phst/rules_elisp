@@ -159,16 +159,17 @@ COPTS = [
     "-pedantic-errors",
     # GCC appears to treat some moves as redundant that are in fact necessary.
     "-Wno-redundant-move",
-    "-D_GNU_SOURCE",
-] + select({
+]
+
+DEFINES = ["_GNU_SOURCE"] + select({
     "//constraints:linux": [],
     "//constraints:macos": [],
     "//constraints:windows": [
-        "-D_UNICODE",
-        "-DUNICODE",
-        "-DSTRICT",
-        "-DNOMINMAX",
-        "-DWIN32_LEAN_AND_MEAN",
+        "_UNICODE",
+        "UNICODE",
+        "STRICT",
+        "NOMINMAX",
+        "WIN32_LEAN_AND_MEAN",
     ],
 })
 
@@ -180,6 +181,8 @@ LAUNCHER_FEATURES = select({
     ],
     "//conditions:default": [],
 })
+
+LAUNCHER_DEFINES = DEFINES
 
 LAUNCHER_COPTS = COPTS + select({
     "//constraints:windows": [
@@ -213,6 +216,7 @@ cc_library(
     copts = COPTS,
     data = [":run_emacs"],
     linkopts = LINKOPTS,
+    local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -238,6 +242,7 @@ cc_library(
     copts = COPTS,
     data = [":run_binary"],
     linkopts = LINKOPTS,
+    local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -262,6 +267,7 @@ cc_test(
     features = LAUNCHER_FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
+    local_defines = LAUNCHER_DEFINES,
     deps = [
         ":binary",
         ":process",
@@ -289,6 +295,7 @@ cc_library(
     copts = COPTS,
     data = [":run_test"],
     linkopts = LINKOPTS,
+    local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -368,6 +375,7 @@ cc_library(
     hdrs = ["process.h"],
     copts = COPTS,
     linkopts = LINKOPTS,
+    local_defines = DEFINES,
     deps = [
         ":platform",
         "@bazel_tools//tools/cpp/runfiles",
@@ -385,6 +393,7 @@ cc_library(
     hdrs = ["platform.h"],
     copts = COPTS,
     linkopts = LINKOPTS,
+    local_defines = DEFINES,
 )
 
 exports_files(
@@ -419,6 +428,7 @@ elisp_binary(
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
+    defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     visibility = ["//visibility:public"],
