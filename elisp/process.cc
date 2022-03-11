@@ -145,7 +145,7 @@ static wchar_t* Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
     std::wcerr << L"empty string" << std::endl;
     std::abort();
   }
-  if (string.find('\0') != string.npos) {
+  if (string.find(L'\0') != string.npos) {
     std::wcerr << string << L" contains null character" << std::endl;
     std::abort();
   }
