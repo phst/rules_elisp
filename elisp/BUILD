@@ -158,6 +158,8 @@ COPTS = select({
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     "//conditions:default": [
+        "-finput-charset=utf-8",
+        "-fexec-charset=utf-8",
         "-fno-exceptions",
         "-Werror",
         "-Wall",
