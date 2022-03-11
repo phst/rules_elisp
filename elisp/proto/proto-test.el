@@ -671,11 +671,17 @@
                    "2022-05-04 03:02:01"))
     (should (eql (setf (elisp/proto/timestamp timestamp) 9999) 9999))))
 
-(ert-deftest elisp/proto/make-timestamp/args-out-of-range ()
-  (should-error (elisp/proto/make-timestamp (encode-time 0 0 0 0 0 20000 t))
-                :type 'args-out-of-range)
-  (should-error (elisp/proto/make-timestamp (encode-time 0 0 0 0 0 -20000 t))
-                :type 'args-out-of-range))
+(ert-deftest elisp/proto/make-timestamp/args-out-of-range/future ()
+  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 20000 t))))
+    (skip-unless timestamp)  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-timestamp timestamp)
+                  :type 'args-out-of-range)))
+
+(ert-deftest elisp/proto/make-timestamp/args-out-of-range/past ()
+  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 -20000 t))))
+    (skip-unless timestamp)  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-timestamp timestamp)
+                  :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/timestamp/time-values ()
   "Check for all known time value forms.  See Info node ‘(elisp) Time of Day’."
@@ -699,15 +705,15 @@
      (should (eql nanos -500000000)))))
 
 (ert-deftest elisp/proto/duration/args-out-of-range/future ()
-  (cl-flet ((do () (encode-time 0 0 0 0 0 20000 t)))
-    (skip-unless (ignore-errors (do)))  ; 32-bit ‘time_t’
-    (should-error (elisp/proto/make-duration (do))
+  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 20000 t))))
+    (skip-unless timestamp)  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-duration timestamp)
                   :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/duration/args-out-of-range/past ()
-  (cl-flet ((do () (encode-time 0 0 0 0 0 -20000 t)))
-    (skip-unless (ignore-errors (do)))  ; 32-bit ‘time_t’
-    (should-error (elisp/proto/make-duration (do))
+  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 -20000 t))))
+    (skip-unless timestamp)  ; 32-bit ‘time_t’
+    (should-error (elisp/proto/make-duration timestamp)
                   :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/unknown-field ()
