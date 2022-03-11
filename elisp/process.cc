@@ -280,10 +280,12 @@ absl::Status ErrorStatus(const std::error_code& code,
 }
 
 #ifdef PHST_RULES_ELISP_WINDOWS
+static constexpr const unsigned int kMaxInt = std::numeric_limits<int>::max();
+
 template <typename... Ts>
 absl::Status WindowsStatus(const absl::string_view function, Ts&&... args) {
   const DWORD error = ::GetLastError();
-  if (error > std::numeric_limits<int>::max()) {
+  if (error > kMaxInt) {
     return absl::InvalidArgumentError(
         absl::StrCat("error code ", error, " too large"));
   }
@@ -465,7 +467,7 @@ absl::StatusOr<int> Run(std::string binary,
   DWORD code;
   success = ::GetExitCodeProcess(process_info.hProcess, &code);
   if (!success) return WindowsStatus("GetExitCodeProcess");
-  return code <= std::numeric_limits<int>::max() ? code : 0xFF;
+  return code <= kMaxInt ? code : 0xFF;
 #else
   const std::vector<char*> argv = Pointers(final_args);
   const std::vector<char*> envp = Pointers(final_env);
