@@ -28,8 +28,8 @@
 (pcase command-line-args-left
   (`(,output ,main . ,includes)
    (setq command-line-args-left nil)
-   (let ((coding-system-for-read 'utf-8)
-         (coding-system-for-write 'utf-8)
+   (let ((coding-system-for-read 'utf-8-unix)
+         (coding-system-for-write 'utf-8-unix)
          (temp-dir (file-name-as-directory (make-temp-file "merge" :dir))))
      (dolist (file includes)
        (copy-file file temp-dir))
