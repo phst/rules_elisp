@@ -50,11 +50,13 @@
 #include <utility>
 #include <vector>
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #pragma GCC diagnostic ignored "-Woverflow"
+#endif
 #include "absl/algorithm/container.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/status/status.h"
@@ -63,7 +65,9 @@
 #include "absl/strings/str_join.h"
 #include "absl/strings/string_view.h"
 #include "tools/cpp/runfiles/runfiles.h"
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 #ifdef __APPLE__
 #include <crt_externs.h>  // for _NSGetEnviron
