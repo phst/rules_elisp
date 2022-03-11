@@ -209,20 +209,6 @@ class Builder:
         args = [str(self._bazel_program), command]
         args.extend(options)
         args.extend(self._cache_options())
-        if self._kernel == 'Windows':
-            # We only support compilation using MinGW-64 at the moment.
-            # Binaries linked with the MinGW-64 linker will depend on a few
-            # libraries that reside in C:\msys64\mingw64\bin, e.g.,
-            # libwinpthread-1.dll or libstdc++-6.dll.  These libraries won’t be
-            # found because C:\msys64\mingw64\bin is normally not in the search
-            # path.  We therefore enforce static linking.  We need to add the
-            # -static option to both the target and host options.  We need to
-            # add it to the compiler option as well, otherwise the option comes
-            # too late, after the -l… options.  Also see
-            # https://stackoverflow.com/a/14033674/.
-            args += ['--compiler=mingw-gcc',
-                     '--linkopt=-static', '--host_linkopt=-static',
-                     '--copt=-static', '--host_copt=-static']
         args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
