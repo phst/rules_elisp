@@ -149,17 +149,26 @@ bzl_library(
 )
 
 # Shared C++ compilation options.
-COPTS = [
-    "-fno-exceptions",
-    "-Werror",
-    "-Wall",
-    "-Wextra",
-    "-Wconversion",
-    "-Wsign-conversion",
-    "-pedantic-errors",
-    # GCC appears to treat some moves as redundant that are in fact necessary.
-    "-Wno-redundant-move",
-]
+COPTS = select({
+    "//constraints:msvc-cl": [
+        "/WX",
+        "/W4",
+        "/utf-8",
+    ],
+    # Assume that something compatible with GCC is the default.  See
+    # https://github.com/bazelbuild/bazel/issues/12707.
+    "//conditions:default": [
+        "-fno-exceptions",
+        "-Werror",
+        "-Wall",
+        "-Wextra",
+        "-Wconversion",
+        "-Wsign-conversion",
+        "-pedantic-errors",
+        # GCC appears to treat some moves as redundant that are in fact necessary.
+        "-Wno-redundant-move",
+    ],
+})
 
 DEFINES = ["_GNU_SOURCE"] + select({
     "//constraints:linux": [],
@@ -174,7 +183,7 @@ DEFINES = ["_GNU_SOURCE"] + select({
 })
 
 LAUNCHER_FEATURES = select({
-    "//constraints:windows": [
+    "//constraints:mingw-gcc": [
         # keep sorted
         "fully_static_link",
         "static_linking_mode",
@@ -185,7 +194,7 @@ LAUNCHER_FEATURES = select({
 LAUNCHER_DEFINES = DEFINES
 
 LAUNCHER_COPTS = COPTS + select({
-    "//constraints:windows": [
+    "//constraints:mingw-gcc": [
         "-mwin32",
         "-municode",
         "-mconsole",
@@ -194,14 +203,15 @@ LAUNCHER_COPTS = COPTS + select({
 })
 
 LINKOPTS = select({
-    "//constraints:windows": [
+    "//constraints:mingw-gcc": [
         "-limagehlp",  # https://stackoverflow.com/a/26513179
     ],
     "//conditions:default": [],
 })
 
 LAUNCHER_LINKOPTS = LINKOPTS + select({
-    "//constraints:windows": [
+    "//constraints:msvc-cl": ["/SUBSYSTEM:CONSOLE"],
+    "//constraints:mingw-gcc": [
         "-mwin32",
         "-municode",
         "-mconsole",
