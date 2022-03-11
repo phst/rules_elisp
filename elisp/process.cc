@@ -330,7 +330,14 @@ absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
   if (!status.ok()) return status;
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4244)
+#endif
   return ToString(string.begin(), string.end());
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 }
 
 static absl::StatusOr<std::string> ToNarrow(const NativeString& string) {
