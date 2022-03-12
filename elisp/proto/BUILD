@@ -27,6 +27,7 @@ elisp_test(
     name = "proto_test",
     size = "small",
     srcs = ["proto-test.el"],
+    flaky = True,  # Bug#46722
     deps = [
         ":any_elisp_proto",
         ":descriptor_elisp_proto",
