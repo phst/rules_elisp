@@ -137,6 +137,7 @@
 #endif
 #ifdef _MSC_VER
 #pragma warning(push, 3)
+#pragma warning(disable: 4090 4244 4334)
 #endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
@@ -2657,10 +2658,10 @@ static void ConvertMessageDescriptors(
     emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), fields);
     Push(ctx, elt, messages_list);
     size_t messages_count;
-    const google_protobuf_DescriptorProto* const* messages =
+    const google_protobuf_DescriptorProto* const* nested_messages =
         google_protobuf_DescriptorProto_nested_type(message, &messages_count);
-    ConvertMessageDescriptors(ctx, View(full_name), messages_count, messages,
-                              messages_list, enums_list);
+    ConvertMessageDescriptors(ctx, View(full_name), messages_count,
+                              nested_messages, messages_list, enums_list);
     size_t enums_count;
     const google_protobuf_EnumDescriptorProto* const* enums =
         google_protobuf_DescriptorProto_enum_type(message, &enums_count);
