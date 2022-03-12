@@ -128,6 +128,7 @@ cc_binary(
             "/std:c11",
             "/WX",
             "/W4",
+            "/wd4100",
             "/utf-8",
         ],
         # Assume that something compatible with GCC is the default.  See
