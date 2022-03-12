@@ -65,7 +65,16 @@
 // operation or if we exhibited incorrect observable behavior otherwise.  See
 // Info node ‘(elisp) Module Nonlocal’.
 
-#if !defined __STDC__ || !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
+// Microsoft Visual C++ mostly supports standard C, but doesn’t define __STDC__
+// unless compiling with /Za, which would disable C99 features.  See
+// https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-160#standard-predefined-macros
+// and
+// https://docs.microsoft.com/en-us/cpp/build/reference/za-ze-disable-language-extensions?view=msvc-160.
+#if !(defined __STDC__ || (defined _MSC_VER && _MSC_VER >= 1930))
+#error this file requires a standards-conformant C compiler
+#endif
+
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
 #error this file requires at least C99
 #endif
 
@@ -119,9 +128,14 @@
 
 #include "emacs-module.h"
 
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#ifdef _MSC_VER
+#pragma warning(push, 3)
+#endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "google/protobuf/any.upb.h"
@@ -140,7 +154,12 @@
 #include "upb/reflection.h"
 #include "upb/text_encode.h"
 #include "upb/upb.h"
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 /// Global variables
 
@@ -859,7 +878,7 @@ static emacs_value MakeTime(struct Context ctx, struct timespec value) {
   // Deal with a negative nanosecond count.
   if (nanos < 0) {
     nanos += 1000000000L;
-    bool overflow = AddOverflowIntmax(ctx, seconds, -1, &seconds);
+    overflow = AddOverflowIntmax(ctx, seconds, -1, &seconds);
     if (overflow) return NULL;
   }
   assert(nanos >= 0L && nanos < 1000000000L);
