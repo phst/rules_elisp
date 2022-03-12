@@ -3494,7 +3494,8 @@ static emacs_value MapPop(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
     ret = OptionalArg(ctx, nargs, args, 2);
   }
   if (!Success(ctx)) return NULL;
-  ABSL_ATTRIBUTE_UNUSED bool deleted = upb_Map_Delete(map.value, key);
+  bool deleted = upb_Map_Delete(map.value, key);
+  (void)deleted;  // avoid compiler warnings
   assert(present == deleted);
   return ret;
 }
