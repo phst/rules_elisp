@@ -125,6 +125,8 @@ cc_binary(
     srcs = ["module.c"],
     copts = select({
         "//constraints:msvc-cl": [
+            "/std:c11",
+            "/Za",
             "/WX",
             "/W4",
             "/utf-8",
