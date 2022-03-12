@@ -173,6 +173,7 @@
   X(kStringp, "stringp")                                         \
   X(kMultibyteStringP, "multibyte-string-p")                     \
   X(kUnibyteStringP, "elisp/proto/unibyte-string-p")             \
+  X(kHexStringP, "elisp/proto/hex-string-p")                     \
   X(kPlistp, "elisp/proto/plistp")                               \
   X(kCons, "cons")                                               \
   X(kList, "list")                                               \
@@ -643,10 +644,11 @@ static uintmax_t ExtractUInteger(struct Context ctx, emacs_value value) {
   assert((size_t)length <= sizeof buffer);
   char* end;
   uintmax_t u = strtoumax(buffer, &end, 16);
-  if (errno == ERANGE || end != buffer + length - 1) {
+  if (errno == ERANGE) {
     ArgsOutOfRange(ctx, value, MakeInteger(ctx, 0),
                    MakeUInteger(ctx, UINTMAX_MAX));
   }
+  if (end != buffer + length - 1) WrongTypeArgument(ctx, kHexStringP, string);
   return u;
 }
 
