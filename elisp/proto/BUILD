@@ -123,22 +123,33 @@ elisp_library(
 cc_binary(
     name = "module.so",
     srcs = ["module.c"],
-    copts = [
-        "-std=c99",
-        "-D_XOPEN_SOURCE=600",  # for ‘struct timespec’
-        "-fvisibility=hidden",
-        "-Werror",
-        "-Wall",
-        "-Wextra",
-        "-Wconversion",
-        "-Wsign-conversion",
-        "-Wvla",
-        "-pedantic-errors",
-    ],
+    copts = select({
+        "//constraints:msvc-cl": [
+            "/WX",
+            "/W4",
+            "/utf-8",
+        ],
+        # Assume that something compatible with GCC is the default.  See
+        # https://github.com/bazelbuild/bazel/issues/12707.
+        "//conditions:default": [
+            "-finput-charset=utf-8",
+            "-fexec-charset=utf-8",
+            "-fno-exceptions",
+            "-std=c99",
+            "-fvisibility=hidden",
+            "-Werror",
+            "-Wall",
+            "-Wextra",
+            "-Wconversion",
+            "-Wsign-conversion",
+            "-Wvla",
+            "-pedantic-errors",
+        ],
+    }),
     linkopts = select({
         # Export only symbols that make up the module interface.
         "//constraints:linux": ["-Wl,--exclude-libs,ALL"],
-        "//constraints:windows": ["-Wl,--exclude-libs,ALL"],
+        "//constraints:windows": [],  # uses ‘win_def_file’
         "//constraints:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
@@ -146,6 +157,10 @@ cc_binary(
         ],
     }),
     linkshared = True,
+    local_defines = [
+        "_XOPEN_SOURCE=600",  # for ‘struct timespec’
+    ],
+    win_def_file = "module.def",
     deps = [
         ":any_upb_proto",
         ":duration_upb_proto",
