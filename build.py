@@ -211,6 +211,7 @@ class Builder:
         args.extend(self._cache_options())
         if self._kernel == 'Windows':
             args.append('--dynamic_mode=off')
+            args.append('--features=-supports_dynamic_linker')
         args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
