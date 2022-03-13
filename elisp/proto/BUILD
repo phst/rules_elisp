@@ -152,7 +152,10 @@ cc_binary(
     linkopts = select({
         # Export only symbols that make up the module interface.
         "//constraints:linux": ["-Wl,--exclude-libs,ALL"],
-        "//constraints:windows": [],  # uses ‘win_def_file’
+        "//constraints:windows": [
+            "/EXPORT:emacs_module_init",
+            "/EXPORT:plugin_is_GPL_compatible,DATA",
+        ],
         "//constraints:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
@@ -163,7 +166,7 @@ cc_binary(
     local_defines = [
         "_XOPEN_SOURCE=600",  # for ‘struct timespec’
     ],
-    win_def_file = "module.def",
+    # win_def_file = "module.def",
     deps = [
         ":any_upb_proto",
         ":duration_upb_proto",
