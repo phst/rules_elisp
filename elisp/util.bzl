@@ -286,6 +286,18 @@ CXXOPTS = select({
 
 CONLYOPTS = []
 
+DEFINES = ["_GNU_SOURCE"] + select({
+    "//constraints:linux": [],
+    "//constraints:macos": [],
+    "//constraints:windows": [
+        "_UNICODE",
+        "UNICODE",
+        "STRICT",
+        "NOMINMAX",
+        "WIN32_LEAN_AND_MEAN",
+    ],
+})
+
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {
