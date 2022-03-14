@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
-load(":util.bzl", "COPTS", "CXXOPTS", "bootstrap", "cc_defaults")
+load(":util.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -147,18 +147,6 @@ bzl_library(
         "//emacs:__pkg__",
     ],
 )
-
-DEFINES = ["_GNU_SOURCE"] + select({
-    "//constraints:linux": [],
-    "//constraints:macos": [],
-    "//constraints:windows": [
-        "_UNICODE",
-        "UNICODE",
-        "STRICT",
-        "NOMINMAX",
-        "WIN32_LEAN_AND_MEAN",
-    ],
-})
 
 LAUNCHER_FEATURES = select({
     "//constraints:mingw-gcc": [
