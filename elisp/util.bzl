@@ -189,6 +189,7 @@ def run_emacs(
         arguments,
         inputs,
         outputs,
+        tags,
         mnemonic,
         progress_message,
         manifest_basename,
@@ -205,6 +206,7 @@ def run_emacs(
       arguments (list of strings or Args objects): command-line arguments
       inputs (depset of File objects): input files
       outputs (list of File objects): output files
+      tags (list of strings): list of rule tags to write into the manifest
       mnemonic (str): one-word action mnemonic
       progress_message (str): progress message
       manifest_basename (str): base name of the manifest file without extension
@@ -234,7 +236,7 @@ def run_emacs(
                     if not f.short_path.startswith("_middlemen/")
                 ],
                 outputFiles = [f.path for f in outputs],
-                tags = ctx.attr.tags,
+                tags = tags,
             ).to_json(),
         )
         arguments = ["--manifest=" + manifest.path, "--"] + arguments
@@ -350,6 +352,7 @@ def _bootstrap_impl(ctx):
         ],
         inputs = depset([src, compile]),
         outputs = [out],
+        tags = ctx.attr.tags,
         mnemonic = "ElispCompile",
         progress_message = "Compiling {}".format(src.short_path),
         manifest_basename = out.basename,

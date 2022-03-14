@@ -80,6 +80,7 @@ def _elisp_library_impl(ctx):
         deps = ctx.attr.deps,
         load_path = ctx.attr.load_path,
         data = ctx.files.data,
+        tags = ctx.attr.tags,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
     return [
@@ -130,6 +131,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
         load_path = [],
         data = None,
+        tags = ctx.rule.attr.tags,
         fatal_warnings = True,
     )
     return [
@@ -687,7 +689,7 @@ to generate other document formats from the output file.""",
     implementation = _elisp_manual_impl,
 )
 
-def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
+def _compile(ctx, srcs, deps, load_path, data, tags, fatal_warnings):
     """Byte-compiles Emacs Lisp source files.
 
     Args:
@@ -698,6 +700,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
       load_path (list of strings): additional load path directories, relative
           to the current package
       data (list of Files): data files to be made available at runtime
+      tags (list of strings): list of rule tags to write into the manifest
       fatal_warnings (bool): whether compilation warnings should be treated as
           errors
 
@@ -890,6 +893,7 @@ def _compile(ctx, srcs, deps, load_path, data, fatal_warnings):
             outputs = [out],
             inputs = inputs,
             arguments = args,
+            tags = tags,
             mnemonic = "ElispCompile",
             progress_message = "Compiling {}".format(src.short_path),
             manifest_basename = out.basename,
@@ -930,6 +934,7 @@ def _binary(ctx, srcs, tags, args, libs):
         deps = ctx.attr.deps,
         load_path = [],
         data = ctx.files.data,
+        tags = ctx.attr.tags,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
     toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
