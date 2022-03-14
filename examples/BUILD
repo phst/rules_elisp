@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_test")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
 
 elisp_library(
     name = "lib_1",
@@ -122,5 +122,29 @@ elisp_binary(
     name = "interactive",
     src = "interactive.el",
     interactive = True,
-    deps = ["//elisp/runfiles"],
+    deps = [
+        ":example_elisp_proto",
+        "//elisp/proto",
+        "//elisp/runfiles",
+    ],
+)
+
+proto_library(
+    name = "example_proto",
+    srcs = ["example.proto"],
+)
+
+elisp_proto_library(
+    name = "example_elisp_proto",
+    deps = [":example_proto"],
+)
+
+elisp_test(
+    name = "proto_test",
+    size = "small",
+    srcs = ["proto-test.el"],
+    deps = [
+        ":example_elisp_proto",
+        "//elisp/proto",
+    ],
 )

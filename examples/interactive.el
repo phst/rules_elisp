@@ -21,6 +21,8 @@
 
 ;;; Code:
 
+(require 'elisp/proto/proto)
 (require 'elisp/runfiles/runfiles)
+(require 'examples/example_proto)
 
 ;;; interactive.el ends here
