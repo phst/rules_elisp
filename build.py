@@ -209,8 +209,6 @@ class Builder:
         args = [str(self._bazel_program), command]
         args.extend(options)
         args.extend(self._cache_options())
-        if self._kernel == 'Windows':
-            args.append('--dynamic_mode=off')
         args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
