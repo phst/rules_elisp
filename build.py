@@ -140,7 +140,7 @@ class Builder:
             os.getenv('USE_BAZEL_VERSION') == 'rolling'):
             # Workaround for
             # https://github.com/bazelbuild/bazel/commit/10d59fedf0273e611732444808c81ce6e01d3889.
-            targets.append('-//elisp/proto/...')
+            targets += ['-//elisp/proto/...', '-//examples/...']
         self._bazel('test', ['//...'], options=['--test_output=errors'],
                     postfix_options=args)
 
