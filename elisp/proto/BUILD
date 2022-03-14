@@ -124,6 +124,7 @@ elisp_library(
 cc_binary(
     name = "module.so",
     srcs = ["module.c"],
+    additional_linker_inputs = [":module.lds"],
     copts = COPTS + CONLYOPTS + select({
         "//constraints:msvc-cl": ["/wd4100"],
         # Assume that something compatible with GCC is the default.  See
@@ -132,7 +133,7 @@ cc_binary(
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
-        "//constraints:linux": ["-Wl,--exclude-libs,ALL"],
+        "//constraints:linux": ["-Wl,--version-script=$(execpath :module.lds)"],
         "//constraints:windows": [],  # uses ‘win_def_file’
         "//constraints:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
