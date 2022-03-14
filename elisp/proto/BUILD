@@ -126,17 +126,10 @@ cc_binary(
     name = "module.so",
     srcs = ["module.c"],
     copts = COPTS + CONLYOPTS + select({
-        "//constraints:msvc-cl": [
-            "/std:c11",
-            "/wd4100",
-        ],
+        "//constraints:msvc-cl": ["/wd4100"],
         # Assume that something compatible with GCC is the default.  See
         # https://github.com/bazelbuild/bazel/issues/12707.
-        "//conditions:default": [
-            "-std=c99",
-            "-fvisibility=hidden",
-            "-Wvla",
-        ],
+        "//conditions:default": ["-fvisibility=hidden"],
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
