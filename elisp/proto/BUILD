@@ -34,7 +34,6 @@ elisp_test(
         ":descriptor_elisp_proto",
         ":duration_elisp_proto",
         ":proto",
-        ":proto2_test_elisp_proto",
         ":test_elisp_proto",
         ":timestamp_elisp_proto",
         ":wrappers_elisp_proto",
@@ -222,16 +221,4 @@ elisp_proto_library(
     name = "test_elisp_proto",
     testonly = 1,
     deps = [":test_proto"],
-)
-
-proto_library(
-    name = "proto2_test_proto",
-    testonly = 1,
-    srcs = ["proto2_test.proto"],
-)
-
-elisp_proto_library(
-    name = "proto2_test_elisp_proto",
-    testonly = 1,
-    deps = [":proto2_test_proto"],
 )
