@@ -37,6 +37,7 @@
 (require 'any_proto)
 (require 'descriptor_proto)
 (require 'duration_proto)
+(require 'elisp/proto/proto2_test_proto)
 (require 'elisp/proto/test_proto)
 (require 'timestamp_proto)
 (require 'wrappers_proto)
@@ -816,10 +817,8 @@
 
 (ert-deftest elisp/proto/parse/missing-required-field ()
   (let ((serialized (elisp/proto/serialize (google/protobuf/StringValue-new))))
-    (should-error
-     (elisp/proto/parse 'google/protobuf/UninterpretedOption/NamePart
-                        serialized)
-     :type 'elisp/proto/missing-required-field)))
+    (should-error (elisp/proto/parse 'elisp/proto/Proto2Test serialized)
+                  :type 'elisp/proto/missing-required-field)))
 
 (ert-deftest elisp/proto/serialize-text/small ()
   (let ((message (elisp/proto/Test-new :packed_int32 [1 2 3])))
