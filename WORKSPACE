@@ -110,27 +110,9 @@ go_register_toolchains(
     version = "1.17.6",
 )
 
-http_archive(
-    name = "com_google_protobuf",
-    sha256 = "9ceef0daf7e8be16cd99ac759271eb08021b53b1c7b6edd399953a76390234cd",
-    strip_prefix = "protobuf-3.19.2/",
-    urls = [
-        "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.19.2.zip",  # 2022-01-05
-    ],
-)
-
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
-
-http_archive(
-    name = "upb",
-    sha256 = "96e4537b2182949b1b85d1ee83af7b073a742a0a6a37e07db014a3e15632851a",
-    strip_prefix = "upb-237e3bf51d27174c8ea3ca5f3a273defa6b14363/",
-    urls = [
-        "https://github.com/protocolbuffers/upb/archive/237e3bf51d27174c8ea3ca5f3a273defa6b14363.zip",  # 2022-03-11
-    ],
-)
 
 load("@upb//bazel:workspace_deps.bzl", "upb_deps")
 
