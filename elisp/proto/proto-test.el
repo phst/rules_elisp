@@ -37,8 +37,7 @@
 (require 'any_proto)
 (require 'descriptor_proto)
 (require 'duration_proto)
-(require 'test_messages_proto2_proto)
-(require 'test_messages_proto3_proto)
+(require 'elisp/proto/test_proto)
 (require 'timestamp_proto)
 (require 'wrappers_proto)
 
@@ -59,25 +58,24 @@
   (should-error (elisp/proto/make 'google/protobuf/Duration :seconds)))
 
 (ert-deftest elisp/proto/make/scalars ()
-  (protobuf_test_messages/proto3/TestAllTypesProto3-new :optional_int32 1
-                                                        :optional_int64 2
-                                                        :optional_uint32 3
-                                                        :optional_uint64 4
-                                                        :optional_float 5
-                                                        :optional_double 6
-                                                        :optional_bool 7
-                                                        :optional_string "8"
-                                                        :optional_bytes "9"))
+  (elisp/proto/Test-new :optional_int32 1
+                        :optional_int64 2
+                        :optional_uint32 3
+                        :optional_uint64 4
+                        :optional_float 5
+                        :optional_double 6
+                        :optional_bool 7
+                        :optional_string "8"
+                        :optional_bytes "9"))
 
 (ert-deftest elisp/proto/field/scalar ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :optional_uint64 123)))
+  (let ((message (elisp/proto/Test-new :optional_uint64 123)))
     (should (eql (elisp/proto/field message 'optional_uint64) 123))
     (should (eql (setf (elisp/proto/field message 'optional_uint64) 456) 456))
     (should (eql (elisp/proto/field message 'optional_uint64) 456))))
 
 (ert-deftest elisp/proto/field/submessage ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new)))
+  (let ((message (elisp/proto/Test-new)))
     (should-not (elisp/proto/has-field message 'optional_nested_message))
     (should-not (elisp/proto/field message 'optional_nested_message))
     (let ((field (elisp/proto/mutable-field message 'optional_nested_message)))
@@ -88,11 +86,10 @@
     (should (elisp/proto/field message 'optional_nested_message))))
 
 (ert-deftest elisp/proto/field/gv-ref ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (field (gv-ref (elisp/proto/field message 'optional_nested_message))))
     (setf (gv-deref field)
-          (protobuf_test_messages/proto3/TestAllTypesProto3/NestedMessage-new
-           :a 123))
+          (elisp/proto/Test/NestedMessage-new :a 123))
     (should (eql (elisp/proto/field
                   (elisp/proto/field message 'optional_nested_message)
                   'a)
@@ -100,31 +97,29 @@
 
 
 (ert-deftest elisp/proto/field/empty-name ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (err (should-error (elisp/proto/field message (intern ""))
                             :type 'wrong-type-argument)))
     (should (equal err `(wrong-type-argument elisp/proto/field-name-p
                                              ,(intern ""))))))
 
 (ert-deftest elisp/proto/mutable-field/submessage ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new)))
+  (let ((message (elisp/proto/Test-new)))
     (should (elisp/proto/message-mutable-p message))
     (let ((field (elisp/proto/mutable-field message 'optional_nested_message)))
       (should field)
       (should (eql (elisp/proto/field field 'a) 0)))
     (let ((field (gv-ref (elisp/proto/field message 'optional_nested_message)))
-          (value
-           (protobuf_test_messages/proto3/TestAllTypesProto3/NestedMessage-new
-            :a 123)))
+          (value (elisp/proto/Test/NestedMessage-new :a 123)))
       (should (eq (setf (gv-deref field) value) value)))))
 
 (ert-deftest elisp/proto/mutable-field/atomic ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new)))
+  (let ((message (elisp/proto/Test-new)))
     (should-error (elisp/proto/mutable-field message 'optional_int32)
                   :type 'elisp/proto/atomic-field)))
 
 (ert-deftest elisp/proto/mutable-field/array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (array (elisp/proto/mutable-field message 'repeated_uint64)))
     (elisp/proto/append-array array 987654)
     (should (eq (elisp/proto/set-field message 'repeated_uint64 array) array))
@@ -132,7 +127,7 @@
     (elisp/proto/set-field message 'repeated_fixed32 [2 3 4])))
 
 (ert-deftest elisp/proto/mutable-field/map ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (map (elisp/proto/mutable-field message 'map_string_bytes)))
     (should (equal (elisp/proto/map-put map "føo" "bar") "bar"))
     (should (eq (elisp/proto/set-field message 'map_string_bytes map) map))
@@ -140,21 +135,18 @@
     (should-error (elisp/proto/set-field message 'map_string_float map))))
 
 (ert-deftest elisp/proto/set-field/wrong-message-type ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (duration (google/protobuf/Duration-new))
          (err (should-error
                (elisp/proto/set-field message 'optional_nested_message duration)
                :type 'wrong-type-argument)))
-    (should
-     (equal err
-            `(wrong-type-argument
-              protobuf_test_messages/proto3/TestAllTypesProto3/NestedMessage-p
-              ,duration)))))
+    (should (equal err `(wrong-type-argument
+                         elisp/proto/Test/NestedMessage-p
+                         ,duration)))))
 
 (ert-deftest elisp/proto/clear-field ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :optional_foreign_message
-                  (protobuf_test_messages/proto3/ForeignMessage-new :c 25))))
+  (let ((message (elisp/proto/Test-new :optional_foreign_message
+                                       (elisp/proto/ForeignMessage-new :c 25))))
     (should (elisp/proto/has-field message 'optional_foreign_message))
     (elisp/proto/clear-field message 'optional_foreign_message)
     (should-not (elisp/proto/has-field message 'optional_foreign_message))))
@@ -172,56 +164,49 @@
                            "{ seconds: 3456 }>")))))
 
 (ert-deftest elisp/proto/array-p ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (elisp/proto/array-p array))
     (should (elisp/proto/array-p mutable-array))))
 
 (ert-deftest elisp/proto/array-mutable-p ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-not (elisp/proto/array-mutable-p array))
     (should (elisp/proto/array-mutable-p mutable-array))))
 
 (ert-deftest elisp/proto/array/seqp ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (seqp array))
     (should (seqp mutable-array))))
 
 (ert-deftest elisp/proto/array/seq-empty-p ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-not (seq-empty-p array))
     (should-not (seq-empty-p mutable-array))))
 
 (ert-deftest elisp/proto/array-length ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (eql (elisp/proto/array-length array) 3))
     (should (eql (elisp/proto/array-length mutable-array) 3))))
 
 (ert-deftest elisp/proto/array/seq-length ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (eql (seq-length array) 3))
     (should (eql (seq-length mutable-array) 3))))
 
 (ert-deftest elisp/proto/array-elt/scalar ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (eql (elisp/proto/array-elt array 1) 2))
@@ -233,17 +218,15 @@
 
 (ert-deftest elisp/proto/array-elt/message ()
   (let* ((message
-          (protobuf_test_messages/proto3/TestAllTypesProto3-new
-           :repeated_foreign_message
-           (list (protobuf_test_messages/proto3/ForeignMessage-new :c 1))))
+          (elisp/proto/Test-new :repeated_foreign_message
+                                (list (elisp/proto/ForeignMessage-new :c 1))))
          (array (elisp/proto/field message 'repeated_foreign_message)))
     (should (eql (elisp/proto/field (seq-elt array 0) 'c) 1))
     (should-error (setf (elisp/proto/field (seq-elt array 0) 'c) 2)
                   :type 'elisp/proto/immutable)))
 
 (ert-deftest elisp/proto/array/seq-elt ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should (eql (seq-elt array 1) 2))
@@ -253,8 +236,7 @@
     (should (eql (seq-elt array 2) 5))))
 
 (ert-deftest elisp/proto/append-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/append-array array 6)
@@ -266,8 +248,7 @@
     (should (eql (seq-elt array 3) 6))))
 
 (ert-deftest elisp/proto/extend-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/extend-array array '(4 5))
@@ -278,20 +259,17 @@
     (should (equal (seq-into-sequence array) [1 2 3 4 5]))))
 
 (ert-deftest elisp/proto/array/seq-into-sequence ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (seq-into-sequence array) [1 2 3]))))
 
 (ert-deftest elisp/proto/make-vector-from-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (elisp/proto/make-vector-from-array array) [1 2 3]))))
 
 (ert-deftest elisp/proto/subarray/success ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32)))
     (pcase-dolist (`(,indices ,result)
                    '(((1 3) [2 3])
@@ -308,8 +286,7 @@
                            result))))))))
 
 (ert-deftest elisp/proto/subarray/args-out-of-range ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32)))
     (pcase-dolist (`(,indices ,error-data)
                    '(((5) (5 -4 4))
@@ -324,8 +301,7 @@
               (should (equal err `(args-out-of-range ,@error-data))))))))))
 
 (ert-deftest elisp/proto/nreverse-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/nreverse-array array)
@@ -334,14 +310,12 @@
     (should (equal (seq-into-sequence array) [3 2 1]))))
 
 (ert-deftest elisp/proto/array/seq-reverse ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (seq-into-sequence (seq-reverse array)) [3 2 1]))))
 
 (ert-deftest elisp/proto/sort-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [4 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [4 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/sort-array array #'<)
@@ -350,20 +324,17 @@
     (should (equal (seq-into-sequence array) [2 3 4]))))
 
 (ert-deftest elisp/proto/array/seq-sort ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [4 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [4 2 3]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (seq-into-sequence (seq-sort #'> array)) [4 3 2]))))
 
 (ert-deftest elisp/proto/array/seq-map ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (seq-map #'1+ array) '(2 3 4)))))
 
 (ert-deftest elisp/proto/copy-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (copy (elisp/proto/copy-array array)))
     (should (elisp/proto/array-p copy))
@@ -373,8 +344,7 @@
     (should (eql (elisp/proto/array-elt array 1) 2))))
 
 (ert-deftest elisp/proto/array/seq-copy ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (copy (seq-copy array)))
     (should (elisp/proto/array-p copy))
@@ -384,8 +354,7 @@
     (should (eql (elisp/proto/array-elt array 1) 2))))
 
 (ert-deftest elisp/proto/array-pop ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/array-pop array 1) :type 'elisp/proto/immutable)
@@ -402,22 +371,19 @@
                    ((1 1) [1 2 3 4])
                    ((0) [])))
     (ert-info ((prin1-to-string indices) :prefix "Indices: ")
-      (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                       :repeated_int32 [1 2 3 4]))
+      (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
              (array (elisp/proto/mutable-field message 'repeated_int32)))
         (apply #'elisp/proto/array-delete array indices)
         (should (equal (seq-into-sequence array) result))))))
 
 (ert-deftest elisp/proto/array-delete/immutable ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should-error (elisp/proto/array-delete array 1 2)
                   :type 'elisp/proto/immutable)))
 
 (ert-deftest elisp/proto/array-delete/args-out-of-range ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/mutable-field message 'repeated_int32)))
     (pcase-dolist (`(,indices ,error-data)
                    '(((5) (5 -4 4))
@@ -431,8 +397,7 @@
           (should (equal err `(args-out-of-range ,@error-data))))))))
 
 (ert-deftest elisp/proto/clear-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/clear-array array) :type 'elisp/proto/immutable)
@@ -441,8 +406,7 @@
     (should (seq-empty-p array))))
 
 (ert-deftest elisp/proto/replace-array ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32))
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/replace-array array '(5 6))
@@ -452,38 +416,34 @@
     (should (equal (seq-into-sequence array) [5 6]))))
 
 (ert-deftest elisp/proto/print-array/scalar ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (cl-prin1-to-string array)
                    "#<protocol buffer array with 4 elements [1 2 3 4]>"))))
 
 (ert-deftest elisp/proto/print-array/submessage ()
   (let* ((message
-          (protobuf_test_messages/proto3/TestAllTypesProto3-new
-           :repeated_foreign_message
-           (list (protobuf_test_messages/proto3/ForeignMessage-new :c 1))))
+          (elisp/proto/Test-new :repeated_foreign_message
+                                (list (elisp/proto/ForeignMessage-new :c 1))))
          (array (elisp/proto/field message 'repeated_foreign_message)))
     (should (equal (cl-prin1-to-string array)
                    "#<protocol buffer array with 1 element [{ c: 1 }]>"))))
 
 (ert-deftest elisp/proto/array/cl-prin1-to-string ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (cl-prin1-to-string array)
                    "#<protocol buffer array with 4 elements [1 2 3 4]>"))))
 
 (ert-deftest elisp/proto/array/cl-prin1-to-string/print-length ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :repeated_int32 [1 2 3 4]))
+  (let* ((message (elisp/proto/Test-new :repeated_int32 [1 2 3 4]))
          (array (elisp/proto/field message 'repeated_int32))
          (print-length 2))
     (should (equal (cl-prin1-to-string array)
                    "#<protocol buffer array with 4 elements [1 2...]>"))))
 
 (ert-deftest elisp/proto/map-p ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (elisp/proto/map-p map))
@@ -491,7 +451,7 @@
 
 (ert-deftest elisp/proto/map/mapp ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (mapp map))
@@ -499,21 +459,21 @@
 
 (ert-deftest elisp/proto/map/map-empty-p ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (map-empty-p map))
     (should (map-empty-p mutable-map))))
 
 (ert-deftest elisp/proto/map-mutable-p ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-not (elisp/proto/map-mutable-p map))
     (should (elisp/proto/map-mutable-p mutable-map))))
 
 (ert-deftest elisp/proto/map-get ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-not (elisp/proto/map-get map 234))
@@ -525,7 +485,7 @@
 
 (ert-deftest elisp/proto/map/map-elt ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-not (map-elt map 123))
@@ -534,7 +494,7 @@
     (should (eql (map-elt map 123) 4.5))))
 
 (ert-deftest elisp/proto/map-put ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/map-put map 234 -1.2)
@@ -546,7 +506,7 @@
 
 (ert-deftest elisp/proto/map/map-put! ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (map-put! map 123 4.5) :type 'map-not-inplace)
@@ -555,7 +515,7 @@
     (should (eql (map-elt map 123) 4.5))))
 
 (ert-deftest elisp/proto/map-contains-key ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-not (elisp/proto/map-contains-key map 234))
@@ -564,7 +524,7 @@
 
 (ert-deftest elisp/proto/map/map-contains-key ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new))
+  (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-not (map-contains-key map 123))
@@ -572,8 +532,8 @@
     (should (map-contains-key map 123))))
 
 (ert-deftest elisp/proto/map-delete ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . -1.75) (-4 . 2.0))))
+  (let* ((message
+          (elisp/proto/Test-new :map_int32_float '((123 . -1.75) (-4 . 2.0))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/map-delete map 123) :type 'elisp/proto/immutable)
@@ -585,8 +545,8 @@
     (should (eql (elisp/proto/map-length map) 1))))
 
 (ert-deftest elisp/proto/map-pop ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . -1.75) (-4 . 2.0))))
+  (let* ((message
+          (elisp/proto/Test-new :map_int32_float '((123 . -1.75) (-4 . 2.0))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/map-pop map 123) :type 'elisp/proto/immutable)
@@ -599,8 +559,7 @@
     (should (eql (elisp/proto/map-length map) 1))))
 
 (ert-deftest elisp/proto/clear-map ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5))))
+  (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/clear-map map) :type 'elisp/proto/immutable)
@@ -608,8 +567,8 @@
     (should (eql (elisp/proto/map-length map) 0))))
 
 (ert-deftest elisp/proto/update-map ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5) (5 . 7))))
+  (let* ((message
+          (elisp/proto/Test-new :map_int32_float '((123 . 4.5) (5 . 7))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/update-map map '((-77 . 3) (5 . 9.5)))
@@ -622,8 +581,8 @@
                      '((-77 . 3.0) (5 . 9.5) (123 . 4.5)))))))
 
 (ert-deftest elisp/proto/replace-map ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5) (5 . 7))))
+  (let* ((message
+          (elisp/proto/Test-new :map_int32_float '((123 . 4.5) (5 . 7))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
     (should-error (elisp/proto/replace-map map '((-77 . 3) (5 . 9.5)))
@@ -637,24 +596,21 @@
 
 (ert-deftest elisp/proto/map/map-apply ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5))))
+  (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (equal (map-apply (lambda (key value) (list (1+ key) value)) map)
                    '((124 4.5))))))
 
 (ert-deftest elisp/proto/map/cl-prin1-to-string ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5))))
+  (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (equal (cl-prin1-to-string map)
                    "#<protocol buffer map with 1 entry [(123 4.5)]>"))))
 
 (ert-deftest elisp/proto/map/map-copy ()
   (skip-unless (>= emacs-major-version 27))
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :map_int32_float '((123 . 4.5))))
+  (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float))
          (copy (map-copy mutable-map)))
@@ -727,26 +683,24 @@
                   :type 'elisp/proto/no-presence)))
 
 (ert-deftest elisp/proto/pcase ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :optional_int32 123)))
+  (let ((message (elisp/proto/Test-new :optional_int32 123)))
     (setf (elisp/proto/field
            (elisp/proto/mutable-field message 'optional_foreign_message) 'c)
           678)
     (pcase-exhaustive message
-      ((elisp/proto protobuf_test_messages/proto3/TestAllTypesProto3
+      ((elisp/proto elisp/proto/Test
                     optional_int32 (optional_string str)
                     optional_nested_message
                     (optional_foreign_message
-                     (elisp/proto protobuf_test_messages/proto3/ForeignMessage
-                                  c)))
+                     (elisp/proto elisp/proto/ForeignMessage c)))
        (should (eql optional_int32 123))
        (should (equal str ""))
        (should-not optional_nested_message)
        (should (eql c 678))))))
 
 (ert-deftest elisp/proto/pcase/defaults ()
-  (pcase (protobuf_test_messages/proto3/TestAllTypesProto3-new)
-    ((elisp/proto protobuf_test_messages/proto3/TestAllTypesProto3
+  (pcase (elisp/proto/Test-new)
+    ((elisp/proto elisp/proto/Test
                   (optional_int32 i32) (optional_int64 i64)
                   (optional_fixed32 u32) (optional_fixed64 u64)
                   (optional_float float) (optional_double double)
@@ -827,8 +781,7 @@
   (skip-unless (>= emacs-major-version 27))  ; needs big integer support
   (let* ((too-large (lsh 1 64))  ; no literals to keep Emacs 26 working
          (max (1- too-large))
-         (message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :optional_uint64 max)))
+         (message (elisp/proto/Test-new :optional_uint64 max)))
     (should (eql (elisp/proto/field message 'optional_uint64) max))
     (let ((err (should-error
                 (cl-incf (elisp/proto/field message 'optional_uint64))
@@ -836,23 +789,19 @@
       (should (equal err `(args-out-of-range ,too-large 0 ,max))))))
 
 (ert-deftest elisp/proto/serialize-parse ()
-  (let* ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                   :packed_int32 [1 2 3]))
+  (let* ((message (elisp/proto/Test-new :packed_int32 [1 2 3]))
          (serialized (elisp/proto/serialize message)))
     (should (stringp serialized))
     (should-not (multibyte-string-p serialized))
     (should-not (string-empty-p serialized))
-    (let ((parsed (elisp/proto/parse
-                   'protobuf_test_messages/proto3/TestAllTypesProto3
-                   serialized)))
-      (should (protobuf_test_messages/proto3/TestAllTypesProto3-p parsed))
+    (let ((parsed (elisp/proto/parse 'elisp/proto/Test serialized)))
+      (should (elisp/proto/Test-p parsed))
       (let ((field (elisp/proto/mutable-field parsed 'packed_int32)))
         (should (equal (seq-into field 'vector) [1 2 3]))
         (should (eql (setf (seq-elt field 1) 77) 77))))
     ;; Check that parsing has created a new message.
     (pcase-exhaustive message
-      ((elisp/proto protobuf_test_messages/proto3/TestAllTypesProto3
-                    packed_int32)
+      ((elisp/proto elisp/proto/Test packed_int32)
        (should (equal (seq-into packed_int32 'vector) [1 2 3]))))))
 
 (ert-deftest elisp/proto/parse/malformed ()
@@ -873,8 +822,7 @@
      :type 'elisp/proto/missing-required-field)))
 
 (ert-deftest elisp/proto/serialize-text/small ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :packed_int32 [1 2 3])))
+  (let ((message (elisp/proto/Test-new :packed_int32 [1 2 3])))
     (should (equal (elisp/proto/serialize-text message :deterministic t)
                    (concat "packed_int32: 1\n"
                            "packed_int32: 2\n"
@@ -892,45 +840,39 @@
 (ert-deftest elisp/proto/serialize-text/large ()
   ;; Make the message large enough to trigger reallocation in
   ;; SerializeMessageText.
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :packed_int32 (make-vector #x2000 1))))
+  (let ((message (elisp/proto/Test-new :packed_int32 (make-vector #x2000 1))))
     (should (equal (elisp/proto/serialize-text message)
                    (string-join (make-vector #x2000 "packed_int32: 1\n"))))))
 
 (ert-deftest elisp/proto/parse-json ()
-  (pcase (elisp/proto/parse-json
-          'protobuf_test_messages/proto3/TestAllTypesProto3
-          "{\"packedInt32\":[1,2,3]}")
-    ((elisp/proto protobuf_test_messages/proto3/TestAllTypesProto3 packed_int32)
+  (pcase (elisp/proto/parse-json 'elisp/proto/Test "{\"packedInt32\":[1,2,3]}")
+    ((elisp/proto elisp/proto/Test packed_int32)
      (should (equal (seq-into packed_int32 'vector) [1 2 3])))
     (otherwise (ert-fail otherwise))))
 
 (ert-deftest elisp/proto/parse-json/discard-unknown ()
-  (pcase (elisp/proto/parse-json
-          'protobuf_test_messages/proto3/TestAllTypesProto3
-          "{\"packedInt32\":[1,2,3],\"unknown\":8765}"
-          :discard-unknown t)
-    ((elisp/proto protobuf_test_messages/proto3/TestAllTypesProto3 packed_int32)
+  (pcase (elisp/proto/parse-json 'elisp/proto/Test
+                                 "{\"packedInt32\":[1,2,3],\"unknown\":8765}"
+                                 :discard-unknown t)
+    ((elisp/proto elisp/proto/Test packed_int32)
      (should (equal (seq-into packed_int32 'vector) [1 2 3])))
     (otherwise (ert-fail otherwise))))
 
 (ert-deftest elisp/proto/parse-json/unknown ()
   (should-error
-   (elisp/proto/parse-json 'protobuf_test_messages/proto3/TestAllTypesProto3
+   (elisp/proto/parse-json 'elisp/proto/Test
                            "{\"packedInt32\":[1,2,3],\"unknown\":8765}")
    :type 'elisp/proto/json-parse-error))
 
 (ert-deftest elisp/proto/serialize-json/small ()
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :packed_int32 [1 2 3])))
+  (let ((message (elisp/proto/Test-new :packed_int32 [1 2 3])))
     (should (equal (elisp/proto/serialize-json message)
                    "{\"packedInt32\":[1,2,3]}"))))
 
 (ert-deftest elisp/proto/serialize-json/large ()
   ;; Make the message large enough to trigger reallocation in
   ;; SerializeMessageJson.
-  (let ((message (protobuf_test_messages/proto3/TestAllTypesProto3-new
-                  :packed_int32 (make-vector #x2000 1))))
+  (let ((message (elisp/proto/Test-new :packed_int32 (make-vector #x2000 1))))
     (should (equal (elisp/proto/serialize-json message)
                    (concat "{\"packedInt32\":["
                            (string-join (make-vector #x2000 "1") ",")

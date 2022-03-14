@@ -34,8 +34,7 @@ elisp_test(
         ":descriptor_elisp_proto",
         ":duration_elisp_proto",
         ":proto",
-        ":test_messages_proto2_elisp_proto",
-        ":test_messages_proto3_elisp_proto",
+        ":test_elisp_proto",
         ":timestamp_elisp_proto",
         ":wrappers_elisp_proto",
     ],
@@ -211,12 +210,12 @@ upb_proto_library(
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
-elisp_proto_library(
-    name = "test_messages_proto2_elisp_proto",
-    deps = ["@com_google_protobuf//:test_messages_proto2_proto"],
+proto_library(
+    name = "test_proto",
+    srcs = ["test.proto"],
 )
 
 elisp_proto_library(
-    name = "test_messages_proto3_elisp_proto",
-    deps = ["@com_google_protobuf//:test_messages_proto3_proto"],
+    name = "test_elisp_proto",
+    deps = [":test_proto"],
 )

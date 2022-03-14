@@ -1,0 +1,55 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package elisp.proto;
+
+message Test {
+  bool optional_bool = 1;
+  int32 optional_int32 = 2;
+  uint32 optional_uint32 = 3;
+  fixed32 optional_fixed32 = 4;
+  int64 optional_int64 = 5;
+  uint64 optional_uint64 = 6;
+  fixed64 optional_fixed64 = 7;
+  float optional_float = 8;
+  double optional_double = 9;
+  string optional_string = 10;
+  string optional_bytes = 11;
+
+  message NestedMessage {
+    int32 a = 1;
+  }
+
+  NestedMessage optional_nested_message = 12;
+  ForeignMessage optional_foreign_message = 13;
+
+  repeated int32 repeated_int32 = 14;
+  repeated uint32 repeated_uint32 = 15;
+  repeated fixed32 repeated_fixed32 = 16;
+  repeated uint64 repeated_uint64 = 17;
+  repeated float repeated_float = 18;
+  repeated ForeignMessage repeated_foreign_message = 19;
+
+  repeated int32 packed_int32 = 20 [packed=true];
+
+  map<int32, float> map_int32_float = 21;
+  map<string, string> map_string_string = 22;
+  map<string, bytes> map_string_bytes = 23;
+}
+
+message ForeignMessage {
+  int32 c = 1;
+}
