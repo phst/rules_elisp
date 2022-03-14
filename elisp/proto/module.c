@@ -776,7 +776,7 @@ static struct MutableString ExtractString(struct Context ctx, upb_alloc* alloc,
 static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
 #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
   if (IsEmacs28(ctx)) {
-    return env->make_unibyte_string(env, data, size);
+    return ctx.env->make_unibyte_string(ctx.env, value.data, value.size);
   }
 #endif
   if (value.size > PTRDIFF_MAX) {
