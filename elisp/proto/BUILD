@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
-load("//elisp:util.bzl", "CONLYOPTS", "COPTS")
+load("//elisp:util.bzl", "CONLYOPTS", "COPTS", "DEFINES")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_reflection_library")
 
@@ -149,7 +149,7 @@ cc_binary(
         ],
     }),
     linkshared = True,
-    local_defines = [
+    local_defines = DEFINES + [
         "_XOPEN_SOURCE=600",  # for ‘struct timespec’
     ],
     win_def_file = "module.def",
