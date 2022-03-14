@@ -156,10 +156,20 @@ VALUES is a list of (NAME NUMBER) pairs."
            (dolist (enum enums)
              (cl-destructuring-bind (full-name . values) enum
                (elisp/proto/generate-enum full-name values)))
-           (prin1 `(provide ',(intern feature))) (terpri)
-           (insert ";;; " output-name " ends here\n"))))))
+           (prin1 `(provide ',(intern feature))) (terpri) (terpri)
+           (insert ";; Local Variables:\n"
+                   ;; Generated docstrings can be overly long if they contain
+                   ;; lengthy message names.  Don’t issue byte-compiler warnings
+                   ;; for them.
+                   ";; byte-compile-docstring-max-column: 500\n"
+                   ";; End:\n\n"
+                   ";;; " output-name " ends here\n"))))))
   (_ (user-error (concat "Usage: elisp/proto/generate "
                          "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE "
                          "DEPENDENCIES..."))))
+
+;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
+;; Info node ‘(emacs) Specifying File Variables’.
+
 
 ;;; generate.el ends here
