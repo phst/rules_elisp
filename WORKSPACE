@@ -125,10 +125,10 @@ protobuf_deps()
 
 http_archive(
     name = "upb",
-    sha256 = "4778f3b460a1566c90a613efce2ecf0a402d5f8bb8c3724df59cd6b1818b5e6c",
-    strip_prefix = "upb-721b077724bed8b4146f3235a95be4071f38b7a0/",
+    sha256 = "96e4537b2182949b1b85d1ee83af7b073a742a0a6a37e07db014a3e15632851a",
+    strip_prefix = "upb-237e3bf51d27174c8ea3ca5f3a273defa6b14363/",
     urls = [
-        "https://github.com/protocolbuffers/upb/archive/721b077724bed8b4146f3235a95be4071f38b7a0.zip",  # 2022-03-09
+        "https://github.com/protocolbuffers/upb/archive/237e3bf51d27174c8ea3ca5f3a273defa6b14363.zip",  # 2022-03-11
     ],
 )
 
