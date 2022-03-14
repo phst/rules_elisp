@@ -133,7 +133,10 @@ cc_binary(
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
-        "//constraints:linux": ["-Wl,--version-script=$(execpath :module.lds)"],
+        "//constraints:linux": [
+            "-Wl,--version-script=$(execpath :module.lds)",
+            "-Wl,--no-undefined",
+        ],
         "//constraints:windows": [],  # uses ‘win_def_file’
         "//constraints:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
