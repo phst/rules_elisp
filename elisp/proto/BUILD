@@ -212,10 +212,12 @@ upb_proto_reflection_library(
 
 proto_library(
     name = "test_proto",
+    testonly = 1,
     srcs = ["test.proto"],
 )
 
 elisp_proto_library(
     name = "test_elisp_proto",
+    testonly = 1,
     deps = [":test_proto"],
 )
