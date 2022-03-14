@@ -184,10 +184,6 @@ def cpp_int(int):
         fail("integer {} out of range".format(int))
     return str(int)
 
-# Note: Toolchain names need to be fully qualified, otherwise external
-# workspaces won’t find them.
-TOOLCHAIN_TYPE = "@phst_rules_elisp//elisp:toolchain_type"
-
 def run_emacs(
         ctx,
         arguments,
