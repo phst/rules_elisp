@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
-load(":util.bzl", "bootstrap", "cc_defaults")
+load(":util.bzl", "COPTS", "bootstrap", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -147,30 +147,6 @@ bzl_library(
         "//emacs:__pkg__",
     ],
 )
-
-# Shared C++ compilation options.
-COPTS = select({
-    "//constraints:msvc-cl": [
-        "/WX",
-        "/W4",
-        "/utf-8",
-    ],
-    # Assume that something compatible with GCC is the default.  See
-    # https://github.com/bazelbuild/bazel/issues/12707.
-    "//conditions:default": [
-        "-finput-charset=utf-8",
-        "-fexec-charset=utf-8",
-        "-fno-exceptions",
-        "-Werror",
-        "-Wall",
-        "-Wextra",
-        "-Wconversion",
-        "-Wsign-conversion",
-        "-pedantic-errors",
-        # GCC appears to treat some moves as redundant that are in fact necessary.
-        "-Wno-redundant-move",
-    ],
-})
 
 DEFINES = ["_GNU_SOURCE"] + select({
     "//constraints:linux": [],

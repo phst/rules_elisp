@@ -251,6 +251,30 @@ def run_emacs(
         input_manifests = input_manifests,
     )
 
+# Shared C++ compilation options.
+COPTS = select({
+    "//constraints:msvc-cl": [
+        "/WX",
+        "/W4",
+        "/utf-8",
+    ],
+    # Assume that something compatible with GCC is the default.  See
+    # https://github.com/bazelbuild/bazel/issues/12707.
+    "//conditions:default": [
+        "-finput-charset=utf-8",
+        "-fexec-charset=utf-8",
+        "-fno-exceptions",
+        "-Werror",
+        "-Wall",
+        "-Wextra",
+        "-Wconversion",
+        "-Wsign-conversion",
+        "-pedantic-errors",
+        # GCC appears to treat some moves as redundant that are in fact necessary.
+        "-Wno-redundant-move",
+    ],
+})
+
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {
