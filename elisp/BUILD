@@ -149,39 +149,21 @@ bzl_library(
 )
 
 LAUNCHER_FEATURES = select({
-    "//constraints:mingw-gcc": [
-        # keep sorted
-        "fully_static_link",
-        "static_linking_mode",
-    ],
     "//conditions:default": [],
 })
 
 LAUNCHER_DEFINES = DEFINES
 
 LAUNCHER_COPTS = COPTS + CXXOPTS + select({
-    "//constraints:mingw-gcc": [
-        "-mwin32",
-        "-municode",
-        "-mconsole",
-    ],
     "//conditions:default": [],
 })
 
 LINKOPTS = select({
-    "//constraints:mingw-gcc": [
-        "-limagehlp",  # https://stackoverflow.com/a/26513179
-    ],
     "//conditions:default": [],
 })
 
 LAUNCHER_LINKOPTS = LINKOPTS + select({
     "//constraints:msvc-cl": ["/SUBSYSTEM:CONSOLE"],
-    "//constraints:mingw-gcc": [
-        "-mwin32",
-        "-municode",
-        "-mconsole",
-    ],
     "//conditions:default": [],
 })
 

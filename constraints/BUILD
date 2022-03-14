@@ -31,13 +31,3 @@ config_setting(
     name = "msvc-cl",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
 )
-
-config_setting(
-    name = "clang-cl",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "clang-cl"},
-)
-
-config_setting(
-    name = "mingw-gcc",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "mingw-gcc"},
-)
