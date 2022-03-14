@@ -200,13 +200,13 @@ upb_proto_reflection_library(
     deps = ["@com_google_protobuf//:duration_proto"],
 )
 
-upb_proto_reflection_library(
-    name = "timestamp_upbdefs_proto",
+upb_proto_library(
+    name = "timestamp_upb_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
-upb_proto_library(
-    name = "timestamp_upb_proto",
+upb_proto_reflection_library(
+    name = "timestamp_upbdefs_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
