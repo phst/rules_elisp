@@ -104,6 +104,7 @@ def _elisp_library_impl(ctx):
     ]
 
 def _elisp_proto_aspect_impl(target, ctx):
+    """Aspect implementation for the “elisp_proto_aspect” aspect."""
     info = target[ProtoInfo]
     deps = depset(transitive = [
         depset(dep[EmacsLispInfo].source_files)
@@ -150,10 +151,14 @@ def _elisp_proto_aspect_impl(target, ctx):
     ]
 
 def _elisp_proto_feature(file):
+    """Returns the Emacs feature name for a protocol buffer library."""
     stem, ext = paths.split_extension(file.short_path)
     if ext != ".el":
         fail("invalid extension {}".format(ext))
     if stem.startswith("../"):
+        # If the file is from another workspace, its short_path is of the form
+        # “../WORKSPACE/PACKAGE/FILE.el”.  Strip off the leading “../WORKSPACE”
+        # part.
         stem = stem[3:]
         ws, sep, stem = stem.partition("/")
         if not ws or not sep:
