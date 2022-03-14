@@ -284,7 +284,15 @@ CXXOPTS = select({
     ],
 })
 
-CONLYOPTS = []
+CONLYOPTS = select({
+    "//constraints:msvc-cl": ["/std:c11"],
+    # Assume that something compatible with GCC is the default.  See
+    # https://github.com/bazelbuild/bazel/issues/12707.
+    "//conditions:default": [
+        "-std=c99",
+        "-Wvla",
+    ],
+})
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
