@@ -209,6 +209,10 @@ class Builder:
         args = [str(self._bazel_program), command]
         args.extend(options)
         args.extend(self._cache_options())
+        if self._kernel == 'Windows':
+            args.append('--dynamic_mode=off')
+            #args.append('--features=-supports_dynamic_linker')
+            args.append('--features=windows_export_all_symbols')
         args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
