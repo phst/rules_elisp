@@ -135,12 +135,6 @@ class Builder:
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
     def _test(self, *args: str) -> None:
-        targets = ['//...']
-        if (self._kernel == 'Windows' and
-            os.getenv('USE_BAZEL_VERSION') == 'rolling'):
-            # Workaround for
-            # https://github.com/bazelbuild/bazel/commit/10d59fedf0273e611732444808c81ce6e01d3889.
-            targets.append('-//elisp/proto/...')
         self._bazel('test', ['//...'], options=['--test_output=errors'],
                     postfix_options=args)
 
