@@ -187,7 +187,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (put #'cl-define-compiler-macro 'edebug-form-spec
                `(&define name
                          ([&optional "&whole" arg]
-                          ,@(car (elisp/ert/edebug--get-spec 'cl-macro-list)))
+                          ,@(car
+                             (or (get 'cl-macro-list 'edebug-elem-spec)
+                                 (elisp/ert/edebug--get-spec 'cl-macro-list))))
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
