@@ -15,7 +15,7 @@
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//elisp:util.bzl", "CONLYOPTS", "COPTS", "DEFINES")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@upb//bazel:upb_proto_library.bzl", "upb_proto_reflection_library")
+load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 
 elisp_library(
     name = "proto",
@@ -148,8 +148,11 @@ cc_binary(
     win_def_file = "module.def",
     deps = [
         ":any_upb_proto",
+        ":any_upbdefs_proto",
         ":duration_upb_proto",
+        ":duration_upbdefs_proto",
         ":timestamp_upb_proto",
+        ":timestamp_upbdefs_proto",
         "//emacs:module_header",
         "@com_google_absl//absl/base:core_headers",
         "@upb",
@@ -178,17 +181,32 @@ elisp_binary(
     deps = [":proto"],
 )
 
-upb_proto_reflection_library(
+upb_proto_library(
     name = "any_upb_proto",
     deps = ["@com_google_protobuf//:any_proto"],
 )
 
 upb_proto_reflection_library(
+    name = "any_upbdefs_proto",
+    deps = ["@com_google_protobuf//:any_proto"],
+)
+
+upb_proto_library(
     name = "duration_upb_proto",
     deps = ["@com_google_protobuf//:duration_proto"],
 )
 
 upb_proto_reflection_library(
+    name = "duration_upbdefs_proto",
+    deps = ["@com_google_protobuf//:duration_proto"],
+)
+
+upb_proto_reflection_library(
+    name = "timestamp_upbdefs_proto",
+    deps = ["@com_google_protobuf//:timestamp_proto"],
+)
+
+upb_proto_library(
     name = "timestamp_upb_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
