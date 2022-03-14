@@ -270,10 +270,21 @@ COPTS = select({
         "-Wconversion",
         "-Wsign-conversion",
         "-pedantic-errors",
-        # GCC appears to treat some moves as redundant that are in fact necessary.
+    ],
+})
+
+CXXOPTS = select({
+    "//constraints:msvc-cl": [],
+    # Assume that something compatible with GCC is the default.  See
+    # https://github.com/bazelbuild/bazel/issues/12707.
+    "//conditions:default": [
+        # GCC appears to treat some moves as redundant that are in fact
+        # necessary.
         "-Wno-redundant-move",
     ],
 })
+
+CONLYOPTS = []
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",

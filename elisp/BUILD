@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
-load(":util.bzl", "COPTS", "bootstrap", "cc_defaults")
+load(":util.bzl", "COPTS", "CXXOPTS", "bootstrap", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -171,7 +171,7 @@ LAUNCHER_FEATURES = select({
 
 LAUNCHER_DEFINES = DEFINES
 
-LAUNCHER_COPTS = COPTS + select({
+LAUNCHER_COPTS = COPTS + CXXOPTS + select({
     "//constraints:mingw-gcc": [
         "-mwin32",
         "-municode",
@@ -201,7 +201,7 @@ cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     data = [":run_emacs"],
     linkopts = LINKOPTS,
     local_defines = DEFINES,
@@ -227,7 +227,7 @@ cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     data = [":run_binary"],
     linkopts = LINKOPTS,
     local_defines = DEFINES,
@@ -246,7 +246,7 @@ cc_test(
     name = "binary_test",
     size = "small",
     srcs = ["binary_test.cc"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",
         "binary.h",
@@ -280,7 +280,7 @@ cc_library(
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     data = [":run_test"],
     linkopts = LINKOPTS,
     local_defines = DEFINES,
@@ -361,7 +361,7 @@ cc_library(
     name = "process",
     srcs = ["process.cc"],
     hdrs = ["process.h"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     linkopts = LINKOPTS,
     local_defines = DEFINES,
     deps = [
@@ -379,7 +379,7 @@ cc_library(
 cc_library(
     name = "platform",
     hdrs = ["platform.h"],
-    copts = COPTS,
+    copts = COPTS + CXXOPTS,
     linkopts = LINKOPTS,
     local_defines = DEFINES,
 )
