@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
+load("//elisp:util.bzl", "CONLYOPTS", "COPTS")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_reflection_library")
 
@@ -124,29 +125,17 @@ elisp_library(
 cc_binary(
     name = "module.so",
     srcs = ["module.c"],
-    copts = select({
+    copts = COPTS + CONLYOPTS + select({
         "//constraints:msvc-cl": [
             "/std:c11",
-            "/WX",
-            "/W4",
             "/wd4100",
-            "/utf-8",
         ],
         # Assume that something compatible with GCC is the default.  See
         # https://github.com/bazelbuild/bazel/issues/12707.
         "//conditions:default": [
-            "-finput-charset=utf-8",
-            "-fexec-charset=utf-8",
-            "-fno-exceptions",
             "-std=c99",
             "-fvisibility=hidden",
-            "-Werror",
-            "-Wall",
-            "-Wextra",
-            "-Wconversion",
-            "-Wsign-conversion",
             "-Wvla",
-            "-pedantic-errors",
         ],
     }),
     linkopts = select({
