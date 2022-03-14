@@ -141,6 +141,7 @@ cc_binary(
         ],
     }),
     linkshared = True,
+    linkstatic = True,
     local_defines = DEFINES + [
         "_XOPEN_SOURCE=600",  # for ‘struct timespec’
     ],
