@@ -3856,6 +3856,15 @@ static const struct Globals* InitializeGlobals(emacs_env* env,
   return globals;
 }
 
+enum InitializationResult {
+  kSuccess,
+  kRuntimeTooSmall,
+  kEmacsTooOld,
+  kCannotAllocateDefPool,
+  kCannotInitializeGlobals,
+  kCannotRegisterKnownTypes
+};
+
 // Make the module work even if we compile with -fvisibility=hidden.
 #if ABSL_HAVE_ATTRIBUTE(visibility)
 #define VISIBLE __attribute__((visibility("default")))
@@ -3864,21 +3873,21 @@ static const struct Globals* InitializeGlobals(emacs_env* env,
 #endif
 
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
-  if ((size_t)rt->size < sizeof *rt) return 1;
+  if ((size_t)rt->size < sizeof *rt) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
-  if ((size_t)env->size < sizeof(struct emacs_env_25)) return 2;
+  if ((size_t)env->size < sizeof(struct emacs_env_25)) return kEmacsTooOld;
   upb_DefPool* pool = upb_DefPool_New();
-  if (pool == NULL) return 3;
+  if (pool == NULL) return kCannotAllocateDefPool;
   // We have to register all message types that we use with and without
   // reflection eagerly, otherwise the layouts used for the two methods might
   // differ.
   if (google_protobuf_Any_getmsgdef(pool) == NULL ||
       google_protobuf_Duration_getmsgdef(pool) == NULL ||
       google_protobuf_Timestamp_getmsgdef(pool) == NULL) {
-    return 5;
+    return kCannotRegisterKnownTypes;
   }
   const struct Globals* globals = InitializeGlobals(env, pool);
-  if (globals == NULL) return 4;
+  if (globals == NULL) return kCannotInitializeGlobals;
   struct Context ctx = {env, globals};
   InhibitGC(ctx);
   Defun(ctx, "elisp/proto/make", 1, emacs_variadic_function,
@@ -4273,7 +4282,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   DefineError(ctx, kRegistrationFailed,
               "Could not register file descriptor set");
   Provide(ctx, "elisp/proto/module");
-  return 0;
+  return kSuccess;
 }
 
 int VISIBLE plugin_is_GPL_compatible = 1;
