@@ -62,6 +62,7 @@ elisp_proto_library(
 
 elisp_proto_library(
     name = "descriptor_elisp_proto",
+    visibility = ["//visibility:public"],
     deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 
