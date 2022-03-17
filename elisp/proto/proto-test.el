@@ -927,6 +927,13 @@
                      (("test.Enum" (VALUE 77)))))))
   (should-error (elisp/proto/parse-file-descriptor-set "garbage")))
 
+(ert-deftest elisp/proto/reload ()
+  "Check that unloading and reloading a protocol buffer library works."
+  ;; Use a feature that’s not used in any other test.
+  (require 'type_proto)
+  (unload-feature 'type_proto)
+  (require 'type_proto))
+
 (defalias 'elisp/proto/time--equal-p
   (if (fboundp 'time-equal-p) #'time-equal-p
     (lambda (a b) (not (or (time-less-p a b) (time-less-p b a))))))

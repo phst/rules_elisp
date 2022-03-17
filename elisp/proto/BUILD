@@ -36,6 +36,7 @@ elisp_test(
         ":proto",
         ":test_elisp_proto",
         ":timestamp_elisp_proto",
+        ":type_elisp_proto",
         ":wrappers_elisp_proto",
     ],
 )
