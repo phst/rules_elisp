@@ -3869,6 +3869,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   if ((size_t)env->size < sizeof(struct emacs_env_25)) return 2;
   upb_DefPool* pool = upb_DefPool_New();
   if (pool == NULL) return 3;
+  // We have to register all message types that we use with and without
+  // reflection eagerly, otherwise the layouts used for the two methods might
+  // differ.
+  if (google_protobuf_Any_getmsgdef(pool) == NULL ||
+      google_protobuf_Duration_getmsgdef(pool) == NULL ||
+      google_protobuf_Timestamp_getmsgdef(pool) == NULL) {
+    return 5;
+  }
   const struct Globals* globals = InitializeGlobals(env, pool);
   if (globals == NULL) return 4;
   struct Context ctx = {env, globals};
