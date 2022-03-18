@@ -338,13 +338,15 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 
 #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
 static bool IsEmacs27(struct Context ctx) {
-  return (size_t)ctx.env->size >= sizeof(struct emacs_env_27);
+  enum { kMinimumSize = sizeof(struct emacs_env_27) };
+  return ctx.env->size >= kMinimumSize;
 }
 #endif
 
 #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
 static bool IsEmacs28(struct Context ctx) {
-  return (size_t)ctx.env->size >= sizeof(struct emacs_env_28);
+  enum { kMinimumSize = sizeof(struct emacs_env_28) };
+  return ctx.env->size >= kMinimumSize;
 }
 #endif
 
@@ -3873,9 +3875,13 @@ enum InitializationResult {
 #endif
 
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
-  if ((size_t)rt->size < sizeof *rt) return kRuntimeTooSmall;
+  enum {
+    kMinimumRuntimeSize = sizeof *rt,
+    kMinimumEnvironmentSize = sizeof(struct emacs_env_25)
+  };
+  if (rt->size < kMinimumRuntimeSize) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
-  if ((size_t)env->size < sizeof(struct emacs_env_25)) return kEmacsTooOld;
+  if (env->size < kMinimumEnvironmentSize) return kEmacsTooOld;
   upb_DefPool* pool = upb_DefPool_New();
   if (pool == NULL) return kCannotAllocateDefPool;
   // We have to register all message types that we use with and without
