@@ -276,10 +276,11 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    "//constraints:msvc-cl": [],
+    "//constraints:msvc-cl": ["/std:c++14"],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     "//conditions:default": [
+        "-std=c++11",
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",
