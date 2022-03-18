@@ -271,6 +271,7 @@ COPTS = select({
         "-Wextra",
         "-Wconversion",
         "-Wsign-conversion",
+        "-pedantic",
         "-pedantic-errors",
     ],
 })
