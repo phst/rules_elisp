@@ -688,7 +688,7 @@ static bool CheckUIntegerRange(struct Context ctx, uintmax_t value,
 
 static uintmax_t ExtractRangedUInteger(struct Context ctx, uintmax_t max,
                                        emacs_value value) {
-  // No need to go through big integer of string conversion codepaths.
+  // No need to go through big integer or string conversion codepaths.
   if (max <= INTMAX_MAX) {
     return (uintmax_t)ExtractRangedInteger(ctx, 0, (intmax_t)max, value);
   }
