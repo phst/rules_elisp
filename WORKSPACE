@@ -94,10 +94,10 @@ http_file(
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "d6b2513456fe2229811da7eb67a444be7785f5323c6708b38d851d2b51e54d83",
+    sha256 = "f2dcd210c7095febe54b804bb1cd3a58fe8435a909db2ec04e31542631cf715c",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.30.0/rules_go-v0.30.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.30.0/rules_go-v0.30.0.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.31.0/rules_go-v0.31.0.zip",
     ],
 )
 
@@ -107,7 +107,7 @@ go_rules_dependencies()
 
 go_register_toolchains(
     nogo = "@//:nogo",
-    version = "1.17.6",
+    version = "1.18",
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
