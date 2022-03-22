@@ -167,6 +167,7 @@ cc_binary(
         "@upb//:json",
         "@upb//:reflection",
         "@upb//:textformat",
+        "@upb//upb/util:required_fields",
     ],
 )
 

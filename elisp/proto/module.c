@@ -157,6 +157,7 @@
 #include "upb/reflection.h"
 #include "upb/text_encode.h"
 #include "upb/upb.h"
+#include "upb/util/required_fields.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -3768,6 +3769,38 @@ static emacs_value UnpackAny(emacs_env* env,
   return MakeMutableMessage(ctx, any.arena, def, msg);
 }
 
+static emacs_value CheckRequired(emacs_env* env,
+                                 ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                                 emacs_value* args, void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 1);
+  struct MessageArg msg = ExtractMessage(ctx, args[0]);
+  if (msg.type == NULL) return NULL;
+  upb_FieldPathEntry* fields;
+  if (upb_util_HasUnsetRequired(msg.value, msg.type, DefPool(ctx), &fields)) {
+    assert(fields != NULL && fields->field != NULL);
+    emacs_value paths = Nil(ctx);
+    upb_FieldPathEntry* it = fields;
+    while (it->field != NULL) {
+      char buffer[0x1000];
+      size_t length = upb_FieldPath_ToText(&it, buffer, sizeof buffer);
+      if (length >= sizeof buffer) {
+        // Mark very long field paths as truncated.
+        memset(buffer + sizeof buffer - 3, '.', 3);
+        length = sizeof buffer;
+      }
+      emacs_value path =
+          MakeString(ctx, upb_StringView_FromDataAndSize(buffer, length));
+      Push(ctx, path, &paths);
+      assert(it != NULL);
+    }
+    free(fields);
+    Signal2(ctx, kMissingRequiredField, MakeMessageName(ctx, msg.type),
+            Nreverse(ctx, paths));
+  }
+  return Nil(ctx);
+}
+
 static emacs_value CheckFieldName(emacs_env* env,
                                   ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
                                   emacs_value* args, void* data) {
@@ -4229,6 +4262,12 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   // The check functions are technically side-effect-free, but their return
   // value is never used, so don’t mark them as such to prevent the byte
   // compiler from complaining.
+  Defun(ctx, "elisp/proto/check-required", 1, 1,
+        "Check that all required fields in MESSAGE are set.\n"
+        "If a required field is not set, signal an error of type\n"
+        "‘elisp/proto/missing-required-field’.\n\n"
+        "(fn message)",
+        0, CheckRequired);
   Defun(ctx, "elisp/proto/check-field-name", 2, 2,
         "Check if FIELD is a field in the protocol buffer message TYPE.\n"
         "Signal an error of type ‘elisp/proto/unknown-field’ if not.\n\n"

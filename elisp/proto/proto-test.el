@@ -934,6 +934,19 @@
   (unload-feature 'type_proto)
   (require 'type_proto))
 
+(ert-deftest elisp/proto/check-required/success ()
+  (elisp/proto/check-required
+   (google/protobuf/UninterpretedOption/NamePart-new :name_part "foo"
+                                                     :is_extension t)))
+
+(ert-deftest elisp/proto/check-required/failure ()
+  (let* ((message (google/protobuf/UninterpretedOption/NamePart-new))
+         (err (should-error (elisp/proto/check-required message)
+                            :type 'elisp/proto/missing-required-field)))
+    (should (equal err '(elisp/proto/missing-required-field
+                         "google.protobuf.UninterpretedOption.NamePart"
+                         ("name_part" "is_extension"))))))
+
 (defalias 'elisp/proto/time--equal-p
   (if (fboundp 'time-equal-p) #'time-equal-p
     (lambda (a b) (not (or (time-less-p a b) (time-less-p b a))))))
