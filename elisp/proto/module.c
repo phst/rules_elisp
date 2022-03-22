@@ -668,6 +668,7 @@ static uintmax_t ExtractUInteger(struct Context ctx, emacs_value value) {
   assert(length > 1);
   assert((size_t)length <= sizeof buffer);
   char* end;
+  errno = 0;
   uintmax_t u = strtoumax(buffer, &end, 16);
   if (errno == ERANGE) {
     ArgsOutOfRange(ctx, value, MakeInteger(ctx, 0),
