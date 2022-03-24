@@ -185,7 +185,8 @@ class Builder:
             files = [str(output)]
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml', '--output-directory=' + str(directory),
-                   '--branch-coverage', '--'] + files)
+                   '--branch-coverage', '--'] + files,
+                  cwd=self._workspace)
         if temp_dir:
             shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
