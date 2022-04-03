@@ -508,7 +508,7 @@ This function returns a new protocol buffer message of type
 ~google.protobuf.Any~ that wraps the given {{{var(message)}}}.
 #+END_defun
 
-#+ATTR_TEXINFO: :options elisp/proto/unpack-any message
+#+ATTR_TEXINFO: :options elisp/proto/unpack-any any
 #+BEGIN_defun
 This function unpacks the given protocol buffer message of type
 ~google.protobuf.Any~.  The return type depends on the ~type_url~ field.  Even
