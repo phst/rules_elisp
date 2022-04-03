@@ -2623,8 +2623,8 @@ static void UnknownKey(struct Context ctx, ptrdiff_t nspecs,
   free(choices);
 }
 
-// Matches the given keyword against an array of option specifications.  Returns
-// a negative value if the keyword is unknown.
+// Matches the given keyword against an array of key specifications.  Returns
+// the index into the array, or a negative number if the keyword is unknown.
 static ptrdiff_t FindKey(struct Context ctx, ptrdiff_t nspecs,
                          const struct KeySpec* specs, emacs_value arg) {
   for (ptrdiff_t i = 0; i < nspecs; ++i) {
