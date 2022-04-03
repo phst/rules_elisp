@@ -884,6 +884,7 @@
     (should (google/protobuf/Any-p any))
     (should (equal (elisp/proto/field any 'type_url)
                    "type.googleapis.com/google.protobuf.Duration"))
+    (should (equal (elisp/proto/any-type-name any) "google.protobuf.Duration"))
     (let ((unpacked (elisp/proto/unpack-any any)))
       (should (google/protobuf/Duration-p unpacked))
       (should (elisp/proto/time--equal-p

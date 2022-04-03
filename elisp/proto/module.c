@@ -3770,6 +3770,25 @@ static emacs_value UnpackAny(emacs_env* env,
   return MakeMutableMessage(ctx, any.arena, def, msg);
 }
 
+static emacs_value AnyTypeName(emacs_env* env,
+                               ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                               emacs_value* args, void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 1);
+  emacs_value arg = args[0];
+  struct MessageArg any =
+      ExtractWellKnownMessage(ctx, kUpb_WellKnown_Any, kAnyP, arg);
+  if (any.type == NULL) return NULL;
+  upb_StringView type_url = google_protobuf_Any_type_url(any.value);
+  if (type_url.data == NULL) {
+    UninitializedAny(ctx, arg);
+    return NULL;
+  }
+  upb_StringView full_name = MessageNameFromTypeUrl(ctx, type_url);
+  if (full_name.data == NULL) return NULL;
+  return MakeString(ctx, full_name);
+}
+
 static emacs_value CheckRequired(emacs_env* env,
                                  ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
                                  emacs_value* args, void* data) {
@@ -4260,6 +4279,12 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "ANY must be a google.protobuf.Any message.\n\n"
         "(fn any)",
         kNoSideEffects, UnpackAny);
+  Defun(ctx, "elisp/proto/any-type-name", 1, 1,
+        "Return the type name of the messaged packed inside ANY.\n"
+        "The return value is the full name of the message type.\n"
+        "ANY must be a google.protobuf.Any message.\n\n"
+        "(fn any)",
+        kNoSideEffects, AnyTypeName);
   // The check functions are technically side-effect-free, but their return
   // value is never used, so don’t mark them as such to prevent the byte
   // compiler from complaining.

@@ -516,6 +516,13 @@ though this allows you to handle message types dynamically, you still need to
 load the generated bindings for the dynamic type for unpacking to work.
 #+END_defun
 
+#+ATTR_TEXINFO: :options elisp/proto/any-type-name any
+#+BEGIN_defun
+This function extracts the full type name from the ~type_url~ field of the given
+protocol buffer message of type ~google.protobuf.Any~.  The return name is the
+full name of the type of the message packed in {{{var(any)}}} as a string.
+#+END_defun
+
 ** Specialized array and map functions
 :PROPERTIES:
 :ALT_TITLE: Protocol buffer array and map functions
