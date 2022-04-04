@@ -18,7 +18,7 @@ load("//elisp:private/util.bzl", "cc_defaults")
 
 alias(
     name = "emacs",
-    actual = ":emacs_27.2",
+    actual = ":emacs_28.1",
     visibility = ["//visibility:public"],
 )
 
@@ -35,13 +35,13 @@ py_test(
 
 alias(
     name = "module_header",
-    actual = "@gnu_emacs_27.2//:module_header",
+    actual = "@gnu_emacs_28.1//:module_header",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "builtin_features",
-    actual = "@gnu_emacs_27.2//:builtin_features",
+    actual = "@gnu_emacs_28.1//:builtin_features",
     visibility = ["//gazelle:__pkg__"],
 )
 
