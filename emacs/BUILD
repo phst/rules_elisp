@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("//elisp:util.bzl", "cc_defaults")
+load("//elisp:private/util.bzl", "cc_defaults")
 
 alias(
     name = "emacs",

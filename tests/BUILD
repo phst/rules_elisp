@@ -1,4 +1,4 @@
-# Copyright 2020, 2021 Google LLC
+# Copyright 2020, 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
-load(":test.bzl", "elisp_test_suite")
+load(":private/test.bzl", "elisp_test_suite")
 
 elisp_test_suite(name = "elisp_test")
 

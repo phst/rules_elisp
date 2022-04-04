@@ -18,7 +18,7 @@ load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
-    ":util.bzl",
+    ":private/util.bzl",
     "CcDefaultInfo",
     "cc_launcher",
     "check_relative_filename",

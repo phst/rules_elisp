@@ -43,7 +43,7 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.8.0.tar.gz",
 )
 
-load("@//:internal.bzl", "requirements_txt")
+load("@//:private/internal.bzl", "requirements_txt")
 
 requirements_txt(name = "requirements_txt")
 
