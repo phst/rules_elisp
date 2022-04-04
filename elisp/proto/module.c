@@ -778,15 +778,16 @@ static struct MutableString ExtractString(struct Context ctx, upb_alloc* alloc,
 // have some helper functions to convert them.
 
 static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
-  if (IsEmacs28(ctx)) {
-    return ctx.env->make_unibyte_string(ctx.env, value.data, value.size);
-  }
-#endif
   if (value.size > PTRDIFF_MAX) {
     OverflowError0(ctx);
     return NULL;
   }
+#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
+  if (IsEmacs28(ctx)) {
+    return ctx.env->make_unibyte_string(ctx.env, value.data,
+                                        (ptrdiff_t)value.size);
+  }
+#endif
   emacs_value* args = AllocateLispArray(ctx, value.size);
   if (args == NULL) return NULL;
   for (size_t i = 0; i < value.size; ++i) {
