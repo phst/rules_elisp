@@ -450,7 +450,6 @@
     (should (elisp/proto/map-p mutable-map))))
 
 (ert-deftest elisp/proto/map/mapp ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
@@ -458,7 +457,6 @@
     (should (mapp mutable-map))))
 
 (ert-deftest elisp/proto/map/map-empty-p ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
@@ -484,7 +482,6 @@
     (should (eql (elisp/proto/map-get map 234) 4.5))))
 
 (ert-deftest elisp/proto/map/map-elt ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
@@ -505,7 +502,6 @@
     (should (eql (setf (elisp/proto/map-get mutable-map 234) 4.5) 4.5))))
 
 (ert-deftest elisp/proto/map/map-put! ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
@@ -523,7 +519,6 @@
     (should (elisp/proto/map-contains-key map 234))))
 
 (ert-deftest elisp/proto/map/map-contains-key ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float)))
@@ -595,21 +590,18 @@
                      '((-77 . 3.0) (5 . 9.5)))))))
 
 (ert-deftest elisp/proto/map/map-apply ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (equal (map-apply (lambda (key value) (list (1+ key) value)) map)
                    '((124 4.5))))))
 
 (ert-deftest elisp/proto/map/cl-prin1-to-string ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (map (elisp/proto/field message 'map_int32_float)))
     (should (equal (cl-prin1-to-string map)
                    "#<protocol buffer map with 1 entry [(123 4.5)]>"))))
 
 (ert-deftest elisp/proto/map/map-copy ()
-  (skip-unless (>= emacs-major-version 27))
   (let* ((message (elisp/proto/Test-new :map_int32_float '((123 . 4.5))))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
          (map (elisp/proto/field message 'map_int32_float))
@@ -778,7 +770,6 @@
     (should (string-empty-p messages))))
 
 (ert-deftest elisp/proto/uint64 ()
-  (skip-unless (>= emacs-major-version 27))  ; needs big integer support
   (let* ((too-large (lsh 1 64))  ; no literals to keep Emacs 26 working
          (max (1- too-large))
          (message (elisp/proto/Test-new :optional_uint64 max)))
