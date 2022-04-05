@@ -847,9 +847,7 @@ file that has been instrumented with Edebug."
        (cl-assert (eql (length coverage) (length offsets)) :show-args)
        (cl-loop
         for offset across offsets
-        ;; This can’t be ‘and’ due to
-        ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40727.
-        for cov across coverage
+        and cov across coverage
         for freq = (funcall frequency cov)
         for position = (+ begin offset)
         ;; Edebug adds two elements per form to the frequency and offset tables,
