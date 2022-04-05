@@ -238,54 +238,52 @@ in the Info node ‘(elisp) Output Streams’."
 
 (gv-define-simple-setter elisp/proto/map-get elisp/proto/map-put)
 
-;; Before Emacs 27, the map functions weren’t generic.
-(when (>= emacs-major-version 27)
-  (cl-defmethod map-elt ((map elisp/proto/map) key &optional default)
-    "Return the value mapped to KEY in the protocol buffer MAP.
+(cl-defmethod map-elt ((map elisp/proto/map) key &optional default)
+  "Return the value mapped to KEY in the protocol buffer MAP.
 MAP must be a protocol buffer map of type ‘elisp/proto/map’.
 Return DEFAULT if KEY isn't present in MAP."
-    (elisp/proto/map-get map key default))
+  (elisp/proto/map-get map key default))
 
-  (cl-defmethod map-delete ((map elisp/proto/map) key)
-    "Attempt to remove KEY from the protocol buffer MAP.
+(cl-defmethod map-delete ((map elisp/proto/map) key)
+  "Attempt to remove KEY from the protocol buffer MAP.
 MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’."
-    (elisp/proto/map-delete map key)
-    map)
+  (elisp/proto/map-delete map key)
+  map)
 
-  (cl-defmethod map-length ((map elisp/proto/map))
-    "Return the number of elements in the protocol buffer MAP.
+(cl-defmethod map-length ((map elisp/proto/map))
+  "Return the number of elements in the protocol buffer MAP.
 MAP must be a protocol buffer map of type ‘elisp/proto/map’."
-    (elisp/proto/map-length map))
+  (elisp/proto/map-length map))
 
-  (cl-defmethod map-copy ((map elisp/proto/map))
-    "Return a shallow copy of MAP.
+(cl-defmethod map-copy ((map elisp/proto/map))
+  "Return a shallow copy of MAP.
 MAP must be a protocol buffer map of type ‘elisp/proto/map’.
 The return value is mutable."
-    (elisp/proto/copy-map map))
+  (elisp/proto/copy-map map))
 
-  (cl-defmethod map-do (function (map elisp/proto/map))
-    "Call FUNCTION for each element in MAP.
+(cl-defmethod map-do (function (map elisp/proto/map))
+  "Call FUNCTION for each element in MAP.
 MAP must be a protocol buffer array of type ‘elisp/proto/map’.
 Call FUNCTION with two arguments, the key and the value."
-    (elisp/proto/do-map function map))
+  (elisp/proto/do-map function map))
 
-  (cl-defmethod mapp ((_ elisp/proto/map))
-    "Return t."
-    t)
+(cl-defmethod mapp ((_ elisp/proto/map))
+  "Return t."
+  t)
 
-  (cl-defmethod map-contains-key ((map elisp/proto/map) key)
-    "Return whether the protocol buffer MAP contains KEY.
+(cl-defmethod map-contains-key ((map elisp/proto/map) key)
+  "Return whether the protocol buffer MAP contains KEY.
 MAP must be a protocol buffer map of type ‘elisp/proto/map’."
-    (elisp/proto/map-contains-key map key))
+  (elisp/proto/map-contains-key map key))
 
-  (cl-defmethod map-put! ((map elisp/proto/map) key value)
-    "Insert a VALUE with a KEY into the protocol buffer MAP.
+(cl-defmethod map-put! ((map elisp/proto/map) key value)
+  "Insert a VALUE with a KEY into the protocol buffer MAP.
 MAP must be a mutable protocol buffer map of type
 ‘elisp/proto/map’.  If an entry with KEY is already present in
 MAP, overwrite it.  Return VALUE."
-    (condition-case nil
-        (elisp/proto/map-put map key value)
-      (elisp/proto/immutable (signal 'map-not-inplace (list map))))))
+  (condition-case nil
+      (elisp/proto/map-put map key value)
+    (elisp/proto/immutable (signal 'map-not-inplace (list map)))))
 
 (gv-define-simple-setter elisp/proto/timestamp elisp/proto/set-timestamp)
 (gv-define-simple-setter elisp/proto/duration elisp/proto/set-duration)
