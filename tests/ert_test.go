@@ -313,11 +313,6 @@ LH:19
 LF:24
 end_of_record
 `
-	if emacsMajor == 26 {
-		// No branch coverage under Emacs 26 expected.
-		t.Log("not checking for branch coverage")
-		wantCoverage = regexp.MustCompile(`(?m)^BR.+\n`).ReplaceAllLiteralString(wantCoverage, "")
-	}
 	if emacsMajor < 28 {
 		// Account for a jump in the suffix index for nested functions
 		// due to https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
