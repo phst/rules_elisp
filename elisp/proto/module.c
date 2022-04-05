@@ -130,6 +130,10 @@
 
 #include "emacs-module.h"
 
+#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 27
+#error Emacs module header too old
+#endif
+
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
