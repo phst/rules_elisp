@@ -324,7 +324,7 @@ FILENAME."
     (file-name-sans-versions arg arg)
     (file-selinux-context file)
     (file-symlink-p file noerror)
-    (file-truename file)
+    (file-truename arg)
     (insert-directory file arg arg arg)
     (insert-file-contents file arg arg arg arg)
     (load file arg arg arg arg)

@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2022 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -92,6 +92,8 @@
                     "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
                     "/bazel-runfile:phst_rules_elisp/elisp/")
                    "runfiles/test.txt"))
+    (should (equal (file-truename "/bazel-runfile:phst_rules_elisp/elisp/")
+                   "/bazel-runfile:phst_rules_elisp/elisp/"))
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 
