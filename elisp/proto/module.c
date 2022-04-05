@@ -265,7 +265,6 @@
   X(kSeqLength, "seq-length")                                    \
   X(kSeqDoIndexed, "seq-do-indexed")                             \
   X(kMapDo, "map-do")                                            \
-  X(kDoMap, "elisp/proto/do-map")                                \
   X(kSideEffectFree, "side-effect-free")                         \
   X(kCAllowPartial, ":allow-partial")                            \
   X(kCDiscardUnknown, ":discard-unknown")                        \
@@ -2287,7 +2286,6 @@ static emacs_value PutMapElement(emacs_env* env,
 static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
                                const upb_FieldDef* field, emacs_value value) {
   assert(upb_FieldDef_IsMap(field));
-  enum GlobalSymbol map_do = kMapDo;
   if (Predicate(ctx, kMapP, value)) {
     // Fast path for an existing map of the right type.
     struct MapArg map = ExtractMap(ctx, value);
@@ -2301,9 +2299,7 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
     }
     // The types are not the same, so we have to convert the entries.  We could
     // special-case this here, but the generic code below works just fine for
-    // this case.  However, in Emacs 26, ‘map-do’ is not yet a generic function,
-    // so call ‘elisp/proto/do-map’ instead.
-    map_do = kDoMap;
+    // this case.
   }
   // Use generalized map functions to convert from an arbitrary map.
   struct MapType type = GetMapType(ctx, field);
@@ -2312,7 +2308,7 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
   if (map == NULL) return NULL;
   struct PutMapElementContext child_ctx = {ctx.globals, arena, type, map};
   emacs_value fun = MakeFunction(ctx, 2, 2, PutMapElement, NULL, &child_ctx);
-  FuncallSymbol2(ctx, map_do, fun, value);
+  FuncallSymbol2(ctx, kMapDo, fun, value);
   return Success(ctx) ? map : NULL;
 }
 
