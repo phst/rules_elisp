@@ -46,6 +46,10 @@ instructions how to use Bazel on Windows, see
 Windows, you’ll also need MinGW-w64 and MSYS2 to build Emacs; see the file
 =nt/INSTALL.W64= in the Emacs source repository.
 
+This repository generally supports the two most recent major versions of Emacs.
+Currently, the supported versions are Emacs 27 and Emacs 28.  Once Emacs 29 is
+released, support for Emacs 27 will be dropped.
+
 * Usage
 
 Add a snippet like the following to your Bazel ~WORKSPACE~ file:
