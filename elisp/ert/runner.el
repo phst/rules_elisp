@@ -53,8 +53,6 @@ This list is populated by --test-source command-line options.")
 (defvar edebug-after-instrumentation-function)
 (defvar edebug-new-definition-function)
 
-(defvar warning-fill-column)  ; only in Emacs 27 and later
-
 ;; ERT resource variables only appeared in Emacs 28.
 (defvar ert-resource-directory-trim-left-regexp)
 (defvar ert-resource-directory-format)

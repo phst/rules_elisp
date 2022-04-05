@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2022 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -32,8 +32,6 @@
 
 (add-to-list 'command-switch-alist
              (cons "--fatal-warnings" #'elisp/fatal-warnings))
-
-(defvar warning-fill-column)  ; only in Emacs 27 and later
 
 (defvar elisp/fatal--warnings nil
   "Whether byte compilation warnings should be treated as errors.
