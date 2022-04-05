@@ -192,9 +192,6 @@ constraint_value(
     name = "incompatible",
     constraint_setting = ":incompatible_setting",
     visibility = [
-        "@gnu_emacs_26.1//:__pkg__",
-        "@gnu_emacs_26.2//:__pkg__",
-        "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
@@ -218,9 +215,6 @@ cc_defaults(
         "//conditions:default": [],
     }),
     visibility = [
-        "@gnu_emacs_26.1//:__pkg__",
-        "@gnu_emacs_26.2//:__pkg__",
-        "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
