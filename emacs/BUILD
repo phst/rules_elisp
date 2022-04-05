@@ -46,24 +46,6 @@ alias(
 )
 
 alias(
-    name = "emacs_26.1",
-    actual = "@gnu_emacs_26.1//:emacs",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "emacs_26.2",
-    actual = "@gnu_emacs_26.2//:emacs",
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "emacs_26.3",
-    actual = "@gnu_emacs_26.3//:emacs",
-    visibility = ["//visibility:public"],
-)
-
-alias(
     name = "emacs_27.1",
     actual = "@gnu_emacs_27.1//:emacs",
     visibility = ["//visibility:public"],
