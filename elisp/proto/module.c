@@ -190,13 +190,11 @@
   X(kCar, "car")                                                 \
   X(kCdr, "cdr")                                                 \
   X(kIntern, "intern")                                           \
-  X(kFboundp, "fboundp")                                         \
   X(kSymbolName, "symbol-name")                                  \
   X(kSymbolValue, "symbol-value")                                \
   X(kSet, "set")                                                 \
   X(kFunctionPut, "function-put")                                \
   X(kNumberp, "numberp")                                         \
-  X(kNatnump, "natnump")                                         \
   X(kStringp, "stringp")                                         \
   X(kMultibyteStringP, "multibyte-string-p")                     \
   X(kUnibyteStringP, "elisp/proto/unibyte-string-p")             \
@@ -209,10 +207,6 @@
   X(kMakeVector, "make-vector")                                  \
   X(kLength, "length")                                           \
   X(kAref, "aref")                                               \
-  X(kStringToNumber, "string-to-number")                         \
-  X(kFormat, "format")                                           \
-  X(kTimeConvert, "time-convert")                                \
-  X(kTimeAdd, "time-add")                                        \
   X(kPrin1, "prin1")                                             \
   X(kPrinc, "princ")                                             \
   X(kPrintLength, "print-length")                                \
@@ -340,13 +334,6 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 //   #endif
 //   …fallback code…
 
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-static bool IsEmacs27(struct Context ctx) {
-  enum { kMinimumSize = sizeof(struct emacs_env_27) };
-  return ctx.env->size >= kMinimumSize;
-}
-#endif
-
 #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
 static bool IsEmacs28(struct Context ctx) {
   enum { kMinimumSize = sizeof(struct emacs_env_28) };
@@ -456,12 +443,6 @@ static emacs_value List3(struct Context ctx, emacs_value arg1, emacs_value arg2,
   return List(ctx, 3, args);
 }
 
-static emacs_value List4(struct Context ctx, emacs_value arg1, emacs_value arg2,
-                         emacs_value arg3, emacs_value arg4) {
-  emacs_value args[] = {arg1, arg2, arg3, arg4};
-  return List(ctx, 4, args);
-}
-
 static void Signal(struct Context ctx, enum GlobalSymbol symbol,
                    ptrdiff_t nargs, emacs_value* args) {
   emacs_value data = List(ctx, nargs, args);
@@ -498,21 +479,6 @@ static void OverflowError0(struct Context ctx) { Signal0(ctx, kOverflowError); }
 
 static void OverflowError1(struct Context ctx, emacs_value arg) {
   Signal1(ctx, kOverflowError, arg);
-}
-
-// Returns whether a + b would overflow.  If not, set *r to a + b.  Otherwise,
-// the value of *r is unspecified.
-static bool AddOverflowIntmax(struct Context ctx, intmax_t a, intmax_t b,
-                              intmax_t* r) {
-  bool overflow;
-#if ABSL_HAVE_BUILTIN(__builtin_add_overflow)
-  overflow = __builtin_add_overflow(a, b, r);
-#else
-  overflow = a >= 0 ? b > INTMAX_MAX - a : b < INTMAX_MIN - a;
-  if (!overflow) *r = a + b;
-#endif
-  if (overflow) OverflowError0(ctx);
-  return overflow;
 }
 
 // Returns whether a + b would overflow.  If not, set *r to a + b.  Otherwise,
@@ -607,77 +573,40 @@ enum {
 
 static emacs_value MakeUInteger(struct Context ctx, uintmax_t value) {
   if (value <= INTMAX_MAX) return MakeInteger(ctx, (intmax_t)value);
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-  if (IsEmacs27(ctx)) {
-    emacs_limb_t limbs[kLimbsForUintmax];
+  emacs_limb_t limbs[kLimbsForUintmax];
 #if EMACS_LIMB_MAX >= UINTMAX_MAX
-    assert(kLimbsForUintmax == 1);
-    limbs[0] = value;
+  assert(kLimbsForUintmax == 1);
+  limbs[0] = value;
 #else
-    for (size_t i = 0; i < kLimbsForUintmax; ++i) {
-      limbs[i] = value;
-      value >>= kLimbBits;
-    }
-#endif
-    return ctx.env->make_big_integer(ctx.env, +1, kLimbsForUintmax, limbs);
+  for (size_t i = 0; i < kLimbsForUintmax; ++i) {
+    limbs[i] = value;
+    value >>= kLimbBits;
   }
 #endif
-  // Fall back to string conversion.
-  char buffer[(sizeof value * CHAR_BIT + 3) / 4 + 1];
-  int length = snprintf(buffer, sizeof buffer, "%jx", value);
-  assert(length > 0);
-  assert((unsigned int)length < sizeof buffer);
-  emacs_value hex = ctx.env->make_string(ctx.env, buffer, length);
-  return FuncallSymbol2(ctx, kStringToNumber, hex, MakeInteger(ctx, 16));
+  return ctx.env->make_big_integer(ctx.env, +1, kLimbsForUintmax, limbs);
 }
 
 static uintmax_t ExtractUInteger(struct Context ctx, emacs_value value) {
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-  // First try with a big integer if possible.
-  if (IsEmacs27(ctx)) {
-    // Short-circuit if we’re already failing so that the ClearError below
-    // doesn’t clear unrelated errors.
-    if (!Success(ctx)) return 0;
-    int sign;
-    ptrdiff_t count = kLimbsForUintmax;
-    emacs_limb_t limbs[kLimbsForUintmax];
-    bool ok =
-        ctx.env->extract_big_integer(ctx.env, value, &sign, &count, limbs);
-    if (!ok || sign < 0 || count > kLimbsForUintmax) {
-      // Don’t leak internal out-of-range signal to the user.
-      ClearError(ctx);
-      ArgsOutOfRange(ctx, value, MakeInteger(ctx, 0),
-                     MakeUInteger(ctx, UINTMAX_MAX));
-      return 0;
-    }
-    if (sign == 0) return 0;
-    assert(count > 0);
-    uintmax_t u = 0;
-    for (size_t i = 0; i < (size_t)count; ++i) {
-      u |= (limbs[i] << (i * kLimbBits));
-    }
-    return u;
-  }
-#endif
-  // Fall back to string conversion.
-  if (!CheckType(ctx, kNatnump, value)) return 0;
-  emacs_value format = ctx.env->make_string(ctx.env, "%x", 2);
-  emacs_value string = FuncallSymbol2(ctx, kFormat, format, value);
-  char buffer[(sizeof value * CHAR_BIT + 3) / 4 + 1];
-  ptrdiff_t length = sizeof buffer;
-  if (!ctx.env->copy_string_contents(ctx.env, string, buffer, &length)) {
-    return 0;
-  }
-  assert(length > 1);
-  assert((size_t)length <= sizeof buffer);
-  char* end;
-  errno = 0;
-  uintmax_t u = strtoumax(buffer, &end, 16);
-  if (errno == ERANGE) {
+  // Short-circuit if we’re already failing so that the ClearError below
+  // doesn’t clear unrelated errors.
+  if (!Success(ctx)) return 0;
+  int sign;
+  ptrdiff_t count = kLimbsForUintmax;
+  emacs_limb_t limbs[kLimbsForUintmax];
+  bool ok = ctx.env->extract_big_integer(ctx.env, value, &sign, &count, limbs);
+  if (!ok || sign < 0 || count > kLimbsForUintmax) {
+    // Don’t leak internal out-of-range signal to the user.
+    ClearError(ctx);
     ArgsOutOfRange(ctx, value, MakeInteger(ctx, 0),
                    MakeUInteger(ctx, UINTMAX_MAX));
+    return 0;
   }
-  if (end != buffer + length - 1) WrongTypeArgument(ctx, kHexStringP, string);
+  if (sign == 0) return 0;
+  assert(count > 0);
+  uintmax_t u = 0;
+  for (size_t i = 0; i < (size_t)count; ++i) {
+    u |= (limbs[i] << (i * kLimbBits));
+  }
   return u;
 }
 
@@ -836,30 +765,12 @@ static void* ExtractUserPtr(struct Context ctx, emacs_value value) {
   return ctx.env->get_user_ptr(ctx.env, value);
 }
 
-static emacs_value Car(struct Context ctx, emacs_value value) {
-  return FuncallSymbol1(ctx, kCar, value);
-}
-
-static emacs_value Cdr(struct Context ctx, emacs_value value) {
-  return FuncallSymbol1(ctx, kCdr, value);
-}
-
 static emacs_value Cons(struct Context ctx, emacs_value car, emacs_value cdr) {
   return FuncallSymbol2(ctx, kCons, car, cdr);
 }
 
 static void Push(struct Context ctx, emacs_value newelt, emacs_value* list) {
   *list = Cons(ctx, newelt, *list);
-}
-
-static emacs_value Pop(struct Context ctx, emacs_value* list) {
-  emacs_value ret = Car(ctx, *list);
-  *list = Cdr(ctx, *list);
-  return ret;
-}
-
-static bool Fboundp(struct Context ctx, enum GlobalSymbol symbol) {
-  return Predicate(ctx, kFboundp, GlobalSymbol(ctx, symbol));
 }
 
 // The time conversion functions assume that time_t is integral and fits into
@@ -871,44 +782,9 @@ static bool Fboundp(struct Context ctx, enum GlobalSymbol symbol) {
 // values.  If successful, the return value will be a valid Lisp timestamp as
 // defined in the Info node ‘(elisp) Time of Day’.
 static emacs_value MakeTime(struct Context ctx, struct timespec value) {
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-  if (IsEmacs27(ctx)) {
-    // make_time accepts non-canonical time representations, see Info node
-    // ‘(elisp) Module Values’.
-    return ctx.env->make_time(ctx.env, value);
-  }
-#endif
-  // We need to normalize the time and bring it into a timestamp format as
-  // described in the Info node ‘(elisp) Time of Day’.
-  intmax_t seconds;
-  // Deal with a nanosecond magnitude that’s not below one second.
-  long nanos = value.tv_nsec % 1000000000L;
-  bool overflow = AddOverflowIntmax(ctx, value.tv_sec,
-                                    value.tv_nsec / 1000000000L, &seconds);
-  if (overflow) return NULL;
-  // Deal with a negative nanosecond count.
-  if (nanos < 0) {
-    nanos += 1000000000L;
-    overflow = AddOverflowIntmax(ctx, seconds, -1, &seconds);
-    if (overflow) return NULL;
-  }
-  assert(nanos >= 0L && nanos < 1000000000L);
-  intmax_t high = seconds / INTMAX_C(0x10000);
-  intmax_t low = seconds % INTMAX_C(0x10000);
-  assert(high > INTMAX_MIN);
-  if (low < 0) {
-    low += 0x10000;
-    --high;
-  }
-  assert(low >= INTMAX_C(0) && low < INTMAX_C(0x10000));
-  long micros = nanos / 1000L;
-  assert(micros >= 0L && micros < 1000000L);
-  nanos %= 1000L;
-  assert(nanos >= 0L && nanos < LONG_MAX / 1000L);
-  long picos = nanos * 1000L;
-  assert(picos >= 0L && picos < 1000000L);
-  return List4(ctx, MakeInteger(ctx, high), MakeInteger(ctx, low),
-               MakeInteger(ctx, micros), MakeInteger(ctx, picos));
+  // make_time accepts non-canonical time representations, see Info node
+  // ‘(elisp) Module Values’.
+  return ctx.env->make_time(ctx.env, value);
 }
 
 // Convert a Lisp time value to a timespec structure.  The Lisp value can be an
@@ -916,37 +792,7 @@ static emacs_value MakeTime(struct Context ctx, struct timespec value) {
 // values.  If successful, the return value will be in canonical form, i.e.,
 // tv_nsec will be in the closed interval [0, 999999999].
 static struct timespec ExtractTime(struct Context ctx, emacs_value value) {
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-  if (IsEmacs27(ctx)) {
-    return ctx.env->extract_time(ctx.env, value);
-  }
-#endif
-  struct timespec null = {0, 0};
-  emacs_value type = TypeOf(ctx, value);
-  if (EqGlobal(ctx, type, kInteger)) {
-    time_t seconds = ExtractRangedInteger(ctx, LLONG_MIN, LLONG_MAX, value);
-    struct timespec spec = {seconds, 0};
-    return spec;
-  }
-  // ‘time-convert’ is new in Emacs 27; resort to ‘time-add’ if it’s
-  // unavailable.
-  emacs_value list =
-      Fboundp(ctx, kTimeConvert)
-          ? FuncallSymbol2(ctx, kTimeConvert, value, GlobalSymbol(ctx, kList))
-          : FuncallSymbol2(ctx, kTimeAdd, value, MakeInteger(ctx, 0));
-  if (!Success(ctx)) return null;
-  intmax_t max = LLONG_MAX >> 16;
-  time_t high = ExtractRangedInteger(ctx, -max, max, Pop(ctx, &list));
-  time_t low = ExtractRangedInteger(ctx, 0, 0xFFFF, Pop(ctx, &list));
-  long picos[2] = {0, 0};
-  for (int i = 0; i < 2 && IsNotNil(ctx, list); ++i) {
-    picos[i] = (long)ExtractRangedInteger(ctx, 0, 999999, Pop(ctx, &list));
-  }
-  if (!Success(ctx)) return null;
-  struct timespec spec = {(high << 16) + low,
-                          picos[0] * 1000L + picos[1] / 1000L};
-  assert(spec.tv_nsec >= 0 && spec.tv_nsec <= 999999999);
-  return spec;
+  return ctx.env->extract_time(ctx.env, value);
 }
 
 static emacs_value MakeVector(struct Context ctx, ptrdiff_t size) {
