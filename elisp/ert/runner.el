@@ -48,11 +48,6 @@
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
 
-;; Customizable Edebug behavior only appeared in Emacs 27.
-(defvar edebug-behavior-alist)
-(defvar edebug-after-instrumentation-function)
-(defvar edebug-new-definition-function)
-
 ;; ERT resource variables only appeared in Emacs 28.
 (defvar ert-resource-directory-trim-left-regexp)
 (defvar ert-resource-directory-format)
@@ -65,8 +60,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
   (let* ((attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
-         ;; If possible, we perform our own coverage instrumentation, but that’s
-         ;; only possible in Emacs 27.
+         ;; We perform our own coverage instrumentation.
          (edebug-behavior-alist (cons '(elisp/ert/coverage
                                         elisp/ert/edebug--enter
                                         elisp/ert/edebug--before
