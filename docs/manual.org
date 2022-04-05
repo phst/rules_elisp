@@ -230,11 +230,8 @@ type directly; instead, you obtain instances of this type by accessing repeated
 message fields.  See
 https://developers.google.com/protocol-buffers/docs/proto3#maps.
 
-Starting with Emacs 27, protocol buffer maps are generalized maps.  This means
-you can use the functions from the ~map.el~ library with them.  See the comments
-in ~map.el~ for details.  If you want to support Emacs 26 as well, you should
-use the specialized map functions instead.  See [[*Specialized array and map
-functions]].
+Protocol buffer maps are generalized maps.  This means you can use the functions
+from the ~map.el~ library with them.  See the comments in ~map.el~ for details.
 #+END_deftp
 
 #+ATTR_TEXINFO: :options elisp/proto/map-p object
