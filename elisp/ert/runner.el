@@ -22,7 +22,7 @@
 
 ;;; Code:
 
-(require 'backtrace nil :noerror)  ; only in Emacs 27
+(require 'backtrace)
 (require 'bytecomp)
 (require 'cl-lib)
 (require 'cl-macs)
@@ -373,11 +373,7 @@ NAME is the name of the test."
           (print-length 50)
           (backtrace (ert-test-result-with-condition-backtrace result))
           (infos (ert-test-result-with-condition-infos result)))
-      (cond ((fboundp 'backtrace-to-string)  ; Emacs 27
-             (insert (backtrace-to-string backtrace)))
-            ((fboundp 'debugger-insert-backtrace)  ; Emacs 26
-             (debugger-insert-backtrace backtrace nil))
-            (t (error "Unsupported Emacs version")))
+      (insert (backtrace-to-string backtrace))
       (goto-char (point-min))
       (while (not (eobp))
         (delete-region (min (line-end-position) (+ 120 (point)))
