@@ -967,11 +967,6 @@ static emacs_value SymbolValue(struct Context ctx, enum GlobalSymbol symbol) {
   return FuncallSymbol1(ctx, kSymbolValue, GlobalSymbol(ctx, symbol));
 }
 
-static void Set(struct Context ctx, enum GlobalSymbol symbol,
-                emacs_value value) {
-  FuncallSymbol2(ctx, kSet, GlobalSymbol(ctx, symbol), value);
-}
-
 #ifndef NDEBUG
 static bool IsAscii(const char* string) {
   for (const char* p = string; *p != '\0'; ++p) {
@@ -1021,20 +1016,6 @@ static size_t PrintLength(struct Context ctx) {
   if (n < 0) return 0;
   if ((uintmax_t)n > (uintmax_t)SIZE_MAX) return SIZE_MAX;  // saturate
   return (size_t)n;
-}
-
-// Inhibit garbage collection to work around Bug#31238 in Emacs 26.
-static void InhibitGC(struct Context ctx) {
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-  if (IsEmacs27(ctx)) return;  // nothing to do
-#endif
-  // We still need to check ‘emacs-major-version’ in case the header is too old.
-  intmax_t version = ExtractInteger(ctx, SymbolValue(ctx, kEmacsMajorVersion));
-  if (!Success(ctx)) return;
-  if (version >= 27) return;  // nothing to do
-  fputs("Inhibiting Emacs garbage collection to work around Bug#31238\n",
-        stderr);
-  Set(ctx, kGcConsThreshold, SymbolValue(ctx, kMostPositiveFixnum));
 }
 
 /// String manipulation
@@ -3949,7 +3930,6 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   const struct Globals* globals = InitializeGlobals(env, pool);
   if (globals == NULL) return kCannotInitializeGlobals;
   struct Context ctx = {env, globals};
-  InhibitGC(ctx);
   Defun(ctx, "elisp/proto/make", 1, emacs_variadic_function,
         "Create a new mutable protocol buffer message object.\n"
         "TYPE must be a symbol denoting a generated protocol buffer\n"
