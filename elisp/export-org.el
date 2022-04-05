@@ -1,6 +1,6 @@
 ;;; export-org.el --- export Org-mode file to Texinfo manual  -*- lexical-binding: t; -*-
 
-;; Copyright 2021 Google LLC
+;; Copyright 2021, 2022 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -28,8 +28,6 @@
 (require 'warnings)
 
 (unless noninteractive (user-error "This file works only in batch mode"))
-
-(defvar warning-fill-column)  ; only in Emacs 27 and later
 
 (pcase command-line-args-left
   (`(,input ,output)
