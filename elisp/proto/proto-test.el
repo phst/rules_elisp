@@ -770,7 +770,7 @@
     (should (string-empty-p messages))))
 
 (ert-deftest elisp/proto/uint64 ()
-  (let* ((too-large (lsh 1 64))  ; no literals to keep Emacs 26 working
+  (let* ((too-large #x10000000000000000)
          (max (1- too-large))
          (message (elisp/proto/Test-new :optional_uint64 max)))
     (should (eql (elisp/proto/field message 'optional_uint64) max))
