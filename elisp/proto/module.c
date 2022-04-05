@@ -333,9 +333,9 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 // version check to ensure that both emacs-module.h and the running Emacs binary
 // are recent enough, using this pattern:
 //
-//   #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
-//   if (IsEmacs27(ctx)) {
-//     …code that assumes Emacs 27…
+//   #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
+//   if (IsEmacs28(ctx)) {
+//     …code that assumes Emacs 28…
 //   }
 //   #endif
 //   …fallback code…
