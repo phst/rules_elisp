@@ -148,9 +148,6 @@ alias(
     name = "emacs_cc_toolchain",
     actual = "@bazel_tools//tools/cpp:current_cc_toolchain",
     visibility = [
-        "@gnu_emacs_26.1//:__pkg__",
-        "@gnu_emacs_26.2//:__pkg__",
-        "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
@@ -166,9 +163,6 @@ cc_toolchain_suite(
         "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
     },
     visibility = [
-        "@gnu_emacs_26.1//:__pkg__",
-        "@gnu_emacs_26.2//:__pkg__",
-        "@gnu_emacs_26.3//:__pkg__",
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
