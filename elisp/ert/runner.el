@@ -83,6 +83,14 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          ;; (cf. https://docs.bazel.build/versions/4.2.2/test-encyclopedia.html#initial-conditions).
          (workspace-name (file-name-nondirectory
                           (directory-file-name default-directory)))
+         (runfiles-handler-installed
+          (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
+         ;; If the runfiles filename handler is installed, use that.  It’s more
+         ;; correct and should also work on Windows.
+         (resource-root (file-name-as-directory
+                         (if runfiles-handler-installed
+                             (concat "/bazel-runfile:" workspace-name)
+                           default-directory)))
          ;; Best-effort support for ‘ert-resource-directory’ and
          ;; ‘ert-resource-file’.  The directory returned by
          ;; ‘ert-resource-directory’ will typically be in the execution root and
@@ -94,9 +102,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (ert-resource-directory-trim-left-regexp
           (rx-to-string `(seq (* nonl) ?/ ,workspace-name ?/) :no-group))
          (ert-resource-directory-format
-          (concat (replace-regexp-in-string (rx ?%) "%%" default-directory
+          (concat (replace-regexp-in-string (rx ?%) "%%" resource-root
                                             :fixedcase :literal)
-                  "/%s-resources/"))
+                  "%s-resources/"))
          (report-file (getenv "XML_OUTPUT_FILE"))
          (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
          (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
@@ -1132,6 +1140,9 @@ SPEC is the prefix for ‘gensym’."
 
 (defalias 'elisp/ert/edebug--get-spec
   (if (fboundp 'edebug-get-spec) 'edebug-get-spec 'get-edebug-spec))
+
+(declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
+                  (operation &rest args))
 
 (provide 'elisp/ert/runner)
 ;;; runner.el ends here
