@@ -3931,7 +3931,7 @@ enum InitializationResult {
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   enum {
     kMinimumRuntimeSize = sizeof *rt,
-    kMinimumEnvironmentSize = sizeof(struct emacs_env_26)
+    kMinimumEnvironmentSize = sizeof(struct emacs_env_27)
   };
   if (rt->size < kMinimumRuntimeSize) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
