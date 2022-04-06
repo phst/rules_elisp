@@ -560,13 +560,11 @@ static intmax_t ExtractRangedInteger(struct Context ctx, intmax_t min,
   return i;
 }
 
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 27
 enum {
   kLimbBits = sizeof(emacs_limb_t) * CHAR_BIT,
   kLimbsForUintmax =
       (sizeof(uintmax_t) + sizeof(emacs_limb_t) - 1) / sizeof(emacs_limb_t)
 };
-#endif
 
 // Protocol buffers and the µpb library use unsigned types heavily, so we have
 // some helper functions to convert them as well.
