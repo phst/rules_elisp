@@ -327,14 +327,14 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 // version check to ensure that both emacs-module.h and the running Emacs binary
 // are recent enough, using this pattern:
 //
-//   #if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
+//   #if EMACS_MAJOR_VERSION >= 28
 //   if (IsEmacs28(ctx)) {
 //     …code that assumes Emacs 28…
 //   }
 //   #endif
 //   …fallback code…
 
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
+#if EMACS_MAJOR_VERSION >= 28
 static bool IsEmacs28(struct Context ctx) {
   enum { kMinimumSize = sizeof(struct emacs_env_28) };
   return ctx.env->size >= kMinimumSize;
@@ -714,7 +714,7 @@ static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
     OverflowError0(ctx);
     return NULL;
   }
-#if defined EMACS_MAJOR_VERSION && EMACS_MAJOR_VERSION >= 28
+#if EMACS_MAJOR_VERSION >= 28
   if (IsEmacs28(ctx)) {
     return ctx.env->make_unibyte_string(ctx.env, value.data,
                                         (ptrdiff_t)value.size);
