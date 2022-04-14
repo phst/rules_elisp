@@ -488,7 +488,7 @@ elisp_binary = rule(
         _grep_includes = attr.label(
             allow_single_file = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         _binary_libs = attr.label_list(
@@ -568,7 +568,7 @@ elisp_test = rule(
         _grep_includes = attr.label(
             allow_single_file = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         _test_libs = attr.label_list(

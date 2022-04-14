@@ -96,7 +96,7 @@ recommended.""",
         "_build": attr.label(
             default = "//emacs:build",
             executable = True,
-            cfg = "host",
+            cfg = "exec",
         ),
         "_cc_toolchain": attr.label(
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
@@ -109,7 +109,7 @@ recommended.""",
         "_grep_includes": attr.label(
             allow_single_file = True,
             executable = True,
-            cfg = "host",
+            cfg = "exec",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         "_emacs_libs": attr.label_list(
