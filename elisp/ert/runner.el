@@ -242,12 +242,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
-            (cl-incf skipped)
-            (let ((message (elisp/ert/failure--message name result))
-                  (condition (ert-test-skipped-condition result)))
-              (setq report `((skipped
-                              ((message . ,(error-message-string condition)))
-                              ,message)))))
+            (cl-incf skipped))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in the XML
                ;; report.
@@ -261,10 +256,15 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                 ;; This shouldn’t normally happen, but happens due to a bug in
                 ;; ERT for forms such as (should (integerp (ert-fail "Boo"))).
                 (push 'ert-test-failed condition))
-              (unless expected
-                (setq report `((,(if failed 'failure 'error)
+              (when-let ((tag (cond ((ert-test-skipped-p result) 'skipped)
+                                    (expected nil)
+                                    (failed 'failure)
+                                    (t 'error))))
+                (setq report `((,tag
                                 ((message . ,(error-message-string condition))
-                                 (type . ,(symbol-name (car condition))))
+                                 ,@(unless (eq tag 'skipped)
+                                     `((type . ,(symbol-name
+                                                 (car condition))))))
                                 ,message))))))
           (push `(testcase ((name . ,(symbol-name name))
                             ;; classname is required, but we don’t have test
