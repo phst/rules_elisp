@@ -34,7 +34,7 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 # https://github.com/bazelbuild/bazel/issues/8305.
 versions.check("4.2.1")
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive", "http_file")
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_python",
@@ -85,11 +85,14 @@ http_archive(
     ],
 )
 
-http_file(
+http_archive(
     name = "junit_xsd",
-    downloaded_file_path = "JUnit.xsd",
-    sha256 = "cfc8bc26da1794da8c3f4c4c4de9d24a671b232076d4e61d92fa72834e28230e",
-    urls = ["https://raw.githubusercontent.com/windyroad/JUnit-Schema/d6daa414c448da22b810c8562f9d6fca086983ba/JUnit.xsd"],
+    build_file = "@//:junit_xsd.BUILD",
+    sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
+    strip_prefix = "JUnit-Schema-1.0.0/",
+    urls = [
+        "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
+    ],
 )
 
 http_archive(

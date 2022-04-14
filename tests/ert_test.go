@@ -96,7 +96,7 @@ func Test(t *testing.T) {
 	}
 	t.Log("test process exited")
 
-	schema, err := runfiles.Path("junit_xsd/file/JUnit.xsd")
+	schema, err := runfiles.Path("junit_xsd/JUnit.xsd")
 	if err != nil {
 		t.Fatal(err)
 	}

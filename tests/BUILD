@@ -29,7 +29,7 @@ go_test(
     srcs = ["ert_test.go"],
     data = [
         ":test_test",
-        "@junit_xsd//file",
+        "@junit_xsd//:file",
     ],
     rundir = ".",
     deps = [
