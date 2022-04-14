@@ -246,7 +246,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             (setq report
                   `((skipped
                      ((message . ,(error-message-string
-                                   (ert-test-skipped-condition result))))))))
+                                   (ert-test-skipped-condition result))))
+                     ,(elisp/ert/failure--message name result)))))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in the XML
                ;; report.

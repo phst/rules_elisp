@@ -215,7 +215,7 @@ func Test(t *testing.T) {
 			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
 			{
 				Name: "skip", ClassName: "ERT", Time: wantElapsed,
-				Skipped: message{Message: "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)"},
+				Skipped: message{Message: "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)", Description: "something"},
 			},
 			{
 				Name: "special-chars", ClassName: "ERT", Time: wantElapsed,
