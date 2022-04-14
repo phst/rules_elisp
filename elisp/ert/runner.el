@@ -225,7 +225,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                      ;; for the XML report.
                      (ert-test-result-type-p result '(or :passed :failed))))
                (status (ert-string-for-test-result result expected))
-               (report nil))
+               (tag nil)
+               (failure-message nil)
+               (type nil)
+               (description nil))
           (message "Test %s %s and took %d ms" name status
                    (* (float-time duration) 1000))
           (cl-incf total)
@@ -242,12 +245,14 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
-            (cl-incf skipped))
+            (cl-incf skipped)
+            (setq tag 'skipped))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in the XML
                ;; report.
-               (setq report '((failure ((message . "Test passed unexpectedly")
-                                        (type . "error"))))))
+               (setq tag 'failure
+                     failure-message "Test passed unexpectedly"
+                     type 'error))
           (when (ert-test-result-with-condition-p result)
             (let ((message (elisp/ert/failure--message name result))
                   (condition (ert-test-result-with-condition-condition result)))
@@ -256,23 +261,23 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                 ;; This shouldn’t normally happen, but happens due to a bug in
                 ;; ERT for forms such as (should (integerp (ert-fail "Boo"))).
                 (push 'ert-test-failed condition))
-              (when-let ((tag (cond ((ert-test-skipped-p result) 'skipped)
-                                    (expected nil)
-                                    (failed 'failure)
-                                    (t 'error))))
-                (setq report `((,tag
-                                ((message . ,(error-message-string condition))
-                                 ,@(unless (eq tag 'skipped)
-                                     `((type . ,(symbol-name
-                                                 (car condition))))))
-                                ,message))))))
-          (push `(testcase ((name . ,(symbol-name name))
-                            ;; classname is required, but we don’t have test
-                            ;; classes, so fill in a dummy value.
-                            (classname . "ERT")
-                            (time . ,(format-time-string "%s.%N" duration)))
-                           ,@report)
-                test-reports)))
+              (setq failure-message (error-message-string condition)
+                    description message)
+              (unless expected
+                (setq tag (if failed 'failure 'error)
+                      type (car condition)))))
+          (let ((report (and tag
+                             `((,tag
+                                ((message . ,failure-message)
+                                 ,@(and type `((type . ,(symbol-name type)))))
+                                ,@(and description `(,description)))))))
+            (push `(testcase ((name . ,(symbol-name name))
+                              ;; classname is required, but we don’t have test
+                              ;; classes, so fill in a dummy value.
+                              (classname . "ERT")
+                              (time . ,(format-time-string "%s.%N" duration)))
+                             ,@report)
+                  test-reports))))
       (message "Running %d tests finished, %d results unexpected"
                total unexpected)
       (unless (member report-file '(nil ""))
