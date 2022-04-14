@@ -15,7 +15,7 @@
 filegroup(
     name = "file",
     data = ["JUnit.xsd"],
-    visibility = ["@phst_rules_elisp//..."],
+    visibility = ["@phst_rules_elisp//tests:__pkg__"],
 )
 
 # Local Variables:
