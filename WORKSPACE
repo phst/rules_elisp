@@ -60,10 +60,10 @@ install_deps()
 
 http_archive(
     name = "io_bazel_stardoc",
-    sha256 = "1e19581f8b83bc5ea8aa3959d8900f120eb1411d0e6abff6f510fcd60a5148db",
-    strip_prefix = "stardoc-cdd19379490c681563b38ef86299f039bd368ce0/",
+    sha256 = "aa814dae0ac400bbab2e8881f9915c6f47c49664bf087c409a15f90438d2c23e",
     urls = [
-        "https://github.com/bazelbuild/stardoc/archive/cdd19379490c681563b38ef86299f039bd368ce0.zip",  # 2022-02-16
+        "https://mirror.bazel.build/github.com/bazelbuild/stardoc/releases/download/0.5.1/stardoc-0.5.1.tar.gz",
+        "https://github.com/bazelbuild/stardoc/releases/download/0.5.1/stardoc-0.5.1.tar.gz",
     ],
 )
 
