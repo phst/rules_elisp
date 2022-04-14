@@ -243,11 +243,11 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
             (cl-incf skipped)
-            (setq report
-                  `((skipped
-                     ((message . ,(error-message-string
-                                   (ert-test-skipped-condition result))))
-                     ,(elisp/ert/failure--message name result)))))
+            (let ((message (elisp/ert/failure--message name result))
+                  (condition (ert-test-skipped-condition result)))
+              (setq report `((skipped
+                              ((message . ,(error-message-string condition)))
+                              ,message)))))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in the XML
                ;; report.
