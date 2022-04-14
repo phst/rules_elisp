@@ -132,12 +132,12 @@ func Test(t *testing.T) {
 		Properties []property `xml:"property"`
 	}
 	type testCase struct {
-		Name      string    `xml:"name,attr"`
-		ClassName string    `xml:"classname,attr"`
-		Time      float64   `xml:"time,attr"`
-		Skipped   *struct{} `xml:"skipped"`
-		Error     message   `xml:"error"`
-		Failure   message   `xml:"failure"`
+		Name      string  `xml:"name,attr"`
+		ClassName string  `xml:"classname,attr"`
+		Time      float64 `xml:"time,attr"`
+		Skipped   message `xml:"skipped"`
+		Error     message `xml:"error"`
+		Failure   message `xml:"failure"`
 	}
 	type report struct {
 		XMLName    xml.Name
@@ -213,7 +213,10 @@ func Test(t *testing.T) {
 				Failure: message{Message: `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`, Type: `ert-test-failed`, Description: "something"},
 			},
 			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
-			{Name: "skip", ClassName: "ERT", Time: wantElapsed, Skipped: new(struct{})},
+			{
+				Name: "skip", ClassName: "ERT", Time: wantElapsed,
+				Skipped: message{Message: "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)"},
+			},
 			{
 				Name: "special-chars", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->", Type: `error`, Description: "something"},
