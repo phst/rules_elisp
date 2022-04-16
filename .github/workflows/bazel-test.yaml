@@ -29,7 +29,8 @@ jobs:
         bazel: [4.2.1, 4.2.2, 5.0.0, 5.1.0, 5.1.1, latest, rolling]
         os: [ubuntu-latest, macos-latest, windows-latest]
         exclude:
-          # FIXME: Investigate why this fails
+          # FIXME: Investigate why this fails.  See
+          # https://groups.google.com/g/bazel-discuss/c/eL9xwmtV3Ik.
           - bazel: rolling
             os: windows-latest
     runs-on: ${{matrix.os}}
