@@ -23,7 +23,6 @@
 ;;; Code:
 
 (require 'cl-lib)
-(require 'eieio)
 (require 'pcase)
 (require 'rx)
 (require 'subr-x)
@@ -31,11 +30,17 @@
 
 ;;;; Main interface:
 
-(defclass elisp/runfiles/runfiles () ()
-  :abstract t
-  :documentation "Provides access to Bazel runfiles.
-This class is abstract; use ‘elisp/runfiles/make’ to create
-instances or ‘elisp/runfiles/get’ access a global instance.")
+(cl-defstruct (elisp/runfiles/runfiles
+               (:conc-name elisp/runfiles/runfiles--)
+               (:constructor elisp/runfiles/runfiles--make (impl))
+               (:copier nil)
+               (:noinline t))
+  "Provides access to Bazel runfiles.
+Use ‘elisp/runfiles/make’ to create instances of
+‘elisp/runfiles/runfiles’, or ‘elisp/runfiles/get’ access a
+global instance.  All structure fields are implementation
+details."
+  (impl nil :read-only t))
 
 (cl-defun elisp/runfiles/make (&key manifest directory)
   "Return a new instance of a subclass of ‘elisp/runfiles/runfiles’.
@@ -90,7 +95,8 @@ manifest, but doesn’t map to a real file on the filesystem; this
 indicates that an empty file should be used in its place."
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles elisp/runfiles/runfiles)
-  (elisp/runfiles/rlocation--internal runfiles filename))
+  (elisp/runfiles/rlocation--internal (elisp/runfiles/runfiles--impl runfiles)
+                                      filename))
 
 (cl-defun elisp/runfiles/env-vars
     (&optional (runfiles (elisp/runfiles/get))
@@ -106,7 +112,8 @@ local names on that host, otherwise signal an error of type
 ‘elisp/runfiles/remote’."
   (cl-check-type runfiles elisp/runfiles/runfiles)
   (cl-check-type remote (or string null))
-  (elisp/runfiles/env-vars--internal runfiles remote))
+  (elisp/runfiles/env-vars--internal (elisp/runfiles/runfiles--impl runfiles)
+                                     remote))
 
 (defun elisp/runfiles/filename-p (string)
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
@@ -402,10 +409,12 @@ unchanged."
 
 ;;;; Implementations of the ‘elisp/runfiles/runfiles’ class:
 
-(defclass elisp/runfiles/runfiles--manifest (elisp/runfiles/runfiles)
-  ((filename :initarg :filename :type string)
-   (manifest :initarg :manifest :type hash-table))
-  :documentation "Manifest-based runfiles implementation.")
+(cl-defstruct (elisp/runfiles/runfiles--manifest
+               (:constructor elisp/runfiles/manifest--make (filename manifest))
+               (:copier nil))
+  "Manifest-based runfiles implementation."
+  (filename nil :read-only t :type string)
+  (manifest nil :read-only t :type hash-table))
 
 (defun elisp/runfiles/make--manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
@@ -432,14 +441,16 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
            (puthash key :empty manifest))
           (other (signal 'elisp/runfiles/syntax-error (list filename other))))
         (forward-line)))
-    (elisp/runfiles/runfiles--manifest :filename filename
-                                       :manifest manifest)))
+    (elisp/runfiles/runfiles--make
+     (elisp/runfiles/manifest--make filename manifest))))
 
 (cl-defmethod elisp/runfiles/rlocation--internal
   ((runfiles elisp/runfiles/runfiles--manifest) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (let ((result (gethash filename (oref runfiles manifest))))
+  (let ((result
+         (gethash filename
+                  (elisp/runfiles/runfiles--manifest-manifest runfiles))))
     (cond
       ((not result)
        ;; Look for ancestor directory mapping.  See
@@ -449,7 +460,9 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
          (while continue
            (pcase candidate
              ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
-              (if-let ((dir (gethash prefix (oref runfiles manifest))))
+              (if-let ((dir (gethash prefix
+                                     (elisp/runfiles/runfiles--manifest-manifest
+                                      runfiles))))
                   (setq result (concat dir (substring-no-properties
                                             filename (length prefix)))
                         continue nil)
@@ -457,10 +470,12 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
              (_ (setq continue nil)))))
        (or result
            (signal 'elisp/runfiles/not-found
-                   (list filename (oref runfiles filename)))))
+                   (list filename
+                         (elisp/runfiles/runfiles--manifest-filename runfiles)))))
       ((eq result :empty)
        (signal 'elisp/runfiles/empty
-               (list filename (oref runfiles filename))))
+               (list filename
+                     (elisp/runfiles/runfiles--manifest-filename runfiles))))
       (t result))))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
@@ -468,35 +483,39 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
   "Implementation of ‘elisp/runfiles/env-vars’ for manifest-based runfiles.
 RUNFILES is a runfiles object, and REMOTE is the remote host
 identifier."
-  (with-slots (filename) runfiles
+  (let ((filename (elisp/runfiles/runfiles--manifest-filename runfiles)))
     (unless (equal (file-remote-p filename) remote)
       (signal 'elisp/runfiles/remote (list filename remote)))
     (list (concat "RUNFILES_MANIFEST_FILE="
                   (file-name-unquote (file-local-name filename)))
           "RUNFILES_DIR" "JAVA_RUNFILES")))
 
-(defclass elisp/runfiles/runfiles--directory (elisp/runfiles/runfiles)
-  ((directory :initarg :directory :type string))
-  :documentation "Directory-based runfiles implementation.")
+(cl-defstruct (elisp/runfiles/runfiles--directory
+               (:constructor elisp/runfiles/directory--make (directory))
+               (:copier nil))
+  "Directory-based runfiles implementation."
+  (directory nil :read-only t :type string))
 
 (defun elisp/runfiles/make--directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
 Return an object of class ‘elisp/runfiles/runfiles--directory’."
-  (elisp/runfiles/runfiles--directory
-   :directory (file-name-as-directory (expand-file-name directory))))
+  (elisp/runfiles/runfiles--make
+   (elisp/runfiles/directory--make
+    (file-name-as-directory (expand-file-name directory)))))
 
 (cl-defmethod elisp/runfiles/rlocation--internal
   ((runfiles elisp/runfiles/runfiles--directory) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for directory-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (expand-file-name filename (oref runfiles directory)))
+  (expand-file-name filename
+                    (elisp/runfiles/runfiles--directory-directory runfiles)))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
   ((runfiles elisp/runfiles/runfiles--directory) remote)
   "Implementation of ‘elisp/runfiles/env-vars’ for directory-based runfiles.
 RUNFILES is a runfiles object, and REMOTE is the remote host
 identifier."
-  (with-slots (directory) runfiles
+  (let ((directory (elisp/runfiles/runfiles--directory-directory runfiles)))
     (unless (equal (file-remote-p directory) remote)
       (signal 'elisp/runfiles/remote (list directory remote)))
     (let ((directory (file-name-unquote (file-local-name directory))))
