@@ -613,20 +613,21 @@
     (should (eql (map-length map) 2))))
 
 (ert-deftest elisp/proto/timestamp ()
-  (let* ((timestamp (elisp/proto/make-timestamp (encode-time 1 2 3 4 5 2022 t)))
+  (let* ((timestamp (elisp/proto/make-timestamp
+                     (encode-time '(1 2 3 4 5 2022 nil nil t))))
          (time (elisp/proto/timestamp timestamp)))
     (should (equal (format-time-string "%F %T" time t)
                    "2022-05-04 03:02:01"))
     (should (eql (setf (elisp/proto/timestamp timestamp) 9999) 9999))))
 
 (ert-deftest elisp/proto/make-timestamp/args-out-of-range/future ()
-  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 20000 t))))
+  (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-timestamp timestamp)
                   :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/make-timestamp/args-out-of-range/past ()
-  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 -20000 t))))
+  (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 -20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-timestamp timestamp)
                   :type 'args-out-of-range)))
@@ -653,13 +654,13 @@
      (should (eql nanos -500000000)))))
 
 (ert-deftest elisp/proto/duration/args-out-of-range/future ()
-  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 20000 t))))
+  (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-duration timestamp)
                   :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/duration/args-out-of-range/past ()
-  (let ((timestamp (ignore-errors (encode-time 0 0 0 0 0 -20000 t))))
+  (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 -20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-duration timestamp)
                   :type 'args-out-of-range)))
