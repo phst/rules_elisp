@@ -29,7 +29,7 @@
          (filename (elisp/runfiles/rlocation
                     "phst_rules_elisp/elisp/runfiles/test.txt" runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
-    (should (object-of-class-p runfiles 'elisp/runfiles/runfiles))
+    (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
     (should (file-readable-p filename))
     (should (file-regular-p filename))
