@@ -63,6 +63,17 @@
     (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
                   :type 'elisp/runfiles/empty)))
 
+(ert-deftest elisp/runfiles/make/manifest/directory ()
+  "Check that we find runfiles in a mapped directory.
+See https://github.com/bazelbuild/bazel/issues/14336 for
+context."
+  (let* ((manifest (elisp/runfiles/rlocation
+                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+         (runfiles (elisp/runfiles/make :manifest manifest
+                                        :directory "/invalid/")))
+    (should (equal (elisp/runfiles/rlocation "foo/bar/baz" runfiles)
+                   "/:runfiles/foo/bar/baz"))))
+
 (ert-deftest elisp/runfiles/file-handler ()
   (let ((file-name-handler-alist file-name-handler-alist))
     (elisp/runfiles/install-handler)

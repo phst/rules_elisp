@@ -442,8 +442,22 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
   (let ((result (gethash filename (oref runfiles manifest))))
     (cond
       ((not result)
-       (signal 'elisp/runfiles/not-found
-               (list filename (oref runfiles filename))))
+       ;; Look for ancestor directory mapping.  See
+       ;; https://github.com/bazelbuild/bazel/issues/14336.
+       (let ((continue t)
+             (candidate filename))
+         (while continue
+           (pcase candidate
+             ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
+              (if-let ((dir (gethash prefix (oref runfiles manifest))))
+                  (setq result (concat dir (substring-no-properties
+                                            filename (length prefix)))
+                        continue nil)
+                (setq candidate prefix)))
+             (_ (setq continue nil)))))
+       (or result
+           (signal 'elisp/runfiles/not-found
+                   (list filename (oref runfiles filename)))))
       ((eq result :empty)
        (signal 'elisp/runfiles/empty
                (list filename (oref runfiles filename))))
