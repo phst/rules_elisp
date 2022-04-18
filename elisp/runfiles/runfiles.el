@@ -451,23 +451,23 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
   (let* ((table (elisp/runfiles/runfiles--manifest-manifest runfiles))
          (manifest-file (elisp/runfiles/runfiles--manifest-filename runfiles))
          (result (gethash filename table)))
+    (unless result
+      ;; Look for ancestor directory mapping.  See
+      ;; https://github.com/bazelbuild/bazel/issues/14336.
+      (let ((continue t)
+            (candidate filename))
+        (while continue
+          (pcase candidate
+            ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
+             (if-let ((dir (gethash prefix table)))
+                 (setq result (concat dir (substring-no-properties
+                                           filename (length prefix)))
+                       continue nil)
+               (setq candidate prefix)))
+            (_ (setq continue nil)))))      )
     (cond
       ((not result)
-       ;; Look for ancestor directory mapping.  See
-       ;; https://github.com/bazelbuild/bazel/issues/14336.
-       (let ((continue t)
-             (candidate filename))
-         (while continue
-           (pcase candidate
-             ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
-              (if-let ((dir (gethash prefix table)))
-                  (setq result (concat dir (substring-no-properties
-                                            filename (length prefix)))
-                        continue nil)
-                (setq candidate prefix)))
-             (_ (setq continue nil)))))
-       (or result
-           (signal 'elisp/runfiles/not-found (list filename manifest-file))))
+       (signal 'elisp/runfiles/not-found (list filename manifest-file)))
       ((eq result :empty)
        (signal 'elisp/runfiles/empty (list filename manifest-file)))
       (t result))))
