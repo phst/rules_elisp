@@ -43,7 +43,7 @@ details."
   (impl nil :read-only t))
 
 (cl-defun elisp/runfiles/make (&key manifest directory)
-  "Return a new instance of a subclass of ‘elisp/runfiles/runfiles’.
+  "Return a new instance of the type ‘elisp/runfiles/runfiles’.
 MANIFEST and DIRECTORY specify the location of the runfiles.  By
 default, use environmental variable to find the runfiles.
 MANIFEST specifies the filename of a runfile manifest.  DIRECTORY
@@ -74,7 +74,7 @@ an error of type ‘elisp/runfiles/not-found’."
   "Cache for ‘elisp/runfiles/get’.")
 
 (defun elisp/runfiles/get ()
-  "Return a global instance of the class ‘elisp/runfiles/runfiles’.
+  "Return a global instance of the type ‘elisp/runfiles/runfiles’.
 Cache the result once created; this means that changes to the
 runfile-specific environmental variables don’t take effect once
 the global instance is initialized."
@@ -87,7 +87,7 @@ the global instance is initialized."
 (cl-defun elisp/runfiles/rlocation
     (filename &optional (runfiles (elisp/runfiles/get)))
   "Return a filename corresponding to the runfile FILENAME.
-RUNFILES must be an object of the class
+RUNFILES must be an object of the type
 ‘elisp/runfiles/runfiles’; it defaults to a global instance.
 Signal an error of type ‘elisp/runfiles/not-found’ if FILENAME
 wasn’t found in the runfiles tree.  Signal an error of type
@@ -105,7 +105,7 @@ indicates that an empty file should be used in its place."
   "Return a list of environmental variable for subprocesses.
 Prepend this list to ‘process-environment’ if you want to invoke
 a process that should have access to the runfiles.  RUNFILES must
-be an object of the class ‘elisp/runfiles/runfiles’; it defaults
+be an object of the type ‘elisp/runfiles/runfiles’; it defaults
 to a global instance.  REMOTE must be nil a remote host
 identifier (see Info node ‘(elisp) Magic File Names’); if the
 returned values are on the same remote host as REMOTE, return the
@@ -408,7 +408,7 @@ unchanged."
     (other other)))
 
 
-;;;; Implementations of the ‘elisp/runfiles/runfiles’ class:
+;;;; Implementations of the ‘elisp/runfiles/runfiles’ type:
 
 (cl-defstruct (elisp/runfiles/runfiles--manifest
                (:constructor elisp/runfiles/manifest--make (filename manifest))
@@ -419,7 +419,7 @@ unchanged."
 
 (defun elisp/runfiles/make--manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
-Return an object of class ‘elisp/runfiles/runfiles--manifest’."
+Return an object of type ‘elisp/runfiles/runfiles--manifest’."
   (let ((manifest (make-hash-table :test #'equal))
         (filename (expand-file-name filename)))
     (with-temp-buffer
@@ -498,7 +498,7 @@ identifier."
 
 (defun elisp/runfiles/make--directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
-Return an object of class ‘elisp/runfiles/runfiles--directory’."
+Return an object of type ‘elisp/runfiles/runfiles--directory’."
   (elisp/runfiles/directory--make
    (file-name-as-directory (expand-file-name directory))))
 
