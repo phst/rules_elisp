@@ -448,9 +448,9 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
   ((runfiles elisp/runfiles/runfiles--manifest) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (let ((result
-         (gethash filename
-                  (elisp/runfiles/runfiles--manifest-manifest runfiles))))
+  (let* ((table (elisp/runfiles/runfiles--manifest-manifest runfiles))
+         (manifest-file (elisp/runfiles/runfiles--manifest-filename runfiles))
+         (result (gethash filename table)))
     (cond
       ((not result)
        ;; Look for ancestor directory mapping.  See
@@ -460,22 +460,16 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
          (while continue
            (pcase candidate
              ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
-              (if-let ((dir (gethash prefix
-                                     (elisp/runfiles/runfiles--manifest-manifest
-                                      runfiles))))
+              (if-let ((dir (gethash prefix table)))
                   (setq result (concat dir (substring-no-properties
                                             filename (length prefix)))
                         continue nil)
                 (setq candidate prefix)))
              (_ (setq continue nil)))))
        (or result
-           (signal 'elisp/runfiles/not-found
-                   (list filename
-                         (elisp/runfiles/runfiles--manifest-filename runfiles)))))
+           (signal 'elisp/runfiles/not-found (list filename manifest-file))))
       ((eq result :empty)
-       (signal 'elisp/runfiles/empty
-               (list filename
-                     (elisp/runfiles/runfiles--manifest-filename runfiles))))
+       (signal 'elisp/runfiles/empty (list filename manifest-file)))
       (t result))))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
@@ -506,8 +500,8 @@ Return an object of type ‘elisp/runfiles/runfiles--directory’."
   ((runfiles elisp/runfiles/runfiles--directory) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for directory-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (expand-file-name filename
-                    (elisp/runfiles/runfiles--directory-directory runfiles)))
+  (let ((directory (elisp/runfiles/runfiles--directory-directory runfiles)))
+    (expand-file-name filename directory)))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
   ((runfiles elisp/runfiles/runfiles--directory) remote)
