@@ -465,12 +465,10 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
                        continue nil)
                (setq candidate prefix)))
             (_ (setq continue nil)))))      )
-    (cond
-      ((not result)
-       (signal 'elisp/runfiles/not-found (list filename manifest-file)))
-      ((eq result :empty)
-       (signal 'elisp/runfiles/empty (list filename manifest-file)))
-      (t result))))
+    (cl-case result
+      ((nil) (signal 'elisp/runfiles/not-found (list filename manifest-file)))
+      (:empty (signal 'elisp/runfiles/empty (list filename manifest-file)))
+      (otherwise result))))
 
 (cl-defmethod elisp/runfiles/env-vars--internal
   ((runfiles elisp/runfiles/runfiles--manifest) remote)
