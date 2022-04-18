@@ -71,7 +71,8 @@ This type corresponds to the protocol buffer message type ‘%s’."
     (pp `(cl-defstruct (,struct
                         (:conc-name ,conc-name)
                         (:constructor ,private-constructor (arena ptr))
-                        (:include elisp/proto/message))
+                        (:include elisp/proto/message)
+                        (:noinline t))
            ,struct-doc))
     (terpri)
     (pp `(defun ,public-constructor (,@(and fields '(&rest fields)))
