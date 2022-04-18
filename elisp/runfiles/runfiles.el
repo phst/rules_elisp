@@ -60,14 +60,15 @@ an error of type ‘elisp/runfiles/not-found’."
     (let ((value (getenv "RUNFILES_DIR")))
       (and value (not (string-empty-p value))
            (setq directory (concat "/:" value)))))
-  (or (and manifest (not (string-equal manifest ""))
-           (file-regular-p manifest)
-           (file-readable-p manifest)
-           (elisp/runfiles/make--manifest manifest))
-      (and directory (not (string-equal directory ""))
-           (file-accessible-directory-p directory)
-           (elisp/runfiles/make--directory directory))
-      (signal 'elisp/runfiles/not-found (list manifest directory))))
+  (elisp/runfiles/runfiles--make
+   (or (and manifest (not (string-equal manifest ""))
+            (file-regular-p manifest)
+            (file-readable-p manifest)
+            (elisp/runfiles/make--manifest manifest))
+       (and directory (not (string-equal directory ""))
+            (file-accessible-directory-p directory)
+            (elisp/runfiles/make--directory directory))
+       (signal 'elisp/runfiles/not-found (list manifest directory)))))
 
 (defvar elisp/runfiles/global--cache nil
   "Cache for ‘elisp/runfiles/get’.")
@@ -441,8 +442,7 @@ Return an object of class ‘elisp/runfiles/runfiles--manifest’."
            (puthash key :empty manifest))
           (other (signal 'elisp/runfiles/syntax-error (list filename other))))
         (forward-line)))
-    (elisp/runfiles/runfiles--make
-     (elisp/runfiles/manifest--make filename manifest))))
+    (elisp/runfiles/manifest--make filename manifest)))
 
 (cl-defmethod elisp/runfiles/rlocation--internal
   ((runfiles elisp/runfiles/runfiles--manifest) filename)
@@ -499,9 +499,8 @@ identifier."
 (defun elisp/runfiles/make--directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
 Return an object of class ‘elisp/runfiles/runfiles--directory’."
-  (elisp/runfiles/runfiles--make
-   (elisp/runfiles/directory--make
-    (file-name-as-directory (expand-file-name directory)))))
+  (elisp/runfiles/directory--make
+   (file-name-as-directory (expand-file-name directory))))
 
 (cl-defmethod elisp/runfiles/rlocation--internal
   ((runfiles elisp/runfiles/runfiles--directory) filename)
