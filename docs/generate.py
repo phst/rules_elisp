@@ -28,6 +28,10 @@ import commonmark.render.renderer
 
 from phst_rules_elisp.docs import stardoc_output_pb2
 
+# The generated protocol buffer modules generate their members dynamically, so
+# Pylint can’t find them.
+# pylint: disable=no-member
+
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
