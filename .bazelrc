@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Run Pylint by default.
-build --aspects=//:private/internal.bzl%check_python
+build --aspects=//:private/defs.bzl%check_python
 build --output_groups=+check_python
 
 # Override hard-coded heap size limit on Visual C++.  See
