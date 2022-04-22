@@ -2597,20 +2597,22 @@ static emacs_value OptionalArg(struct Context ctx, ptrdiff_t nargs,
   return index < nargs ? args[index] : Nil(ctx);
 }
 
-// Specifies a keyword argument for a bit mask as accepted by the various
-// parse/serialize functions.
-struct OptionSpec {
+// Specifies a keyword argument.
+struct KeySpec {
   // Keyword to check.
   enum GlobalSymbol key;
-  // The bit to be set or cleared.  Exactly one bit must be set.
-  uint32_t bit;
-  // Whether the bit should be cleared instead of set.
-  bool negate;
+  // The function to be called upon encountering the keyword argument.  The
+  // function is called with four arguments: a live context, the argument
+  // value, and the ‘iarg’ and ‘parg’ fields.
+  void (*func)(struct Context, emacs_value, int, void*);
+  // Additional arguments to ‘func’.
+  int iarg;
+  void* parg;
 };
 
 // Signals an error that a keyword argument is unknown.
-static void UnknownOption(struct Context ctx, ptrdiff_t nspecs,
-                          const struct OptionSpec* specs, emacs_value arg) {
+static void UnknownKey(struct Context ctx, ptrdiff_t nspecs,
+                       const struct KeySpec* specs, emacs_value arg) {
   assert(nspecs > 0);
   emacs_value* choices = AllocateLispArray(ctx, (size_t)nspecs);
   if (choices == NULL) return;
@@ -2621,56 +2623,62 @@ static void UnknownOption(struct Context ctx, ptrdiff_t nspecs,
   free(choices);
 }
 
-// Matches the given keyword against an array of option specifications.
-static struct OptionSpec FindOption(struct Context ctx, ptrdiff_t nspecs,
-                                    const struct OptionSpec* specs,
-                                    emacs_value arg) {
-  struct OptionSpec null = {kNil, 0, false};
+// Matches the given keyword against an array of option specifications.  Returns
+// a negative value if the keyword is unknown.
+static ptrdiff_t FindKey(struct Context ctx, ptrdiff_t nspecs,
+                         const struct KeySpec* specs, emacs_value arg) {
   for (ptrdiff_t i = 0; i < nspecs; ++i) {
-    struct OptionSpec spec = specs[i];
-    if (EqGlobal(ctx, arg, spec.key)) return spec;
+    if (EqGlobal(ctx, arg, specs[i].key)) return i;
   }
-  UnknownOption(ctx, nspecs, specs, arg);
-  return null;
+  UnknownKey(ctx, nspecs, specs, arg);
+  return -1;
 }
 
-// Parses keyword arguments, setting and clearing bits as specified.  Returns a
-// negative number if something went wrong.  Returns an ‘int’ value because
-// that’s what the various parse/serialize functions accept.  ‘default_opts’
-// specifies the bits to be set by default.
-static int ParseOptions(struct Context ctx, ptrdiff_t nspecs,
-                        const struct OptionSpec* specs, ptrdiff_t nargs,
-                        emacs_value* args, int default_opts) {
+// Parses keyword arguments.  Calls the functions specified in the ‘specs’ array
+// for each actual keyword argument.  Returns ‘false’ if something went wrong.
+static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
+                      const struct KeySpec* specs, ptrdiff_t nargs,
+                      emacs_value* args) {
   assert(nargs >= 0);
   if (nargs % 2 != 0) {
     WrongTypeArgument(ctx, kPlistp, List(ctx, nargs, args));
     return -1;
   }
   if (!CheckIntegerRange(ctx, nargs / 2, 0, nspecs)) return -1;
+  assert(nspecs <= 32);
   uint32_t seen = 0;
-  assert(default_opts >= 0);
-  assert((unsigned int)default_opts <= UINT32_MAX);
-  uint32_t ret = (uint32_t)default_opts;
   for (ptrdiff_t i = 0; i < nargs; i += 2) {
-    struct OptionSpec spec = FindOption(ctx, nspecs, specs, args[i]);
-    uint32_t bit = spec.bit;
-    if (bit == 0) return -1;
-    assert(bit > 0 && (bit & (bit - 1)) == 0);  // exactly one bit set
+    ptrdiff_t j = FindKey(ctx, nspecs, specs, args[i]);
+    if (j < 0) return false;
+    assert(j < nspecs);
+    struct KeySpec spec = specs[j];
+    uint32_t bit = 1 << j;
     if (seen & bit) {
       DuplicateKey(ctx, GlobalSymbol(ctx, spec.key));
       return -1;
     }
     seen |= bit;
-    if (IsNotNil(ctx, args[i + 1])) {
-      if (spec.negate) {
-        ret &= ~bit;
-      } else {
-        ret |= bit;
-      }
-    }
+    spec.func(ctx, args[i + 1], spec.iarg, spec.parg);
   }
-  assert(ret <= INT_MAX);
-  return (int)ret;
+  return true;
+}
+
+static void ToggleBit(void* ptr, int bit, bool set) {
+  int* val = ptr;
+  if (set) {
+    *val |= bit;
+  } else {
+    *val &= ~bit;
+  }
+}
+
+static void SetBit(struct Context ctx, emacs_value value, int bit, void* ptr) {
+  ToggleBit(ptr, bit, IsNotNil(ctx, value));
+}
+
+static void ClearBit(struct Context ctx, emacs_value value, int bit,
+                     void* ptr) {
+  ToggleBit(ptr, bit, IsNil(ctx, value));
 }
 
 static void DefineError(struct Context ctx, enum GlobalSymbol symbol,
@@ -2728,11 +2736,10 @@ static emacs_value Parse(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   struct MutableString serialized =
       ExtractUnibyteString(ctx, upb_Arena_Alloc(arena.ptr), args[1]);
   if (serialized.data == NULL) return NULL;
-  const struct OptionSpec spec = {kCAllowPartial,
-                                  kUpb_DecodeOption_CheckRequired, true};
-  int options = ParseOptions(ctx, 1, &spec, nargs - 2, args + 2,
-                             kUpb_DecodeOption_CheckRequired);
-  if (options < 0) return NULL;
+  int options = kUpb_DecodeOption_CheckRequired;
+  const struct KeySpec spec = {kCAllowPartial, ClearBit,
+                               kUpb_DecodeOption_CheckRequired, &options};
+  if (!ParseKeys(ctx, 1, &spec, nargs - 2, args + 2)) return NULL;
   const upb_MessageDef* def = FindMessageByStructName(ctx, full_name);
   if (def == NULL) return NULL;
   upb_Message* msg =
@@ -2745,10 +2752,10 @@ static emacs_value ParseJson(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
                              void* data) {
   struct Context ctx = {env, data};
   assert(nargs >= 2 && nargs <= 4);
-  const struct OptionSpec spec = {kCDiscardUnknown,
-                                  upb_JsonDecode_IgnoreUnknown, false};
-  int options = ParseOptions(ctx, 1, &spec, nargs - 2, args + 2, 0);
-  if (options < 0) return NULL;
+  int options = 0;
+  const struct KeySpec spec = {kCDiscardUnknown, SetBit,
+                               upb_JsonDecode_IgnoreUnknown, &options};
+  if (!ParseKeys(ctx, 1, &spec, nargs - 2, args + 2)) return NULL;
   struct LispArena arena = MakeArena(ctx);
   if (arena.ptr == NULL) return NULL;
   const upb_MessageDef* def = FindMessageByStructName(ctx, args[0]);
@@ -2768,13 +2775,12 @@ static emacs_value Serialize(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   assert(nargs >= 1 && nargs <= 7);
   struct MessageArg msg = ExtractMessage(ctx, args[0]);
   if (msg.type == NULL) return NULL;
-  const struct OptionSpec specs[] = {
-      {kCAllowPartial, kUpb_Encode_CheckRequired, true},
-      {kCDiscardUnknown, kUpb_Encode_SkipUnknown, false},
-      {kCDeterministic, kUpb_Encode_Deterministic, false}};
-  int options = ParseOptions(ctx, 3, specs, nargs - 1, args + 1,
-                             kUpb_Encode_CheckRequired);
-  if (options < 0) return NULL;
+  int options = kUpb_Encode_CheckRequired;
+  const struct KeySpec specs[] = {
+      {kCAllowPartial, ClearBit, kUpb_Encode_CheckRequired, &options},
+      {kCDiscardUnknown, SetBit, kUpb_Encode_SkipUnknown, &options},
+      {kCDeterministic, SetBit, kUpb_Encode_Deterministic, &options}};
+  if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
   upb_Arena* arena = NewArena(ctx);
   if (arena == NULL) return NULL;
   struct MutableString serialized =
@@ -2794,13 +2800,12 @@ static emacs_value SerializeText(emacs_env* env, ptrdiff_t nargs,
   assert(nargs >= 1 && nargs <= 7);
   struct MessageArg msg = ExtractMessage(ctx, args[0]);
   if (msg.type == NULL) return NULL;
-  const struct OptionSpec specs[] = {
-      {kCCompact, UPB_TXTENC_SINGLELINE, false},
-      {kCDiscardUnknown, UPB_TXTENC_SKIPUNKNOWN, false},
-      {kCDeterministic, UPB_TXTENC_NOSORT, true}};
-  int options =
-      ParseOptions(ctx, 3, specs, nargs - 1, args + 1, UPB_TXTENC_NOSORT);
-  if (options < 0) return NULL;
+  int options = UPB_TXTENC_NOSORT;
+  const struct KeySpec specs[] = {
+      {kCCompact, SetBit, UPB_TXTENC_SINGLELINE, &options},
+      {kCDiscardUnknown, SetBit, UPB_TXTENC_SKIPUNKNOWN, &options},
+      {kCDeterministic, ClearBit, UPB_TXTENC_NOSORT, &options}};
+  if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
   upb_alloc* alloc = &upb_alloc_global;
   struct MutableString serialized =
       SerializeMessageText(ctx, alloc, msg.type, msg.value, options);
@@ -2816,11 +2821,11 @@ static emacs_value SerializeJson(emacs_env* env, ptrdiff_t nargs,
   assert(nargs >= 1 && nargs <= 5);
   struct MessageArg msg = ExtractMessage(ctx, args[0]);
   if (msg.type == NULL) return NULL;
-  const struct OptionSpec specs[] = {
-      {kCEmitDefaults, upb_JsonEncode_EmitDefaults, false},
-      {kCProtoNames, upb_JsonEncode_UseProtoNames, false}};
-  int options = ParseOptions(ctx, 2, specs, nargs - 1, args + 1, 0);
-  if (options < 0) return NULL;
+  int options = 0;
+  const struct KeySpec specs[] = {
+      {kCEmitDefaults, SetBit, upb_JsonEncode_EmitDefaults, &options},
+      {kCProtoNames, SetBit, upb_JsonEncode_UseProtoNames, &options}};
+  if (!ParseKeys(ctx, 2, specs, nargs - 1, args + 1)) return NULL;
   upb_alloc* alloc = &upb_alloc_global;
   struct MutableString serialized =
       SerializeMessageJson(ctx, alloc, msg.type, msg.value, options);
