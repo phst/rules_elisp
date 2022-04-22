@@ -18,7 +18,7 @@
 
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
-load(":private/test.bzl", "elisp_test_suite")
+load(":private/defs.bzl", "elisp_test_suite")
 
 elisp_test_suite(name = "elisp_test")
 
