@@ -16,8 +16,8 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
-load("//:private/defs.bzl", "merged_manual")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
+load("//private:defs.bzl", "merged_manual")
 
 elisp_manual(
     name = "manual",
@@ -62,7 +62,7 @@ stardoc(
     format = "proto",
     input = "//elisp:defs.bzl",
     deps = [
-        "//:private_defs_bzl",
+        "//private:defs_bzl",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
@@ -75,8 +75,8 @@ stardoc(
     format = "proto",
     input = "//emacs:defs.bzl",
     deps = [
-        "//:private_defs_bzl",
         "//elisp:builtin_bzl",
+        "//private:defs_bzl",
         "@bazel_skylib//lib:paths",
     ],
 )

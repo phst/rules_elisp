@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
-load("//:private/defs.bzl", "cc_defaults")
+load("//private:defs.bzl", "cc_defaults")
 
 alias(
     name = "emacs",
@@ -77,8 +77,8 @@ bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
     deps = [
-        "//:private_defs_bzl",
         "//elisp:builtin_bzl",
+        "//private:defs_bzl",
         "@bazel_skylib//lib:paths",
     ],
 )
