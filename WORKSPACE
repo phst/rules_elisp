@@ -43,15 +43,14 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.8.1.tar.gz",
 )
 
-load("@//private:defs.bzl", "requirements_txt")
-
-requirements_txt(name = "requirements_txt")
-
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 pip_parse(
     name = "pip_deps",
-    requirements_lock = "@requirements_txt//:requirements.txt",
+    requirements_darwin = "@//:macos-requirements.txt",
+    requirements_linux = "@//:linux-requirements.txt",
+    requirements_lock = None,
+    requirements_windows = "@//:windows-requirements.txt",
 )
 
 load("@pip_deps//:requirements.bzl", "install_deps")
