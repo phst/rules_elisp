@@ -90,8 +90,8 @@ stardoc(
 )
 
 py_binary(
-    name = "org",
-    srcs = ["org.py"],
+    name = "generate",
+    srcs = ["generate.py"],
     python_version = "PY3",
     srcs_version = "PY3",
     tags = ["no-pytype"],  # FIXME

@@ -23,7 +23,7 @@ def _merged_manual_impl(ctx):
         ctx.actions.run(
             outputs = [org],
             inputs = [bin],
-            executable = ctx.executable._org,
+            executable = ctx.executable._generate,
             arguments = ["--", bin.path, org.path],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file {}".format(org.short_path),
@@ -50,10 +50,10 @@ merged_manual = rule(
             allow_empty = False,
         ),
         "out": attr.output(mandatory = True),
-        "_org": attr.label(
+        "_generate": attr.label(
             executable = True,
             cfg = "exec",
-            default = "//docs:org",
+            default = "//docs:generate",
         ),
         "_merge": attr.label(
             executable = True,
