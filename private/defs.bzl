@@ -18,32 +18,6 @@ These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
-def _requirements_txt_impl(repository_ctx):
-    """Implementation of the “copy_requirements_txt” repository rule."""
-    prefixes = {
-        "linux": "linux",
-        "mac os x": "macos",
-        "windows server 2019": "windows",
-    }
-    prefix = prefixes.get(repository_ctx.os.name, None)
-    if not prefix:
-        fail("Unsupported operating system “{}”".format(repository_ctx.os.name))
-    repository_ctx.symlink(
-        Label("@//:{}-requirements.txt".format(prefix)),
-        "requirements.txt",
-    )
-    repository_ctx.file(
-        "BUILD",
-        'exports_files(["requirements.txt"])',
-        executable = False,
-    )
-
-requirements_txt = repository_rule(
-    implementation = _requirements_txt_impl,
-    local = True,
-    doc = "Generates requirements.txt for the current platform.",
-)
-
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
     if "no-python-check" in tags:
