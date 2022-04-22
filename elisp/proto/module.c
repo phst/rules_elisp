@@ -2652,7 +2652,7 @@ static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
     if (j < 0) return false;
     assert(j < nspecs);
     struct KeySpec spec = specs[j];
-    uint32_t bit = 1 << j;
+    uint32_t bit = UINT32_C(1) << j;
     if (seen & bit) {
       DuplicateKey(ctx, GlobalSymbol(ctx, spec.key));
       return -1;
