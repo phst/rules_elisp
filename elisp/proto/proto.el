@@ -32,7 +32,7 @@
                (:constructor nil)
                (:copier nil)
                (:predicate nil)
-               (:noinline t))
+               :noinline)
   "Internal base type for protocol buffer objects.
 This type is internal and should not be used directly."
   (arena nil :type user-ptr :read-only t)
@@ -43,7 +43,7 @@ This type is internal and should not be used directly."
                (:constructor nil)
                (:copier nil)
                (:include elisp/proto/object)
-               (:noinline t))
+               :noinline)
   "Base type for generated protocol buffer messages.
 The fields are internal and should not be accessed directly.")
 
@@ -129,7 +129,7 @@ in the Info node ‘(elisp) Output Streams’."
                (:constructor elisp/proto/array--new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
-               (:noinline t))
+               :noinline)
   "Wraps a protocol buffer message array.
 Such an array is typically the result of obtaining the value of a
 repeated field using ‘elisp/proto/field’ or
@@ -222,7 +222,7 @@ TYPE specifies the return type, one of ‘vector’, ‘string’, or ‘list’
                (:constructor elisp/proto/map--new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
-               (:noinline t))
+               :noinline)
   "Wraps a protocol buffer message array.
 Such an array is typically the result of obtaining the value of a
 map field using ‘elisp/proto/field’ or

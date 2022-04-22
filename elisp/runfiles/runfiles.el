@@ -34,7 +34,7 @@
                (:conc-name elisp/runfiles/runfiles--)
                (:constructor elisp/runfiles/runfiles--make (impl))
                (:copier nil)
-               (:noinline t))
+               :noinline)
   "Provides access to Bazel runfiles.
 Use ‘elisp/runfiles/make’ to create instances of
 ‘elisp/runfiles/runfiles’, or ‘elisp/runfiles/get’ access a

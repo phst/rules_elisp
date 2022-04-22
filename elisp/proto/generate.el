@@ -72,7 +72,7 @@ This type corresponds to the protocol buffer message type ‘%s’."
                         (:conc-name ,conc-name)
                         (:constructor ,private-constructor (arena ptr))
                         (:include elisp/proto/message)
-                        (:noinline t))
+                        :noinline)
            ,struct-doc))
     (terpri)
     (pp `(defun ,public-constructor (,@(and fields '(&rest fields)))
