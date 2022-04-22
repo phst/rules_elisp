@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
@@ -22,6 +23,20 @@ py_binary(
     srcs = ["build.py"],
     python_version = "PY3",
     srcs_version = "PY3",
+)
+
+bzl_library(
+    name = "private_defs_bzl",
+    srcs = ["private/defs.bzl"],
+    visibility = [
+        "//docs:__pkg__",
+        "//elisp:__pkg__",
+        "//emacs:__pkg__",
+    ],
+    deps = [
+        "//elisp:builtin_bzl",
+        "@bazel_skylib//lib:paths",
+    ],
 )
 
 compile_pip_requirements(

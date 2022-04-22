@@ -21,7 +21,7 @@ load(
 )
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(
-    "//elisp:private/util.bzl",
+    "//:private/defs.bzl",
     "CcDefaultInfo",
     "cc_launcher",
     "cpp_strings",

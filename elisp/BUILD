@@ -14,8 +14,8 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("//:private/defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
-load(":private/util.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
 
 toolchain_type(
     name = "toolchain_type",
@@ -92,7 +92,7 @@ bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
     deps = [
-        ":util_bzl",
+        "//:private_defs_bzl",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:dicts",
         "@bazel_skylib//lib:paths",
@@ -105,22 +105,10 @@ bzl_library(
 )
 
 bzl_library(
-    name = "util_bzl",
-    srcs = ["private/util.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//emacs:__pkg__",
-    ],
-    deps = [
-        ":builtin_bzl",
-        "@bazel_skylib//lib:paths",
-    ],
-)
-
-bzl_library(
     name = "builtin_bzl",
     srcs = ["@bazel_tools//tools:bzl_srcs"],
     visibility = [
+        "//:__pkg__",
         "//docs:__pkg__",
         "//emacs:__pkg__",
     ],
