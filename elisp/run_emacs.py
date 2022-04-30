@@ -43,10 +43,8 @@ def main() -> None:
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
     libexec = install / 'libexec'
-    args = [str(emacs)]  # List[str]
     dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
-    args.append('--dump-file=' + str(dump))
-    args.extend(opts.argv[1:])
+    args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
     env = dict(os.environ,
                EMACSDATA=str(etc),
                EMACSDOC=str(etc),
