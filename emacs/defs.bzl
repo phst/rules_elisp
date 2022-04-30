@@ -45,7 +45,6 @@ def _emacs_binary_impl(ctx):
         substitutions = {
             "[[args]]": cpp_strings([
                 "--install=" + runfile_location(ctx, install),
-                "--dump-mode=" + ctx.attr.dump_mode,
             ]),
         },
         is_executable = True,

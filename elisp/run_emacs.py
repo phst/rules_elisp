@@ -34,8 +34,6 @@ def main() -> None:
     parser.add_argument('--runfiles_env', action='append', type=_env_var,
                         default=[])
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
-    parser.add_argument('--dump-mode', choices=('portable', 'unexec'),
-                        required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
@@ -46,9 +44,8 @@ def main() -> None:
     etc = shared / 'etc'
     libexec = install / 'libexec'
     args = [str(emacs)]  # List[str]
-    if opts.dump_mode == 'portable':
-        dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
-        args.append('--dump-file=' + str(dump))
+    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
+    args.append('--dump-file=' + str(dump))
     args.extend(opts.argv[1:])
     env = dict(os.environ,
                EMACSDATA=str(etc),
