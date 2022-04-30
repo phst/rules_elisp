@@ -104,7 +104,6 @@ _toolchains = repository_rule(
 def _build_file(macos_arm):
     return _BUILD_TEMPLATE.format(
         module_header = '"emacs-module.h"',
-        dump_mode = "portable",
         windows = "",
         macos_x86 = "",
         macos_arm = "" if macos_arm else '"@phst_rules_elisp//emacs:incompatible"',
@@ -117,7 +116,6 @@ emacs_binary(
     name = "emacs",
     srcs = glob(["**"]),
     builtin_features = "builtin_features.json",
-    dump_mode = "{dump_mode}",
     module_header = {module_header},
     readme = "README",
     target_compatible_with = select({{
