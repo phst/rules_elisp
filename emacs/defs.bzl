@@ -87,11 +87,8 @@ This is used by Gazelle.""",
         ),
         "dump_mode": attr.string(
             default = "portable",
-            values = ["portable", "unexec"],
-            doc = """Dumping mode that Emacs will use.  This can be either
- `portable` to use the portable dumper introduced in Emacs 27, or `unexec` to
-use the legacy “unexec” dumper.  Starting with Emacs 27, `portable` is strongly
-recommended.""",
+            values = ["portable"],
+            doc = "Deprecated; must always be set to `portable`.",
         ),
         "_build": attr.label(
             default = "//emacs:build",
