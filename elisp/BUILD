@@ -195,6 +195,8 @@ cc_test(
     deps = [
         ":binary",
         ":process",
+        "@com_google_absl//absl/status",
+        "@com_google_absl//absl/status:statusor",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -224,11 +226,9 @@ cc_library(
     deps = [
         ":platform",
         ":process",
-        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
     ],
 )
 
@@ -304,6 +304,7 @@ cc_library(
         ":platform",
         "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/algorithm:container",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/cleanup",
         "@com_google_absl//absl/container:flat_hash_map",
         "@com_google_absl//absl/status",

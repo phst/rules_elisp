@@ -33,11 +33,11 @@
 #include <windows.h>
 #else
 #include <spawn.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
 #endif
 
+#include <algorithm>
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
@@ -61,7 +61,8 @@
 #pragma warning(push, 3)
 #endif
 #include "absl/algorithm/container.h"
-#include "absl/cleanup/cleanup.h"
+#include "absl/base/attributes.h"
+#include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"

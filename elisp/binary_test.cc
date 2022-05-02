@@ -17,10 +17,26 @@
 #include <string>
 #include <vector>
 
-#include "gmock/gmock.h"
-#include "gtest/gtest.h"
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#endif
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "gmock/gmock.h"  // IWYU pragma: keep
+#include "gtest/gtest.h"  // IWYU pragma: keep
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
 
 #include "elisp/process.h"
+
+// IWYU pragma: no_include "gtest/gtest_pred_impl.h"
+// IWYU pragma: no_include <gmock/gmock-matchers.h>
+// IWYU pragma: no_include <gtest/gtest-matchers.h>
+// IWYU pragma: no_include <gtest/gtest-message.h>
+// IWYU pragma: no_include <gtest/gtest-test-part.h>
 
 namespace phst_rules_elisp {
 namespace {

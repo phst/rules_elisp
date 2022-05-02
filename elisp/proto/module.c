@@ -81,13 +81,10 @@
 #endif
 
 #include <assert.h>
-#include <errno.h>
-#include <inttypes.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -152,6 +149,7 @@
 #include "google/protobuf/duration.upbdefs.h"
 #include "google/protobuf/timestamp.upb.h"
 #include "google/protobuf/timestamp.upbdefs.h"
+#include "upb/collections.h"
 #include "upb/decode.h"
 #include "upb/def.h"
 #include "upb/encode.h"
@@ -168,6 +166,8 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
+
+// IWYU pragma: no_include "upb/msg_internal.h"
 
 /// Global variables
 

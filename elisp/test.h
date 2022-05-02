@@ -15,7 +15,6 @@
 #ifndef PHST_RULES_ELISP_ELISP_TEST_H
 #define PHST_RULES_ELISP_ELISP_TEST_H
 
-#include <string>
 #include <vector>
 
 #ifdef __GNUC__

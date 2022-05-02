@@ -16,8 +16,6 @@
 
 #include <cstdlib>
 #include <iostream>
-#include <memory>
-#include <string>
 #include <vector>
 
 #ifdef __GNUC__
@@ -32,8 +30,6 @@
 #endif
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
-#include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
