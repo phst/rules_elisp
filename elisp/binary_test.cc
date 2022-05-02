@@ -23,12 +23,18 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
+#ifdef _MSC_VER
+#pragma warning(push, 3)
+#endif
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "gmock/gmock.h"  // IWYU pragma: keep
 #include "gtest/gtest.h"  // IWYU pragma: keep
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
+#ifdef _MSC_VER
+#pragma warning(pop)
 #endif
 
 #include "elisp/process.h"
