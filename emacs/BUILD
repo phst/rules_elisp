@@ -95,6 +95,8 @@ selects.config_setting_group(
         ":linux",
         ":freebsd",
         ":openbsd",
+        ":macos_x86",
+        ":windows",
     ],
 )
 

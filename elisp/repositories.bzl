@@ -117,9 +117,7 @@ emacs_binary(
     readme = "README",
     target_compatible_with = select({{
         "@phst_rules_elisp//emacs:always_supported": [],
-        "@phst_rules_elisp//emacs:windows": [],
         "@phst_rules_elisp//emacs:macos_arm": [{macos_arm}],
-        "@phst_rules_elisp//emacs:macos_x86": [],
         "//conditions:default": ["@phst_rules_elisp//emacs:incompatible"],
     }}),
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
