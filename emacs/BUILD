@@ -92,10 +92,11 @@ exports_files(
 selects.config_setting_group(
     name = "always_supported",
     match_any = [
-        ":linux",
+        # keep sorted
         ":freebsd",
-        ":openbsd",
+        ":linux",
         ":macos_x86",
+        ":openbsd",
         ":windows",
     ],
 )
@@ -103,6 +104,7 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "windows",
     match_any = [
+        # keep sorted
         ":windows_x86_32",
         ":windows_x86_64",
     ],
@@ -111,6 +113,7 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "macos_x86",
     match_any = [
+        # keep sorted
         ":macos_x86_32",
         ":macos_x86_64",
     ],
@@ -119,8 +122,9 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "macos_arm",
     match_any = [
-        ":macos_arm64",
+        # keep sorted
         ":macos_aarch64",
+        ":macos_arm64",
     ],
 )
 
@@ -150,40 +154,45 @@ config_setting(
 config_setting(
     name = "windows_x86_64",
     constraint_values = [
-        "@platforms//os:windows",
+        # keep sorted
         "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
     ],
 )
 
 config_setting(
     name = "macos_x86_32",
     constraint_values = [
-        "@platforms//os:macos",
+        # keep sorted
         "@platforms//cpu:x86_32",
+        "@platforms//os:macos",
     ],
 )
 
 config_setting(
     name = "macos_x86_64",
     constraint_values = [
-        "@platforms//os:macos",
+        # keep sorted
         "@platforms//cpu:x86_64",
+        "@platforms//os:macos",
     ],
 )
 
 config_setting(
     name = "macos_aarch64",
     constraint_values = [
-        "@platforms//os:macos",
+        # keep sorted
         "@platforms//cpu:aarch64",
+        "@platforms//os:macos",
     ],
 )
 
 config_setting(
     name = "macos_arm64",
     constraint_values = [
-        "@platforms//os:macos",
+        # keep sorted
         "@platforms//cpu:arm64",
+        "@platforms//os:macos",
     ],
 )
 
