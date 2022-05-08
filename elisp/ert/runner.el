@@ -548,7 +548,7 @@ as the offset vector.  The vector is attached to the
          ;; branch frequency vector and attach it to DATA.
          (when-let ((branches (elisp/ert/instrument--branches vector form)))
            (setf (elisp/ert/coverage--data-branches data) branches))))
-      ((pred elisp/ert/proper--list-p)
+      ((pred proper-list-p)
        ;; Use ‘dolist’ where possible to avoid deep recursion.
        (dolist (element form)
          (elisp/ert/instrument--form seen vector element)))
@@ -579,7 +579,7 @@ corresponding element in the return value will be nil."
      (let ((branches (vector nil nil)))
        (elisp/ert/instrument--branch vector branches (list cond) nil 0 1)
        branches))
-    (`(,(or 'and 'or) . ,(and (pred elisp/ert/proper--list-p) conditions))
+    (`(,(or 'and 'or) . ,(and (pred proper-list-p) conditions))
      ;; The last condition form won’t introduce a new branch.
      (cl-callf butlast conditions)
      ;; Assume that each remaining condition introduces two branches.  This
@@ -594,7 +594,7 @@ corresponding element in the return value will be nil."
             'cl-case 'cl-ecase
             'cl-typecase 'cl-etypecase
             'pcase 'pcase-exhaustive)
-       . ,(and (pred elisp/ert/proper--list-p) clauses))
+       . ,(and (pred proper-list-p) clauses))
      (let ((branches (make-vector (length clauses) nil)))
        (cl-loop for clause in clauses
                 and index from 0
@@ -609,7 +609,7 @@ corresponding element in the return value will be nil."
                                                  index nil nil))
        branches))
     (`(,(or 'condition-case 'condition-case-unless-debug)
-       ,_var ,bodyform . ,(and (pred elisp/ert/proper--list-p) clauses))
+       ,_var ,bodyform . ,(and (pred proper-list-p) clauses))
      ;; Similar to the ‘cond’ case, but here we have one branch for each handler
      ;; as well as one branch for a successful exit.
      (let ((branches (make-vector (1+ (length clauses)) nil)))
@@ -629,7 +629,7 @@ corresponding element in the return value will be nil."
        (elisp/ert/instrument--branch vector branches (list expr) nil 0 1)
        branches))
     (`(,(or 'if-let 'if-let* 'when-let 'when-let* 'and-let*)
-       ,(and (pred elisp/ert/proper--list-p) spec) . ,_)
+       ,(and (pred proper-list-p) spec) . ,_)
      (let ((branches (make-vector (* 2 (length spec)) nil)))
        (cl-loop for binding in spec
                 and index from 0 by 2
@@ -643,7 +643,7 @@ corresponding element in the return value will be nil."
                       (elisp/ert/instrument--branch
                        vector branches (list form) nil index (1+ index)))))
        branches))
-    (`(cl-loop . ,(and (pred elisp/ert/proper--list-p) rest))
+    (`(cl-loop . ,(and (pred proper-list-p) rest))
      (when-let ((conditions (cl-loop for (keyword form) on rest
                                      when (memq keyword '(if when unless))
                                      collect form)))
@@ -1067,11 +1067,6 @@ exact copies as equal."
                                                      buffer-2 nil nil)
                           0)))))))))
 
-;; This polyfill needs to be defined before using it as type to prevent errors
-;; during compilation.
-(defalias 'elisp/ert/proper--list-p
-  (if (fboundp 'proper-list-p) 'proper-list-p 'format-proper-list-p))
-
 (defun elisp/ert/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
   ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
@@ -1087,7 +1082,7 @@ exact copies as equal."
                      (let ((new (cl-etypecase obj
                                   (symbol (elisp/ert/check--xml-name obj))
                                   (string (elisp/ert/sanitize--xml-string obj))
-                                  (elisp/ert/proper--list (mapcar #'walk obj))
+                                  (proper-list (mapcar #'walk obj))
                                   (cons
                                    (cons (walk (car obj)) (walk (cdr obj)))))))
                        (puthash obj new map)
