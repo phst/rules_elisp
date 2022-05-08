@@ -956,6 +956,4 @@ A and B are the time values to compare."
       ,(format-time-string "%F %T.%N %Z" b)
       :difference ,(format-time-string "%F %T.%N" (time-subtract a b) t))))
 
-(declare-function map-put! "map.el" (map key value))
-
 ;;; proto-test.el ends here
