@@ -2082,6 +2082,14 @@ static upb_Map* NewMap(struct Context ctx, upb_Arena* arena,
   return map;
 }
 
+// Inserts or updates a map entry.  Returns whether the operation succeeded.
+static bool SetMapEntry(struct Context ctx, upb_Arena* arena, upb_Map* map, upb_MessageValue key,
+                        upb_MessageValue value) {
+  bool ok = upb_Map_Set(map, key, value, arena);
+  if (!ok) MemoryFull(ctx);
+  return ok;
+}
+
 struct PutMapElementContext {
   const struct Globals* globals;
   upb_Arena* arena;
@@ -2105,7 +2113,7 @@ static emacs_value PutMapElement(emacs_env* env,
   upb_MessageValue key = AdoptScalar(ctx, arena, type.key, key_arg);
   upb_MessageValue value = AdoptSingular(ctx, arena, type.value, args[1]);
   if (!Success(ctx)) return NULL;
-  upb_Map_Set(map, key, value, arena);
+  SetMapEntry(ctx, arena, map, key, value);
   return Nil(ctx);
 }
 
@@ -2143,15 +2151,15 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
 
 // Updates the destination map with entries from the source map, overriding
 // entries in the destination.
-static void UpdateMapEntries(upb_Arena* arena, upb_Map* dest,
-                             const upb_Map* src) {
+static bool UpdateMapEntries(struct Context ctx, upb_Arena* arena,
+                             upb_Map* dest, const upb_Map* src) {
   size_t iter = kUpb_Map_Begin;
   while (upb_MapIterator_Next(src, &iter)) {
     upb_MessageValue key = upb_MapIterator_Key(src, iter);
     upb_MessageValue value = upb_MapIterator_Value(src, iter);
-    // FIXME: There’s no way to detect allocation failure here!
-    upb_Map_Set(dest, key, value, arena);
+    if (!SetMapEntry(ctx, arena, dest, key, value)) return false;
   }
+  return true;
 }
 
 /// Looking up definitions
@@ -3300,7 +3308,7 @@ static emacs_value MapPut(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   emacs_value ret = args[2];
   upb_MessageValue value = AdoptSingular(ctx, map.arena.ptr, type.value, ret);
   if (!Success(ctx)) return NULL;
-  upb_Map_Set(map.value, key, value, map.arena.ptr);
+  SetMapEntry(ctx, map.arena.ptr, map.value, key, value);
   return ret;
 }
 
@@ -3364,7 +3372,7 @@ static emacs_value UpdateMap(emacs_env* env,
   if (dest.type == NULL) return NULL;
   const upb_Map* src = AdoptMap(ctx, dest.arena.ptr, dest.type, args[1]);
   if (src == NULL) return NULL;
-  UpdateMapEntries(dest.arena.ptr, dest.value, src);
+  UpdateMapEntries(ctx, dest.arena.ptr, dest.value, src);
   return Nil(ctx);
 }
 
@@ -3378,7 +3386,7 @@ static emacs_value ReplaceMap(emacs_env* env,
   const upb_Map* src = AdoptMap(ctx, dest.arena.ptr, dest.type, args[1]);
   if (src == NULL) return NULL;
   upb_Map_Clear(dest.value);
-  UpdateMapEntries(dest.arena.ptr, dest.value, src);
+  UpdateMapEntries(ctx, dest.arena.ptr, dest.value, src);
   return Nil(ctx);
 }
 
@@ -3393,7 +3401,7 @@ static emacs_value CopyMap(emacs_env* env,
   if (type.key == NULL) return NULL;
   upb_Map* dest = NewMap(ctx, src.arena.ptr, type);
   if (dest == NULL) return NULL;
-  UpdateMapEntries(src.arena.ptr, dest, src.value);
+  if (!UpdateMapEntries(ctx, src.arena.ptr, dest, src.value)) return NULL;
   return MakeMutableMap(ctx, src.arena, src.type, dest);
 }
 
