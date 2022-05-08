@@ -501,6 +501,18 @@
     (should (elisp/proto/map-contains-key map 234))
     (should (eql (setf (elisp/proto/map-get mutable-map 234) 4.5) 4.5))))
 
+(ert-deftest elisp/proto/map-set ()
+  (let* ((message (elisp/proto/Test-new))
+         (mutable-map (elisp/proto/mutable-field message 'map_int32_float))
+         (map (elisp/proto/field message 'map_int32_float)))
+    (should-error (elisp/proto/map-set map 234 -1.2)
+                  :type 'elisp/proto/immutable)
+    (should (elisp/proto/map-set mutable-map 234 -7))
+    (should (eql (elisp/proto/map-get map 234) -7.0))
+    (should (elisp/proto/map-contains-key map 234))
+    (should-not (elisp/proto/map-set mutable-map 234 9999))
+    (should (eql (elisp/proto/map-get map 234) 9999.0))))
+
 (ert-deftest elisp/proto/map/map-put! ()
   (let* ((message (elisp/proto/Test-new))
          (mutable-map (elisp/proto/mutable-field message 'map_int32_float))

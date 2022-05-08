@@ -3312,6 +3312,22 @@ static emacs_value MapPut(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   return ret;
 }
 
+static emacs_value MapSet(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                          emacs_value* args, void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 3);
+  struct MutableMapArg map = ExtractMutableMap(ctx, args[0]);
+  if (map.type == NULL) return NULL;
+  struct MapType type = GetMapType(ctx, map.type);
+  if (type.key == NULL) return NULL;
+  upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
+  upb_MessageValue value = AdoptSingular(ctx, map.arena.ptr, type.value, args[2]);
+  if (!Success(ctx)) return NULL;
+  bool present = upb_Map_Get(map.value, key, NULL);
+  SetMapEntry(ctx, map.arena.ptr, map.value, key, value);
+  return MakeBoolean(ctx, !present);
+}
+
 static emacs_value MapDelete(emacs_env* env,
                              ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
                              emacs_value* args, void* data) {
@@ -4032,6 +4048,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "Return VALUE.\n\n"
         "(fn map key value)",
         0, MapPut);
+  Defun(ctx, "elisp/proto/map-set", 3, 3,
+        "Insert a VALUE with a KEY into the protocol buffer MAP.\n"
+        "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
+        "If an entry with KEY is already present in MAP, overwrite it\n"
+        "and return nil; otherwise insert a new entry and return\n"
+        "a non-nil value.\n\n"
+        "(fn map key value)",
+        0, MapSet);
   Defun(ctx, "elisp/proto/map-delete", 2, 2,
         "Attempt to remove KEY from the protocol buffer MAP.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"

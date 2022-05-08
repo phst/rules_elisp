@@ -593,6 +593,17 @@ Elements in {{{var(source)}}} are converted to the element type of
 {{{var(dest)}}} as necessary.
 #+END_defun
 
+#+ATTR_TEXINFO: :options elisp/proto/map-put map key value
+#+BEGIN_defun
+#+TEXINFO: @defunx elisp/proto/map-set map key value
+These two functions perform an “upsert” operation: if {{{var(key)}}} is already
+present in {{{var(map)}}}, they update its value to {{{var(value)}}}, otherwise
+they insert a new entry into the map.  The only difference is the return value:
+~elisp/proto/map-put~ follows the convention of ~puthash~ and always returns
+{{{var(value)}}}, while ~elisp/proto/map-set~ returns whether a new entry was
+inserted.
+#+END_defun
+
 #+ATTR_TEXINFO: :options elisp/proto/array-pop array index
 #+BEGIN_defun
 #+TEXINFO: @defunx elisp/proto/map-pop map key
