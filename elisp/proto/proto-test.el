@@ -46,7 +46,7 @@
     (should (google/protobuf/Duration-p message))
     (should (elisp/proto/message-p message))
     (should (elisp/proto/message-mutable-p message))
-    (should (elisp/proto/time--equal-p (elisp/proto/duration message) 333))))
+    (should (time-equal-p (elisp/proto/duration message) 333))))
 
 (ert-deftest elisp/proto/make/unknown-message ()
   (let ((err (should-error (elisp/proto/make (intern "unknown/Message"))
@@ -638,8 +638,7 @@
     (ert-info ((prin1-to-string time) :prefix "Time value: ")
       (let ((timestamp (elisp/proto/make-timestamp time)))
         (when time ; no point in comparing the current time
-          (should (elisp/proto/time--equal-p
-                   (elisp/proto/timestamp timestamp) time)))))))
+          (should (time-equal-p (elisp/proto/timestamp timestamp) time)))))))
 
 (ert-deftest elisp/proto/duration ()
   (let* ((duration (elisp/proto/make-duration 456))
@@ -879,8 +878,7 @@
     (should (equal (elisp/proto/any-type-name any) "google.protobuf.Duration"))
     (let ((unpacked (elisp/proto/unpack-any any)))
       (should (google/protobuf/Duration-p unpacked))
-      (should (elisp/proto/time--equal-p
-               (elisp/proto/duration unpacked) 123)))))
+      (should (time-equal-p (elisp/proto/duration unpacked) 123)))))
 
 (ert-deftest elisp/proto/uninitialized-any ()
   (should-error (elisp/proto/unpack-any (google/protobuf/Any-new))
@@ -940,17 +938,12 @@
                          "google.protobuf.UninterpretedOption.NamePart"
                          ("name_part" "is_extension"))))))
 
-(defalias 'elisp/proto/time--equal-p
-  (if (fboundp 'time-equal-p) #'time-equal-p
-    (lambda (a b) (not (or (time-less-p a b) (time-less-p b a))))))
-
-(put #'elisp/proto/time--equal-p 'ert-explainer
-     #'elisp/proto/explain--time-equal-p)
+(put #'time-equal-p 'ert-explainer #'elisp/proto/explain--time-equal-p)
 
 (defun elisp/proto/explain--time-equal-p (a b)
-  "ERT explainer for ‘elisp/proto/time--equal-p’.
+  "ERT explainer for ‘time-equal-p’.
 A and B are the time values to compare."
-  (unless (elisp/proto/time--equal-p a b)
+  (unless (time-equal-p a b)
     `(different-time-values
       ,(format-time-string "%F %T.%N %Z" a)
       ,(format-time-string "%F %T.%N %Z" b)
