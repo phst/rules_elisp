@@ -2083,11 +2083,12 @@ static upb_Map* NewMap(struct Context ctx, upb_Arena* arena,
 }
 
 // Inserts or updates a map entry.  Returns whether the operation succeeded.
-static bool SetMapEntry(struct Context ctx, upb_Arena* arena, upb_Map* map, upb_MessageValue key,
-                        upb_MessageValue value) {
-  bool ok = upb_Map_Set(map, key, value, arena);
-  if (!ok) MemoryFull(ctx);
-  return ok;
+static upb_MapInsertStatus SetMapEntry(struct Context ctx, upb_Arena* arena,
+                                       upb_Map* map, upb_MessageValue key,
+                                       upb_MessageValue value) {
+  upb_MapInsertStatus status = upb_Map_Insert(map, key, value, arena);
+  if (status == kUpb_MapInsertStatus_OutOfMemory) MemoryFull(ctx);
+  return status;
 }
 
 struct PutMapElementContext {
@@ -2157,7 +2158,10 @@ static bool UpdateMapEntries(struct Context ctx, upb_Arena* arena,
   while (upb_MapIterator_Next(src, &iter)) {
     upb_MessageValue key = upb_MapIterator_Key(src, iter);
     upb_MessageValue value = upb_MapIterator_Value(src, iter);
-    if (!SetMapEntry(ctx, arena, dest, key, value)) return false;
+    if (SetMapEntry(ctx, arena, dest, key, value) ==
+        kUpb_MapInsertStatus_OutOfMemory) {
+      return false;
+    }
   }
   return true;
 }
@@ -3323,9 +3327,9 @@ static emacs_value MapSet(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
   upb_MessageValue value = AdoptSingular(ctx, map.arena.ptr, type.value, args[2]);
   if (!Success(ctx)) return NULL;
-  bool present = upb_Map_Get(map.value, key, NULL);
-  SetMapEntry(ctx, map.arena.ptr, map.value, key, value);
-  return MakeBoolean(ctx, !present);
+  upb_MapInsertStatus status =
+      SetMapEntry(ctx, map.arena.ptr, map.value, key, value);
+  return MakeBoolean(ctx, status == kUpb_MapInsertStatus_Inserted);
 }
 
 static emacs_value MapDelete(emacs_env* env,
