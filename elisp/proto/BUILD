@@ -163,6 +163,7 @@ cc_binary(
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/base:core_headers",
         "@upb",
+        "@upb//:collections",
         "@upb//:descriptor_upb_proto",
         "@upb//:json",
         "@upb//:reflection",
