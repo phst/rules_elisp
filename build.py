@@ -161,11 +161,7 @@ class Builder:
     @target
     def coverage(self) -> None:
         """Generates a coverage report."""
-        # Exclude Gazelle because the Go output format is incompatible with
-        # genhtml.  This exclusion could be removed once
-        # https://github.com/bazelbuild/rules_go/issues/140 is fixed.
-        output = self._bazel('coverage', ['//...', '-//gazelle/...'],
-                             capture_stdout=True)
+        output = self._bazel('coverage', ['//...'], capture_stdout=True)
         files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
         if not files:
             raise FileNotFoundError('no coverage files generated')
