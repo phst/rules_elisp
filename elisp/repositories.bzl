@@ -77,10 +77,10 @@ def rules_elisp_dependencies():
     )
     http_archive(
         name = "upb",
-        sha256 = "e0a0deee0c4714486fe89532c6d03e0add056bef2c0a2c490aef194f1457f523",
-        strip_prefix = "upb-d72d98495d0ea52da0761fbd0fa3718c7f8988d3/",
+        sha256 = "34eae37467d3376f60ef57258134e91981143d243d7bcc1d50d90b4df5962f70",
+        strip_prefix = "upb-6e1aa9f136ad9749080b3a4765545bafd7243b0d/",
         urls = [
-            "https://github.com/protocolbuffers/upb/archive/d72d98495d0ea52da0761fbd0fa3718c7f8988d3.zip",  # 2022-05-07
+            "https://github.com/protocolbuffers/upb/archive/6e1aa9f136ad9749080b3a4765545bafd7243b0d.zip",  # 2022-06-08
         ],
     )
     _toolchains(name = "phst_rules_elisp_toolchains")
