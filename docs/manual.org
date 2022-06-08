@@ -460,6 +460,8 @@ equals their default value; normally such fields are left out.  The
 ~:proto-names~ keyword argument determines the naming style for field names: by
 default, camel-case versions of the names are used, but if the keyword argument
 is non-~nil~, the names from the protocol buffer definition are used verbatim.
+If the ~:enum-numbers~ keyword argument is non-~nil~, the output will use
+numeric values for enumeration fields instead of enumerator names.
 #+END_defun
 
 You can print a human-readable representation of protocol buffer messages,
