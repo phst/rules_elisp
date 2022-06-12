@@ -1684,7 +1684,8 @@ struct MutableArrayArg {
 static emacs_value MakeArrayStruct(struct Context ctx, struct LispArena arena,
                                    const upb_FieldDef* type, upb_Array* value,
                                    bool mutable) {
-  assert(upb_FieldDef_IsRepeated(type) && !upb_FieldDef_IsMap(type));
+  assert(upb_FieldDef_IsRepeated(type));
+  assert(!upb_FieldDef_IsMap(type));
   assert(value != NULL);
   struct TypedArray array = {type, value, mutable};
   struct TypedArray* ptr = AllocateFromArena(ctx, arena.ptr, sizeof *ptr);
