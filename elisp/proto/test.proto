@@ -49,7 +49,7 @@ message Test {
   map<string, string> map_string_string = 22;
   map<string, bytes> map_string_bytes = 23;
 
-  Enumeration enum = 24;
+  Enumeration enumeration = 24;
 }
 
 message ForeignMessage {
@@ -57,6 +57,6 @@ message ForeignMessage {
 }
 
 enum Enumeration {
-  FOO = 0;
-  BAR = 1;
+  ENUM_UNSPECIFIED = 0;
+  ENUM_BAR = 1;
 }

@@ -882,10 +882,10 @@
                            "]}")))))
 
 (ert-deftest elisp/proto/serialize-json/enum-numbers ()
-  (let ((message (elisp/proto/Test-new :enum elisp/proto/BAR)))
+  (let ((message (elisp/proto/Test-new :enumeration elisp/proto/ENUM_BAR)))
     (pcase-dolist (`(,enum-numbers ,expected)
-                   '((nil "{\"enum\":\"BAR\"}")
-                     (t "{\"enum\":1}")))
+                   '((nil "{\"enumeration\":\"ENUM_BAR\"}")
+                     (t "{\"enumeration\":1}")))
       (ert-info ((prin1-to-string enum-numbers) :prefix "enum-numbers: ")
         (should (equal (elisp/proto/serialize-json message
                                                    :enum-numbers enum-numbers)
