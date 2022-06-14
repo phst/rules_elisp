@@ -1334,8 +1334,25 @@ static void ParseError(struct Context ctx, upb_DecodeStatus status,
 }
 
 // Signals an error indicating that serializing a message has failed.
-static void SerializeError(struct Context ctx, const upb_MessageDef* def) {
-  Signal1(ctx, kSerializeError, MakeMessageName(ctx, def));
+static void SerializeError(struct Context ctx, upb_EncodeStatus status,
+                           const upb_MessageDef* def) {
+  switch (status) {
+    case kUpb_EncodeStatus_Ok:
+      break;
+    case kUpb_EncodeStatus_OutOfMemory:
+      MemoryFull(ctx);
+      break;
+    case kUpb_EncodeStatus_MaxDepthExceeded:
+      OverflowError1(ctx, MakeMessageName(ctx, def));
+      break;
+    case kUpb_EncodeStatus_MissingRequired:
+      Signal1(ctx, kMissingRequiredField, MakeMessageName(ctx, def));
+      break;
+    default:
+      Signal2(ctx, kSerializeError, MakeInteger(ctx, status),
+              MakeMessageName(ctx, def));
+      break;
+  }
 }
 
 // Signals an error indicating that a field has no notion of presence.
@@ -1357,12 +1374,14 @@ static struct MutableString SerializeMessage(struct Context ctx,
                                              int options) {
   struct MutableString null = {NULL, 0};
   size_t size;
-  char* data =
-      upb_Encode(msg, upb_MessageDef_MiniTable(def), options, arena, &size);
-  if (data == NULL) {
-    SerializeError(ctx, def);
+  char* data;
+  upb_EncodeStatus status = upb_Encode(msg, upb_MessageDef_MiniTable(def),
+                                       options, arena, &data, &size);
+  if (status != kUpb_EncodeStatus_Ok) {
+    SerializeError(ctx, status, def);
     return null;
   }
+  if (size == 0) data = "";
   struct MutableString ret = {data, size};
   return ret;
 }
@@ -2789,11 +2808,11 @@ static emacs_value Serialize(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   assert(nargs >= 1 && nargs <= 7);
   struct MessageArg msg = ExtractMessage(ctx, args[0]);
   if (msg.type == NULL) return NULL;
-  int options = kUpb_Encode_CheckRequired;
+  int options = kUpb_EncodeOption_CheckRequired;
   const struct KeySpec specs[] = {
-      {kCAllowPartial, ClearBit, kUpb_Encode_CheckRequired, &options},
-      {kCDiscardUnknown, SetBit, kUpb_Encode_SkipUnknown, &options},
-      {kCDeterministic, SetBit, kUpb_Encode_Deterministic, &options}};
+      {kCAllowPartial, ClearBit, kUpb_EncodeOption_CheckRequired, &options},
+      {kCDiscardUnknown, SetBit, kUpb_EncodeOption_SkipUnknown, &options},
+      {kCDeterministic, SetBit, kUpb_EncodeOption_Deterministic, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
   upb_Arena* arena = NewArena(ctx);
   if (arena == NULL) return NULL;
@@ -3600,9 +3619,9 @@ static emacs_value PackAny(emacs_env* env,
   }
   struct MutableString type_url =
       TypeUrl(ctx, upb_Arena_Alloc(arena.ptr), msg.type);
-  struct MutableString serialized =
-      SerializeMessage(ctx, arena.ptr, msg.type, msg.value,
-                       kUpb_Encode_Deterministic | kUpb_Encode_CheckRequired);
+  struct MutableString serialized = SerializeMessage(
+      ctx, arena.ptr, msg.type, msg.value,
+      kUpb_EncodeOption_Deterministic | kUpb_EncodeOption_CheckRequired);
   if (type_url.data == NULL || serialized.data == NULL) return NULL;
   google_protobuf_Any_set_type_url(any, View(type_url));
   google_protobuf_Any_set_value(any, View(serialized));
