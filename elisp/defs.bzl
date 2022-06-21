@@ -16,7 +16,7 @@
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -540,8 +540,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = [
-        "@bazel_tools//tools/cpp:toolchain_type",
+    toolchains = use_cpp_toolchains() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
@@ -637,8 +636,7 @@ the `:nocover` tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
-    toolchains = [
-        "@bazel_tools//tools/cpp:toolchain_type",
+    toolchains = use_cpp_toolchains() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
