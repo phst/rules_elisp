@@ -222,16 +222,7 @@ class Builder:
                 env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
             # Hacks so that Bazel finds the right binaries on GitHub.  See
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
-            if self._kernel in ('Linux', 'Darwin'):
-                tool_cache = pathlib.Path(os.getenv('RUNNER_TOOL_CACHE'))
-                # Remove Python versions set up by the setup-python action.  For
-                # some reason they don’t work.
-                for var in ('PATH', 'LD_LIBRARY_PATH'):
-                    path = env.get(var, '').split(os.pathsep)
-                    prefix = str(tool_cache / 'Python') + '/'
-                    env[var] = os.pathsep.join(
-                        d for d in path if not d.startswith(prefix))
-            elif self._kernel == 'Windows':
+            if self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
         return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
 
