@@ -540,7 +540,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchains() + [
+    toolchains = use_cpp_toolchain() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
@@ -636,7 +636,7 @@ the `:nocover` tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
-    toolchains = use_cpp_toolchains() + [
+    toolchains = use_cpp_toolchain() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
     incompatible_use_toolchain_transition = True,
