@@ -280,7 +280,6 @@ def _elisp_test_impl(ctx):
     ]
 
 elisp_toolchain = rule(
-    implementation = _elisp_toolchain_impl,
     attrs = {
         "emacs": attr.label(
             doc = """An executable file that behaves like the Emacs binary.
@@ -343,6 +342,7 @@ temporary files that are deleted after the action completes, or files passed on
 the command line interpreted according to the `input_args` and `output_args`
 attributes of the `elisp_binary` rule.""",
     provides = [platform_common.ToolchainInfo],
+    implementation = _elisp_toolchain_impl,
 )
 
 # Compilation-related attributes shared between elisp_library, elisp_binary,
@@ -371,7 +371,12 @@ elisp_library = rule(
             doc = """List of source files.  These must either be Emacs Lisp
 files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
 `.dll`.""",
-            allow_files = [".el", ".so", ".dylib", ".dll"],
+            allow_files = [
+                ".el",
+                ".so",
+                ".dylib",
+                ".dll",
+            ],
             mandatory = True,
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
@@ -415,15 +420,14 @@ ensure that files get only loaded in their byte-compiled form.
 The source files in `srcs` can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
+    incompatible_use_toolchain_transition = True,
     provides = [EmacsLispInfo],
     toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
 )
 
 # The protocol buffer aspect is private for now.
 _elisp_proto_aspect = aspect(
-    doc = "An aspect to generate protocol buffer libraries for Emacs Lisp.",
     attr_aspects = ["deps"],
     attrs = {
         "_compile": attr.label(
@@ -440,8 +444,9 @@ _elisp_proto_aspect = aspect(
             providers = [EmacsLispInfo],
         ),
     },
-    required_providers = [ProtoInfo],
+    doc = "An aspect to generate protocol buffer libraries for Emacs Lisp.",
     provides = [EmacsLispInfo],
+    required_providers = [ProtoInfo],
     toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
     implementation = _elisp_proto_aspect_impl,
 )
@@ -456,10 +461,10 @@ elisp_proto_library = rule(
             aspects = [_elisp_proto_aspect],
         ),
     },
-    doc = r"""Generates Emacs bindings for a protocol buffer library.
+    doc = """Generates Emacs bindings for a protocol buffer library.
 By convention, for a `proto_library` rule named
-<code><var>prefix</var>\_proto</code> there should be a corresponding
-`elisp_proto_library` rule named <code><var>prefix</var>\_elisp\_proto</code>.
+<code><var>prefix</var>\\_proto</code> there should be a corresponding
+`elisp_proto_library` rule named <code><var>prefix</var>\\_elisp\\_proto</code>.
 Other `elisp_library`, `elisp_binary`, and `elisp_test` rules can then depend
 on this rule.  This rule generates and byte-compiles Emacs Lisp representations
 of the protocol buffer definitions listed in the `deps` attribute and all their
@@ -467,9 +472,9 @@ direct and indirect dependencies.  The feature symbol for `require` is
 <code><var>package</var>/<var>name</var></code>, where
 <code>//<var>package</var>:<var>name</var></code> is the label of the
 corresponding `proto_library` rule.""",
+    incompatible_use_toolchain_transition = True,
     provides = [EmacsLispInfo],
     toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_proto_library_impl,
 )
 
@@ -481,6 +486,10 @@ elisp_binary = rule(
             allow_single_file = [".el"],
             mandatory = True,
         ),
+        _binary_libs = attr.label_list(
+            default = ["//elisp:binary"],
+            providers = [CcInfo],
+        ),
         _cc_toolchain = attr.label(
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
             providers = [cc_common.CcToolchainInfo],
@@ -491,28 +500,17 @@ elisp_binary = rule(
             cfg = "exec",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
-        _binary_libs = attr.label_list(
-            default = ["//elisp:binary"],
-            providers = [CcInfo],
+        _launcher_defaults = attr.label(
+            default = "//elisp:launcher_defaults",
+            providers = [CcDefaultInfo],
         ),
         _template = attr.label(
             default = "//elisp:binary.template",
             allow_single_file = [".template"],
         ),
-        _launcher_defaults = attr.label(
-            default = "//elisp:launcher_defaults",
-            providers = [CcDefaultInfo],
-        ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
-        ),
-        deps = attr.label_list(
-            doc = "List of `elisp_library` dependencies.",
-            providers = [EmacsLispInfo],
-        ),
-        interactive = attr.bool(
-            doc = "Run Emacs in interactive instead of batch mode.",
         ),
         input_args = attr.int_list(
             doc = """Indices of command-line arguments that represent input
@@ -524,6 +522,9 @@ command line, the corresponding arguments are treated as filenames for input
 files and added to the `inputFiles` field of the manifest.  This only has an
 effect for toolchains that specify `wrap = True`.""",
         ),
+        interactive = attr.bool(
+            doc = "Run Emacs in interactive instead of batch mode.",
+        ),
         output_args = attr.int_list(
             doc = """Indices of command-line arguments that represent output
 filenames.  These number specify indices into the `argv` array.  Negative
@@ -534,16 +535,20 @@ command line, the corresponding arguments are treated as filenames for output
 files and added to the `outputFiles` field of the manifest.  This only has an
 effect for toolchains that specify `wrap = True`.""",
         ),
+        deps = attr.label_list(
+            doc = "List of `elisp_library` dependencies.",
+            providers = [EmacsLispInfo],
+        ),
     ),
     doc = """Binary rule that loads a single Emacs Lisp file.
 The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchains() + [
+    incompatible_use_toolchain_transition = True,
+    toolchains = use_cpp_toolchain() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_binary_impl,
 )
 
@@ -564,19 +569,16 @@ elisp_test = rule(
             default = "@bazel_tools//tools/cpp:current_cc_toolchain",
             providers = [cc_common.CcToolchainInfo],
         ),
+        _collect_cc_coverage = attr.label(
+            default = "@bazel_tools//tools/test:collect_cc_coverage",
+            executable = True,
+            cfg = "target",
+        ),
         _grep_includes = attr.label(
             allow_single_file = True,
             executable = True,
             cfg = "exec",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
-        ),
-        _test_libs = attr.label_list(
-            default = ["//elisp:test"],
-            providers = [CcInfo],
-        ),
-        _template = attr.label(
-            default = "//elisp:test.template",
-            allow_single_file = [".template"],
         ),
         _launcher_defaults = attr.label(
             default = "//elisp:launcher_defaults",
@@ -587,18 +589,24 @@ elisp_test = rule(
             executable = True,
             cfg = "target",
         ),
-        _collect_cc_coverage = attr.label(
-            default = "@bazel_tools//tools/test:collect_cc_coverage",
-            executable = True,
-            cfg = "target",
+        _template = attr.label(
+            default = "//elisp:test.template",
+            allow_single_file = [".template"],
+        ),
+        _test_libs = attr.label_list(
+            default = ["//elisp:test"],
+            providers = [CcInfo],
         ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
         ),
-        deps = attr.label_list(
-            doc = "List of `elisp_library` dependencies.",
-            providers = [EmacsLispInfo],
+        skip_tags = attr.string_list(
+            doc = """List of test tags to skip.  This attribute contains a list
+of tag names; if a test is tagged with one of the tags from this list, it is
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+interactive mode.  Use the `:tags` keyword argument to `ert-deftest` to tag
+tests.""",
         ),
         skip_tests = attr.string_list(
             doc = """List of tests to skip.  This attribute contains a list of
@@ -609,12 +617,9 @@ macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-E
 instead.  The `skip_tests` attribute is mainly useful for third-party code that
 you don’t control.""",
         ),
-        skip_tags = attr.string_list(
-            doc = """List of test tags to skip.  This attribute contains a list
-of tag names; if a test is tagged with one of the tags from this list, it is
-skipped.  This can be useful to e.g. skip tests that are flaky or only work in
-interactive mode.  Use the `:tags` keyword argument to `ert-deftest` to tag
-tests.""",
+        deps = attr.label_list(
+            doc = "List of `elisp_library` dependencies.",
+            providers = [EmacsLispInfo],
         ),
     ),
     doc = """Runs ERT tests that are defined in the source files.
@@ -635,11 +640,11 @@ In coverage mode (i.e., when run under `bazel coverage`), all tests tagged with
 the `:nocover` tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
+    incompatible_use_toolchain_transition = True,
     test = True,
-    toolchains = use_cpp_toolchains() + [
+    toolchains = use_cpp_toolchain() + [
         "@phst_rules_elisp//elisp:toolchain_type",
     ],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_test_impl,
 )
 
