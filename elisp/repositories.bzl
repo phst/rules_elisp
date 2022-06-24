@@ -82,6 +82,7 @@ def rules_elisp_dependencies():
         urls = [
             "https://github.com/protocolbuffers/upb/archive/83f4988561baf5951bce6f07ddaa1cb325ba0241.zip",  # 2022-06-23
         ],
+        patches = ["@phst_rules_elisp//:upb.patch"],
     )
     _toolchains(name = "phst_rules_elisp_toolchains")
 
