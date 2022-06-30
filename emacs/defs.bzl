@@ -19,7 +19,7 @@ load(
     "CPP_LINK_EXECUTABLE_ACTION_NAME",
     "C_COMPILE_ACTION_NAME",
 )
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -129,7 +129,7 @@ This is used by Gazelle.""",
 The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+    toolchains = use_cpp_toolchain(),
     incompatible_use_toolchain_transition = True,
     implementation = _emacs_binary_impl,
 )
