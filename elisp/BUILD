@@ -287,7 +287,6 @@ py_library(
     srcs_version = "PY3",
     visibility = [
         "//emacs:__pkg__",
-        "//examples:__pkg__",
         "//tests/wrap:__pkg__",
     ],
     deps = ["@bazel_tools//tools/python/runfiles"],
