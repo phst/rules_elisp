@@ -1290,7 +1290,7 @@ static struct MutableMessageArg ExtractWellKnownMutableMessage(
 // full.
 static upb_Message* NewMessage(struct Context ctx, upb_Arena* arena,
                                const upb_MessageDef* def) {
-  upb_Message* msg = upb_Message_New(def, arena);
+  upb_Message* msg = upb_Message_New(upb_MessageDef_MiniTable(def), arena);
   if (msg == NULL) MemoryFull(ctx);
   return msg;
 }
