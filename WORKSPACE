@@ -57,6 +57,14 @@ load("@pip_deps//:requirements.bzl", "install_deps")
 
 install_deps()
 
+load("@upb//bazel:workspace_deps.bzl", "upb_deps")
+
+upb_deps()
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
 http_archive(
     name = "io_bazel_stardoc",
     sha256 = "05fb57bb4ad68a360470420a3b6f5317e4f722839abc5b17ec4ef8ed465aaa47",
@@ -111,14 +119,6 @@ go_register_toolchains(
     nogo = "@//:nogo",
     version = "1.18.4",
 )
-
-load("@upb//bazel:workspace_deps.bzl", "upb_deps")
-
-upb_deps()
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
 
 http_archive(
     name = "com_grail_bazel_compdb",
