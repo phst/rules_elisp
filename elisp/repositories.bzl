@@ -15,13 +15,15 @@
 """Contains workspace functions to use Emacs Lisp rules."""
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
 def rules_elisp_dependencies():
     """Installs necessary dependencies for Emacs Lisp rules.
 
     Call this function in your `WORKSPACE` file.
     """
-    http_archive(
+    maybe(
+        http_archive,
         name = "gnu_emacs_27.1",
         build_file_content = _build_file(macos_arm = False),
         sha256 = "4a4c128f915fc937d61edfc273c98106711b540c9be3cd5d2e2b9b5b2f172e41",
@@ -31,7 +33,8 @@ def rules_elisp_dependencies():
             "https://ftp.gnu.org/gnu/emacs/emacs-27.1.tar.xz",
         ],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "gnu_emacs_27.2",
         build_file_content = _build_file(macos_arm = True),
         sha256 = "b4a7cc4e78e63f378624e0919215b910af5bb2a0afc819fad298272e9f40c1b9",
@@ -41,7 +44,8 @@ def rules_elisp_dependencies():
             "https://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.xz",
         ],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "gnu_emacs_28.1",
         build_file_content = _build_file(macos_arm = True),
         sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
@@ -51,7 +55,8 @@ def rules_elisp_dependencies():
             "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
         ],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "bazel_skylib",
         sha256 = "f7be3474d42aae265405a592bb7da8e171919d74c16f082a5457840f06054728",
         urls = [
@@ -59,7 +64,8 @@ def rules_elisp_dependencies():
             "https://github.com/bazelbuild/bazel-skylib/releases/download/1.2.1/bazel-skylib-1.2.1.tar.gz",
         ],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "com_google_absl",
         sha256 = "a4567ff02faca671b95e31d315bab18b42b6c6f1a60e91c6ea84e5a2142112c2",
         strip_prefix = "abseil-cpp-20211102.0/",
@@ -67,7 +73,8 @@ def rules_elisp_dependencies():
             "https://github.com/abseil/abseil-cpp/archive/refs/tags/20211102.0.zip",  # 2021-11-03
         ],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "upb",
         sha256 = "13f99a9b2591fdb6dc2997c619e0cf77655047b23fa8fd30c139ae4e8669e391",
         strip_prefix = "upb-83f4988561baf5951bce6f07ddaa1cb325ba0241/",
@@ -79,7 +86,8 @@ def rules_elisp_dependencies():
         # release.
         patches = ["@phst_rules_elisp//:upb.patch"],
     )
-    http_archive(
+    maybe(
+        http_archive,
         name = "com_google_protobuf",
         sha256 = "8b28fdd45bab62d15db232ec404248901842e5340299a57765e48abe8a80d930",
         strip_prefix = "protobuf-3.20.1/",
