@@ -112,13 +112,13 @@ go_register_toolchains(
     version = "1.18.4",
 )
 
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-
 load("@upb//bazel:workspace_deps.bzl", "upb_deps")
 
 upb_deps()
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
 
 http_archive(
     name = "com_grail_bazel_compdb",
