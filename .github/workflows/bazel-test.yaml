@@ -28,6 +28,11 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         bazel: [5.1.0, 5.1.1, 5.2.0, latest, rolling]
         os: [ubuntu-latest, macos-latest, windows-latest]
+        exclude:
+          # FIXME: Remove this exclusion once
+          # https://github.com/bazelbuild/bazel/issues/15919 is fixed.
+          - bazel: rolling
+            os: windows-latest
     runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
