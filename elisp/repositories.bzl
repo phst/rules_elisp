@@ -68,14 +68,6 @@ def rules_elisp_dependencies():
         ],
     )
     http_archive(
-        name = "com_google_protobuf",
-        sha256 = "8b28fdd45bab62d15db232ec404248901842e5340299a57765e48abe8a80d930",
-        strip_prefix = "protobuf-3.20.1/",
-        urls = [
-            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.20.1.tar.gz",  # 2022-04-22
-        ],
-    )
-    http_archive(
         name = "upb",
         sha256 = "13f99a9b2591fdb6dc2997c619e0cf77655047b23fa8fd30c139ae4e8669e391",
         strip_prefix = "upb-83f4988561baf5951bce6f07ddaa1cb325ba0241/",
@@ -86,6 +78,14 @@ def rules_elisp_dependencies():
         # https://github.com/bazelbuild/bazel/issues/15735 is in a rolling
         # release.
         patches = ["@phst_rules_elisp//:upb.patch"],
+    )
+    http_archive(
+        name = "com_google_protobuf",
+        sha256 = "8b28fdd45bab62d15db232ec404248901842e5340299a57765e48abe8a80d930",
+        strip_prefix = "protobuf-3.20.1/",
+        urls = [
+            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.20.1.tar.gz",  # 2022-04-22
+        ],
     )
     _toolchains(name = "phst_rules_elisp_toolchains")
 
