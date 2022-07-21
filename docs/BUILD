@@ -104,6 +104,7 @@ py_binary(
 py_proto_library(
     name = "stardoc_output_py_proto",
     srcs = [":stardoc_output.proto"],
+    include = "",
     srcs_version = "PY3",
     tags = ["no-python-check"],
 )
