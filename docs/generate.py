@@ -20,7 +20,7 @@ import io
 import pathlib
 import re
 import textwrap
-from typing import Callable, List, Tuple
+from typing import Callable, List, Optional, Tuple
 
 import commonmark
 import commonmark.node
@@ -293,7 +293,8 @@ class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
         super().__init__()
         self._writer = writer
 
-    def handle_starttag(self, tag: str, attrs: List[Tuple[str, str]]) -> None:
+    def handle_starttag(self, tag: str,
+                        attrs: List[Tuple[str, Optional[str]]]) -> None:
         if attrs:
             raise NotImplementedError('got attributes {attrs} for <{tag}> tag')
         start, _ = self._TAGS[tag]
