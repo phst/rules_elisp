@@ -120,4 +120,27 @@ context."
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 
+(ert-deftest elisp/runfiles/repo-mapping ()
+  (let ((temp-dir (make-temp-file "elisp-test-" :directory ".runfiles")))
+    (copy-file
+     (elisp/runfiles/rlocation "phst_rules_elisp/elisp/runfiles/test-mapping")
+     (expand-file-name "_repo_mapping" temp-dir))
+    (let ((runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
+                                         :directory temp-dir)))
+      (pcase-dolist (`(,file ,caller-repo ,want)
+                     '(("main/file" nil "main/file")
+                       ("main/file" "" "main/file")
+                       ("main/file" "main" "main/file")
+                       ("main/file" "external" "foobar/file")
+                       ("external/file" nil "external/file")
+                       ("external/file" "" "external/file")
+                       ("external/file" "main" "external/file")
+                       ("external/file" "external" "external/file")))
+        (ert-info ((format "Looking up file %S from repository %S"
+                           file caller-repo))
+          (should (equal (elisp/runfiles/rlocation file runfiles
+                                                   :caller-repo caller-repo)
+                         (expand-file-name want temp-dir))))))
+    (delete-directory temp-dir :recursive)))
+
 ;;; runfiles-test.el ends here

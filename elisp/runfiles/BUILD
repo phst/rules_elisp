@@ -36,6 +36,7 @@ elisp_test(
         "test.txt",
         "test-lib.elc",
         "test-manifest",
+        "test-mapping",
     ],
     deps = [":runfiles"],
 )
