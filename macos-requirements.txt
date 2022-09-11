@@ -4,9 +4,9 @@
 #
 #    bazel run //:requirements.update
 #
-astroid==2.12.4 \
-    --hash=sha256:39fa822c82dc112f5072a208ddf01c58184043aa90e3e469786fa0520c71aaa7 \
-    --hash=sha256:af71cdc0775b6e4d88076746620e2c8cd1bf4533a9977cfdd00eeea97d95530c
+astroid==2.12.9 \
+    --hash=sha256:0dafbfcf4ebdecd3c8f6d742c9d9c88508229ca823d5c98ab872d964f3321e56 \
+    --hash=sha256:27a22f40e45af6d362498647a0940e8ae9c35f71cb572a1b6f8f810122a11918
     # via pylint
 attrs==21.4.0 \
     --hash=sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4 \
@@ -115,9 +115,9 @@ pydot==1.4.2 \
     --hash=sha256:248081a39bcb56784deb018977e428605c1c758f10897a339fce1dd728ff007d \
     --hash=sha256:66c98190c65b8d2e2382a441b4c0edfdb4f4c025ef9cb9874de478fb0793a451
     # via pytype
-pylint==2.15.0 \
-    --hash=sha256:4b124affc198b7f7c9b5f9ab690d85db48282a025ef9333f51d2d7281b92a6c3 \
-    --hash=sha256:4f3f7e869646b0bd63b3dfb79f3c0f28fc3d2d923ea220d52620fd625aed92b0
+pylint==2.15.2 \
+    --hash=sha256:cc3da458ba810c49d330e09013dec7ced5217772dec8f043ccdd34dae648fde8 \
+    --hash=sha256:f63404a2547edb5247da263748771ac9a806ed1de4174cda01293c08ddbc2999
     # via -r ./requirements.in
 pyparsing==3.0.9 \
     --hash=sha256:2b020ecf7d21b687f219b71ecad3631f644a47f01403fa1d1036b0c6416d70fb \
