@@ -47,6 +47,8 @@ load("@rules_python//python:pip.bzl", "pip_parse")
 
 pip_parse(
     name = "pip_deps",
+    # Work around https://github.com/ionelmc/python-lazy-object-proxy/issues/70.
+    extra_pip_args = ["--use-deprecated=legacy-resolver"],
     requirements_darwin = "@//:macos-requirements.txt",
     requirements_linux = "@//:linux-requirements.txt",
     requirements_lock = None,
