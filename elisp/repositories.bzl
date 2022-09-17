@@ -81,10 +81,6 @@ def rules_elisp_dependencies():
         urls = [
             "https://github.com/protocolbuffers/upb/archive/83f4988561baf5951bce6f07ddaa1cb325ba0241.zip",  # 2022-06-23
         ],
-        # FIXME: Remove patch once the fix for
-        # https://github.com/bazelbuild/bazel/issues/15735 is in a rolling
-        # release.
-        patches = ["@phst_rules_elisp//:upb.patch"],
     )
     maybe(
         http_archive,
