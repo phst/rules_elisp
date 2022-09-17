@@ -28,11 +28,6 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         bazel: [5.1.0, 5.1.1, 5.2.0, 5.3.0, latest, rolling]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        exclude:
-          # FIXME: Remove this exclusion once
-          # https://github.com/bazelbuild/bazel/issues/15919 is fixed.
-          - bazel: rolling
-            os: windows-latest
     runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
@@ -52,7 +47,9 @@ jobs:
         uses: msys2/setup-msys2@v2
         with:
           update: false
-          release: false
+          release: true
+          # Work around https://github.com/bazelbuild/bazel/issues/15919.
+          location: C:\Tools\
           # See nt/INSTALL.W64 for the list of required MSYS2 packages
           install: >
             base-devel

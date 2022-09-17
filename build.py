@@ -222,8 +222,10 @@ class Builder:
                 env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
             # Hacks so that Bazel finds the right binaries on GitHub.  See
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
+            # Note that due to https://github.com/bazelbuild/bazel/issues/15919
+            # we have to install MSYS2 in C:\Tools.
             if self._kernel == 'Windows':
-                env['BAZEL_SH'] = r'C:\msys64\usr\bin\bash.exe'
+                env['BAZEL_SH'] = r'C:\Tools\msys64\usr\bin\bash.exe'
         return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
 
     def _cache_options(self) -> Sequence[str]:
