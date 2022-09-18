@@ -256,7 +256,7 @@ class Builder:
 
 def _versions() -> FrozenSet[str]:
     # All potentially supported Emacs versions.
-    ret = {'27.1', '27.2', '28.1'}
+    ret = {'27.1', '27.2', '28.1', '28.2'}
     uname = platform.uname()
     if uname.system in ('Linux', 'Windows'):
         # GNU/Linux and Windows support all Emacs versions.
