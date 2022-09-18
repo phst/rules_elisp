@@ -18,7 +18,7 @@ load("//private:defs.bzl", "cc_defaults")
 
 alias(
     name = "emacs",
-    actual = ":emacs_28.1",
+    actual = ":emacs_28.2",
     visibility = ["//visibility:public"],
 )
 
@@ -35,13 +35,13 @@ py_test(
 
 alias(
     name = "module_header",
-    actual = "@gnu_emacs_28.1//:module_header",
+    actual = "@gnu_emacs_28.2//:module_header",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "builtin_features",
-    actual = "@gnu_emacs_28.1//:builtin_features",
+    actual = "@gnu_emacs_28.2//:builtin_features",
     visibility = ["//gazelle:__pkg__"],
 )
 
@@ -60,6 +60,12 @@ alias(
 alias(
     name = "emacs_28.1",
     actual = "@gnu_emacs_28.1//:emacs",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "emacs_28.2",
+    actual = "@gnu_emacs_28.2//:emacs",
     visibility = ["//visibility:public"],
 )
 
@@ -206,6 +212,7 @@ constraint_value(
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
+        "@gnu_emacs_28.2//:__pkg__",
     ],
 )
 
@@ -229,5 +236,6 @@ cc_defaults(
         "@gnu_emacs_27.1//:__pkg__",
         "@gnu_emacs_27.2//:__pkg__",
         "@gnu_emacs_28.1//:__pkg__",
+        "@gnu_emacs_28.2//:__pkg__",
     ],
 )
