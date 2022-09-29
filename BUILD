@@ -26,6 +26,7 @@ py_binary(
 
 compile_pip_requirements(
     name = "requirements",
+    env = {"USERPROFILE": r"C:\Temp"},
     extra_args = [
         "--allow-unsafe",  # for setuptools
     ],
