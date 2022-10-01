@@ -221,6 +221,7 @@ def cpp_string(string):
 
 def run_emacs(
         ctx,
+        *,
         arguments,
         inputs,
         outputs,

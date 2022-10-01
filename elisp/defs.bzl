@@ -704,7 +704,7 @@ to generate other document formats from the output file.""",
     implementation = _elisp_manual_impl,
 )
 
-def _compile(ctx, srcs, deps, load_path, data, tags, fatal_warnings, check_reachable = True):
+def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings, check_reachable = True):
     """Byte-compiles Emacs Lisp source files.
 
     Args:
@@ -930,7 +930,7 @@ def _compile(ctx, srcs, deps, load_path, data, tags, fatal_warnings, check_reach
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, srcs, tags, args, libs):
+def _binary(ctx, *, srcs, tags, args, libs):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_template” attribute containing the C++ template
