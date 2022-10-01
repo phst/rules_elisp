@@ -114,7 +114,7 @@ _toolchains = repository_rule(
     implementation = _toolchains_impl,
 )
 
-def _build_file(macos_arm):
+def _build_file(*, macos_arm):
     return _BUILD_TEMPLATE.format(
         macos_arm = "" if macos_arm else '"@phst_rules_elisp//emacs:incompatible"',
     )

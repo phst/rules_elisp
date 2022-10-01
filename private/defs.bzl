@@ -248,6 +248,7 @@ def cpp_int(int):
 
 def run_emacs(
         ctx,
+        *,
         arguments,
         inputs,
         outputs,
