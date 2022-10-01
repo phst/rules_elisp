@@ -219,33 +219,6 @@ def cpp_string(string):
         string = string.replace(char, "\\" + char)
     return 'PHST_RULES_ELISP_NATIVE_LITERAL("' + string + '")'
 
-def cpp_ints(ints):
-    """Formats the given integer list as C++ initializer list.
-
-    Args:
-      ints (list of int): numbers to be formatted
-
-    Returns:
-      a string containing C++ code representing the given number list
-    """
-    return ", ".join([cpp_int(i) for i in ints])
-
-def cpp_int(int):
-    """Format the given integer as C++ decimal literal.
-
-    Args:
-      int: an integer
-
-    Returns:
-      a string containing a C++ decimal literal
-    """
-
-    # See https://stackoverflow.com/a/1819236 for the guarantees on the C++ int
-    # type range.
-    if int < -32767 or int > 32767:
-        fail("integer {} out of range".format(int))
-    return str(int)
-
 def run_emacs(
         ctx,
         arguments,
