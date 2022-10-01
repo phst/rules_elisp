@@ -205,6 +205,8 @@ class Builder:
                cwd: Optional[pathlib.Path] = None,
                capture_stdout: bool = False) -> Optional[str]:
         args = [str(self._bazel_program), command]
+        if self._github:
+            args.append('--verbose_failures')
         args.extend(options)
         args.extend(self._cache_options())
         args.extend(postfix_options)
