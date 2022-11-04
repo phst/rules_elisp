@@ -77,15 +77,6 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
-        name = "com_google_absl",
-        sha256 = "54707f411cb62a26a776dad5fd60829098c181700edcd022ea5c2ca49e9b7ef1",
-        strip_prefix = "abseil-cpp-20220623.1/",
-        urls = [
-            "https://github.com/abseil/abseil-cpp/archive/refs/tags/20220623.1.zip",  # 2022-08-31
-        ],
-    )
-    maybe(
-        http_archive,
         name = "upb",
         sha256 = "13f99a9b2591fdb6dc2997c619e0cf77655047b23fa8fd30c139ae4e8669e391",
         strip_prefix = "upb-83f4988561baf5951bce6f07ddaa1cb325ba0241/",
@@ -94,8 +85,9 @@ def rules_elisp_dependencies():
         ],
     )
 
-    # Note that we don’t add an archive for the protocol buffers repository
-    # here, because µpb already depends on an unreleased version thereof.
+    # Note that we don’t add an archive for the protocol buffers and Abseil
+    # repositories here, because µpb already depends on an unreleased version
+    # thereof.
     _toolchains(name = "phst_rules_elisp_toolchains")
 
 # buildifier: disable=unnamed-macro
