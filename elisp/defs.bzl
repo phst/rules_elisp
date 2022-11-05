@@ -125,29 +125,14 @@ def _elisp_proto_aspect_impl(target, ctx):
         mnemonic = "GenElispProto",
         progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
     )
-
-    # Add a hack for well-known protocol buffer types.  In the released versions
-    # of the protocol buffer libraries, these are normal proto_library targets
-    # in the root package of the com_google_protobuf repository, but in newer
-    # versions they are aliases to targets in the src/google/protobuf package.
-    # Until https://github.com/bazelbuild/bazel/issues/11044 is fixed, we have
-    # no access to the alias label, so we add an ugly hack for backwards
-    # compatibility.  Some day this should get cleaned up.
-    if ctx.label.workspace_name == "com_google_protobuf" and ctx.label.package == "src/google/protobuf":
-        load_path = ["."]
-        check_reachable = False
-    else:
-        load_path = []
-        check_reachable = True
     result = _compile(
         ctx = ctx,
         srcs = [src],
         deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
-        load_path = load_path,
+        load_path = [],
         data = None,
         tags = ctx.rule.attr.tags,
         fatal_warnings = True,
-        check_reachable = check_reachable,
     )
     return [
         coverage_common.instrumented_files_info(
@@ -180,9 +165,7 @@ def _elisp_proto_feature(file):
         ws, sep, stem = stem.partition("/")
         if not ws or not sep:
             fail("invalid name {}", file.short_path)
-
-    # See the comment in _elisp_proto_aspect_impl about well-known types.
-    return stem.removeprefix("src/google/protobuf/")
+    return stem
 
 def _elisp_proto_library_impl(ctx):
     """Rule implementation for the “elisp_proto_library” rule."""
@@ -704,7 +687,7 @@ to generate other document formats from the output file.""",
     implementation = _elisp_manual_impl,
 )
 
-def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings, check_reachable = True):
+def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
     """Byte-compiles Emacs Lisp source files.
 
     Args:
@@ -718,9 +701,6 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings, check_re
       tags (list of strings): list of rule tags to write into the manifest
       fatal_warnings (bool): whether compilation warnings should be treated as
           errors
-      check_reachable (bool): whether the function should check that the source
-          files are reachable from the given load path; this parameter is a hack
-          that should be removed eventually
 
     Returns:
       A structure with the following fields:
@@ -783,12 +763,11 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings, check_re
                 paths.join(ctx.label.workspace_root, dir),
             ))
 
-        if check_reachable:
-            # At least some of the sources must be reachable from the directory.
-            prefix = "./" if dir == "." else "./" + dir + "/"
-            if not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
-                fail("None of the files [{}] are reachable from load path directory {}"
-                    .format(", ".join([src.short_path for src in srcs]), dir))
+        # At least some of the sources must be reachable from the directory.
+        prefix = "./" if dir == "." else "./" + dir + "/"
+        if not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
+            fail("None of the files [{}] are reachable from load path directory {}"
+                .format(", ".join([src.short_path for src in srcs]), dir))
 
         # If we’re compiling source files from another package, we need to
         # insert the output base directory for this rule.  In that case, we
