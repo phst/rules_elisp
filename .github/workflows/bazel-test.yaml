@@ -31,7 +31,7 @@ jobs:
     runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install Python
         id: python
         uses: actions/setup-python@v4
@@ -66,14 +66,14 @@ jobs:
           choco install visualstudio2019-workload-vctools
         if: runner.os == 'Windows'
       - name: Cache Bazel repositories
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/bazel-repository-cache
           key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
           restore-keys: |
             bazel-repositories-
       - name: Cache Bazel results
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: ~/bazel-action-cache
           key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
