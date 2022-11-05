@@ -79,9 +79,7 @@ def main() -> None:
                PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
-         # We’d like to add “--” after the options, but that’s not possible due
-         # to https://github.com/PyCQA/pylint/issues/7003.
-         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
+         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()), '--']
         + [str(file.relative_to(cwd))
            for file in sorted(workspace.srcs)],
         check=False, cwd=cwd, env=env,
