@@ -86,20 +86,20 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
-        name = "upb",
-        sha256 = "13f99a9b2591fdb6dc2997c619e0cf77655047b23fa8fd30c139ae4e8669e391",
-        strip_prefix = "upb-83f4988561baf5951bce6f07ddaa1cb325ba0241/",
-        urls = [
-            "https://github.com/protocolbuffers/upb/archive/83f4988561baf5951bce6f07ddaa1cb325ba0241.zip",  # 2022-06-23
-        ],
-    )
-    maybe(
-        http_archive,
         name = "com_google_protobuf",
         sha256 = "f10a175c9492847729a4eef787e85698b8f3ee83394a1a1d1d9f48f8835b74cf",
         strip_prefix = "protobuf-21.6/",
         urls = [
             "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.6.zip",  # 2022-09-13
+        ],
+    )
+    maybe(
+        http_archive,
+        name = "upb",
+        sha256 = "13f99a9b2591fdb6dc2997c619e0cf77655047b23fa8fd30c139ae4e8669e391",
+        strip_prefix = "upb-83f4988561baf5951bce6f07ddaa1cb325ba0241/",
+        urls = [
+            "https://github.com/protocolbuffers/upb/archive/83f4988561baf5951bce6f07ddaa1cb325ba0241.zip",  # 2022-06-23
         ],
     )
     _toolchains(name = "phst_rules_elisp_toolchains")
