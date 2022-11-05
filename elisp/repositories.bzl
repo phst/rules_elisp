@@ -93,9 +93,15 @@ def rules_elisp_dependencies():
             "https://github.com/protocolbuffers/upb/archive/83f4988561baf5951bce6f07ddaa1cb325ba0241.zip",  # 2022-06-23
         ],
     )
-
-    # Note that we don’t add an archive for the protocol buffers repository
-    # here, because µpb already depends on an unreleased version thereof.
+    maybe(
+        http_archive,
+        name = "com_google_protobuf",
+        sha256 = "f10a175c9492847729a4eef787e85698b8f3ee83394a1a1d1d9f48f8835b74cf",
+        strip_prefix = "protobuf-21.6/",
+        urls = [
+            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.6.zip",  # 2022-09-13
+        ],
+    )
     _toolchains(name = "phst_rules_elisp_toolchains")
 
 # buildifier: disable=unnamed-macro
