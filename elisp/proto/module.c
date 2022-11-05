@@ -160,6 +160,7 @@
 #include "upb/reflection/def.h"
 #include "upb/reflection/message.h"
 #include "upb/status.h"
+#include "upb/string_view.h"
 #include "upb/text/encode.h"
 #include "upb/upb.h"
 #include "upb/util/required_fields.h"
