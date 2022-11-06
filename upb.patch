@@ -28,6 +28,138 @@
          if strip_import_prefix and strip_import_prefix != "/":
              if not package.startswith(strip_import_prefix[1:]):
 
+--- upb/reflection/common.h
++++ upb/reflection/common.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ // Declarations common to all public def types.
+ 
+
+--- upb/reflection/def_pool.h
++++ upb/reflection/def_pool.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_DEF_POOL_H_
+ #define UPB_REFLECTION_DEF_POOL_H_
+
+--- upb/reflection/enum_def.h
++++ upb/reflection/enum_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_ENUM_DEF_H_
+ #define UPB_REFLECTION_ENUM_DEF_H_
+
+--- upb/reflection/enum_value_def.h
++++ upb/reflection/enum_value_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_ENUM_VALUE_DEF_H_
+ #define UPB_REFLECTION_ENUM_VALUE_DEF_H_
+
+--- upb/reflection/extension_range.h
++++ upb/reflection/extension_range.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_EXTENSION_RANGE_H_
+ #define UPB_REFLECTION_EXTENSION_RANGE_H_
+
+--- upb/reflection/field_def.h
++++ upb/reflection/field_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_FIELD_DEF_H_
+ #define UPB_REFLECTION_FIELD_DEF_H_
+
+--- upb/reflection/file_def.h
++++ upb/reflection/file_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_FILE_DEF_H_
+ #define UPB_REFLECTION_FILE_DEF_H_
+
+--- upb/reflection/message_def.h
++++ upb/reflection/message_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_MESSAGE_DEF_H_
+ #define UPB_REFLECTION_MESSAGE_DEF_H_
+
+--- upb/reflection/method_def.h
++++ upb/reflection/method_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_METHOD_DEF_H_
+ #define UPB_REFLECTION_METHOD_DEF_H_
+
+--- upb/reflection/oneof_def.h
++++ upb/reflection/oneof_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_ONEOF_DEF_H_
+ #define UPB_REFLECTION_ONEOF_DEF_H_
+
+--- upb/reflection/service_def.h
++++ upb/reflection/service_def.h
+@@ -25,7 +25,7 @@
+  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  */
+ 
+-// IWYU pragma: private, include "third_party/upb/upb/reflection/def.h"
++// IWYU pragma: private, include "upb/reflection/def.h"
+ 
+ #ifndef UPB_REFLECTION_SERVICE_DEF_H_
+ #define UPB_REFLECTION_SERVICE_DEF_H_
+
 --- upbc/BUILD
 +++ upbc/BUILD
 @@ -98,7 +98,7 @@
