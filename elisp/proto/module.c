@@ -151,7 +151,6 @@
 #include "google/protobuf/timestamp.upbdefs.h"
 #include "upb/collections/array.h"
 #include "upb/collections/map.h"
-#include "upb/collections/message_value.h"
 #include "upb/json/decode.h"
 #include "upb/json/encode.h"
 #include "upb/mem/alloc.h"
