@@ -286,6 +286,9 @@ enum GlobalSymbol {
 };
 // clang-format on
 
+// Work around what appears to be an IWYU bug.
+// IWYU pragma: no_forward_declare GlobalSymbol
+
 struct Cons {
   emacs_value car, cdr;
 };
