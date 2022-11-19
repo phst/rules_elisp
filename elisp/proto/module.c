@@ -149,19 +149,20 @@
 #include "google/protobuf/duration.upbdefs.h"
 #include "google/protobuf/timestamp.upb.h"
 #include "google/protobuf/timestamp.upbdefs.h"
+#include "upb/base/descriptor_constants.h"
+#include "upb/base/status.h"
+#include "upb/base/string_view.h"
 #include "upb/collections/array.h"
 #include "upb/collections/map.h"
 #include "upb/json/decode.h"
 #include "upb/json/encode.h"
 #include "upb/mem/alloc.h"
 #include "upb/mem/arena.h"
-#include "upb/msg.h"
+#include "upb/message/message.h"
+#include "upb/mini_table/types.h"
 #include "upb/reflection/def.h"
 #include "upb/reflection/message.h"
-#include "upb/status.h"
-#include "upb/string_view.h"
 #include "upb/text/encode.h"
-#include "upb/upb.h"
 #include "upb/util/required_fields.h"
 #include "upb/wire/decode.h"
 #include "upb/wire/encode.h"
@@ -171,8 +172,6 @@
 #ifdef _MSC_VER
 #pragma warning(pop)
 #endif
-
-// IWYU pragma: no_include "upb/msg_internal.h"
 
 /// Global variables
 
