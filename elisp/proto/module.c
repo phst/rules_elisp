@@ -159,6 +159,7 @@
 #include "upb/mem/alloc.h"
 #include "upb/mem/arena.h"
 #include "upb/message/message.h"
+#include "upb/mini_table/types.h"
 #include "upb/reflection/def.h"
 #include "upb/reflection/message.h"
 #include "upb/text/encode.h"
