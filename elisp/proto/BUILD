@@ -166,6 +166,7 @@ cc_binary(
         "@upb//:collections",
         "@upb//:descriptor_upb_proto",
         "@upb//:json",
+        "@upb//:mini_table",
         "@upb//:reflection",
         "@upb//:textformat",
         "@upb//upb/util:required_fields",
