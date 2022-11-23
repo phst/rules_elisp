@@ -156,7 +156,6 @@
 #include "upb/collections/map.h"
 #include "upb/json/decode.h"
 #include "upb/json/encode.h"
-#include "upb/mem/alloc.h"
 #include "upb/mem/arena.h"
 #include "upb/message/message.h"
 #include "upb/mini_table/types.h"
