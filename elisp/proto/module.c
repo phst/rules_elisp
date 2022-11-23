@@ -45,9 +45,9 @@
 // that take an upb_Arena* parameter should normally use that arena to allocate
 // memory, unless the memory is short-lived; they assume that any other
 // arena-allocated object passed to them has been allocated from the same arena.
-// Other functions that allocate memory either take an upb_alloc* parameter to
-// use as allocator, or allocate from the normal heap.  Memory allocated from an
-// arena is never freed explicitly; other memory should be freed as needed.
+// Other functions that allocate memory either take a struct Allocator parameter
+// to use as allocator, or allocate from the normal heap.  Memory allocated from
+// an arena is never freed explicitly; other memory should be freed as needed.
 //
 // We use the term “scalar value” in the same sense as the protocol buffer
 // documentation; see
@@ -661,8 +661,43 @@ static emacs_value MakeString(struct Context ctx, upb_StringView value) {
   return ctx.env->make_string(ctx.env, value.data, (ptrdiff_t)value.size);
 }
 
-static void* Allocate(struct Context ctx, upb_alloc* alloc, size_t size) {
-  void* ptr = upb_malloc(alloc, size);
+struct Allocator {
+  void* (*alloc)(size_t size, void* data);
+  void (*free)(void* ptr, void* data);
+  void* data;
+};
+
+static void* AllocateWithAllocator(size_t size, void* data) {
+  return upb_malloc(data, size);
+}
+
+static void FreeWithAllocator(void* ptr, void* data) {
+  upb_free(data, ptr);
+}
+
+static struct Allocator Allocator(upb_alloc* alloc) {
+  struct Allocator ret = {AllocateWithAllocator, FreeWithAllocator, alloc};
+  return ret;
+}
+
+static struct Allocator GlobalAllocator(void) {
+  return Allocator(&upb_alloc_global);
+}
+
+static void* AllocateWithArena(size_t size, void* data) {
+  return upb_Arena_Malloc(data, size);
+}
+
+static void FreeWithArena(void* ptr ABSL_ATTRIBUTE_UNUSED,
+                          void* data ABSL_ATTRIBUTE_UNUSED) {}
+
+static struct Allocator ArenaAllocator(upb_Arena* arena) {
+  struct Allocator ret = {AllocateWithArena, FreeWithArena, arena};
+  return ret;
+}
+
+static void* Allocate(struct Context ctx, struct Allocator alloc, size_t size) {
+  void* ptr = alloc.alloc(size, alloc.data);
   if (ptr == NULL && size > 0) MemoryFull(ctx);
   return ptr;
 }
@@ -685,6 +720,10 @@ static void* AllocateFromArena(struct Context ctx, upb_Arena* arena,
   return ptr;
 }
 
+static void Free(struct Allocator alloc, void* ptr) {
+  alloc.free(ptr, alloc.data);
+}
+
 // A string with a given length.  This is just like upb_StringView, except that
 // the string is mutable.  Functions that return a MutableString should
 // null-terminate it so that s.data[s.size] is valid and zero.  If a function
@@ -694,7 +733,8 @@ struct MutableString {
   size_t size;
 };
 
-static struct MutableString ExtractString(struct Context ctx, upb_alloc* alloc,
+static struct MutableString ExtractString(struct Context ctx,
+                                          struct Allocator alloc,
                                           emacs_value value) {
   struct MutableString null = {NULL, 0};
   ptrdiff_t size;
@@ -703,7 +743,7 @@ static struct MutableString ExtractString(struct Context ctx, upb_alloc* alloc,
   char* data = Allocate(ctx, alloc, (size_t)size);
   if (data == NULL) return null;
   if (!ctx.env->copy_string_contents(ctx.env, value, data, &size)) {
-    upb_free(alloc, data);
+    Free(alloc, data);
     return null;
   }
   // Exclude trailing null byte.
@@ -738,7 +778,7 @@ static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
 }
 
 static struct MutableString ExtractUnibyteString(struct Context ctx,
-                                                 upb_alloc* alloc,
+                                                 struct Allocator alloc,
                                                  emacs_value value) {
   struct MutableString null = {NULL, 0};
   if (!Predicate(ctx, kStringp, value) ||
@@ -810,7 +850,8 @@ static void SetVectorElement(struct Context ctx, emacs_value vector,
   ctx.env->vec_set(ctx.env, vector, i, value);
 }
 
-static struct MutableString SymbolName(struct Context ctx, upb_alloc* alloc,
+static struct MutableString SymbolName(struct Context ctx,
+                                       struct Allocator alloc,
                                        emacs_value symbol) {
   return ExtractString(ctx, alloc, FuncallSymbol1(ctx, kSymbolName, symbol));
 }
@@ -879,7 +920,7 @@ static upb_StringView View(struct MutableString string) {
 // Safely concatenate multiple strings into a heap-allocated buffer.  When
 // successful, the returned string pointer is never NULL points to a
 // null-terminated string.
-static struct MutableString Concat(struct Context ctx, upb_alloc* alloc,
+static struct MutableString Concat(struct Context ctx, struct Allocator alloc,
                                    ptrdiff_t nargs,
                                    const upb_StringView* args) {
   struct MutableString null = {NULL, 0};
@@ -906,13 +947,13 @@ static struct MutableString Concat(struct Context ctx, upb_alloc* alloc,
   return ret;
 }
 
-static struct MutableString Concat2(struct Context ctx, upb_alloc* alloc,
+static struct MutableString Concat2(struct Context ctx, struct Allocator alloc,
                                     upb_StringView a, upb_StringView b) {
   upb_StringView args[] = {a, b};
   return Concat(ctx, alloc, 2, args);
 }
 
-static struct MutableString Concat3(struct Context ctx, upb_alloc* alloc,
+static struct MutableString Concat3(struct Context ctx, struct Allocator alloc,
                                     upb_StringView a, upb_StringView b,
                                     upb_StringView c) {
   upb_StringView args[] = {a, b, c};
@@ -1122,7 +1163,7 @@ static emacs_value MakeMessageFields(struct Context ctx,
 // These functions need to be generated for each message type by the protocol
 // buffer compiler in generate.el.
 static struct MutableString MessageFunctionName(struct Context ctx,
-                                                upb_alloc* alloc,
+                                                struct Allocator alloc,
                                                 const char* suffix,
                                                 const upb_MessageDef* def) {
   upb_StringView full_name =
@@ -1137,7 +1178,7 @@ static struct MutableString MessageFunctionName(struct Context ctx,
 
 // Returns the name of the type predicate for the given message type.
 static struct MutableString MessagePredicateName(struct Context ctx,
-                                                 upb_alloc* alloc,
+                                                 struct Allocator alloc,
                                                  const upb_MessageDef* def) {
   return MessageFunctionName(ctx, alloc, "-p", def);
 }
@@ -1146,7 +1187,7 @@ static struct MutableString MessagePredicateName(struct Context ctx,
 // constructor must be called with two arguments, a user pointer pointing to an
 // upb_Arena, and a user pointer pointing to a TypedMessage.
 static struct MutableString MessageConstructorName(struct Context ctx,
-                                                   upb_alloc* alloc,
+                                                   struct Allocator alloc,
                                                    const upb_MessageDef* def) {
   return MessageFunctionName(ctx, alloc, "--new", def);
 }
@@ -1155,11 +1196,11 @@ static struct MutableString MessageConstructorName(struct Context ctx,
 // value is not of a specific message type.
 static void WrongMessageType(struct Context ctx, const upb_MessageDef* def,
                              emacs_value value) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString predicate = MessagePredicateName(ctx, alloc, def);
   if (predicate.data == NULL) return;
   Signal2(ctx, kWrongTypeArgument, Intern(ctx, View(predicate)), value);
-  upb_free(alloc, predicate.data);
+  Free(alloc, predicate.data);
 }
 
 // Creates a new Lisp structure object of the right type for the given message
@@ -1202,11 +1243,11 @@ static struct LispMessage ExtractMessageStruct(struct Context ctx,
 static emacs_value ConstructMessage(struct Context ctx, struct LispArena arena,
                                     const upb_MessageDef* def,
                                     upb_Message* value, bool mutable) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString constructor = MessageConstructorName(ctx, alloc, def);
   emacs_value lisp = MakeMessageStruct(
       ctx, arena, Intern(ctx, View(constructor)), def, value, mutable);
-  upb_free(alloc, constructor.data);
+  Free(alloc, constructor.data);
   return lisp;
 }
 
@@ -1395,7 +1436,7 @@ static struct MutableString SerializeMessage(struct Context ctx,
 
 // Returns the textual form of the given message.  Wraps upb_TextEncode.
 static struct MutableString SerializeMessageText(struct Context ctx,
-                                                 upb_alloc* alloc,
+                                                 struct Allocator alloc,
                                                  const upb_MessageDef* def,
                                                  const upb_Message* msg,
                                                  int options) {
@@ -1410,7 +1451,7 @@ static struct MutableString SerializeMessageText(struct Context ctx,
     return ret;
   }
   // Otherwise we need to allocate a larger buffer.
-  upb_free(alloc, buffer);
+  Free(alloc, buffer);
   bool overflow = AddOverflowSize(ctx, length, 1, &size);
   if (overflow) return null;
   buffer = Allocate(ctx, alloc, size);
@@ -1424,7 +1465,7 @@ static struct MutableString SerializeMessageText(struct Context ctx,
 
 // Returns the JSON form of the given message.  Wraps upb_JsonEncode.
 static struct MutableString SerializeMessageJson(struct Context ctx,
-                                                 upb_alloc* alloc,
+                                                 struct Allocator alloc,
                                                  const upb_MessageDef* def,
                                                  const upb_Message* msg,
                                                  int options) {
@@ -1442,7 +1483,7 @@ static struct MutableString SerializeMessageJson(struct Context ctx,
     return ret;
   }
   // Otherwise we need to allocate a larger buffer.
-  upb_free(alloc, buffer);
+  Free(alloc, buffer);
   bool overflow = AddOverflowSize(ctx, length, 1, &size);
   if (overflow) OverflowError0(ctx);
   buffer = Allocate(ctx, alloc, size);
@@ -1451,7 +1492,7 @@ static struct MutableString SerializeMessageJson(struct Context ctx,
   length =
       upb_JsonEncode(msg, def, DefPool(ctx), options, buffer, size, &status);
   if (!upb_Status_IsOk(&status)) {
-    upb_free(alloc, buffer);
+    Free(alloc, buffer);
     ProtoError(ctx, kJsonSerializeError, &status);
     return null;
   }
@@ -1500,12 +1541,12 @@ static upb_Message* ParseMessageJson(struct Context ctx, upb_Arena* arena,
 // delimiters, similar to ‘princ’.
 static void PrincFields(struct Context ctx, const upb_MessageDef* def,
                         const upb_Message* msg, emacs_value stream) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString string =
       SerializeMessageText(ctx, alloc, def, msg, UPB_TXTENC_SINGLELINE);
   if (string.data == NULL) return;
   PrincString(ctx, View(string), stream);
-  upb_free(alloc, string.data);
+  Free(alloc, string.data);
 }
 
 /// Type-erased scalar and singular values
@@ -1552,11 +1593,11 @@ static upb_MessageValue AdoptScalar(struct Context ctx, upb_Arena* arena,
     case kUpb_CType_String:
       // We have to allocate strings from the correct arena and may not free
       // them here to avoid dangling pointers.
-      dest.str_val = View(ExtractString(ctx, upb_Arena_Alloc(arena), value));
+      dest.str_val = View(ExtractString(ctx, ArenaAllocator(arena), value));
       break;
     case kUpb_CType_Bytes:
       dest.str_val =
-          View(ExtractUnibyteString(ctx, upb_Arena_Alloc(arena), value));
+          View(ExtractUnibyteString(ctx, ArenaAllocator(arena), value));
       break;
     default:
       WrongTypeArgument(ctx, kScalarFieldP, MakeFieldName(ctx, type));
@@ -2213,13 +2254,13 @@ static const upb_MessageDef* FindMessageByFullName(struct Context ctx,
 // before, and the Lisp structure must have been defined in a generated file.
 static const upb_MessageDef* FindMessageByStructName(struct Context ctx,
                                                      emacs_value struct_name) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString full_name = SymbolName(ctx, alloc, struct_name);
   if (full_name.data == NULL) return NULL;
   // This transformation must match the code in generate.el.
   ReplaceChar(full_name, '/', '.');
   const upb_MessageDef* def = FindMessageByFullName(ctx, View(full_name));
-  upb_free(alloc, full_name.data);
+  Free(alloc, full_name.data);
   return def;
 }
 
@@ -2264,7 +2305,7 @@ static const upb_MessageDef* FindMessageByTypeUrl(struct Context ctx,
 // Any message type; see
 // https://developers.google.com/protocol-buffers/docs/proto3#any and the
 // comments in any.proto.
-static struct MutableString TypeUrl(struct Context ctx, upb_alloc* alloc,
+static struct MutableString TypeUrl(struct Context ctx, struct Allocator alloc,
                                     const upb_MessageDef* def) {
   upb_StringView prefix = upb_StringView_FromString("type.googleapis.com/");
   upb_StringView full_name =
@@ -2289,15 +2330,15 @@ static const upb_FieldDef* FindFieldDef(struct Context ctx,
 static const upb_FieldDef* FindFieldBySymbol(struct Context ctx,
                                              const upb_MessageDef* def,
                                              emacs_value symbol) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString name = SymbolName(ctx, alloc, symbol);
   if (name.data == NULL || name.size < 1) {
-    upb_free(alloc, name.data);
+    Free(alloc, name.data);
     WrongTypeArgument(ctx, kFieldNameP, symbol);
     return NULL;
   }
   const upb_FieldDef* field = FindFieldDef(ctx, def, View(name));
-  upb_free(alloc, name.data);
+  Free(alloc, name.data);
   return field;
 }
 
@@ -2307,16 +2348,16 @@ static const upb_FieldDef* FindFieldBySymbol(struct Context ctx,
 static const upb_FieldDef* FindFieldByKeyword(struct Context ctx,
                                               const upb_MessageDef* def,
                                               emacs_value keyword) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString name = SymbolName(ctx, alloc, keyword);
   if (name.data == NULL || name.size < 2 || name.data[0] != ':') {
-    upb_free(alloc, name.data);
+    Free(alloc, name.data);
     WrongTypeArgument(ctx, kFieldKeywordP, keyword);
     return NULL;
   }
   const upb_FieldDef* field = FindFieldDef(
       ctx, def, upb_StringView_FromDataAndSize(name.data + 1, name.size - 1));
-  upb_free(alloc, name.data);
+  Free(alloc, name.data);
   return field;
 }
 
@@ -2420,7 +2461,7 @@ static bool SetDurationProto(struct Context ctx, google_protobuf_Duration* msg,
 static const google_protobuf_FileDescriptorSet* ReadFileDescriptorSet(
     struct Context ctx, upb_Arena* arena, emacs_value serialized) {
   struct MutableString string =
-      ExtractUnibyteString(ctx, upb_Arena_Alloc(arena), serialized);
+      ExtractUnibyteString(ctx, ArenaAllocator(arena), serialized);
   if (string.data == NULL) return NULL;
   const google_protobuf_FileDescriptorSet* set =
       google_protobuf_FileDescriptorSet_parse_ex(
@@ -2491,7 +2532,7 @@ static void ConvertEnumDescriptors(
     struct Context ctx, upb_StringView parent, size_t count,
     const google_protobuf_EnumDescriptorProto* const* enums,
     emacs_value* list) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   upb_StringView dot = upb_StringView_FromString(".");
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_EnumDescriptorProto* enumeration = enums[i];
@@ -2501,7 +2542,7 @@ static void ConvertEnumDescriptors(
     if (full_name.data == NULL) return;
     emacs_value values = ConvertEnumValueDescriptors(ctx, enumeration);
     emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), values);
-    upb_free(alloc, full_name.data);
+    Free(alloc, full_name.data);
     Push(ctx, elt, list);
   }
 }
@@ -2516,7 +2557,7 @@ static void ConvertMessageDescriptors(
     struct Context ctx, upb_StringView parent, size_t count,
     const google_protobuf_DescriptorProto* const* messages,
     emacs_value* messages_list, emacs_value* enums_list) {
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   upb_StringView dot = upb_StringView_FromString(".");
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_DescriptorProto* message = messages[i];
@@ -2536,7 +2577,7 @@ static void ConvertMessageDescriptors(
         google_protobuf_DescriptorProto_enum_type(message, &enums_count);
     ConvertEnumDescriptors(ctx, View(full_name), enums_count, enums,
                            enums_list);
-    upb_free(alloc, full_name.data);
+    Free(alloc, full_name.data);
   }
 }
 
@@ -2773,7 +2814,7 @@ static emacs_value Parse(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   if (arena.ptr == NULL) return NULL;
   emacs_value full_name = args[0];
   struct MutableString serialized =
-      ExtractUnibyteString(ctx, upb_Arena_Alloc(arena.ptr), args[1]);
+      ExtractUnibyteString(ctx, ArenaAllocator(arena.ptr), args[1]);
   if (serialized.data == NULL) return NULL;
   int options = kUpb_DecodeOption_CheckRequired;
   const struct KeySpec spec = {kCAllowPartial, ClearBit,
@@ -2799,11 +2840,11 @@ static emacs_value ParseJson(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   if (arena.ptr == NULL) return NULL;
   const upb_MessageDef* def = FindMessageByStructName(ctx, args[0]);
   if (def == NULL) return NULL;
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString json = ExtractString(ctx, alloc, args[1]);
   if (json.data == NULL) return NULL;
   upb_Message* msg = ParseMessageJson(ctx, arena.ptr, def, View(json), options);
-  upb_free(alloc, json.data);
+  Free(alloc, json.data);
   if (msg == NULL) return NULL;
   return MakeMutableMessage(ctx, arena, def, msg);
 }
@@ -2845,12 +2886,12 @@ static emacs_value SerializeText(emacs_env* env, ptrdiff_t nargs,
       {kCDiscardUnknown, SetBit, UPB_TXTENC_SKIPUNKNOWN, &options},
       {kCDeterministic, ClearBit, UPB_TXTENC_NOSORT, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString serialized =
       SerializeMessageText(ctx, alloc, msg.type, msg.value, options);
   if (serialized.data == NULL) return NULL;
   emacs_value ret = MakeString(ctx, View(serialized));
-  upb_free(alloc, serialized.data);
+  Free(alloc, serialized.data);
   return ret;
 }
 
@@ -2866,12 +2907,12 @@ static emacs_value SerializeJson(emacs_env* env, ptrdiff_t nargs,
       {kCProtoNames, SetBit, upb_JsonEncode_UseProtoNames, &options},
       {kCEnumNumbers, SetBit, upb_JsonEncode_FormatEnumsAsIntegers, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
-  upb_alloc* alloc = &upb_alloc_global;
+  struct Allocator alloc = GlobalAllocator();
   struct MutableString serialized =
       SerializeMessageJson(ctx, alloc, msg.type, msg.value, options);
   if (serialized.data == NULL) return NULL;
   emacs_value ret = MakeString(ctx, View(serialized));
-  upb_free(alloc, serialized.data);
+  Free(alloc, serialized.data);
   return ret;
 }
 
@@ -3624,7 +3665,7 @@ static emacs_value PackAny(emacs_env* env,
     return NULL;
   }
   struct MutableString type_url =
-      TypeUrl(ctx, upb_Arena_Alloc(arena.ptr), msg.type);
+      TypeUrl(ctx, ArenaAllocator(arena.ptr), msg.type);
   struct MutableString serialized = SerializeMessage(
       ctx, arena.ptr, msg.type, msg.value,
       kUpb_EncodeOption_Deterministic | kUpb_EncodeOption_CheckRequired);
