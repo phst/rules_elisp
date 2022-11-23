@@ -32,6 +32,7 @@ def rules_elisp_dependencies():
             "https://ftpmirror.gnu.org/emacs/emacs-27.1.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-27.1.tar.xz",
         ],
+        patches = ["@phst_rules_elisp//:emacs-27.patch"],
     )
     maybe(
         http_archive,
@@ -43,6 +44,7 @@ def rules_elisp_dependencies():
             "https://ftpmirror.gnu.org/emacs/emacs-27.2.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.xz",
         ],
+        patches = ["@phst_rules_elisp//:emacs-27.patch"],
     )
     maybe(
         http_archive,
