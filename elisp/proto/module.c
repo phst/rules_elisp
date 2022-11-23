@@ -667,21 +667,17 @@ struct Allocator {
   void* data;
 };
 
-static void* AllocateWithAllocator(size_t size, void* data) {
-  return upb_malloc(data, size);
+static void* GlobalAllocate(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
+  return malloc(size);
 }
 
-static void FreeWithAllocator(void* ptr, void* data) {
-  upb_free(data, ptr);
-}
-
-static struct Allocator Allocator(upb_alloc* alloc) {
-  struct Allocator ret = {AllocateWithAllocator, FreeWithAllocator, alloc};
-  return ret;
+static void GlobalFree(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
+  free(ptr);
 }
 
 static struct Allocator GlobalAllocator(void) {
-  return Allocator(&upb_alloc_global);
+  struct Allocator ret = {GlobalAllocate, GlobalFree, NULL};
+  return ret;
 }
 
 static void* AllocateWithArena(size_t size, void* data) {
