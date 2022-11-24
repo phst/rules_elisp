@@ -1449,8 +1449,8 @@ static struct MutableString SerializeMessageText(struct Context ctx,
   Free(alloc, buffer);
   bool overflow = AddOverflowSize(ctx, length, 1, &size);
   if (overflow) return null;
-  buffer = Allocate(ctx, alloc, size);
   assert(size > 0);
+  buffer = Allocate(ctx, alloc, size);
   if (buffer == NULL) return null;
   length = upb_TextEncode(msg, def, DefPool(ctx), options, buffer, size);
   assert(length == size - 1);
@@ -1481,6 +1481,7 @@ static struct MutableString SerializeMessageJson(struct Context ctx,
   Free(alloc, buffer);
   bool overflow = AddOverflowSize(ctx, length, 1, &size);
   if (overflow) OverflowError0(ctx);
+  assert(size > 0);
   buffer = Allocate(ctx, alloc, size);
   if (buffer == NULL) return null;
   upb_Status_Clear(&status);
