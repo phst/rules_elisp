@@ -666,16 +666,16 @@ struct Allocator {
   void* data;
 };
 
-static void* GlobalAllocate(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
+static void* HeapAllocate(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
   return malloc(size);
 }
 
-static void GlobalFree(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
+static void HeapFree(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
   free(ptr);
 }
 
-static struct Allocator GlobalAllocator(void) {
-  struct Allocator ret = {GlobalAllocate, GlobalFree, NULL};
+static struct Allocator HeapAllocator(void) {
+  struct Allocator ret = {HeapAllocate, HeapFree, NULL};
   return ret;
 }
 
@@ -1191,7 +1191,7 @@ static struct MutableString MessageConstructorName(struct Context ctx,
 // value is not of a specific message type.
 static void WrongMessageType(struct Context ctx, const upb_MessageDef* def,
                              emacs_value value) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString predicate = MessagePredicateName(ctx, alloc, def);
   if (predicate.data == NULL) return;
   Signal2(ctx, kWrongTypeArgument, Intern(ctx, View(predicate)), value);
@@ -1238,7 +1238,7 @@ static struct LispMessage ExtractMessageStruct(struct Context ctx,
 static emacs_value ConstructMessage(struct Context ctx, struct LispArena arena,
                                     const upb_MessageDef* def,
                                     upb_Message* value, bool mutable) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString constructor = MessageConstructorName(ctx, alloc, def);
   emacs_value lisp = MakeMessageStruct(
       ctx, arena, Intern(ctx, View(constructor)), def, value, mutable);
@@ -1536,7 +1536,7 @@ static upb_Message* ParseMessageJson(struct Context ctx, upb_Arena* arena,
 // delimiters, similar to ‘princ’.
 static void PrincFields(struct Context ctx, const upb_MessageDef* def,
                         const upb_Message* msg, emacs_value stream) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString string =
       SerializeMessageText(ctx, alloc, def, msg, UPB_TXTENC_SINGLELINE);
   if (string.data == NULL) return;
@@ -2249,7 +2249,7 @@ static const upb_MessageDef* FindMessageByFullName(struct Context ctx,
 // before, and the Lisp structure must have been defined in a generated file.
 static const upb_MessageDef* FindMessageByStructName(struct Context ctx,
                                                      emacs_value struct_name) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString full_name = SymbolName(ctx, alloc, struct_name);
   if (full_name.data == NULL) return NULL;
   // This transformation must match the code in generate.el.
@@ -2325,7 +2325,7 @@ static const upb_FieldDef* FindFieldDef(struct Context ctx,
 static const upb_FieldDef* FindFieldBySymbol(struct Context ctx,
                                              const upb_MessageDef* def,
                                              emacs_value symbol) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString name = SymbolName(ctx, alloc, symbol);
   if (name.data == NULL || name.size < 1) {
     Free(alloc, name.data);
@@ -2343,7 +2343,7 @@ static const upb_FieldDef* FindFieldBySymbol(struct Context ctx,
 static const upb_FieldDef* FindFieldByKeyword(struct Context ctx,
                                               const upb_MessageDef* def,
                                               emacs_value keyword) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString name = SymbolName(ctx, alloc, keyword);
   if (name.data == NULL || name.size < 2 || name.data[0] != ':') {
     Free(alloc, name.data);
@@ -2527,7 +2527,7 @@ static void ConvertEnumDescriptors(
     struct Context ctx, upb_StringView parent, size_t count,
     const google_protobuf_EnumDescriptorProto* const* enums,
     emacs_value* list) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   upb_StringView dot = upb_StringView_FromString(".");
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_EnumDescriptorProto* enumeration = enums[i];
@@ -2552,7 +2552,7 @@ static void ConvertMessageDescriptors(
     struct Context ctx, upb_StringView parent, size_t count,
     const google_protobuf_DescriptorProto* const* messages,
     emacs_value* messages_list, emacs_value* enums_list) {
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   upb_StringView dot = upb_StringView_FromString(".");
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_DescriptorProto* message = messages[i];
@@ -2835,7 +2835,7 @@ static emacs_value ParseJson(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   if (arena.ptr == NULL) return NULL;
   const upb_MessageDef* def = FindMessageByStructName(ctx, args[0]);
   if (def == NULL) return NULL;
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString json = ExtractString(ctx, alloc, args[1]);
   if (json.data == NULL) return NULL;
   upb_Message* msg = ParseMessageJson(ctx, arena.ptr, def, View(json), options);
@@ -2881,7 +2881,7 @@ static emacs_value SerializeText(emacs_env* env, ptrdiff_t nargs,
       {kCDiscardUnknown, SetBit, UPB_TXTENC_SKIPUNKNOWN, &options},
       {kCDeterministic, ClearBit, UPB_TXTENC_NOSORT, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString serialized =
       SerializeMessageText(ctx, alloc, msg.type, msg.value, options);
   if (serialized.data == NULL) return NULL;
@@ -2902,7 +2902,7 @@ static emacs_value SerializeJson(emacs_env* env, ptrdiff_t nargs,
       {kCProtoNames, SetBit, upb_JsonEncode_UseProtoNames, &options},
       {kCEnumNumbers, SetBit, upb_JsonEncode_FormatEnumsAsIntegers, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
-  struct Allocator alloc = GlobalAllocator();
+  struct Allocator alloc = HeapAllocator();
   struct MutableString serialized =
       SerializeMessageJson(ctx, alloc, msg.type, msg.value, options);
   if (serialized.data == NULL) return NULL;
