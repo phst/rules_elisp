@@ -35,7 +35,7 @@ go_test(
     deps = [
         "@com_github_google_go_cmp//cmp:go_default_library",
         "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
-        "@com_github_phst_runfiles//:go_default_library",
+        "@io_bazel_rules_go//go/runfiles",
     ],
 )
 

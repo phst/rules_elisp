@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"github.com/bazelbuild/bazel-gazelle/testtools"
-	"github.com/phst/runfiles"
+	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 var gazelleBinary = flag.String("gazelle", "", "location of the Gazelle binary")
@@ -63,7 +63,7 @@ func TestGazelleBinary(t *testing.T) {
 	})
 	t.Cleanup(clean)
 
-	bin, err := runfiles.Path(path.Join("phst_rules_elisp", *gazelleBinary))
+	bin, err := runfiles.Rlocation(path.Join("phst_rules_elisp", *gazelleBinary))
 	if err != nil {
 		t.Fatal(err)
 	}

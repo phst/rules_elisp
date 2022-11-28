@@ -27,13 +27,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/phst/runfiles"
 )
 
 func Test(t *testing.T) {
-	source, err := runfiles.Path("phst_rules_elisp/tests/test.el")
+	source, err := runfiles.Rlocation("phst_rules_elisp/tests/test.el")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -45,7 +45,7 @@ func Test(t *testing.T) {
 	if runtime.GOOS == "windows" {
 		bin += ".exe"
 	}
-	bin, err = runfiles.Path(bin)
+	bin, err = runfiles.Rlocation(bin)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -96,7 +96,7 @@ func Test(t *testing.T) {
 	}
 	t.Log("test process exited")
 
-	schema, err := runfiles.Path("junit_xsd/JUnit.xsd")
+	schema, err := runfiles.Rlocation("junit_xsd/JUnit.xsd")
 	if err != nil {
 		t.Fatal(err)
 	}

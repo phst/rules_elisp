@@ -69,7 +69,7 @@ go_test(
         "@bazel_gazelle//testtools:go_default_library",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
         "@com_github_google_go_cmp//cmp:go_default_library",
-        "@com_github_phst_runfiles//:go_default_library",
+        "@io_bazel_rules_go//go/runfiles",
     ],
 )
 
