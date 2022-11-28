@@ -35,7 +35,7 @@
   "Return whether O is a string that’s unlikely to cause trouble."
   (declare (side-effect-free t))
   (and (stringp o)
-       (string-match-p (rx bos (+ (any blank alnum ?_ ?- ?. ?/ ?:)) eos) o)))
+       (string-match-p (rx bos (+ (any blank alnum ?_ ?- ?. ?/ ?: ?@)) eos) o)))
 
 (defun elisp/proto/generate-message (full-name fields)
   "Generate code for the protocol buffer message type FULL-NAME.

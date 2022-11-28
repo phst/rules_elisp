@@ -119,7 +119,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         arguments = [
             info.direct_descriptor_set.path,
             src.path,
-            "//{}:{}".format(ctx.label.package, ctx.label.name),
+            str(ctx.label),
             _elisp_proto_feature(src),
         ] + [_elisp_proto_feature(d) for d in deps.to_list()],
         mnemonic = "GenElispProto",
