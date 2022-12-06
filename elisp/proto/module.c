@@ -2384,7 +2384,7 @@ static bool SetFieldValue(struct Context ctx, upb_Arena* arena,
                           emacs_value value) {
   upb_MessageValue val = AdoptValue(ctx, arena, field, value);
   if (!Success(ctx)) return false;
-  bool ok = upb_Message_Set(msg, field, val, arena);
+  bool ok = upb_Message_SetFieldByDef(msg, field, val, arena);
   if (!ok) MemoryFull(ctx);
   return ok;
 }
@@ -2951,7 +2951,7 @@ static emacs_value HasField(emacs_env* env,
     NoPresence(ctx, def);
     return NULL;
   }
-  return MakeBoolean(ctx, upb_Message_Has(msg.value, def));
+  return MakeBoolean(ctx, upb_Message_HasFieldByDef(msg.value, def));
 }
 
 static emacs_value Field(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
@@ -2963,19 +2963,20 @@ static emacs_value Field(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   const upb_FieldDef* def = FindFieldBySymbol(ctx, msg.type, args[1]);
   if (def == NULL) return NULL;
   if (upb_FieldDef_IsMap(def)) {
-    const upb_Map* value = upb_Message_Get(msg.value, def).map_val;
+    const upb_Map* value = upb_Message_GetFieldByDef(msg.value, def).map_val;
     return value == NULL ? Nil(ctx) : MakeMap(ctx, msg.arena, def, value);
   }
   if (upb_FieldDef_IsRepeated(def)) {
-    const upb_Array* value = upb_Message_Get(msg.value, def).array_val;
+    const upb_Array* value =
+        upb_Message_GetFieldByDef(msg.value, def).array_val;
     return value == NULL ? Nil(ctx) : MakeArray(ctx, msg.arena, def, value);
   }
   if (upb_FieldDef_IsSubMessage(def)) {
-    if (!upb_Message_Has(msg.value, def)) return Nil(ctx);
+    if (!upb_Message_HasFieldByDef(msg.value, def)) return Nil(ctx);
     return MakeMessage(ctx, msg.arena, upb_FieldDef_MessageSubDef(def),
-                       upb_Message_Get(msg.value, def).msg_val);
+                       upb_Message_GetFieldByDef(msg.value, def).msg_val);
   }
-  return MakeScalar(ctx, def, upb_Message_Get(msg.value, def));
+  return MakeScalar(ctx, def, upb_Message_GetFieldByDef(msg.value, def));
 }
 
 static emacs_value MutableField(emacs_env* env,
@@ -3029,7 +3030,7 @@ static emacs_value ClearField(emacs_env* env,
   if (msg.type == NULL) return NULL;
   const upb_FieldDef* def = FindFieldBySymbol(ctx, msg.type, args[1]);
   if (def == NULL) return NULL;
-  upb_Message_ClearField(msg.value, def);
+  upb_Message_ClearFieldByDef(msg.value, def);
   return Nil(ctx);
 }
 
