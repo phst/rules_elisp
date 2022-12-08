@@ -77,16 +77,16 @@ def main() -> None:
         def test_manifest(self) -> None:
             """Test the manifest."""
             got = json.loads(args.manifest.read_text(encoding='utf-8'))
-            want = {
+            want: Dict[str, Any] = {
                 'root':        'RUNFILES_ROOT',
                 'tags':        ['local', 'mytag'],
 		'loadPath':    ['phst_rules_elisp'],
 		'inputFiles':  ['phst_rules_elisp/elisp/binary.cc',
                                 'phst_rules_elisp/elisp/binary.h'],
 		'outputFiles': [str(output_file)],
-            }  # type: Dict[str, Any]
+            }
             for var in (got, want):
-                files = var.get('inputFiles', [])  # type: List[str]
+                files: List[str] = var.get('inputFiles', [])
                 for i, file in enumerate(files):
                     file = pathlib.PurePosixPath(file)
                     if not file.is_absolute():
