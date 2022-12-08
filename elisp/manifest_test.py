@@ -29,6 +29,7 @@ class ManifestTest(unittest.TestCase):
         """Unit test for manifest.add."""
         args = ['--foo']
         with manifest.add('wrap', args) as file:
+            self.assertIsNotNone(file)
             file.write('test')
         self.assertEqual(len(args), 3)
         self.assertEqual(args[0], '--foo')
