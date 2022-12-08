@@ -172,7 +172,7 @@ class Builder:
         files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
         if not files:
             raise FileNotFoundError('no coverage files generated')
-        temp_dir = None  # type: Optional[pathlib.Path]
+        temp_dir: Optional[pathlib.Path] = None
         if self._kernel == 'Darwin':
             # Work around https://github.com/bazelbuild/bazel/issues/14969.  Run
             # the LCov merger binary again, filtering out macOS system headers.

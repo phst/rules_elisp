@@ -84,8 +84,8 @@ def main() -> None:
             args += ['--skip-tag', _quote(tag)]
         args.append('--funcall=elisp/ert/run-batch-and-exit')
         if manifest_file:
-            inputs = []  # type: List[pathlib.Path]
-            outputs = []  # type: List[pathlib.Path]
+            inputs: List[pathlib.Path] = []
+            outputs: List[pathlib.Path] = []
             report_file = orig_env.get('XML_OUTPUT_FILE')
             if report_file:
                 outputs.append(pathlib.Path(report_file))
