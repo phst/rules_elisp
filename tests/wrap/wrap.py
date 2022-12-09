@@ -49,8 +49,8 @@ def main() -> None:
             """Test that the Emacs command line is as expected."""
             got = args.rest
             want = ['--quick', '--batch']
-	    # The load path setup depends on whether we use manifest-based or
-	    # directory-based runfiles.
+            # The load path setup depends on whether we use manifest-based or
+            # directory-based runfiles.
             try:
                 directory = run_files.resolve(
                     pathlib.PurePosixPath('phst_rules_elisp'))
@@ -60,7 +60,7 @@ def main() -> None:
                     '--load=' + str(run_files.resolve(pathlib.PurePosixPath(
                         'phst_rules_elisp/elisp/runfiles/runfiles.elc'))),
                     '--funcall=elisp/runfiles/install-handler',
-		    '--directory=/bazel-runfile:phst_rules_elisp',
+                    '--directory=/bazel-runfile:phst_rules_elisp',
                 ]
             else:
                 # Directory-based runfiles.
@@ -78,12 +78,12 @@ def main() -> None:
             """Test the manifest."""
             got = json.loads(args.manifest.read_text(encoding='utf-8'))
             want: Dict[str, Any] = {
-                'root':        'RUNFILES_ROOT',
-                'tags':        ['local', 'mytag'],
-		'loadPath':    ['phst_rules_elisp'],
-		'inputFiles':  ['phst_rules_elisp/elisp/binary.cc',
-                                'phst_rules_elisp/elisp/binary.h'],
-		'outputFiles': [str(output_file)],
+                'root': 'RUNFILES_ROOT',
+                'tags': ['local', 'mytag'],
+                'loadPath': ['phst_rules_elisp'],
+                'inputFiles': ['phst_rules_elisp/elisp/binary.cc',
+                               'phst_rules_elisp/elisp/binary.h'],
+                'outputFiles': [str(output_file)],
             }
             for var in (got, want):
                 files: List[str] = var.get('inputFiles', [])
