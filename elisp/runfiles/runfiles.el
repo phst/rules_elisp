@@ -32,6 +32,7 @@
 
 (cl-defstruct (elisp/runfiles/runfiles
                (:conc-name elisp/runfiles/runfiles--)
+               (:constructor nil)
                (:constructor elisp/runfiles/runfiles--make (impl))
                (:copier nil)
                :noinline)
@@ -411,6 +412,7 @@ unchanged."
 ;;;; Implementations of the ‘elisp/runfiles/runfiles’ type:
 
 (cl-defstruct (elisp/runfiles/runfiles--manifest
+               (:constructor nil)
                (:constructor elisp/runfiles/manifest--make (filename manifest))
                (:copier nil))
   "Manifest-based runfiles implementation."
@@ -483,6 +485,7 @@ identifier."
           "RUNFILES_DIR" "JAVA_RUNFILES")))
 
 (cl-defstruct (elisp/runfiles/runfiles--directory
+               (:constructor nil)
                (:constructor elisp/runfiles/directory--make (directory))
                (:copier nil))
   "Directory-based runfiles implementation."

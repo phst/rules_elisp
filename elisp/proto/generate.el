@@ -70,6 +70,7 @@ This type corresponds to the protocol buffer message type ‘%s’."
                         (prin1-to-string `(fn &key ,@fields)))))))
     (pp `(cl-defstruct (,struct
                         (:conc-name ,conc-name)
+                        (:constructor nil)
                         (:constructor ,private-constructor (arena ptr))
                         (:include elisp/proto/message)
                         :noinline)

@@ -126,6 +126,7 @@ in the Info node ‘(elisp) Output Streams’."
 
 (cl-defstruct (elisp/proto/array
                (:conc-name elisp/proto/array--)
+               (:constructor nil)
                (:constructor elisp/proto/array--new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
@@ -219,6 +220,7 @@ TYPE specifies the return type, one of ‘vector’, ‘string’, or ‘list’
 
 (cl-defstruct (elisp/proto/map
                (:conc-name elisp/proto/map--)
+               (:constructor nil)
                (:constructor elisp/proto/map--new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
