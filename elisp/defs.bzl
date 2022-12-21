@@ -25,6 +25,7 @@ load(
     "cpp_strings",
     "run_emacs",
     "runfile_location",
+    "workspace_relative_filename",
 )
 
 EmacsLispInfo = provider(
@@ -155,17 +156,9 @@ def _elisp_proto_aspect_impl(target, ctx):
 
 def _elisp_proto_feature(file):
     """Returns the Emacs feature name for a protocol buffer library."""
-    stem, ext = paths.split_extension(file.short_path)
+    stem, ext = paths.split_extension(workspace_relative_filename(file))
     if ext != ".el":
         fail("invalid extension {}".format(ext))
-    if stem.startswith("../"):
-        # If the file is from another workspace, its short_path is of the form
-        # “../WORKSPACE/PACKAGE/FILE.el”.  Strip off the leading “../WORKSPACE”
-        # part.
-        stem = stem[3:]
-        ws, sep, stem = stem.partition("/")
-        if not ws or not sep:
-            fail("invalid name {}", file.short_path)
     return stem
 
 def _elisp_proto_library_impl(ctx):

@@ -143,6 +143,34 @@ def runfile_location(ctx, file):
         paths.join(ctx.workspace_name, file.short_path),
     )
 
+def workspace_relative_filename(file):
+    """Return the filename of the given file relative to its workspace root.
+
+    Within an action, the file doesn’t necessarily exist at that location since
+    it could be generated; use `file.path` instead to obtain a location that’s
+    guaranteed to exist.  Within the runfiles tree, the file will be placed
+    under the workspace directory for its owning target.  Since files can be
+    present in multiple workspaces, the resulting name isn’t necessarily
+    globally unique.
+
+    Args:
+      file (File): any file object
+
+    Returns:
+      a string representing the filename of the file relative to its workspace
+      root
+    """
+    name = file.short_path
+    if name.startswith("../"):
+        # If the file is from another workspace, its short_path is of the form
+        # “../WORKSPACE/PACKAGE/FILE.el”.  Strip off the leading “../WORKSPACE”
+        # part.
+        name = name[3:]
+        ws, sep, name = name.partition("/")
+        if not ws or not sep:
+            fail("invalid name {}", file.short_path)
+    return name
+
 def cc_launcher(ctx, cc_toolchain, src, deps):
     """Builds a launcher executable that starts Emacs.
 
