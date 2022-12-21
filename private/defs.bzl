@@ -39,13 +39,18 @@ def _check_python_impl(target, ctx):
     )
     ctx.actions.write(params_file, json.encode(params))
     pylintrc = ctx.file._pylintrc
-    args = [
-        "--out=" + output_file.path,
-        "--pylintrc=" + pylintrc.path,
-        "--params=" + params_file.path,
-    ] + ["--import=" + d for d in info.imports.to_list()]
+    args = ctx.actions.args()
+    args.add(output_file, format = "--out=%s")
+    args.add(pylintrc, format = "--pylintrc=%s")
+    args.add(params_file, format = "--params=%s")
+    args.add_all(
+        info.imports,
+        format_each = "--import=%s",
+        uniquify = True,
+        expand_directories = False,
+    )
     if "no-pytype" not in tags:
-        args.append("--pytype")
+        args.add("--pytype")
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._check])
     ctx.actions.run(
         outputs = [output_file],
@@ -54,7 +59,7 @@ def _check_python_impl(target, ctx):
             transitive = [info.transitive_sources, tool_inputs],
         ),
         executable = ctx.executable._check,
-        arguments = args,
+        arguments = [args],
         mnemonic = "PythonCheck",
         progress_message = "Performing static analysis of target {}".format(target.label),
         input_manifests = input_manifests,
