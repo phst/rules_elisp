@@ -913,7 +913,7 @@ static upb_StringView View(struct MutableString string) {
 }
 
 // Safely concatenate multiple strings into a heap-allocated buffer.  When
-// successful, the returned string pointer is never NULL points to a
+// successful, the returned string pointer is non-NULL and points to a
 // null-terminated string.
 static struct MutableString Concat(struct Context ctx, struct Allocator alloc,
                                    ptrdiff_t nargs,
