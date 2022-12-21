@@ -588,10 +588,7 @@ elisp_test = rule(
         # take over the values from
         # https://github.com/bazelbuild/bazel/blob/master/src/main/starlark/builtins_bzl/common/python/py_test_bazel.bzl.
         _lcov_merger = attr.label(
-            default = configuration_field(
-                fragment = "coverage",
-                name = "output_generator",
-            ),
+            default = configuration_field("coverage", "output_generator"),
             executable = True,
             cfg = "exec",
         ),
