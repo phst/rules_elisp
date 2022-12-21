@@ -136,7 +136,7 @@ def runfile_location(ctx, file):
 
     # It might seem surprising that we can use “ctx.workspace_name”
     # unconditionally.  However, for files in external workspaces, “short_path”
-    # will start with “../〈workspace〉/…”, so the logic here is correct.
+    # will start with “../〈workspace〉/…”, so the logic here is correct.
     # “check_relative_filename” not only ensures that the filename is relative,
     # but also canonicalizes it.
     return check_relative_filename(
