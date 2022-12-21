@@ -100,6 +100,7 @@ def main() -> None:
     if os.name == 'posix' and args.pytype:
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
+             '--pythonpath=' + os.pathsep.join(workspace.path),
              '--no-cache', '--'] + [str(file.relative_to(cwd))
                                     for file in sorted(workspace.srcs)],
             check=False, cwd=cwd, env=env,
