@@ -26,7 +26,7 @@ import commonmark
 import commonmark.node
 import commonmark.render.renderer
 
-from phst_rules_elisp.docs import stardoc_output_pb2
+from docs import stardoc_output_pb2
 
 # The generated protocol buffer modules generate their members dynamically, so
 # Pylint can’t find them.

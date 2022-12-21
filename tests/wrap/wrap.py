@@ -23,7 +23,7 @@ import sys
 from typing import Any, Dict, List, Tuple
 import unittest
 
-from phst_rules_elisp.elisp import runfiles
+from elisp import runfiles
 
 def main() -> None:
     """Main function."""

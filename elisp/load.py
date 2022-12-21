@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2021, 2022 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ on it in any way outside the rule implementation."""
 import pathlib
 from typing import Iterable, List
 
-from phst_rules_elisp.elisp import runfiles
+from elisp import runfiles
 
 def add_path(run_files: runfiles.Runfiles, args: List[str],
              load_path: Iterable[pathlib.PurePosixPath]) -> None:

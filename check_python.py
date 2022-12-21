@@ -49,7 +49,7 @@ class Workspace:
                 # https://github.com/bazelbuild/bazel/issues/10076.
                 (dirpath / '__init__.py').touch()
         self.srcs = frozenset(srcs)
-        self.path = [str(tempdir)] + [str(tempdir / d) for d in path]
+        self.path = [str(tempdir / d) for d in path]
         self.tempdir = tempdir
         self._output = out
 

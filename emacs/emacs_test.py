@@ -19,7 +19,7 @@ import pathlib
 import subprocess
 import unittest
 
-from phst_rules_elisp.elisp import runfiles
+from elisp import runfiles
 
 class EmacsTest(unittest.TestCase):
     """Unit tests for the Emacs binary."""

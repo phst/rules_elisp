@@ -25,9 +25,9 @@ import subprocess
 import sys
 from typing import Iterable, Mapping, Optional, Sequence, Tuple
 
-from phst_rules_elisp.elisp import load
-from phst_rules_elisp.elisp import manifest
-from phst_rules_elisp.elisp import runfiles
+from elisp import load
+from elisp import manifest
+from elisp import runfiles
 
 def main() -> None:
     """Main function."""
