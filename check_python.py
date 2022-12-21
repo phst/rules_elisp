@@ -22,11 +22,13 @@ import shutil
 import sys
 import subprocess
 import tempfile
+from typing import Iterable
 
 class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
 
-    def __init__(self, params_file: pathlib.Path) -> None:
+    def __init__(self, params_file: pathlib.Path, *, out: pathlib.Path,
+                 path: Iterable[pathlib.Path]) -> None:
         params = json.loads(params_file.read_text(encoding='utf-8'))
         workspace_name = 'phst_rules_elisp'
         srcs = []
@@ -47,9 +49,9 @@ class Workspace:
                 # https://github.com/bazelbuild/bazel/issues/10076.
                 (dirpath / '__init__.py').touch()
         self.srcs = frozenset(srcs)
-        self.path = [str(tempdir)] + [str(tempdir / d) for d in params['path']]
+        self.path = [str(tempdir)] + [str(tempdir / d) for d in path]
         self.tempdir = tempdir
-        self._output = pathlib.Path(params['out'])
+        self._output = out
 
     def success(self) -> None:
         """Clean up the temporary directory."""
@@ -62,12 +64,15 @@ def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
+    parser.add_argument('--out', type=pathlib.Path, required=True)
+    parser.add_argument('--import', type=pathlib.Path, action='append',
+                        default=[], dest='path')
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
-    workspace = Workspace(args.params)
+    workspace = Workspace(args.params, out=args.out, path=args.path)
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
     bindir = workspace.tempdir / 'bin'

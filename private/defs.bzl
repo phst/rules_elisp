@@ -28,7 +28,6 @@ def _check_python_impl(target, ctx):
     params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".stamp")
     params = struct(
-        out = output_file.path,
         srcs = [
             struct(
                 rel = file.short_path,
@@ -37,14 +36,14 @@ def _check_python_impl(target, ctx):
             )
             for file in info.transitive_sources.to_list()
         ],
-        path = info.imports.to_list(),
     )
     ctx.actions.write(params_file, json.encode(params))
     pylintrc = ctx.file._pylintrc
     args = [
+        "--out=" + output_file.path,
         "--pylintrc=" + pylintrc.path,
         "--params=" + params_file.path,
-    ]
+    ] + ["--import=" + d for d in info.imports.to_list()]
     if "no-pytype" not in tags:
         args.append("--pytype")
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._check])
