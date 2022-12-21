@@ -1240,6 +1240,7 @@ static emacs_value ConstructMessage(struct Context ctx, struct LispArena arena,
                                     upb_Message* value, bool mutable) {
   struct Allocator alloc = HeapAllocator();
   struct MutableString constructor = MessageConstructorName(ctx, alloc, def);
+  if (constructor.data == NULL) return NULL;
   emacs_value lisp = MakeMessageStruct(
       ctx, arena, Intern(ctx, View(constructor)), def, value, mutable);
   Free(alloc, constructor.data);
