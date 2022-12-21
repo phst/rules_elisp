@@ -27,7 +27,19 @@ def _check_python_impl(target, ctx):
     stem = "_{}.python-check".format(target.label.name)
     params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".stamp")
-    _write_params(ctx.actions, params_file, output_file, info)
+    params = struct(
+        out = output_file.path,
+        srcs = [
+            struct(
+                rel = file.short_path,
+                src = file.path,
+                ext = bool(file.owner.workspace_name),
+            )
+            for file in info.transitive_sources.to_list()
+        ],
+        path = info.imports.to_list(),
+    )
+    ctx.actions.write(params_file, json.encode(params))
     pylintrc = ctx.file._pylintrc
     args = [
         "--pylintrc=" + pylintrc.path,
@@ -65,21 +77,6 @@ check_python = aspect(
     },
     required_providers = [PyInfo],
 )
-
-def _write_params(actions, params_file, output_file, info):
-    params = struct(
-        out = output_file.path,
-        srcs = [
-            struct(
-                rel = file.short_path,
-                src = file.path,
-                ext = bool(file.owner.workspace_name),
-            )
-            for file in info.transitive_sources.to_list()
-        ],
-        path = info.imports.to_list(),
-    )
-    actions.write(params_file, json.encode(params))
 
 def check_relative_filename(filename):
     """Returns `filename`, checking whether it is relative.
