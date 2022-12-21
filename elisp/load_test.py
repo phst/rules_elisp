@@ -19,8 +19,8 @@ import pathlib
 import tempfile
 import unittest
 
-from phst_rules_elisp.elisp import load
-from phst_rules_elisp.elisp import runfiles
+from elisp import load
+from elisp import runfiles
 
 class AddPathTest(unittest.TestCase):
     """Unit tests for the load.add_path function."""

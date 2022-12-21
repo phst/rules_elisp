@@ -26,7 +26,7 @@ import subprocess
 import sys
 from typing import Iterable, Tuple
 
-from phst_rules_elisp.elisp import runfiles
+from elisp import runfiles
 
 def main() -> None:
     """Main function."""

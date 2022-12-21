@@ -23,7 +23,7 @@ import subprocess
 import tempfile
 import unittest
 
-from phst_rules_elisp.elisp import runfiles
+from elisp import runfiles
 
 class BinaryTest(unittest.TestCase):
     """Example test showing how to work with elisp_binary rules."""

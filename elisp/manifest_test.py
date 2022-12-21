@@ -20,7 +20,7 @@ import json
 import pathlib
 import unittest
 
-from phst_rules_elisp.elisp import manifest
+from elisp import manifest
 
 class ManifestTest(unittest.TestCase):
     """Unit tests for the manifest.add and manifest.write functions."""
