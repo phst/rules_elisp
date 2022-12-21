@@ -28,9 +28,9 @@ class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
 
     def __init__(self, params_file: pathlib.Path, *, out: pathlib.Path,
-                 path: Iterable[pathlib.Path]) -> None:
+                 path: Iterable[pathlib.Path],
+                 workspace_name: str) -> None:
         params = json.loads(params_file.read_text(encoding='utf-8'))
-        workspace_name = 'phst_rules_elisp'
         srcs = []
         tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
         for file in params['srcs']:
@@ -67,18 +67,20 @@ def main() -> None:
     parser.add_argument('--out', type=pathlib.Path, required=True)
     parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
+    parser.add_argument('--workspace_name', type=str, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
-    workspace = Workspace(args.params, out=args.out, path=args.path)
+    workspace = Workspace(args.params, out=args.out, path=args.path,
+                          workspace_name=args.workspace_name)
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
     bindir = workspace.tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
-    cwd = workspace.tempdir / 'phst_rules_elisp'
+    cwd = workspace.tempdir / args.workspace_name
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
                PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
