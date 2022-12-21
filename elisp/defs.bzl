@@ -583,15 +583,22 @@ elisp_test = rule(
             default = "//elisp:launcher_defaults",
             providers = [CcDefaultInfo],
         ),
+        # Magic coverage attributes.  This is only partially documented
+        # (https://bazel.build/rules/lib/coverage#output_generator), but we can
+        # take over the values from
+        # https://github.com/bazelbuild/bazel/blob/master/src/main/starlark/builtins_bzl/common/python/py_test_bazel.bzl.
         _lcov_merger = attr.label(
-            default = "@bazel_tools//tools/test:lcov_merger",
+            default = configuration_field(
+                fragment = "coverage",
+                name = "output_generator",
+            ),
             executable = True,
-            cfg = "target",
+            cfg = "exec",
         ),
         _collect_cc_coverage = attr.label(
             default = "@bazel_tools//tools/test:collect_cc_coverage",
             executable = True,
-            cfg = "target",
+            cfg = "exec",
         ),
         data = attr.label_list(
             doc = "List of files to be made available at runtime.",
