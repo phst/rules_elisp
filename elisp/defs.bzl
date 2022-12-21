@@ -112,16 +112,17 @@ def _elisp_proto_aspect_impl(target, ctx):
         for dep in ctx.rule.attr.deps
     ])
     src = ctx.actions.declare_file(ctx.label.name + ".el")
+    args = ctx.actions.args()
+    args.add(info.direct_descriptor_set)
+    args.add(src)
+    args.add(str(ctx.label))
+    args.add(_elisp_proto_feature(src))
+    args.add_all(deps, map_each = _elisp_proto_feature)
     ctx.actions.run(
         outputs = [src],
         inputs = [info.direct_descriptor_set],
         executable = ctx.executable._generate,
-        arguments = [
-            info.direct_descriptor_set.path,
-            src.path,
-            str(ctx.label),
-            _elisp_proto_feature(src),
-        ] + [_elisp_proto_feature(d) for d in deps.to_list()],
+        arguments = [args],
         mnemonic = "GenElispProto",
         progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
     )
