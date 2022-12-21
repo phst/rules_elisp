@@ -49,6 +49,14 @@ def _check_python_impl(target, ctx):
         uniquify = True,
         expand_directories = False,
     )
+    args.add_all(
+        info.transitive_sources,
+        map_each = _workspace_name,
+        format_each = "--import=%s",
+        uniquify = True,
+        expand_directories = False,
+    )
+    args.add(ctx.workspace_name, format = "--import=%s")
     args.add(ctx.workspace_name, format = "--workspace_name=%s")
     if "no-pytype" not in tags:
         args.add("--pytype")
@@ -487,3 +495,7 @@ python_runtime = rule(
     provides = [PyRuntimeInfo],
     implementation = _python_runtime_impl,
 )
+
+def _workspace_name(file):
+    # Skip empty string for main repository.
+    return file.owner.workspace_name or None
