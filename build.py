@@ -142,8 +142,7 @@ class Builder:
             options=[
                 '--test_output=errors',
                 '--//private:python_interpreter=' + str(self._python_program)
-            ],
-            postfix_options=args)
+            ] + list(args))
 
     @target
     def ext(self) -> None:
@@ -208,7 +207,7 @@ class Builder:
         self._run(['install-info', '--', str(dest), str(info_dir / 'dir')])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
-               options: Iterable[str] = (), postfix_options: Iterable[str] = (),
+               options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
                capture_stdout: bool = False) -> Optional[str]:
         args = [str(self._bazel_program), command]
@@ -216,7 +215,6 @@ class Builder:
             args.append('--verbose_failures')
         args.extend(options)
         args.extend(self._cache_options())
-        args.extend(postfix_options)
         args.append('--')
         args.extend(targets)
         env = dict(self._env)
