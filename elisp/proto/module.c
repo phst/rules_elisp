@@ -2219,8 +2219,9 @@ static const upb_Map* AdoptMap(struct Context ctx, upb_Arena* arena,
 static bool UpdateMapEntries(struct Context ctx, upb_Arena* arena,
                              upb_Map* dest, const upb_Map* src) {
   size_t iter = kUpb_Map_Begin;
-  upb_MessageValue key, value;
-  while (upb_Map_Next(src, &key, &value, &iter)) {
+  while (upb_MapIterator_Next(src, &iter)) {
+    upb_MessageValue key = upb_MapIterator_Key(src, iter);
+    upb_MessageValue value = upb_MapIterator_Value(src, iter);
     if (SetMapEntry(ctx, arena, dest, key, value) ==
         kUpb_MapInsertStatus_OutOfMemory) {
       return false;
@@ -3516,13 +3517,13 @@ static emacs_value PrintMap(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   PrincLiteral(ctx, map_length == 1 ? " entry [" : " entries [", stream);
   size_t iter = kUpb_Map_Begin;
   size_t i = 0;
-  upb_MessageValue key, value;
-  while (i < limit && upb_Map_Next(map.value, &key, &value, &iter)) {
+  while (i < limit && upb_MapIterator_Next(map.value, &iter)) {
     if (i > 0) PrincLiteral(ctx, " ", stream);
     PrincLiteral(ctx, "(", stream);
-    Prin1Scalar(ctx, type.key, key, stream);
+    Prin1Scalar(ctx, type.key, upb_MapIterator_Key(map.value, iter), stream);
     PrincLiteral(ctx, " ", stream);
-    Prin1Singular(ctx, type.value, value, stream);
+    Prin1Singular(ctx, type.value, upb_MapIterator_Value(map.value, iter),
+                  stream);
     PrincLiteral(ctx, ")", stream);
     ++i;
   }
@@ -3541,10 +3542,10 @@ static emacs_value DoMap(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   if (type.key == NULL) return NULL;
   const upb_Map* src = map.value;
   size_t iter = kUpb_Map_Begin;
-  upb_MessageValue map_key, map_value;
-  while (upb_Map_Next(src, &map_key, &map_value, &iter)) {
-    emacs_value key = MakeScalar(ctx, type.key, map_key);
-    emacs_value value = MakeSingular(ctx, map.arena, type.value, map_value);
+  while (upb_MapIterator_Next(src, &iter)) {
+    emacs_value key = MakeScalar(ctx, type.key, upb_MapIterator_Key(src, iter));
+    emacs_value value = MakeSingular(ctx, map.arena, type.value,
+                                     upb_MapIterator_Value(src, iter));
     Funcall2(ctx, function, key, value);
   }
   return Nil(ctx);
