@@ -272,8 +272,7 @@
   X(kCDeterministic, ":deterministic")                           \
   X(kCCompact, ":compact")                                       \
   X(kCEmitDefaults, ":emit-defaults")                            \
-  X(kCProtoNames, ":proto-names")                                \
-  X(kCEnumNumbers, ":enum-numbers")
+  X(kCProtoNames, ":proto-names")
 
 // clang-format off
 // Clang-Format get confused by this coding structure.
@@ -2901,9 +2900,8 @@ static emacs_value SerializeJson(emacs_env* env, ptrdiff_t nargs,
   int options = 0;
   const struct KeySpec specs[] = {
       {kCEmitDefaults, SetBit, upb_JsonEncode_EmitDefaults, &options},
-      {kCProtoNames, SetBit, upb_JsonEncode_UseProtoNames, &options},
-      {kCEnumNumbers, SetBit, upb_JsonEncode_FormatEnumsAsIntegers, &options}};
-  if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
+      {kCProtoNames, SetBit, upb_JsonEncode_UseProtoNames, &options}};
+  if (!ParseKeys(ctx, 2, specs, nargs - 1, args + 1)) return NULL;
   struct Allocator alloc = HeapAllocator();
   struct MutableString serialized =
       SerializeMessageJson(ctx, alloc, msg.type, msg.value, options);
@@ -3921,10 +3919,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "Serialize a protocol buffer MESSAGE to its JSON representation.\n"
         "If EMIT-DEFAULTS is non-nil, emit default values.\n"
         "If PROTO-NAMES is non-nil, use protocol buffer (snake-case)\n"
-        "instead of JSON (camel-case) names.\n"
-        "If ENUM-NUMBERS is non-nil, use numeric values for enumeration\n"
-        "fields instead of enumerator names.\n\n"
-        "(fn message &key emit-defaults proto-names enum-numbers)",
+        "instead of JSON (camel-case) names.\n\n"
+        "(fn message &key emit-defaults proto-names)",
         kNoSideEffects, SerializeJson);
   Defun(ctx, "elisp/proto/message-mutable-p", 1, 1,
         "Return whether the protocol buffer MESSAGE is mutable.\n"
