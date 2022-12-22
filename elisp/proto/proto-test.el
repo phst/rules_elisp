@@ -881,16 +881,6 @@
                            (string-join (make-vector #x2000 "1") ",")
                            "]}")))))
 
-(ert-deftest elisp/proto/serialize-json/enum-numbers ()
-  (let ((message (elisp/proto/Test-new :enumeration elisp/proto/ENUM_BAR)))
-    (pcase-dolist (`(,enum-numbers ,expected)
-                   '((nil "{\"enumeration\":\"ENUM_BAR\"}")
-                     (t "{\"enumeration\":1}")))
-      (ert-info ((prin1-to-string enum-numbers) :prefix "enum-numbers: ")
-        (should (equal (elisp/proto/serialize-json message
-                                                   :enum-numbers enum-numbers)
-                       expected))))))
-
 (ert-deftest elisp/proto/any ()
   (let* ((message (elisp/proto/make-duration 123))
          (any (elisp/proto/pack-any message)))
