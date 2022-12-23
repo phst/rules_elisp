@@ -3410,7 +3410,7 @@ static emacs_value MapDelete(emacs_env* env,
   if (type.key == NULL) return NULL;
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
   if (!Success(ctx)) return NULL;
-  bool deleted = upb_Map_Delete(map.value, key);
+  bool deleted = upb_Map_Delete2(map.value, key, NULL);
   return MakeBoolean(ctx, deleted);
 }
 
@@ -3433,7 +3433,7 @@ static emacs_value MapPop(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
     ret = OptionalArg(ctx, nargs, args, 2);
   }
   if (!Success(ctx)) return NULL;
-  bool deleted = upb_Map_Delete(map.value, key);
+  bool deleted = upb_Map_Delete2(map.value, key, NULL);
   (void)deleted;  // avoid compiler warnings
   assert(present == deleted);
   return ret;
