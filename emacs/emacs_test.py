@@ -28,7 +28,8 @@ class EmacsTest(unittest.TestCase):
         """Tests that emacs --version works."""
         run_files = runfiles.Runfiles()
         emacs = run_files.resolve(pathlib.PurePosixPath(
-            'gnu_emacs_28.2/emacs' + ('.exe' if os.name == 'nt' else '')))
+            'phst_rules_elisp/emacs/emacs_28.2' +
+            ('.exe' if os.name == 'nt' else '')))
         env = dict(os.environ)
         env.update(run_files.environment())
         process = subprocess.run([str(emacs), '--version'], env=env,

@@ -15,6 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("//private:defs.bzl", "cc_defaults")
+load(":defs.bzl", "emacs_binary")
 
 alias(
     name = "emacs",
@@ -33,39 +34,66 @@ py_test(
     deps = ["//elisp:runfiles"],
 )
 
-alias(
+cc_library(
     name = "module_header",
-    actual = "@gnu_emacs_28.2//:module_header",
+    srcs = ["emacs-module.h"],
+    includes = ["."],
     visibility = ["//visibility:public"],
 )
 
-alias(
+filegroup(
     name = "builtin_features",
-    actual = "@gnu_emacs_28.2//:builtin_features",
+    srcs = ["builtin_features.json"],
     visibility = ["//gazelle:__pkg__"],
 )
 
-alias(
+emacs_binary(
     name = "emacs_27.1",
-    actual = "@gnu_emacs_27.1//:emacs",
+    srcs = ["@gnu_emacs_27.1//:srcs"],
+    readme = "@gnu_emacs_27.1//:readme",
+    target_compatible_with = select({
+        ":always_supported": [],
+        ":macos_arm": [":incompatible"],
+        "//conditions:default": [":incompatible"],
+    }),
     visibility = ["//visibility:public"],
 )
 
-alias(
+emacs_binary(
     name = "emacs_27.2",
-    actual = "@gnu_emacs_27.2//:emacs",
+    srcs = ["@gnu_emacs_27.2//:srcs"],
+    readme = "@gnu_emacs_27.2//:readme",
+    target_compatible_with = select({
+        ":always_supported": [],
+        ":macos_arm": [],
+        "//conditions:default": [":incompatible"],
+    }),
     visibility = ["//visibility:public"],
 )
 
-alias(
+emacs_binary(
     name = "emacs_28.1",
-    actual = "@gnu_emacs_28.1//:emacs",
+    srcs = ["@gnu_emacs_28.1//:srcs"],
+    readme = "@gnu_emacs_28.1//:readme",
+    target_compatible_with = select({
+        ":always_supported": [],
+        ":macos_arm": [],
+        "//conditions:default": [":incompatible"],
+    }),
     visibility = ["//visibility:public"],
 )
 
-alias(
+emacs_binary(
     name = "emacs_28.2",
-    actual = "@gnu_emacs_28.2//:emacs",
+    srcs = ["@gnu_emacs_28.2//:srcs"],
+    builtin_features = "builtin_features.json",
+    module_header = "emacs-module.h",
+    readme = "@gnu_emacs_28.2//:readme",
+    target_compatible_with = select({
+        ":always_supported": [],
+        ":macos_arm": [],
+        "//conditions:default": [":incompatible"],
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -208,12 +236,6 @@ constraint_setting(name = "incompatible_setting")
 constraint_value(
     name = "incompatible",
     constraint_setting = ":incompatible_setting",
-    visibility = [
-        "@gnu_emacs_27.1//:__pkg__",
-        "@gnu_emacs_27.2//:__pkg__",
-        "@gnu_emacs_28.1//:__pkg__",
-        "@gnu_emacs_28.2//:__pkg__",
-    ],
 )
 
 cc_defaults(
@@ -232,10 +254,4 @@ cc_defaults(
         ],
         "//conditions:default": [],
     }),
-    visibility = [
-        "@gnu_emacs_27.1//:__pkg__",
-        "@gnu_emacs_27.2//:__pkg__",
-        "@gnu_emacs_28.1//:__pkg__",
-        "@gnu_emacs_28.2//:__pkg__",
-    ],
 )
