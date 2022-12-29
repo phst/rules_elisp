@@ -53,7 +53,6 @@ class Builder:
 
     def __init__(self, *,
                  bazel: pathlib.Path,
-                 python: pathlib.Path,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._kernel = platform.system()
@@ -61,7 +60,6 @@ class Builder:
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
         self._bazel_program = bazel
-        self._python_program = python
         self._workspace = self._info('workspace')
         self._action_cache = action_cache
         self._repository_cache = repository_cache
@@ -139,10 +137,7 @@ class Builder:
     def _test(self, *args: str) -> None:
         self._bazel(
             'test', ['//...'],
-            options=[
-                '--test_output=errors',
-                '--//private:python_interpreter=' + str(self._python_program)
-            ] + list(args))
+            options=['--test_output=errors'] + list(args))
 
     @target
     def ext(self) -> None:
@@ -283,13 +278,11 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--python', type=_program, default='python3')
     parser.add_argument('--action-cache', type=_cache_directory)
     parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', choices=sorted(_targets))
     args = parser.parse_args(sys.argv[1:] or ['all'])
     builder = Builder(bazel=args.bazel,
-                      python=args.python,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:
