@@ -17,7 +17,6 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
@@ -494,34 +493,6 @@ merged_manual = rule(
         ),
     },
     implementation = _merged_manual_impl,
-)
-
-def _python_runtime_impl(ctx):
-    interpreter = ctx.attr.interpreter[BuildSettingInfo].value
-    if interpreter:
-        if not paths.is_absolute(interpreter):
-            fail("interpreter filename {} is not absolute".format(interpreter))
-        info = PyRuntimeInfo(
-            interpreter_path = interpreter,
-            python_version = "PY3",
-        )
-    else:
-        info = ctx.attr.fallback_toolchain[platform_common.ToolchainInfo].py3_runtime
-    return [info]
-
-python_runtime = rule(
-    attrs = {
-        "interpreter": attr.label(
-            mandatory = True,
-            providers = [BuildSettingInfo],
-        ),
-        "fallback_toolchain": attr.label(
-            mandatory = True,
-            providers = [platform_common.ToolchainInfo],
-        ),
-    },
-    provides = [PyRuntimeInfo],
-    implementation = _python_runtime_impl,
 )
 
 def _workspace_name(file):

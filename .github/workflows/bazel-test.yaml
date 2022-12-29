@@ -36,7 +36,6 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v3
       - name: Install Python
-        id: python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
@@ -88,7 +87,6 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
-          --python=${{steps.python.outputs.python-path}}
           --action-cache=~/bazel-action-cache
           --repository-cache=~/bazel-repository-cache
           -- check
