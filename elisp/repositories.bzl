@@ -122,9 +122,9 @@ def rules_elisp_toolchains():
 
 def _toolchains_impl(repository_ctx):
     if repository_ctx.os.name.startswith("windows"):
-        content = _WINDOWS_TOOLCHAINS
+        content = repository_ctx.read(Label("@phst_rules_elisp//elisp:windows-toolchains.BUILD"))
     else:
-        content = _UNIX_TOOLCHAINS
+        content = repository_ctx.read(Label("@phst_rules_elisp//elisp:unix-toolchains.BUILD"))
     repository_ctx.file("BUILD", content)
 
 _toolchains = repository_rule(
@@ -163,34 +163,5 @@ filegroup(
     name = "builtin_features",
     srcs = ["builtin_features.json"],
     visibility = ["@phst_rules_elisp//emacs:__pkg__"],
-)
-"""
-
-_UNIX_TOOLCHAINS = """
-alias(
-    name = "emacs_cc_toolchain",
-    actual = "@bazel_tools//tools/cpp:current_cc_toolchain",
-    visibility = [
-        "@gnu_emacs_27.1//:__pkg__",
-        "@gnu_emacs_27.2//:__pkg__",
-        "@gnu_emacs_28.1//:__pkg__",
-        "@gnu_emacs_28.2//:__pkg__",
-    ],
-)
-"""
-
-_WINDOWS_TOOLCHAINS = """
-cc_toolchain_suite(
-    name = "emacs_cc_toolchain",
-    toolchains = {
-        "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
-        "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
-    },
-    visibility = [
-        "@gnu_emacs_27.1//:__pkg__",
-        "@gnu_emacs_27.2//:__pkg__",
-        "@gnu_emacs_28.1//:__pkg__",
-        "@gnu_emacs_28.2//:__pkg__",
-    ],
 )
 """
