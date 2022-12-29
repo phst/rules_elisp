@@ -26,7 +26,6 @@ import signal
 import subprocess
 import sys
 import time
-from typing import List, Tuple
 import urllib.parse
 
 from elisp import load
@@ -84,8 +83,8 @@ def main() -> None:
             args += ['--skip-tag', _quote(tag)]
         args.append('--funcall=elisp/ert/run-batch-and-exit')
         if manifest_file:
-            inputs: List[pathlib.Path] = []
-            outputs: List[pathlib.Path] = []
+            inputs: list[pathlib.Path] = []
+            outputs: list[pathlib.Path] = []
             report_file = orig_env.get('XML_OUTPUT_FILE')
             if report_file:
                 outputs.append(pathlib.Path(report_file))
@@ -175,7 +174,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                 stream.write(file + '\n')
 
 
-def _env_var(arg: str) -> Tuple[str, str]:
+def _env_var(arg: str) -> tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
 

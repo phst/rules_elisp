@@ -18,13 +18,13 @@ This is an internal helper binary for the Emacs Lisp Bazel rules.  Don’t rely 
 it in any way outside the rule implementation."""
 
 import argparse
+from collections.abc import Iterable
 import glob
 import os
 import os.path
 import pathlib
 import subprocess
 import sys
-from typing import Iterable, Tuple
 
 from elisp import runfiles
 
@@ -90,7 +90,7 @@ def _check_codepage(description: str, values: Iterable[str]) -> None:
                 f'can’t encode {description} “{value}” for Windows') from ex
 
 
-def _env_var(arg: str) -> Tuple[str, str]:
+def _env_var(arg: str) -> tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
 

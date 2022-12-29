@@ -14,9 +14,10 @@
 
 """Contains a class to access Bazel runfiles."""
 
+from collections.abc import Mapping
 import os
 import pathlib
-from typing import Mapping, Optional
+from typing import Optional
 
 from tools.python.runfiles import runfiles
 

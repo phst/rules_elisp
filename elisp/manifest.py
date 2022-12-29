@@ -18,16 +18,17 @@ This is an internal helper library for the Emacs Lisp Bazel rules.  Don’t rely
 on it in any way outside the rule implementation."""
 
 import argparse
+from collections.abc import Generator, Iterable
 import contextlib
 import json
 import os
 import os.path
 import pathlib
 import tempfile
-from typing import Generator, IO, Iterable, List, Optional
+from typing import IO, Optional
 
 @contextlib.contextmanager
-def add(mode: str, args: List[str]) -> Generator[Optional[IO[str]], None, None]:
+def add(mode: str, args: list[str]) -> Generator[Optional[IO[str]], None, None]:
     """Create a temporary file for a manifest if needed.
 
 If a file was created, appropriate arguments are added to args."""

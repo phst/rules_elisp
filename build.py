@@ -19,6 +19,7 @@
 Mimics a trivial version of Make."""
 
 import argparse
+from collections.abc import Callable, Iterable, Mapping, Sequence
 import functools
 import io
 import os
@@ -30,11 +31,10 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from typing import (Callable, Dict, FrozenSet, Iterable, Mapping, Optional,
-                    Sequence)
+from typing import Optional
 
 _Target = Callable[['Builder'], None]
-_targets: Dict[str, _Target] = {}
+_targets: dict[str, _Target] = {}
 
 
 def target(func: _Target) -> _Target:
@@ -261,7 +261,7 @@ class Builder:
         return result.stdout
 
 
-def _versions() -> FrozenSet[str]:
+def _versions() -> frozenset[str]:
     # All potentially supported Emacs versions.
     ret = {'27.1', '27.2', '28.1', '28.2'}
     uname = platform.uname()

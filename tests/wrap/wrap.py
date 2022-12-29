@@ -20,7 +20,7 @@ import json
 import os
 import pathlib
 import sys
-from typing import Any, Dict, List, Tuple
+from typing import Any
 import unittest
 
 from elisp import runfiles
@@ -77,7 +77,7 @@ def main() -> None:
         def test_manifest(self) -> None:
             """Test the manifest."""
             got = json.loads(args.manifest.read_text(encoding='utf-8'))
-            want: Dict[str, Any] = {
+            want: dict[str, Any] = {
                 'root': 'RUNFILES_ROOT',
                 'tags': ['local', 'mytag'],
                 'loadPath': ['phst_rules_elisp'],
@@ -86,7 +86,7 @@ def main() -> None:
                 'outputFiles': [str(output_file)],
             }
             for var in (got, want):
-                files: List[str] = var.get('inputFiles', [])
+                files: list[str] = var.get('inputFiles', [])
                 for i, file in enumerate(files):
                     file = pathlib.PurePosixPath(file)
                     if not file.is_absolute():
@@ -98,7 +98,7 @@ def main() -> None:
         raise ValueError('incorrect arguments')
 
 
-def _env_var(arg: str) -> Tuple[str, str]:
+def _env_var(arg: str) -> tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
 

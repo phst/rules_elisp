@@ -15,12 +15,13 @@
 """Helper binary to convert Stardoc output into Org Mode format."""
 
 import argparse
+from collections.abc import Callable
 import html.parser
 import io
 import pathlib
 import re
 import textwrap
-from typing import Callable, List, Optional, Tuple
+from typing import Optional
 
 import commonmark
 import commonmark.node
@@ -294,7 +295,7 @@ class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
         self._writer = writer
 
     def handle_starttag(self, tag: str,
-                        attrs: List[Tuple[str, Optional[str]]]) -> None:
+                        attrs: list[tuple[str, Optional[str]]]) -> None:
         if attrs:
             raise NotImplementedError('got attributes {attrs} for <{tag}> tag')
         start, _ = self._TAGS[tag]

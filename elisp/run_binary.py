@@ -18,12 +18,13 @@ This is an internal helper binary for the Emacs Lisp Bazel rules.  Don’t rely 
 it in any way outside the rule implementation."""
 
 import argparse
+from collections.abc import Iterable, Mapping, Sequence
 import os
 import os.path
 import pathlib
 import subprocess
 import sys
-from typing import Iterable, Mapping, Optional, Sequence, Tuple
+from typing import Optional
 
 from elisp import load
 from elisp import manifest
@@ -114,7 +115,7 @@ def _arg_files(argv: Sequence[str], root: pathlib.Path,
     return tuple(result)
 
 
-def _env_var(arg: str) -> Tuple[str, str]:
+def _env_var(arg: str) -> tuple[str, str]:
     key, _, value = arg.partition('=')
     return key, value
 

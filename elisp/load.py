@@ -17,12 +17,12 @@
 This is an internal helper library for the Emacs Lisp Bazel rules.  Don’t rely
 on it in any way outside the rule implementation."""
 
+from collections.abc import Iterable
 import pathlib
-from typing import Iterable, List
 
 from elisp import runfiles
 
-def add_path(run_files: runfiles.Runfiles, args: List[str],
+def add_path(run_files: runfiles.Runfiles, args: list[str],
              load_path: Iterable[pathlib.PurePosixPath]) -> None:
     """Add load path elements to the given args list."""
     runfiles_elc = pathlib.PurePosixPath(

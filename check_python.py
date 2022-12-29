@@ -15,6 +15,7 @@
 """Runs Pylint and Pytype."""
 
 import argparse
+from collections.abc import Iterable
 import json
 import os
 import pathlib
@@ -22,7 +23,6 @@ import shutil
 import sys
 import subprocess
 import tempfile
-from typing import Iterable
 
 class Workspace:
     """Represents a temporary workspace for Pylint and Pytype."""
