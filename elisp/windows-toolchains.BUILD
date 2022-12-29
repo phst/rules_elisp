@@ -18,12 +18,7 @@ cc_toolchain_suite(
         "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
         "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
     },
-    visibility = [
-        "@gnu_emacs_27.1//:__pkg__",
-        "@gnu_emacs_27.2//:__pkg__",
-        "@gnu_emacs_28.1//:__pkg__",
-        "@gnu_emacs_28.2//:__pkg__",
-    ],
+    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
 )
 
 # Local Variables:
