@@ -44,12 +44,21 @@ http_archive(
     url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.16.1.tar.gz",
 )
 
+load("@rules_python//python:repositories.bzl", "python_register_toolchains")
+
+python_register_toolchains(
+    name = "hermetic_python_toolchain",
+    python_version = "3.10",
+)
+
 load("@rules_python//python:pip.bzl", "pip_parse")
+load("@hermetic_python_toolchain//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
     # Work around https://github.com/ionelmc/python-lazy-object-proxy/issues/70.
     extra_pip_args = ["--use-deprecated=legacy-resolver"],
+    python_interpreter_target = interpreter,
     requirements_darwin = "@//:macos-requirements.txt",
     requirements_linux = "@//:linux-requirements.txt",
     requirements_lock = None,
