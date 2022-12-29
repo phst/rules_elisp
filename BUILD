@@ -15,12 +15,12 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
-load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@hermetic_python_toolchain//:defs.bzl", "compile_pip_requirements", "py_binary")
 
 py_binary(
     name = "build",
     srcs = ["build.py"],
-    python_version = "PY3",
+    main = "build.py",
     srcs_version = "PY3",
 )
 
@@ -51,7 +51,7 @@ alias(
 py_binary(
     name = "check_python",
     srcs = ["check_python.py"],
-    python_version = "PY3",
+    main = "check_python.py",
     srcs_version = "PY3",
     visibility = [
         "//:__subpackages__",
