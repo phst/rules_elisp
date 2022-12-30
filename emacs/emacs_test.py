@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ class EmacsTest(unittest.TestCase):
     def test_version(self) -> None:
         """Tests that emacs --version works."""
         run_files = runfiles.Runfiles()
-        emacs = run_files.resolve('phst_rules_elisp' / self.emacs)
+        emacs = run_files.resolve(self.emacs)
         env = dict(os.environ)
         env.update(run_files.environment())
         process = subprocess.run([str(emacs), '--version'], env=env,

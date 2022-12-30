@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022 Google LLC
+// Copyright 2020, 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -102,7 +102,7 @@ TEST(Executor, RunBinaryWrap) {
       runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
   ASSERT_TRUE(input_file.ok()) << input_file.status();
   const std::vector<NativeString> args = {
-      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=phst_rules_elisp/") + wrapper,
+      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=") + wrapper,
       PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
