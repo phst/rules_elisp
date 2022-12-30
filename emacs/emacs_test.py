@@ -14,9 +14,12 @@
 
 """Unit tests for the Emacs binary."""
 
+import argparse
 import os
 import pathlib
 import subprocess
+import sys
+from typing import Optional
 import unittest
 
 from elisp import runfiles
@@ -24,12 +27,12 @@ from elisp import runfiles
 class EmacsTest(unittest.TestCase):
     """Unit tests for the Emacs binary."""
 
+    emacs: Optional[pathlib.PurePosixPath] = None
+
     def test_version(self) -> None:
         """Tests that emacs --version works."""
         run_files = runfiles.Runfiles()
-        emacs = run_files.resolve(pathlib.PurePosixPath(
-            'phst_rules_elisp/emacs/emacs_28.2' +
-            ('.exe' if os.name == 'nt' else '')))
+        emacs = run_files.resolve('phst_rules_elisp' / self.emacs)
         env = dict(os.environ)
         env.update(run_files.environment())
         process = subprocess.run([str(emacs), '--version'], env=env,
@@ -37,5 +40,13 @@ class EmacsTest(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
 
 
+def _main() -> None:
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--emacs', type=pathlib.PurePosixPath, required=True)
+    args = parser.parse_args()
+    EmacsTest.emacs = args.emacs
+    unittest.main(argv=sys.argv[:1])
+
+
 if __name__ == '__main__':
-    unittest.main()
+    _main()

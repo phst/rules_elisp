@@ -14,7 +14,10 @@
 
 #include "elisp/binary.h"
 
+#include <cstdlib>
+#include <iostream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #ifdef __GNUC__
@@ -26,6 +29,8 @@
 #ifdef _MSC_VER
 #pragma warning(push, 3)
 #endif
+#include "absl/base/thread_annotations.h"
+#include "absl/synchronization/mutex.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "gmock/gmock.h"  // IWYU pragma: keep
@@ -37,6 +42,7 @@
 #pragma warning(pop)
 #endif
 
+#include "elisp/platform.h"
 #include "elisp/process.h"
 
 // IWYU pragma: no_include "gtest/gtest_pred_impl.h"
@@ -50,20 +56,43 @@ namespace {
 
 using ::testing::Eq;
 
+class Wrapper final {
+ public:
+  Wrapper() = default;
+  Wrapper(const Wrapper&) = delete;
+  Wrapper& operator=(const Wrapper&) = delete;
+
+  NativeString Get() const ABSL_LOCKS_EXCLUDED(mu_) {
+    absl::MutexLock lock(&mu_);
+    return value_;
+  }
+
+  void Set(NativeString value) ABSL_LOCKS_EXCLUDED(mu_) {
+    absl::MutexLock lock(&mu_);
+    value_ = std::move(value);
+  }
+
+ private:
+  NativeString value_ ABSL_GUARDED_BY(mu_);
+  mutable absl::Mutex mu_;
+};
+
+static Wrapper& GetWrapper() {
+  static Wrapper& wrapper = *new Wrapper;
+  return wrapper;
+}
+
 TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
-  NativeString wrapper =
-      PHST_RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/tests/wrap/wrap");
-#ifdef PHST_RULES_ELISP_WINDOWS
-  wrapper += L".exe";
-#endif
+  const NativeString wrapper = GetWrapper().Get();
+  ASSERT_FALSE(wrapper.empty()) << "missing --wrapper flag";
   const NativeString argv0 = PHST_RULES_ELISP_NATIVE_LITERAL("unused");
   const absl::StatusOr<NativeString> input_file =
       runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
   ASSERT_TRUE(input_file.ok()) << input_file.status();
   const std::vector<NativeString> args = {
-      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=") + wrapper,
+      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=phst_rules_elisp/") + wrapper,
       PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
       PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
@@ -88,3 +117,14 @@ TEST(Executor, RunBinaryWrap) {
 
 }  // namespace
 }  // namespace phst_rules_elisp
+
+int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
+  testing::InitGoogleTest(&argc, argv);
+  // Don’t use absl::ParseCommandLine since that doesn’t support wide strings.
+  if (argc != 2) {
+    std::cerr << "usage: binary_test WRAPPER" << std::endl;
+    return EXIT_FAILURE;
+  }
+  phst_rules_elisp::GetWrapper().Set(argv[1]);
+  return RUN_ALL_TESTS();
+}
