@@ -37,6 +37,10 @@ class Runfiles:
         Raises:
           FileNotFoundError if the runfile wasn’t found in the manifest
         """
+        if not name:
+            raise ValueError('Missing runfile name')
+        if name.is_absolute():
+            raise ValueError(f'Runfile name “{name}” is absolute')
         result = self._impl.Rlocation(str(name))
         if not result:
             raise FileNotFoundError(f'Runfile “{name}” not found')
