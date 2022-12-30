@@ -96,7 +96,7 @@ TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
   const NativeString wrapper = Wrapper::Get();
-  ASSERT_FALSE(wrapper.empty()) << "missing --wrapper flag";
+  ASSERT_FALSE(wrapper.empty()) << "missing wrapper command-line argument";
   const NativeString argv0 = PHST_RULES_ELISP_NATIVE_LITERAL("unused");
   const absl::StatusOr<NativeString> input_file =
       runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
