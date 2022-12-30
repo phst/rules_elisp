@@ -193,6 +193,11 @@ cc_test(
     name = "binary_test",
     size = "small",
     srcs = ["binary_test.cc"],
+    args = [
+        # FIXME: Use rlocationpath once we drop support for Bazel older than
+        # version 5.4.0.
+        "$(rootpath //tests/wrap)",
+    ],
     copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",
@@ -205,10 +210,13 @@ cc_test(
     local_defines = LAUNCHER_DEFINES,
     deps = [
         ":binary",
+        ":platform",
         ":process",
+        "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_googletest//:gtest_main",
+        "@com_google_absl//absl/synchronization",
+        "@com_google_googletest//:gtest",
     ],
 )
 

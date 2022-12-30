@@ -28,6 +28,11 @@ py_test(
     size = "medium",
     timeout = "short",
     srcs = ["emacs_test.py"],
+    args = [
+        # FIXME: Use rlocationpath once we drop support for Bazel older than
+        # version 5.4.0.
+        "--emacs=$(rootpath :emacs)",
+    ],
     data = [":emacs"],
     python_version = "PY3",
     srcs_version = "PY3",

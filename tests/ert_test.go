@@ -16,13 +16,14 @@ package runner_test
 
 import (
 	"encoding/xml"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"strconv"
 	"testing"
 	"time"
@@ -31,6 +32,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
+
+var binary = flag.String("binary", "", "location of the binary file relative to the runfiles root")
 
 func Test(t *testing.T) {
 	source, err := runfiles.Rlocation("phst_rules_elisp/tests/test.el")
@@ -41,11 +44,7 @@ func Test(t *testing.T) {
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin := "phst_rules_elisp/tests/test_test"
-	if runtime.GOOS == "windows" {
-		bin += ".exe"
-	}
-	bin, err = runfiles.Rlocation(bin)
+	bin, err := runfiles.Rlocation(path.Join("phst_rules_elisp", *binary))
 	if err != nil {
 		t.Fatal(err)
 	}
