@@ -34,11 +34,7 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = ["ert_test.go"],
-    args = [
-        # FIXME: Use rlocationpath once we drop support for Bazel older than
-        # version 5.4.0.
-        "--binary=$(rootpath :test_test)",
-    ],
+    args = ["--binary=$(rlocationpath :test_test)"],
     data = [
         ":test_test",
         "@junit_xsd//:file",

@@ -21,7 +21,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -46,7 +45,7 @@ func Test(t *testing.T) {
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin, err := runfiles.Rlocation(path.Join("phst_rules_elisp", *binary))
+	bin, err := runfiles.Rlocation(*binary)
 	if err != nil {
 		t.Fatal(err)
 	}

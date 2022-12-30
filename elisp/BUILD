@@ -196,11 +196,7 @@ cc_test(
     name = "binary_test",
     size = "small",
     srcs = ["binary_test.cc"],
-    args = [
-        # FIXME: Use rlocationpath once we drop support for Bazel older than
-        # version 5.4.0.
-        "$(rootpath //tests/wrap)",
-    ],
+    args = ["$(rlocationpath //tests/wrap)"],
     copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",
