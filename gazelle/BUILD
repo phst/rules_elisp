@@ -56,7 +56,11 @@ go_test(
         "imports_test.go",
         "resolve_test.go",
     ],
-    args = ["--gazelle=$(rootpath :gazelle)"],
+    args = [
+        # FIXME: Use rlocationpath once we drop support for Bazel older than
+        # version 5.4.0.
+        "--gazelle=$(rootpath :gazelle)",
+    ],
     data = [":gazelle"],
     rundir = ".",
     deps = [
