@@ -58,34 +58,44 @@ using ::testing::Eq;
 
 class Wrapper final {
  public:
-  Wrapper() = default;
+  static NativeString Get() ABSL_LOCKS_EXCLUDED(mu_) {
+    return Singleton().DoGet();
+  }
+
+  static void Set(NativeString value) ABSL_LOCKS_EXCLUDED(mu_) {
+    Singleton().DoSet(std::move(value));
+  }
+
   Wrapper(const Wrapper&) = delete;
   Wrapper& operator=(const Wrapper&) = delete;
 
-  NativeString Get() const ABSL_LOCKS_EXCLUDED(mu_) {
+ private:
+  static Wrapper& Singleton() {
+    static Wrapper& wrapper = *new Wrapper;
+    return wrapper;
+  }
+
+  Wrapper() = default;
+
+  NativeString DoGet() ABSL_LOCKS_EXCLUDED(mu_) {
     absl::MutexLock lock(&mu_);
     return value_;
   }
 
-  void Set(NativeString value) ABSL_LOCKS_EXCLUDED(mu_) {
+  void DoSet(NativeString value) ABSL_LOCKS_EXCLUDED(mu_) {
     absl::MutexLock lock(&mu_);
     value_ = std::move(value);
   }
 
- private:
   NativeString value_ ABSL_GUARDED_BY(mu_);
-  mutable absl::Mutex mu_;
+  absl::Mutex mu_;
 };
 
-static Wrapper& GetWrapper() {
-  static Wrapper& wrapper = *new Wrapper;
-  return wrapper;
-}
 
 TEST(Executor, RunBinaryWrap) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
-  const NativeString wrapper = GetWrapper().Get();
+  const NativeString wrapper = Wrapper::Get();
   ASSERT_FALSE(wrapper.empty()) << "missing --wrapper flag";
   const NativeString argv0 = PHST_RULES_ELISP_NATIVE_LITERAL("unused");
   const absl::StatusOr<NativeString> input_file =
@@ -125,6 +135,6 @@ int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
     std::cerr << "usage: binary_test WRAPPER" << std::endl;
     return EXIT_FAILURE;
   }
-  phst_rules_elisp::GetWrapper().Set(argv[1]);
+  phst_rules_elisp::Wrapper::Set(argv[1]);
   return RUN_ALL_TESTS();
 }
