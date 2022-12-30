@@ -122,10 +122,10 @@ def rules_elisp_toolchains():
 
 def _toolchains_impl(repository_ctx):
     if repository_ctx.os.name.startswith("windows"):
-        content = repository_ctx.read(Label("@phst_rules_elisp//elisp:windows-toolchains.BUILD"))
+        target = Label("@phst_rules_elisp//elisp:windows-toolchains.BUILD")
     else:
-        content = repository_ctx.read(Label("@phst_rules_elisp//elisp:unix-toolchains.BUILD"))
-    repository_ctx.file("BUILD", content)
+        target = Label("@phst_rules_elisp//elisp:unix-toolchains.BUILD")
+    repository_ctx.symlink(target, "BUILD")
 
 _toolchains = repository_rule(
     implementation = _toolchains_impl,
