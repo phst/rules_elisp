@@ -288,7 +288,7 @@ def run_emacs(
       manifest_load_path: (list of strings or None): additional load path for
           manifest with directories relative to the execution root
     """
-    toolchain = ctx.toolchains[Label("@phst_rules_elisp//elisp:toolchain_type")]
+    toolchain = ctx.toolchains[Label("//elisp:toolchain_type")]
     emacs = toolchain.emacs
     arguments = ["--quick", "--batch", "--no-build-details"] + arguments
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
@@ -446,7 +446,7 @@ bootstrap = rule(
         ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
-    toolchains = [Label("@phst_rules_elisp//elisp:toolchain_type")],
+    toolchains = [Label("//elisp:toolchain_type")],
     incompatible_use_toolchain_transition = True,
 )
 

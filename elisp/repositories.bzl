@@ -25,31 +25,31 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "gnu_emacs_27.1",
-        build_file = Label("@phst_rules_elisp//:emacs.BUILD"),
+        build_file = Label("//:emacs.BUILD"),
         sha256 = "4a4c128f915fc937d61edfc273c98106711b540c9be3cd5d2e2b9b5b2f172e41",
         strip_prefix = "emacs-27.1/",
         urls = [
             "https://ftpmirror.gnu.org/emacs/emacs-27.1.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-27.1.tar.xz",
         ],
-        patches = [Label("@phst_rules_elisp//:emacs-27.patch")],
+        patches = [Label("//:emacs-27.patch")],
     )
     maybe(
         http_archive,
         name = "gnu_emacs_27.2",
-        build_file = Label("@phst_rules_elisp//:emacs.BUILD"),
+        build_file = Label("//:emacs.BUILD"),
         sha256 = "b4a7cc4e78e63f378624e0919215b910af5bb2a0afc819fad298272e9f40c1b9",
         strip_prefix = "emacs-27.2/",
         urls = [
             "https://ftpmirror.gnu.org/emacs/emacs-27.2.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-27.2.tar.xz",
         ],
-        patches = [Label("@phst_rules_elisp//:emacs-27.patch")],
+        patches = [Label("//:emacs-27.patch")],
     )
     maybe(
         http_archive,
         name = "gnu_emacs_28.1",
-        build_file = Label("@phst_rules_elisp//:emacs.BUILD"),
+        build_file = Label("//:emacs.BUILD"),
         sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
         strip_prefix = "emacs-28.1/",
         urls = [
@@ -60,7 +60,7 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "gnu_emacs_28.2",
-        build_file = Label("@phst_rules_elisp//:emacs.BUILD"),
+        build_file = Label("//:emacs.BUILD"),
         sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
         strip_prefix = "emacs-28.2/",
         urls = [
@@ -122,9 +122,9 @@ def rules_elisp_toolchains():
 
 def _toolchains_impl(repository_ctx):
     if repository_ctx.os.name.startswith("windows"):
-        target = Label("@phst_rules_elisp//elisp:windows-toolchains.BUILD")
+        target = Label("//elisp:windows-toolchains.BUILD")
     else:
-        target = Label("@phst_rules_elisp//elisp:unix-toolchains.BUILD")
+        target = Label("//elisp:unix-toolchains.BUILD")
     repository_ctx.symlink(target, "BUILD")
 
 _toolchains = repository_rule(
