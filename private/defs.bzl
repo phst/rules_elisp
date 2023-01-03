@@ -78,12 +78,12 @@ check_python = aspect(
     implementation = _check_python_impl,
     attrs = {
         "_check": attr.label(
-            default = "//:check_python",
+            default = Label("//:check_python"),
             executable = True,
             cfg = "exec",
         ),
         "_pylintrc": attr.label(
-            default = "//:.pylintrc",
+            default = Label("//:.pylintrc"),
             allow_single_file = True,
         ),
     },
@@ -288,7 +288,7 @@ def run_emacs(
       manifest_load_path: (list of strings or None): additional load path for
           manifest with directories relative to the execution root
     """
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = ctx.toolchains[Label("@phst_rules_elisp//elisp:toolchain_type")]
     emacs = toolchain.emacs
     arguments = ["--quick", "--batch", "--no-build-details"] + arguments
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
@@ -329,14 +329,14 @@ def run_emacs(
 
 # Shared C++ compilation options.
 COPTS = select({
-    "//constraints:msvc-cl": [
+    Label("//constraints:msvc-cl"): [
         "/WX",
         "/W4",
         "/utf-8",
     ],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
-    "//conditions:default": [
+    Label("//conditions:default"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
         "-fno-exceptions",
@@ -351,10 +351,10 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    "//constraints:msvc-cl": ["/std:c++14"],
+    Label("//constraints:msvc-cl"): ["/std:c++14"],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
-    "//conditions:default": [
+    Label("//conditions:default"): [
         "-std=c++11",
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
@@ -363,19 +363,19 @@ CXXOPTS = select({
 })
 
 CONLYOPTS = select({
-    "//constraints:msvc-cl": ["/std:c11"],
+    Label("//constraints:msvc-cl"): ["/std:c11"],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
-    "//conditions:default": [
+    Label("//conditions:default"): [
         "-std=c99",
         "-Wvla",
     ],
 })
 
 DEFINES = ["_GNU_SOURCE"] + select({
-    "//constraints:linux": [],
-    "//constraints:macos": [],
-    "//constraints:windows": [
+    Label("//constraints:linux"): [],
+    Label("//constraints:macos"): [],
+    Label("//constraints:windows"): [
         "_UNICODE",
         "UNICODE",
         "STRICT",
@@ -440,10 +440,13 @@ bootstrap = rule(
     attrs = {
         "src": attr.label(mandatory = True, allow_single_file = [".el"]),
         "out": attr.output(mandatory = True),
-        "_compile": attr.label(allow_single_file = [".el"], default = "//elisp:compile.el"),
+        "_compile": attr.label(
+            allow_single_file = [".el"],
+            default = Label("//elisp:compile.el"),
+        ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
-    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    toolchains = [Label("@phst_rules_elisp//elisp:toolchain_type")],
     incompatible_use_toolchain_transition = True,
 )
 
@@ -484,12 +487,12 @@ merged_manual = rule(
         "_generate": attr.label(
             executable = True,
             cfg = "exec",
-            default = "//docs:generate",
+            default = Label("//docs:generate"),
         ),
         "_merge": attr.label(
             executable = True,
             cfg = "exec",
-            default = "//docs:merge",
+            default = Label("//docs:merge"),
         ),
     },
     implementation = _merged_manual_impl,

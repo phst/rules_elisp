@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,16 +90,16 @@ This is used by Gazelle.""",
             doc = "Deprecated; must always be set to `portable`.",
         ),
         "_build": attr.label(
-            default = "//emacs:build",
+            default = Label("//emacs:build"),
             executable = True,
             cfg = "exec",
         ),
         "_cc_toolchain": attr.label(
-            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_cc_toolchain": attr.label(
-            default = "@phst_rules_elisp_toolchains//:emacs_cc_toolchain",
+            default = Label("@phst_rules_elisp_toolchains//:emacs_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_grep_includes": attr.label(
@@ -109,19 +109,19 @@ This is used by Gazelle.""",
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         "_emacs_libs": attr.label_list(
-            default = ["//elisp:emacs"],
+            default = [Label("//elisp:emacs")],
             providers = [CcInfo],
         ),
         "_template": attr.label(
-            default = "//emacs:launcher.template",
+            default = Label("//emacs:launcher.template"),
             allow_single_file = [".template"],
         ),
         "_launcher_defaults": attr.label(
-            default = "//elisp:launcher_defaults",
+            default = Label("//elisp:launcher_defaults"),
             providers = [CcDefaultInfo],
         ),
         "_emacs_defaults": attr.label(
-            default = ":defaults",
+            default = Label("//emacs:defaults"),
             providers = [CcDefaultInfo],
         ),
     },

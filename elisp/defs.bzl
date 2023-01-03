@@ -204,7 +204,7 @@ def _elisp_binary_impl(ctx):
 
 def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = ctx.toolchains[Label("@phst_rules_elisp//elisp:toolchain_type")]
 
     args = [
         "--skip-test=" + test
@@ -352,7 +352,7 @@ compile cleanly and that you don’t control.""",
         default = True,
     ),
     "_compile": attr.label(
-        default = "//elisp:compile.elc",
+        default = Label("//elisp:compile.elc"),
         allow_single_file = [".elc"],
     ),
 }
@@ -410,7 +410,7 @@ The source files in `srcs` can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
-    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    toolchains = [Label("@phst_rules_elisp//elisp:toolchain_type")],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
 )
@@ -421,22 +421,22 @@ _elisp_proto_aspect = aspect(
     attr_aspects = ["deps"],
     attrs = {
         "_compile": attr.label(
-            default = "//elisp:compile.elc",
+            default = Label("//elisp:compile.elc"),
             allow_single_file = [".elc"],
         ),
         "_generate": attr.label(
-            default = "//elisp/proto:generate",
+            default = Label("//elisp/proto:generate"),
             executable = True,
             cfg = "exec",
         ),
         "_protobuf_lib": attr.label(
-            default = "//elisp/proto",
+            default = Label("//elisp/proto"),
             providers = [EmacsLispInfo],
         ),
     },
     required_providers = [ProtoInfo],
     provides = [EmacsLispInfo],
-    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    toolchains = [Label("@phst_rules_elisp//elisp:toolchain_type")],
     implementation = _elisp_proto_aspect_impl,
 )
 
@@ -462,7 +462,7 @@ direct and indirect dependencies.  The feature symbol for `require` is
 <code>//<var>package</var>:<var>name</var></code> is the label of the
 corresponding `proto_library` rule.""",
     provides = [EmacsLispInfo],
-    toolchains = ["@phst_rules_elisp//elisp:toolchain_type"],
+    toolchains = [Label("@phst_rules_elisp//elisp:toolchain_type")],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_proto_library_impl,
 )
@@ -476,7 +476,7 @@ elisp_binary = rule(
             mandatory = True,
         ),
         _cc_toolchain = attr.label(
-            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         _grep_includes = attr.label(
@@ -486,15 +486,15 @@ elisp_binary = rule(
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         _binary_libs = attr.label_list(
-            default = ["//elisp:binary"],
+            default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
         _template = attr.label(
-            default = "//elisp:binary.template",
+            default = Label("//elisp:binary.template"),
             allow_single_file = [".template"],
         ),
         _launcher_defaults = attr.label(
-            default = "//elisp:launcher_defaults",
+            default = Label("//elisp:launcher_defaults"),
             providers = [CcDefaultInfo],
         ),
         data = attr.label_list(
@@ -535,7 +535,7 @@ in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = use_cpp_toolchain() + [
-        "@phst_rules_elisp//elisp:toolchain_type",
+        Label("@phst_rules_elisp//elisp:toolchain_type"),
     ],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_binary_impl,
@@ -555,7 +555,7 @@ elisp_test = rule(
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         _cc_toolchain = attr.label(
-            default = "@bazel_tools//tools/cpp:current_cc_toolchain",
+            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         _grep_includes = attr.label(
@@ -565,15 +565,15 @@ elisp_test = rule(
             default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         _test_libs = attr.label_list(
-            default = ["//elisp:test"],
+            default = [Label("//elisp:test")],
             providers = [CcInfo],
         ),
         _template = attr.label(
-            default = "//elisp:test.template",
+            default = Label("//elisp:test.template"),
             allow_single_file = [".template"],
         ),
         _launcher_defaults = attr.label(
-            default = "//elisp:launcher_defaults",
+            default = Label("//elisp:launcher_defaults"),
             providers = [CcDefaultInfo],
         ),
         # Magic coverage attributes.  This is only partially documented
@@ -586,7 +586,7 @@ elisp_test = rule(
             cfg = "exec",
         ),
         _collect_cc_coverage = attr.label(
-            default = "@bazel_tools//tools/test:collect_cc_coverage",
+            default = Label("@bazel_tools//tools/test:collect_cc_coverage"),
             executable = True,
             cfg = "exec",
         ),
@@ -635,7 +635,7 @@ normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
     toolchains = use_cpp_toolchain() + [
-        "@phst_rules_elisp//elisp:toolchain_type",
+        Label("@phst_rules_elisp//elisp:toolchain_type"),
     ],
     incompatible_use_toolchain_transition = True,
     implementation = _elisp_test_impl,
@@ -829,7 +829,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         ],
     )
 
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = ctx.toolchains[Label("@phst_rules_elisp//elisp:toolchain_type")]
 
     # Expand load path only if needed.  It’s important that the expanded load
     # path is equivalent to the --directory arguments below.
@@ -933,7 +933,7 @@ def _binary(ctx, *, srcs, tags, args, libs):
         tags = ctx.attr.tags,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
-    toolchain = ctx.toolchains["@phst_rules_elisp//elisp:toolchain_type"]
+    toolchain = ctx.toolchains[Label("@phst_rules_elisp//elisp:toolchain_type")]
     emacs = toolchain.emacs
 
     # Only pass in data files when needed.
