@@ -49,7 +49,6 @@ load("@rules_python//python:repositories.bzl", "python_register_toolchains")
 python_register_toolchains(
     name = "hermetic_python",
     python_version = "3.10",
-    register_toolchains = False,
 )
 
 load("@rules_python//python:pip.bzl", "pip_parse")
