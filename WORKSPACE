@@ -47,12 +47,12 @@ http_archive(
 load("@rules_python//python:repositories.bzl", "python_register_toolchains")
 
 python_register_toolchains(
-    name = "hermetic_python_toolchain",
+    name = "hermetic_python",
     python_version = "3.10",
 )
 
 load("@rules_python//python:pip.bzl", "pip_parse")
-load("@hermetic_python_toolchain//:defs.bzl", "interpreter")
+load("@hermetic_python//:defs.bzl", "interpreter")
 
 pip_parse(
     name = "pip_deps",
