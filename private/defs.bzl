@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -446,7 +446,7 @@ bootstrap = rule(
         ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
-    toolchains = [Label("//elisp:toolchain_type")],
+    toolchains = ["//elisp:toolchain_type"],
     incompatible_use_toolchain_transition = True,
 )
 
