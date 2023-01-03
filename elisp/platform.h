@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ using NativeChar = wchar_t;
 #define PHST_RULES_ELISP_NATIVE_LITERAL(literal) L##literal
 #define PHST_RULES_ELISP_MAIN wmain
 #else
+using NativeChar = char;
 #define PHST_RULES_ELISP_NATIVE_LITERAL(literal) literal
 #define PHST_RULES_ELISP_MAIN main
-using NativeChar = char;
 #endif
 
 using NativeString = std::basic_string<NativeChar>;
