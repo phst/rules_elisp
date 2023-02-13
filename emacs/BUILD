@@ -59,8 +59,8 @@ emacs_binary(
     readme = "@gnu_emacs_27.1//:readme",
     target_compatible_with = select({
         ":always_supported": [],
-        ":macos_arm": [":incompatible"],
-        "//conditions:default": [":incompatible"],
+        ":macos_arm": ["@platforms//:incompatible"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
 )
@@ -72,7 +72,7 @@ emacs_binary(
     target_compatible_with = select({
         ":always_supported": [],
         ":macos_arm": [],
-        "//conditions:default": [":incompatible"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
 )
@@ -84,7 +84,7 @@ emacs_binary(
     target_compatible_with = select({
         ":always_supported": [],
         ":macos_arm": [],
-        "//conditions:default": [":incompatible"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
 )
@@ -98,7 +98,7 @@ emacs_binary(
     target_compatible_with = select({
         ":always_supported": [],
         ":macos_arm": [],
-        "//conditions:default": [":incompatible"],
+        "//conditions:default": ["@platforms//:incompatible"],
     }),
     visibility = ["//visibility:public"],
 )
@@ -234,14 +234,6 @@ config_setting(
         "@platforms//cpu:arm64",
         "@platforms//os:macos",
     ],
-)
-
-# https://bazel.build/extending/platforms#expressive-constraints
-constraint_setting(name = "incompatible_setting")
-
-constraint_value(
-    name = "incompatible",
-    constraint_setting = ":incompatible_setting",
 )
 
 cc_defaults(
