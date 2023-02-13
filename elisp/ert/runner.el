@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (warning-fill-column 1000)  ; Bug#52281
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
-         (temporary-file-directory (concat "/:" temp-dir))
+         (temporary-file-directory
+          (file-name-as-directory (concat "/:" temp-dir)))
          ;; We could get the workspace name from the TEST_WORKSPACE environment
          ;; variable, but that one’s optional
          ;; (cf. https://docs.bazel.build/versions/4.2.2/test-encyclopedia.html#initial-conditions).
