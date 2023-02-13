@@ -251,7 +251,7 @@ cc_defaults(
         "NO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
     ],
     linkopts = select({
-        "//constraints:macos": [
+        "@platforms//os:macos": [
             # Override the toolchain’s “-undefined dynamic” option so that the
             # configure script doesn’t incorrectly detect absent functions as
             # present.

@@ -373,9 +373,9 @@ CONLYOPTS = select({
 })
 
 DEFINES = ["_GNU_SOURCE"] + select({
-    Label("//constraints:linux"): [],
-    Label("//constraints:macos"): [],
-    Label("//constraints:windows"): [
+    Label("@platforms//os:linux"): [],
+    Label("@platforms//os:macos"): [],
+    Label("@platforms//os:windows"): [
         "_UNICODE",
         "UNICODE",
         "STRICT",
