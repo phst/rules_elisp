@@ -91,7 +91,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          ;; everything up to the workspace directory in the execution root
          ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
          ;; and replace it with the default directory.  Robust tests should use
-         ;; the ‘elisp/runfiles’ library to find their data files.
+         ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
          (ert-resource-directory-trim-left-regexp
           (rx-to-string `(seq (* nonl) ?/ ,workspace-name ?/) :no-group))
          (ert-resource-directory-format
