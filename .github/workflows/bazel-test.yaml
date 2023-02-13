@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@ jobs:
       - name: Install Visual C++ build tools
         # Install the 2019 version because Bazel doesn’t support anything newer
         # in most versions; see
-        # https://docs.bazel.build/versions/5.0.0/install-windows.html#installing-compilers-and-language-runtimes.
+        # https://bazel.build/install/windows#install-compilers.
         run: |
           choco install visualstudio2019buildtools
           choco install visualstudio2019-workload-vctools

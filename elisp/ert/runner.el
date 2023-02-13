@@ -18,7 +18,7 @@
 
 ;; This library runs ERT tests under Bazel.  It provides support for the
 ;; --test_filter flag, as described in
-;; https://docs.bazel.build/test-encyclopedia.html#initial-conditions.
+;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
 
 ;;; Code:
 
@@ -73,7 +73,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
           (file-name-as-directory (concat "/:" temp-dir)))
          ;; We could get the workspace name from the TEST_WORKSPACE environment
          ;; variable, but that one’s optional
-         ;; (cf. https://docs.bazel.build/versions/4.2.2/test-encyclopedia.html#initial-conditions).
+         ;; (cf. https://bazel.build/reference/test-encyclopedia#initial-conditions).
          (workspace-name (file-name-nondirectory
                           (directory-file-name default-directory)))
          (runfiles-handler-installed
@@ -89,7 +89,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          ;; ‘ert-resource-directory’ will typically be in the execution root and
          ;; no longer be valid when the test runs.  Therefore, strip out
          ;; everything up to the workspace directory in the execution root
-         ;; (cf. https://docs.bazel.build/versions/4.2.2/output_directories.html#layout-diagram),
+         ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
          ;; and replace it with the default directory.  Robust tests should use
          ;; the ‘elisp/runfiles’ library to find their data files.
          (ert-resource-directory-trim-left-regexp
@@ -119,7 +119,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                           load-suffixes))
          (load-buffers ()))
     ;; TEST_SRCDIR and TEST_TMPDIR are required,
-    ;; cf. https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
+    ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
     (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
     (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
     (and coverage-enabled (member coverage-manifest '(nil ""))
@@ -284,7 +284,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
       (unless (member report-file '(nil ""))
         (with-temp-buffer
           ;; The expected format of the XML output file isn’t well-documented.
-          ;; https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
+          ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
           ;; only states that the XML file is “based on the JUnit test result
           ;; schema”, referring to
           ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
@@ -976,7 +976,7 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
     (when-let ((file (symbol-file test 'ert--test)))
       ;; The filename typically refers to a compiled file in the execution root.
       ;; Try to resolve it to a source file.  See
-      ;; https://docs.bazel.build/versions/4.1.0/output_directories.html#layout-diagram.
+      ;; https://bazel.build/remote/output-directories#layout-diagram.
       (when (string-match (rx "/execroot/"
                               (+ (not (any ?/))) ?/ ; workspace
                               (+ (not (any ?/))) ?/ ; bazel-out

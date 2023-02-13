@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ This repository provides a Bazel integration for Emacs Lisp; see
 [[https://bazel.build/][the Bazel homepage]] for more information about Bazel,
 and see [[info:elisp#Top][the Emacs Lisp manual]].  It is modeled after the
 rules definitions for other languages, like the
-[[https://docs.bazel.build/be/c-cpp.html][C++ rules]].
+[[https://bazel.build/reference/be/c-cpp][C++ rules]].
 
 This is not an officially supported Google product.
 
@@ -99,8 +99,8 @@ load path.
 #+CINDEX: Runfiles
 
 This repository also includes a library to access runfiles; see
-[[https://docs.bazel.build/skylark/rules.html#runfiles][the Bazel documentation
-on runfiles]].  To use it, add a build dependency on
+[[https://bazel.build/extending/rules#runfiles][the Bazel documentation on
+runfiles]].  To use it, add a build dependency on
 ~@phst_rules_elisp//elisp/runfiles~.
 
 #+FINDEX: elisp/runfiles/rlocation

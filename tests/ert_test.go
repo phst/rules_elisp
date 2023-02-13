@@ -67,7 +67,7 @@ func Test(t *testing.T) {
 	env := os.Environ()
 	env = append(env, runfilesEnv...)
 	// See
-	// https://docs.bazel.build/versions/4.1.0/test-encyclopedia.html#initial-conditions.
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	env = append(env,
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",

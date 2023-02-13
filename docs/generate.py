@@ -185,9 +185,8 @@ class _Generator:
 def _markdown(text: str) -> str:
     """Convert a Markdown snippet to Org-mode."""
     # Bazel (including Stardoc) interprets all files as Latin-1,
-    # https://docs.bazel.build/versions/4.1.0/build-ref.html#BUILD_files.
-    # However, our files all use UTF-8, leading to double encoding.  Reverse
-    # that effect here.
+    # cf. https://bazel.build/concepts/build-files.  However, our files all use
+    # UTF-8, leading to double encoding.  Reverse that effect here.
     text = text.strip().encode('latin-1').decode('utf-8')
     document = commonmark.Parser().parse(text)
     text = _OrgRenderer().render(document)

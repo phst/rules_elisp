@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -235,7 +235,7 @@ config_setting(
     ],
 )
 
-# https://docs.bazel.build/versions/4.0.0/platforms.html#more-expressive-constraints
+# https://bazel.build/extending/platforms#expressive-constraints
 constraint_setting(name = "incompatible_setting")
 
 constraint_value(
