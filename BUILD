@@ -42,9 +42,9 @@ compile_pip_requirements(
 alias(
     name = "requirements_txt",
     actual = select({
-        "//constraints:linux": "linux-requirements.txt",
-        "//constraints:macos": "macos-requirements.txt",
-        "//constraints:windows": "windows-requirements.txt",
+        "@platforms//os:linux": "linux-requirements.txt",
+        "@platforms//os:macos": "macos-requirements.txt",
+        "@platforms//os:windows": "windows-requirements.txt",
     }),
 )
 

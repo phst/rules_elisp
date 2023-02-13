@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -117,9 +117,9 @@ elisp_proto_library(
 elisp_library(
     name = "module",
     srcs = select({
-        "//constraints:linux": ["module.so"],
-        "//constraints:macos": ["module.so"],
-        "//constraints:windows": ["module.dll"],
+        "@platforms//os:linux": ["module.so"],
+        "@platforms//os:macos": ["module.so"],
+        "@platforms//os:windows": ["module.dll"],
     }),
 )
 
@@ -135,12 +135,12 @@ cc_binary(
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
-        "//constraints:linux": [
+        "@platforms//os:linux": [
             "-Wl,--version-script=$(execpath :module.lds)",
             "-Wl,--no-undefined",
         ],
-        "//constraints:windows": [],  # uses ‘win_def_file’
-        "//constraints:macos": [
+        "@platforms//os:windows": [],  # uses ‘win_def_file’
+        "@platforms//os:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
             "-Wl,-undefined,error",
