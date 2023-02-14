@@ -107,6 +107,7 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "upb",
+        patches = ["@//:upb.patch"],
         sha256 = "0d6af8c8c00b3d733721f8d890ef43dd40f537c2e815b529085c1a6c30a21084",
         strip_prefix = "upb-a5477045acaa34586420942098f5fecd3570f577/",
         urls = [
