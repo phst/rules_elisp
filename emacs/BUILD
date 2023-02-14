@@ -43,6 +43,7 @@ cc_library(
     name = "module_header",
     srcs = ["emacs-module.h"],
     includes = ["."],
+    linkstatic = True,
     visibility = ["//visibility:public"],
 )
 

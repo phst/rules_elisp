@@ -151,6 +151,7 @@ cc_library(
     copts = COPTS + CXXOPTS,
     data = [":run_emacs"],
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
@@ -177,6 +178,7 @@ cc_library(
     copts = COPTS + CXXOPTS,
     data = [":run_binary"],
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
@@ -240,6 +242,7 @@ cc_library(
     copts = COPTS + CXXOPTS,
     data = [":run_test"],
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = DEFINES,
     visibility = ["//visibility:public"],
     deps = [
@@ -318,6 +321,7 @@ cc_library(
     hdrs = ["process.h"],
     copts = COPTS + CXXOPTS,
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = DEFINES,
     deps = [
         ":platform",
@@ -337,6 +341,7 @@ cc_library(
     hdrs = ["platform.h"],
     copts = COPTS + CXXOPTS,
     linkopts = LINKOPTS,
+    linkstatic = True,
     local_defines = DEFINES,
 )
 
