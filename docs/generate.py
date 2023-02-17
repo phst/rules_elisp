@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -168,7 +168,7 @@ class _Generator:
         if attr.default_value:
             suffixes.append(f'default: ~{attr.default_value}~')
         if attr.provider_name_group:
-            group, = attr.provider_name_group
+            (group,) = attr.provider_name_group
             names = ', '.join(f'~{name}~' for name in group.provider_name)
             suffixes.append(f'required providers: {names}')
         suffix = '; '.join(suffixes)
