@@ -244,9 +244,9 @@ cc_defaults(
     ],
     linkopts = select({
         "@platforms//os:macos": [
-            # Override the toolchain’s “-undefined dynamic” option so that the
-            # configure script doesn’t incorrectly detect absent functions as
-            # present.
+            # Override the toolchain’s “-undefined dynamic_lookup” option so
+            # that the configure script doesn’t incorrectly detect absent
+            # functions as present.
             "-undefined",
             "error",
         ],
