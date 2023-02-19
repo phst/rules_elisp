@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -77,6 +77,15 @@ context."
 (ert-deftest elisp/runfiles/file-handler ()
   (let ((file-name-handler-alist file-name-handler-alist))
     (elisp/runfiles/install-handler)
+    (should (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
+    (should (eql (cl-count #'elisp/runfiles/file-handler file-name-handler-alist
+                           :key #'cdr :test #'eq)
+                 1))
+    ;; Check that ‘elisp/runfiles/install-handler’ is idempotent.
+    (elisp/runfiles/install-handler)
+    (should (eql (cl-count #'elisp/runfiles/file-handler file-name-handler-alist
+                           :key #'cdr :test #'eq)
+                 1))
     (should
      (file-exists-p "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
     (should (file-readable-p

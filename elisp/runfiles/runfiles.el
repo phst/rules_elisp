@@ -158,7 +158,8 @@ runfiles tree.  For example, \"/bazel-runfile:dir/file\" will
 have the same effect as using
 ‘(elisp/runfiles/get \"dir/file\")’."
   (cl-pushnew (cons (rx bos "/bazel-runfile:") #'elisp/runfiles/file-handler)
-              file-name-handler-alist))
+              file-name-handler-alist
+              :test #'equal))
 
 (defun elisp/runfiles/file-handler (operation &rest args)
   "File name handler for Bazel runfiles.
