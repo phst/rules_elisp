@@ -98,10 +98,10 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_protobuf",
-        sha256 = "387e2c559bb2c7c1bc3798c4e6cff015381a79b2758696afcbf8e88730b47389",
-        strip_prefix = "protobuf-3.19.6/",
+        sha256 = "e13ca6c2f1522924b8482f3b3a482427d0589ff8ea251088f7e39f4713236053",
+        strip_prefix = "protobuf-21.7/",
         urls = [
-            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v3.19.6.zip",  # 2022-09-29
+            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.7.zip",  # 2022-09-29
         ],
     )
     maybe(
