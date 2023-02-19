@@ -122,10 +122,8 @@ def rules_elisp_toolchains():
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
 
 def _toolchains_impl(repository_ctx):
-    if repository_ctx.os.name.startswith("windows"):
-        target = Label("//elisp:windows-toolchains.BUILD")
-    else:
-        target = Label("//elisp:unix-toolchains.BUILD")
+    windows = repository_ctx.os.name.startswith("windows")
+    target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
     repository_ctx.symlink(target, "BUILD")
 
 _toolchains = repository_rule(
