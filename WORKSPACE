@@ -38,9 +38,9 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "rules_python",
-    sha256 = "8c15896f6686beb5c631a4459a3aa8392daccaab805ea899c9d14215074b60ef",
-    strip_prefix = "rules_python-0.17.3",
-    url = "https://github.com/bazelbuild/rules_python/archive/refs/tags/0.17.3.tar.gz",
+    sha256 = "29a801171f7ca190c543406f9894abf2d483c206e14d6acbd695623662320097",
+    strip_prefix = "rules_python-0.18.1",
+    url = "https://github.com/bazelbuild/rules_python/releases/download/0.18.1/rules_python-0.18.1.tar.gz",
 )
 
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
