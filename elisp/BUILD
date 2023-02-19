@@ -125,19 +125,13 @@ bzl_library(
     ],
 )
 
-LAUNCHER_FEATURES = select({
-    "//conditions:default": [],
-})
+LAUNCHER_FEATURES = []
 
 LAUNCHER_DEFINES = DEFINES
 
-LAUNCHER_COPTS = COPTS + CXXOPTS + select({
-    "//conditions:default": [],
-})
+LAUNCHER_COPTS = COPTS + CXXOPTS
 
-LINKOPTS = select({
-    "//conditions:default": [],
-})
+LINKOPTS = []
 
 LAUNCHER_LINKOPTS = LINKOPTS + select({
     "//constraints:msvc-cl": ["/SUBSYSTEM:CONSOLE"],
