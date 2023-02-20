@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ def main() -> None:
     orig_env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
-    args = [str(emacs)]  # List[str]
+    args: list[str] = [str(emacs)]
     with manifest.add(opts.mode, args) as manifest_file:
         args.append('--quick')
         if not opts.interactive:
