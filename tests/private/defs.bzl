@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@
 
 """Unit tests for defs.bzl."""
 
-load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
 load("//elisp:defs.bzl", "EmacsLispInfo", "elisp_library")
+load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
 
 # Test for the EmacsLispInfo provider.
 

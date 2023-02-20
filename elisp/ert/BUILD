@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//elisp:defs.bzl", "elisp_library")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
 elisp_library(
     name = "runner",

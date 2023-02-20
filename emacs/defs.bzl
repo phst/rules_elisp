@@ -15,18 +15,18 @@
 """Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel."""
 
 load(
-    "@bazel_tools//tools/build_defs/cc:action_names.bzl",
-    "CPP_LINK_EXECUTABLE_ACTION_NAME",
-    "C_COMPILE_ACTION_NAME",
-)
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
-load(
     "//private:defs.bzl",
     "CcDefaultInfo",
     "cc_launcher",
     "cpp_strings",
     "runfile_location",
 )
+load(
+    "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+    "CPP_LINK_EXECUTABLE_ACTION_NAME",
+    "C_COMPILE_ACTION_NAME",
+)
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""

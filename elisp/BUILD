@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
 toolchain_type(
     name = "toolchain_type",

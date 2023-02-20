@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
 elisp_library(
     name = "lib_1",
