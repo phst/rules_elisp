@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -101,6 +101,8 @@ py_binary(
     ],
 )
 
+# FIXME: Switch to py_proto_library from rules_python once
+# https://github.com/bazelbuild/rules_python/issues/1081 is fixed.
 py_proto_library(
     name = "stardoc_output_py_proto",
     srcs = [":stardoc_output.proto"],
