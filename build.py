@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -156,7 +156,7 @@ class Builder:
         env = dict(self._env,
                    BAZEL_COMPDB_BAZEL_PATH=str(self._bazel_program),
                    # Need to compile with Clang for clangd to work.
-                   CC='clang')
+                   CC=str(_program('clang')))
         self._run(args, cwd=self._workspace, env=env)
 
     @target
