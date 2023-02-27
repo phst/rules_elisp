@@ -78,7 +78,7 @@ check_python = aspect(
     implementation = _check_python_impl,
     attrs = {
         "_check": attr.label(
-            default = Label("//:check_python"),
+            default = Label("//dev:check_python"),
             executable = True,
             cfg = "exec",
         ),

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -60,10 +60,10 @@ pip_parse(
     # Work around https://github.com/ionelmc/python-lazy-object-proxy/issues/70.
     extra_pip_args = ["--use-deprecated=legacy-resolver"],
     python_interpreter_target = interpreter,
-    requirements_darwin = "@//:macos-requirements.txt",
-    requirements_linux = "@//:linux-requirements.txt",
+    requirements_darwin = "@//dev:macos-requirements.txt",
+    requirements_linux = "@//dev:linux-requirements.txt",
     requirements_lock = None,
-    requirements_windows = "@//:windows-requirements.txt",
+    requirements_windows = "@//dev:windows-requirements.txt",
 )
 
 load("@pip_deps//:requirements.bzl", "install_deps")
@@ -121,7 +121,7 @@ load("@io_bazel_rules_go//go:deps.bzl", "go_register_toolchains", "go_rules_depe
 go_rules_dependencies()
 
 go_register_toolchains(
-    nogo = "@//:nogo",
+    nogo = "@//dev:nogo",
     version = "1.19.3",
 )
 
