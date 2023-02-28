@@ -23,7 +23,7 @@ licenses(["notice"])
 
 license(
     name = "license",
-    license_kind = "@rules_license//licenses/generic:notice",
+    license_kinds = ["@rules_license//licenses/generic:notice"],
 )
 
 py_binary(
