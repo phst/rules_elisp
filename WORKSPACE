@@ -70,6 +70,12 @@ load("@pip_deps//:requirements.bzl", "install_deps")
 
 install_deps()
 
+load("@rules_license//:deps.bzl", "rules_license_dependencies")
+
+# This must come after the rules_python repository because rules_license
+# otherwise adds an ancient version of rules_python.
+rules_license_dependencies()
+
 http_archive(
     name = "io_bazel_stardoc",
     sha256 = "3fd8fec4ddec3c670bd810904e2e33170bedfe12f90adf943508184be458c8bb",

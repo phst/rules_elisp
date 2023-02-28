@@ -88,6 +88,12 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
+        name = "rules_license",
+        sha256 = "6157e1e68378532d0241ecd15d3c45f6e5cfd98fc10846045509fb2a7cc9e381",
+        urls = ["https://github.com/bazelbuild/rules_license/releases/download/0.0.4/rules_license-0.0.4.tar.gz"],
+    )
+    maybe(
+        http_archive,
         name = "com_google_absl",
         sha256 = "a4567ff02faca671b95e31d315bab18b42b6c6f1a60e91c6ea84e5a2142112c2",
         strip_prefix = "abseil-cpp-20211102.0/",
