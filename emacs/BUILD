@@ -17,6 +17,8 @@ load(":defs.bzl", "emacs_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 
+licenses(["notice"])
+
 alias(
     name = "emacs",
     actual = ":emacs_28.2",

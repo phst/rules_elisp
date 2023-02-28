@@ -15,6 +15,8 @@
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 
+licenses(["notice"])
+
 elisp_library(
     name = "lib_1",
     srcs = ["lib-1.el"],

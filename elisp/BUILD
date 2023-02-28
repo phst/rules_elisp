@@ -17,6 +17,8 @@ load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 
+licenses(["notice"])
+
 toolchain_type(
     name = "toolchain_type",
     visibility = ["//visibility:public"],

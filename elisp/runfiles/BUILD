@@ -14,6 +14,8 @@
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
+licenses(["notice"])
+
 elisp_library(
     name = "runfiles",
     srcs = ["runfiles.el"],

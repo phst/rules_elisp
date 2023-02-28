@@ -19,6 +19,8 @@ load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 
+licenses(["notice"])
+
 elisp_manual(
     name = "manual",
     src = "merged.org",

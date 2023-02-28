@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+licenses(["notice"])
+
 config_setting(
     name = "msvc-cl",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
