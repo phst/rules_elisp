@@ -20,7 +20,10 @@ load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 load(":private/defs.bzl", "elisp_test_suite")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
+)
 
 licenses(["notice"])
 

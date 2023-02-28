@@ -17,7 +17,10 @@ load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
+)
 
 licenses(["notice"])
 

@@ -17,7 +17,10 @@ load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
+)
 
 licenses(["notice"])
 

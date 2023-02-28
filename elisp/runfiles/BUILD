@@ -14,7 +14,10 @@
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
-package(default_applicable_licenses = ["//:license"])
+package(
+    default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
+)
 
 licenses(["notice"])
 
