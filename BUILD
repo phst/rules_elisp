@@ -21,6 +21,8 @@ package(
 
 licenses(["notice"])
 
+exports_files(["LICENSE"])
+
 license(
     name = "license",
     license_kinds = ["@rules_license//licenses/generic:notice"],
