@@ -25,7 +25,7 @@ exports_files(["LICENSE"])
 
 license(
     name = "license",
-    license_kinds = ["@rules_license//licenses/generic:notice"],
+    license_kind = "@rules_license//licenses/generic:notice",
 )
 
 py_binary(
