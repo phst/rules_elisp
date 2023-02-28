@@ -12,7 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@rules_license//rules:license.bzl", "license")
+
+package(default_applicable_licenses = [":license"])
+
 licenses(["notice"])
+
+license(
+    name = "license",
+    license_kind = "@rules_license//licenses/generic:notice",
+)
 
 py_binary(
     name = "build",

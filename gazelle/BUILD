@@ -16,6 +16,8 @@ load("@bazel_gazelle//:def.bzl", "gazelle_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 
+package(default_applicable_licenses = ["//:license"])
+
 licenses(["notice"])
 
 gazelle_binary(

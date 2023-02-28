@@ -18,6 +18,8 @@
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
+package(default_applicable_licenses = ["//:license"])
+
 licenses(["notice"])
 
 # This library verifies that libraries can have source files from unrelated

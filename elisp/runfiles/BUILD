@@ -14,6 +14,8 @@
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
+package(default_applicable_licenses = ["//:license"])
+
 licenses(["notice"])
 
 elisp_library(
