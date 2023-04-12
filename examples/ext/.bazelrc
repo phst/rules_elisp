@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,13 +12,4 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Run Pylint by default.
-build --aspects='//private:defs.bzl%check_python'
-build --output_groups='+check_python'
-
-# Override hard-coded heap size limit on Visual C++.  See
-# https://github.com/bazelbuild/bazel/issues/15027.  We don’t use --copt because
-# that would interfere with MinGW-64.
-build --action_env='_CL_=/Zm2000' --host_action_env='_CL_=/Zm2000'
-
-import %workspace%/c-std.bazelrc
+import %workspace%/../../c-std.bazelrc

@@ -341,7 +341,6 @@ COPTS = select({
     Label("//conditions:default"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
-        "-fno-exceptions",
         "-Werror",
         "-Wall",
         "-Wextra",
@@ -353,11 +352,10 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    Label("//private:msvc-cl"): ["/std:c++14"],
+    Label("//private:msvc-cl"): [],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     Label("//conditions:default"): [
-        "-std=c++11",
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",
@@ -365,13 +363,10 @@ CXXOPTS = select({
 })
 
 CONLYOPTS = select({
-    Label("//private:msvc-cl"): ["/std:c11"],
+    Label("//private:msvc-cl"): [],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
-    Label("//conditions:default"): [
-        "-std=c99",
-        "-Wvla",
-    ],
+    Label("//conditions:default"): ["-Wvla"],
 })
 
 DEFINES = ["_GNU_SOURCE"] + select({
