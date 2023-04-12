@@ -333,6 +333,8 @@ COPTS = select({
         "/WX",
         "/W4",
         "/utf-8",
+        "/permissive-",
+        "/Zc:__cplusplus",
     ],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
