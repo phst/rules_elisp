@@ -152,7 +152,8 @@ class Builder:
         execroot = self._info('execution_root')
         generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
                      'generate.py')
-        args = [sys.executable, str(generator), '--'] + self._cache_options()
+        args = [sys.executable, str(generator), '--',
+                self._config_option()] + self._cache_options()
         env = dict(self._env,
                    BAZEL_COMPDB_BAZEL_PATH=str(self._bazel_program),
                    # Need to compile with Clang for clangd to work.
@@ -205,7 +206,7 @@ class Builder:
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
                capture_stdout: bool = False) -> Optional[str]:
-        args = [str(self._bazel_program), command]
+        args = [str(self._bazel_program), command, self._config_option()]
         if self._github:
             args.append('--verbose_failures')
         args.extend(options)
@@ -229,6 +230,12 @@ class Builder:
             if self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\Tools\msys64\usr\bin\bash.exe'
         return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
+
+    def _config_option(self) -> str:
+        # Assume that we use Visual C++ if and only if we’re compiling on
+        # Windows.
+        config = 'msvc' if self._kernel == 'Windows' else 'gcc'
+        return f'--config={config}'
 
     def _cache_options(self) -> Sequence[str]:
         opts = []
