@@ -24,7 +24,7 @@ permissions:
 
 jobs:
   bazel-versions:
-    name: All supported Bazel versions
+    name: Supported Bazel versions
     strategy:
       matrix:
         # We don’t use the GitHub matrix support for the Emacs toolchain to
