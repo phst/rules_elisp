@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022 Google LLC
+// Copyright 2020, 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
 
 #ifndef PHST_RULES_ELISP_ELISP_PROCESS_H
 #define PHST_RULES_ELISP_ELISP_PROCESS_H
+
+#if !defined __cplusplus || __cplusplus < 201103L
+#error this file requires at least C++11
+#endif
 
 #include <memory>
 #include <string>

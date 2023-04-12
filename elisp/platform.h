@@ -15,6 +15,10 @@
 #ifndef PHST_RULES_ELISP_ELISP_PLATFORM_H
 #define PHST_RULES_ELISP_ELISP_PLATFORM_H
 
+#if !defined __cplusplus || __cplusplus < 201103L
+#error this file requires at least C++11
+#endif
+
 #include <string>
 
 namespace phst_rules_elisp {
