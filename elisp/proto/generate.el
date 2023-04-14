@@ -1,6 +1,6 @@
 ;;; generate.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022 Google LLC
+;; Copyright 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -31,11 +31,12 @@
 
 (require 'elisp/proto/proto)
 
-(defun elisp/proto/simple-string-p (o)
-  "Return whether O is a string that’s unlikely to cause trouble."
-  (declare (side-effect-free t))
-  (and (stringp o)
-       (string-match-p (rx bos (+ (any blank alnum ?_ ?- ?. ?/ ?: ?@)) eos) o)))
+(cl-deftype elisp/proto/simple-string ()
+  '(and string
+        (satisfies (lambda (string)
+                     (string-match-p
+                      (rx bos (+ (any blank alnum ?_ ?- ?. ?/ ?: ?@)) eos)
+                      string)))))
 
 (defun elisp/proto/generate-message (full-name fields)
   "Generate code for the protocol buffer message type FULL-NAME.
