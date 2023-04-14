@@ -821,7 +821,7 @@ TABLE."
   "Insert a coverage report into the current buffer.
 BUFFER must be a different buffer visiting an Emacs Lisp source
 file that has been instrumented with Edebug."
-  (cl-check-type buffer buffer-live)
+  (cl-check-type buffer (and buffer (satisfies buffer-live-p)))
   (let ((file-name (elisp/ert/sanitize--string
                     (elisp/ert/file--display-name (buffer-file-name buffer))))
         (functions ())
@@ -1083,7 +1083,8 @@ exact copies as equal."
                      (let ((new (cl-etypecase obj
                                   (symbol (elisp/ert/check--xml-name obj))
                                   (string (elisp/ert/sanitize--xml-string obj))
-                                  (proper-list (mapcar #'walk obj))
+                                  ((and list (satisfies proper-list-p))
+                                   (mapcar #'walk obj))
                                   (cons
                                    (cons (walk (car obj)) (walk (cdr obj)))))))
                        (puthash obj new map)
