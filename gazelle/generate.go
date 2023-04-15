@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -64,11 +64,12 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 		log.Printf("unreadable source file %s: %s", file, err)
 		return nil, Imports{}
 	}
-	// We assume that most file are libraries and only assume a test file if
-	// the filename makes that likely.  We don’t look at the file contents
-	// at all: libraries can legitimately contain ‘ert-deftest’ forms, and
-	// we want to support empty files, too.  We never detect binaries: they
-	// are rather rare and hard to distinguish from libraries.
+	// We assume that most files are libraries and only assume a test file
+	// if the filename makes that likely.  We don’t look at the file
+	// contents at all: libraries can legitimately contain ‘ert-deftest’
+	// forms, and we want to support empty files, too.  We never detect
+	// binaries: they are rather rare and hard to distinguish from
+	// libraries.
 	kind := libraryKind
 	if testFilePattern.MatchString(file) {
 		kind = testKind
