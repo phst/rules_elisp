@@ -329,7 +329,7 @@ def run_emacs(
 
 # Shared C++ compilation options.
 COPTS = select({
-    Label("//constraints:msvc-cl"): [
+    Label("//private:msvc-cl"): [
         "/WX",
         "/W4",
         "/utf-8",
@@ -353,7 +353,7 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    Label("//constraints:msvc-cl"): ["/std:c++14"],
+    Label("//private:msvc-cl"): ["/std:c++14"],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     Label("//conditions:default"): [
@@ -365,7 +365,7 @@ CXXOPTS = select({
 })
 
 CONLYOPTS = select({
-    Label("//constraints:msvc-cl"): ["/std:c11"],
+    Label("//private:msvc-cl"): ["/std:c11"],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     Label("//conditions:default"): [

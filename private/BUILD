@@ -34,3 +34,8 @@ bzl_library(
         "@bazel_skylib//lib:paths",
     ],
 )
+
+config_setting(
+    name = "msvc-cl",
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
+)

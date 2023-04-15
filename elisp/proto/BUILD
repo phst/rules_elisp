@@ -135,7 +135,7 @@ cc_binary(
     srcs = ["module.c"],
     additional_linker_inputs = [":module.lds"],
     copts = COPTS + CONLYOPTS + select({
-        "//constraints:msvc-cl": ["/wd4100"],
+        "//private:msvc-cl": ["/wd4100"],
         # Assume that something compatible with GCC is the default.  See
         # https://github.com/bazelbuild/bazel/issues/12707.
         "//conditions:default": ["-fvisibility=hidden"],
