@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022 Google LLC
+// Copyright 2020, 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,7 +15,6 @@
 #include "elisp/emacs.h"
 
 #include <cstdlib>
-#include <iostream>
 #include <vector>
 
 #ifdef __GNUC__
@@ -28,6 +27,7 @@
 #ifdef _MSC_VER
 #pragma warning(push, 3)
 #endif
+#include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #ifdef __GNUC__
@@ -51,7 +51,7 @@ static absl::StatusOr<int> RunEmacsImpl(const NativeString& argv0,
 int RunEmacs(const NativeString& argv0, const std::vector<NativeString>& args) {
   const absl::StatusOr<int> status_or_code = RunEmacsImpl(argv0, args);
   if (!status_or_code.ok()) {
-    std::cerr << status_or_code.status() << std::endl;
+    LOG(ERROR) << status_or_code.status();
     return EXIT_FAILURE;
   }
   return status_or_code.value();
