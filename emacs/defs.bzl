@@ -192,7 +192,8 @@ def _install(ctx, cc_toolchain, source):
         "--source=" + source,
         "--install=" + install.path,
         "--cc=" + cc,
-        "--cflags=" + " ".join(cflags),
+        # Crude way to work around specifying Visual C++ options in .bazelrc.
+        "--cflags=" + " ".join(cflags).replace("/std:c", "-std=gnu"),
         "--ldflags=" + " ".join(ldflags),
     ]
     outs = [install]
