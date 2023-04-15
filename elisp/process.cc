@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022 Google LLC
+// Copyright 2020, 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -63,6 +63,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
+#include "absl/log/check.h"
+#include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
@@ -143,7 +145,7 @@ static std::wstring BuildEnvironmentBlock(
     if (var.find(L'\0') != var.npos) {
       std::wcerr << L"Environment variable " << var
                  << L" contains a null character" << std::endl;
-      std::abort();
+      LOG(FATAL) << "Environment variable contains a null character";
     }
     result.append(var);
     result.push_back(L'\0');
@@ -152,13 +154,10 @@ static std::wstring BuildEnvironmentBlock(
   return result;
 }
 static wchar_t* Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  if (string.empty()) {
-    std::wcerr << L"empty string" << std::endl;
-    std::abort();
-  }
+  CHECK(!string.empty()) << "empty string";
   if (string.find(L'\0') != string.npos) {
     std::wcerr << string << L" contains null character" << std::endl;
-    std::abort();
+    LOG(FATAL) << "string contains null character";
   }
   return &string.front();
 }
@@ -167,14 +166,8 @@ static std::vector<char*> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<char*> ptrs;
   for (std::string& s : strings) {
-    if (s.empty()) {
-      std::cerr << "empty string" << std::endl;
-      std::abort();
-    }
-    if (s.find('\0') != s.npos) {
-      std::cerr << s << " contains null character" << std::endl;
-      std::abort();
-    }
+    CHECK(!s.empty()) << "empty string";
+    CHECK(s.find('\0') == s.npos) << s << " contains null character";
     ptrs.push_back(&s.front());
   }
   ptrs.push_back(nullptr);
@@ -189,11 +182,8 @@ static Environment CopyEnv() {
     void operator()(wchar_t* p) const noexcept { ::FreeEnvironmentStrings(p); }
   };
   const std::unique_ptr<wchar_t, Free> envp(::GetEnvironmentStringsW());
-  if (envp == nullptr) {
-    // This cannot really happen in practice.
-    std::wcerr << L"GetEnvironmentStringsW failed" << std::endl;
-    std::abort();
-  }
+  // This cannot really happen in practice.
+  CHECK(envp != nullptr) << L"GetEnvironmentStringsW failed";
   const wchar_t* p = envp.get();
   while (*p != L'\0') {
     // Skip over the first character to properly deal with the magic “per-drive
@@ -203,18 +193,14 @@ static Environment CopyEnv() {
     const wchar_t* const q = std::wcschr(p + 1, L'=');
     if (q == nullptr) {
       std::wcerr << L"Invalid environment block entry " << p << std::endl;
-      std::abort();
+      LOG(FATAL) << "Invalid environment block entry";
     }
     map.emplace(std::wstring(p, q), std::wstring(q + 1));
     p = std::wcschr(p, L'\0');
-    if (p == nullptr) {
-      // This can’t happen because the environment block is terminated by a
-      // double null character.
-      std::wcerr
-          << L"GetEnvironmentStringsW returned an invalid environment block"
-          << std::endl;
-      std::abort();
-    }
+    // This can’t happen because the environment block is terminated by a double
+    // null character.
+    CHECK(p != nullptr)
+        << L"GetEnvironmentStringsW returned an invalid environment block";
     ++p;
   }
 #else
