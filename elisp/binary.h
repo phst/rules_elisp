@@ -15,8 +15,8 @@
 #ifndef PHST_RULES_ELISP_ELISP_BINARY_H
 #define PHST_RULES_ELISP_ELISP_BINARY_H
 
-#if !defined __cplusplus || __cplusplus < 201103L
-#error this file requires at least C++11
+#if !defined __cplusplus || __cplusplus < 201402L
+#error this file requires at least C++14
 #endif
 
 #include <vector>

@@ -76,8 +76,8 @@
 #error this file requires a standards-conformant C compiler
 #endif
 
-#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 199901L
-#error this file requires at least C99
+#if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
+#error this file requires at least C11
 #endif
 
 #include <assert.h>
