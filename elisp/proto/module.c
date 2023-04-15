@@ -577,7 +577,7 @@ static emacs_value MakeUInteger(struct Context ctx, uintmax_t value) {
   if (value <= INTMAX_MAX) return MakeInteger(ctx, (intmax_t)value);
   emacs_limb_t limbs[kLimbsForUintmax];
 #if EMACS_LIMB_MAX >= UINTMAX_MAX
-  assert(kLimbsForUintmax == 1);
+  static_assert(kLimbsForUintmax == 1, "kLimbsForUintmax != 1");
   limbs[0] = value;
 #else
   for (size_t i = 0; i < kLimbsForUintmax; ++i) {
