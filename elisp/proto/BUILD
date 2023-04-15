@@ -155,9 +155,7 @@ cc_binary(
     }),
     linkshared = True,
     linkstatic = True,
-    local_defines = DEFINES + [
-        "_XOPEN_SOURCE=600",  # for ‘struct timespec’
-    ],
+    local_defines = DEFINES,
     win_def_file = "module.def",
     deps = [
         ":any_upb_proto",
