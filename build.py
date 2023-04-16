@@ -55,14 +55,14 @@ class Builder:
                  bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
+        self._bazel_program = bazel
+        self._action_cache = action_cache
+        self._repository_cache = repository_cache
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
-        self._bazel_program = bazel
         self._workspace = self._info('workspace')
-        self._action_cache = action_cache
-        self._repository_cache = repository_cache
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -243,8 +243,7 @@ class Builder:
         return opts
 
     def _info(self, key: str) -> pathlib.Path:
-        output = self._run([str(self._bazel_program), 'info', '--', key],
-                           capture_stdout=True)
+        output = self._bazel('info', [key], capture_stdout=True)
         assert output is not None
         return pathlib.Path(output.rstrip('\n'))
 
