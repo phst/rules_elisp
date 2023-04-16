@@ -202,7 +202,7 @@ static Environment CopyEnv() {
     // Their names start with an equals sign.
     const wchar_t* const q = std::wcschr(p + 1, L'=');
     if (q == nullptr) {
-      std::wcerr << "Invalid environment block entry " << p << std::endl;
+      std::wcerr << L"Invalid environment block entry " << p << std::endl;
       std::abort();
     }
     map.emplace(std::wstring(p, q), std::wstring(q + 1));
