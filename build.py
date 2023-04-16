@@ -230,10 +230,7 @@ class Builder:
         return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
 
     def _bazel_options(self) -> Sequence[str]:
-        # Assume that we use Visual C++ if and only if we’re compiling on
-        # Windows.
-        config = 'msvc' if self._kernel == 'Windows' else 'gcc'
-        opts = [f'--config={config}']
+        opts = []
         if self._github:
             opts += [
                 '--verbose_failures',

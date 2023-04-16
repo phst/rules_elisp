@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+common --enable_platform_specific_config
+
 # Specify options that might modify code generation here instead of BUILD or
 # Starlark files.  See
 # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil.
@@ -21,11 +23,14 @@
 # use --host_per_file_copt yet since that has only been introduced in Bazel 6.
 # The backslash is escaped due to
 # https://github.com/bazelbuild/bazel/issues/11517.
-build:gcc --copt='-fno-exceptions' --host_copt='-fno-exceptions'
-build:gcc --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
-build:gcc --conlyopt='-std=gnu11' --host_conlyopt='-std=gnu11'
-build:msvc --per_file_copt='.+\\.(cc|cpp|cxx)$@/std:c++14'
-build:msvc --conlyopt='/std:c11' --host_conlyopt='/std:c11'
+build:linux --copt='-fno-exceptions' --host_copt='-fno-exceptions'
+build:linux --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
+build:linux --conlyopt='-std=gnu11' --host_conlyopt='-std=gnu11'
+build:macos --copt='-fno-exceptions' --host_copt='-fno-exceptions'
+build:macos --cxxopt='-std=c++14' --host_cxxopt='-std=c++14'
+build:macos --conlyopt='-std=c11' --host_conlyopt='-std=c11'
+build:windows --per_file_copt='.+\\.(cc|cpp|cxx)$@/std:c++14'
+build:windows --conlyopt='/std:c11' --host_conlyopt='/std:c11'
 
 # Local Variables:
 # mode: bazelrc
