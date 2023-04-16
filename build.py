@@ -235,7 +235,10 @@ class Builder:
         config = 'msvc' if self._kernel == 'Windows' else 'gcc'
         opts = [f'--config={config}']
         if self._github:
-            opts.append('--verbose_failures')
+            opts += [
+                '--verbose_failures',
+                '--experimental_convenience_symlinks=ignore',
+            ]
         if self._action_cache:
             opts.append('--disk_cache=' + str(self._action_cache))
         if self._repository_cache:
