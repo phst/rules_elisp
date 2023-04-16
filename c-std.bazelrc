@@ -15,13 +15,15 @@
 # Specify options that might modify code generation here instead of BUILD or
 # Starlark files.  See
 # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil.
-# On Windows, we can’t use --cxxopt due to
-# https://github.com/bazelbuild/bazel/issues/15073.  We don’t use
-# --host_per_file_copt yet since that has only been introduced in Bazel 6.  The
-# backslash is escaped due to https://github.com/bazelbuild/bazel/issues/11517.
+# On GNU/Linux, compiling the CGo parts of the Go standard library fails without
+# GNU extensions, so we use gnu99 instead of c99.  On Windows, we can’t use
+# --cxxopt due to https://github.com/bazelbuild/bazel/issues/15073.  We don’t
+# use --host_per_file_copt yet since that has only been introduced in Bazel 6.
+# The backslash is escaped due to
+# https://github.com/bazelbuild/bazel/issues/11517.
 build:gcc --copt='-fno-exceptions' --host_copt='-fno-exceptions'
 build:gcc --cxxopt='-std=c++11' --host_cxxopt='-std=c++11'
-build:gcc --conlyopt='-std=c99' --host_conlyopt='-std=c99'
+build:gcc --conlyopt='-std=gnu99' --host_conlyopt='-std=gnu99'
 build:msvc --per_file_copt='.+\\.(cc|cpp|cxx)$@/std:c++14'
 build:msvc --conlyopt='/std:c11' --host_conlyopt='/std:c11'
 
