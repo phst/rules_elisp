@@ -43,6 +43,7 @@ go_test(
         ":test_test",
         "@junit_xsd//:file",
     ],
+    embedsrcs = ["coverage.dat"],
     rundir = ".",
     deps = [
         "@com_github_google_go_cmp//cmp:go_default_library",
