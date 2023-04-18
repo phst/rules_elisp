@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022 Google LLC
+// Copyright 2020, 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -263,28 +263,28 @@ BRDA:30,0,0,0
 BRDA:30,0,1,1
 BRDA:34,0,0,1
 BRDA:34,0,1,0
-BRDA:44,0,0,0
-BRDA:44,0,1,1
-BRDA:44,0,2,0
-BRDA:44,0,3,0
-BRDA:46,0,0,0
-BRDA:46,0,1,1
-BRDA:46,0,2,1
-BRDA:46,0,3,0
-BRDA:46,1,0,1
-BRDA:46,1,1,0
-BRDA:48,0,0,-
-BRDA:48,0,1,-
-BRDA:49,0,0,1
-BRDA:49,0,1,0
-BRDA:52,0,0,0
-BRDA:52,0,1,1
+BRDA:45,0,0,0
+BRDA:45,0,1,1
+BRDA:45,0,2,0
+BRDA:45,0,3,0
+BRDA:47,0,0,0
+BRDA:47,0,1,1
+BRDA:47,0,2,1
+BRDA:47,0,3,0
+BRDA:47,1,0,1
+BRDA:47,1,1,0
+BRDA:49,0,0,-
+BRDA:49,0,1,-
+BRDA:50,0,0,1
+BRDA:50,0,1,0
 BRDA:53,0,0,0
 BRDA:53,0,1,1
-BRDA:53,0,2,0
-BRDA:53,0,3,0
-BRDA:54,0,0,3
-BRDA:54,0,1,0
+BRDA:54,0,0,0
+BRDA:54,0,1,1
+BRDA:54,0,2,0
+BRDA:54,0,3,0
+BRDA:55,0,0,3
+BRDA:55,0,1,0
 BRF:26
 BRH:10
 DA:30,1
@@ -302,17 +302,18 @@ DA:42,1
 DA:44,1
 DA:45,1
 DA:46,1
-DA:47,0
+DA:47,1
 DA:48,0
-DA:49,1
+DA:49,0
 DA:50,1
-DA:51,0
-DA:52,1
+DA:51,1
+DA:52,0
 DA:53,1
-DA:54,3
-DA:56,1
-LH:19
-LF:24
+DA:54,1
+DA:55,3
+DA:57,1
+LH:20
+LF:25
 end_of_record
 `
 	if emacsMajor < 28 {
@@ -325,11 +326,11 @@ end_of_record
 			}
 			return strconv.Itoa(2*i + 1)
 		})
-		// In Emacs 27, the special when-let form on line 52 of
+		// In Emacs 27, the special when-let form on line 53 of
 		// test-lib.el isn’t properly instrumented, so remove the
 		// branches for that line, and decrement the branch counts
 		// accordingly.
-		wantCoverage = regexp.MustCompile(`(?m)^BRDA:52,.+\n`).ReplaceAllLiteralString(wantCoverage, "")
+		wantCoverage = regexp.MustCompile(`(?m)^BRDA:53,.+\n`).ReplaceAllLiteralString(wantCoverage, "")
 		wantCoverage = replaceSubmatch(wantCoverage, `(?m)^BRF:(\d+)$`, func(s string) string {
 			i, err := strconv.Atoi(s)
 			if err != nil {

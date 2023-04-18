@@ -1,6 +1,6 @@
 ;;; test-lib.el --- test to check the test runner -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -41,11 +41,12 @@
   (cl-flet ((foo () 2))
     (message "%d" (foo)))
   ;; More branch coverage examples.
-  (cond
-   (arg)
-   ((or (eq arg 'foo) (and (not arg) 77) (memq arg '(1 2 3))) arg)
-   ((not arg))
-   ((and (not arg) 123) arg))
+  (message "%S"
+           (cond
+            (arg)
+            ((or (eq arg 'foo) (and (not arg) 77) (memq arg '(1 2 3))) arg)
+            ((not arg))
+            ((and (not arg) 123) arg)))
   (condition-case nil
       (message "%S" arg)
     (error arg))
