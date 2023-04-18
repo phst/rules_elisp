@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,19 +14,23 @@
 
 """Tests for //examples:bin."""
 
+import argparse
 import os
 import pathlib
-import platform
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
+from typing import Optional
 import unittest
 
 from elisp import runfiles
 
 class BinaryTest(unittest.TestCase):
     """Example test showing how to work with elisp_binary rules."""
+
+    bin: Optional[pathlib.PurePosixPath] = None
 
     maxDiff = 2000
 
@@ -39,10 +43,7 @@ class BinaryTest(unittest.TestCase):
     def test_run(self) -> None:
         """Runs the test binary and checks its output."""
         run_files = runfiles.Runfiles()
-        binary = pathlib.PurePosixPath('phst_rules_elisp/examples/bin')
-        if platform.system() == 'Windows':
-            binary = binary.with_suffix('.exe')
-        binary = run_files.resolve(binary)
+        binary = run_files.resolve(self.bin)
         # Be sure to pass environment variables to find runfiles.  We also set
         # GCOV_PREFIX (see
         # https://gcc.gnu.org/onlinedocs/gcc/Cross-profiling.html) and
@@ -87,5 +88,13 @@ class BinaryTest(unittest.TestCase):
                               'hi from data dependency'])
 
 
+def _main() -> None:
+    parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--bin', type=pathlib.PurePosixPath, required=True)
+    args = parser.parse_args()
+    BinaryTest.bin = args.bin
+    unittest.main(argv=sys.argv[:1])
+
+
 if __name__ == '__main__':
-    unittest.main()
+    _main()
