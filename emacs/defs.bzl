@@ -188,20 +188,31 @@ def _install(ctx, cc_toolchain, source):
     install = ctx.actions.declare_directory(
         "_{}_install".format(ctx.label.name),
     )
-    args = [
-        "--source=" + source,
-        "--install=" + install.path,
-        "--cc=" + cc,
-        # Crude way to work around specifying Visual C++ options in .bazelrc.
-        "--cflags=" + " ".join(cflags).replace("/std:c", "-std=gnu"),
-        "--ldflags=" + " ".join(ldflags),
-    ]
+    args = ctx.actions.args()
+    args.add(source, format = "--source=%s")
+    args.add(install.path, format = "--install=%s")
+    args.add(cc, format = "--cc=%s")
+    args.add_joined(
+        cflags,
+        join_with = " ",
+        map_each = _munge_msvc_flag,
+        format_joined = "--cflags=%s",
+        omit_if_empty = False,
+        expand_directories = False,
+    )
+    args.add_joined(
+        ldflags,
+        join_with = " ",
+        format_joined = "--ldflags=%s",
+        omit_if_empty = False,
+        expand_directories = False,
+    )
     outs = [install]
     if ctx.outputs.module_header:
-        args.append("--module-header=" + ctx.outputs.module_header.path)
+        args.add(ctx.outputs.module_header, format = "--module-header=%s")
         outs.append(ctx.outputs.module_header)
     if ctx.outputs.builtin_features:
-        args.append("--builtin-features=" + ctx.outputs.builtin_features.path)
+        args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
         outs.append(ctx.outputs.builtin_features)
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._build])
     ctx.actions.run(
@@ -211,7 +222,7 @@ def _install(ctx, cc_toolchain, source):
             transitive = [cc_toolchain.all_files, tool_inputs],
         ),
         executable = ctx.executable._build,
-        arguments = args,
+        arguments = [args],
         mnemonic = "EmacsInstall",
         progress_message = (
             "Installing Emacs into {}".format(install.short_path)
@@ -220,3 +231,7 @@ def _install(ctx, cc_toolchain, source):
         input_manifests = input_manifests,
     )
     return install
+
+def _munge_msvc_flag(s):
+    # Crude way to work around specifying Visual C++ options in .bazelrc.
+    return s.replace("/std:c", "-std=gnu")

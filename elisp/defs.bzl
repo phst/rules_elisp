@@ -856,33 +856,33 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             direct = srcs + [ctx.file._compile],
             transitive = indirect_outs + [transitive_data],
         )
-        args = [
-            "--load=" + ctx.file._compile.path,
-            ctx.actions.args().add_all(
-                # We don’t add the full transitive load path here because the
-                # direct load path would only contain the file to be compiled.
-                depset(order = "preorder", transitive = indirect_load_path),
-                map_each = _load_directory_for_actions,
-                format_each = "--directory=%s",
-                uniquify = True,
-                expand_directories = False,
-            ).add_all(
-                source_load_path,
-                format_each = "--directory=%s",
-                uniquify = True,
-                expand_directories = False,
-            ).add_all(
-                ["--fatal-warnings"] if fatal_warnings else [],
-            ),
-            "--funcall=elisp/compile-batch-and-exit",
-            src.path,
-            out.path,
-        ]
+        args = ctx.actions.args()
+        args.add(ctx.file._compile, format = "--load=%s")
+        args.add_all(
+            # We don’t add the full transitive load path here because the
+            # direct load path would only contain the file to be compiled.
+            depset(order = "preorder", transitive = indirect_load_path),
+            map_each = _load_directory_for_actions,
+            format_each = "--directory=%s",
+            uniquify = True,
+            expand_directories = False,
+        )
+        args.add_all(
+            source_load_path,
+            format_each = "--directory=%s",
+            uniquify = True,
+            expand_directories = False,
+        )
+        if fatal_warnings:
+            args.add("--fatal-warnings")
+        args.add("--funcall=elisp/compile-batch-and-exit")
+        args.add(src)
+        args.add(out)
         run_emacs(
             ctx = ctx,
             outputs = [out],
             inputs = inputs,
-            arguments = args,
+            arguments = [args],
             tags = tags,
             mnemonic = "ElispCompile",
             progress_message = "Compiling {}".format(src.short_path),
