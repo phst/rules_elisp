@@ -48,6 +48,11 @@
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
 
+(defvar elisp/ert/testing--in-progress nil
+  "Whether tests are currently running.
+Used to detect recursive invocation of
+‘elisp/ert/run-batch-and-exit’.")
+
 ;; ERT resource variables only appeared in Emacs 28.
 (defvar ert-resource-directory-trim-left-regexp)
 (defvar ert-resource-directory-format)
@@ -57,7 +62,10 @@ This list is populated by --test-source command-line options.")
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
 TESTBRIDGE_TEST_ONLY environmental variable as test selector."
   (or noninteractive (error "This function works only in batch mode"))
-  (let* ((attempt-stack-overflow-recovery nil)
+  (when elisp/ert/testing--in-progress
+    (error "Recursive invocation of ‘elisp/ert/run-batch-and-exit’"))
+  (let* ((elisp/ert/testing--in-progress t)
+         (attempt-stack-overflow-recovery nil)
          (attempt-orderly-shutdown-on-fatal-signal nil)
          (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
          ;; We perform our own coverage instrumentation.

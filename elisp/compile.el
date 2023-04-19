@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -37,6 +37,11 @@
   "Whether byte compilation warnings should be treated as errors.
 The --fatal-warnings option sets this variable.")
 
+(defvar elisp/compilation--in-progress nil
+  "Whether a byte compilation is currently running.
+Used to detect recursive invocation of
+‘elisp/compile-batch-and-exit’.")
+
 (defun elisp/compile-batch-and-exit ()
   "Byte-compiles a single Emacs Lisp file and exits Emacs.
 There must be exactly two remaining arguments on the command
@@ -46,15 +51,18 @@ code.  If the command line option --fatal-warnings is given,
 treat warnings as errors."
   (unless noninteractive
     (error "This function works only in batch mode"))
+  (when elisp/compilation--in-progress
+    (error "Recursive invocation of ‘elisp/compile-batch-and-exit’"))
   (pcase command-line-args-left
     (`(,src ,out)
      (setq command-line-args-left nil)
      ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44481.
      (when (version< emacs-version "27.2")
        (define-advice system-name (:after-until ()) ""))
-     ;; Leaving these enabled leads to undefined behavior and doesn’t make sense
-     ;; in batch mode.
-     (let* ((attempt-stack-overflow-recovery nil)
+     (let* ((elisp/compilation--in-progress t)
+            ;; Leaving these enabled leads to undefined behavior and doesn’t
+            ;; make sense in batch mode.
+            (attempt-stack-overflow-recovery nil)
             (attempt-orderly-shutdown-on-fatal-signal nil)
             ;; Ensure filenames in the output are relative to the current
             ;; directory.
