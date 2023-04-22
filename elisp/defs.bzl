@@ -510,7 +510,7 @@ elisp_binary = rule(
         ),
         input_args = attr.int_list(
             doc = """Indices of command-line arguments that represent input
-filenames.  These number specify indices into the `argv` array.  Negative
+filenames.  These numbers specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
 the index `2` stands for `argv[2]`, and the index `-2` stands for
 `argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
@@ -520,7 +520,7 @@ effect for toolchains that specify `wrap = True`.""",
         ),
         output_args = attr.int_list(
             doc = """Indices of command-line arguments that represent output
-filenames.  These number specify indices into the `argv` array.  Negative
+filenames.  These numbers specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
 the index `2` stands for `argv[2]`, and the index `-2` stands for
 `argv[argc - 2]`.  When passing arguments to an `emacs_binary` program on the
