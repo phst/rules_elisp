@@ -2,7 +2,6 @@
 ;;; For more information see (info "(emacs) Directory Variables")
 
 ((nil . ((compile-command . "./build.py")
-         (bug-reference-url-format . "https://bugs.gnu.org/%s")
          (indent-tabs-mode . nil)
          (fill-column . 80)))
  (c++-mode . ((page-delimiter . "^///")
