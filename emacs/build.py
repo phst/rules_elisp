@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,10 +80,9 @@ def main() -> None:
     run('./configure', '--prefix=' + install.as_posix(),
         '--without-all', '--without-ns', '--with-x-toolkit=no',
         '--without-libgmp',
-        # Enable threads explicitly to work around
-        # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=30106 in older Emacs
-        # versions.  Enable toolkit scrollbars to work around
-        # https://debbugs.gnu.org/cgi/bugreport.cgi?bug=37042.
+        # Enable threads explicitly to work around https://debbugs.gnu.org/30106
+        # in older Emacs versions.  Enable toolkit scrollbars to work around
+        # https://debbugs.gnu.org/37042.
         '--with-modules', '--with-threads', '--with-toolkit-scroll-bars',
         '--disable-build-details',
         'CC=' + args.cc.resolve().as_posix(),
@@ -108,7 +107,7 @@ def main() -> None:
     shutil.rmtree(temp, ignore_errors=True)
     # Delete source files that have a corresponding compiled file, as these
     # files don’t work well with Coverage (see
-    # e.g. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=40766).
+    # e.g. https://debbugs.gnu.org/40766).
     for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
         compiled.with_suffix('.el').unlink()
     # Sanity check to verify that the resulting binary works.

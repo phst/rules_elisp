@@ -254,7 +254,7 @@ func Test(t *testing.T) {
 	wantCoverage := wantCoverage // make local copy
 	if emacsMajor < 28 {
 		// Account for a jump in the suffix index for nested functions
-		// due to https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988.
+		// due to https://debbugs.gnu.org/41988.
 		wantCoverage = replaceSubmatch(wantCoverage, `@cl-flet@(\d+)`, func(s string) string {
 			i, err := strconv.Atoi(s)
 			if err != nil {

@@ -56,7 +56,7 @@ treat warnings as errors."
   (pcase command-line-args-left
     (`(,src ,out)
      (setq command-line-args-left nil)
-     ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=44481.
+     ;; Work around https://debbugs.gnu.org/44481.
      (when (version< emacs-version "27.2")
        (define-advice system-name (:after-until ()) ""))
      (let* ((elisp/compilation--in-progress t)
@@ -67,8 +67,8 @@ treat warnings as errors."
             ;; Ensure filenames in the output are relative to the current
             ;; directory.
             (byte-compile-root-dir default-directory)
-            (warning-fill-column 1000)  ; Bug#52281
-            ;; Write output to a temporary file (Bug#44631).
+            (warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
+            ;; Write output to a temporary file (https://debbugs.gnu.org/44631).
             (temp (make-temp-file "compile-" nil ".elc"))
             (byte-compile-dest-file-function (lambda (_) temp))
             (byte-compile-error-on-warn elisp/fatal--warnings)

@@ -35,7 +35,7 @@
 (require 'pp)
 (require 'rx)
 (require 'subr-x)
-(require 'trampver)  ; load eagerly to work around Bug#11218
+(require 'trampver)  ; load eagerly to work around https://debbugs.gnu.org/11218
 (require 'warnings)
 (require 'xml)
 
@@ -74,7 +74,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                         elisp/ert/edebug--before
                                         elisp/ert/edebug--after)
                                       (bound-and-true-p edebug-behavior-alist)))
-         (warning-fill-column 1000)  ; Bug#52281
+         (warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory
@@ -175,10 +175,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
         (when (< emacs-major-version 28)
-          ;; Work around https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41989 and
-          ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41988 by uniquifying
-          ;; the Edebug symbols for ‘cl-flet’ (and ‘cl-labels’, which defers to
-          ;; ‘cl-flet’).
+          ;; Work around https://debbugs.gnu.org/41989 and
+          ;; https://debbugs.gnu.org/41988 by uniquifying the Edebug symbols for
+          ;; ‘cl-flet’ (and ‘cl-labels’, which defers to ‘cl-flet’).
           (put :unique 'edebug-form-spec #'elisp/ert/edebug--unique)
           (put #'cl-flet 'edebug-form-spec
                ;; This is the expansion of the Edebug specification for
@@ -445,7 +444,7 @@ visiting the file."
       (dolist (data edebug-form-data)
         (let ((name (edebug--form-data-name data)))
           ;; Don’t attempt to byte-compile macros due to
-          ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41618.
+          ;; https://debbugs.gnu.org/41618.
           (unless (macrop name) (byte-compile name)))))
     (do-after-load-evaluation fullname)
     (progress-reporter-done reporter)
@@ -456,8 +455,7 @@ visiting the file."
 This can be used as ‘edebug-new-definition-function’."
   (cl-check-type name symbol)
   ;; Check for duplicate names, if possible.  Duplicates cause subtle errors
-  ;; that are otherwise very hard to debug,
-  ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41853.
+  ;; that are otherwise very hard to debug, cf. https://debbugs.gnu.org/41853.
   (when (get name 'edebug-behavior)
     (error "Symbol ‘%s’ instrumented twice" name))
   (put name 'edebug-behavior 'elisp/ert/coverage)
@@ -633,7 +631,8 @@ corresponding element in the return value will be nil."
                                                  index nil nil))
        branches))
     (`(,(or 'if-let 'when-let) (,(pred symbolp) ,expr) . ,_)
-     ;; This flavor doesn’t actually work right due to Bug#48489.
+     ;; This flavor doesn’t actually work right due to
+     ;; https://debbugs.gnu.org/48489.
      (let ((branches (vector nil nil)))
        (elisp/ert/instrument--branch vector branches (list expr) nil 0 1)
        branches))
@@ -1041,7 +1040,7 @@ DIRECTORY is the directory that could contain FILENAME."
                          (directory-file-name directory))))
          (setq directory (concat "/bazel-runfile:" workspace
                                  (unless (string-empty-p workspace) "/")))))
-  ;; Work around Bug#46219.
+  ;; Work around https://debbugs.gnu.org/46219.
   (unless (file-remote-p filename)
     (setq filename (file-name-quote (expand-file-name filename))))
   (unless (file-remote-p directory)
@@ -1079,8 +1078,8 @@ exact copies as equal."
 (defun elisp/ert/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
   ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
-  ;; cf. https://debbugs.gnu.org/cgi/bugreport.cgi?bug=41094.  Use a hashtable
-  ;; to avoid infinite loops on cyclic data structures.
+  ;; cf. https://debbugs.gnu.org/41094.  Use a hashtable to avoid infinite loops
+  ;; on cyclic data structures.
   (cl-check-type tree list)
   (let ((map (make-hash-table :test #'eq))
         (marker (cons nil nil)))
