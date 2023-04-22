@@ -934,11 +934,11 @@ file that has been instrumented with Edebug."
          (cl-loop
           for offset hash-keys of branches using (hash-values branches)
           and block across-ref blocks
-          for hits = (cl-count 0 branches :test-not #'eq)
+          for hits = (cl-count 0 branches :test-not #'eql)
           do
           (cl-check-type offset natnum)
           (cl-check-type branches vector)
-          (when (eq hits 0) (fillarray branches '-))  ; block not executed
+          (when (eql hits 0) (fillarray branches '-))  ; block not executed
           (setf block (cons offset branches))
           (cl-incf branches-found (length branches))
           (cl-incf branches-hit hits))
