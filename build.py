@@ -148,17 +148,9 @@ class Builder:
     @target
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
-        self._bazel('build', ['@com_grail_bazel_compdb//:files'])
-        execroot = self._info('execution_root')
-        generator = (execroot / 'external' / 'com_grail_bazel_compdb' /
-                     'generate.py')
-        args = [sys.executable, str(generator), '--']
+        args = ['//dev:refresh_compile_commands', '--']
         args.extend(self._bazel_options())
-        env = dict(self._env,
-                   BAZEL_COMPDB_BAZEL_PATH=str(self._bazel_program),
-                   # Need to compile with Clang for clangd to work.
-                   CC=str(_program('clang')))
-        self._run(args, cwd=self._workspace, env=env)
+        self._bazel('run', args)
 
     @target
     def coverage(self) -> None:

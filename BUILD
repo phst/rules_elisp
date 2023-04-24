@@ -38,5 +38,8 @@ py_binary(
 
 exports_files(
     [".pylintrc"],
-    visibility = ["//:__subpackages__"],
+    visibility = [
+        "//:__subpackages__",
+        "@hedron_compile_commands//:__pkg__",
+    ],
 )
