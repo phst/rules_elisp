@@ -140,18 +140,17 @@ load("@upb//bazel:workspace_deps.bzl", "upb_deps")
 upb_deps()
 
 http_archive(
-    name = "com_grail_bazel_compdb",
-    build_file = "@//:compdb.BUILD",
-    sha256 = "32483ad5aef7496bf338454d851fb63f7a7c72c6b62c40fd74af4f5a5c3749a4",
-    strip_prefix = "bazel-compilation-database-0.5.2/",
+    name = "hedron_compile_commands",
+    sha256 = "22979f20e569219ce80031a0ee051230826390a8d9ccb587529a33003ec1e259",
+    strip_prefix = "bazel-compile-commands-extractor-b33a4b05c2287372c8e932c55ff4d3a37e6761ed/",
     urls = [
-        "https://github.com/grailbio/bazel-compilation-database/archive/refs/tags/0.5.2.zip",  # 2021-09-10
+        "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/b33a4b05c2287372c8e932c55ff4d3a37e6761ed.zip",  # 2023-04-16
     ],
 )
 
-load("@com_grail_bazel_compdb//:deps.bzl", "bazel_compdb_deps")
+load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
 
-bazel_compdb_deps()
+hedron_compile_commands_setup()
 
 http_archive(
     name = "com_github_bazelbuild_buildtools",

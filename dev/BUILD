@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
@@ -23,6 +24,11 @@ package(
 )
 
 licenses(["notice"])
+
+refresh_compile_commands(
+    name = "refresh_compile_commands",
+    tags = ["no-python-check"],
+)
 
 compile_pip_requirements(
     name = "requirements",
@@ -55,7 +61,7 @@ py_binary(
     srcs_version = "PY3",
     visibility = [
         "//:__subpackages__",
-        "@com_grail_bazel_compdb//:__pkg__",
+        "@hedron_compile_commands//:__pkg__",
     ],
     deps = [requirement("pylint")] + select({
         # Pytype doesn’t work on Windows, so don’t build it when running
