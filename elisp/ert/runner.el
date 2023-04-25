@@ -248,8 +248,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             ;; “.el.instrument” files when printing the error message, so bind
             ;; ‘load-suffixes’ temporarily to its original value.
             (let ((load-suffixes original-load-suffixes))
-              (elisp/ert/log--error name
-                                    (format-message "Test %s %s" name status)))
+              (when-let ((prefix (elisp/ert/message--prefix name)))
+                (message "%s: Test %s %s" prefix name status)))
             (and fail-fast (setq tests nil)))
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
@@ -975,12 +975,12 @@ file that has been instrumented with Edebug."
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (length vector))))))
 
-(defun elisp/ert/log--error (test message)
-  "Log an error for TEST.
-TEST should be an ERT test symbol.  MESSAGE is the error message.
-If possible, format the message according to the
-GNU Coding Standards; see Info node ‘(standards) Errors’."
-  (cl-check-type message string)
+(defun elisp/ert/message--prefix (test)
+  "Return a message prefix for TEST.
+TEST should be an ERT test symbol.  If possible, return a prefix
+of the form “FILE:LINE” as described in the GNU Coding Standards;
+see Info node ‘(standards) Errors’.  If the file and line can’t
+be determined, return nil."
   (cl-check-type test symbol)
   (let ((case-fold-search nil)
         (directory default-directory))
@@ -1018,10 +1018,9 @@ GNU Coding Standards; see Info node ‘(standards) Errors’."
             ;; Try to print nice and short filenames.  We do this by using the
             ;; filename relative to the test working directory
             ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).
-            (message "%s:%d: %s"
-                     (elisp/ert/file--display-name file directory)
-                     (line-number-at-pos)
-                     message)))))))
+            (format "%s:%d"
+                    (elisp/ert/file--display-name file directory)
+                    (line-number-at-pos))))))))
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
