@@ -61,7 +61,8 @@ Used to detect recursive invocation of
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
 TESTBRIDGE_TEST_ONLY environmental variable as test selector."
-  (or noninteractive (error "This function works only in batch mode"))
+  (unless noninteractive
+    (error "This function works only in batch mode"))
   (when elisp/ert/testing--in-progress
     (error "Recursive invocation of ‘elisp/ert/run-batch-and-exit’"))
   (let* ((elisp/ert/testing--in-progress t)
