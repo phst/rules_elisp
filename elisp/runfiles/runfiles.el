@@ -1,6 +1,6 @@
 ;;; runfiles.el --- access to Bazel runfiles  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -69,7 +69,8 @@ an error of type ‘elisp/runfiles/not-found’."
        (and directory (not (string-equal directory ""))
             (file-accessible-directory-p directory)
             (elisp/runfiles/make--directory directory))
-       (signal 'elisp/runfiles/not-found (list manifest directory)))))
+       (signal 'elisp/runfiles/not-found
+               (list "Runfiles not found" manifest directory)))))
 
 (defvar elisp/runfiles/global--cache nil
   "Cache for ‘elisp/runfiles/get’.")
@@ -469,7 +470,9 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
                (setq candidate prefix)))
             (_ (setq continue nil)))))      )
     (cl-case result
-      ((nil) (signal 'elisp/runfiles/not-found (list filename manifest-file)))
+      ((nil)
+       (signal 'elisp/runfiles/not-found
+               (list "Runfile not found in manifest" filename manifest-file)))
       (:empty (signal 'elisp/runfiles/empty (list filename manifest-file)))
       (otherwise result))))
 
