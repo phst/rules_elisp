@@ -316,7 +316,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                          (value . ,emacs-version))))
                ,@(nreverse test-reports)
                (system-out) (system-err)))))
-          (let ((coding-system-for-write 'utf-8-unix))
+          (let ((coding-system-for-write 'utf-8-unix)
+                (write-region-annotate-functions nil)
+                (write-region-post-annotation-function nil))
             (write-region nil nil (concat "/:" report-file)))))
       (when coverage-enabled
         (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
@@ -804,7 +806,9 @@ instrumented using Edebug."
   (cl-check-type coverage-dir string)
   (cl-check-type buffers list)
   (with-temp-buffer
-    (let ((coding-system-for-write 'utf-8-unix))
+    (let ((coding-system-for-write 'utf-8-unix)
+          (write-region-annotate-functions nil)
+          (write-region-post-annotation-function nil))
       (dolist (buffer buffers)
         (elisp/ert/insert--coverage-report buffer)
         (kill-buffer buffer))
