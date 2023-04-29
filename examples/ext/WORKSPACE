@@ -14,6 +14,8 @@
 
 workspace(name = "example")
 
+# We use local_repository here so that our tests are hermetic.  In reality you’d
+# use an http_archive snippet as described in the manual for rules_elisp.
 local_repository(
     name = "phst_rules_elisp",
     path = "../..",
