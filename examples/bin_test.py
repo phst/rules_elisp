@@ -14,25 +14,25 @@
 
 """Tests for //examples:bin."""
 
-import argparse
 import os
 import pathlib
 import re
 import shutil
 import subprocess
-import sys
 import tempfile
-from typing import Optional
-import unittest
+
+from absl import flags
+from absl.testing import absltest
 
 from elisp import runfiles
 
-class BinaryTest(unittest.TestCase):
+FLAGS = flags.FLAGS
+
+flags.DEFINE_string('bin', None, 'runfile location of the binary under test',
+                    required=True)
+
+class BinaryTest(absltest.TestCase):
     """Example test showing how to work with elisp_binary rules."""
-
-    bin: Optional[pathlib.PurePosixPath] = None
-
-    maxDiff = 2000
 
     def setUp(self) -> None:
         super().setUp()
@@ -43,7 +43,7 @@ class BinaryTest(unittest.TestCase):
     def test_run(self) -> None:
         """Runs the test binary and checks its output."""
         run_files = runfiles.Runfiles()
-        binary = run_files.resolve(self.bin)
+        binary = run_files.resolve(pathlib.PurePosixPath(FLAGS.bin))
         # Be sure to pass environment variables to find runfiles.  We also set
         # GCOV_PREFIX (see
         # https://gcc.gnu.org/onlinedocs/gcc/Cross-profiling.html) and
@@ -88,13 +88,5 @@ class BinaryTest(unittest.TestCase):
                               'hi from data dependency'])
 
 
-def _main() -> None:
-    parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--bin', type=pathlib.PurePosixPath, required=True)
-    args = parser.parse_args()
-    BinaryTest.bin = args.bin
-    unittest.main(argv=sys.argv[:1])
-
-
 if __name__ == '__main__':
-    _main()
+    absltest.main()

@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,11 +18,12 @@ import argparse
 import io
 import json
 import pathlib
-import unittest
+
+from absl.testing import absltest
 
 from elisp import manifest
 
-class ManifestTest(unittest.TestCase):
+class ManifestTest(absltest.TestCase):
     """Unit tests for the manifest.add and manifest.write functions."""
 
     def test_add(self) -> None:
@@ -60,4 +61,4 @@ class ManifestTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    absltest.main()

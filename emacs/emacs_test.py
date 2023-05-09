@@ -14,25 +14,27 @@
 
 """Unit tests for the Emacs binary."""
 
-import argparse
-import os
 import pathlib
+import os
 import subprocess
-import sys
-from typing import Optional
-import unittest
+
+from absl import flags
+from absl.testing import absltest
 
 from elisp import runfiles
 
-class EmacsTest(unittest.TestCase):
-    """Unit tests for the Emacs binary."""
+FLAGS = flags.FLAGS
 
-    emacs: Optional[pathlib.PurePosixPath] = None
+flags.DEFINE_string('emacs', None, 'runfile location of the Emacs binary',
+                    required=True)
+
+class EmacsTest(absltest.TestCase):
+    """Unit tests for the Emacs binary."""
 
     def test_version(self) -> None:
         """Tests that emacs --version works."""
         run_files = runfiles.Runfiles()
-        emacs = run_files.resolve(self.emacs)
+        emacs = run_files.resolve(pathlib.PurePosixPath(FLAGS.emacs))
         env = dict(os.environ)
         env.update(run_files.environment())
         process = subprocess.run([str(emacs), '--version'], env=env,
@@ -40,13 +42,5 @@ class EmacsTest(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
 
 
-def _main() -> None:
-    parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--emacs', type=pathlib.PurePosixPath, required=True)
-    args = parser.parse_args()
-    EmacsTest.emacs = args.emacs
-    unittest.main(argv=sys.argv[:1])
-
-
 if __name__ == '__main__':
-    _main()
+    absltest.main()

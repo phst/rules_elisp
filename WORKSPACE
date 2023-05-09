@@ -140,6 +140,15 @@ load("@upb//bazel:workspace_deps.bzl", "upb_deps")
 upb_deps()
 
 http_archive(
+    name = "io_abseil_py",
+    sha256 = "480faf554f57e1f1e82700d811fd9ec3658cfd5bd43ed644cf7243a82343734e",
+    strip_prefix = "abseil-py-1.4.0/",
+    urls = [
+        "https://github.com/abseil/abseil-py/archive/refs/tags/v1.4.0.zip",  # 2023-01-11
+    ],
+)
+
+http_archive(
     name = "hedron_compile_commands",
     sha256 = "22979f20e569219ce80031a0ee051230826390a8d9ccb587529a33003ec1e259",
     strip_prefix = "bazel-compile-commands-extractor-b33a4b05c2287372c8e932c55ff4d3a37e6761ed/",
