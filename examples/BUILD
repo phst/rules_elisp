@@ -123,7 +123,11 @@ py_test(
     data = ["bin"],
     python_version = "PY3",
     srcs_version = "PY3",
-    deps = ["//elisp:runfiles"],
+    deps = [
+        "//elisp:runfiles",
+        "@io_abseil_py//absl/flags",
+        "@io_abseil_py//absl/testing:absltest",
+    ],
 )
 
 # You can run this binary interactively: bazel run //examples:interactive

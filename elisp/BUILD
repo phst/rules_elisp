@@ -281,7 +281,10 @@ py_test(
     srcs = ["manifest_test.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    deps = [":manifest"],
+    deps = [
+        ":manifest",
+        "@io_abseil_py//absl/testing:absltest",
+    ],
 )
 
 py_library(
@@ -301,6 +304,7 @@ py_test(
     deps = [
         ":load",
         ":runfiles",
+        "@io_abseil_py//absl/testing:absltest",
     ],
 )
 
