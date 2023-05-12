@@ -833,7 +833,7 @@ TABLE."
   "Insert a coverage report into the current buffer.
 BUFFER must be a different buffer visiting an Emacs Lisp source
 file that has been instrumented with Edebug."
-  (cl-check-type buffer (and buffer (satisfies buffer-live-p)))
+  (cl-check-type buffer buffer)
   (let ((file-name (elisp/ert/sanitize--string
                     (elisp/ert/file--display-name (buffer-file-name buffer))))
         (functions ())
