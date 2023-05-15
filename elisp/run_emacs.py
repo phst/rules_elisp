@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ def main() -> None:
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
     libexec = install / 'libexec'
-    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs.pdmp')
+    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs*.pdmp')
     args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
     env = dict(os.environ,
                EMACSDATA=str(etc),
