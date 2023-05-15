@@ -78,7 +78,7 @@ def main() -> None:
             raise
 
     run('./configure', '--prefix=' + install.as_posix(),
-        '--without-all', '--without-ns', '--with-x-toolkit=no',
+        '--without-all', '--without-ns', '--without-x', '--with-x-toolkit=no',
         '--without-libgmp',
         # Enable threads explicitly to work around https://debbugs.gnu.org/30106
         # in older Emacs versions.  Enable toolkit scrollbars to work around
