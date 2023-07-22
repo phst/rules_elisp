@@ -20,6 +20,7 @@ load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 load(":private/defs.bzl", "elisp_test_suite")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -35,9 +36,8 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = ["ert_test.go"],
-    args = ["--binary=$(rlocationpath :test_test)"],
-    data = [":test_test"],
     embedsrcs = [
+        "test_package.tar",
         "JUnit.xsd",
         "coverage.dat",
     ],
@@ -88,6 +88,14 @@ exports_files(
 config_setting(
     name = "coverage",
     values = {"collect_code_coverage": "true"},
+)
+
+pkg_tar(
+    name = "test_package",
+    testonly = True,
+    srcs = [":test_test"],
+    include_runfiles = True,
+    strip_prefix = "/",
 )
 
 copy_file(
