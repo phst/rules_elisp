@@ -63,12 +63,7 @@ go_test(
         "imports_test.go",
         "resolve_test.go",
     ],
-    args = [
-        # FIXME: Use rlocationpath once we drop support for Bazel older than
-        # version 5.4.0.
-        "--gazelle=$(rootpath :gazelle)",
-    ],
-    data = [":gazelle"],
+    embedsrcs = ["gazelle.exe"],
     rundir = ".",
     deps = [
         ":go_default_library",
@@ -88,4 +83,11 @@ copy_file(
     name = "copy_builtin_features",
     src = "//emacs:builtin_features",
     out = "builtin_features.json",
+)
+
+copy_file(
+    name = "copy_gazelle",
+    testonly = True,
+    src = ":gazelle",
+    out = "gazelle.exe",
 )
