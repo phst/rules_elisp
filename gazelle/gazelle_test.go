@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,16 +15,15 @@
 package gazelle_test
 
 import (
-	"flag"
+	"os"
 	"os/exec"
-	"path"
+	"path/filepath"
 	"testing"
 
-	"github.com/bazelbuild/bazel-gazelle/testtools"
-	"github.com/bazelbuild/rules_go/go/runfiles"
-)
+	_ "embed"
 
-var gazelleBinary = flag.String("gazelle", "", "location of the Gazelle binary")
+	"github.com/bazelbuild/bazel-gazelle/testtools"
+)
 
 func TestGazelleBinary(t *testing.T) {
 	dir, clean := testtools.CreateFiles(t, []testtools.FileSpec{
@@ -63,8 +62,8 @@ func TestGazelleBinary(t *testing.T) {
 	})
 	t.Cleanup(clean)
 
-	bin, err := runfiles.Rlocation(path.Join("phst_rules_elisp", *gazelleBinary))
-	if err != nil {
+	bin := filepath.Join(dir, "gazelle.exe")
+	if err := os.WriteFile(bin, gazelleBinary, 0500); err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(bin, "update")
@@ -122,3 +121,6 @@ elisp_library(
 		},
 	})
 }
+
+//go:embed gazelle.exe
+var gazelleBinary []byte
