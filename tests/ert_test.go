@@ -96,7 +96,8 @@ func Test(t *testing.T) {
 	}
 	t.Log("test process exited")
 
-	schema, err := runfiles.Rlocation("junit_xsd/JUnit.xsd")
+	schema := filepath.Join(tempDir, "JUnit.xsd")
+	err = os.WriteFile(schema, jUnitXsd, 0400)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -320,6 +321,9 @@ func replaceSubmatch(text string, rgx string, fun func(string) string) string {
 		return match[:i] + fun(match[i:j]) + match[j:]
 	})
 }
+
+//go:embed JUnit.xsd
+var jUnitXsd []byte
 
 //go:embed coverage.dat
 var wantCoverage string

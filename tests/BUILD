@@ -18,6 +18,7 @@
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 load(":private/defs.bzl", "elisp_test_suite")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 package(
@@ -35,11 +36,11 @@ go_test(
     timeout = "short",
     srcs = ["ert_test.go"],
     args = ["--binary=$(rlocationpath :test_test)"],
-    data = [
-        ":test_test",
-        "@junit_xsd//:file",
+    data = [":test_test"],
+    embedsrcs = [
+        "JUnit.xsd",
+        "coverage.dat",
     ],
-    embedsrcs = ["coverage.dat"],
     rundir = ".",
     deps = [
         "@com_github_google_go_cmp//cmp:go_default_library",
@@ -87,4 +88,11 @@ exports_files(
 config_setting(
     name = "coverage",
     values = {"collect_code_coverage": "true"},
+)
+
+copy_file(
+    name = "copy_junit_xsd",
+    testonly = True,
+    src = "@junit_xsd//:JUnit.xsd",
+    out = "JUnit.xsd",
 )
