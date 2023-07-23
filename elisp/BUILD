@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "bootstrap", "cc_defaults")
+load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "bootstrap", "cc_defaults", "executable_only")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(
@@ -151,11 +151,15 @@ cc_library(
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_emacs"],
+    data = [":run_emacs_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
+        # additional quoting.
+        """PHST_RULES_ELISP_RUN_EMACS='R"*($(rlocationpath :run_emacs_stripped))*"'""",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -176,16 +180,25 @@ py_binary(
     deps = [":runfiles"],
 )
 
+executable_only(
+    name = "run_emacs_stripped",
+    src = ":run_emacs",
+)
+
 cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_binary"],
+    data = [":run_binary_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
+        # additional quoting.
+        """PHST_RULES_ELISP_RUN_BINARY='R"*($(rlocationpath :run_binary_stripped))*"'""",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -239,17 +252,26 @@ py_binary(
     ],
 )
 
+executable_only(
+    name = "run_binary_stripped",
+    src = ":run_binary",
+)
+
 cc_library(
     name = "test",
     testonly = 1,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_test"],
+    data = [":run_test_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
+        # additional quoting.
+        """PHST_RULES_ELISP_RUN_TEST='R"*($(rlocationpath :run_test_stripped))*"'""",
+    ],
     visibility = ["//visibility:public"],
     deps = [
         ":platform",
@@ -274,6 +296,12 @@ py_binary(
         ":manifest",
         ":runfiles",
     ],
+)
+
+executable_only(
+    name = "run_test_stripped",
+    testonly = True,
+    src = ":run_test",
 )
 
 py_library(

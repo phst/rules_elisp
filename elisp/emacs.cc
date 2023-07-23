@@ -46,7 +46,7 @@ static absl::StatusOr<int> RunEmacsImpl(const NativeString& argv0,
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run("phst_rules_elisp/elisp/run_emacs", args, *runfiles);
+  return Run(PHST_RULES_ELISP_RUN_EMACS, args, *runfiles);
 }
 
 int RunEmacs(const NativeString& argv0, const std::vector<NativeString>& args) {

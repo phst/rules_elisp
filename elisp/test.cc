@@ -45,7 +45,7 @@ static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   if (!runfiles.ok()) return runfiles.status();
-  return Run("phst_rules_elisp/elisp/run_test", args, *runfiles);
+  return Run(PHST_RULES_ELISP_RUN_TEST, args, *runfiles);
 }
 
 int RunTest(const std::vector<NativeString>& args) {

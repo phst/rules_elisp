@@ -406,11 +406,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
 absl::StatusOr<int> Run(const absl::string_view binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles) {
-  std::string binary_str(binary);
-#ifdef PHST_RULES_ELISP_WINDOWS
-  binary_str += ".exe";
-#endif
-  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary_str);
+  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   absl::StatusOr<Environment> map = runfiles.Environment();
@@ -479,7 +475,7 @@ absl::StatusOr<int> Run(const absl::string_view binary,
       ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
                        nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
                        envp.data(), nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", binary_str);
+  if (!success) return WindowsStatus("CreateProcessW", binary);
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
     ::CloseHandle(process_info.hThread);
@@ -498,7 +494,7 @@ absl::StatusOr<int> Run(const absl::string_view binary,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", binary_str);
+                       "posix_spawn", binary);
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);

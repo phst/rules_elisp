@@ -46,7 +46,7 @@ static absl::StatusOr<int> RunBinaryImpl(
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run("phst_rules_elisp/elisp/run_binary", args, *runfiles);
+  return Run(PHST_RULES_ELISP_RUN_BINARY, args, *runfiles);
 }
 
 int RunBinary(const NativeString& argv0,
