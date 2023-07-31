@@ -99,8 +99,6 @@ emacs_binary(
 emacs_binary(
     name = "emacs_28.2",
     srcs = ["@gnu_emacs_28.2//:srcs"],
-    builtin_features = "builtin_features.json",
-    module_header = "emacs-module.h",
     readme = "@gnu_emacs_28.2//:readme",
     target_compatible_with = select({
         ":always_supported": [],
@@ -113,6 +111,8 @@ emacs_binary(
 emacs_binary(
     name = "emacs_29.1",
     srcs = ["@gnu_emacs_29.1//:srcs"],
+    builtin_features = "builtin_features.json",
+    module_header = "emacs-module.h",
     readme = "@gnu_emacs_29.1//:readme",
     target_compatible_with = select({
         ":always_supported": [],
