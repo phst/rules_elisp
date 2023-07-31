@@ -127,7 +127,7 @@
 
 #include "emacs-module.h"
 
-#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 27
+#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 28
 #error Emacs module header too old
 #endif
 
@@ -330,20 +330,21 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 // version check to ensure that both emacs-module.h and the running Emacs binary
 // are recent enough, using this pattern:
 //
-//   #if EMACS_MAJOR_VERSION >= 28
-//   if (IsEmacs28(ctx)) {
-//     …code that assumes Emacs 28…
+//   #if EMACS_MAJOR_VERSION >= 29
+//   if (IsEmacs29(ctx)) {
+//     …code that assumes Emacs 29…
 //     return …;
 //   }
 //   #endif
 //   …fallback code…
 
-#if EMACS_MAJOR_VERSION >= 28
-static bool IsEmacs28(struct Context ctx) {
-  enum { kMinimumSize = sizeof(struct emacs_env_28) };
-  return ctx.env->size >= kMinimumSize;
-}
-#endif
+// Uncomment the code below once we actually need a check for Emacs 29:
+// #if EMACS_MAJOR_VERSION >= 29
+// static bool IsEmacs29(struct Context ctx) {
+//   enum { kMinimumSize = sizeof(struct emacs_env_29) };
+//   return ctx.env->size >= kMinimumSize;
+// }
+// #endif
 
 /// Wrappers around module functions
 
@@ -752,21 +753,8 @@ static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
     OverflowError0(ctx);
     return NULL;
   }
-#if EMACS_MAJOR_VERSION >= 28
-  if (IsEmacs28(ctx)) {
-    return ctx.env->make_unibyte_string(ctx.env, value.data,
-                                        (ptrdiff_t)value.size);
-  }
-#endif
-  emacs_value* args = AllocateLispArray(ctx, value.size);
-  if (args == NULL) return NULL;
-  for (size_t i = 0; i < value.size; ++i) {
-    args[i] = MakeUInteger(ctx, (unsigned char)value.data[i]);
-  }
-  emacs_value res =
-      FuncallSymbol(ctx, kUnibyteString, (ptrdiff_t)value.size, args);
-  free(args);
-  return res;
+  return ctx.env->make_unibyte_string(ctx.env, value.data,
+                                      (ptrdiff_t)value.size);
 }
 
 static struct MutableString ExtractUnibyteString(struct Context ctx,
@@ -3833,7 +3821,7 @@ enum InitializationResult {
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   enum {
     kMinimumRuntimeSize = sizeof *rt,
-    kMinimumEnvironmentSize = sizeof(struct emacs_env_27)
+    kMinimumEnvironmentSize = sizeof(struct emacs_env_28)
   };
   if (rt->size < kMinimumRuntimeSize) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
