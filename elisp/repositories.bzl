@@ -70,6 +70,17 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
+        name = "gnu_emacs_29.1",
+        build_file = Label("//:emacs.BUILD"),
+        sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
+        strip_prefix = "emacs-29.1/",
+        urls = [
+            "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
+            "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz",
+        ],
+    )
+    maybe(
+        http_archive,
         name = "platforms",
         sha256 = "5308fc1d8865406a49427ba24a9ab53087f17f5266a7aabbfc28823f3916e1ca",
         urls = [

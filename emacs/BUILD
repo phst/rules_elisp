@@ -110,6 +110,18 @@ emacs_binary(
     visibility = ["//visibility:public"],
 )
 
+emacs_binary(
+    name = "emacs_29.1",
+    srcs = ["@gnu_emacs_29.1//:srcs"],
+    readme = "@gnu_emacs_29.1//:readme",
+    target_compatible_with = select({
+        ":always_supported": [],
+        ":macos_arm": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    visibility = ["//visibility:public"],
+)
+
 py_binary(
     name = "build",
     srcs = ["build.py"],
