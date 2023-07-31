@@ -253,15 +253,11 @@ class Builder:
 
 def _versions() -> frozenset[str]:
     # All potentially supported Emacs versions.
-    ret = {'27.1', '27.2', '28.1', '28.2', '29.1'}
+    ret = {'28.1', '28.2', '29.1'}
     uname = platform.uname()
-    if uname.system in ('Linux', 'Windows'):
-        # GNU/Linux and Windows support all Emacs versions.
+    if uname.system in ('Linux', 'Darwin', 'Windows'):
+        # GNU/Linux, macOS, and Windows support all Emacs versions.
         pass
-    elif uname.system == 'Darwin':
-        if uname.machine != 'x86_64':
-            # Apple Silicon doesn’t support Emacs 27.1.
-            ret.remove('27.1')
     else:
         raise ValueError(f'unsupported kernel {uname.system}')
     return frozenset(ret)
