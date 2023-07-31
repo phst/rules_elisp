@@ -26,7 +26,7 @@ licenses(["notice"])
 
 alias(
     name = "emacs",
-    actual = ":emacs_28.2",
+    actual = ":emacs_29.1",
     visibility = ["//visibility:public"],
 )
 
