@@ -1,6 +1,6 @@
 ;;; proto.el --- basic protocol buffer functionality  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -62,10 +62,9 @@ print a warning if any keyword in KEYS doesn’t refer to a field
 in TYPE.  In any case, return FORM.  This internal function is
 meant to be used in compiler macros."
   ;; Emacs turns errors in compiler macros into messages, see
-  ;; ‘macroexp--compiler-macro’.  If possible (Emacs 28), print a compiler
-  ;; warning; otherwise, just print a message.
+  ;; ‘macroexp--compiler-macro’.  Print a compiler warning instead.
   (if-let ((message (elisp/proto/keys--message type keys)))
-      (elisp/proto/macroexp--warn-and-return message form 'callargs)
+      (macroexp-warn-and-return message form 'callargs)
     form))
 
 (defun elisp/proto/keys--message (type keys)
@@ -293,12 +292,6 @@ MAP, overwrite it.  Return VALUE."
 
 (gv-define-simple-setter elisp/proto/timestamp elisp/proto/set-timestamp)
 (gv-define-simple-setter elisp/proto/duration elisp/proto/set-duration)
-
-(defalias 'elisp/proto/macroexp--warn-and-return
-  (if (fboundp 'macroexp-warn-and-return) #'macroexp-warn-and-return
-    (lambda (msg form &optional _category)
-      (message "Warning: %s" msg)  ; mimic format of ‘macroexp-warn-and-return’
-      form)))
 
 (provide 'elisp/proto/proto)
 ;;; proto.el ends here

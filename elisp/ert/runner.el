@@ -198,7 +198,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                          ([&optional "&whole" arg]
                           ,@(car
                              (or (get 'cl-macro-list 'edebug-elem-spec)
-                                 (elisp/ert/edebug--get-spec 'cl-macro-list))))
+                                 (edebug-get-spec 'cl-macro-list))))
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
@@ -1140,9 +1140,6 @@ SPEC is the prefix for ‘gensym’."
               (intern (format "%s@%s" edebug-def-name suffix))
             suffix)))
   nil)
-
-(defalias 'elisp/ert/edebug--get-spec
-  (if (fboundp 'edebug-get-spec) 'edebug-get-spec 'get-edebug-spec))
 
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
