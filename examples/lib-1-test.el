@@ -1,6 +1,6 @@
 ;;; lib-1-test.el --- unit test for lib-1 -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2020, 2021, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -34,7 +34,6 @@
   (should (= 0 1)))
 
 (ert-deftest lib-1-resource ()
-  (skip-unless (fboundp 'ert-resource-file))
   (with-temp-buffer
     (insert-file-contents (ert-resource-file "test.txt"))
     (should (equal (buffer-string) "hi from ERT resource\n"))))
