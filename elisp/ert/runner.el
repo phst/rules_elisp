@@ -53,10 +53,6 @@ This list is populated by --test-source command-line options.")
 Used to detect recursive invocation of
 ‘elisp/ert/run-batch-and-exit’.")
 
-;; ERT resource variables only appeared in Emacs 28.
-(defvar ert-resource-directory-trim-left-regexp)
-(defvar ert-resource-directory-format)
-
 (defun elisp/ert/run-batch-and-exit ()
   "Run ERT tests in batch mode.
 This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
@@ -175,21 +171,6 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                  :test #'elisp/ert/file--equal-p))
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
-        (when (< emacs-major-version 28)
-          ;; Work around https://debbugs.gnu.org/41989 and
-          ;; https://debbugs.gnu.org/41988 by uniquifying the Edebug symbols for
-          ;; ‘cl-flet’ (and ‘cl-labels’, which defers to ‘cl-flet’).
-          (put :unique 'edebug-form-spec #'elisp/ert/edebug--unique)
-          (put #'cl-flet 'edebug-form-spec
-               ;; This is the expansion of the Edebug specification for
-               ;; ‘cl-flet’, plus a ‘:unique’ specifier to uniquify the name.
-               '((&rest [&or (&define name :unique "cl-flet@" def-form)
-                             (&define name :unique "cl-flet@"
-                                      cl-lambda-list
-                                      cl-declarations-or-string
-                                      [&optional ("interactive" interactive)]
-                                      def-body)])
-                 cl-declarations body)))
         ;; Work around another Edebug specification issue fixed with Emacs
         ;; commit aeb25f9d3d12a18ef3881e23b32a34615355d4d0.
         (when (< emacs-major-version 29)

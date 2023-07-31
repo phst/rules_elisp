@@ -56,9 +56,6 @@ treat warnings as errors."
   (pcase command-line-args-left
     (`(,src ,out)
      (setq command-line-args-left nil)
-     ;; Work around https://debbugs.gnu.org/44481.
-     (when (version< emacs-version "27.2")
-       (define-advice system-name (:after-until ()) ""))
      (let* ((elisp/compilation--in-progress t)
             ;; Leaving these enabled leads to undefined behavior and doesn’t
             ;; make sense in batch mode.
