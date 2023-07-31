@@ -36,18 +36,6 @@ toolchain(
 )
 
 toolchain(
-    name = "emacs_27.1_toolchain",
-    toolchain = "emacs_27.1",
-    toolchain_type = ":toolchain_type",
-)
-
-toolchain(
-    name = "emacs_27.2_toolchain",
-    toolchain = "emacs_27.2",
-    toolchain_type = ":toolchain_type",
-)
-
-toolchain(
     name = "emacs_28.1_toolchain",
     toolchain = "emacs_28.1",
     toolchain_type = ":toolchain_type",
@@ -80,16 +68,6 @@ elisp_toolchain(
     name = "local",
     emacs = ":local_emacs",
     use_default_shell_env = True,
-)
-
-elisp_toolchain(
-    name = "emacs_27.1",
-    emacs = "//emacs:emacs_27.1",
-)
-
-elisp_toolchain(
-    name = "emacs_27.2",
-    emacs = "//emacs:emacs_27.2",
 )
 
 elisp_toolchain(

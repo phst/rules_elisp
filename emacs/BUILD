@@ -61,30 +61,6 @@ filegroup(
 )
 
 emacs_binary(
-    name = "emacs_27.1",
-    srcs = ["@gnu_emacs_27.1//:srcs"],
-    readme = "@gnu_emacs_27.1//:readme",
-    target_compatible_with = select({
-        ":always_supported": [],
-        ":macos_arm": ["@platforms//:incompatible"],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
-    visibility = ["//visibility:public"],
-)
-
-emacs_binary(
-    name = "emacs_27.2",
-    srcs = ["@gnu_emacs_27.2//:srcs"],
-    readme = "@gnu_emacs_27.2//:readme",
-    target_compatible_with = select({
-        ":always_supported": [],
-        ":macos_arm": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
-    visibility = ["//visibility:public"],
-)
-
-emacs_binary(
     name = "emacs_28.1",
     srcs = ["@gnu_emacs_28.1//:srcs"],
     readme = "@gnu_emacs_28.1//:readme",
