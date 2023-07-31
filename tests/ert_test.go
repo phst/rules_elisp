@@ -17,13 +17,11 @@ package runner_test
 import (
 	"encoding/xml"
 	"flag"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"testing"
 	"time"
 
@@ -164,14 +162,6 @@ func Test(t *testing.T) {
 			break
 		}
 	}
-	match := regexp.MustCompile(`^(\d+)\.\d+`).FindStringSubmatch(emacsVersion)
-	if match == nil {
-		t.Fatalf("invalid Emacs version %q", emacsVersion)
-	}
-	emacsMajor, err := strconv.Atoi(match[1])
-	if err != nil {
-		t.Errorf("invalid Emacs version %q", emacsVersion)
-	}
 	t.Logf("got Emacs version %s", emacsVersion)
 	// Margin for time comparisons.  One hour is excessive, but we only
 	// care about catching obvious bugs here.
@@ -253,36 +243,6 @@ func Test(t *testing.T) {
 	// See geninfo(1) for the coverage file format.  The function hit count
 	// doesn’t work yet for nested functions.
 	wantCoverage := wantCoverage // make local copy
-	if emacsMajor < 28 {
-		// Account for a jump in the suffix index for nested functions
-		// due to https://debbugs.gnu.org/41988.
-		wantCoverage = replaceSubmatch(wantCoverage, `@cl-flet@(\d+)`, func(s string) string {
-			i, err := strconv.Atoi(s)
-			if err != nil {
-				t.Errorf("invalid suffix in coverage manifest: %s", err)
-			}
-			return strconv.Itoa(2*i + 1)
-		})
-		// In Emacs 27, the special when-let form on line 53 of
-		// test-lib.el isn’t properly instrumented, so remove the
-		// branches for that line, and decrement the branch counts
-		// accordingly.
-		wantCoverage = regexp.MustCompile(`(?m)^BRDA:53,.+\n`).ReplaceAllLiteralString(wantCoverage, "")
-		wantCoverage = replaceSubmatch(wantCoverage, `(?m)^BRF:(\d+)$`, func(s string) string {
-			i, err := strconv.Atoi(s)
-			if err != nil {
-				t.Errorf("invalid branch count in coverage manifest: %s", err)
-			}
-			return strconv.Itoa(i - 2)
-		})
-		wantCoverage = replaceSubmatch(wantCoverage, `(?m)^BRH:(\d+)$`, func(s string) string {
-			i, err := strconv.Atoi(s)
-			if err != nil {
-				t.Errorf("invalid branch hit count in coverage manifest: %s", err)
-			}
-			return strconv.Itoa(i - 1)
-		})
-	}
 	// Depending on the exact runfiles layout, the test runner might have
 	// printed different representations of test filenames.
 	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
@@ -304,23 +264,6 @@ func (t *timestamp) UnmarshalText(b []byte) error {
 func toTime(t timestamp) time.Time { return time.Time(t) }
 
 func bothEmpty(a, b string) bool { return (a == "") == (b == "") }
-
-// replaceSubmatch transforms the strings matched by the first subgroup in the
-// given regular expression through the given function.
-func replaceSubmatch(text string, rgx string, fun func(string) string) string {
-	r := regexp.MustCompile(rgx)
-	if r.NumSubexp() != 1 {
-		panic(fmt.Errorf("want exactly one subexpression in regular expression %q, got %d", r, r.NumSubexp()))
-	}
-	return r.ReplaceAllStringFunc(text, func(match string) string {
-		indices := r.FindStringSubmatchIndex(match)
-		if len(indices) != 4 || indices[0] != 0 || indices[1] != len(match) {
-			panic(fmt.Errorf("invalid regular expression %q for match %q", r, match))
-		}
-		i, j := indices[2], indices[3]
-		return match[:i] + fun(match[i:j]) + match[j:]
-	})
-}
 
 //go:embed JUnit.xsd
 var jUnitXsd []byte
