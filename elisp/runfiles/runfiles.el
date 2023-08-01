@@ -199,6 +199,14 @@ ARGS are the arguments to the operation."
      ;; Attempt to handle everything else in a generic way.
      (t (elisp/runfiles/handle--generic operation args)))))
 
+(defun elisp/runfiles/handle--abbreviate-file-name (filename)
+  "Implementation of ‘abbreviate-file-name’ for Bazel runfiles.
+See Info node ‘(elisp) Directory Names’ for the meaning of
+FILENAME."
+  ;; We don’t support abbreviated file names, so we return the file name
+  ;; unchanged.
+  filename)
+
 (defun elisp/runfiles/handle--directory-files
     (directory full-name match-regexp nosort)
   "Implementation of ‘directory-files’ for Bazel runfiles.

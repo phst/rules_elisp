@@ -114,6 +114,9 @@ context."
                    "runfiles/test.txt"))
     (should (equal (file-truename "/bazel-runfile:phst_rules_elisp/elisp/")
                    "/bazel-runfile:phst_rules_elisp/elisp/"))
+    (should (equal (abbreviate-file-name
+                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
+                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 
