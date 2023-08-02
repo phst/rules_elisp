@@ -18,13 +18,16 @@ This is an internal helper binary for the Emacs Lisp Bazel rules.  Don’t rely 
 it in any way outside the rule implementation."""
 
 import argparse
-from collections.abc import Iterable
+from collections.abc import Generator, Iterable
+import contextlib
 import glob
 import os
 import os.path
 import pathlib
+import shutil
 import subprocess
 import sys
+import tempfile
 
 from elisp import runfiles
 
@@ -44,31 +47,32 @@ def main() -> None:
     etc = shared / 'etc'
     libexec = install / 'libexec'
     dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs*.pdmp')
-    args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
-    env = dict(os.environ,
-               EMACSDATA=str(etc),
-               EMACSDOC=str(etc),
-               EMACSLOADPATH=str(shared / 'lisp'),
-               EMACSPATH=str(libexec))
-    # We don’t want the Python launcher to change the current working directory,
-    # otherwise relative filenames will be all messed up.  See
-    # https://github.com/bazelbuild/bazel/issues/7190.
-    env.pop('RUN_UNDER_RUNFILES', None)
-    env.update(run_files.environment())
-    if os.name == 'nt':
-        # On Windows, Emacs doesn’t support Unicode arguments or environment
-        # variables.  Check here rather than sending over garbage.
-        _check_codepage('argument', args)
-        _check_codepage('environment variable name', env.keys())
-        _check_codepage('environment variable value', env.values())
-    try:
-        subprocess.run(args, env=env, check=True)
-    except subprocess.CalledProcessError as ex:
-        if 0 < ex.returncode < 0x100:
-            # Don’t print a stacktrace if Emacs exited with a non-zero exit
-            # code.
-            sys.exit(ex.returncode)
-        raise
+    with _shorten(dump) as dump:
+        args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
+        env = dict(os.environ,
+                   EMACSDATA=str(etc),
+                   EMACSDOC=str(etc),
+                   EMACSLOADPATH=str(shared / 'lisp'),
+                   EMACSPATH=str(libexec))
+        # We don’t want the Python launcher to change the current working
+        # directory, otherwise relative filenames will be all messed up.  See
+        # https://github.com/bazelbuild/bazel/issues/7190.
+        env.pop('RUN_UNDER_RUNFILES', None)
+        env.update(run_files.environment())
+        if os.name == 'nt':
+            # On Windows, Emacs doesn’t support Unicode arguments or environment
+            # variables.  Check here rather than sending over garbage.
+            _check_codepage('argument', args)
+            _check_codepage('environment variable name', env.keys())
+            _check_codepage('environment variable value', env.values())
+        try:
+            subprocess.run(args, env=env, check=True)
+        except subprocess.CalledProcessError as ex:
+            if 0 < ex.returncode < 0x100:
+                # Don’t print a stacktrace if Emacs exited with a non-zero exit
+                # code.
+                sys.exit(ex.returncode)
+            raise
 
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
@@ -79,6 +83,21 @@ def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
     if len(files) > 1:
         raise OSError(f'multiple files match {pattern}: {files}')
     return pathlib.Path(files[0])
+
+
+# https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+_MAX_PATH: int = 260
+
+
+@contextlib.contextmanager
+def _shorten(filename: pathlib.Path) -> Generator[pathlib.Path, None, None]:
+    if os.name != 'nt' or len(str(filename)) < _MAX_PATH:
+        yield filename
+    else:
+        with tempfile.TemporaryDirectory() as directory:
+            short = pathlib.Path(directory) / 'emacs.pdmp'
+            shutil.copyfile(filename, short)
+            yield short
 
 
 def _check_codepage(description: str, values: Iterable[str]) -> None:
