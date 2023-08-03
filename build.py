@@ -104,7 +104,8 @@ class Builder:
         """Checks that all BUILD files are formatted correctly."""
         self._bazel('run',
                     ['@com_github_bazelbuild_buildtools//buildifier',
-                     '--mode=check', '--lint=warn', '-r', '--',
+                     '--mode=check', '--lint=warn',
+                     '--warnings=+native-py,+out-of-order-load', '-r', '--',
                      str(self._workspace)])
 
     @target
