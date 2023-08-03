@@ -31,7 +31,7 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         # FIXME: add “rolling” once
         # https://github.com/bazelbuild/bazel/issues/18131 is fixed.
-        bazel: [5.4.0, 6.0.0, 6.1.2, 6.2.0, latest]
+        bazel: [5.4.0, 6.0.0, 6.1.2, 6.2.1, latest]
         os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{matrix.os}}
     steps:
