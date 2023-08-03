@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_license//rules:license.bzl", "license")
+load("@rules_python//python:defs.bzl", "py_binary")
 
 package(
     default_applicable_licenses = [":license"],

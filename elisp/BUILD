@@ -16,6 +16,7 @@ load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defau
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 
 package(
     default_applicable_licenses = ["//:license"],
