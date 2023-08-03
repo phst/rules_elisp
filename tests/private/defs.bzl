@@ -14,8 +14,8 @@
 
 """Unit tests for defs.bzl."""
 
-load("//elisp:defs.bzl", "EmacsLispInfo", "elisp_library")
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
+load("//elisp:defs.bzl", "EmacsLispInfo", "elisp_library")
 
 # Test for the EmacsLispInfo provider.
 

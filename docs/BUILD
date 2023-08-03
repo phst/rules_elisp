@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "merged_manual")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
+load("//private:defs.bzl", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
