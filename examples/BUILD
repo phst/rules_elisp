@@ -14,6 +14,7 @@
 
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@rules_python//python:defs.bzl", "py_test")
 
 package(
     default_applicable_licenses = ["//:license"],

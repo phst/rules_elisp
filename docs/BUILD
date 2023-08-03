@@ -18,6 +18,7 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("@rules_python//python:defs.bzl", "py_binary")
 
 package(
     default_applicable_licenses = ["//:license"],

@@ -16,6 +16,7 @@ load("//private:defs.bzl", "cc_defaults")
 load(":defs.bzl", "emacs_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 
 package(
     default_applicable_licenses = ["//:license"],

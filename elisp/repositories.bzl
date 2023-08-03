@@ -105,6 +105,13 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
+        name = "rules_python",
+        sha256 = "863ba0fa944319f7e3d695711427d9ad80ba92c6edd0b7c7443b84e904689539",
+        strip_prefix = "rules_python-0.22.0",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/0.22.0/rules_python-0.22.0.tar.gz",
+    )
+    maybe(
+        http_archive,
         name = "com_google_absl",
         sha256 = "61d0af0262a0131bb8917fcb883e5e831ee5ad1535433f2f13f85906d1607f81",
         strip_prefix = "abseil-cpp-20230125.1/",
