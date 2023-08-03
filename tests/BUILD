@@ -16,10 +16,10 @@
 # package so that they can use external workspaces loaded in our WORKSPACE file
 # only, e.g. the Go rules.
 
-load("//elisp:defs.bzl", "elisp_library", "elisp_test")
-load(":private/defs.bzl", "elisp_test_suite")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("//elisp:defs.bzl", "elisp_library", "elisp_test")
+load(":private/defs.bzl", "elisp_test_suite")
 
 package(
     default_applicable_licenses = ["//:license"],

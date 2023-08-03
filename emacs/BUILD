@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("//private:defs.bzl", "cc_defaults")
-load(":defs.bzl", "emacs_binary")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
+load("//private:defs.bzl", "cc_defaults")
+load(":defs.bzl", "emacs_binary")
 
 package(
     default_applicable_licenses = ["//:license"],

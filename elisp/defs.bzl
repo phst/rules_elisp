@@ -14,6 +14,9 @@
 
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
+load("@bazel_skylib//lib:collections.bzl", "collections")
+load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -24,9 +27,6 @@ load(
     "runfile_location",
     "workspace_relative_filename",
 )
-load("@bazel_skylib//lib:collections.bzl", "collections")
-load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 
 EmacsLispInfo = provider(
     doc = """Provider for Emacs Lisp libraries.
