@@ -105,10 +105,10 @@ local_repository(
 
 http_archive(
     name = "com_google_googletest",
-    sha256 = "24564e3b712d3eb30ac9a85d92f7d720f60cc0173730ac166f27dda7fed76cb2",
-    strip_prefix = "googletest-release-1.12.1/",
+    sha256 = "1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4",
+    strip_prefix = "googletest-1.14.0/",
     urls = [
-        "https://github.com/google/googletest/archive/refs/tags/release-1.12.1.zip",  # 2022-06-27
+        "https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip",  # 2023-08-02
     ],
 )
 
