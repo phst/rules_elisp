@@ -112,6 +112,10 @@ http_archive(
     ],
 )
 
+load("@com_google_googletest//:googletest_deps.bzl", "googletest_deps")
+
+googletest_deps()
+
 http_archive(
     name = "junit_xsd",
     build_file = "@//:junit_xsd.BUILD",
