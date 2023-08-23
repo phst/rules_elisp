@@ -229,6 +229,7 @@ def _install(ctx, cc_toolchain, source):
         ),
         env = env,
         input_manifests = input_manifests,
+        toolchain = None,
     )
     return install
 

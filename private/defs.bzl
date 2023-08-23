@@ -71,6 +71,7 @@ def _check_python_impl(target, ctx):
         mnemonic = "PythonCheck",
         progress_message = "Performing static analysis of target {}".format(target.label),
         input_manifests = input_manifests,
+        toolchain = None,
     )
     return [OutputGroupInfo(check_python = depset([output_file]))]
 
@@ -325,6 +326,7 @@ def run_emacs(
         use_default_shell_env = toolchain.use_default_shell_env,
         execution_requirements = toolchain.execution_requirements,
         input_manifests = input_manifests,
+        toolchain = Label("//elisp:toolchain_type"),
     )
 
 # Shared C++ compilation options.
@@ -458,6 +460,7 @@ def _merged_manual_impl(ctx):
             arguments = ["--", bin.path, org.path],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file {}".format(org.short_path),
+            toolchain = None,
         )
         orgs.append(org)
     ctx.actions.run(
@@ -467,6 +470,7 @@ def _merged_manual_impl(ctx):
         arguments = [ctx.outputs.out.path, ctx.file.main.path] + [o.path for o in orgs],
         mnemonic = "MergeManual",
         progress_message = "Generating merged manual {}".format(ctx.outputs.out.short_path),
+        toolchain = None,
     )
 
 merged_manual = rule(

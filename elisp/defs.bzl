@@ -126,6 +126,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         arguments = [args],
         mnemonic = "GenElispProto",
         progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
+        toolchain = None,
     )
     result = _compile(
         ctx = ctx,
@@ -652,6 +653,7 @@ def _elisp_manual_impl(ctx):
         mnemonic = "Export",
         progress_message = "Exporting {} into Texinfo file".format(src.short_path),
         input_manifests = input_manifests,
+        toolchain = None,
     )
 
 elisp_manual = rule(
