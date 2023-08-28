@@ -35,6 +35,15 @@ bzl_library(
     ],
 )
 
+bzl_library(
+    name = "repositories_bzl",
+    srcs = ["repositories.bzl"],
+    visibility = [
+        "//docs:__pkg__",
+        "//elisp:__pkg__",
+    ],
+)
+
 config_setting(
     name = "msvc-cl",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
