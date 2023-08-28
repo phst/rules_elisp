@@ -36,6 +36,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--runfiles_env', action='append', type=_env_var,
                         default=[])
+    parser.add_argument('--coverage_dir', type=pathlib.Path)
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
@@ -59,6 +60,8 @@ def main() -> None:
         # https://github.com/bazelbuild/bazel/issues/7190.
         env.pop('RUN_UNDER_RUNFILES', None)
         env.update(run_files.environment())
+        if opts.coverage_dir:
+            env['COVERAGE_DIR'] = str(opts.coverage_dir)
         if os.name == 'nt':
             # On Windows, Emacs doesn’t support Unicode arguments or environment
             # variables.  Check here rather than sending over garbage.
