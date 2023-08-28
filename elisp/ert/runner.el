@@ -112,6 +112,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (coverage-enabled (equal (getenv "COVERAGE") "1"))
          (coverage-manifest (getenv "COVERAGE_MANIFEST"))
          (coverage-dir (getenv "COVERAGE_DIR"))
+         (verbose-coverage (not (member (getenv "VERBOSE_COVERAGE") '(nil ""))))
          (selector (elisp/ert/make--selector
                     (and coverage-enabled '(:nocover))))
          (original-load-suffixes load-suffixes)
@@ -136,6 +137,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
       (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
              shard-count shard-index))
     (when coverage-enabled
+      (when verbose-coverage
+        (message "Reading coverage manifest %s" coverage-manifest))
       (let ((format-alist nil)
             (after-insert-file-functions nil)
             ;; The coverage manifest uses ISO-8859-1, see
@@ -151,6 +154,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                    (buffer-substring-no-properties (point) (line-end-position)))
                   instrumented-files)
             (forward-line)))
+        (when verbose-coverage
+          (message "Found %d files in coverage manifest"
+                   (length instrumented-files)))
         ;; We don’t bother removing the advises since we are going to kill
         ;; Emacs anyway.
         (add-function
@@ -302,6 +308,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                 (write-region-post-annotation-function nil))
             (write-region nil nil (concat "/:" report-file)))))
       (when coverage-enabled
+        (when verbose-coverage
+          (message "Writing coverage report into directory %s" coverage-dir))
         (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
                                           load-buffers))
       (kill-emacs (min unexpected 1)))))
