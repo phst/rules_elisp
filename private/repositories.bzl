@@ -56,6 +56,19 @@ def non_module_deps():
     )
     _toolchains(name = "phst_rules_elisp_toolchains")
 
+def non_module_dev_deps():
+    """Installs development dependencies that are not available as modules."""
+    maybe(
+        http_archive,
+        name = "junit_xsd",
+        build_file = "@//:junit_xsd.BUILD",
+        sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
+        strip_prefix = "JUnit-Schema-1.0.0/",
+        urls = [
+            "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
+        ],
+    )
+
 def _toolchains_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
