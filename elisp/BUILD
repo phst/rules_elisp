@@ -110,6 +110,7 @@ bzl_library(
 bzl_library(
     name = "repositories_bzl",
     srcs = ["repositories.bzl"],
+    deps = ["//private:repositories_bzl"],
 )
 
 bzl_library(

@@ -16,45 +16,13 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
+load("//private:repositories.bzl", "non_module_deps")
 
 def rules_elisp_dependencies():
     """Installs necessary dependencies for Emacs Lisp rules.
 
     Call this function in your `WORKSPACE` file.
     """
-    maybe(
-        http_archive,
-        name = "gnu_emacs_28.1",
-        build_file = Label("//:emacs.BUILD"),
-        sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
-        strip_prefix = "emacs-28.1/",
-        urls = [
-            "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
-        ],
-    )
-    maybe(
-        http_archive,
-        name = "gnu_emacs_28.2",
-        build_file = Label("//:emacs.BUILD"),
-        sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
-        strip_prefix = "emacs-28.2/",
-        urls = [
-            "https://ftpmirror.gnu.org/emacs/emacs-28.2.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz",
-        ],
-    )
-    maybe(
-        http_archive,
-        name = "gnu_emacs_29.1",
-        build_file = Label("//:emacs.BUILD"),
-        sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
-        strip_prefix = "emacs-29.1/",
-        urls = [
-            "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz",
-        ],
-    )
     maybe(
         http_archive,
         name = "platforms",
@@ -117,18 +85,9 @@ def rules_elisp_dependencies():
             "https://github.com/protocolbuffers/upb/archive/a5477045acaa34586420942098f5fecd3570f577.zip",  # 2022-09-23
         ],
     )
-    _toolchains(name = "phst_rules_elisp_toolchains")
+    non_module_deps()
 
 # buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
-
-def _toolchains_impl(repository_ctx):
-    windows = repository_ctx.os.name.startswith("windows")
-    target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
-    repository_ctx.symlink(target, "BUILD")
-
-_toolchains = repository_rule(
-    implementation = _toolchains_impl,
-)

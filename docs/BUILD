@@ -94,7 +94,10 @@ stardoc(
     out = "repositories.bin",
     format = "proto",
     input = "//elisp:repositories.bzl",
-    deps = ["//elisp:builtin_bzl"],
+    deps = [
+        "//elisp:builtin_bzl",
+        "//private:repositories_bzl",
+    ],
 )
 
 py_binary(
