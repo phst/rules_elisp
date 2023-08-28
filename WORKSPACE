@@ -41,6 +41,7 @@ py_repositories()
 python_register_toolchains(
     name = "hermetic_python",
     python_version = "3.10",
+    register_coverage_tool = True,
 )
 
 load("@hermetic_python//:defs.bzl", "interpreter")
