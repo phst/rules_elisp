@@ -176,15 +176,6 @@ load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_
 hedron_compile_commands_setup()
 
 http_archive(
-    name = "com_github_bazelbuild_buildtools",
-    sha256 = "e3bb0dc8b0274ea1aca75f1f8c0c835adbe589708ea89bf698069d0790701ea3",
-    strip_prefix = "buildtools-5.1.0/",
-    urls = [
-        "https://github.com/bazelbuild/buildtools/archive/refs/tags/5.1.0.tar.gz",  # 2022-04-13
-    ],
-)
-
-http_archive(
     name = "bazel_gazelle",
     sha256 = "ecba0f04f96b4960a5b250c8e8eeec42281035970aa8852dda73098274d14a1d",
     urls = [
@@ -195,6 +186,13 @@ http_archive(
 load("@bazel_gazelle//:deps.bzl", "gazelle_dependencies", "go_repository")
 
 gazelle_dependencies()
+
+go_repository(
+    name = "com_github_bazelbuild_buildtools",
+    importpath = "github.com/bazelbuild/buildtools",
+    sum = "h1:skvX7icFzwe3yKdg2wZALO+aLAYs13Qua1v2iZPo2HE=",
+    version = "v0.0.0-20230825120932-b163fcf72b7d",
+)
 
 go_repository(
     name = "com_github_google_go_cmp",
