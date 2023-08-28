@@ -307,7 +307,7 @@ py_library(
         "//examples:__pkg__",
         "//tests/wrap:__pkg__",
     ],
-    deps = ["@bazel_tools//tools/python/runfiles"],
+    deps = ["@rules_python//python/runfiles"],
 )
 
 cc_library(

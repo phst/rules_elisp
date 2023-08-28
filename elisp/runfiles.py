@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ import os
 import pathlib
 from typing import Optional
 
-from tools.python.runfiles import runfiles
+from python.runfiles import runfiles
 
 class Runfiles:
     """Represents a set of Bazel runfiles."""
