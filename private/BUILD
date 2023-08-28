@@ -44,6 +44,12 @@ bzl_library(
     ],
 )
 
+bzl_library(
+    name = "non_module_deps_bzl",
+    srcs = ["non_module_deps.bzl"],
+    deps = [":repositories_bzl"],
+)
+
 config_setting(
     name = "msvc-cl",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
