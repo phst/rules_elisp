@@ -117,7 +117,7 @@ def check_relative_filename(filename):
     if not (filename == "." or filename[0].isalpha() or filename.startswith("_")):
         fail("filename {} has to start with a letter or underscore".format(filename))
     for char in filename.elems():
-        if not (char.isalnum() or char in "-_./+$@%=,"):
+        if not (char.isalnum() or char in "-_./+$@%=,~"):
             fail("invalid character {} in filename {}".format(char, filename))
     return filename
 
