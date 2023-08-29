@@ -13,9 +13,10 @@
 # limitations under the License.
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
-load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
+load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
 
 package(
@@ -71,6 +72,40 @@ py_binary(
         "@platforms//os:macos": [requirement("pytype")],
         "//conditions:default": [],
     }),
+)
+
+go_test(
+    name = "go_default_test",
+    size = "small",
+    srcs = ["version_test.go"],
+    embedsrcs = [
+        # keep sorted
+        "MODULE.bazel",
+        "WORKSPACE",
+        "repositories.bzl",
+    ],
+    deps = [
+        "@com_github_bazelbuild_buildtools//build",
+        "@com_github_google_go_cmp//cmp",
+    ],
+)
+
+copy_file(
+    name = "copy_module_bazel",
+    src = "//:MODULE.bazel",
+    out = "MODULE.bazel",
+)
+
+copy_file(
+    name = "copy_workspace",
+    src = "//:WORKSPACE",
+    out = "WORKSPACE",
+)
+
+copy_file(
+    name = "copy_repositories_bzl",
+    src = "//elisp:repositories.bzl",
+    out = "repositories.bzl",
 )
 
 nogo(
