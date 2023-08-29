@@ -44,3 +44,11 @@ exports_files(
         "@hedron_compile_commands//:__pkg__",
     ],
 )
+
+exports_files(
+    [
+        "MODULE.bazel",
+        "WORKSPACE",
+    ],
+    visibility = ["//dev:__pkg__"],
+)

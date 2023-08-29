@@ -82,7 +82,6 @@ use_repo(go_deps, "com_github_bazelbuild_buildtools", "com_github_google_go_cmp"
 # We want to test the external example without adding its repository to the
 # registry.  So we use a fake dependency and override it immediately locally.
 bazel_dep(name = "fmt", version = "10.1.0", dev_dependency = True, repo_name = "example")
-
 local_path_override(
     module_name = "fmt",
     path = "examples/ext",

@@ -348,7 +348,10 @@ exports_files(
         "defs.bzl",
         "repositories.bzl",
     ],
-    visibility = ["//docs:__pkg__"],
+    visibility = [
+        "//dev:__pkg__",
+        "//docs:__pkg__",
+    ],
 )
 
 # We can’t use “elisp_library” here for bootstrapping reasons.
