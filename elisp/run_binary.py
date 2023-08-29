@@ -50,11 +50,11 @@ def main() -> None:
     parser.add_argument('--output-arg', action='append', type=int, default=[])
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
-    orig_env = dict(os.environ)
+    env: dict[str, str] = dict(os.environ)
     # We don’t want the Python launcher to change the current working directory,
     # otherwise relative filenames will be all messed up.  See
     # https://github.com/bazelbuild/bazel/issues/7190.
-    orig_env.pop('RUN_UNDER_RUNFILES', None)
+    env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
@@ -67,12 +67,11 @@ def main() -> None:
             abs_name = run_files.resolve(file)
             args.append('--load=' + str(abs_name))
         if manifest_file:
-            runfiles_dir = _runfiles_dir(orig_env)
+            runfiles_dir = _runfiles_dir(env)
             input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
             output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
             manifest.write(opts, input_files, output_files, manifest_file)
         args.extend(opts.argv[1:])
-        env = dict(orig_env)
         env.update(opts.env)
         env.update(run_files.environment())
         try:
