@@ -57,11 +57,11 @@ def main() -> None:
     # explicit request.
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(name)s %(message)s')
-    orig_env = dict(os.environ)
+    env: dict[str, str] = dict(os.environ)
     # We don’t want the Python launcher to change the current working directory,
     # otherwise relative filenames will be all messed up.  See
     # https://github.com/bazelbuild/bazel/issues/7190.
-    orig_env.pop('RUN_UNDER_RUNFILES', None)
+    env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
@@ -84,7 +84,6 @@ def main() -> None:
             args += ['--skip-tag', _quote(tag)]
         args.append('--funcall=elisp/ert/run-batch-and-exit')
         args.extend(opts.argv[1:])
-        env = dict(orig_env)
         env.update(opts.env)
         env.update(run_files.environment())
         if manifest_file:
@@ -111,7 +110,7 @@ def main() -> None:
             # process, see https://github.com/bazelbuild/bazel/issues/12684.  We
             # work around this by creating a new process group and sending
             # CTRL + BREAK slightly before Bazel kills us.
-            timeout_str = orig_env.get('TEST_TIMEOUT') or None
+            timeout_str = env.get('TEST_TIMEOUT') or None
             if timeout_str:
                 # Lower the timeout to account for infrastructure overhead.
                 timeout_secs = int(timeout_str) - 2
