@@ -413,7 +413,7 @@ absl::StatusOr<int> Run(std::string binary,
   // find and its own binary; see
   // https://github.com/bazelbuild/bazel/blob/6.0.0-pre.20211110.1/src/tools/launcher/launcher_main.cc.
   for (const auto& p : *map) {
-    runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles_env=") +
+    runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
                             p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
                             p.second);
   }

@@ -36,7 +36,7 @@ def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--env', action='append', type=_env_var, default=[])
-    parser.add_argument('--runfiles_env', action='append', type=_env_var,
+    parser.add_argument('--runfiles-env', action='append', type=_env_var,
                         default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)

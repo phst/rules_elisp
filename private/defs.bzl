@@ -56,7 +56,7 @@ def _check_python_impl(target, ctx):
         expand_directories = False,
     )
     args.add(ctx.workspace_name, format = "--import=%s")
-    args.add(ctx.workspace_name, format = "--workspace_name=%s")
+    args.add(ctx.workspace_name, format = "--workspace-name=%s")
     if "no-pytype" not in tags:
         args.add("--pytype")
     tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._check])

@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ def main() -> None:
     parser.add_argument('--out', type=pathlib.Path, required=True)
     parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
-    parser.add_argument('--workspace_name', type=str, required=True)
+    parser.add_argument('--workspace-name', type=str, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
