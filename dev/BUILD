@@ -32,6 +32,7 @@ refresh_compile_commands(
 
 compile_pip_requirements(
     name = "requirements",
+    timeout = "moderate",
     env = {"USERPROFILE": r"C:\Temp"},
     extra_args = [
         "--allow-unsafe",  # for setuptools
