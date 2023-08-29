@@ -68,6 +68,15 @@ def non_module_dev_deps():
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
     )
+    maybe(
+        http_archive,
+        name = "hedron_compile_commands",
+        sha256 = "22979f20e569219ce80031a0ee051230826390a8d9ccb587529a33003ec1e259",
+        strip_prefix = "bazel-compile-commands-extractor-b33a4b05c2287372c8e932c55ff4d3a37e6761ed/",
+        urls = [
+            "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/b33a4b05c2287372c8e932c55ff4d3a37e6761ed.zip",  # 2023-04-16
+        ],
+    )
 
 def _toolchains_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
