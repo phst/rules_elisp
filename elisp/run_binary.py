@@ -33,9 +33,9 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--env', action='append', type=_env_var, default=[])
     parser.add_argument('--runfiles_env', action='append', type=_env_var,
                         default=[])
-    parser.add_argument('--coverage_dir', type=pathlib.Path)
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
@@ -73,9 +73,8 @@ def main() -> None:
             manifest.write(opts, input_files, output_files, manifest_file)
         args.extend(opts.argv[1:])
         env = dict(orig_env)
+        env.update(opts.env)
         env.update(run_files.environment())
-        if opts.coverage_dir:
-            env['COVERAGE_DIR'] = str(opts.coverage_dir)
         try:
             subprocess.run(args, env=env, check=True)
         except subprocess.CalledProcessError as ex:

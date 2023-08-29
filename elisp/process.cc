@@ -433,8 +433,8 @@ absl::StatusOr<int> Run(std::string binary,
   // Emacs process to fulfill the coverage protocol.
   if (const auto node =
           orig_env.extract(PHST_RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"))) {
-    final_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--coverage_dir=") +
-                         node.mapped());
+    final_args.push_back(
+        PHST_RULES_ELISP_NATIVE_LITERAL("--env=COVERAGE_DIR=") + node.mapped());
   }
   final_args.insert(final_args.end(), args.begin(), args.end());
   // We don’t want the Python launcher to change the current working directory,
