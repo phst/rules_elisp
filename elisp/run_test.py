@@ -83,28 +83,28 @@ def main() -> None:
         for tag in opts.skip_tag:
             args += ['--skip-tag', _quote(tag)]
         args.append('--funcall=elisp/ert/run-batch-and-exit')
-        if manifest_file:
-            inputs: list[pathlib.Path] = []
-            outputs: list[pathlib.Path] = []
-            report_file = orig_env.get('XML_OUTPUT_FILE')
-            if report_file:
-                outputs.append(pathlib.Path(report_file))
-            if orig_env.get('COVERAGE') == '1':
-                coverage_manifest = orig_env.get('COVERAGE_MANIFEST')
-                if coverage_manifest:
-                    coverage_manifest = pathlib.Path(coverage_manifest)
-                    _fix_coverage_manifest(coverage_manifest, run_files)
-                    inputs.append(coverage_manifest)
-                coverage_dir = orig_env.get('COVERAGE_DIR')
-                if coverage_dir:
-                    outputs.append(
-                        pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
-            manifest.write(opts, inputs, outputs, manifest_file)
         args.extend(opts.argv[1:])
         env = dict(orig_env)
         env.update(run_files.environment())
         if opts.coverage_dir:
             env['COVERAGE_DIR'] = str(opts.coverage_dir)
+        if manifest_file:
+            inputs: list[pathlib.Path] = []
+            outputs: list[pathlib.Path] = []
+            report_file = env.get('XML_OUTPUT_FILE')
+            if report_file:
+                outputs.append(pathlib.Path(report_file))
+            if env.get('COVERAGE') == '1':
+                coverage_manifest = env.get('COVERAGE_MANIFEST')
+                if coverage_manifest:
+                    coverage_manifest = pathlib.Path(coverage_manifest)
+                    _fix_coverage_manifest(coverage_manifest, run_files)
+                    inputs.append(coverage_manifest)
+                coverage_dir = env.get('COVERAGE_DIR')
+                if coverage_dir:
+                    outputs.append(
+                        pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
+            manifest.write(opts, inputs, outputs, manifest_file)
         timeout_secs = None
         kwargs = {}
         if _WINDOWS:
