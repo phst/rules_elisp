@@ -80,10 +80,19 @@ def main() -> None:
     bindir = workspace.tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
+    runfiles_dir = os.getenv('RUNFILES_DIR')
+    orig_path = list(sys.path)
+    if runfiles_dir:
+        # We have to remove the runfiles root from the path, otherwise extension
+        # importing gets messed up because Astroid attempts to construct a
+        # module name based on the directory path, which fails if a directory
+        # name contains dots.  Work around that by not allowing imports relative
+        # to the runfiles root.
+        orig_path = [d for d in orig_path if d != runfiles_dir]
     cwd = workspace.tempdir / args.workspace_name
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
-               PYTHONPATH=os.pathsep.join(sys.path + workspace.path))
+               PYTHONPATH=os.pathsep.join(orig_path + workspace.path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
          # We’d like to add “--” after the options, but that’s not possible due
