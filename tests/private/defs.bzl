@@ -38,7 +38,7 @@ def _provider_test_impl(ctx):
         actual = info.load_path,
         expected = [struct(
             for_actions = ctx.bin_dir.path,
-            for_runfiles = "phst_rules_elisp",
+            for_runfiles = ctx.workspace_name,
         )],
     )
     asserts.equals(env, actual = info.data_files, expected = [])
@@ -60,7 +60,7 @@ def _provider_test_impl(ctx):
         actual = info.transitive_load_path.to_list(),
         expected = [struct(
             for_actions = ctx.bin_dir.path,
-            for_runfiles = "phst_rules_elisp",
+            for_runfiles = ctx.workspace_name,
         )],
     )
     return analysistest.end(env)
