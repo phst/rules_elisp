@@ -14,13 +14,17 @@
 
 # Bazel/Starlark files always use Unix-style line endings,
 # cf. https://github.com/bazelbuild/buildtools/issues/914.
-BUILD         text eol=lf
-WORKSPACE     text eol=lf
-*.bzl         text eol=lf
+BUILD                   text eol=lf
+WORKSPACE               text eol=lf
+*.bzl                   text eol=lf
 
 # We enforce Unix-style line endings for the Stardoc files to address
 # https://github.com/bazelbuild/stardoc/issues/110.
-/docs/*.org   text eol=lf
+/docs/*.org             text eol=lf
 
 # Don’t mess with coverage test data.
-/tests/coverage.dat text eol=lf
+/tests/coverage.dat     text eol=lf
+
+# Local Variables:
+# tab-stop-list: (24)
+# End:
