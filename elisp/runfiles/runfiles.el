@@ -108,7 +108,7 @@ indicates that an empty file should be used in its place."
 Prepend this list to ‘process-environment’ if you want to invoke
 a process that should have access to the runfiles.  RUNFILES must
 be an object of the type ‘elisp/runfiles/runfiles’; it defaults
-to a global instance.  REMOTE must be nil a remote host
+to a global instance.  REMOTE must be nil or a remote host
 identifier (see Info node ‘(elisp) Magic File Names’); if the
 returned values are on the same remote host as REMOTE, return the
 local names on that host, otherwise signal an error of type
