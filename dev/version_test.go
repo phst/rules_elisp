@@ -63,6 +63,46 @@ func TestDependencyVersions(t *testing.T) {
 	}
 }
 
+func TestGoDependencies(t *testing.T) {
+	moduleFile, err := build.ParseModule("MODULE.bazel", moduleContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	moduleDeps := make(map[string]string)
+	for _, rule := range moduleFile.Rules("go_deps.module") {
+		path := rule.AttrString("path")
+		version := rule.AttrString("version")
+		if path == "" || version == "" {
+			t.Fatalf("invalid go_deps.module rule %q", path)
+		}
+		if _, dup := moduleDeps[path]; dup {
+			t.Errorf("duplicate Go dependency %q", path)
+		}
+		moduleDeps[path] = version
+	}
+
+	workspaceFile, err := build.ParseWorkspace("WORKSPACE", workspaceContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	legacyDeps := make(map[string]string)
+	for _, rule := range workspaceFile.Rules("go_repository") {
+		path := rule.AttrString("importpath")
+		version := rule.AttrString("version")
+		if path == "" || version == "" {
+			t.Fatalf("invalid go_repository rule %q", path)
+		}
+		if _, dup := legacyDeps[path]; dup {
+			t.Errorf("duplicate Go dependency %q", path)
+		}
+		legacyDeps[path] = version
+	}
+
+	if diff := cmp.Diff(moduleDeps, legacyDeps); diff != "" {
+		t.Errorf("-module +legacy\n%s", diff)
+	}
+}
+
 type dependency struct {
 	Version string
 	Dev     bool
