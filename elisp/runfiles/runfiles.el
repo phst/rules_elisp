@@ -112,7 +112,7 @@ should be used in its place."
     (pcase-exhaustive filename
       ((rx bos
            (let apparent (+ (not (any ?/ ?\n))))
-           (let rest ?/ (+ nonl))
+           (let rest (? ?/ (+ nonl)))
            eos)
        (when-let ((mapping (gethash (cons canonical apparent) table)))
          (setq filename (concat mapping rest))))))
