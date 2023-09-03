@@ -272,8 +272,8 @@ def main() -> None:
     parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action-cache', type=_cache_directory)
     parser.add_argument('--repository-cache', type=_cache_directory)
-    parser.add_argument('goals', nargs='*', choices=sorted(_targets))
-    args = parser.parse_args(sys.argv[1:] or ['all'])
+    parser.add_argument('goals', nargs='*', default=['all'])
+    args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
