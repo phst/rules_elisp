@@ -27,7 +27,7 @@ func TestDependencyVersions(t *testing.T) {
 		if name == "" || version == "" {
 			t.Fatalf("invalid bazel_dep rule %q", name)
 		}
-		if name == "fmt" {
+		if name == "phst_rules_elisp_example" {
 			// ignore, only used as example
 			continue
 		}
