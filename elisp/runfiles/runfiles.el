@@ -42,7 +42,7 @@ Use ‘elisp/runfiles/make’ to create instances of
 global instance.  All structure fields are implementation
 details."
   (impl nil :read-only t)
-  (repo-mapping nil :type 'hash-table :read-only t))
+  (repo-mapping nil :type (or null hash-table) :read-only t))
 
 (cl-defun elisp/runfiles/make (&key manifest directory)
   "Return a new instance of the type ‘elisp/runfiles/runfiles’.
