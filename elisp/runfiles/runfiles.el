@@ -33,8 +33,7 @@
 (cl-defstruct (elisp/runfiles/runfiles
                (:conc-name elisp/runfiles/runfiles--)
                (:constructor nil)
-               (:constructor elisp/runfiles/runfiles--make
-                             (impl repo-mapping caller-repo))
+               (:constructor elisp/runfiles/runfiles--make (impl repo-mapping))
                (:copier nil)
                :noinline)
   "Provides access to Bazel runfiles.
@@ -43,22 +42,18 @@ Use ‘elisp/runfiles/make’ to create instances of
 global instance.  All structure fields are implementation
 details."
   (impl nil :read-only t)
-  (repo-mapping nil :type 'hash-table :read-only t)
-  (caller-repo nil :type 'string :read-only t))
+  (repo-mapping nil :type 'hash-table :read-only t))
 
-(cl-defun elisp/runfiles/make (&key manifest directory caller-repo)
+(cl-defun elisp/runfiles/make (&key manifest directory)
   "Return a new instance of the type ‘elisp/runfiles/runfiles’.
 MANIFEST and DIRECTORY specify the location of the runfiles.  By
 default, use environmental variable to find the runfiles.
 MANIFEST specifies the filename of a runfile manifest.  DIRECTORY
 specifies the runfile directory.  Either of them can be nil or
 empty.  If the runfiles aren’t found at either location, signal
-an error of type ‘elisp/runfiles/not-found’.  CALLER-REPO, if
-present, is the canonical name of the repository of the calling
-function; it’s used for repository mappings."
+an error of type ‘elisp/runfiles/not-found’."
   (cl-check-type manifest (or null string))
   (cl-check-type directory (or null string))
-  (cl-check-type caller-repo (or null string))
   (unless manifest
     (let ((value (getenv "RUNFILES_MANIFEST_FILE")))
       (and value (not (string-empty-p value))
@@ -80,7 +75,7 @@ function; it’s used for repository mappings."
                                      (elisp/runfiles/rlocation--internal
                                       impl "_repo_mapping"))))
                     (elisp/runfiles/parse--repo-mapping file))))
-    (elisp/runfiles/runfiles--make impl mapping caller-repo)))
+    (elisp/runfiles/runfiles--make impl mapping)))
 
 (defvar elisp/runfiles/global--cache nil
   "Cache for ‘elisp/runfiles/get’.")
@@ -103,19 +98,17 @@ the global instance is initialized."
 RUNFILES must be an object of the type ‘elisp/runfiles/runfiles’;
 it defaults to a global instance.  CALLER-REPO, if present, is
 the canonical name of the repository of the calling function;
-it’s used for repository mappings.  If CALLER-REPO is nil, use
-the CALLER-REPO passed to ‘elisp/runfiles/make’.  Signal an error
-of type ‘elisp/runfiles/not-found’ if FILENAME wasn’t found in
-the runfiles tree.  Signal an error of type
-‘elisp/runfiles/empty’ if FILENAME is present in the runfiles
-manifest, but doesn’t map to a real file on the filesystem; this
-indicates that an empty file should be used in its place."
+it’s used for repository mappings.  Signal an error of type
+‘elisp/runfiles/not-found’ if FILENAME wasn’t found in the
+runfiles tree.  Signal an error of type ‘elisp/runfiles/empty’ if
+FILENAME is present in the runfiles manifest, but doesn’t map to
+a real file on the filesystem; this indicates that an empty file
+should be used in its place."
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles elisp/runfiles/runfiles)
   (cl-check-type caller-repo (or null string))
   (when-let ((table (elisp/runfiles/runfiles--repo-mapping runfiles))
-             (canonical (or caller-repo
-                            (elisp/runfiles/runfiles--caller-repo runfiles))))
+             (canonical caller-repo))
     (pcase-exhaustive filename
       ((rx bos
            (let apparent (+ (not (any ?/ ?\n))))
