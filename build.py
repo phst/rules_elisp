@@ -135,16 +135,16 @@ class Builder:
         for version in sorted(_versions()):
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
-    def _test(self, *args: str) -> None:
+    def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
         self._bazel(
             'test', ['//...'],
-            options=['--test_output=errors'] + list(args))
+            options=['--test_output=errors'] + list(args),
+            cwd=cwd)
 
     @target
     def ext(self) -> None:
         """Run the tests in the example workspace."""
-        self._bazel('test', ['//...'], options=['--test_output=errors'],
-                    cwd=self._workspace / 'examples' / 'ext')
+        self._test(cwd=self._workspace / 'examples' / 'ext')
 
     @target
     def compdb(self) -> None:
