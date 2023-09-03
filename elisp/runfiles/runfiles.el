@@ -97,7 +97,10 @@ the global instance is initialized."
 RUNFILES must be an object of the type ‘elisp/runfiles/runfiles’;
 it defaults to a global instance.  CALLER-REPO, if present, is
 the canonical name of the repository of the calling function;
-it’s used for repository mappings.  Signal an error of type
+it’s used for repository mappings.  If CALLER-REPO is not given
+and a call to the ‘elisp/runfiles/rlocation’ function is being
+compiled, attempt to determine the caller’s repository using
+‘macroexp-file-name’.  Signal an error of type
 ‘elisp/runfiles/not-found’ if FILENAME wasn’t found in the
 runfiles tree.  Signal an error of type ‘elisp/runfiles/empty’ if
 FILENAME is present in the runfiles manifest, but doesn’t map to
@@ -118,6 +121,27 @@ should be used in its place."
          (setq filename (concat mapping rest))))))
   (elisp/runfiles/rlocation--internal (elisp/runfiles/runfiles--impl runfiles)
                                       filename))
+
+;; A somewhat robust way to determine the caller repository is at compile time.
+;; We could also try to determine the caller at runtime using ‘backtrace-frame’
+;; and ‘symbol-file’, but that doesn’t work in cases where the caller is an
+;; anonymous function, e.g., in ERT tests.
+(cl-define-compiler-macro elisp/runfiles/rlocation
+    (&whole form filename &optional runfiles &key caller-repo)
+  (unless caller-repo
+    (when-let ((caller-file (macroexp-file-name)))
+      ;; The directory after the execution root should be the repository name at
+      ;; compile time.  See
+      ;; https://bazel.build/remote/output-directories#layout-diagram.
+      (pcase caller-file
+        ((rx "/execroot/" (let name (+ (not (any ?/)))) ?/)
+         (setq form
+               `(elisp/runfiles/rlocation
+                 ,filename ,runfiles
+                 ;; The canonical name of the main repository is the empty
+                 ;; string.
+                 :caller-repo ,(if (string-equal name "_main") "" name)))))))
+  form)
 
 (cl-defun elisp/runfiles/env-vars
     (&optional runfiles (remote (file-remote-p default-directory)))
