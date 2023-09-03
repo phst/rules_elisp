@@ -92,8 +92,7 @@ the global instance is initialized."
   '(and string (satisfies elisp/runfiles/filename-p)))
 
 (cl-defun elisp/runfiles/rlocation
-    (filename &optional (runfiles (elisp/runfiles/get))
-              &key caller-repo)
+    (filename &optional runfiles &key caller-repo)
   "Return a filename corresponding to the runfile FILENAME.
 RUNFILES must be an object of the type ‘elisp/runfiles/runfiles’;
 it defaults to a global instance.  CALLER-REPO, if present, is
@@ -105,8 +104,9 @@ FILENAME is present in the runfiles manifest, but doesn’t map to
 a real file on the filesystem; this indicates that an empty file
 should be used in its place."
   (cl-check-type filename elisp/runfiles/filename)
-  (cl-check-type runfiles elisp/runfiles/runfiles)
+  (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
+  (unless runfiles (setq runfiles (elisp/runfiles/get)))
   (when-let ((table (elisp/runfiles/runfiles--repo-mapping runfiles))
              (canonical caller-repo))
     (pcase-exhaustive filename
@@ -120,8 +120,7 @@ should be used in its place."
                                       filename))
 
 (cl-defun elisp/runfiles/env-vars
-    (&optional (runfiles (elisp/runfiles/get))
-               (remote (file-remote-p default-directory)))
+    (&optional runfiles (remote (file-remote-p default-directory)))
   "Return a list of environmental variable for subprocesses.
 Prepend this list to ‘process-environment’ if you want to invoke
 a process that should have access to the runfiles.  RUNFILES must
@@ -131,8 +130,9 @@ identifier (see Info node ‘(elisp) Magic File Names’); if the
 returned values are on the same remote host as REMOTE, return the
 local names on that host, otherwise signal an error of type
 ‘elisp/runfiles/remote’."
-  (cl-check-type runfiles elisp/runfiles/runfiles)
+  (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type remote (or string null))
+  (unless runfiles (setq runfiles (elisp/runfiles/get)))
   (elisp/runfiles/env-vars--internal (elisp/runfiles/runfiles--impl runfiles)
                                      remote))
 
