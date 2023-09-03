@@ -174,27 +174,23 @@ class Builder:
         files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
         if not files:
             raise FileNotFoundError('no coverage files generated')
-        temp_dir: Optional[pathlib.Path] = None
-        if self._kernel == 'Darwin':
-            # Work around https://github.com/bazelbuild/bazel/issues/14969.  Run
-            # the LCov merger binary again, filtering out macOS system headers.
-            temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
-            report = temp_dir / 'report.txt'
-            output = temp_dir / 'coverage.dat'
-            with report.open('xt') as stream:
-                for file in files:
-                    stream.write(os.path.abspath(file) + '\n')
-            self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
-                                '--reports_file=' + str(report),
-                                '--output_file=' + str(output),
-                                '--filter_sources=/Applications/.+'])
-            files = [str(output)]
+        # Work around https://github.com/bazelbuild/bazel/issues/14969.  Run the
+        # LCov merger binary again, filtering out macOS system headers.
+        temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
+        report = temp_dir / 'report.txt'
+        output = temp_dir / 'coverage.dat'
+        with report.open('xt') as stream:
+            for file in files:
+                stream.write(os.path.abspath(file) + '\n')
+        self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
+                            '--reports_file=' + str(report),
+                            '--output_file=' + str(output),
+                            '--filter_sources=/Applications/.+'])
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml', '--output-directory=' + str(directory),
-                   '--branch-coverage', '--'] + files,
+                   '--branch-coverage', '--', str(output)],
                   cwd=self._workspace)
-        if temp_dir:
-            shutil.rmtree(temp_dir)
+        shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
 
     @target
