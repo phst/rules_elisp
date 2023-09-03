@@ -15,7 +15,7 @@
 """Bzlmod module definition for an external example."""
 
 module(
-    name = "fmt",  # must match the fake names used in the main MODULE.bazel
+    name = "phst_rules_elisp_example",
     version = "0",
 )
 

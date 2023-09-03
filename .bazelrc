@@ -12,6 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Enable local registry for testing.
+common --registry='file://%workspace%/registry/'
+common --registry='https://bcr.bazel.build/'
+
 # Run Pylint by default.
 build --aspects='//private:defs.bzl%check_python'
 build --output_groups='+check_python'
