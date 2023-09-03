@@ -20,6 +20,7 @@ Mimics a trivial version of Make."""
 
 import argparse
 from collections.abc import Callable, Iterable, Mapping, Sequence
+import enum
 import functools
 import io
 import os
@@ -35,6 +36,8 @@ from typing import Optional
 
 _Target = Callable[['Builder'], None]
 _targets: dict[str, _Target] = {}
+
+_Bzlmod = enum.Enum('_Bzlmod', ['NO', 'YES', 'BOTH'])
 
 
 def target(func: _Target) -> _Target:
@@ -53,9 +56,11 @@ class Builder:
 
     def __init__(self, *,
                  bazel: pathlib.Path,
+                 bzlmod: _Bzlmod = _Bzlmod.BOTH,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._bazel_program = bazel
+        self._bzlmod = bzlmod
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._kernel = platform.system()
@@ -136,10 +141,19 @@ class Builder:
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
     def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
-        self._bazel(
-            'test', ['//...'],
-            options=['--test_output=errors'] + list(args),
-            cwd=cwd)
+        prefixes = {
+            _Bzlmod.NO: ['no'],
+            _Bzlmod.YES: [''],
+            _Bzlmod.BOTH: ['no', ''],
+        }
+        for prefix in prefixes[self._bzlmod]:
+            self._bazel(
+                'test', ['//...'],
+                options=[
+                    '--test_output=errors',
+                    f'--{prefix}experimental_enable_bzlmod',
+                ] + list(args),
+                cwd=cwd)
 
     @target
     def ext(self) -> None:
@@ -270,11 +284,14 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
+    parser.add_argument('--bzlmod', choices=['no', 'yes', 'both'],
+                        default='both')
     parser.add_argument('--action-cache', type=_cache_directory)
     parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
+                      bzlmod=getattr(_Bzlmod, args.bzlmod.upper()),
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:
