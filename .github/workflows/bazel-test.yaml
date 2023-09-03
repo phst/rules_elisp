@@ -89,6 +89,7 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
+          --bzlmod=no
           --action-cache=~/bazel-action-cache
           --repository-cache=~/bazel-repository-cache
           -- check
