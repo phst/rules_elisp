@@ -186,6 +186,13 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                           ,@(car
                              (or (get 'cl-macro-list 'edebug-elem-spec)
                                  (edebug-get-spec 'cl-macro-list))))
+                         cl-declarations-or-string def-body)))
+        ;; Work around another Edebug specification issue fixed with Emacs
+        ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
+        (when (eql emacs-major-version 29)
+          (put #'cl-define-compiler-macro 'edebug-form-spec
+               `(&define [&name symbolp "@cl-compiler-macro"]
+                         cl-macro-list
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
