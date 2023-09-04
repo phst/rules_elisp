@@ -45,6 +45,10 @@
 #include "elisp/platform.h"
 #include "elisp/process.h"
 
+#ifndef BAZEL_CURRENT_REPOSITORY
+#define BAZEL_CURRENT_REPOSITORY ""
+#endif
+
 // IWYU pragma: no_include "gtest/gtest_pred_impl.h"
 // IWYU pragma: no_include <gmock/gmock-matchers.h>
 // IWYU pragma: no_include <gtest/gtest-matchers.h>
@@ -93,7 +97,8 @@ class Wrapper final {
 
 
 TEST(Executor, RunBinaryWrap) {
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::CreateForTest();
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
   const NativeString wrapper = Wrapper::Get();
   ASSERT_FALSE(wrapper.empty()) << "missing wrapper command-line argument";

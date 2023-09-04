@@ -51,8 +51,10 @@ using Environment = absl::flat_hash_map<NativeString, NativeString>;
 
 class Runfiles final {
  public:
-  static absl::StatusOr<Runfiles> Create(const NativeString& argv0);
-  static absl::StatusOr<Runfiles> CreateForTest();
+  static absl::StatusOr<Runfiles> Create(const std::string& source_repository,
+                                         const NativeString& argv0);
+  static absl::StatusOr<Runfiles> CreateForTest(
+      const std::string& source_repository);
   absl::StatusOr<NativeString> Resolve(const std::string& name) const;
   absl::StatusOr<phst_rules_elisp::Environment> Environment() const;
 
