@@ -181,7 +181,7 @@ class Builder:
         output = temp_dir / 'coverage.dat'
         with report.open('xt') as stream:
             for file in files:
-                stream.write(os.path.abspath(file) + '\n')
+                stream.write(file + '\n')
         self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
                             '--reports_file=' + str(report),
                             '--output_file=' + str(output),
