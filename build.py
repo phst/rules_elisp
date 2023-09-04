@@ -193,7 +193,10 @@ class Builder:
         output.write_text(content, 'utf-8')
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml', '--output-directory=' + str(directory),
-                   '--branch-coverage', '--flat', '--', str(output)],
+                   '--branch-coverage', '--flat',
+                   '--demangle-cpp=c++filt',
+                   '--demangle-cpp=--no-strip-underscore',
+                   '--', str(output)],
                   cwd=self._workspace)
         shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
