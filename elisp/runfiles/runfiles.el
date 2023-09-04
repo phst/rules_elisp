@@ -429,22 +429,21 @@ which see."
   (let ((match (assq operation elisp/runfiles/generic--handlers)))
     (unless match
       (error "Unhandled file name operation %s" operation))
-    (cl-flet ((invoke
-               ()
-               (let ((default-directory
+    (cl-flet ((invoke ()
+                (let ((default-directory
                        (elisp/runfiles/transform--name default-directory)))
-                 (apply operation
-                        (cl-loop
-                         for type in (remq 'noerror (cdr match))
-                         for arg in args
-                         collect
-                         (cl-ecase type
-                           (file (elisp/runfiles/transform--name arg))
-                           (newfile
-                            (if (string-prefix-p "/bazel-runfile:" arg)
-                                (signal 'elisp/runfiles/read-only nil)
-                              arg))
-                           (arg arg)))))))
+                  (apply operation
+                         (cl-loop
+                          for type in (remq 'noerror (cdr match))
+                          for arg in args
+                          collect
+                          (cl-ecase type
+                            (file (elisp/runfiles/transform--name arg))
+                            (newfile
+                             (if (string-prefix-p "/bazel-runfile:" arg)
+                                 (signal 'elisp/runfiles/read-only nil)
+                               arg))
+                            (arg arg)))))))
       (if (memq 'noerror (cdr match))
           (condition-case nil
               (invoke)

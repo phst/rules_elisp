@@ -361,10 +361,12 @@ SKIP-TAGS is a list of additional tags to skip."
   (cl-callf append skip-tags (reverse elisp/ert/skip--tags))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
-  (cl-flet ((combine (op def elts) (cond ((null elts) def)
-                                         ((cdr elts) `(,op ,@elts))
-                                         (t (car elts))))
-            (invert (sel) (if sel `(not ,sel) t)))
+  (cl-flet ((combine (op def elts)
+              (cond ((null elts) def)
+                    ((cdr elts) `(,op ,@elts))
+                    (t (car elts))))
+            (invert (sel)
+              (if sel `(not ,sel) t)))
     (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
            (filter (if (member test-filter '(nil "")) t (read test-filter)))
            (skip-tags-sel
@@ -1083,19 +1085,18 @@ exact copies as equal."
   (cl-check-type tree list)
   (let ((map (make-hash-table :test #'eq))
         (marker (cons nil nil)))
-    (cl-labels ((walk
-                 (obj)
-                 (let ((existing (gethash obj map marker)))
-                   (if (not (eq existing marker)) existing
-                     (let ((new (cl-etypecase obj
-                                  (symbol (elisp/ert/check--xml-name obj))
-                                  (string (elisp/ert/sanitize--xml-string obj))
-                                  ((and list (satisfies proper-list-p))
-                                   (mapcar #'walk obj))
-                                  (cons
-                                   (cons (walk (car obj)) (walk (cdr obj)))))))
-                       (puthash obj new map)
-                       new)))))
+    (cl-labels ((walk (obj)
+                  (let ((existing (gethash obj map marker)))
+                    (if (not (eq existing marker)) existing
+                      (let ((new (cl-etypecase obj
+                                   (symbol (elisp/ert/check--xml-name obj))
+                                   (string (elisp/ert/sanitize--xml-string obj))
+                                   ((and list (satisfies proper-list-p))
+                                    (mapcar #'walk obj))
+                                   (cons
+                                    (cons (walk (car obj)) (walk (cdr obj)))))))
+                        (puthash obj new map)
+                        new)))))
       (walk tree))))
 
 (defun elisp/ert/check--xml-name (symbol)
