@@ -192,8 +192,10 @@ class Builder:
         content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
         output.write_text(content, 'utf-8')
         directory = self._workspace / 'coverage-report'
-        self._run(['genhtml', '--output-directory=' + str(directory),
-                   '--branch-coverage', '--flat',
+        self._run(['genhtml',
+                   '--output-directory=' + str(directory),
+                   '--branch-coverage',
+                   '--flat',
                    '--demangle-cpp=c++filt',
                    '--demangle-cpp=--no-strip-underscore',
                    '--', str(output)],
