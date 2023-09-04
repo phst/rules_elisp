@@ -343,11 +343,19 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 #endif
 }
 
-absl::StatusOr<Runfiles> Runfiles::Create(const NativeString& argv0) {
+absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
+                                          const NativeString& argv0) {
+#ifndef BAZEL_CURRENT_REPOSITORY
+  CHECK(source_repository.empty());
+#endif
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  std::unique_ptr<Impl> impl(Impl::Create(*narrow_argv0, &error));
+  std::unique_ptr<Impl> impl(Impl::Create(*narrow_argv0,
+#ifdef BAZEL_CURRENT_REPOSITORY
+                                          source_repository,
+#endif
+                                          &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
@@ -355,9 +363,17 @@ absl::StatusOr<Runfiles> Runfiles::Create(const NativeString& argv0) {
   return Runfiles(std::move(impl));
 }
 
-absl::StatusOr<Runfiles> Runfiles::CreateForTest() {
+absl::StatusOr<Runfiles> Runfiles::CreateForTest(
+    const std::string& source_repository) {
+#ifndef BAZEL_CURRENT_REPOSITORY
+  CHECK(source_repository.empty());
+#endif
   std::string error;
-  std::unique_ptr<Impl> impl(Impl::CreateForTest(&error));
+  std::unique_ptr<Impl> impl(Impl::CreateForTest(
+#ifdef BAZEL_CURRENT_REPOSITORY
+      source_repository,
+#endif
+      &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles for test: ", error));

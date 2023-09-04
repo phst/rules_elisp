@@ -39,11 +39,16 @@
 
 #include "elisp/process.h"
 
+#ifndef BAZEL_CURRENT_REPOSITORY
+#define BAZEL_CURRENT_REPOSITORY ""
+#endif
+
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunBinaryImpl(
     const NativeString& argv0, const std::vector<NativeString>& args) {
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(argv0);
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_binary", args, *runfiles);
 }
