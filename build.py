@@ -179,7 +179,7 @@ class Builder:
         temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
         report = temp_dir / 'report.txt'
         output = temp_dir / 'coverage.dat'
-        with report.open('xt') as stream:
+        with report.open('xt', encoding='utf-8') as stream:
             for file in files:
                 stream.write(file + '\n')
         self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
