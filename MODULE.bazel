@@ -35,6 +35,11 @@ bazel_dep(name = "rules_go", version = "0.41.0", dev_dependency = True, repo_nam
 bazel_dep(name = "abseil-py", version = "1.4.0", dev_dependency = True, repo_name = "io_abseil_py")
 bazel_dep(name = "gazelle", version = "0.32.0", dev_dependency = True, repo_name = "bazel_gazelle")
 
+# Bring in the local_config_cc repository.  It’s needed for
+# phst_rules_elisp_toolchains on Windows.
+cc_configure = use_extension("@bazel_tools//tools/cpp:cc_configure.bzl", "cc_configure_extensions")
+use_repo(cc_configure, "local_config_cc")
+
 # Non-module dependencies
 non_module_deps = use_extension("//private:non_module_deps.bzl", "non_module_deps")
 use_repo(non_module_deps, "gnu_emacs_28.1")
