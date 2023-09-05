@@ -18,7 +18,8 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
-load("//elisp:defs.bzl", "elisp_library", "elisp_test")
+load("@rules_python//python:defs.bzl", "py_test")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_test")
 load(":private/defs.bzl", "elisp_test_suite")
 
 package(
@@ -95,4 +96,25 @@ copy_file(
     testonly = True,
     src = "@junit_xsd//:JUnit.xsd",
     out = "JUnit.xsd",
+)
+
+elisp_binary(
+    name = "empty",
+    src = "empty.el",
+)
+
+py_test(
+    name = "empty_test",
+    size = "medium",
+    timeout = "short",
+    srcs = ["empty_test.py"],
+    args = ["--binary=$(rlocationpath :empty)"],
+    data = [":empty"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        "//elisp:runfiles",
+        "@io_abseil_py//absl/flags",
+        "@io_abseil_py//absl/testing:absltest",
+    ],
 )
