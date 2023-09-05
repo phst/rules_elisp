@@ -95,7 +95,7 @@ class Wrapper final {
 };
 
 
-TEST(Executor, RunBinaryWrap) {
+TEST(RunBinary, Wrapped) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
