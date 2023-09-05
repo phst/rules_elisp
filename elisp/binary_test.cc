@@ -14,7 +14,6 @@
 
 #include "elisp/binary.h"
 
-#include <cstdlib>
 #include <string>
 #include <utility>
 #include <vector>
@@ -29,7 +28,7 @@
 #pragma warning(push, 3)
 #endif
 #include "absl/base/thread_annotations.h"
-#include "absl/log/log.h"
+#include "absl/log/check.h"
 #include "absl/synchronization/mutex.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -136,10 +135,7 @@ TEST(Executor, RunBinaryWrap) {
 int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
   testing::InitGoogleTest(&argc, argv);
   // Don’t use absl::ParseCommandLine since that doesn’t support wide strings.
-  if (argc != 2) {
-    LOG(ERROR) << "usage: binary_test WRAPPER";
-    return EXIT_FAILURE;
-  }
+  QCHECK_EQ(argc, 2) << "usage: binary_test WRAPPER";
   phst_rules_elisp::Wrapper::Set(argv[1]);
   return RUN_ALL_TESTS();
 }
