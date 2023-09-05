@@ -195,8 +195,8 @@ class Builder:
         self._run(['genhtml',
                    '--output-directory=' + str(directory),
                    '--branch-coverage',
-                   '--demangle-cpp=c++filt',
-                   '--demangle-cpp=--no-strip-underscore',
+                   '--demangle-cpp',
+                   '--rc=genhtml_demangle_cpp_params=--no-strip-underscore',
                    '--', str(output)],
                   cwd=self._workspace)
         shutil.rmtree(temp_dir)
