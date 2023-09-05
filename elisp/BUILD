@@ -306,6 +306,7 @@ py_library(
     visibility = [
         "//emacs:__pkg__",
         "//examples:__pkg__",
+        "//tests:__pkg__",
         "//tests/wrap:__pkg__",
     ],
     deps = ["@rules_python//python/runfiles"],
