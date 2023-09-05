@@ -195,7 +195,6 @@ class Builder:
         self._run(['genhtml',
                    '--output-directory=' + str(directory),
                    '--branch-coverage',
-                   '--flat',
                    '--demangle-cpp=c++filt',
                    '--demangle-cpp=--no-strip-underscore',
                    '--', str(output)],
