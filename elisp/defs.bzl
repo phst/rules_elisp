@@ -480,12 +480,6 @@ elisp_binary = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        _grep_includes = attr.label(
-            allow_single_file = True,
-            executable = True,
-            cfg = "exec",
-            default = Label("@bazel_tools//tools/cpp:grep-includes"),
-        ),
         _binary_libs = attr.label_list(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
@@ -556,12 +550,6 @@ elisp_test = rule(
         _cc_toolchain = attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
-        ),
-        _grep_includes = attr.label(
-            allow_single_file = True,
-            executable = True,
-            cfg = "exec",
-            default = Label("@bazel_tools//tools/cpp:grep-includes"),
         ),
         _test_libs = attr.label_list(
             default = [Label("//elisp:test")],

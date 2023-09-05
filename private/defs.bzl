@@ -214,7 +214,6 @@ def cc_launcher(ctx, cc_toolchain, src, deps):
         compilation_outputs = objs,
         linking_contexts = [info.linking_context for info in infos],
         user_link_flags = defaults.linkopts,
-        grep_includes = ctx.executable._grep_includes,
     )
     runfiles = ctx.runfiles()
     for dep in deps:
