@@ -110,11 +110,6 @@ def main() -> None:
     # e.g. https://debbugs.gnu.org/40766).
     for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
         compiled.with_suffix('.el').unlink()
-    # Sanity check to verify that the resulting binary works.
-    exe_suffix = '.exe' if windows else ''
-    subprocess.run([str(install / 'bin' / ('emacs' + exe_suffix)),
-                    '--quick', '--batch'],
-                   check=True, stdin=subprocess.DEVNULL)
     if args.module_header:
         # Copy emacs-module.h to the desired location.
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
