@@ -15,7 +15,6 @@
 """Runs Pylint and Pytype."""
 
 import argparse
-from collections.abc import Iterable
 import json
 import os
 import os.path
@@ -24,41 +23,6 @@ import shutil
 import sys
 import subprocess
 import tempfile
-
-class Workspace:
-    """Represents a temporary workspace for Pylint and Pytype."""
-
-    def __init__(self, params_file: pathlib.Path, *, out: pathlib.Path,
-                 path: Iterable[pathlib.Path],
-                 workspace_name: str) -> None:
-        params = json.loads(params_file.read_text(encoding='utf-8'))
-        srcs = []
-        tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
-        for file in params['srcs']:
-            dest = tempdir / workspace_name / file['rel']
-            dest.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copyfile(file['src'], dest)
-            # Don’t attempt to check generated protocol buffer files.
-            if not file['ext'] and not dest.name.endswith('_pb2.py'):
-                srcs.append(dest)
-        if not srcs:
-            raise FileNotFoundError('no source files found')
-        for dirpath, _, _ in os.walk(tempdir):
-            dirpath = pathlib.Path(dirpath)
-            if dirpath != tempdir:
-                # Mimic the Bazel behavior.  Also see
-                # https://github.com/bazelbuild/bazel/issues/10076.
-                (dirpath / '__init__.py').touch()
-        self.srcs = frozenset(srcs)
-        self.path = [str(tempdir / d) for d in path]
-        self.tempdir = tempdir
-        self._output = out
-
-    def success(self) -> None:
-        """Clean up the temporary directory."""
-        shutil.rmtree(self.tempdir)
-        self.tempdir = None
-        self._output.touch()
 
 
 def main() -> None:
@@ -72,13 +36,32 @@ def main() -> None:
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
+    workspace_name = args.workspace_name
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
-    workspace = Workspace(args.params, out=args.out, path=args.path,
-                          workspace_name=args.workspace_name)
+    params = json.loads(args.params.read_text(encoding='utf-8'))
+    srcs = []
+    tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
+    for file in params['srcs']:
+        dest = tempdir / workspace_name / file['rel']
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(file['src'], dest)
+        # Don’t attempt to check generated protocol buffer files.
+        if not file['ext'] and not dest.name.endswith('_pb2.py'):
+            srcs.append(dest)
+    if not srcs:
+        raise FileNotFoundError('no source files found')
+    for dirpath, _, _ in os.walk(tempdir):
+        dirpath = pathlib.Path(dirpath)
+        if dirpath != tempdir:
+            # Mimic the Bazel behavior.  Also see
+            # https://github.com/bazelbuild/bazel/issues/10076.
+            (dirpath / '__init__.py').touch()
+    srcs = frozenset(srcs)
+    workspace_path = [str(tempdir / d) for d in args.path]
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
-    bindir = workspace.tempdir / 'bin'
+    bindir = tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
     runfiles_dir = os.getenv('RUNFILES_DIR')
@@ -97,17 +80,16 @@ def main() -> None:
                 orig_path.append(entry)
         except FileNotFoundError:
             pass  # ignore nonexisting entries
-    cwd = workspace.tempdir / args.workspace_name
+    cwd = tempdir / workspace_name
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
-               PYTHONPATH=os.pathsep.join(orig_path + workspace.path))
+               PYTHONPATH=os.pathsep.join(orig_path + workspace_path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
          # We’d like to add “--” after the options, but that’s not possible due
          # to https://github.com/PyCQA/pylint/issues/7003.
          '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
-        + [str(file.relative_to(cwd))
-           for file in sorted(workspace.srcs)],
+        + [str(file.relative_to(cwd)) for file in sorted(srcs)],
         check=False, cwd=cwd, env=env,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
@@ -117,9 +99,9 @@ def main() -> None:
     if os.name == 'posix' and args.pytype:
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
-             '--pythonpath=' + os.pathsep.join(workspace.path),
+             '--pythonpath=' + os.pathsep.join(workspace_path),
              '--no-cache', '--'] + [str(file.relative_to(cwd))
-                                    for file in sorted(workspace.srcs)],
+                                    for file in sorted(srcs)],
             check=False, cwd=cwd, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
@@ -128,7 +110,8 @@ def main() -> None:
             sys.exit(result.returncode)
     # Only clean up the workspace if we exited successfully, to help with
     # debugging.
-    workspace.success()
+    shutil.rmtree(tempdir)
+    args.out.touch()
 
 
 if __name__ == '__main__':
