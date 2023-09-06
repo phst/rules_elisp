@@ -30,7 +30,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--out', type=pathlib.Path, required=True)
-    parser.add_argument('--import', type=pathlib.Path, action='append',
+    parser.add_argument('--import', type=pathlib.PurePosixPath, action='append',
                         default=[], dest='path')
     parser.add_argument('--workspace-name', type=str, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
