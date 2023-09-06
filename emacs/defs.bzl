@@ -179,9 +179,7 @@ def _install(ctx, cc_toolchain, source):
             action_name = action,
             variables = vars,
         ))
-    install = ctx.actions.declare_directory(
-        "_{}_install".format(ctx.label.name),
-    )
+    install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add(source, format = "--source=%s")
     args.add(install.path, format = "--install=%s")
