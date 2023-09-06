@@ -37,6 +37,11 @@ def main() -> None:
     parser.add_argument('--pytype', action='store_true', default=False)
     args = parser.parse_args()
     workspace_name = args.workspace_name
+    dirs = [d for d in sys.path if os.path.basename(d) == workspace_name]
+    if len(dirs) != 1:
+        raise ValueError(f'no unique workspace directory: {dirs}')
+    module_space = pathlib.Path(dirs[0]).parent
+    module_space_stat = module_space.stat()
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
     # main and external workspaces.
     params = json.loads(args.params.read_text(encoding='utf-8'))
@@ -64,19 +69,16 @@ def main() -> None:
     bindir = tempdir / 'bin'
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
-    runfiles_dir = os.getenv('RUNFILES_DIR')
-    runfiles_stat = os.stat(runfiles_dir) if runfiles_dir else None
     orig_path = []
     for entry in sys.path:
         try:
             entry_stat = os.stat(entry)
-            # We have to remove the runfiles root from the path, otherwise
+            # We have to remove the module space from the path, otherwise
             # extension importing gets messed up because Astroid attempts to
             # construct a module name based on the directory path, which fails
             # if a directory name contains dots.  Work around that by not
-            # allowing imports relative to the runfiles root.
-            if not (runfiles_stat
-                    and os.path.samestat(entry_stat, runfiles_stat)):
+            # allowing imports relative to the module space.
+            if not os.path.samestat(entry_stat, module_space_stat):
                 orig_path.append(entry)
         except FileNotFoundError:
             pass  # ignore nonexisting entries
