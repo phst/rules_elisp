@@ -53,7 +53,7 @@ def main() -> None:
         raise FileNotFoundError('no source files found')
     for dirpath, _, _ in os.walk(tempdir):
         dirpath = pathlib.Path(dirpath)
-        if dirpath != tempdir:
+        if not dirpath.samefile(tempdir):
             # Mimic the Bazel behavior.  Also see
             # https://github.com/bazelbuild/bazel/issues/10076.
             (dirpath / '__init__.py').touch()
