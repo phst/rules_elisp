@@ -18,6 +18,7 @@ import argparse
 from collections.abc import Iterable
 import json
 import os
+import os.path
 import pathlib
 import shutil
 import sys
@@ -81,14 +82,21 @@ def main() -> None:
     bindir.mkdir()
     (bindir / 'python').symlink_to(sys.executable)
     runfiles_dir = os.getenv('RUNFILES_DIR')
-    orig_path = list(sys.path)
-    if runfiles_dir:
-        # We have to remove the runfiles root from the path, otherwise extension
-        # importing gets messed up because Astroid attempts to construct a
-        # module name based on the directory path, which fails if a directory
-        # name contains dots.  Work around that by not allowing imports relative
-        # to the runfiles root.
-        orig_path = [d for d in orig_path if d != runfiles_dir]
+    runfiles_stat = os.stat(runfiles_dir) if runfiles_dir else None
+    orig_path = []
+    for entry in sys.path:
+        try:
+            entry_stat = os.stat(entry)
+            # We have to remove the runfiles root from the path, otherwise
+            # extension importing gets messed up because Astroid attempts to
+            # construct a module name based on the directory path, which fails
+            # if a directory name contains dots.  Work around that by not
+            # allowing imports relative to the runfiles root.
+            if not (runfiles_stat
+                    and os.path.samestat(entry_stat, runfiles_stat)):
+                orig_path.append(entry)
+        except FileNotFoundError:
+            pass  # ignore nonexisting entries
     cwd = workspace.tempdir / args.workspace_name
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
