@@ -186,10 +186,15 @@ class Builder:
                             '--reports_file=' + str(report),
                             '--output_file=' + str(output),
                             '--filter_sources=/Applications/.+'])
+        content = output.read_text('utf-8')
         # coverage.py occasionally writes branch coverage data for line 0, which
         # genhtml doesn’t accept.
-        content = output.read_text('utf-8')
         content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
+        # Make filenames absolute.
+        content = re.sub(
+            r'^SF:([^/].+)$',
+            'SF:' + str(self._workspace).replace('\\', r'\\') + r'/\1',
+            content, flags=re.M)
         output.write_text(content, 'utf-8')
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml',
