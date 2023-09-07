@@ -174,35 +174,29 @@ class Builder:
         files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
         if not files:
             raise FileNotFoundError('no coverage files generated')
-        # Work around https://github.com/bazelbuild/bazel/issues/14969.  Run the
-        # LCov merger binary again, filtering out macOS system headers.
+        # The tracefiles need some munging for genhtml to accept them.
         temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
-        report = temp_dir / 'report.txt'
-        output = temp_dir / 'coverage.info'
-        with report.open('xt', encoding='utf-8') as stream:
-            for file in files:
-                stream.write(file + '\n')
-        self._bazel('run', ['@bazel_tools//tools/test:lcov_merger',
-                            '--reports_file=' + str(report),
-                            '--output_file=' + str(output),
-                            '--filter_sources=/Applications/.+'])
-        content = output.read_text('utf-8')
-        # coverage.py occasionally writes branch coverage data for line 0, which
-        # genhtml doesn’t accept.
-        content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
-        # Make filenames absolute.
-        content = re.sub(
-            r'^SF:([^/].+)$',
-            'SF:' + str(self._workspace).replace('\\', r'\\') + r'/\1',
-            content, flags=re.M)
-        output.write_text(content, 'utf-8')
+        outputs: list[pathlib.Path] = []
+        for i, file in enumerate(sorted(files)):
+            content = pathlib.Path(file).read_text('utf-8')
+            # coverage.py occasionally writes branch coverage data for line 0,
+            # which genhtml doesn’t accept.
+            content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
+            # Make filenames absolute.
+            content = re.sub(
+                r'^SF:([^/].+)$',
+                'SF:' + str(self._workspace).replace('\\', r'\\') + r'/\1',
+                content, flags=re.M)
+            output = temp_dir / f'coverage-{i:03d}.info'
+            output.write_text(content, 'utf-8')
+            outputs.append(output)
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml',
                    '--output-directory=' + str(directory),
                    '--branch-coverage',
                    '--demangle-cpp',
                    '--rc=genhtml_demangle_cpp_params=--no-strip-underscore',
-                   '--', str(output)],
+                   '--'] + list(map(str, outputs)),
                   cwd=self._workspace)
         shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
