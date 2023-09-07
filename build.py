@@ -178,7 +178,7 @@ class Builder:
         # LCov merger binary again, filtering out macOS system headers.
         temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
         report = temp_dir / 'report.txt'
-        output = temp_dir / 'coverage.dat'
+        output = temp_dir / 'coverage.info'
         with report.open('xt', encoding='utf-8') as stream:
             for file in files:
                 stream.write(file + '\n')
