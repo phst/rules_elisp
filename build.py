@@ -181,11 +181,11 @@ class Builder:
             content = pathlib.Path(file).read_text('utf-8')
             # coverage.py occasionally writes branch coverage data for line 0,
             # which genhtml doesn’t accept.
-            content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
+            content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.MULTILINE)
             # Make filenames absolute.
             content = re.sub(r'^SF:([^/].+)$',
                              lambda m: 'SF:' + str(self._workspace / m[1]),
-                             content, flags=re.M)
+                             content, flags=re.MULTILINE)
             output = temp_dir / f'coverage-{i:03d}.info'
             output.write_text(content, 'utf-8')
             outputs.append(output)
