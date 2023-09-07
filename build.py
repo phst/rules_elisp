@@ -183,10 +183,9 @@ class Builder:
             # which genhtml doesn’t accept.
             content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.M)
             # Make filenames absolute.
-            content = re.sub(
-                r'^SF:([^/].+)$',
-                'SF:' + str(self._workspace).replace('\\', r'\\') + r'/\1',
-                content, flags=re.M)
+            content = re.sub(r'^SF:([^/].+)$',
+                             lambda m: 'SF:' + str(self._workspace / m[1]),
+                             content, flags=re.M)
             output = temp_dir / f'coverage-{i:03d}.info'
             output.write_text(content, 'utf-8')
             outputs.append(output)
