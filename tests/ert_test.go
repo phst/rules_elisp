@@ -184,8 +184,12 @@ func Test(t *testing.T) {
 				Name: "abort", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
 			},
-			{Name: "command-line", ClassName: "ERT", Time: wantElapsed},
-			{Name: "coverage", ClassName: "ERT", Time: wantElapsed},
+			{
+				Name: "command-line", ClassName: "ERT", Time: wantElapsed,
+			},
+			{
+				Name: "coverage", ClassName: "ERT", Time: wantElapsed,
+			},
 			{
 				Name: "error", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
@@ -194,7 +198,9 @@ func Test(t *testing.T) {
 				Name: "ert-fail", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Test failed: "Fail!"`, Type: `ert-test-failed`, Description: "something"},
 			},
-			{Name: "expect-failure", ClassName: "ERT", Time: wantElapsed},
+			{
+				Name: "expect-failure", ClassName: "ERT", Time: wantElapsed,
+			},
 			{
 				Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Test passed unexpectedly`, Type: `error`},
@@ -203,7 +209,9 @@ func Test(t *testing.T) {
 				Name: "fail", ClassName: "ERT", Time: wantElapsed,
 				Failure: message{Message: `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`, Type: `ert-test-failed`, Description: "something"},
 			},
-			{Name: "pass", ClassName: "ERT", Time: wantElapsed},
+			{
+				Name: "pass", ClassName: "ERT", Time: wantElapsed,
+			},
 			{
 				Name: "skip", ClassName: "ERT", Time: wantElapsed,
 				Skipped: message{Message: "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)", Description: "something"},
