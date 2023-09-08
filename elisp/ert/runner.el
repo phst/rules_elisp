@@ -806,7 +806,10 @@ instrumented using Edebug."
   (with-temp-buffer
     (let ((coding-system-for-write 'utf-8-unix)
           (write-region-annotate-functions nil)
-          (write-region-post-annotation-function nil))
+          (write-region-post-annotation-function nil)
+          (test-name (getenv "TEST_TARGET")))
+      (unless (member test-name '(nil ""))
+        (insert "TN:" (elisp/ert/sanitize--string test-name) ?\n))
       (dolist (buffer buffers)
         (elisp/ert/insert--coverage-report buffer)
         (kill-buffer buffer))
