@@ -35,7 +35,11 @@ import (
 var binary = flag.String("binary", "", "location of the binary file relative to the runfiles root")
 
 func Test(t *testing.T) {
-	source, err := runfiles.Rlocation("phst_rules_elisp/tests/test.el")
+	rf, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, err := rf.Rlocation("phst_rules_elisp/tests/test.el")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -43,15 +47,11 @@ func Test(t *testing.T) {
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin, err := runfiles.Rlocation(*binary)
+	bin, err := rf.Rlocation(*binary)
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Logf("using test binary %s", bin)
-	runfilesEnv, err := runfiles.Env()
-	if err != nil {
-		t.Fatal(err)
-	}
 	tempDir := t.TempDir()
 	reportName := filepath.Join(tempDir, "report.xml")
 	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
@@ -64,7 +64,7 @@ func Test(t *testing.T) {
 
 	cmd := exec.Command(bin, "arg 1", "arg\n2")
 	env := os.Environ()
-	env = append(env, runfilesEnv...)
+	env = append(env, rf.Env()...)
 	// See
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	env = append(env,
