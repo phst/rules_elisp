@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-pylint == 2.17.2
+pylint == 3.0.2
 
 # Pytype isn’t supported on Windows,
 # cf. https://github.com/google/pytype/tree/2023.10.31#requirements
