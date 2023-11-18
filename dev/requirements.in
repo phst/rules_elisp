@@ -15,7 +15,7 @@
 pylint == 2.17.2
 
 # Pytype isn’t supported on Windows,
-# cf. https://github.com/google/pytype/tree/2023.04.11#requirements
-pytype == 2023.04.11 ; sys_platform == 'linux' or sys_platform == 'darwin'
+# cf. https://github.com/google/pytype/tree/2023.10.31#requirements
+pytype == 2023.10.31 ; sys_platform == 'linux' or sys_platform == 'darwin'
 
 commonmark == 0.9.1
