@@ -20,3 +20,7 @@ module(
 )
 
 bazel_dep(name = "phst_rules_elisp", version = "0")
+local_path_override(
+    module_name = "phst_rules_elisp",
+    path = "../..",
+)
