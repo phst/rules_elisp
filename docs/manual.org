@@ -78,10 +78,14 @@ rules_elisp_toolchains()
 #+END_SRC
 
 #+TEXINFO: @noindent
-Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
-See [[*Symbols defined in =//emacs:defs.bzl=]] and the examples in the
-~examples~ directory for details.  Note that the C++ code used by ~rules_elisp~
-requires at least C++14, but Bazel still compiles with C++11 by default.  See
+Since ~rules_elisp~ depends on ~rules_python~, you’ll also need to add a
+dependency on the latter.  See
+[[https://rules-python.readthedocs.io/en/latest/getting-started.html#using-a-workspace-file][the
+~rules_python~ documentation]].  Then you can use the ~elisp_library~,
+~elisp_binary~, and ~elisp_test~ rules.  See [[*Symbols defined in
+=//emacs:defs.bzl=]] and the examples in the ~examples~ directory for details.
+Note that the C++ code used by ~rules_elisp~ requires at least C++14, but Bazel
+still compiles with C++11 by default.  See
 [[https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil][the
 Abseil FAQ]] how to correctly change the C++ standard for your project.
 
