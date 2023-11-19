@@ -173,13 +173,13 @@ gazelle_dependencies()
 go_repository(
     name = "com_github_bazelbuild_buildtools",
     importpath = "github.com/bazelbuild/buildtools",
-    sum = "h1:skvX7icFzwe3yKdg2wZALO+aLAYs13Qua1v2iZPo2HE=",
-    version = "v0.0.0-20230825120932-b163fcf72b7d",
+    sum = "h1:2Gc2Q6hVR1SJ8bBI9Ybzoggp8u/ED2WkM4MfvEIn9+c=",
+    version = "v0.0.0-20231115204819-d4c9dccdfbb1",
 )
 
 go_repository(
     name = "com_github_google_go_cmp",
     importpath = "github.com/google/go-cmp",
-    sum = "h1:O2Tfq5qg4qc4AmwVlvv0oLiVAGB7enBSJ2x2DqQFi38=",
-    version = "v0.5.9",
+    sum = "h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=",
+    version = "v0.6.0",
 )
