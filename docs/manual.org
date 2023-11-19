@@ -52,7 +52,24 @@ released, support for Emacs 28 will be dropped.
 
 * Usage
 
-Add a snippet like the following to your Bazel ~WORKSPACE~ file:
+If you’re using Bzlmod, add a snippet like the following to your ~MODULE.bazel~
+file:
+
+#+BEGIN_SRC bazel-module
+bazel_dep(name = "phst_rules_elisp", version = "0")
+git_override(
+    module_name = "phst_rules_elisp",
+    remote = "https://github.com/phst/rules_elisp.git",
+    commit = "c64b6e36a2a12005c33d55c6a31865871553d60f",
+)
+#+END_SRC
+
+#+TEXINFO: @noindent
+See [[https://bazel.build/external/overview#bzlmod][the Bzlmod documentation]]
+for background information.
+
+Alternatively, if you’re not using Bzlmod, add a snippet like the following to
+your Bazel ~WORKSPACE~ file:
 
 #+BEGIN_SRC bazel-workspace
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
@@ -78,14 +95,17 @@ rules_elisp_toolchains()
 #+END_SRC
 
 #+TEXINFO: @noindent
-Since ~rules_elisp~ depends on ~rules_python~, you’ll also need to add a
-dependency on the latter.  See
+See [[https://bazel.build/external/overview#workspace-system][the Bazel
+documentation on WORKSPACE dependencies]] for background information.  Since
+~rules_elisp~ depends on ~rules_python~, you’ll also need to add a dependency on
+the latter.  See
 [[https://rules-python.readthedocs.io/en/latest/getting-started.html#using-a-workspace-file][the
-~rules_python~ documentation]].  Then you can use the ~elisp_library~,
-~elisp_binary~, and ~elisp_test~ rules.  See [[*Symbols defined in
-=//emacs:defs.bzl=]] and the examples in the ~examples~ directory for details.
-Note that the C++ code used by ~rules_elisp~ requires at least C++14, but Bazel
-still compiles with C++11 by default.  See
+~rules_python~ documentation]].
+
+Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
+See [[*Symbols defined in =//emacs:defs.bzl=]] and the examples in the
+~examples~ directory for details.  Note that the C++ code used by ~rules_elisp~
+requires at least C++14, but Bazel still compiles with C++11 by default.  See
 [[https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil][the
 Abseil FAQ]] how to correctly change the C++ standard for your project.
 
