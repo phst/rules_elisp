@@ -62,6 +62,7 @@
 #endif
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/log/check.h"
 #include "absl/log/log.h"
@@ -153,7 +154,8 @@ static std::wstring BuildEnvironmentBlock(
   result.push_back(L'\0');
   return result;
 }
-static wchar_t* Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+static absl::Nonnull<wchar_t*> Pointer(
+    std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   CHECK(!string.empty()) << "empty string";
   if (string.find(L'\0') != string.npos) {
     std::wcerr << string << L" contains null character" << std::endl;
@@ -162,9 +164,9 @@ static wchar_t* Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   return &string.front();
 }
 #else
-static std::vector<char*> Pointers(
+static std::vector<absl::Nonnull<char*>> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  std::vector<char*> ptrs;
+  std::vector<absl::Nonnull<char*>> ptrs;
   for (std::string& s : strings) {
     CHECK(!s.empty()) << "empty string";
     CHECK(s.find('\0') == s.npos) << s << " contains null character";
@@ -179,18 +181,21 @@ static Environment CopyEnv() {
   Environment map;
 #ifdef PHST_RULES_ELISP_WINDOWS
   struct Free {
-    void operator()(wchar_t* p) const noexcept { ::FreeEnvironmentStrings(p); }
+    void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
+      ::FreeEnvironmentStrings(p);
+    }
   };
-  const std::unique_ptr<wchar_t, Free> envp(::GetEnvironmentStringsW());
+  const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
+      ::GetEnvironmentStringsW());
   // This cannot really happen in practice.
   CHECK(envp != nullptr) << L"GetEnvironmentStringsW failed";
-  const wchar_t* p = envp.get();
+  absl::Nonnull<const wchar_t*> p = envp.get();
   while (*p != L'\0') {
     // Skip over the first character to properly deal with the magic “per-drive
     // current directory” variables,
     // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
     // Their names start with an equals sign.
-    const wchar_t* const q = std::wcschr(p + 1, L'=');
+    const absl::Nullable<const wchar_t*> q = std::wcschr(p + 1, L'=');
     if (q == nullptr) {
       std::wcerr << L"Invalid environment block entry " << p << std::endl;
       LOG(FATAL) << "Invalid environment block entry";
@@ -204,7 +209,7 @@ static Environment CopyEnv() {
     ++p;
   }
 #else
-  const char* const* const envp =
+  const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
 #ifdef __APPLE__
       // See environ(7) why this is necessary.
       *_NSGetEnviron()
@@ -212,9 +217,10 @@ static Environment CopyEnv() {
       environ
 #endif
       ;
-  for (const char* const* pp = envp; *pp != nullptr; ++pp) {
-    const char* p = *pp;
-    const char* q = std::strchr(p, '=');
+  for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
+       *pp != nullptr; ++pp) {
+    const absl::Nonnull<const char*> p = *pp;
+    const absl::Nullable<const char*> q = std::strchr(p, '=');
     if (q != nullptr) {
       map.emplace(std::string(p, q), std::string(q + 1));
     }
@@ -351,11 +357,11 @@ absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  std::unique_ptr<Impl> impl(Impl::Create(*narrow_argv0,
+  absl::Nullable<std::unique_ptr<Impl>> impl(Impl::Create(*narrow_argv0,
 #ifdef BAZEL_CURRENT_REPOSITORY
-                                          source_repository,
+                                                          source_repository,
 #endif
-                                          &error));
+                                                          &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
@@ -369,7 +375,7 @@ absl::StatusOr<Runfiles> Runfiles::CreateForTest(
   CHECK(source_repository.empty());
 #endif
   std::string error;
-  std::unique_ptr<Impl> impl(Impl::CreateForTest(
+  absl::Nullable<std::unique_ptr<Impl>> impl(Impl::CreateForTest(
 #ifdef BAZEL_CURRENT_REPOSITORY
       source_repository,
 #endif
@@ -381,7 +387,8 @@ absl::StatusOr<Runfiles> Runfiles::CreateForTest(
   return Runfiles(std::move(impl));
 }
 
-Runfiles::Runfiles(std::unique_ptr<Impl> impl) : impl_(std::move(impl)) {}
+Runfiles::Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl)
+    : impl_(std::move(impl)) {}
 
 absl::StatusOr<NativeString> Runfiles::Resolve(const std::string& name) const {
   const absl::Status status = CheckASCII(name);
@@ -493,8 +500,8 @@ absl::StatusOr<int> Run(std::string binary,
   if (!success) return WindowsStatus("GetExitCodeProcess");
   return code <= kMaxInt ? code : 0xFF;
 #else
-  const std::vector<char*> argv = Pointers(final_args);
-  const std::vector<char*> envp = Pointers(final_env);
+  const std::vector<absl::Nonnull<char*>> argv = Pointers(final_args);
+  const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());
