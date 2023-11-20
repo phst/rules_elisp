@@ -127,7 +127,7 @@ class Builder:
                     file = pathlib.Path(dirpath) / file
                     text = file.read_text(encoding='utf-8')
                     if '@io_bazel_rules_go' in text:
-                        raise ValueError('unwanted Go targets in {file} found')
+                        raise ValueError(f'unwanted Go targets in {file} found')
 
     @target
     def test(self) -> None:
