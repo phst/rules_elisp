@@ -33,6 +33,7 @@
 #ifdef _MSC_VER
 #pragma warning(push, 3)
 #endif
+#include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -60,8 +61,8 @@ class Runfiles final {
 
  private:
   using Impl = bazel::tools::cpp::runfiles::Runfiles;
-  explicit Runfiles(std::unique_ptr<Impl> impl);
-  std::unique_ptr<Impl> impl_;
+  explicit Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl);
+  absl::Nonnull<std::unique_ptr<Impl>> impl_;
 };
 
 absl::StatusOr<int> Run(std::string binary,
