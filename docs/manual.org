@@ -66,7 +66,8 @@ git_override(
 
 #+TEXINFO: @noindent
 See [[https://bazel.build/external/overview#bzlmod][the Bzlmod documentation]]
-for background information.
+for background information.  Due to various Bzlmod-related bugs in older Bazel
+versions, this approach requires at least Bazel 6.3.
 
 Alternatively, if you’re not using Bzlmod, add a snippet like the following to
 your Bazel ~WORKSPACE~ file:

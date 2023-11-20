@@ -94,7 +94,8 @@ jobs:
             (
               startsWith(matrix.bazel, '5.') ||
               startsWith(matrix.bazel, '6.0.') ||
-              startsWith(matrix.bazel, '6.1.')
+              startsWith(matrix.bazel, '6.1.') ||
+              startsWith(matrix.bazel, '6.2.')
             ) && 'no' || 'both'
           }}
           --action-cache=~/bazel-action-cache
