@@ -21,7 +21,7 @@ module(
 
 # Non-development module dependencies
 bazel_dep(name = "platforms", version = "0.0.7")
-bazel_dep(name = "bazel_skylib", version = "1.4.2")
+bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "rules_license", version = "0.0.7")
 bazel_dep(name = "rules_python", version = "0.26.0")
 bazel_dep(name = "abseil-cpp", version = "20230802.0", repo_name = "com_google_absl")
