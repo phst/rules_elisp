@@ -1,6 +1,6 @@
 ;;; lib-4.el --- example library 4 -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@
 ;; Example library in an external workspace.
 
 ;;; Code:
+
+(require 'dash)  ; from elisp_http_archive rule
 
 (defun lib-4-func ()
   (message "hi from lib-4"))

@@ -77,3 +77,32 @@ def _toolchains_impl(repository_ctx):
 _toolchains = repository_rule(
     implementation = _toolchains_impl,
 )
+
+HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
+available as an `elisp_library`.  This {kind} is very similar to
+[`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive),
+except that it always generates a BUILD file containing a single `elisp_library`
+rule in the root package for all Emacs Lisp files in the archive.
+The `elisp_library` rule is always named `library`."""
+
+HTTP_ARCHIVE_ATTRS = {
+    "urls": attr.string_list(
+        doc = """List of archive URLs to try.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-urls).""",
+        mandatory = True,
+        allow_empty = False,
+    ),
+    "integrity": attr.string(
+        doc = """Expected checksum of the archive file in [Subresource
+Integrity](https://www.w3.org/TR/SRI/) format.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-integrity).""",
+        mandatory = True,
+    ),
+    "strip_prefix": attr.string(
+        doc = """Directory prefix to strip from the archive contents.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
+    ),
+}

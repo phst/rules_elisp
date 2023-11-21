@@ -16,7 +16,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//private:repositories.bzl", "non_module_deps")
+load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "non_module_deps")
 
 def rules_elisp_dependencies():
     """Installs necessary dependencies for Emacs Lisp rules.
@@ -91,3 +91,58 @@ def rules_elisp_dependencies():
 def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
+
+def _elisp_http_archive_impl(repository_ctx):
+    """Implementation of the `elisp_http_archive` repository rule."""
+    repository_ctx.download_and_extract(
+        url = repository_ctx.attr.urls,
+        integrity = repository_ctx.attr.integrity or fail("missing archive checksum"),
+        stripPrefix = repository_ctx.attr.strip_prefix,
+    )
+    defs_bzl = str(repository_ctx.attr._defs_bzl)
+    if not defs_bzl.startswith("@"):
+        # Work around https://github.com/bazelbuild/bazel/issues/15916.
+        defs_bzl = "@" + defs_bzl
+    repository_ctx.file(
+        "WORKSPACE.bazel",
+        _WORKSPACE_TEMPLATE.format(
+            name = repository_ctx.attr.name,
+        ),
+        executable = False,
+    )
+    repository_ctx.file(
+        "BUILD.bazel",
+        _BUILD_TEMPLATE.format(
+            defs_bzl = defs_bzl,
+        ),
+        executable = False,
+    )
+
+elisp_http_archive = repository_rule(
+    doc = HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
+    attrs = dict(
+        HTTP_ARCHIVE_ATTRS,
+        _defs_bzl = attr.label(default = Label("//elisp:defs.bzl")),
+    ),
+    implementation = _elisp_http_archive_impl,
+)
+
+_WORKSPACE_TEMPLATE = """# Generated file; do not edit.
+
+workspace(name = "{name}")
+"""
+
+_BUILD_TEMPLATE = """# Generated file; do not edit.
+
+load("{defs_bzl}", "elisp_library")
+
+elisp_library(
+    name = "library",
+    srcs = glob(
+        ["*.el"],
+        exclude = ["*-pkg.el"],
+    ),
+    fatal_warnings = False,
+    visibility = ["//visibility:public"],
+)
+"""

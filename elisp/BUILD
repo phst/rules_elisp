@@ -110,7 +110,17 @@ bzl_library(
 bzl_library(
     name = "repositories_bzl",
     srcs = ["repositories.bzl"],
+    visibility = ["//docs:__pkg__"],
     deps = ["//private:repositories_bzl"],
+)
+
+bzl_library(
+    name = "extensions_bzl",
+    srcs = ["extensions.bzl"],
+    deps = [
+        ":repositories_bzl",
+        "//private:repositories_bzl",
+    ],
 )
 
 bzl_library(
@@ -347,7 +357,9 @@ cc_library(
 
 exports_files(
     [
+        # keep sorted
         "defs.bzl",
+        "extensions.bzl",
         "repositories.bzl",
     ],
     visibility = [

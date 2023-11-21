@@ -26,6 +26,7 @@ elisp_library(
     srcs = ["lib-4.el"],
     load_path = ["."],
     visibility = ["//visibility:public"],
+    deps = ["@dash//:library"],
 )
 
 elisp_test(

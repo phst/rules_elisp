@@ -102,6 +102,10 @@ local_repository(
     path = "examples/ext",
 )
 
+load("@example//:repositories.bzl", "example_dependencies")
+
+example_dependencies()
+
 http_archive(
     name = "com_google_googletest",
     sha256 = "1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4",
