@@ -233,7 +233,7 @@ def _elisp_test_impl(ctx):
     test_env = {}
     if ctx.configuration.coverage_enabled:
         # Bazel’s coverage runner
-        # (https://github.com/bazelbuild/bazel/blob/3.0.0/tools/test/collect_coverage.sh)
+        # (https://github.com/bazelbuild/bazel/blob/6.4.0/tools/test/collect_coverage.sh)
         # needs a binary called “lcov_merge.”  Its location is passed in the
         # LCOV_MERGER environmental variable.  For builtin rules, this variable
         # is set automatically based on a magic “$lcov_merger” or
@@ -248,10 +248,10 @@ def _elisp_test_impl(ctx):
 
         # C/C++ coverage instrumentation needs another binary that wraps gcov;
         # see
-        # https://github.com/bazelbuild/bazel/blob/5.0.0/tools/test/collect_coverage.sh#L199.
+        # https://github.com/bazelbuild/bazel/blob/6.4.0/tools/test/collect_coverage.sh#L183.
         # This is normally set from a hidden “$collect_cc_coverage” attribute;
         # see
-        # https://github.com/bazelbuild/bazel/blob/5.0.0/src/main/java/com/google/devtools/build/lib/analysis/test/TestActionBuilder.java#L253-L258.
+        # https://github.com/bazelbuild/bazel/blob/6.4.0/src/main/java/com/google/devtools/build/lib/analysis/test/TestActionBuilder.java#L256-L261.
         # We also need to inject its location here, like above.
         runfiles = runfiles.merge(
             ctx.attr._collect_cc_coverage[DefaultInfo].default_runfiles,
@@ -370,7 +370,7 @@ files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
             mandatory = True,
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
-            # https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
+            # https://github.com/bazelbuild/bazel/blob/6.4.0/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L73.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         outs = attr.output_list(
@@ -544,7 +544,7 @@ elisp_test = rule(
             mandatory = True,
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
-            # https://github.com/bazelbuild/bazel/blob/09c621e4cf5b968f4c6cdf905ab142d5961f9ddc/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
+            # https://github.com/bazelbuild/bazel/blob/6.4.0/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L73.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         _cc_toolchain = attr.label(
@@ -931,9 +931,9 @@ def _binary(ctx, *, srcs, tags, args, libs):
     # here: it assumes that coverage is generated during compilation, but we can
     # generate coverage information only at runtime.  Bazel’s coverage support
     # isn’t really documented; some information is available at
-    # https://github.com/bazelbuild/bazel/blob/3.7.0/CODEBASE.md#coverage-collection
-    # and in the source code comments of the file
-    # https://github.com/bazelbuild/bazel/blob/3.0.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
+    # https://bazel.build/contribute/codebase#coverage-collection and in the
+    # source code comments of the file
+    # https://github.com/bazelbuild/bazel/blob/6.4.0/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
     # When runtime coverage support is enabled, Bazel writes a list of filenames
     # that are covered by --instrumentation_filter to a text file whose filename
     # is in COVERAGE_MANIFEST.  The test runner then parses that file and only
