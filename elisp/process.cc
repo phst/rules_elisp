@@ -431,10 +431,13 @@ absl::StatusOr<int> Run(std::string binary,
   // Pass the runfiles environment variables as separate arguments.  This is
   // necessary because the binary launcher unconditionally sets the runfiles
   // environment variables based on its own argv[0]; see
-  // https://github.com/bazelbuild/bazel/blob/6.0.0-pre.20211110.1/src/tools/launcher/launcher.cc.
-  // We also can’t set argv[0] to this binary because the launcher uses it to
-  // find and its own binary; see
-  // https://github.com/bazelbuild/bazel/blob/6.0.0-pre.20211110.1/src/tools/launcher/launcher_main.cc.
+  // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher.cc
+  // and https://github.com/bazelbuild/bazel/pull/16916.  We also can’t set
+  // argv[0] to this binary because the launcher uses it to find its own binary;
+  // see
+  // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher_main.cc.
+  // Once we drop support for Bazel 6.0 and below, we should be able to modify
+  // argv[0] to make this launcher more transparent.
   for (const auto& p : *map) {
     runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
                             p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
