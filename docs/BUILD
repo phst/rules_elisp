@@ -45,6 +45,8 @@ DOCS = [
     "elisp",
     "emacs",
     "repositories",
+    # Requires Bazel 7.  See https://github.com/bazelbuild/stardoc/issues/192.
+    # "extensions",
 ]
 
 merged_manual(
@@ -99,6 +101,19 @@ stardoc(
         "//private:repositories_bzl",
     ],
 )
+
+# Requires Bazel 7.  See https://github.com/bazelbuild/stardoc/issues/192.
+# stardoc(
+#     name = "extensions",
+#     out = "extensions.bin",
+#     format = "proto",
+#     input = "//elisp:extensions.bzl",
+#     deps = [
+#         "//elisp:builtin_bzl",
+#         "//elisp:repositories_bzl",
+#         "//private:repositories_bzl",
+#     ],
+# )
 
 py_binary(
     name = "generate",
