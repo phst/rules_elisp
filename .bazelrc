@@ -16,9 +16,4 @@
 build --aspects='//private:defs.bzl%check_python'
 build --output_groups='+check_python'
 
-# Override hard-coded heap size limit on Visual C++.  See
-# https://github.com/bazelbuild/bazel/issues/15027.  We don’t use --copt because
-# that would interfere with MinGW-64.
-build --action_env='_CL_=/Zm2000' --host_action_env='_CL_=/Zm2000'
-
 import %workspace%/c-std.bazelrc
