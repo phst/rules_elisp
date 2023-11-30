@@ -84,6 +84,14 @@ go_deps.module(
 )
 use_repo(go_deps, "com_github_bazelbuild_buildtools", "com_github_google_go_cmp")
 
+# Tools for development
+bazel_dep(name = "phst_update_workspace_snippets", dev_dependency = True)
+git_override(
+    module_name = "phst_update_workspace_snippets",
+    commit = "e6494ba4e15f79d2dcef4fb49e0c20f31b8bf058",
+    remote = "https://github.com/phst/update-workspace-snippets.git",
+)
+
 # We want to test the external example without adding its repository to the
 # registry.  So we use override the dependency immediately locally.
 bazel_dep(name = "phst_rules_elisp_example", version = "0", dev_dependency = True, repo_name = "example")

@@ -36,6 +36,11 @@ func TestDependencyVersions(t *testing.T) {
 	moduleDeps := make(map[string]dependency)
 	for _, rule := range moduleFile.Rules("bazel_dep") {
 		name := rule.Name()
+		if name == "phst_update_workspace_snippets" {
+			// Ignore: this is a tool only run locally that doesn’t
+			// need a legacy WORKSPACE dependency.
+			continue
+		}
 		version := rule.AttrString("version")
 		dev := rule.AttrLiteral("dev_dependency") == "True"
 		if name == "" || version == "" {
