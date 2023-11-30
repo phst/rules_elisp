@@ -14,7 +14,6 @@
 
 load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@hedron_compile_commands//:refresh_compile_commands.bzl", "refresh_compile_commands")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
@@ -25,11 +24,6 @@ package(
 )
 
 licenses(["notice"])
-
-refresh_compile_commands(
-    name = "refresh_compile_commands",
-    tags = ["no-python-check"],
-)
 
 compile_pip_requirements(
     name = "requirements",
