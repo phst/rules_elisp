@@ -134,9 +134,9 @@ class Builder:
         """Checks that all source files have a license header."""
         self._bazel('run',
                     ['@com_github_google_addlicense//:addlicense',
-                     '-check',
-                     '-ignore=**/coverage-report/**',
-                     '-ignore=**/.dir-locals.el',
+                     '--check',
+                     '--ignore=**/coverage-report/**',
+                     '--ignore=**/.dir-locals.el',
                      '--',
                      str(self._workspace)])
 
