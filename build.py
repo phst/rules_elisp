@@ -174,7 +174,7 @@ class Builder:
     @target
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
-        args = ['@hedron_compile_commands//:refresh_all', '--']
+        args = ['@hedron_compile_commands//:refresh_all']
         args.extend(self._bazel_options())
         self._bazel('run', args, options=['--output_groups=-check_python'])
 
