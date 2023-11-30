@@ -94,6 +94,7 @@ class Builder:
         """Builds and tests the project."""
         self.buildifier()
         self.nogo()
+        self.license()
         # Test both default toolchain and versioned toolchains.
         self.test()
         self.versions()
@@ -129,6 +130,14 @@ class Builder:
                     text = file.read_text(encoding='utf-8')
                     if '@io_bazel_rules_go' in text:
                         raise ValueError(f'unwanted Go targets in {file} found')
+
+    @target
+    def license(self) -> None:
+        """Checks that all source files have a license header."""
+        self._run(['addlicense', '-check',
+                   '-ignore=coverage-report/**',
+                   '-ignore=.dir-locals.el',
+                   '--', '.'])
 
     @target
     def test(self) -> None:
