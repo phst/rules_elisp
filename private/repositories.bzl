@@ -71,10 +71,10 @@ def non_module_dev_deps():
     maybe(
         http_archive,
         name = "hedron_compile_commands",
-        sha256 = "22979f20e569219ce80031a0ee051230826390a8d9ccb587529a33003ec1e259",
-        strip_prefix = "bazel-compile-commands-extractor-b33a4b05c2287372c8e932c55ff4d3a37e6761ed/",
+        sha256 = "f5a4d9e40962e2cccd1baee504502cf2abcb434539037ddca871fb65f76e5347",
+        strip_prefix = "bazel-compile-commands-extractor-eca42c63700fccdc49cf58177e0a96f0f6075a68/",
         urls = [
-            "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/b33a4b05c2287372c8e932c55ff4d3a37e6761ed.zip",  # 2023-04-16
+            "https://github.com/hedronvision/bazel-compile-commands-extractor/archive/eca42c63700fccdc49cf58177e0a96f0f6075a68.zip",  # 2023-11-15
         ],
     )
 
