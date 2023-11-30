@@ -38,6 +38,7 @@ _Target = Callable[['Builder'], None]
 _targets: dict[str, _Target] = {}
 
 _Bzlmod = enum.Enum('_Bzlmod', ['NO', 'YES', 'BOTH'])
+_Capture = enum.Enum('_Capture', ['NONE', 'STDOUT', 'STDERR'])
 
 
 def target(func: _Target) -> _Target:
@@ -170,32 +171,38 @@ class Builder:
     @target
     def coverage(self) -> None:
         """Generates a coverage report."""
-        output = self._bazel('coverage', ['//...'], capture_stdout=True)
-        files = re.findall(r'^  (/.+/coverage\.dat)$', output, re.MULTILINE)
+        output = self._bazel(
+            'coverage', ['//...'],
+            options=['--combined_report=lcov'], capture=_Capture.STDERR)
+        files = re.findall(
+            r'^INFO: LCOV coverage report is located at (/.+\.dat)$',
+            output, re.MULTILINE)
         if not files:
-            raise FileNotFoundError('no coverage files generated')
-        # The tracefiles need some munging for genhtml to accept them.
+            raise FileNotFoundError('no coverage report generated')
+        if len(files) > 1:
+            raise ValueError(
+                f'found {len(files)} coverage reports instead of one')
+        file, = files
+        # The tracefile needs some munging for genhtml to accept it.
         temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
-        outputs: list[pathlib.Path] = []
-        for i, file in enumerate(sorted(files)):
-            content = pathlib.Path(file).read_text('utf-8')
-            # coverage.py occasionally writes branch coverage data for line 0,
-            # which genhtml doesn’t accept.
-            content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.MULTILINE)
-            # Make filenames absolute.
-            content = re.sub(r'^SF:([^/].+)$',
-                             lambda m: 'SF:' + str(self._workspace / m[1]),
-                             content, flags=re.MULTILINE)
-            output = temp_dir / f'coverage-{i:03d}.info'
-            output.write_text(content, 'utf-8')
-            outputs.append(output)
+        content = pathlib.Path(file).read_text('utf-8')
+        # coverage.py occasionally writes branch coverage data for line 0, which
+        # genhtml doesn’t accept.
+        content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.MULTILINE)
+        # Make filenames absolute.
+        content = re.sub(r'^SF:([^/].+)$',
+                         lambda m: 'SF:' + str(self._workspace / m[1]),
+                         content, flags=re.MULTILINE)
+        output = temp_dir / 'coverage.info'
+        output.write_text(content, 'utf-8')
         directory = self._workspace / 'coverage-report'
         self._run(['genhtml',
                    '--output-directory=' + str(directory),
                    '--branch-coverage',
                    '--demangle-cpp',
                    '--rc=genhtml_demangle_cpp_params=--no-strip-underscore',
-                   '--'] + list(map(str, outputs)),
+                   '--',
+                   str(output)],
                   cwd=self._workspace)
         shutil.rmtree(temp_dir)
         print(f'coverage report written to {directory}')
@@ -215,7 +222,7 @@ class Builder:
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
-               capture_stdout: bool = False) -> Optional[str]:
+               capture: _Capture = _Capture.NONE) -> Optional[str]:
         args = [str(self._bazel_program), command]
         args.extend(self._bazel_options())
         args.extend(options)
@@ -237,7 +244,7 @@ class Builder:
             # we have to install MSYS2 in C:\Tools.
             if self._kernel == 'Windows':
                 env['BAZEL_SH'] = r'C:\Tools\msys64\usr\bin\bash.exe'
-        return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
+        return self._run(args, cwd=cwd, env=env, capture=capture)
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
@@ -253,20 +260,21 @@ class Builder:
         return opts
 
     def _info(self, key: str) -> pathlib.Path:
-        output = self._bazel('info', [key], capture_stdout=True)
+        output = self._bazel('info', [key], capture=_Capture.STDOUT)
         assert output is not None
         return pathlib.Path(output.rstrip('\n'))
 
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
              env: Optional[Mapping[str, str]] = None,
-             capture_stdout: bool = False) -> Optional[str]:
+             capture: _Capture = _Capture.NONE) -> Optional[str]:
         print(*map(shlex.quote, args))
         result = subprocess.run(
             args, check=True, cwd=cwd or self._cwd, env=env or self._env,
-            stdout=subprocess.PIPE if capture_stdout else None,
+            stdout=subprocess.PIPE if capture == _Capture.STDOUT else None,
+            stderr=subprocess.PIPE if capture == _Capture.STDERR else None,
             encoding='utf-8')
-        return result.stdout
+        return result.stdout if capture == _Capture.STDOUT else result.stderr
 
 
 def _versions() -> frozenset[str]:
