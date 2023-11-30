@@ -26,12 +26,10 @@ import io
 import os
 import pathlib
 import platform
-import re
 import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 from typing import Optional
 
 _Target = Callable[['Builder'], None]
@@ -180,40 +178,11 @@ class Builder:
     @target
     def coverage(self) -> None:
         """Generates a coverage report."""
-        output = self._bazel(
-            'coverage', ['//...'],
-            options=['--combined_report=lcov'], capture=_Capture.STDERR)
-        files = re.findall(
-            r'^INFO: LCOV coverage report is located at (/.+\.dat)$',
-            output, re.MULTILINE)
-        if not files:
-            raise FileNotFoundError('no coverage report generated')
-        if len(files) > 1:
-            raise ValueError(
-                f'found {len(files)} coverage reports instead of one')
-        file, = files
-        # The tracefile needs some munging for genhtml to accept it.
-        temp_dir = pathlib.Path(tempfile.mkdtemp(prefix='bazel-coverage-'))
-        content = pathlib.Path(file).read_text('utf-8')
-        # coverage.py occasionally writes branch coverage data for line 0, which
-        # genhtml doesn’t accept.
-        content = re.sub(r'^BRDA:0,.+\n', '', content, flags=re.MULTILINE)
-        # Make filenames absolute.
-        content = re.sub(r'^SF:([^/].+)$',
-                         lambda m: 'SF:' + str(self._workspace / m[1]),
-                         content, flags=re.MULTILINE)
-        output = temp_dir / 'coverage.info'
-        output.write_text(content, 'utf-8')
         directory = self._workspace / 'coverage-report'
-        self._run(['genhtml',
-                   '--output-directory=' + str(directory),
-                   '--branch-coverage',
-                   '--demangle-cpp',
-                   '--rc=genhtml_demangle_cpp_params=--no-strip-underscore',
-                   '--',
-                   str(output)],
-                  cwd=self._workspace)
-        shutil.rmtree(temp_dir)
+        self._bazel('run',
+                    ['@phst_bazelcov//:bazelcov',
+                     f'--bazel={self._bazel_program}', f'--output={directory}'],
+                    options=['--enable_bzlmod'])
         print(f'coverage report written to {directory}')
 
     @target
