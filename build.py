@@ -132,10 +132,13 @@ class Builder:
     @target
     def license(self) -> None:
         """Checks that all source files have a license header."""
-        self._run(['addlicense', '-check',
-                   '-ignore=coverage-report/**',
-                   '-ignore=.dir-locals.el',
-                   '--', '.'])
+        self._bazel('run',
+                    ['@com_github_google_addlicense//:addlicense',
+                     '-check',
+                     '-ignore=**/coverage-report/**',
+                     '-ignore=**/.dir-locals.el',
+                     '--',
+                     str(self._workspace)])
 
     @target
     def test(self) -> None:

@@ -178,6 +178,13 @@ go_repository(
 )
 
 go_repository(
+    name = "com_github_google_addlicense",
+    importpath = "github.com/google/addlicense",
+    sum = "h1:jpVf9qPbU8rz5MxKo7d+RMcNHkqxi4YJi/laauX4aAE=",
+    version = "v1.1.1",
+)
+
+go_repository(
     name = "com_github_google_go_cmp",
     importpath = "github.com/google/go-cmp",
     sum = "h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=",
