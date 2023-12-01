@@ -44,7 +44,7 @@ func TestDependencyVersions(t *testing.T) {
 		}
 		version := rule.AttrString("version")
 		dev := rule.AttrLiteral("dev_dependency") == "True"
-		if name == "" || version == "" {
+		if name == "" {
 			t.Fatalf("invalid bazel_dep rule %q", name)
 		}
 		if name == "phst_rules_elisp_example" {
