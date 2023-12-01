@@ -139,7 +139,7 @@ class Builder:
                      '--ignore=**/.dir-locals.el',
                      # Work around bug in addlicense on Windows.  See
                      # https://github.com/google/addlicense/pull/152.
-                     fr'--ignore={self._workspace}\\.dir-locals.el',
+                     r'--ignore=*\\.dir-locals.el',
                      '--',
                      str(self._workspace)])
 
