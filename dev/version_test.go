@@ -17,6 +17,7 @@ package version_test
 import (
 	"fmt"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 	"testing"
@@ -34,21 +35,23 @@ func TestDependencyVersions(t *testing.T) {
 	}
 	commitHashVersionRegexp := regexp.MustCompile(`^[.\d]+-\d+-([[:xdigit:]]+)$`)
 	moduleDeps := make(map[string]dependency)
+	moduleOnlyDeps := []string{
+		// Only used as an example.
+		"phst_rules_elisp_example",
+		// Tools that are only run locally and therefore don’t need a
+		// legacy WORKSPACE dependency.
+		"hedron_compile_commands",
+		"phst_bazelcov",
+		"phst_update_workspace_snippets",
+	}
 	for _, rule := range moduleFile.Rules("bazel_dep") {
 		name := rule.Name()
-		switch name {
-		case "hedron_compile_commands", "phst_bazelcov", "phst_update_workspace_snippets":
-			// Ignore: these are tools only run locally that don’t
-			// need a legacy WORKSPACE dependency.
-			continue
-		}
 		version := rule.AttrString("version")
 		dev := rule.AttrLiteral("dev_dependency") == "True"
 		if name == "" {
 			t.Fatalf("invalid bazel_dep rule %q", name)
 		}
-		if name == "phst_rules_elisp_example" {
-			// ignore, only used as example
+		if slices.Contains(moduleOnlyDeps, name) {
 			continue
 		}
 		if m := commitHashVersionRegexp.FindStringSubmatch(version); m != nil {
