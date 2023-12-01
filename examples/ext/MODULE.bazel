@@ -14,10 +14,7 @@
 
 """Bzlmod module definition for an external example."""
 
-module(
-    name = "phst_rules_elisp_example",
-    version = "0",
-)
+module(name = "phst_rules_elisp_example")
 
 bazel_dep(name = "phst_rules_elisp", version = "0")
 local_path_override(
