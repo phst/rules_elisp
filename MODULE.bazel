@@ -83,11 +83,17 @@ go_deps.module(
     sum = "h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=",
     version = "v0.6.0",
 )
+go_deps.module(
+    path = "golang.org/x/mod",
+    sum = "h1:dGoOF9QVLYng8IHTm7BAyWqCqSheQ5pYWGhzW00YJr0=",
+    version = "v0.14.0",
+)
 use_repo(
     go_deps,
     "com_github_bazelbuild_buildtools",
     "com_github_google_addlicense",
     "com_github_google_go_cmp",
+    "org_golang_x_mod",
 )
 
 # Tools for development

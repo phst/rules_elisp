@@ -76,11 +76,13 @@ go_test(
         # keep sorted
         "MODULE.bazel",
         "WORKSPACE",
+        "go.mod",
         "repositories.bzl",
     ],
     deps = [
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
+        "@org_golang_x_mod//modfile",
     ],
 )
 
@@ -100,6 +102,12 @@ copy_file(
     name = "copy_repositories_bzl",
     src = "//elisp:repositories.bzl",
     out = "repositories.bzl",
+)
+
+copy_file(
+    name = "copy_go_mod",
+    src = "//:go.mod",
+    out = "go.mod",
 )
 
 nogo(

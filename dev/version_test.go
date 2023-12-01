@@ -26,6 +26,7 @@ import (
 
 	"github.com/bazelbuild/buildtools/build"
 	"github.com/google/go-cmp/cmp"
+	"golang.org/x/mod/modfile"
 )
 
 func TestDependencyVersions(t *testing.T) {
@@ -87,6 +88,32 @@ func TestDependencyVersions(t *testing.T) {
 }
 
 func TestGoDependencies(t *testing.T) {
+	goModFile, err := modfile.Parse("go.mod", goModContent, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	goModDeps := make(map[string]string)
+	for _, req := range goModFile.Require {
+		path := req.Mod.Path
+		version := req.Mod.Version
+		if path == "" || version == "" {
+			t.Fatalf("invalid go.mod statement %q", req.Mod)
+		}
+		if req.Indirect {
+			continue
+		}
+		switch path {
+		case "github.com/bazelbuild/rules_go", "github.com/bazelbuild/bazel-gazelle":
+			// Used for bootstrapping, won’t appear in WORKSPACE
+			// dependencies.
+			continue
+		}
+		if _, dup := goModDeps[path]; dup {
+			t.Errorf("duplicate Go dependency %q", path)
+		}
+		goModDeps[path] = version
+	}
+
 	moduleFile, err := build.ParseModule("MODULE.bazel", moduleContent)
 	if err != nil {
 		t.Fatal(err)
@@ -123,6 +150,11 @@ func TestGoDependencies(t *testing.T) {
 
 	if diff := cmp.Diff(moduleDeps, legacyDeps); diff != "" {
 		t.Errorf("-module +legacy\n%s", diff)
+	}
+
+	delete(moduleDeps, "github.com/google/addlicense") // a tool not listed in go.mod
+	if diff := cmp.Diff(goModDeps, moduleDeps); diff != "" {
+		t.Errorf("-go.mod +module\n%s", diff)
 	}
 }
 
@@ -235,3 +267,6 @@ var workspaceContent []byte
 
 //go:embed repositories.bzl
 var repositoriesContent []byte
+
+//go:embed go.mod
+var goModContent []byte
