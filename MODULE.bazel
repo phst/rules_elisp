@@ -14,10 +14,7 @@
 
 """Bzlmod module definition for rules_elisp."""
 
-module(
-    name = "phst_rules_elisp",
-    version = "0",
-)
+module(name = "phst_rules_elisp")
 
 # Non-development module dependencies
 bazel_dep(name = "platforms", version = "0.0.7")

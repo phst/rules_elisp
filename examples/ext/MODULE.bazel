@@ -16,7 +16,7 @@
 
 module(name = "phst_rules_elisp_example")
 
-bazel_dep(name = "phst_rules_elisp", version = "0")
+bazel_dep(name = "phst_rules_elisp")
 local_path_override(
     module_name = "phst_rules_elisp",
     path = "../..",

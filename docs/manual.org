@@ -56,7 +56,7 @@ If you’re using Bzlmod, add a snippet like the following to your ~MODULE.bazel
 file:
 
 #+BEGIN_SRC bazel-module
-bazel_dep(name = "phst_rules_elisp", version = "0")
+bazel_dep(name = "phst_rules_elisp")
 git_override(
     module_name = "phst_rules_elisp",
     remote = "https://github.com/phst/rules_elisp.git",
