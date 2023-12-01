@@ -154,10 +154,6 @@ http_archive(
     ],
 )
 
-load("@hedron_compile_commands//:workspace_setup.bzl", "hedron_compile_commands_setup")
-
-hedron_compile_commands_setup()
-
 http_archive(
     name = "bazel_gazelle",
     sha256 = "b7387f72efb59f876e4daae42f1d3912d0d45563eac7cb23d1de0b094ab588cf",

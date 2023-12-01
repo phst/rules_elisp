@@ -37,7 +37,7 @@ func TestDependencyVersions(t *testing.T) {
 	for _, rule := range moduleFile.Rules("bazel_dep") {
 		name := rule.Name()
 		switch name {
-		case "phst_bazelcov", "phst_update_workspace_snippets":
+		case "hedron_compile_commands", "phst_bazelcov", "phst_update_workspace_snippets":
 			// Ignore: these are tools only run locally that don’t
 			// need a legacy WORKSPACE dependency.
 			continue
