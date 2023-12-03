@@ -297,7 +297,7 @@ class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
     def handle_starttag(self, tag: str,
                         attrs: list[tuple[str, Optional[str]]]) -> None:
         if attrs:
-            raise NotImplementedError('got attributes {attrs} for <{tag}> tag')
+            raise NotImplementedError(f'got attributes {attrs} for <{tag}> tag')
         start, _ = self._TAGS[tag]
         self._writer.write(start)
 
