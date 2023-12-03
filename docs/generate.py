@@ -285,6 +285,7 @@ class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
     # Work around https://bugs.python.org/issue31844.
 
     _TAGS = {
+        'p': ('\n\n', ''),
         'code': ('@@texinfo:@code{@@', '@@texinfo:}@@'),
         'var': ('@@texinfo:@var{@@', '@@texinfo:}@@'),
     }
