@@ -15,6 +15,7 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -196,11 +197,18 @@ build_test(
 )
 
 build_test(
-    name = "run_tst_test",
+    name = "run_tst_build_test",
     targets = ["//elisp/private/tools:run_tst"],
 )
 
 build_test(
     name = "compile_test",
     targets = ["//elisp/private/tools:compile"],
+)
+
+# keep
+elisp_test(
+    name = "run_tst_test",
+    size = "small",
+    srcs = ["run-tst-test.el"],
 )
