@@ -12,8 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load("//elisp:defs.bzl", "elisp_library")
+load("//elisp:defs.bzl", "elisp_library", "elisp_test")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -30,7 +29,9 @@ elisp_library(
     visibility = ["//visibility:public"],
 )
 
-build_test(
+elisp_test(
     name = "runner_test",
-    targets = [":runner"],
+    size = "small",
+    srcs = ["runner-test.el"],
+    deps = [":runner"],
 )

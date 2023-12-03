@@ -136,6 +136,16 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                  (< shard-index shard-count))
       (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
              shard-count shard-index))
+    ;; Set a few environment variables as required or recommended in
+    ;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
+    (unless (getenv "HOME") (setenv "HOME" temp-dir))
+    (setenv "LC_CTYPE")
+    (unless (getenv "LOGNAME") (setenv "LOGNAME" user-login-name))
+    ;; Don’t use unsafe default from
+    ;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
+    (setenv "PATH" "/usr/bin:/usr/sbin:/bin:/sbin")
+    (setenv "SHLVL" "2")
+    (unless (getenv "BAZEL_TEST") (setenv "BAZEL_TEST" "1"))
     (when coverage-enabled
       (when verbose-coverage
         (message "Reading coverage manifest %s" coverage-manifest))
