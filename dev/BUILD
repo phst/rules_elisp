@@ -29,9 +29,6 @@ compile_pip_requirements(
     name = "requirements",
     timeout = "moderate",
     env = {"USERPROFILE": r"C:\Temp"},
-    extra_args = [
-        "--allow-unsafe",  # for setuptools
-    ],
     requirements_in = "requirements.in",
     requirements_txt = ":requirements_txt",
     tags = [
