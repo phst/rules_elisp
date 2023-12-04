@@ -281,8 +281,7 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
         raise NotImplementedError(f'unknown node type {node.t!r}')
 
 
-class _HTMLParser(html.parser.HTMLParser):  # pylint: disable=abstract-method
-    # Work around https://bugs.python.org/issue31844.
+class _HTMLParser(html.parser.HTMLParser):
 
     _TAGS = {
         'p': ('\n\n', ''),
