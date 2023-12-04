@@ -18,6 +18,9 @@ load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev
 
 def _non_module_deps_impl(_ctx):
     _deps()
+
+def _non_module_dev_deps_impl(_ctx):
     _dev_deps()
 
 non_module_deps = module_extension(implementation = _non_module_deps_impl)
+non_module_dev_deps = module_extension(implementation = _non_module_dev_deps_impl)
