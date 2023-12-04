@@ -177,7 +177,10 @@ class Builder:
     @target
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
-        options = ('--enable_bzlmod', '--output_groups=-check_python')
+        options = (
+            '--experimental_enable_bzlmod',
+            '--output_groups=-check_python',
+        )
         args = ['@hedron_compile_commands//:refresh_all']
         args.extend(self._bazel_options())
         args.extend(options)
@@ -190,7 +193,7 @@ class Builder:
         self._bazel('run',
                     ['@phst_bazelcov//:bazelcov',
                      f'--bazel={self._bazel_program}', f'--output={directory}'],
-                    options=['--enable_bzlmod'])
+                    options=['--experimental_enable_bzlmod'])
         print(f'coverage report written to {directory}')
 
     @target

@@ -16,6 +16,6 @@
 
 workspace="$(bazel info workspace)" || exit
 
-bazel run --enable_bzlmod -- \
+bazel run --experimental_enable_bzlmod -- \
   @phst_update_workspace_snippets//:update-workspace-snippets \
   "${workspace:?}/docs/manual.org"
