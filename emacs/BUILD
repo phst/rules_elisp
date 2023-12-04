@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -235,9 +235,7 @@ config_setting(
 cc_defaults(
     name = "defaults",
     copts = [],
-    defines = [
-        "NO_SHLWAPI_ISOS",  # Work around https://bugs.gnu.org/48303
-    ],
+    defines = [],
     linkopts = select({
         "@platforms//os:macos": [
             # Override the toolchain’s “-undefined dynamic_lookup” option so
