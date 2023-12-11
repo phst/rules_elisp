@@ -159,6 +159,7 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status",
@@ -214,6 +215,7 @@ cc_test(
         ":binary",
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/log:check",
         "@com_google_absl//absl/status",
@@ -249,6 +251,7 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:core_headers",
         "@com_google_absl//absl/log",
         "@com_google_absl//absl/status",
