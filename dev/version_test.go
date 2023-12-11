@@ -126,6 +126,45 @@ func TestGoDependencies(t *testing.T) {
 	}
 }
 
+func TestOverrides(t *testing.T) {
+	file, err := build.ParseModule("MODULE.bazel", moduleContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deps := make(map[string]bool)
+	for _, rule := range file.Rules("bazel_dep") {
+		deps[rule.Name()] = rule.AttrLiteral("dev_dependency") == "True"
+	}
+	if len(deps) == 0 {
+		t.Error("no dependencies found")
+	}
+
+	for _, rule := range file.Rules("") {
+		kind := rule.Kind()
+		if !strings.HasSuffix(kind, "_override") {
+			continue
+		}
+		name := rule.AttrString("module_name")
+		dev, ok := deps[name]
+		if !ok {
+			t.Errorf("unknown dependency %s overridden by %s", name, kind)
+		}
+		// Overrides only work in root modules, so this dependency
+		// wouldn’t work outside of our own workspace.
+		// μpb must be overridden due to
+		// https://github.com/protocolbuffers/protobuf/issues/13741.
+		// This is unfortunate but currently required.  The
+		// special-casing for μpb should be removed once both
+		// https://github.com/protocolbuffers/protobuf/issues/13741 and
+		// https://github.com/protocolbuffers/protobuf/issues/14564 are
+		// fixed.
+		if !dev && name != "upb" {
+			t.Errorf("production dependency %s is overridden using %s", name, kind)
+		}
+	}
+}
+
 type dependency struct {
 	Version string
 	Dev     bool
