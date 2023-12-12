@@ -85,6 +85,8 @@ class _Generator:
             self._function(func)
         for aspect in module.aspect_info:
             self._aspect(aspect)
+        for rule in module.repository_rule_info:
+            self._repo_rule(rule)
 
     def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
         name = rule.rule_name
@@ -153,6 +155,24 @@ class _Generator:
                         f'attributes: {attrs}\n')
         for attr in aspect.attribute:
             self._attribute(attr)
+        self._write('#+END_deffn\n\n')
+
+    def _repo_rule(self, rule: stardoc_output_pb2.RepositoryRuleInfo) -> None:
+        name = rule.rule_name
+        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                          for a in rule.attribute)
+        self._write(
+            f'#+ATTR_TEXINFO: :options {{Repository rule}} {name} ({attrs})\n')
+        self._write('#+BEGIN_deffn\n')
+        self._write(_markdown(rule.doc_string).lstrip())
+        self._write(f'The ~{name}~ repository rule '
+                    f'supports the following attributes:\n\n')
+        for attr in rule.attribute:
+            self._attribute(attr)
+        if rule.environ:
+            env = ', '.join(f'~{e}~' for e in rule.environ)
+            self._write(f'It depends on the following '
+                        f'environment variables: {env}\n\n')
         self._write('#+END_deffn\n\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
@@ -249,6 +269,9 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
             assert self._indent == '  '  # no support for nested lists
             self._indent = ''
             self.cr()
+
+    def emph(self, node: commonmark.node.Node, entering: bool) -> None:
+        self.lit('/')
 
     def code(self, node: commonmark.node.Node, entering: bool) -> None:
         self.lit(f'~{node.literal}~')
