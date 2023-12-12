@@ -29,7 +29,7 @@ build:linux --conlyopt='-std=gnu11' --host_conlyopt='-std=gnu11'
 build:macos --copt='-fno-exceptions' --host_copt='-fno-exceptions'
 build:macos --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
 build:macos --conlyopt='-std=c11' --host_conlyopt='-std=c11'
-build:windows --per_file_copt='.+\\.(cc|cpp|cxx)$@/std:c++17'
+build:windows --per_file_copt='.+\\.(cc|cpp|cxx)@/std:c++17'
 build:windows --conlyopt='/std:c11' --host_conlyopt='/std:c11'
 
 # Local Variables:
