@@ -18,18 +18,14 @@ common --enable_platform_specific_config
 # Starlark files.  See
 # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil.
 # On GNU/Linux, compiling the CGo parts of the Go standard library fails without
-# GNU extensions, so we use gnu11 instead of c11.  On Windows, we can’t use
-# --cxxopt due to https://github.com/bazelbuild/bazel/issues/15073.  We don’t
-# use --host_per_file_copt yet since that has only been introduced in Bazel 6.
-# The backslash is escaped due to
-# https://github.com/bazelbuild/bazel/issues/11517.
+# GNU extensions, so we use gnu11 instead of c11.
 build:linux --copt='-fno-exceptions' --host_copt='-fno-exceptions'
 build:linux --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
 build:linux --conlyopt='-std=gnu11' --host_conlyopt='-std=gnu11'
 build:macos --copt='-fno-exceptions' --host_copt='-fno-exceptions'
 build:macos --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
 build:macos --conlyopt='-std=c11' --host_conlyopt='-std=c11'
-build:windows --per_file_copt='.+\\.(cc|cpp|cxx)@/std:c++17'
+build:windows --cxxopt='/std:c++17' --host_cxxopt='/std:c++17'
 build:windows --conlyopt='/std:c11' --host_conlyopt='/std:c11'
 
 # Local Variables:
