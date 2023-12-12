@@ -135,7 +135,14 @@ should be used in its place."
                            ;; The directory after the execution root should be
                            ;; the repository name at compile time.  See
                            ;; https://bazel.build/remote/output-directories#layout-diagram.
-                           ((rx "/execroot/" (let name (+ (not (any ?/)))) ?/)
+                           ;; If --incompatible_sandbox_hermetic_tmp is enabled,
+                           ;; the execution root is /tmp/bazel-working-directory
+                           ;; or /tmp/bazel-execroot instead;
+                           ;; cf. https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/sandbox/LinuxSandboxedSpawnRunner.java.
+                           ((rx ?/
+                                (or "execroot"
+                                    "bazel-working-directory" "bazel-execroot")
+                                ?/ (let name (+ (not (any ?/)))) ?/)
                             ;; The canonical name of the main repository is the
                             ;; empty string.
                             (if (string-equal name "_main") "" name))))))
