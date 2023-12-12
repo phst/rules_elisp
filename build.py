@@ -166,6 +166,8 @@ class Builder:
                 '--test_output=errors',
                 f'--{prefix}experimental_enable_bzlmod',
             ]
+            if bzlmod and self._github:
+                options.append('--lockfile_mode=error')
             options.extend(args)
             self._bazel('test', ['//...'], options=options, cwd=cwd)
 
