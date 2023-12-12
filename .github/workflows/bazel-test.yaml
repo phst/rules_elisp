@@ -96,6 +96,12 @@ jobs:
               startsWith(matrix.bazel, '6.2.')
             ) && 'no' || 'both'
           }}
+          ${{
+            (
+              startsWith(matrix.bazel, '5.') ||
+              startsWith(matrix.bazel, '6.')
+            ) && '--ignore-lockfile'
+          }}
           --action-cache=~/bazel-action-cache
           --repository-cache=~/bazel-repository-cache
           -- check

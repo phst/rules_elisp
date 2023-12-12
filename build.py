@@ -56,10 +56,12 @@ class Builder:
     def __init__(self, *,
                  bazel: pathlib.Path,
                  bzlmod: _Bzlmod = _Bzlmod.BOTH,
+                 ignore_lockfile: bool = False,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._bazel_program = bazel
         self._bzlmod = bzlmod
+        self._ignore_lockfile = ignore_lockfile
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._kernel = platform.system()
@@ -166,7 +168,7 @@ class Builder:
                 '--test_output=errors',
                 f'--{prefix}experimental_enable_bzlmod',
             ]
-            if bzlmod and self._github:
+            if bzlmod and self._github and not self._ignore_lockfile:
                 options.append('--lockfile_mode=error')
             options.extend(args)
             self._bazel('test', ['//...'], options=options, cwd=cwd)
@@ -290,12 +292,14 @@ def main() -> None:
     parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--bzlmod', choices=['no', 'yes', 'both'],
                         default='both')
+    parser.add_argument('--ignore-lockfile', action='store_true')
     parser.add_argument('--action-cache', type=_cache_directory)
     parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
                       bzlmod=getattr(_Bzlmod, args.bzlmod.upper()),
+                      ignore_lockfile=args.ignore_lockfile,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:
