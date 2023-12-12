@@ -155,12 +155,13 @@ class Builder:
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
     def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
-        prefixes = {
-            _Bzlmod.NO: ['no'],
-            _Bzlmod.YES: [''],
-            _Bzlmod.BOTH: ['no', ''],
+        bzlmods = {
+            _Bzlmod.NO: [False],
+            _Bzlmod.YES: [True],
+            _Bzlmod.BOTH: [False, True],
         }
-        for prefix in prefixes[self._bzlmod]:
+        for bzlmod in bzlmods[self._bzlmod]:
+            prefix = '' if bzlmod else 'no'
             self._bazel(
                 'test', ['//...'],
                 options=[
