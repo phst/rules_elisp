@@ -639,7 +639,7 @@ def _elisp_manual_impl(ctx):
         outputs = [out],
         inputs = depset(direct = [src], transitive = [tool_inputs]),
         executable = ctx.executable._export,
-        arguments = [src.path, out.path],
+        arguments = [ctx.actions.args().add(src).add(out)],
         mnemonic = "Export",
         progress_message = "Exporting {} into Texinfo file".format(src.short_path),
         input_manifests = input_manifests,
