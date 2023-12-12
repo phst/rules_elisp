@@ -353,7 +353,14 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    Label("//private:msvc-cl"): [],
+    Label("//private:msvc-cl"): [
+        # We should specify C++ options using --cxxopt in .bazelrc due to
+        # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil.
+        # However, this doesn’t work on Windows due to
+        # https://github.com/bazelbuild/bazel/issues/15073.  Once we drop
+        # support for Bazel 6.2 and below, we can remove this hack again.
+        "/std:c++17",
+    ],
     # Assume that something compatible with GCC is the default.  See
     # https://github.com/bazelbuild/bazel/issues/12707.
     Label("//conditions:default"): [
