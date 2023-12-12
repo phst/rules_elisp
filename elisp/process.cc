@@ -161,7 +161,7 @@ static absl::Nonnull<wchar_t*> Pointer(
     std::wcerr << string << L" contains null character" << std::endl;
     LOG(FATAL) << "string contains null character";
   }
-  return &string.front();
+  return string.data();
 }
 #else
 static std::vector<absl::Nonnull<char*>> Pointers(
@@ -170,7 +170,7 @@ static std::vector<absl::Nonnull<char*>> Pointers(
   for (std::string& s : strings) {
     CHECK(!s.empty()) << "empty string";
     CHECK(s.find('\0') == s.npos) << s << " contains null character";
-    ptrs.push_back(&s.front());
+    ptrs.push_back(s.data());
   }
   ptrs.push_back(nullptr);
   return ptrs;
@@ -490,7 +490,7 @@ absl::StatusOr<int> Run(std::string binary,
   BOOL success =
       ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
                        nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
-                       &envp.front(), nullptr, &startup_info, &process_info);
+                       envp.data(), nullptr, &startup_info, &process_info);
   if (!success) return WindowsStatus("CreateProcessW", binary);
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
