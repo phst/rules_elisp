@@ -106,14 +106,14 @@ def _elisp_http_archive_impl(repository_ctx):
     repository_ctx.file(
         "WORKSPACE.bazel",
         _WORKSPACE_TEMPLATE.format(
-            name = repository_ctx.attr.name,
+            name = repr(repository_ctx.attr.name),
         ),
         executable = False,
     )
     repository_ctx.file(
         "BUILD.bazel",
         _BUILD_TEMPLATE.format(
-            defs_bzl = defs_bzl,
+            defs_bzl = repr(defs_bzl),
         ),
         executable = False,
     )
@@ -129,12 +129,12 @@ elisp_http_archive = repository_rule(
 
 _WORKSPACE_TEMPLATE = """# Generated file; do not edit.
 
-workspace(name = "{name}")
+workspace(name = {name})
 """
 
 _BUILD_TEMPLATE = """# Generated file; do not edit.
 
-load("{defs_bzl}", "elisp_library")
+load({defs_bzl}, "elisp_library")
 
 elisp_library(
     name = "library",
