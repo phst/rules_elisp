@@ -105,7 +105,7 @@ def _elisp_http_archive_impl(repository_ctx):
         defs_bzl = "@" + defs_bzl
     repository_ctx.template(
         "WORKSPACE.bazel",
-        Label(":WORKSPACE.template"),
+        Label("//elisp:WORKSPACE.template"),
         {
             "[[name]]": repr(repository_ctx.attr.name),
         },
@@ -113,7 +113,7 @@ def _elisp_http_archive_impl(repository_ctx):
     )
     repository_ctx.template(
         "BUILD.bazel",
-        Label(":BUILD.template"),
+        Label("//elisp:BUILD.template"),
         {
             "[[defs_bzl]]": repr(defs_bzl),
         },

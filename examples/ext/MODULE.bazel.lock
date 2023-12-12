@@ -1400,7 +1400,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "Y0CMAbiZQG/jtEvHgGq9BvrFem8RK1oUacjGTw1OsWE=",
+        "bzlTransitiveDigest": "amiSaB/HIFz+EvROOWEZ6snqxb0zsKoSl1rfmMfehTU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
