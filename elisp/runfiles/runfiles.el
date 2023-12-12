@@ -129,6 +129,7 @@ should be used in its place."
 (cl-define-compiler-macro elisp/runfiles/rlocation
     (&whole form filename &optional runfiles &key caller-repo)
   (unless caller-repo
+    (message "%S" `(macroexp-file-name ,(macroexp-file-name)))
     (when-let ((caller-file (macroexp-file-name)))
       ;; The directory after the execution root should be the repository name at
       ;; compile time.  See
