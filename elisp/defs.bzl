@@ -70,9 +70,6 @@ def _elisp_toolchain_impl(ctx):
         wrap = ctx.attr.wrap,
     )]
 
-# Note: Toolchain names need to be fully qualified, otherwise external
-# workspaces won’t find them.
-
 def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
     result = _compile(
