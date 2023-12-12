@@ -179,6 +179,7 @@ class Builder:
         """Generates a compilation database for clangd."""
         options = (
             '--experimental_enable_bzlmod',
+            '--lockfile_mode=off',
             '--output_groups=-check_python',
         )
         args = ['@hedron_compile_commands//:refresh_all']
@@ -193,7 +194,8 @@ class Builder:
         self._bazel('run',
                     ['@phst_bazelcov//:bazelcov',
                      f'--bazel={self._bazel_program}', f'--output={directory}'],
-                    options=['--experimental_enable_bzlmod'])
+                    options=['--experimental_enable_bzlmod',
+                             '--lockfile_mode=off'])
         print(f'coverage report written to {directory}')
 
     @target
