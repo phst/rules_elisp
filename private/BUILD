@@ -32,6 +32,7 @@ bzl_library(
     deps = [
         "//elisp:builtin_bzl",
         "@bazel_skylib//lib:paths",
+        "@bazel_skylib//rules:common_settings",
     ],
 )
 

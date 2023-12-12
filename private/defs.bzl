@@ -17,6 +17,7 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
 
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
@@ -393,10 +394,12 @@ CcDefaultInfo = provider(
 )
 
 def _cc_defaults_impl(ctx):
+    cxxopt = ctx.attr.cxxopt
+    cxxopt = cxxopt[BuildSettingInfo].value if cxxopt else None
     return CcDefaultInfo(
         features = ctx.attr.features,
         defines = ctx.attr.defines,
-        copts = ctx.attr.copts,
+        copts = ctx.attr.copts + ([cxxopt] if cxxopt else []),
         linkopts = ctx.attr.linkopts,
     )
 
@@ -405,6 +408,7 @@ cc_defaults = rule(
     attrs = {
         "defines": attr.string_list(mandatory = True),
         "copts": attr.string_list(mandatory = True),
+        "cxxopt": attr.label(providers = [BuildSettingInfo]),
         "linkopts": attr.string_list(mandatory = True),
     },
     doc = "Internal rule for default C++ flags",

@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@bazel_skylib//rules:common_settings.bzl", "string_flag")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
@@ -395,10 +396,16 @@ elisp_binary(
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
+    cxxopt = ":launcher_cxxopt",
     defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     visibility = ["//visibility:public"],
+)
+
+string_flag(
+    name = "launcher_cxxopt",
+    build_setting_default = "",
 )
 
 exports_files(
