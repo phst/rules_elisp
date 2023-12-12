@@ -134,11 +134,10 @@ should be used in its place."
     ;; https://bazel.build/remote/output-directories#layout-diagram.
     (pcase (macroexp-file-name)
       ((rx "/execroot/" (let name (+ (not (any ?/)))) ?/)
-       (setq form
-             `(elisp/runfiles/rlocation
-               ,filename ,runfiles
-               ;; The canonical name of the main repository is the empty string.
-               :caller-repo ,(if (string-equal name "_main") "" name))))))
+       ;; The canonical name of the main repository is the empty string.
+       (when (string-equal name "_main") (setq name ""))
+       (setq form `(elisp/runfiles/rlocation ,filename ,runfiles
+                                             :caller-repo ,name)))))
   form)
 
 (cl-defun elisp/runfiles/env-vars
