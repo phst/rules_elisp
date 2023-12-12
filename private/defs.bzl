@@ -450,26 +450,31 @@ bootstrap = rule(
 )
 
 def _merged_manual_impl(ctx):
+    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._generate])
     orgs = []
     for bin in ctx.files.includes:
         org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"))
         ctx.actions.run(
             outputs = [org],
-            inputs = [bin],
+            inputs = depset(direct = [bin], transitive = [tool_inputs]),
             executable = ctx.executable._generate,
             arguments = ["--", bin.path, org.path],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file {}".format(org.short_path),
+            input_manifests = input_manifests,
             toolchain = None,
         )
         orgs.append(org)
+
+    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._merge])
     ctx.actions.run(
         outputs = [ctx.outputs.out],
-        inputs = [ctx.file.main] + orgs,
+        inputs = depset(direct = [ctx.file.main] + orgs, transitive = [tool_inputs]),
         executable = ctx.executable._merge,
         arguments = [ctx.outputs.out.path, ctx.file.main.path] + [o.path for o in orgs],
         mnemonic = "MergeManual",
         progress_message = "Generating merged manual {}".format(ctx.outputs.out.short_path),
+        input_manifests = input_manifests,
         toolchain = None,
     )
 
