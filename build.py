@@ -162,13 +162,12 @@ class Builder:
         }
         for bzlmod in bzlmods[self._bzlmod]:
             prefix = '' if bzlmod else 'no'
-            self._bazel(
-                'test', ['//...'],
-                options=[
-                    '--test_output=errors',
-                    f'--{prefix}experimental_enable_bzlmod',
-                ] + list(args),
-                cwd=cwd)
+            options = [
+                '--test_output=errors',
+                f'--{prefix}experimental_enable_bzlmod',
+            ]
+            options.extend(args)
+            self._bazel('test', ['//...'], options=options, cwd=cwd)
 
     @target
     def ext(self) -> None:
