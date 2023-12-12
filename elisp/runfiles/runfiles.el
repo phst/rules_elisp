@@ -129,18 +129,16 @@ should be used in its place."
 (cl-define-compiler-macro elisp/runfiles/rlocation
     (&whole form filename &optional runfiles &key caller-repo)
   (unless caller-repo
-    (when-let ((caller-file (macroexp-file-name)))
-      ;; The directory after the execution root should be the repository name at
-      ;; compile time.  See
-      ;; https://bazel.build/remote/output-directories#layout-diagram.
-      (pcase caller-file
-        ((rx "/execroot/" (let name (+ (not (any ?/)))) ?/)
-         (setq form
-               `(elisp/runfiles/rlocation
-                 ,filename ,runfiles
-                 ;; The canonical name of the main repository is the empty
-                 ;; string.
-                 :caller-repo ,(if (string-equal name "_main") "" name)))))))
+    ;; The directory after the execution root should be the repository name at
+    ;; compile time.  See
+    ;; https://bazel.build/remote/output-directories#layout-diagram.
+    (pcase (macroexp-file-name)
+      ((rx "/execroot/" (let name (+ (not (any ?/)))) ?/)
+       (setq form
+             `(elisp/runfiles/rlocation
+               ,filename ,runfiles
+               ;; The canonical name of the main repository is the empty string.
+               :caller-repo ,(if (string-equal name "_main") "" name))))))
   form)
 
 (cl-defun elisp/runfiles/env-vars
