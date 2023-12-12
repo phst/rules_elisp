@@ -103,18 +103,20 @@ def _elisp_http_archive_impl(repository_ctx):
     if not defs_bzl.startswith("@"):
         # Work around https://github.com/bazelbuild/bazel/issues/15916.
         defs_bzl = "@" + defs_bzl
-    repository_ctx.file(
+    repository_ctx.template(
         "WORKSPACE.bazel",
-        _WORKSPACE_TEMPLATE.format(
-            name = repr(repository_ctx.attr.name),
-        ),
+        Label(":WORKSPACE.template"),
+        {
+            "[[name]]": repr(repository_ctx.attr.name),
+        },
         executable = False,
     )
-    repository_ctx.file(
+    repository_ctx.template(
         "BUILD.bazel",
-        _BUILD_TEMPLATE.format(
-            defs_bzl = repr(defs_bzl),
-        ),
+        Label(":BUILD.template"),
+        {
+            "[[defs_bzl]]": repr(defs_bzl),
+        },
         executable = False,
     )
 
@@ -126,23 +128,3 @@ elisp_http_archive = repository_rule(
     ),
     implementation = _elisp_http_archive_impl,
 )
-
-_WORKSPACE_TEMPLATE = """# Generated file; do not edit.
-
-workspace(name = {name})
-"""
-
-_BUILD_TEMPLATE = """# Generated file; do not edit.
-
-load({defs_bzl}, "elisp_library")
-
-elisp_library(
-    name = "library",
-    srcs = glob(
-        ["*.el"],
-        exclude = ["*-pkg.el"],
-    ),
-    fatal_warnings = False,
-    visibility = ["//visibility:public"],
-)
-"""
