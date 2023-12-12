@@ -156,7 +156,6 @@ static std::wstring BuildEnvironmentBlock(
 }
 static absl::Nonnull<wchar_t*> Pointer(
     std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  CHECK(!string.empty()) << "empty string";
   if (string.find(L'\0') != string.npos) {
     std::wcerr << string << L" contains null character" << std::endl;
     LOG(FATAL) << "string contains null character";
@@ -168,7 +167,6 @@ static std::vector<absl::Nonnull<char*>> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<absl::Nonnull<char*>> ptrs;
   for (std::string& s : strings) {
-    CHECK(!s.empty()) << "empty string";
     CHECK(s.find('\0') == s.npos) << s << " contains null character";
     ptrs.push_back(s.data());
   }
