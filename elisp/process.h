@@ -15,8 +15,8 @@
 #ifndef PHST_RULES_ELISP_ELISP_PROCESS_H
 #define PHST_RULES_ELISP_ELISP_PROCESS_H
 
-#if !defined __cplusplus || __cplusplus < 201402L
-#error this file requires at least C++14
+#if !defined __cplusplus || __cplusplus < 201703L
+#error this file requires at least C++17
 #endif
 
 #include <memory>
