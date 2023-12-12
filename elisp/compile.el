@@ -30,6 +30,8 @@
 (require 'bytecomp)
 (require 'warnings)
 
+(defvar elisp/current-repository)
+
 (add-to-list 'command-switch-alist
              (cons "--fatal-warnings" #'elisp/fatal-warnings))
 
@@ -54,7 +56,7 @@ treat warnings as errors."
   (when elisp/compilation--in-progress
     (error "Recursive invocation of ‘elisp/compile-batch-and-exit’"))
   (pcase command-line-args-left
-    (`(,src ,out)
+    (`(,current-repo ,src ,out)
      (setq command-line-args-left nil)
      (let* ((elisp/compilation--in-progress t)
             ;; Leaving these enabled leads to undefined behavior and doesn’t
@@ -69,11 +71,12 @@ treat warnings as errors."
             (temp (make-temp-file "compile-" nil ".elc"))
             (byte-compile-dest-file-function (lambda (_) temp))
             (byte-compile-error-on-warn elisp/fatal--warnings)
+            (elisp/current-repository current-repo)
             (success (byte-compile-file src)))
        (when success (copy-file temp out :overwrite))
        (delete-file temp)
        (kill-emacs (if success 0 1))))
-    (_ (error "Usage: emacs elisp/compile.el SRC OUT"))))
+    (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT"))))
 
 (defun elisp/fatal-warnings (_arg)
   "Process the --fatal-warnings command-line option."

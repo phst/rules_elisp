@@ -421,6 +421,7 @@ def _bootstrap_impl(ctx):
             "--load=" + compile.path,
             "--fatal-warnings",
             "--funcall=elisp/compile-batch-and-exit",
+            ctx.label.workspace_name,
             src.path,
             out.path,
         ],
