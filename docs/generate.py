@@ -93,8 +93,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options Rule {name} ({attrs})\n')
         self._write('#+BEGIN_deffn\n')
         self._write(_markdown(rule.doc_string).lstrip())
-        self._write(f'The ~{rule.rule_name}~ rule '
-                    f'supports the following attributes:\n\n')
+        self._write(f'The ~{name}~ rule supports the following attributes:\n\n')
         for attr in rule.attribute:
             self._attribute(attr)
         self._write('#+END_deffn\n\n')
@@ -112,8 +111,7 @@ class _Generator:
         if returns:
             self._write(f'Returns: {returns}\n\n')
         if func.deprecated.doc_string:
-            raise ValueError(
-                f'unsupported deprecated function {func.function_name}')
+            raise ValueError(f'unsupported deprecated function {name}')
         self._write('#+END_defun\n\n')
 
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
@@ -133,8 +131,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options Provider {name} ({fields})\n')
         self._write('#+BEGIN_deffn\n')
         self._write(_markdown(provider.doc_string).lstrip())
-        self._write(f'The ~{provider.provider_name}~ provider '
-                    f'has the following fields:\n\n')
+        self._write(f'The ~{name}~ provider has the following fields:\n\n')
         for field in provider.field_info:
             doc = _markdown(field.doc_string).strip()
             if not doc.endswith('.'):
