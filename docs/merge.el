@@ -1,6 +1,6 @@
 ;;; merge.el --- merge generated documentation into combined manual  -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022 Google LLC
+;; Copyright 2021, 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 (unless noninteractive (user-error "This file works only in batch mode"))
 
 (pcase command-line-args-left
-  (`(,output ,main . ,includes)
+  (`(,exclude ,output ,main . ,includes)
    (setq command-line-args-left nil)
    (let ((coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
@@ -36,9 +36,11 @@
      (with-temp-buffer
        (insert-file-contents main :visit)
        (org-mode)
+       (unless (string-empty-p exclude)
+         (org-map-entries #'org-cut-subtree exclude))
        (org-export-expand-include-keyword nil temp-dir)
        (write-region nil nil output))
      (delete-directory temp-dir :recursive)))
-  (_ (user-error "Usage: docs/merge OUTPUT.org MAIN.org INCLUDE.org…")))
+  (_ (user-error "Usage: docs/merge EXCLUDE OUTPUT.org MAIN.org INCLUDE.org…")))
 
 ;;; merge.el ends here

@@ -68,6 +68,7 @@ def non_module_dev_deps():
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
     )
+    _bazel_version(name = "phst_rules_elisp_bazel_version")
 
 def _toolchains_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
@@ -76,6 +77,29 @@ def _toolchains_impl(repository_ctx):
 
 _toolchains = repository_rule(
     implementation = _toolchains_impl,
+)
+
+def _bazel_version_impl(repository_ctx):
+    repository_ctx.file(
+        "WORKSPACE.bazel",
+        "workspace(name = %r)\n" % repository_ctx.name,
+        executable = False,
+    )
+    repository_ctx.file(
+        "BUILD.bazel",
+        "",
+        executable = False,
+    )
+    repository_ctx.file(
+        "defs.bzl",
+        "BAZEL_VERSION = %r\n" % native.bazel_version,
+        executable = False,
+    )
+
+_bazel_version = repository_rule(
+    doc = "Workaround for https://github.com/bazelbuild/bazel/issues/8305",
+    implementation = _bazel_version_impl,
+    local = True,  # always reevaluate in case the Bazel version changes
 )
 
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents

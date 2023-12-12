@@ -53,7 +53,7 @@ use_repo(non_module_deps, "gnu_emacs_29.1")
 use_repo(non_module_deps, "phst_rules_elisp_toolchains")
 
 non_module_dev_deps = use_extension("//private:non_module_deps.bzl", "non_module_dev_deps", dev_dependency = True)
-use_repo(non_module_dev_deps, "junit_xsd")
+use_repo(non_module_dev_deps, "junit_xsd", "phst_rules_elisp_bazel_version")
 
 # Local toolchains
 register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")

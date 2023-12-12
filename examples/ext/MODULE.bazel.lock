@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "526fb28cd385e19782cbffe7b8faa0902bab500365416b74151423b0a038c704"
+    "phst_rules_elisp": "5e53bfd7d7c5ef77ac6166d9d220c6a4e6948810fe4d0c05a3b0c957d3e118c6"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -1400,7 +1400,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "amiSaB/HIFz+EvROOWEZ6snqxb0zsKoSl1rfmMfehTU=",
+        "bzlTransitiveDigest": "5/PBTH7gfS7MN1FELxdJO7Z8gNUQfnmz7FdbGtQqRS8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1421,7 +1421,7 @@
     },
     "@@phst_rules_elisp~override//private:non_module_deps.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "JfK1s0FGVs6XOd582q3OEMhFL5IXJGL0KSreQCFumXI=",
+        "bzlTransitiveDigest": "fyb8XpIqWnrxxh7XDKGojmAucCEjbJY+paKbg/Fy+w8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
