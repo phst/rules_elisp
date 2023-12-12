@@ -471,6 +471,7 @@ def _merged_manual_impl(ctx):
         orgs.append(org)
 
     args = ctx.actions.args()
+    args.add(ctx.attr.exclude_tag)
     args.add(ctx.outputs.out)
     args.add(ctx.file.main)
     args.add_all(orgs, expand_directories = False)
@@ -498,6 +499,7 @@ merged_manual = rule(
             allow_empty = False,
         ),
         "out": attr.output(mandatory = True),
+        "exclude_tag": attr.string(mandatory = True),
         "_generate": attr.label(
             executable = True,
             cfg = "exec",

@@ -676,6 +676,13 @@ from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 
 #+INCLUDE: repositories.org
 
+* Symbols defined in =//elisp:extensions.bzl= :extensions:
+:PROPERTIES:
+:ALT_TITLE: Extension Starlark symbols
+:END:
+
+#+INCLUDE: extensions.org
+
 * Symbols defined in =//emacs:defs.bzl=
 :PROPERTIES:
 :ALT_TITLE: Emacs Starlark symbols

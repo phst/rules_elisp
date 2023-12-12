@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
+load("@phst_rules_elisp_bazel_version//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
@@ -41,17 +43,18 @@ genrule(
     cmd = "makeinfo --no-split --output=$@ -- $<",
 )
 
+DOCUMENT_EXTENSIONS = versions.is_at_least("7", BAZEL_VERSION)
+
 DOCS = [
     "elisp",
     "emacs",
     "repositories",
-    # Requires Bazel 7.  See https://github.com/bazelbuild/stardoc/issues/192.
-    # "extensions",
-]
+] + (["extensions"] if DOCUMENT_EXTENSIONS else [])
 
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
+    exclude_tag = "" if DOCUMENT_EXTENSIONS else "extensions",
     includes = DOCS,
     main = "manual.org",
 )
@@ -102,18 +105,23 @@ stardoc(
     ],
 )
 
-# Requires Bazel 7.  See https://github.com/bazelbuild/stardoc/issues/192.
-# stardoc(
-#     name = "extensions",
-#     out = "extensions.bin",
-#     format = "proto",
-#     input = "//elisp:extensions.bzl",
-#     deps = [
-#         "//elisp:builtin_bzl",
-#         "//elisp:repositories_bzl",
-#         "//private:repositories_bzl",
-#     ],
-# )
+stardoc(
+    name = "extensions",
+    out = "extensions.bin",
+    format = "proto",
+    input = "//elisp:extensions.bzl",
+    tags = [
+        # Due to https://github.com/bazelbuild/stardoc/issues/192, building this
+        # target fails on Bazel 6 and below, so don’t include it in target
+        # patterns.
+        "manual",
+    ],
+    deps = [
+        "//elisp:builtin_bzl",
+        "//elisp:repositories_bzl",
+        "//private:repositories_bzl",
+    ],
+)
 
 py_binary(
     name = "generate",

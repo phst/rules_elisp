@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "526fb28cd385e19782cbffe7b8faa0902bab500365416b74151423b0a038c704",
+  "moduleFileHash": "5e53bfd7d7c5ef77ac6166d9d220c6a4e6948810fe4d0c05a3b0c957d3e118c6",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -74,10 +74,12 @@
             "column": 36
           },
           "imports": {
-            "junit_xsd": "junit_xsd"
+            "junit_xsd": "junit_xsd",
+            "phst_rules_elisp_bazel_version": "phst_rules_elisp_bazel_version"
           },
           "devImports": [
-            "junit_xsd"
+            "junit_xsd",
+            "phst_rules_elisp_bazel_version"
           ],
           "tags": [],
           "hasDevUseExtension": true,
@@ -1845,7 +1847,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "amiSaB/HIFz+EvROOWEZ6snqxb0zsKoSl1rfmMfehTU=",
+        "bzlTransitiveDigest": "5/PBTH7gfS7MN1FELxdJO7Z8gNUQfnmz7FdbGtQqRS8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1866,7 +1868,7 @@
     },
     "//private:non_module_deps.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "JfK1s0FGVs6XOd582q3OEMhFL5IXJGL0KSreQCFumXI=",
+        "bzlTransitiveDigest": "fyb8XpIqWnrxxh7XDKGojmAucCEjbJY+paKbg/Fy+w8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1924,7 +1926,7 @@
     },
     "//private:non_module_deps.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "JfK1s0FGVs6XOd582q3OEMhFL5IXJGL0KSreQCFumXI=",
+        "bzlTransitiveDigest": "fyb8XpIqWnrxxh7XDKGojmAucCEjbJY+paKbg/Fy+w8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1939,6 +1941,13 @@
               "urls": [
                 "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz"
               ]
+            }
+          },
+          "phst_rules_elisp_bazel_version": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_bazel_version",
+            "attributes": {
+              "name": "_main~non_module_dev_deps~phst_rules_elisp_bazel_version"
             }
           }
         }

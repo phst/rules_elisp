@@ -85,6 +85,8 @@ class _Generator:
             self._function(func)
         for aspect in module.aspect_info:
             self._aspect(aspect)
+        for extension in module.module_extension_info:
+            self._extension(extension)
         for rule in module.repository_rule_info:
             self._repo_rule(rule)
 
@@ -156,6 +158,29 @@ class _Generator:
         for attr in aspect.attribute:
             self._attribute(attr)
         self._write('#+END_deffn\n\n')
+
+    def _extension(self, ext: stardoc_output_pb2.ModuleExtensionInfo) -> None:
+        name = ext.extension_name
+        tags = ', '.join(t.tag_name for t in ext.tag_class)
+        self._write(
+            f'#+ATTR_TEXINFO: :options {{Module extension}} {name} {tags}\n')
+        self._write('#+BEGIN_deftp\n')
+        self._write(_markdown(ext.doc_string).lstrip())
+        self._write(f'The ~{name}~ module extension '
+                    f'provides the following tag classes:\n\n')
+        for tag in ext.tag_class:
+            attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                              for a in tag.attribute)
+            self._write(f'#+ATTR_TEXINFO: :options '
+                        f'{{Tag class}} {name} {tag.tag_name} ({attrs})\n')
+            self._write('#+BEGIN_defop\n')
+            self._write(_markdown(tag.doc_string).lstrip())
+            self._write(f'The ~{tag.tag_name}~ tag class '
+                        f'supports the following attributes:\n\n')
+            for attr in tag.attribute:
+                self._attribute(attr)
+            self._write('#+END_defop\n\n')
+        self._write('#+END_deftp\n\n')
 
     def _repo_rule(self, rule: stardoc_output_pb2.RepositoryRuleInfo) -> None:
         name = rule.rule_name
