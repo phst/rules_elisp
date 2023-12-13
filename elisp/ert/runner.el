@@ -1129,18 +1129,6 @@ Return SYMBOL."
          (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
      string :fixedcase :literal)))
 
-(defun elisp/ert/edebug--unique (_cursor spec)
-  "Handle the ‘:unique’ Edebug specification.
-SPEC is the prefix for ‘gensym’."
-  (cl-check-type spec string)
-  ;; See ‘edebug-match-colon-name’ for a similar function.
-  (let ((suffix (gensym spec)))
-    (setq edebug-def-name
-          (if edebug-def-name
-              (intern (format "%s@%s" edebug-def-name suffix))
-            suffix)))
-  nil)
-
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
 
