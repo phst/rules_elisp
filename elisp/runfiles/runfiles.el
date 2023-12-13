@@ -122,6 +122,29 @@ should be used in its place."
   (elisp/runfiles/rlocation--internal (elisp/runfiles/runfiles--impl runfiles)
                                       filename))
 
+(eval-and-compile
+  (defun elisp/runfiles/current--repo ()
+    "Attempt to detect the repository containing the file being compiled.
+This works somewhat reliably for files being compiled as part of
+a Bazel action (e.g., ‘elisp_library’ targets).  The result is
+only meaningful while byte compilation is in progress (e.g.,
+while expanding macros during byte compilation).  Return nil if
+the current repository can’t be determined."
+    (declare (side-effect-free error-free))
+    ;; ‘elisp/current-repository’ is bound by //elisp:compile.el.
+    (or (bound-and-true-p elisp/current-repository)
+        (pcase (macroexp-file-name)
+          ;; The directory after the execution root should be the repository
+          ;; name at compile time.  See
+          ;; https://bazel.build/remote/output-directories#layout-diagram.  If
+          ;; --incompatible_sandbox_hermetic_tmp is enabled, the execution root
+          ;; is /tmp/bazel-working-directory or /tmp/bazel-execroot instead;
+          ;; cf. https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/sandbox/LinuxSandboxedSpawnRunner.java.
+          ((rx ?/ (or "execroot" "bazel-working-directory" "bazel-execroot") ?/
+               (let name (+ (not (any ?/)))) ?/)
+           ;; The canonical name of the main repository is the empty string.
+           (if (string-equal name "_main") "" name))))))
+
 ;; A somewhat robust way to determine the caller repository is at compile time.
 ;; We could also try to determine the caller at runtime using ‘backtrace-frame’
 ;; and ‘symbol-file’, but that doesn’t work in cases where the caller is an
@@ -129,23 +152,7 @@ should be used in its place."
 (cl-define-compiler-macro elisp/runfiles/rlocation
     (&whole form filename &optional runfiles &key caller-repo)
   (unless caller-repo
-    ;; ‘elisp/current-repository’ is bound by //elisp:compile.el.
-    (when-let ((name (or (bound-and-true-p elisp/current-repository)
-                         (pcase (macroexp-file-name)
-                           ;; The directory after the execution root should be
-                           ;; the repository name at compile time.  See
-                           ;; https://bazel.build/remote/output-directories#layout-diagram.
-                           ;; If --incompatible_sandbox_hermetic_tmp is enabled,
-                           ;; the execution root is /tmp/bazel-working-directory
-                           ;; or /tmp/bazel-execroot instead;
-                           ;; cf. https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/sandbox/LinuxSandboxedSpawnRunner.java.
-                           ((rx ?/
-                                (or "execroot"
-                                    "bazel-working-directory" "bazel-execroot")
-                                ?/ (let name (+ (not (any ?/)))) ?/)
-                            ;; The canonical name of the main repository is the
-                            ;; empty string.
-                            (if (string-equal name "_main") "" name))))))
+    (when-let ((name (elisp/runfiles/current--repo)))
       (setq form `(elisp/runfiles/rlocation ,filename ,runfiles
                                             :caller-repo ,name))))
   form)
