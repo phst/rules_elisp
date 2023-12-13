@@ -73,6 +73,7 @@ TYPE should be a message structure type symbol; KEYS are the
 unevaluated keyword arguments.  If KEYS are valid keyword-value
 pairs for TYPE, or if their validity can’t be determined
 statically, return nil."
+  (declare (side-effect-free t))
   (condition-case-unless-debug err
       (cl-loop for (key . _) on keys by #'cddr
                when (macroexp-const-p key)

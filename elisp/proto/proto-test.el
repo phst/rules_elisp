@@ -1,6 +1,6 @@
 ;;; proto-test.el --- unit tests for protocol buffer support  -*- lexical-binding: t; -*-
 
-;; Copyright 2022 Google LLC
+;; Copyright 2022, 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -955,6 +955,7 @@
 (defun elisp/proto/explain--time-equal-p (a b)
   "ERT explainer for ‘time-equal-p’.
 A and B are the time values to compare."
+  (declare (side-effect-free error-free))
   (unless (time-equal-p a b)
     `(different-time-values
       ,(format-time-string "%F %T.%N %Z" a)

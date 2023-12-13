@@ -357,6 +357,7 @@ This list is populated by --skip-tag command-line options.")
 (defun elisp/ert/make--selector (skip-tags)
   "Build an ERT selector from environment and command line.
 SKIP-TAGS is a list of additional tags to skip."
+  (declare (side-effect-free error-free))
   (cl-check-type skip-tags list)
   (cl-callf append skip-tags (reverse elisp/ert/skip--tags))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
@@ -380,6 +381,7 @@ SKIP-TAGS is a list of additional tags to skip."
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
 NAME is the name of the test."
+  (declare (side-effect-free error-free))
   (cl-check-type name symbol)
   (cl-check-type result ert-test-result-with-condition)
   (with-temp-buffer
@@ -1025,6 +1027,7 @@ be determined, return nil."
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
+  (declare (side-effect-free error-free))
   (cl-check-type string string)
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
@@ -1082,6 +1085,7 @@ exact copies as equal."
 
 (defun elisp/ert/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
+  (declare (side-effect-free t))
   ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
   ;; cf. https://debbugs.gnu.org/41094.  Use a hashtable to avoid infinite loops
   ;; on cyclic data structures.
@@ -1105,6 +1109,7 @@ exact copies as equal."
 (defun elisp/ert/check--xml-name (symbol)
   "Check that SYMBOL maps to a valid XML name.
 Return SYMBOL."
+  (declare (side-effect-free t))
   (cl-check-type symbol symbol)
   (let ((name (symbol-name symbol)))
     ;; Allow only known-safe characters in tags.  Also see
@@ -1118,6 +1123,7 @@ Return SYMBOL."
 
 (defun elisp/ert/sanitize--xml-string (string)
   "Return a sanitized variant of STRING containing only valid XML characters."
+  (declare (side-effect-free error-free))
   (cl-check-type string string)
   (let ((case-fold-search nil))
     (replace-regexp-in-string
