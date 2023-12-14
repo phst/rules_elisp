@@ -591,8 +591,8 @@ elisp_test = rule(
             doc = """List of tests to skip.  This attribute contains a list of
 ERT test symbols; when running the test rule, these tests are skipped.
 
-Most of the time, you should use
-[the `skip-unless` macro](<info:ert#Tests and Their Environment>) instead.
+Most of the time, you should use the `skip-unless` macro instead; see
+[Tests and Their Environment](<info:ert#Tests and Their Environment>).
 The `skip_tests` attribute is mainly useful for third-party code that
 you don’t control.""",
         ),
@@ -606,13 +606,13 @@ tests.""",
     ),
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
-See the [ERT manual](<info:ert#How to Write Tests>) for details.
+For details, see [How to Write Tests](<info:ert#How to Write Tests>).
 The generated test binary loads all source files and executes all
 tests like `ert-run-tests-batch-and-exit`.
 
 You can restrict the tests to be run using the `--test_filter` option.  If set,
 the value of `--test_filter` must be a Lisp expression usable as an
-[ERT test selector](<info:ert#Test Selectors>).
+ERT test selector; see [Test Selectors](<info:ert#Test Selectors>).
 You can also restrict the tests to be run using the `skip_tests` and
 `skip_tags` rule attributes.  These restrictions are additive, i.e., a test
 only runs if it’s not suppressed by either facility.
@@ -663,11 +663,11 @@ elisp_manual = rule(
             default = Label("//elisp:export_org"),
         ),
     },
-    doc = """Generates a [GNU Texinfo](info:texinfo)
-manual from an [Org Mode file](info:org) using
-[Org’s exporting functionality](info:org#Exporting).
-You can then use [`texi2any`](<info:texinfo#Generic Translator texi2any>)
-to generate other document formats from the output file.""",
+    doc = """Generates a GNU Texinfo manual from an Org Mode file.
+See [GNU Texinfo](info:texinfo), and see [the Org Mode manual](info:org).
+Uses Org’s exporting functionality; see [Exporting](info:org#Exporting).
+You can then use `texi2any` to generate other document formats from the output
+file; see [`texi2any`](<info:texinfo#Generic Translator texi2any>).""",
     implementation = _elisp_manual_impl,
 )
 
