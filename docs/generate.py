@@ -169,18 +169,23 @@ class _Generator:
         self._write(f'The ~{name}~ module extension '
                     f'provides the following tag classes:\n\n')
         for tag in ext.tag_class:
-            attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
-                              for a in tag.attribute)
-            self._write(f'#+ATTR_TEXINFO: :options '
-                        f'{{Tag class}} {name} {tag.tag_name} ({attrs})\n')
-            self._write('#+BEGIN_defop\n')
-            self._write(_markdown(tag.doc_string).lstrip())
-            self._write(f'The ~{tag.tag_name}~ tag class '
-                        f'supports the following attributes:\n\n')
-            for attr in tag.attribute:
-                self._attribute(attr)
-            self._write('#+END_defop\n\n')
+            self._tag_class(name, tag)
         self._write('#+END_deftp\n\n')
+
+    def _tag_class(self, extension_name: str,
+                   tag: stardoc_output_pb2.ModuleExtensionTagClassInfo) -> None:
+        name = tag.tag_name
+        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                          for a in tag.attribute)
+        self._write(f'#+ATTR_TEXINFO: :options '
+                    f'{{Tag class}} {extension_name} {name} ({attrs})\n')
+        self._write('#+BEGIN_defop\n')
+        self._write(_markdown(tag.doc_string).lstrip())
+        self._write(
+            f'The ~{name}~ tag class supports the following attributes:\n\n')
+        for attr in tag.attribute:
+            self._attribute(attr)
+        self._write('#+END_defop\n\n')
 
     def _repo_rule(self, rule: stardoc_output_pb2.RepositoryRuleInfo) -> None:
         name = rule.rule_name
