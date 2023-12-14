@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@phst_rules_elisp_bazel_version//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
@@ -135,19 +134,8 @@ py_binary(
     ],
 )
 
-proto_library(
-    name = "stardoc_output_proto",
-    srcs = [":stardoc_output.proto"],
-)
-
 py_proto_library(
     name = "stardoc_output_py_proto",
     tags = ["no-python-check"],
-    deps = [":stardoc_output_proto"],
-)
-
-copy_file(
-    name = "copy_stardoc_output_proto",
-    src = "@io_bazel_stardoc//stardoc/proto:stardoc_output.proto",
-    out = "stardoc_output.proto",
+    deps = ["@io_bazel_stardoc//stardoc/proto:stardoc_output_proto"],
 )
