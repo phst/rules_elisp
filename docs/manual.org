@@ -464,13 +464,13 @@ This function is like ~elisp/proto/parse~, but it expects the JSON serialization
 instead of the binary serialization.
 #+END_defun
 
-#+ATTR_TEXINFO: :options elisp/proto/serialize message [:allow-partial :discard-unknown :deterministic]
+#+ATTR_TEXINFO: :options elisp/proto/serialize message [:allow-partial] [:discard-unknown] [:deterministic]
 #+BEGIN_defun
 This function is the inverse of ~elisp/proto/parse~, producing the binary
 serialization of the {{{var(message)}}} as a unibyte string.
 #+END_defun
 
-#+ATTR_TEXINFO: :options elisp/proto/serialize-text message [:compact :discard-unknown :deterministic]
+#+ATTR_TEXINFO: :options elisp/proto/serialize-text message [:compact] [:discard-unknown] [:deterministic]
 #+BEGIN_defun
 This function is the inverse of ~elisp/proto/parse~, producing the binary
 serialization of the {{{var(message)}}} as a unibyte string.  If the
@@ -479,7 +479,7 @@ less vertical whitespace; however, you shouldn’t rely on any specific output
 format in any case.
 #+END_defun
 
-#+ATTR_TEXINFO: :options elisp/proto/serialize-json message [:emit-defaults :proto-names]
+#+ATTR_TEXINFO: :options elisp/proto/serialize-json message [:emit-defaults] [:proto-names]
 #+BEGIN_defun
 This function is the inverse of ~elisp/proto/parse-json~, producing the JSON
 serialization of the {{{var(message)}}} as a string.  If the ~:emit-defaults~
