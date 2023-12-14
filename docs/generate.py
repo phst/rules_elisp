@@ -133,7 +133,7 @@ class _Generator:
         name = provider.provider_name
         fields = ', '.join(f.name for f in provider.field_info)
         self._write(f'#+ATTR_TEXINFO: :options Provider {name} ({fields})\n')
-        self._write('#+BEGIN_deffn\n')
+        self._write('#+BEGIN_deftp\n')
         self._write(_markdown(provider.doc_string).lstrip())
         self._write(f'The ~{name}~ provider has the following fields:\n\n')
         for field in provider.field_info:
@@ -142,7 +142,7 @@ class _Generator:
                 raise ValueError(
                     f'documentation string {doc!r} should end with a period')
             self._item(f'~{field.name}~ :: {doc}')
-        self._write('#+END_deffn\n\n')
+        self._write('#+END_deftp\n\n')
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
         name = aspect.aspect_name
