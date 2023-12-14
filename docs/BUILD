@@ -63,10 +63,10 @@ elisp_binary(
     name = "merge",
     src = "merge.el",
     input_args = list(range(
-        2,
-        len(DOCS) + 3,
+        3,
+        len(DOCS) + 4,
     )),
-    output_args = [1],
+    output_args = [2],
 )
 
 stardoc(
