@@ -132,7 +132,7 @@ class _Generator:
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
         name = provider.provider_name
-        fields = ', '.join(f.name for f in provider.field_info)
+        fields = ' '.join(f.name for f in provider.field_info)
         self._write(f'#+ATTR_TEXINFO: :options Provider {name} {fields}\n')
         self._write('#+BEGIN_deftp\n')
         self._write(_markdown(provider.doc_string).lstrip())
@@ -147,8 +147,8 @@ class _Generator:
 
     def _aspect(self, aspect: stardoc_output_pb2.AspectInfo) -> None:
         name = aspect.aspect_name
-        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
-                          for a in aspect.attribute)
+        attrs = ' '.join(a.name if a.mandatory else f'[{a.name}]'
+                         for a in aspect.attribute)
         self._write(f'#+ATTR_TEXINFO: :options Aspect {name} {attrs}\n')
         self._write('#+BEGIN_deffn\n')
         self._write(_markdown(aspect.doc_string).lstrip())
@@ -162,7 +162,7 @@ class _Generator:
 
     def _extension(self, ext: stardoc_output_pb2.ModuleExtensionInfo) -> None:
         name = ext.extension_name
-        tags = ', '.join(t.tag_name for t in ext.tag_class)
+        tags = ' '.join(t.tag_name for t in ext.tag_class)
         self._write(
             f'#+ATTR_TEXINFO: :options {{Module extension}} {name} {tags}\n')
         self._write('#+BEGIN_deftp\n')
