@@ -356,7 +356,7 @@ argument.  The field name is a plain symbol denoting the unqualified field name.
 #+ATTR_TEXINFO: :options elisp/proto/has-field message field
 #+BEGIN_defun
 This function returns whether the given field is present in the message object.
-If the field doesn’t have a notion of presence (e.g. it’s a repeated field), an
+If the field doesn’t have a notion of presence (e.g., it’s a repeated field), an
 error is signaled.
 #+END_defun
 
