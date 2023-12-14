@@ -47,7 +47,6 @@ def _emacs_binary_impl(ctx):
                 "--install=" + runfile_location(ctx, install),
             ]),
         },
-        is_executable = True,
     )
     executable, runfiles = cc_launcher(
         ctx,
