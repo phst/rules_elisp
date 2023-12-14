@@ -591,9 +591,9 @@ elisp_test = rule(
             doc = """List of tests to skip.  This attribute contains a list of
 ERT test symbols; when running the test rule, these tests are skipped.
 
-Most of the time, you should use [the `skip-unless`
-macro](https://www.gnu.org/software/emacs/manual/html_node/ert/Tests-and-Their-Environment.html)
-instead.  The `skip_tests` attribute is mainly useful for third-party code that
+Most of the time, you should use
+[the `skip-unless` macro](<info:ert#Tests and Their Environment>) instead.
+The `skip_tests` attribute is mainly useful for third-party code that
 you don’t control.""",
         ),
         skip_tags = attr.string_list(
@@ -606,14 +606,13 @@ tests.""",
     ),
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
-See the [ERT
-manual](https://www.gnu.org/software/emacs/manual/html_node/ert/How-to-Write-Tests.html)
-for details.  The generated test binary loads all source files and executes all
+See the [ERT manual](<info:ert#How to Write Tests>) for details.
+The generated test binary loads all source files and executes all
 tests like `ert-run-tests-batch-and-exit`.
 
 You can restrict the tests to be run using the `--test_filter` option.  If set,
-the value of `--test_filter` must be a Lisp expression usable as an [ERT test
-selector](https://www.gnu.org/software/emacs/manual/html_node/ert/Test-Selectors.html).
+the value of `--test_filter` must be a Lisp expression usable as an
+[ERT test selector](<info:ert#Test Selectors>).
 You can also restrict the tests to be run using the `skip_tests` and
 `skip_tags` rule attributes.  These restrictions are additive, i.e., a test
 only runs if it’s not suppressed by either facility.
@@ -664,11 +663,10 @@ elisp_manual = rule(
             default = Label("//elisp:export_org"),
         ),
     },
-    doc = """Generates a [GNU Texinfo](https://www.gnu.org/software/texinfo/)
-manual from an [Org Mode file](https://orgmode.org/) using
-[Org’s exporting functionality](https://orgmode.org/manual/Exporting.html).
-You can then use
-[`texi2any`](https://www.gnu.org/software/texinfo/manual/texinfo/html_node/Generic-Translator-texi2any.html)
+    doc = """Generates a [GNU Texinfo](info:texinfo)
+manual from an [Org Mode file](info:org) using
+[Org’s exporting functionality](info:org#Exporting).
+You can then use [`texi2any`](<info:texinfo#Generic Translator texi2any>)
 to generate other document formats from the output file.""",
     implementation = _elisp_manual_impl,
 )

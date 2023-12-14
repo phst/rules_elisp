@@ -22,6 +22,7 @@ import pathlib
 import re
 import textwrap
 from typing import Optional
+import urllib.parse
 
 import commonmark
 import commonmark.node
@@ -312,7 +313,16 @@ class _OrgRenderer(commonmark.render.renderer.Renderer):
         self.lit('#+TEXINFO: @noindent')
 
     def link(self, node: commonmark.node.Node, entering: bool) -> None:
-        self.lit(f'[[{node.destination}][' if entering else ']]')
+        if entering:
+            dest = node.destination
+            # CommonMark helpfully URL-escapes link destinations, but this
+            # prevents links to Info nodes containing spaces.
+            match = re.fullmatch(r'(info:[^#:]+[#:])(.*%.*)', dest)
+            if match:
+                dest = match[1] + urllib.parse.unquote(match[2])
+            self.lit(f'[[{dest}][')
+        else:
+            self.lit(']]')
 
     def html_inline(self, node: commonmark.node.Node, entering: bool) -> None:
         writer = io.StringIO()
