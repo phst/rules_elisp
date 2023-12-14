@@ -14,11 +14,11 @@
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@com_google_protobuf//:protobuf.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@phst_rules_elisp_bazel_version//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "merged_manual")
 
@@ -135,14 +135,15 @@ py_binary(
     ],
 )
 
-# FIXME: Switch to py_proto_library from rules_python once
-# https://github.com/bazelbuild/rules_python/issues/1081 is fixed.
+proto_library(
+    name = "stardoc_output_proto",
+    srcs = [":stardoc_output.proto"],
+)
+
 py_proto_library(
     name = "stardoc_output_py_proto",
-    srcs = [":stardoc_output.proto"],
-    include = "",
-    srcs_version = "PY3",
     tags = ["no-python-check"],
+    deps = [":stardoc_output_proto"],
 )
 
 copy_file(
