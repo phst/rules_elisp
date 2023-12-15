@@ -77,6 +77,9 @@ pip.parse(
 use_repo(pip, pip_deps = "pip")
 
 # Go-specific dependencies
+go_sdk = use_extension("@io_bazel_rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
+go_sdk.nogo(nogo = "//dev:nogo")
+
 go_deps = use_extension("@bazel_gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
 go_deps.module(
     path = "github.com/bazelbuild/buildtools",

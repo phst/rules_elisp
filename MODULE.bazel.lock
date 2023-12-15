@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "e5341152f0ac8501f5e9b962d03037466f6b200b8ddd04e7204f53d993e2ca12",
+  "moduleFileHash": "03cd1c58d19ce371d56be09ee46c1bc13b84934bbf6695e70922334b97439cd9",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -151,12 +151,40 @@
           "hasNonDevUseExtension": true
         },
         {
+          "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
+          "extensionName": "go_sdk",
+          "usingModule": "<root>",
+          "location": {
+            "file": "@@//:MODULE.bazel",
+            "line": 80,
+            "column": 23
+          },
+          "imports": {},
+          "devImports": [],
+          "tags": [
+            {
+              "tagName": "nogo",
+              "attributeValues": {
+                "nogo": "//dev:nogo"
+              },
+              "devDependency": true,
+              "location": {
+                "file": "@@//:MODULE.bazel",
+                "line": 81,
+                "column": 12
+              }
+            }
+          ],
+          "hasDevUseExtension": true,
+          "hasNonDevUseExtension": false
+        },
+        {
           "extensionBzlFile": "@bazel_gazelle//:extensions.bzl",
           "extensionName": "go_deps",
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 80,
+            "line": 83,
             "column": 24
           },
           "imports": {
@@ -180,7 +208,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 81,
+                "line": 84,
                 "column": 15
               }
             },
@@ -194,7 +222,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 86,
+                "line": 89,
                 "column": 15
               }
             },
@@ -208,7 +236,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 91,
+                "line": 94,
                 "column": 15
               }
             }
@@ -2733,7 +2761,7 @@
             "ruleClassName": "go_register_nogo",
             "attributes": {
               "name": "rules_go~0.44.0~go_sdk~io_bazel_rules_nogo",
-              "nogo": "@io_bazel_rules_go//:default_nogo",
+              "nogo": "'@@//dev:nogo'",
               "includes": [
                 "'@@//:__subpackages__'"
               ],
