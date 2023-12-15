@@ -17,10 +17,10 @@
 module(name = "phst_rules_elisp")
 
 # Non-development module dependencies
-bazel_dep(name = "platforms", version = "0.0.7")
+bazel_dep(name = "platforms", version = "0.0.8")
 bazel_dep(name = "bazel_skylib", version = "1.5.0")
 bazel_dep(name = "rules_license", version = "0.0.7")
-bazel_dep(name = "rules_python", version = "0.27.0")
+bazel_dep(name = "rules_python", version = "0.27.1")
 bazel_dep(name = "abseil-cpp", version = "20230802.0", repo_name = "com_google_absl")
 bazel_dep(name = "protobuf", version = "21.7", repo_name = "com_google_protobuf")
 bazel_dep(name = "upb", version = "0.0.0-20220923-a547704")
