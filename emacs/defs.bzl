@@ -123,7 +123,6 @@ The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = use_cpp_toolchain(),
-    incompatible_use_toolchain_transition = True,
     implementation = _emacs_binary_impl,
 )
 
