@@ -414,7 +414,6 @@ as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
     toolchains = ["//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_library_impl,
 )
 
@@ -466,7 +465,6 @@ direct and indirect dependencies.  The feature symbol for `require` is
 corresponding `proto_library` rule.""",
     provides = [EmacsLispInfo],
     toolchains = ["//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_proto_library_impl,
 )
 
@@ -532,7 +530,6 @@ in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
     toolchains = use_cpp_toolchain() + ["//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_binary_impl,
 )
 
@@ -623,7 +620,6 @@ normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
     toolchains = use_cpp_toolchain() + ["//elisp:toolchain_type"],
-    incompatible_use_toolchain_transition = True,
     implementation = _elisp_test_impl,
 )
 
