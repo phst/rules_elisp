@@ -103,6 +103,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
+        "//elisp/private:build_package",
         "//elisp/private:compile",
     ],
 )

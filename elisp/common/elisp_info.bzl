@@ -47,5 +47,11 @@ additions for this library and all its transitive dependencies.
 The `depset` uses preorder traversal: entries for libraries closer to the root
 of the dependency graph come first.  The `depset` elements are structures as
 described in the provider documentation.""",
+        "package_file": """A `File` object for the -pkg.el file.
+None if `enable_package` is False.""",
+        "metadata_file": """A `File` object for the metadata file.
+None if `enable_package` is False.""",
+        "autoloads_file": """A `File` object for the autoloads file.
+None if `enable_package` is False.""",
     },
 )
