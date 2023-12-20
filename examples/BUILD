@@ -49,6 +49,7 @@ elisp_library(
     srcs = [
         "lib-2-a.el",
         "lib-2-b.el",
+        "lib-2-pkg.el",
         ":module",
     ],
     fatal_warnings = False,
