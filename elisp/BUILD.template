@@ -24,7 +24,7 @@ elisp_library(
             "*-pkg.el",
             "*-test.el",
             "*-tests.el",
-        ],
+        ] + [[exclude]],
     ),
     fatal_warnings = False,
     visibility = ["//visibility:public"],

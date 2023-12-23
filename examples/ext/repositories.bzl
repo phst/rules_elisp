@@ -27,4 +27,5 @@ def example_dependencies():
         urls = [
             "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip",  # 2021-08-26
         ],
+        exclude = ["dash-functional.el"],
     )

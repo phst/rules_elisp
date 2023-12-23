@@ -131,4 +131,8 @@ See the [corresponding attribute for
 See the [corresponding attribute for
 `http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
     ),
+    "exclude": attr.string_list(
+        doc = """Glob patterns of additional files to exclude from
+the library.""",
+    ),
 }
