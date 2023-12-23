@@ -20,7 +20,11 @@ elisp_library(
     name = "library",
     srcs = glob(
         ["*.el"],
-        exclude = ["*-pkg.el"],
+        exclude = [
+            "*-pkg.el",
+            "*-test.el",
+            "*-tests.el",
+        ],
     ),
     fatal_warnings = False,
     visibility = ["//visibility:public"],
