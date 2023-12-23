@@ -107,6 +107,8 @@ available as an `elisp_library`.  This {kind} is very similar to
 [`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive),
 except that it always generates a BUILD file containing a single `elisp_library`
 rule in the root package for all Emacs Lisp files in the archive.
+Test files (`…-test.el`, `…-tests.el`) and package metadata files (`…-pkg.el`)
+are excluded.
 The `elisp_library` rule is always named `library`."""
 
 HTTP_ARCHIVE_ATTRS = {
