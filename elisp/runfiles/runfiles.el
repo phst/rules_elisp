@@ -123,7 +123,7 @@ should be used in its place."
                                       filename))
 
 (eval-and-compile
-  (defun elisp/runfiles/current--repo ()
+  (defun elisp/runfiles/current-repo ()
     "Attempt to detect the repository containing the file being compiled.
 This works somewhat reliably for files being compiled as part of
 a Bazel action (e.g., ‘elisp_library’ targets).  The result is
@@ -152,7 +152,7 @@ the current repository can’t be determined."
 (cl-define-compiler-macro elisp/runfiles/rlocation
     (&whole form filename &optional runfiles &key caller-repo)
   (unless caller-repo
-    (when-let ((name (elisp/runfiles/current--repo)))
+    (when-let ((name (elisp/runfiles/current-repo)))
       (setq form `(elisp/runfiles/rlocation ,filename ,runfiles
                                             :caller-repo ,name))))
   form)
