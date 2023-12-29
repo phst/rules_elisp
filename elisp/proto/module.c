@@ -138,7 +138,7 @@
 #endif
 #ifdef _MSC_VER
 #pragma warning(push, 3)
-#pragma warning(disable: 4090 4244 4334)
+#pragma warning(disable: 4090 4244 4267 4334)
 #endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
@@ -149,7 +149,8 @@
 #include "google/protobuf/duration.upbdefs.h"
 #include "google/protobuf/timestamp.upb.h"
 #include "google/protobuf/timestamp.upbdefs.h"
-#include "upb/collections.h"
+#include "upb/collections/array.h"
+#include "upb/collections/map.h"
 #include "upb/decode.h"
 #include "upb/def.h"
 #include "upb/encode.h"
@@ -1314,7 +1315,7 @@ static struct MutableMessageArg ExtractWellKnownMutableMessage(
 // full.
 static upb_Message* NewMessage(struct Context ctx, upb_Arena* arena,
                                const upb_MessageDef* def) {
-  upb_Message* msg = upb_Message_New(def, arena);
+  upb_Message* msg = upb_Message_New(upb_MessageDef_MiniTable(def), arena);
   if (msg == NULL) MemoryFull(ctx);
   return msg;
 }
@@ -1385,10 +1386,12 @@ static struct MutableString SerializeMessage(struct Context ctx,
                                              const upb_Message* msg,
                                              int options) {
   struct MutableString null = {NULL, 0};
+  char* data;
   size_t size;
-  char* data =
-      upb_Encode(msg, upb_MessageDef_MiniTable(def), options, arena, &size);
-  if (data == NULL) {
+  upb_EncodeStatus status = upb_Encode(msg, upb_MessageDef_MiniTable(def),
+                                       options, arena, &data, &size);
+  if (status != kUpb_EncodeStatus_Ok) {
+    // TODO: use specific error symbol for the statuses
     SerializeError(ctx, def);
     return null;
   }
@@ -2352,7 +2355,7 @@ static bool SetFieldValue(struct Context ctx, upb_Arena* arena,
                           emacs_value value) {
   upb_MessageValue val = AdoptValue(ctx, arena, field, value);
   if (!Success(ctx)) return false;
-  bool ok = upb_Message_Set(msg, field, val, arena);
+  bool ok = upb_Message_SetFieldByDef(msg, field, val, arena);
   if (!ok) MemoryFull(ctx);
   return ok;
 }
@@ -2819,11 +2822,11 @@ static emacs_value Serialize(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   assert(nargs >= 1 && nargs <= 7);
   struct MessageArg msg = ExtractMessage(ctx, args[0]);
   if (msg.type == NULL) return NULL;
-  int options = kUpb_Encode_CheckRequired;
+  int options = kUpb_EncodeOption_CheckRequired;
   const struct KeySpec specs[] = {
-      {kCAllowPartial, ClearBit, kUpb_Encode_CheckRequired, &options},
-      {kCDiscardUnknown, SetBit, kUpb_Encode_SkipUnknown, &options},
-      {kCDeterministic, SetBit, kUpb_Encode_Deterministic, &options}};
+      {kCAllowPartial, ClearBit, kUpb_EncodeOption_CheckRequired, &options},
+      {kCDiscardUnknown, SetBit, kUpb_EncodeOption_SkipUnknown, &options},
+      {kCDeterministic, SetBit, kUpb_EncodeOption_Deterministic, &options}};
   if (!ParseKeys(ctx, 3, specs, nargs - 1, args + 1)) return NULL;
   upb_Arena* arena = NewArena(ctx);
   if (arena == NULL) return NULL;
@@ -2918,7 +2921,7 @@ static emacs_value HasField(emacs_env* env,
     NoPresence(ctx, def);
     return NULL;
   }
-  return MakeBoolean(ctx, upb_Message_Has(msg.value, def));
+  return MakeBoolean(ctx, upb_Message_HasFieldByDef(msg.value, def));
 }
 
 static emacs_value Field(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
@@ -2930,19 +2933,20 @@ static emacs_value Field(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   const upb_FieldDef* def = FindFieldBySymbol(ctx, msg.type, args[1]);
   if (def == NULL) return NULL;
   if (upb_FieldDef_IsMap(def)) {
-    const upb_Map* value = upb_Message_Get(msg.value, def).map_val;
+    const upb_Map* value = upb_Message_GetFieldByDef(msg.value, def).map_val;
     return value == NULL ? Nil(ctx) : MakeMap(ctx, msg.arena, def, value);
   }
   if (upb_FieldDef_IsRepeated(def)) {
-    const upb_Array* value = upb_Message_Get(msg.value, def).array_val;
+    const upb_Array* value =
+        upb_Message_GetFieldByDef(msg.value, def).array_val;
     return value == NULL ? Nil(ctx) : MakeArray(ctx, msg.arena, def, value);
   }
   if (upb_FieldDef_IsSubMessage(def)) {
-    if (!upb_Message_Has(msg.value, def)) return Nil(ctx);
+    if (!upb_Message_HasFieldByDef(msg.value, def)) return Nil(ctx);
     return MakeMessage(ctx, msg.arena, upb_FieldDef_MessageSubDef(def),
-                       upb_Message_Get(msg.value, def).msg_val);
+                       upb_Message_GetFieldByDef(msg.value, def).msg_val);
   }
-  return MakeScalar(ctx, def, upb_Message_Get(msg.value, def));
+  return MakeScalar(ctx, def, upb_Message_GetFieldByDef(msg.value, def));
 }
 
 static emacs_value MutableField(emacs_env* env,
@@ -2996,7 +3000,7 @@ static emacs_value ClearField(emacs_env* env,
   if (msg.type == NULL) return NULL;
   const upb_FieldDef* def = FindFieldBySymbol(ctx, msg.type, args[1]);
   if (def == NULL) return NULL;
-  upb_Message_ClearField(msg.value, def);
+  upb_Message_ClearFieldByDef(msg.value, def);
   return Nil(ctx);
 }
 
@@ -3375,7 +3379,7 @@ static emacs_value MapDelete(emacs_env* env,
   if (type.key == NULL) return NULL;
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
   if (!Success(ctx)) return NULL;
-  bool deleted = upb_Map_Delete(map.value, key);
+  bool deleted = upb_Map_Delete(map.value, key, NULL);
   return MakeBoolean(ctx, deleted);
 }
 
@@ -3398,7 +3402,8 @@ static emacs_value MapPop(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
     ret = OptionalArg(ctx, nargs, args, 2);
   }
   if (!Success(ctx)) return NULL;
-  bool deleted = upb_Map_Delete(map.value, key);
+  // TODO: use third argument of upb_Map_Delete
+  bool deleted = upb_Map_Delete(map.value, key, NULL);
   (void)deleted;  // avoid compiler warnings
   assert(present == deleted);
   return ret;
@@ -3629,9 +3634,9 @@ static emacs_value PackAny(emacs_env* env,
   }
   struct MutableString type_url =
       TypeUrl(ctx, ArenaAllocator(arena.ptr), msg.type);
-  struct MutableString serialized =
-      SerializeMessage(ctx, arena.ptr, msg.type, msg.value,
-                       kUpb_Encode_Deterministic | kUpb_Encode_CheckRequired);
+  struct MutableString serialized = SerializeMessage(
+      ctx, arena.ptr, msg.type, msg.value,
+      kUpb_EncodeOption_Deterministic | kUpb_EncodeOption_CheckRequired);
   if (type_url.data == NULL || serialized.data == NULL) return NULL;
   google_protobuf_Any_set_type_url(any, View(type_url));
   google_protobuf_Any_set_value(any, View(serialized));
