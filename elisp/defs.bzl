@@ -130,11 +130,15 @@ def _elisp_proto_aspect_impl(target, ctx):
         input_manifests = input_manifests,
         toolchain = None,
     )
+    load_path = []
+    if ctx.label.package == "src/google/protobuf":
+        # See the comment in _elisp_proto_feature why we’re doing this.
+        load_path.append(".")
     result = _compile(
         ctx = ctx,
         srcs = [src],
         deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
-        load_path = [],
+        load_path = load_path,
         data = None,
         tags = ctx.rule.attr.tags,
         fatal_warnings = True,
@@ -162,7 +166,12 @@ def _elisp_proto_feature(file):
     stem, ext = paths.split_extension(workspace_relative_filename(file))
     if ext != ".el":
         fail("invalid extension {}".format(ext))
-    return stem
+
+    # Work around https://github.com/bazelbuild/bazel/issues/11044 for built-in
+    # types.
+    # FIXME: It would probably better to keep the “google/protobuf/” prefix and
+    # fix users instead.
+    return stem.removeprefix("src/google/protobuf/")
 
 def _elisp_proto_library_impl(ctx):
     """Rule implementation for the “elisp_proto_library” rule."""
@@ -744,8 +753,11 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             ))
 
         # At least some of the sources must be reachable from the directory.
+        # FIXME: Ugly special-casing necessary for built-in protocol buffer
+        # libraries since they unexpectedly generate source files in external
+        # workspaces.
         prefix = "./" if dir == "." else "./" + dir + "/"
-        if not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
+        if dir != "src/google/protobuf" and not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
             fail("None of the files [{}] are reachable from load path directory {}"
                 .format(", ".join([src.short_path for src in srcs]), dir))
 

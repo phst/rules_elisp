@@ -69,20 +69,21 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_protobuf",
-        sha256 = "e13ca6c2f1522924b8482f3b3a482427d0589ff8ea251088f7e39f4713236053",
-        strip_prefix = "protobuf-21.7/",
+        patches = ["@//:protobuf.patch"],
+        sha256 = "9776a431a6fd0730c85c7c083cf1cde7d6774d3f4afdb18cc6f34cbe5687e236",
+        strip_prefix = "protobuf-23.1/",
         urls = [
-            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v21.7.zip",  # 2022-09-29
+            "https://github.com/protocolbuffers/protobuf/releases/download/v23.1/protobuf-23.1.zip",  # 2023-05-16
         ],
     )
     maybe(
         http_archive,
         name = "upb",
         patches = ["@//:upb.patch"],
-        sha256 = "0d6af8c8c00b3d733721f8d890ef43dd40f537c2e815b529085c1a6c30a21084",
-        strip_prefix = "upb-a5477045acaa34586420942098f5fecd3570f577/",
+        sha256 = "0c57aac04d62eeabe097513593c800a99aa3f5d8ac1e7871c7afadbe1d39851a",
+        strip_prefix = "upb-61a97efa24a5ce01fb8cc73c9d1e6e7060f8ea98/",
         urls = [
-            "https://github.com/protocolbuffers/upb/archive/a5477045acaa34586420942098f5fecd3570f577.zip",  # 2022-09-23
+            "https://github.com/protocolbuffers/upb/archive/61a97efa24a5ce01fb8cc73c9d1e6e7060f8ea98.zip",  # 2023-05-16
         ],
     )
     non_module_deps()
