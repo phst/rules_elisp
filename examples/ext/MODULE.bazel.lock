@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "33efc849a248062adc872dce085f33bf3c2ce7362ca0ebecbb92d09cdaf1ff43"
+    "phst_rules_elisp": "4a061335d5dc4c9eeaa1fe7adc4d0f9112660af6c5f8fe639d24a08da58eb313"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -1248,36 +1248,13 @@
             }
           }
         },
-        "recordedRepoMappingEntries": []
-      }
-    },
-    "@@bazel_features~1.1.1//private:extensions.bzl%version_extension": {
-      "general": {
-        "bzlTransitiveDigest": "xm7Skm1Las5saxzFWt2hbS+e68BWi+MXyt6+lKIhjPA=",
-        "accumulatedFileDigests": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "bazel_features_version": {
-            "bzlFile": "@@bazel_features~1.1.1//private:version_repo.bzl",
-            "ruleClassName": "version_repo",
-            "attributes": {
-              "name": "bazel_features~1.1.1~version_extension~bazel_features_version"
-            }
-          },
-          "bazel_features_globals": {
-            "bzlFile": "@@bazel_features~1.1.1//private:globals_repo.bzl",
-            "ruleClassName": "globals_repo",
-            "attributes": {
-              "name": "bazel_features~1.1.1~version_extension~bazel_features_globals",
-              "globals": {
-                "RunEnvironmentInfo": "5.3.0",
-                "DefaultInfo": "0.0.1",
-                "__TestingOnly_NeverAvailable": "1000000000.0.0"
-              }
-            }
-          }
-        },
-        "recordedRepoMappingEntries": []
+        "recordedRepoMappingEntries": [
+          [
+            "apple_support~1.5.0",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
       }
     },
     "@@bazel_features~1.4.1//private:extensions.bzl%version_extension": {

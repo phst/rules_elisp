@@ -120,10 +120,10 @@ non_module_dev_deps(name = "phst_rules_elisp_dev_deps")
 
 http_archive(
     name = "io_bazel_rules_go",
-    sha256 = "c8035e8ae248b56040a65ad3f0b7434712e2037e5dfdcebfe97576e620422709",
+    sha256 = "6734a719993b1ba4ebe9806e853864395a8d3968ad27f9dd759c196b3eb3abe8",
     urls = [
-        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.44.0/rules_go-v0.44.0.zip",
-        "https://github.com/bazelbuild/rules_go/releases/download/v0.44.0/rules_go-v0.44.0.zip",
+        "https://mirror.bazel.build/github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
+        "https://github.com/bazelbuild/rules_go/releases/download/v0.45.1/rules_go-v0.45.1.zip",
     ],
 )
 
@@ -133,7 +133,7 @@ go_rules_dependencies()
 
 go_register_toolchains(
     nogo = "@//dev:nogo",
-    version = "1.21.5",
+    version = "1.21.6",
 )
 
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
