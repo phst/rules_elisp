@@ -57,11 +57,13 @@ class Builder:
                  bazel: pathlib.Path,
                  bzlmod: _Bzlmod = _Bzlmod.BOTH,
                  ignore_lockfile: bool = False,
+                 output_base: Optional[pathlib.Path] = None,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._bazel_program = bazel
         self._bzlmod = bzlmod
         self._ignore_lockfile = ignore_lockfile
+        self._output_base = output_base
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._kernel = platform.system()
@@ -218,7 +220,10 @@ class Builder:
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
                capture: _Capture = _Capture.NONE) -> Optional[str]:
-        args = [str(self._bazel_program), command]
+        args = [str(self._bazel_program)]
+        if self._output_base:
+            args.append('--output_base=' + str(self._output_base))
+        args.append(command)
         args.extend(self._bazel_options())
         args.extend(options)
         args.append('--')
@@ -293,6 +298,7 @@ def main() -> None:
     parser.add_argument('--bzlmod', choices=['no', 'yes', 'both'],
                         default='both')
     parser.add_argument('--ignore-lockfile', action='store_true')
+    parser.add_argument('--output-base', type=pathlib.Path)
     parser.add_argument('--action-cache', type=_cache_directory)
     parser.add_argument('--repository-cache', type=_cache_directory)
     parser.add_argument('goals', nargs='*', default=['all'])
@@ -300,6 +306,7 @@ def main() -> None:
     builder = Builder(bazel=args.bazel,
                       bzlmod=getattr(_Bzlmod, args.bzlmod.upper()),
                       ignore_lockfile=args.ignore_lockfile,
+                      output_base=args.output_base,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:

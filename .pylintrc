@@ -17,10 +17,10 @@ output-format=parseable
 
 [DESIGN]
 max-locals=25
-max-args=6
+max-args=10
 max-branches=15
 max-statements=80
-max-attributes=10
+max-attributes=15
 min-public-methods=1
 
 [FORMAT]
