@@ -3407,19 +3407,9 @@ static emacs_value MapPop(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
   if (!Success(ctx)) return NULL;
   upb_MessageValue val;
-  emacs_value ret;
-  bool present = upb_Map_Get(map.value, key, &val);
-  if (present) {
-    ret = MakeSingular(ctx, map.arena, type.value, val);
-  } else {
-    ret = OptionalArg(ctx, nargs, args, 2);
-  }
-  if (!Success(ctx)) return NULL;
-  // TODO: use third argument of upb_Map_Delete
-  bool deleted = upb_Map_Delete(map.value, key, NULL);
-  (void)deleted;  // avoid compiler warnings
-  assert(present == deleted);
-  return ret;
+  bool deleted = upb_Map_Delete(map.value, key, &val);
+  return deleted ? MakeSingular(ctx, map.arena, type.value, val)
+                 : OptionalArg(ctx, nargs, args, 2);
 }
 
 static emacs_value ClearMap(emacs_env* env,
