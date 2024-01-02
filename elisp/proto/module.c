@@ -3373,7 +3373,8 @@ static emacs_value MapSet(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
   struct MapType type = GetMapType(ctx, map.type);
   if (type.key == NULL) return NULL;
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
-  upb_MessageValue value = AdoptSingular(ctx, map.arena.ptr, type.value, args[2]);
+  upb_MessageValue value =
+      AdoptSingular(ctx, map.arena.ptr, type.value, args[2]);
   if (!Success(ctx)) return NULL;
   upb_MapInsertStatus status =
       SetMapEntry(ctx, map.arena.ptr, map.value, key, value);
