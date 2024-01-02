@@ -1364,8 +1364,21 @@ static void ParseError(struct Context ctx, upb_DecodeStatus status,
 }
 
 // Signals an error indicating that serializing a message has failed.
-static void SerializeError(struct Context ctx, const upb_MessageDef* def) {
-  Signal1(ctx, kSerializeError, MakeMessageName(ctx, def));
+static void SerializeError(struct Context ctx, upb_EncodeStatus status,
+                           const upb_MessageDef* def) {
+  switch (status) {
+    case kUpb_EncodeStatus_Ok:
+      break;
+    case kUpb_EncodeStatus_OutOfMemory:
+      MemoryFull(ctx);
+      break;
+    case kUpb_EncodeStatus_MaxDepthExceeded:
+      OverflowError1(ctx, MakeMessageName(ctx, def));
+      break;
+    case kUpb_EncodeStatus_MissingRequired:
+      Signal1(ctx, kMissingRequiredField, MakeMessageName(ctx, def));
+      break;
+  }
 }
 
 // Signals an error indicating that a field has no notion of presence.
@@ -1391,8 +1404,7 @@ static struct MutableString SerializeMessage(struct Context ctx,
   upb_EncodeStatus status = upb_Encode(msg, upb_MessageDef_MiniTable(def),
                                        options, arena, &data, &size);
   if (status != kUpb_EncodeStatus_Ok) {
-    // TODO: use specific error symbol for the statuses
-    SerializeError(ctx, def);
+    SerializeError(ctx, status, def);
     return null;
   }
   struct MutableString ret = {data, size};
