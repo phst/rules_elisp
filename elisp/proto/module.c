@@ -2912,8 +2912,9 @@ static emacs_value PrintMessage(emacs_env* env, ptrdiff_t nargs,
   return Nil(ctx);
 }
 
-static emacs_value Clear(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
-                         emacs_value* args, void* data) {
+static emacs_value ClearMessage(emacs_env* env,
+                                ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                                emacs_value* args, void* data) {
   struct Context ctx = {env, data};
   assert(nargs == 1);
   struct MutableMessageArg msg = ExtractMutableMessage(ctx, args[0]);
@@ -3922,12 +3923,12 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "in the Info node ‘(elisp) Output Streams’.\n\n"
         "(fn message &optional stream)",
         0, PrintMessage);
-  Defun(ctx, "elisp/proto/clear", 1, 1,
+  Defun(ctx, "elisp/proto/clear-message", 1, 1,
         "Clear all fields in MESSAGE.\n"
         "MESSAGE must be a mutable protocol buffer message object, i.e.,\n"
         "its type must be a subtype of ‘elisp/proto/message’.\n\n"
         "(fn message)",
-        0, Clear);
+        0, ClearMessage);
   Defun(ctx, "elisp/proto/has-field", 2, 2,
         "Return non-nil if the FIELD is present in MESSAGE.\n"
         "MESSAGE must be a protocol buffer message object, i.e., its type\n"

@@ -68,9 +68,9 @@
                         :optional_string "8"
                         :optional_bytes "9"))
 
-(ert-deftest elisp/proto/clear ()
+(ert-deftest elisp/proto/clear-message ()
   (let ((message (google/protobuf/Duration-new :seconds 333)))
-    (elisp/proto/clear message)
+    (elisp/proto/clear-message message)
     (should (google/protobuf/Duration-p message))
     (should (eql (elisp/proto/field message 'seconds) 0))
     (should (time-equal-p (elisp/proto/duration message) 0))))
