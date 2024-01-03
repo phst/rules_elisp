@@ -95,7 +95,6 @@
                   'a)
                  123))))
 
-
 (ert-deftest elisp/proto/field/empty-name ()
   (let* ((message (elisp/proto/Test-new))
          (err (should-error (elisp/proto/field message (intern ""))
