@@ -68,6 +68,13 @@
                         :optional_string "8"
                         :optional_bytes "9"))
 
+(ert-deftest elisp/proto/clear ()
+  (let ((message (google/protobuf/Duration-new :seconds 333)))
+    (elisp/proto/clear message)
+    (should (google/protobuf/Duration-p message))
+    (should (eql (elisp/proto/field message 'seconds) 0))
+    (should (time-equal-p (elisp/proto/duration message) 0))))
+
 (ert-deftest elisp/proto/field/scalar ()
   (let ((message (elisp/proto/Test-new :optional_uint64 123)))
     (should (eql (elisp/proto/field message 'optional_uint64) 123))
