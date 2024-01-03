@@ -140,10 +140,6 @@ class Builder:
                     ['@com_github_google_addlicense//:addlicense',
                      '--check',
                      '--ignore=**/coverage-report/**',
-                     '--ignore=**/.dir-locals.el',
-                     # Work around bug in addlicense on Windows.  See
-                     # https://github.com/google/addlicense/pull/152.
-                     r'--ignore=*\\.dir-locals.el',
                      '--',
                      str(self._workspace)])
 
