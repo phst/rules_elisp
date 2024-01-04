@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -206,6 +206,8 @@ class _Generator:
         self._write('#+END_deffn\n\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
+        if attr.doc_string.startswith('Deprecated;'):
+            return
         doc = _markdown(attr.doc_string).strip()
         if not doc.endswith('.'):
             raise ValueError(
