@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -171,9 +171,11 @@ cc_binary(
         "@upb//:collections",
         "@upb//:descriptor_upb_proto",
         "@upb//:json",
+        "@upb//:message",
         "@upb//:mini_table",
         "@upb//:reflection",
         "@upb//:textformat",
+        "@upb//:wire",
         "@upb//upb/util:required_fields",
     ],
 )
