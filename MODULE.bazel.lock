@@ -13,7 +13,7 @@
     "compatibilityMode": "ERROR"
   },
   "localOverrideHashes": {
-    "phst_rules_elisp_example": "bec00fcb727acb7926256457c32d05beb752838cbc421bcf3b467dbd25cf907e",
+    "phst_rules_elisp_example": "af93cb966401072cf57ae8f7efc1ff5aa104f28e21c36f3bdf292e19d997e646",
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787"
   },
   "moduleDepGraph": {
@@ -1147,6 +1147,9 @@
               "tagName": "http_archive",
               "attributeValues": {
                 "name": "dash",
+                "exclude": [
+                  "dash-functional.el"
+                ],
                 "integrity": "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
                 "strip_prefix": "dash.el-2.19.1/",
                 "urls": [
