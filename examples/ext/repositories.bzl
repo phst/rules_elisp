@@ -1,4 +1,4 @@
-# Copyright 2023 Philipp Stephani
+# Copyright 2023, 2024 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,10 +22,10 @@ def example_dependencies():
     maybe(
         elisp_http_archive,
         name = "dash",
+        exclude = ["dash-functional.el"],
         integrity = "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
         strip_prefix = "dash.el-2.19.1/",
         urls = [
             "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip",  # 2021-08-26
         ],
-        exclude = ["dash-functional.el"],
     )
