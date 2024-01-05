@@ -2703,9 +2703,9 @@ static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
   assert(nargs >= 0);
   if (nargs % 2 != 0) {
     WrongTypeArgument(ctx, kPlistp, List(ctx, nargs, args));
-    return -1;
+    return false;
   }
-  if (!CheckIntegerRange(ctx, nargs / 2, 0, nspecs)) return -1;
+  if (!CheckIntegerRange(ctx, nargs / 2, 0, nspecs)) return false;
   assert(nspecs <= 32);
   uint32_t seen = 0;
   for (ptrdiff_t i = 0; i < nargs; i += 2) {
@@ -2716,7 +2716,7 @@ static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
     uint32_t bit = UINT32_C(1) << j;
     if (seen & bit) {
       DuplicateKey(ctx, GlobalSymbol(ctx, spec.key));
-      return -1;
+      return false;
     }
     seen |= bit;
     spec.func(ctx, args[i + 1], spec.iarg, spec.parg);
