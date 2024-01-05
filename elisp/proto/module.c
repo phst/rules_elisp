@@ -1380,6 +1380,10 @@ static void SerializeError(struct Context ctx, upb_EncodeStatus status,
     case kUpb_EncodeStatus_MissingRequired:
       Signal1(ctx, kMissingRequiredField, MakeMessageName(ctx, def));
       break;
+    default:
+      Signal2(ctx, kSerializeError, MakeInteger(ctx, status),
+              MakeMessageName(ctx, def));
+      break;
   }
 }
 
