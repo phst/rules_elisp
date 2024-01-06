@@ -1330,7 +1330,11 @@ static struct AnyArg ExtractAny(struct Context ctx, emacs_value value) {
   struct MessageArg msg =
       ExtractWellKnownMessage(ctx, kUpb_WellKnown_Any, kAnyP, value);
   if (msg.type == NULL) return null;
-  struct AnyArg any = {msg.arena, msg.value};
+  union {
+    const upb_Message* msg;
+    const google_protobuf_Any* any;
+  } u = {msg.value};
+  struct AnyArg any = {msg.arena, u.any};
   return any;
 }
 
@@ -3573,9 +3577,13 @@ static emacs_value Timestamp(emacs_env* env,
   struct MessageArg msg = ExtractWellKnownMessage(ctx, kUpb_WellKnown_Timestamp,
                                                   kTimestampP, args[0]);
   if (msg.type == NULL) return NULL;
+  union {
+    const upb_Message* msg;
+    const google_protobuf_Timestamp* ts;
+  } u = {msg.value};
   struct timespec time;
-  time.tv_sec = google_protobuf_Timestamp_seconds(msg.value);
-  time.tv_nsec = google_protobuf_Timestamp_nanos(msg.value);
+  time.tv_sec = google_protobuf_Timestamp_seconds(u.ts);
+  time.tv_nsec = google_protobuf_Timestamp_nanos(u.ts);
   return MakeTime(ctx, time);
 }
 
@@ -3587,9 +3595,13 @@ static emacs_value Duration(emacs_env* env,
   struct MessageArg msg = ExtractWellKnownMessage(ctx, kUpb_WellKnown_Duration,
                                                   kDurationP, args[0]);
   if (msg.type == NULL) return NULL;
+  union {
+    const upb_Message* msg;
+    const google_protobuf_Duration* dur;
+  } u = {msg.value};
   struct timespec time;
-  time.tv_sec = google_protobuf_Duration_seconds(msg.value);
-  time.tv_nsec = google_protobuf_Duration_nanos(msg.value);
+  time.tv_sec = google_protobuf_Duration_seconds(u.dur);
+  time.tv_nsec = google_protobuf_Duration_nanos(u.dur);
   return MakeTime(ctx, time);
 }
 
@@ -3601,8 +3613,12 @@ static emacs_value SetTimestamp(emacs_env* env,
   struct MutableMessageArg msg = ExtractWellKnownMutableMessage(
       ctx, kUpb_WellKnown_Timestamp, kTimestampP, args[0]);
   if (msg.type == NULL) return NULL;
+  union {
+    upb_Message* msg;
+    google_protobuf_Timestamp* ts;
+  } u = {msg.value};
   emacs_value time = args[1];
-  SetTimestampProto(ctx, msg.value, time);
+  SetTimestampProto(ctx, u.ts, time);
   return time;
 }
 
@@ -3614,8 +3630,12 @@ static emacs_value SetDuration(emacs_env* env,
   struct MutableMessageArg msg = ExtractWellKnownMutableMessage(
       ctx, kUpb_WellKnown_Duration, kDurationP, args[0]);
   if (msg.type == NULL) return NULL;
+  union {
+    upb_Message* msg;
+    google_protobuf_Duration* dur;
+  } u = {msg.value};
   emacs_value time = args[1];
-  SetDurationProto(ctx, msg.value, time);
+  SetDurationProto(ctx, u.dur, time);
   return time;
 }
 
