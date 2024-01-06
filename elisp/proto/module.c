@@ -1313,6 +1313,27 @@ static struct MutableMessageArg ExtractWellKnownMutableMessage(
   return msg;
 }
 
+// A C representation of a mutable or immutable ‘elisp/proto/message’ structure
+// object representing a google.protobuf.Any message.  Module functions should
+// typically use ExtractAny to obtain an AnyArg structure from a Lisp value.
+struct AnyArg {
+  struct LispArena arena;
+  const google_protobuf_Any* value;
+};
+
+// Returns an immutable message of the type google.protobuf.Any from its Lisp
+// representation.  This also works if the underlying message is mutable.
+// Module functions should use this function to extract google.protobuf.Any
+// messages from Lisp function arguments.
+static struct AnyArg ExtractAny(struct Context ctx, emacs_value value) {
+  struct AnyArg null = {{NULL, NULL}, NULL};
+  struct MessageArg msg =
+      ExtractWellKnownMessage(ctx, kUpb_WellKnown_Any, kAnyP, value);
+  if (msg.type == NULL) return null;
+  struct AnyArg any = {msg.arena, msg.value};
+  return any;
+}
+
 // Allocates a new message from the given arena.  Signals an error if memory is
 // full.
 static upb_Message* NewMessage(struct Context ctx, upb_Arena* arena,
@@ -3669,9 +3690,8 @@ static emacs_value UnpackAny(emacs_env* env,
   struct Context ctx = {env, data};
   assert(nargs == 1);
   emacs_value arg = args[0];
-  struct MessageArg any =
-      ExtractWellKnownMessage(ctx, kUpb_WellKnown_Any, kAnyP, arg);
-  if (any.type == NULL) return NULL;
+  struct AnyArg any = ExtractAny(ctx, arg);
+  if (any.value == NULL) return NULL;
   upb_StringView type_url = google_protobuf_Any_type_url(any.value);
   upb_StringView serialized = google_protobuf_Any_value(any.value);
   if (type_url.data == NULL || serialized.data == NULL) {
@@ -3692,9 +3712,8 @@ static emacs_value AnyTypeName(emacs_env* env,
   struct Context ctx = {env, data};
   assert(nargs == 1);
   emacs_value arg = args[0];
-  struct MessageArg any =
-      ExtractWellKnownMessage(ctx, kUpb_WellKnown_Any, kAnyP, arg);
-  if (any.type == NULL) return NULL;
+  struct AnyArg any = ExtractAny(ctx, arg);
+  if (any.value == NULL) return NULL;
   upb_StringView type_url = google_protobuf_Any_type_url(any.value);
   if (type_url.data == NULL) {
     UninitializedAny(ctx, arg);
