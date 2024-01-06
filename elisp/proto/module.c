@@ -806,7 +806,7 @@ static void Push(struct Context ctx, emacs_value newelt, emacs_value* list) {
 // intmax_t.  This should always be the case on supported systems, but can’t be
 // verified easily.
 
-// Convert a timespec structure to a Lisp timestamp.  The timespec value need
+// Converts a timespec structure to a Lisp timestamp.  The timespec value need
 // not be canonical, i.e., its tv_sec and tv_nsec fields can have arbitrary
 // values.  If successful, the return value will be a valid Lisp timestamp as
 // defined in the Info node ‘(elisp) Time of Day’.
@@ -816,7 +816,7 @@ static emacs_value MakeTime(struct Context ctx, struct timespec value) {
   return ctx.env->make_time(ctx.env, value);
 }
 
-// Convert a Lisp time value to a timespec structure.  The Lisp value can be an
+// Converts a Lisp time value to a timespec structure.  The Lisp value can be an
 // arbitrary time value.  See Info node ‘(elisp) Time of Day’ for the valid time
 // values.  If successful, the return value will be in canonical form, i.e.,
 // tv_nsec will be in the closed interval [0, 999999999].
@@ -900,7 +900,7 @@ static upb_StringView View(struct MutableString string) {
   return upb_StringView_FromDataAndSize(string.data, string.size);
 }
 
-// Safely concatenate multiple strings into a heap-allocated buffer.  When
+// Safely concatenates multiple strings into a heap-allocated buffer.  When
 // successful, the returned string pointer is non-NULL and points to a
 // null-terminated string.
 static struct MutableString Concat(struct Context ctx, struct Allocator alloc,
@@ -992,8 +992,8 @@ static struct LispArena MakeArena(struct Context ctx) {
   return arena;
 }
 
-// Assume that the given value holds a user pointer that points to an upb_Arena
-// object.  Return that pointer and the value itself.
+// Assumes that the given value holds a user pointer that points to an upb_Arena
+// object.  Returns that pointer and the value itself.
 static struct LispArena ExtractArena(struct Context ctx, emacs_value value) {
   struct LispArena null = {NULL, NULL};
   upb_Arena* ptr = ExtractUserPtr(ctx, value);
@@ -1005,8 +1005,8 @@ static struct LispArena ExtractArena(struct Context ctx, emacs_value value) {
   return arena;
 }
 
-// Fuse the given arenas, and signal an error if that failed.  The two arguments
-// may refer to the same arena, in which case the function is a no-op.
+// Fuses the given arenas, and signals an error if that failed.  The two
+// arguments may refer to the same arena, in which case the function is a no-op.
 static bool FuseArenas(struct Context ctx, upb_Arena* a, upb_Arena* b) {
   bool ok = upb_Arena_Fuse(a, b);
   if (!ok) Signal0(ctx, kArenaFusionFailed);
@@ -1033,7 +1033,7 @@ struct LispStructure {
   const void* ptr;
 };
 
-// Create a new object of a type that’s a subtype of ‘elisp/proto/object’.  The
+// Creates a new object of a type that’s a subtype of ‘elisp/proto/object’.  The
 // constructor must refer to a constructor function that creates and initializes
 // the object; the constructor function must take two arguments, an arena user
 // pointer and the user pointer for the object itself.
@@ -1042,8 +1042,8 @@ static emacs_value MakeStructure(struct Context ctx, emacs_value constructor,
   return Funcall2(ctx, constructor, arena.lisp, MakeUserPtr(ctx, ptr, NULL));
 }
 
-// Verify that the given Lisp value refers to an object of a subtype of
-// ‘elisp/proto/object’.  Use the given predicate to check for the object type.
+// Verifies that the given Lisp value refers to an object of a subtype of
+// ‘elisp/proto/object’.  Uses the given predicate to check for the object type.
 static struct LispStructure ExtractStructure(struct Context ctx,
                                              enum GlobalSymbol predicate,
                                              emacs_value value) {
@@ -1061,7 +1061,7 @@ static struct LispStructure ExtractStructure(struct Context ctx,
   return ret;
 }
 
-// Signal an error of type ‘elisp/proto/immutable’.
+// Signals an error of type ‘elisp/proto/immutable’.
 static void Immutable(struct Context ctx, emacs_value value) {
   Signal1(ctx, kImmutable, value);
 }
@@ -1969,7 +1969,7 @@ struct RangeArg {
   size_t from, to;
 };
 
-// Parse a range argument pair following the conventions of ‘substring’ or
+// Parses a range argument pair following the conventions of ‘substring’ or
 // ‘seq-subseq’.
 static struct RangeArg ExtractRange(struct Context ctx, size_t size,
                                     ptrdiff_t nargs, emacs_value* args) {
@@ -2467,7 +2467,7 @@ static bool SetDurationProto(struct Context ctx, google_protobuf_Duration* msg,
 // have generate.el operate on generated Lisp reflections of those because that
 // would create a dependency cycle.
 
-// Parse a file descriptor set from its serialized representation.
+// Parses a file descriptor set from its serialized representation.
 static const google_protobuf_FileDescriptorSet* ReadFileDescriptorSet(
     struct Context ctx, upb_Arena* arena, emacs_value serialized) {
   struct MutableString string =
@@ -2681,7 +2681,7 @@ static void Defun(struct Context ctx, const char* name, ptrdiff_t min_arity,
   }
 }
 
-// Return args[index] if that is valid, otherwise return nil.
+// Returns args[index] if that is valid, otherwise return nil.
 static emacs_value OptionalArg(struct Context ctx, ptrdiff_t nargs,
                                emacs_value* args, ptrdiff_t index) {
   return index < nargs ? args[index] : Nil(ctx);
@@ -3838,7 +3838,7 @@ static emacs_value RegisterFileDescriptorSet(
 
 /// Module initialization
 
-// Allocate a new Globals structure from the heap and initialize it.  Only the
+// Allocates a new Globals structure from the heap and initialize it.  Only the
 // module initializer function should call this.
 static const struct Globals* InitializeGlobals(emacs_env* env,
                                                upb_DefPool* pool) {
