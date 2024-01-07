@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("//private:defs.bzl", "cc_defaults")
 load(":defs.bzl", "emacs_binary")
@@ -65,11 +64,6 @@ emacs_binary(
     name = "emacs_28.1",
     srcs = ["@gnu_emacs_28.1//:srcs"],
     readme = "@gnu_emacs_28.1//:readme",
-    target_compatible_with = select({
-        ":always_supported": [],
-        ":macos_arm": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
     visibility = ["//visibility:public"],
 )
 
@@ -77,11 +71,6 @@ emacs_binary(
     name = "emacs_28.2",
     srcs = ["@gnu_emacs_28.2//:srcs"],
     readme = "@gnu_emacs_28.2//:readme",
-    target_compatible_with = select({
-        ":always_supported": [],
-        ":macos_arm": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
     visibility = ["//visibility:public"],
 )
 
@@ -91,11 +80,6 @@ emacs_binary(
     builtin_features = "builtin_features.json",
     module_header = "emacs-module.h",
     readme = "@gnu_emacs_29.1//:readme",
-    target_compatible_with = select({
-        ":always_supported": [],
-        ":macos_arm": [],
-        "//conditions:default": ["@platforms//:incompatible"],
-    }),
     visibility = ["//visibility:public"],
 )
 
@@ -122,114 +106,6 @@ bzl_library(
 exports_files(
     ["defs.bzl"],
     visibility = ["//docs:__pkg__"],
-)
-
-# All versions of Emacs support these platforms.
-selects.config_setting_group(
-    name = "always_supported",
-    match_any = [
-        # keep sorted
-        ":freebsd",
-        ":linux",
-        ":macos_x86",
-        ":openbsd",
-        ":windows",
-    ],
-)
-
-selects.config_setting_group(
-    name = "windows",
-    match_any = [
-        # keep sorted
-        ":windows_x86_32",
-        ":windows_x86_64",
-    ],
-)
-
-selects.config_setting_group(
-    name = "macos_x86",
-    match_any = [
-        # keep sorted
-        ":macos_x86_32",
-        ":macos_x86_64",
-    ],
-)
-
-selects.config_setting_group(
-    name = "macos_arm",
-    match_any = [
-        # keep sorted
-        ":macos_aarch64",
-        ":macos_arm64",
-    ],
-)
-
-config_setting(
-    name = "linux",
-    constraint_values = ["@platforms//os:linux"],
-)
-
-config_setting(
-    name = "freebsd",
-    constraint_values = ["@platforms//os:freebsd"],
-)
-
-config_setting(
-    name = "openbsd",
-    constraint_values = ["@platforms//os:openbsd"],
-)
-
-config_setting(
-    name = "windows_x86_32",
-    constraint_values = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_32",
-    ],
-)
-
-config_setting(
-    name = "windows_x86_64",
-    constraint_values = [
-        # keep sorted
-        "@platforms//cpu:x86_64",
-        "@platforms//os:windows",
-    ],
-)
-
-config_setting(
-    name = "macos_x86_32",
-    constraint_values = [
-        # keep sorted
-        "@platforms//cpu:x86_32",
-        "@platforms//os:macos",
-    ],
-)
-
-config_setting(
-    name = "macos_x86_64",
-    constraint_values = [
-        # keep sorted
-        "@platforms//cpu:x86_64",
-        "@platforms//os:macos",
-    ],
-)
-
-config_setting(
-    name = "macos_aarch64",
-    constraint_values = [
-        # keep sorted
-        "@platforms//cpu:aarch64",
-        "@platforms//os:macos",
-    ],
-)
-
-config_setting(
-    name = "macos_arm64",
-    constraint_values = [
-        # keep sorted
-        "@platforms//cpu:arm64",
-        "@platforms//os:macos",
-    ],
 )
 
 cc_defaults(
