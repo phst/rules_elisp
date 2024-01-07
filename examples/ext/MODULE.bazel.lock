@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "03cd1c58d19ce371d56be09ee46c1bc13b84934bbf6695e70922334b97439cd9"
+    "phst_rules_elisp": "56b8cdc5f1d69c26369be6753b62e8f67dded9ce050b387fca979cc4ca54ab44"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -167,9 +167,9 @@
               "attributeValues": {
                 "hub_name": "pip",
                 "python_version": "3.10",
-                "requirements_darwin": "@//dev:macos-requirements.txt",
-                "requirements_linux": "@//dev:linux-requirements.txt",
-                "requirements_windows": "@//dev:windows-requirements.txt"
+                "requirements_darwin": "//dev:macos-requirements.txt",
+                "requirements_linux": "//dev:linux-requirements.txt",
+                "requirements_windows": "//dev:windows-requirements.txt"
               },
               "devDependency": false,
               "location": {
@@ -1308,7 +1308,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "YaYClEmgGjQDZhIBEG2crpW//IxMsyjERqNOjh7KhE4=",
+        "bzlTransitiveDigest": "ghGeIxI1eKjZpll7OHlgmBw26zX9a4Gwe4rmPWly/lU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1329,7 +1329,7 @@
     },
     "@@phst_rules_elisp~override//private:non_module_deps.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "p5/2E95oO56b+1pscLd6jI5re3SWPwzcSI54HkvcLVk=",
+        "bzlTransitiveDigest": "+ujkSHA9D5KZX/YVsxoLIPa/JtvlyD94AcKWGY/iUc0=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

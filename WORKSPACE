@@ -50,10 +50,10 @@ load("@rules_python//python:pip.bzl", "pip_parse")
 pip_parse(
     name = "pip_deps",
     python_interpreter_target = interpreter,
-    requirements_darwin = "@//dev:macos-requirements.txt",
-    requirements_linux = "@//dev:linux-requirements.txt",
+    requirements_darwin = "//dev:macos-requirements.txt",
+    requirements_linux = "//dev:linux-requirements.txt",
     requirements_lock = None,
-    requirements_windows = "@//dev:windows-requirements.txt",
+    requirements_windows = "//dev:windows-requirements.txt",
 )
 
 load("@pip_deps//:requirements.bzl", "install_deps")

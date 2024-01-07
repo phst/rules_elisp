@@ -69,7 +69,7 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_protobuf",
-        patches = [Label("@//:protobuf.patch")],
+        patches = [Label("//:protobuf.patch")],
         sha256 = "9776a431a6fd0730c85c7c083cf1cde7d6774d3f4afdb18cc6f34cbe5687e236",
         strip_prefix = "protobuf-23.1/",
         urls = [
@@ -79,7 +79,7 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "upb",
-        patches = [Label("@//:upb.patch")],
+        patches = [Label("//:upb.patch")],
         sha256 = "0c57aac04d62eeabe097513593c800a99aa3f5d8ac1e7871c7afadbe1d39851a",
         strip_prefix = "upb-61a97efa24a5ce01fb8cc73c9d1e6e7060f8ea98/",
         urls = [

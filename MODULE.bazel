@@ -70,9 +70,9 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
     hub_name = "pip",
     python_version = "3.10",
-    requirements_darwin = "@//dev:macos-requirements.txt",
-    requirements_linux = "@//dev:linux-requirements.txt",
-    requirements_windows = "@//dev:windows-requirements.txt",
+    requirements_darwin = "//dev:macos-requirements.txt",
+    requirements_linux = "//dev:linux-requirements.txt",
+    requirements_windows = "//dev:windows-requirements.txt",
 )
 use_repo(pip, pip_deps = "pip")
 
