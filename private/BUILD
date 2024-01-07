@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,4 +53,8 @@ bzl_library(
 config_setting(
     name = "msvc-cl",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
