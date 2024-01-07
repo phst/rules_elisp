@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -341,9 +341,7 @@ COPTS = select({
         "/permissive-",
         "/Zc:__cplusplus",
     ],
-    # Assume that something compatible with GCC is the default.  See
-    # https://github.com/bazelbuild/bazel/issues/12707.
-    Label("//conditions:default"): [
+    Label("//private:gcc_or_clang"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
         "-Werror",
@@ -358,20 +356,17 @@ COPTS = select({
 
 CXXOPTS = select({
     Label("//private:msvc-cl"): [],
-    # Assume that something compatible with GCC is the default.  See
-    # https://github.com/bazelbuild/bazel/issues/12707.
-    Label("//conditions:default"): [
+    Label("//private:gcc"): [
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",
     ],
+    Label("//private:clang"): [],
 })
 
 CONLYOPTS = select({
     Label("//private:msvc-cl"): [],
-    # Assume that something compatible with GCC is the default.  See
-    # https://github.com/bazelbuild/bazel/issues/12707.
-    Label("//conditions:default"): ["-Wvla"],
+    Label("//private:gcc_or_clang"): ["-Wvla"],
 })
 
 DEFINES = ["_GNU_SOURCE"] + select({

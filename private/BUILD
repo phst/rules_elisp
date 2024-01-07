@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -48,6 +49,49 @@ bzl_library(
     name = "non_module_deps_bzl",
     srcs = ["non_module_deps.bzl"],
     deps = [":repositories_bzl"],
+)
+
+selects.config_setting_group(
+    name = "gcc_or_clang",
+    match_any = [
+        ":gcc",
+        ":clang",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+selects.config_setting_group(
+    name = "gcc",
+    match_any = [
+        ":gcc_new",
+        ":gcc_old",
+    ],
+    visibility = ["//visibility:private"],
+)
+
+config_setting(
+    name = "gcc_new",
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "gcc"},
+    visibility = ["//visibility:private"],
+)
+
+# Obsolete value for the C++ compiler flag, to be removed once
+# https://github.com/bazelbuild/bazel/pull/16297 and
+# https://github.com/bazelbuild/bazel/pull/20350 are in all supported Bazel
+# versions.
+config_setting(
+    name = "gcc_old",
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "compiler"},
+    visibility = ["//elisp:__pkg__"],
+)
+
+config_setting(
+    name = "clang",
+    flag_values = {"@bazel_tools//tools/cpp:compiler": "clang"},
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 config_setting(

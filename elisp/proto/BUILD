@@ -136,9 +136,7 @@ cc_binary(
     additional_linker_inputs = [":module.lds"],
     copts = COPTS + CONLYOPTS + select({
         "//private:msvc-cl": ["/wd4100"],
-        # Assume that something compatible with GCC is the default.  See
-        # https://github.com/bazelbuild/bazel/issues/12707.
-        "//conditions:default": ["-fvisibility=hidden"],
+        "//private:gcc_or_clang": ["-fvisibility=hidden"],
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
