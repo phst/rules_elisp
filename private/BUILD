@@ -72,7 +72,10 @@ selects.config_setting_group(
 config_setting(
     name = "gcc_new",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "gcc"},
-    visibility = ["//visibility:private"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 # Obsolete value for the C++ compiler flag, to be removed once
@@ -82,7 +85,10 @@ config_setting(
 config_setting(
     name = "gcc_old",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "compiler"},
-    visibility = ["//elisp:__pkg__"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 config_setting(
