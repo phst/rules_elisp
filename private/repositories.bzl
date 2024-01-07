@@ -61,7 +61,7 @@ def non_module_dev_deps():
     maybe(
         http_archive,
         name = "junit_xsd",
-        build_file = "@//:junit_xsd.BUILD",
+        build_file = Label("@//:junit_xsd.BUILD"),
         sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
         strip_prefix = "JUnit-Schema-1.0.0/",
         urls = [
