@@ -26,6 +26,7 @@ import io
 import os
 import pathlib
 import platform
+import re
 import shlex
 import shutil
 import subprocess
@@ -50,19 +51,23 @@ def target(func: _Target) -> _Target:
     return wrapper
 
 
+def _parse_version(string: str) -> tuple[int, int]:
+    # https://www.gnu.org/prep/standards/html_node/_002d_002dversion.html
+    match = re.match(r'.+ (\d+)\.(\d+)[^ ]*$', string, re.ASCII | re.MULTILINE)
+    if not match:
+        raise ValueError(f'invalid version string {string}')
+    return int(match[1]), int(match[2])
+
+
 class Builder:
     """Builds the project."""
 
     def __init__(self, *,
                  bazel: pathlib.Path,
-                 bzlmod: _Bzlmod = _Bzlmod.BOTH,
-                 ignore_lockfile: bool = False,
                  output_base: Optional[pathlib.Path] = None,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._bazel_program = bazel
-        self._bzlmod = bzlmod
-        self._ignore_lockfile = ignore_lockfile
         self._output_base = output_base
         self._action_cache = action_cache
         self._repository_cache = repository_cache
@@ -71,6 +76,11 @@ class Builder:
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
         self._workspace = self._info('workspace')
+        version = _parse_version(
+            self._run([str(bazel), '--version'], capture=_Capture.STDOUT))
+        # Older Bazel versions don’t support Bzlmod properly.
+        self._bzlmod = _Bzlmod.BOTH if version >= (6, 3) else _Bzlmod.NO
+        self._ignore_lockfile = version < (7, 0)
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -317,17 +327,12 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--bzlmod', choices=['no', 'yes', 'both'],
-                        default='both')
-    parser.add_argument('--ignore-lockfile', action='store_true')
     parser.add_argument('--output-base', type=pathlib.Path)
     parser.add_argument('--action-cache', type=pathlib.PurePosixPath)
     parser.add_argument('--repository-cache', type=pathlib.PurePosixPath)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
-                      bzlmod=getattr(_Bzlmod, args.bzlmod.upper()),
-                      ignore_lockfile=args.ignore_lockfile,
                       output_base=args.output_base,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
