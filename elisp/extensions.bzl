@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ def _elisp_impl(module_ctx):
                 urls = arch.urls,
                 integrity = arch.integrity,
                 strip_prefix = arch.strip_prefix,
+                exclude = arch.exclude,
             )
 
 elisp = module_extension(

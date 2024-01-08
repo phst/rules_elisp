@@ -1757,7 +1757,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "ghGeIxI1eKjZpll7OHlgmBw26zX9a4Gwe4rmPWly/lU=",
+        "bzlTransitiveDigest": "K3o5acmeGmC9bbITLl3P9/mCvLalqbpYIyGBII/4gMA=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1770,7 +1770,10 @@
                 "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip"
               ],
               "integrity": "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
-              "strip_prefix": "dash.el-2.19.1/"
+              "strip_prefix": "dash.el-2.19.1/",
+              "exclude": [
+                "dash-functional.el"
+              ]
             }
           }
         }
