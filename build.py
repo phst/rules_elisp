@@ -295,8 +295,8 @@ def main() -> None:
                         default='both')
     parser.add_argument('--ignore-lockfile', action='store_true')
     parser.add_argument('--output-base', type=pathlib.Path)
-    parser.add_argument('--action-cache', type=_cache_directory)
-    parser.add_argument('--repository-cache', type=_cache_directory)
+    parser.add_argument('--action-cache', type=pathlib.PurePosixPath)
+    parser.add_argument('--repository-cache', type=pathlib.PurePosixPath)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
@@ -317,10 +317,6 @@ def _program(name: str) -> pathlib.Path:
     if not file:
         raise FileNotFoundError(f'program {name} not found')
     return pathlib.Path(file)
-
-
-def _cache_directory(arg: str) -> pathlib.Path:
-    return pathlib.Path(arg).expanduser()
 
 
 if __name__ == '__main__':
