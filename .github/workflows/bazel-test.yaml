@@ -102,25 +102,10 @@ jobs:
             bazel-actions-${{runner.os}}-${{matrix.bazel}}-
             bazel-actions-${{runner.os}}-
       - name: Run Bazel tests
-        # Older Bazel versions don’t support Bzlmod properly.
         # Use disk cache to speed up runs.
         run: >
           python build.py
           --bazel=bazelisk
-          --bzlmod=${{
-            (
-              startsWith(matrix.bazel, '5.') ||
-              startsWith(matrix.bazel, '6.0.') ||
-              startsWith(matrix.bazel, '6.1.') ||
-              startsWith(matrix.bazel, '6.2.')
-            ) && 'no' || 'both'
-          }}
-          ${{
-            (
-              startsWith(matrix.bazel, '5.') ||
-              startsWith(matrix.bazel, '6.')
-            ) && '--ignore-lockfile' || ''
-          }}
           --action-cache=~/bazel-action-cache
           --repository-cache=~/bazel-repository-cache
           ${{ runner.os == 'Windows' && '--output-base=O:\\' || '' }}
