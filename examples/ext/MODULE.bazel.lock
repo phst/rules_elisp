@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "63c0dc40dc96074eb755792e54b48d941bd86d14b7eb71a0f175d53e191d2388"
+    "phst_rules_elisp": "a11acbb44c7d517f3857cbf3ac37420e45e6d9d30dd3fd04aa19a612cdbebac2"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -187,7 +187,7 @@
         "platforms": "platforms@0.0.8",
         "bazel_skylib": "bazel_skylib@1.5.0",
         "rules_license": "rules_license@0.0.7",
-        "rules_python": "rules_python@0.27.1",
+        "rules_python": "rules_python@0.28.0",
         "com_google_absl": "abseil-cpp@20230802.0.bcr.1",
         "com_google_protobuf": "protobuf@23.1",
         "upb": "upb@0.0.0-20230516-61a97ef",
@@ -321,7 +321,7 @@
         "rules_java": "rules_java@7.1.0",
         "rules_license": "rules_license@0.0.7",
         "rules_proto": "rules_proto@5.3.0-21.7",
-        "rules_python": "rules_python@0.27.1",
+        "rules_python": "rules_python@0.28.0",
         "platforms": "platforms@0.0.8",
         "com_google_protobuf": "protobuf@23.1",
         "zlib": "zlib@1.3",
@@ -428,10 +428,10 @@
         }
       }
     },
-    "rules_python@0.27.1": {
+    "rules_python@0.28.0": {
       "name": "rules_python",
-      "version": "0.27.1",
-      "key": "rules_python@0.27.1",
+      "version": "0.28.0",
+      "key": "rules_python@0.28.0",
       "repoName": "rules_python",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [
@@ -441,10 +441,10 @@
         {
           "extensionBzlFile": "@rules_python//python/private/bzlmod:internal_deps.bzl",
           "extensionName": "internal_deps",
-          "usingModule": "rules_python@0.27.1",
+          "usingModule": "rules_python@0.28.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/rules_python/0.27.1/MODULE.bazel",
-            "line": 17,
+            "file": "https://bcr.bazel.build/modules/rules_python/0.28.0/MODULE.bazel",
+            "line": 15,
             "column": 30
           },
           "imports": {
@@ -472,8 +472,8 @@
               "attributeValues": {},
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/rules_python/0.27.1/MODULE.bazel",
-                "line": 18,
+                "file": "https://bcr.bazel.build/modules/rules_python/0.28.0/MODULE.bazel",
+                "line": 16,
                 "column": 22
               }
             }
@@ -484,10 +484,10 @@
         {
           "extensionBzlFile": "@rules_python//python/extensions:python.bzl",
           "extensionName": "python",
-          "usingModule": "rules_python@0.27.1",
+          "usingModule": "rules_python@0.28.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/rules_python/0.27.1/MODULE.bazel",
-            "line": 43,
+            "file": "https://bcr.bazel.build/modules/rules_python/0.28.0/MODULE.bazel",
+            "line": 41,
             "column": 23
           },
           "imports": {
@@ -503,8 +503,8 @@
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/rules_python/0.27.1/MODULE.bazel",
-                "line": 49,
+                "file": "https://bcr.bazel.build/modules/rules_python/0.28.0/MODULE.bazel",
+                "line": 47,
                 "column": 17
               }
             }
@@ -526,14 +526,14 @@
         "bzlFile": "@bazel_tools//tools/build_defs/repo:http.bzl",
         "ruleClassName": "http_archive",
         "attributes": {
-          "name": "rules_python~0.27.1",
+          "name": "rules_python~0.28.0",
           "urls": [
-            "https://github.com/bazelbuild/rules_python/releases/download/0.27.1/rules_python-0.27.1.tar.gz"
+            "https://github.com/bazelbuild/rules_python/releases/download/0.28.0/rules_python-0.28.0.tar.gz"
           ],
-          "integrity": "sha256-6FrjDeM2JaY+yn/ECpT+qEXmQYiOUvMra+6pHosbJ5M=",
-          "strip_prefix": "rules_python-0.27.1",
+          "integrity": "sha256-1wzXKnpIgPAACmNGJTQUglwZzdQKKCib32e45kgO3/g=",
+          "strip_prefix": "rules_python-0.28.0",
           "remote_patches": {
-            "https://bcr.bazel.build/modules/rules_python/0.27.1/patches/module_dot_bazel_version.patch": "sha256-Ier7Gb4zhbS273tClCov24gNYdheo4FdegZwaHBrQy0="
+            "https://bcr.bazel.build/modules/rules_python/0.28.0/patches/module_dot_bazel_version.patch": "sha256-ahlL+BWhDXgXnryTdQrMPH/YxrxV4syHfvX35w6/uTQ="
           },
           "remote_patch_strip": 1
         }
@@ -641,7 +641,7 @@
       ],
       "deps": {
         "bazel_skylib": "bazel_skylib@1.5.0",
-        "rules_python": "rules_python@0.27.1",
+        "rules_python": "rules_python@0.28.0",
         "rules_cc": "rules_cc@0.0.9",
         "rules_proto": "rules_proto@5.3.0-21.7",
         "rules_java": "rules_java@7.1.0",
@@ -1085,7 +1085,7 @@
       "toolchainsToRegister": [],
       "extensionUsages": [],
       "deps": {
-        "rules_python": "rules_python@0.27.1",
+        "rules_python": "rules_python@0.28.0",
         "bazel_skylib": "bazel_skylib@1.5.0",
         "rules_license": "rules_license@0.0.7",
         "bazel_tools": "bazel_tools@_",
@@ -1308,7 +1308,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "K3o5acmeGmC9bbITLl3P9/mCvLalqbpYIyGBII/4gMA=",
+        "bzlTransitiveDigest": "JdmGSmkPY++kMq7+dBtdNzLtl673DJFm8zuJb3R4R8g=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1928,17 +1928,17 @@
         }
       }
     },
-    "@@rules_python~0.27.1//python/extensions:python.bzl%python": {
+    "@@rules_python~0.28.0//python/extensions:python.bzl%python": {
       "general": {
-        "bzlTransitiveDigest": "sBUIrhzhZtq8rynvWnwm1dcZK05YfGluNUI/gOjLs2A=",
+        "bzlTransitiveDigest": "WGh2++zZo763vw3ggWNjiKD3UycOOOb8IxXjrgIN2As=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
           "python_3_11_s390x-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_s390x-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_11_s390x-unknown-linux-gnu",
               "sha256": "f9f19823dba3209cedc4647b00f46ed0177242917db20fb7fb539970e384531c",
               "patches": [],
               "platform": "s390x-unknown-linux-gnu",
@@ -1954,10 +1954,10 @@
             }
           },
           "python_3_10_aarch64-apple-darwin": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_aarch64-apple-darwin",
+              "name": "rules_python~0.28.0~python~python_3_10_aarch64-apple-darwin",
               "sha256": "fd027b1dedf1ea034cdaa272e91771bdf75ddef4c8653b05d224a0645aa2ca3c",
               "patches": [],
               "platform": "aarch64-apple-darwin",
@@ -1973,10 +1973,10 @@
             }
           },
           "python_3_10_x86_64-apple-darwin": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_x86_64-apple-darwin",
+              "name": "rules_python~0.28.0~python~python_3_10_x86_64-apple-darwin",
               "sha256": "be0b19b6af1f7d8c667e5abef5505ad06cf72e5a11bb5844970c395a7e5b1275",
               "patches": [],
               "platform": "x86_64-apple-darwin",
@@ -1992,10 +1992,10 @@
             }
           },
           "python_3_11_aarch64-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_aarch64-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_11_aarch64-unknown-linux-gnu",
               "sha256": "3e26a672df17708c4dc928475a5974c3fb3a34a9b45c65fb4bd1e50504cc84ec",
               "patches": [],
               "platform": "aarch64-unknown-linux-gnu",
@@ -2011,10 +2011,10 @@
             }
           },
           "python_3_11_aarch64-apple-darwin": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_aarch64-apple-darwin",
+              "name": "rules_python~0.28.0~python~python_3_11_aarch64-apple-darwin",
               "sha256": "916c35125b5d8323a21526d7a9154ca626453f63d0878e95b9f613a95006c990",
               "patches": [],
               "platform": "aarch64-apple-darwin",
@@ -2030,10 +2030,10 @@
             }
           },
           "python_3_10_ppc64le-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_ppc64le-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_10_ppc64le-unknown-linux-gnu",
               "sha256": "f3f9c43eec1a0c3f72845d0b705da17a336d3906b7df212d2640b8f47e8ff375",
               "patches": [],
               "platform": "ppc64le-unknown-linux-gnu",
@@ -2049,10 +2049,10 @@
             }
           },
           "python_3_10_x86_64-pc-windows-msvc": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_x86_64-pc-windows-msvc",
+              "name": "rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc",
               "sha256": "b8d930ce0d04bda83037ad3653d7450f8907c88e24bb8255a29b8dab8930d6f1",
               "patches": [],
               "platform": "x86_64-pc-windows-msvc",
@@ -2068,10 +2068,10 @@
             }
           },
           "pythons_hub": {
-            "bzlFile": "@@rules_python~0.27.1//python/private/bzlmod:pythons_hub.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python/private/bzlmod:pythons_hub.bzl",
             "ruleClassName": "hub_repo",
             "attributes": {
-              "name": "rules_python~0.27.1~python~pythons_hub",
+              "name": "rules_python~0.28.0~python~pythons_hub",
               "default_python_version": "3.11",
               "toolchain_prefixes": [
                 "_0000_python_3_10_",
@@ -2092,10 +2092,10 @@
             }
           },
           "python_3_11_x86_64-pc-windows-msvc": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_x86_64-pc-windows-msvc",
+              "name": "rules_python~0.28.0~python~python_3_11_x86_64-pc-windows-msvc",
               "sha256": "3933545e6d41462dd6a47e44133ea40995bc6efeed8c2e4cbdf1a699303e95ea",
               "patches": [],
               "platform": "x86_64-pc-windows-msvc",
@@ -2114,13 +2114,13 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_aarch64-apple-darwin_coverage",
+              "name": "rules_python~0.28.0~python~python_3_10_aarch64-apple-darwin_coverage",
               "build_file_content": "\nfilegroup(\n    name = \"coverage\",\n    srcs = [\"coverage/__main__.py\"],\n    data = glob([\"coverage/*.py\", \"coverage/**/*.py\", \"coverage/*.so\"]),\n    visibility = [\"@python_3_10_aarch64-apple-darwin//:__subpackages__\"],\n)\n    ",
               "patch_args": [
                 "-p1"
               ],
               "patches": [
-                "@@rules_python~0.27.1//python/private:coverage.patch"
+                "@@rules_python~0.28.0//python/private:coverage.patch"
               ],
               "sha256": "6d040ef7c9859bb11dfeb056ff5b3872436e3b5e401817d87a31e1750b9ae2fb",
               "type": "zip",
@@ -2133,13 +2133,13 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_aarch64-unknown-linux-gnu_coverage",
+              "name": "rules_python~0.28.0~python~python_3_10_aarch64-unknown-linux-gnu_coverage",
               "build_file_content": "\nfilegroup(\n    name = \"coverage\",\n    srcs = [\"coverage/__main__.py\"],\n    data = glob([\"coverage/*.py\", \"coverage/**/*.py\", \"coverage/*.so\"]),\n    visibility = [\"@python_3_10_aarch64-unknown-linux-gnu//:__subpackages__\"],\n)\n    ",
               "patch_args": [
                 "-p1"
               ],
               "patches": [
-                "@@rules_python~0.27.1//python/private:coverage.patch"
+                "@@rules_python~0.28.0//python/private:coverage.patch"
               ],
               "sha256": "ba90a9563ba44a72fda2e85302c3abc71c5589cea608ca16c22b9804262aaeb6",
               "type": "zip",
@@ -2152,13 +2152,13 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_x86_64-apple-darwin_coverage",
+              "name": "rules_python~0.28.0~python~python_3_10_x86_64-apple-darwin_coverage",
               "build_file_content": "\nfilegroup(\n    name = \"coverage\",\n    srcs = [\"coverage/__main__.py\"],\n    data = glob([\"coverage/*.py\", \"coverage/**/*.py\", \"coverage/*.so\"]),\n    visibility = [\"@python_3_10_x86_64-apple-darwin//:__subpackages__\"],\n)\n    ",
               "patch_args": [
                 "-p1"
               ],
               "patches": [
-                "@@rules_python~0.27.1//python/private:coverage.patch"
+                "@@rules_python~0.28.0//python/private:coverage.patch"
               ],
               "sha256": "d39b5b4f2a66ccae8b7263ac3c8170994b65266797fb96cbbfd3fb5b23921db8",
               "type": "zip",
@@ -2168,10 +2168,10 @@
             }
           },
           "python_3_10_aarch64-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_aarch64-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_10_aarch64-unknown-linux-gnu",
               "sha256": "8675915ff454ed2f1597e27794bc7df44f5933c26b94aa06af510fe91b58bb97",
               "patches": [],
               "platform": "aarch64-unknown-linux-gnu",
@@ -2190,13 +2190,13 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_x86_64-unknown-linux-gnu_coverage",
+              "name": "rules_python~0.28.0~python~python_3_10_x86_64-unknown-linux-gnu_coverage",
               "build_file_content": "\nfilegroup(\n    name = \"coverage\",\n    srcs = [\"coverage/__main__.py\"],\n    data = glob([\"coverage/*.py\", \"coverage/**/*.py\", \"coverage/*.so\"]),\n    visibility = [\"@python_3_10_x86_64-unknown-linux-gnu//:__subpackages__\"],\n)\n    ",
               "patch_args": [
                 "-p1"
               ],
               "patches": [
-                "@@rules_python~0.27.1//python/private:coverage.patch"
+                "@@rules_python~0.28.0//python/private:coverage.patch"
               ],
               "sha256": "31563e97dae5598556600466ad9beea39fb04e0229e61c12eaa206e0aa202063",
               "type": "zip",
@@ -2206,10 +2206,10 @@
             }
           },
           "python_3_11": {
-            "bzlFile": "@@rules_python~0.27.1//python/private:toolchains_repo.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python/private:toolchains_repo.bzl",
             "ruleClassName": "toolchain_aliases",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11",
+              "name": "rules_python~0.28.0~python~python_3_11",
               "python_version": "3.11.6",
               "user_repository_name": "python_3_11",
               "platforms": [
@@ -2224,10 +2224,10 @@
             }
           },
           "python_3_10_s390x-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_s390x-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_10_s390x-unknown-linux-gnu",
               "sha256": "859f6cfe9aedb6e8858892fdc124037e83ab05f28d42a7acd314c6a16d6bd66c",
               "patches": [],
               "platform": "s390x-unknown-linux-gnu",
@@ -2243,10 +2243,10 @@
             }
           },
           "python_3_10": {
-            "bzlFile": "@@rules_python~0.27.1//python/private:toolchains_repo.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python/private:toolchains_repo.bzl",
             "ruleClassName": "toolchain_aliases",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10",
+              "name": "rules_python~0.28.0~python~python_3_10",
               "python_version": "3.10.13",
               "user_repository_name": "python_3_10",
               "platforms": [
@@ -2261,10 +2261,10 @@
             }
           },
           "python_3_11_ppc64le-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_ppc64le-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_11_ppc64le-unknown-linux-gnu",
               "sha256": "7937035f690a624dba4d014ffd20c342e843dd46f89b0b0a1e5726b85deb8eaf",
               "patches": [],
               "platform": "ppc64le-unknown-linux-gnu",
@@ -2280,10 +2280,10 @@
             }
           },
           "python_3_11_x86_64-apple-darwin": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_x86_64-apple-darwin",
+              "name": "rules_python~0.28.0~python~python_3_11_x86_64-apple-darwin",
               "sha256": "178cb1716c2abc25cb56ae915096c1a083e60abeba57af001996e8bc6ce1a371",
               "patches": [],
               "platform": "x86_64-apple-darwin",
@@ -2299,10 +2299,10 @@
             }
           },
           "python_versions": {
-            "bzlFile": "@@rules_python~0.27.1//python/private:toolchains_repo.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python/private:toolchains_repo.bzl",
             "ruleClassName": "multi_toolchain_aliases",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_versions",
+              "name": "rules_python~0.28.0~python~python_versions",
               "python_versions": {
                 "3.10": "python_3_10",
                 "3.11": "python_3_11"
@@ -2310,10 +2310,10 @@
             }
           },
           "python_3_10_x86_64-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_10_x86_64-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_10_x86_64-unknown-linux-gnu",
               "sha256": "5d0429c67c992da19ba3eb58b3acd0b35ec5e915b8cae9a4aa8ca565c423847a",
               "patches": [],
               "platform": "x86_64-unknown-linux-gnu",
@@ -2329,10 +2329,10 @@
             }
           },
           "python_3_11_x86_64-unknown-linux-gnu": {
-            "bzlFile": "@@rules_python~0.27.1//python:repositories.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python:repositories.bzl",
             "ruleClassName": "python_repository",
             "attributes": {
-              "name": "rules_python~0.27.1~python~python_3_11_x86_64-unknown-linux-gnu",
+              "name": "rules_python~0.28.0~python~python_3_11_x86_64-unknown-linux-gnu",
               "sha256": "ee37a7eae6e80148c7e3abc56e48a397c1664f044920463ad0df0fc706eacea8",
               "patches": [],
               "platform": "x86_64-unknown-linux-gnu",
@@ -2350,9 +2350,9 @@
         }
       }
     },
-    "@@rules_python~0.27.1//python/private/bzlmod:internal_deps.bzl%internal_deps": {
+    "@@rules_python~0.28.0//python/private/bzlmod:internal_deps.bzl%internal_deps": {
       "general": {
-        "bzlTransitiveDigest": "xr7pKQvGhawsuA61pquXxuhuxlzM5QyWfF9UXfyr2Y4=",
+        "bzlTransitiveDigest": "7tzmA9WHpPfOW5jW14SL0JDcJPGgyGqjNOBKQbmvIT8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -2360,7 +2360,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__wheel",
+              "name": "rules_python~0.28.0~internal_deps~pypi__wheel",
               "url": "https://files.pythonhosted.org/packages/b8/8b/31273bf66016be6ad22bb7345c37ff350276cfd46e389a0c2ac5da9d9073/wheel-0.41.2-py3-none-any.whl",
               "sha256": "75909db2664838d015e3d9139004ee16711748a52c8f336b52882266540215d8",
               "type": "zip",
@@ -2371,7 +2371,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__click",
+              "name": "rules_python~0.28.0~internal_deps~pypi__click",
               "url": "https://files.pythonhosted.org/packages/00/2e/d53fa4befbf2cfa713304affc7ca780ce4fc1fd8710527771b58311a3229/click-8.1.7-py3-none-any.whl",
               "sha256": "ae74fb96c20a0277a1d615f1e4d73c8414f5a98db8b799a7931d1582f3390c28",
               "type": "zip",
@@ -2382,7 +2382,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__importlib_metadata",
+              "name": "rules_python~0.28.0~internal_deps~pypi__importlib_metadata",
               "url": "https://files.pythonhosted.org/packages/cc/37/db7ba97e676af155f5fcb1a35466f446eadc9104e25b83366e8088c9c926/importlib_metadata-6.8.0-py3-none-any.whl",
               "sha256": "3ebb78df84a805d7698245025b975d9d67053cd94c79245ba4b3eb694abe68bb",
               "type": "zip",
@@ -2393,7 +2393,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__pyproject_hooks",
+              "name": "rules_python~0.28.0~internal_deps~pypi__pyproject_hooks",
               "url": "https://files.pythonhosted.org/packages/d5/ea/9ae603de7fbb3df820b23a70f6aff92bf8c7770043254ad8d2dc9d6bcba4/pyproject_hooks-1.0.0-py3-none-any.whl",
               "sha256": "283c11acd6b928d2f6a7c73fa0d01cb2bdc5f07c57a2eeb6e83d5e56b97976f8",
               "type": "zip",
@@ -2404,7 +2404,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__pep517",
+              "name": "rules_python~0.28.0~internal_deps~pypi__pep517",
               "url": "https://files.pythonhosted.org/packages/ee/2f/ef63e64e9429111e73d3d6cbee80591672d16f2725e648ebc52096f3d323/pep517-0.13.0-py3-none-any.whl",
               "sha256": "4ba4446d80aed5b5eac6509ade100bff3e7943a8489de249654a5ae9b33ee35b",
               "type": "zip",
@@ -2415,7 +2415,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__packaging",
+              "name": "rules_python~0.28.0~internal_deps~pypi__packaging",
               "url": "https://files.pythonhosted.org/packages/ab/c3/57f0601a2d4fe15de7a553c00adbc901425661bf048f2a22dfc500caf121/packaging-23.1-py3-none-any.whl",
               "sha256": "994793af429502c4ea2ebf6bf664629d07c1a9fe974af92966e4b8d2df7edc61",
               "type": "zip",
@@ -2426,7 +2426,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__pip_tools",
+              "name": "rules_python~0.28.0~internal_deps~pypi__pip_tools",
               "url": "https://files.pythonhosted.org/packages/e8/df/47e6267c6b5cdae867adbdd84b437393e6202ce4322de0a5e0b92960e1d6/pip_tools-7.3.0-py3-none-any.whl",
               "sha256": "8717693288720a8c6ebd07149c93ab0be1fced0b5191df9e9decd3263e20d85e",
               "type": "zip",
@@ -2437,7 +2437,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__setuptools",
+              "name": "rules_python~0.28.0~internal_deps~pypi__setuptools",
               "url": "https://files.pythonhosted.org/packages/4f/ab/0bcfebdfc3bfa8554b2b2c97a555569c4c1ebc74ea288741ea8326c51906/setuptools-68.1.2-py3-none-any.whl",
               "sha256": "3d8083eed2d13afc9426f227b24fd1659489ec107c0e86cec2ffdde5c92e790b",
               "type": "zip",
@@ -2448,7 +2448,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__zipp",
+              "name": "rules_python~0.28.0~internal_deps~pypi__zipp",
               "url": "https://files.pythonhosted.org/packages/8c/08/d3006317aefe25ea79d3b76c9650afabaf6d63d1c8443b236e7405447503/zipp-3.16.2-py3-none-any.whl",
               "sha256": "679e51dd4403591b2d6838a48de3d283f3d188412a9782faadf845f298736ba0",
               "type": "zip",
@@ -2459,7 +2459,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__colorama",
+              "name": "rules_python~0.28.0~internal_deps~pypi__colorama",
               "url": "https://files.pythonhosted.org/packages/d1/d6/3965ed04c63042e047cb6a3e6ed1a63a35087b6a609aa3a15ed8ac56c221/colorama-0.4.6-py2.py3-none-any.whl",
               "sha256": "4f1d9991f5acc0ca119f9d443620b77f9d6b33703e51011c16baf57afb285fc6",
               "type": "zip",
@@ -2470,7 +2470,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__build",
+              "name": "rules_python~0.28.0~internal_deps~pypi__build",
               "url": "https://files.pythonhosted.org/packages/58/91/17b00d5fac63d3dca605f1b8269ba3c65e98059e1fd99d00283e42a454f0/build-0.10.0-py3-none-any.whl",
               "sha256": "af266720050a66c893a6096a2f410989eeac74ff9a68ba194b3f6473e8e26171",
               "type": "zip",
@@ -2478,17 +2478,17 @@
             }
           },
           "rules_python_internal": {
-            "bzlFile": "@@rules_python~0.27.1//python/private:internal_config_repo.bzl",
+            "bzlFile": "@@rules_python~0.28.0//python/private:internal_config_repo.bzl",
             "ruleClassName": "internal_config_repo",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~rules_python_internal"
+              "name": "rules_python~0.28.0~internal_deps~rules_python_internal"
             }
           },
           "pypi__pip": {
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__pip",
+              "name": "rules_python~0.28.0~internal_deps~pypi__pip",
               "url": "https://files.pythonhosted.org/packages/50/c2/e06851e8cc28dcad7c155f4753da8833ac06a5c704c109313b8d5a62968a/pip-23.2.1-py3-none-any.whl",
               "sha256": "7ccf472345f20d35bdc9d1841ff5f313260c2c33fe417f48c30ac46cccabf5be",
               "type": "zip",
@@ -2499,7 +2499,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__installer",
+              "name": "rules_python~0.28.0~internal_deps~pypi__installer",
               "url": "https://files.pythonhosted.org/packages/e5/ca/1172b6638d52f2d6caa2dd262ec4c811ba59eee96d54a7701930726bce18/installer-0.7.0-py3-none-any.whl",
               "sha256": "05d1933f0a5ba7d8d6296bb6d5018e7c94fa473ceb10cf198a92ccea19c27b53",
               "type": "zip",
@@ -2510,7 +2510,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__more_itertools",
+              "name": "rules_python~0.28.0~internal_deps~pypi__more_itertools",
               "url": "https://files.pythonhosted.org/packages/5a/cb/6dce742ea14e47d6f565589e859ad225f2a5de576d7696e0623b784e226b/more_itertools-10.1.0-py3-none-any.whl",
               "sha256": "64e0735fcfdc6f3464ea133afe8ea4483b1c5fe3a3d69852e6503b43a0b222e6",
               "type": "zip",
@@ -2521,7 +2521,7 @@
             "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
             "ruleClassName": "http_archive",
             "attributes": {
-              "name": "rules_python~0.27.1~internal_deps~pypi__tomli",
+              "name": "rules_python~0.28.0~internal_deps~pypi__tomli",
               "url": "https://files.pythonhosted.org/packages/97/75/10a9ebee3fd790d20926a90a2547f0bf78f371b2f13aa822c759680ca7b9/tomli-2.0.1-py3-none-any.whl",
               "sha256": "939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc",
               "type": "zip",
