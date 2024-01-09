@@ -41,19 +41,16 @@ bazel_dep(name = "abseil-py", version = "1.4.0", dev_dependency = True, repo_nam
 bazel_dep(name = "gazelle", version = "0.35.0", dev_dependency = True, repo_name = "bazel_gazelle")
 
 # Bring in the local_config_cc repository.  It’s needed for
-# phst_rules_elisp_toolchains on Windows.
+# phst_rules_elisp_deps on Windows.
 cc_configure = use_extension("@bazel_tools//tools/cpp:cc_configure.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc")
 
 # Non-module dependencies
 non_module_deps = use_extension("//private:extensions.bzl", "non_module_deps")
-use_repo(non_module_deps, "gnu_emacs_28.1")
-use_repo(non_module_deps, "gnu_emacs_28.2")
-use_repo(non_module_deps, "gnu_emacs_29.1")
-use_repo(non_module_deps, "phst_rules_elisp_toolchains")
+use_repo(non_module_deps, "phst_rules_elisp_deps")
 
 non_module_dev_deps = use_extension("//private:extensions.bzl", "non_module_dev_deps", dev_dependency = True)
-use_repo(non_module_dev_deps, "junit_xsd", "phst_rules_elisp_bazel_version")
+use_repo(non_module_dev_deps, "phst_rules_elisp_dev_deps")
 
 # Local toolchains
 register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")

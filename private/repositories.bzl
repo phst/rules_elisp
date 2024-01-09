@@ -16,72 +16,63 @@
 
 These definitions are internal and subject to change without notice."""
 
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-
 visibility(["//", "//elisp"])
 
-def non_module_deps():
-    """Installs dependencies that are not available as modules."""
-    maybe(
-        http_archive,
-        name = "gnu_emacs_28.1",
-        build_file = Label("//:emacs.BUILD"),
+def _non_module_deps_impl(repository_ctx):
+    repository_ctx.download_and_extract(
         sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
-        strip_prefix = "emacs-28.1/",
-        urls = [
+        url = [
             "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
         ],
     )
-    maybe(
-        http_archive,
-        name = "gnu_emacs_28.2",
-        build_file = Label("//:emacs.BUILD"),
+    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-28.1/BUILD")
+    repository_ctx.download_and_extract(
         sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
-        strip_prefix = "emacs-28.2/",
-        urls = [
+        url = [
             "https://ftpmirror.gnu.org/emacs/emacs-28.2.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz",
         ],
     )
-    maybe(
-        http_archive,
-        name = "gnu_emacs_29.1",
-        build_file = Label("//:emacs.BUILD"),
+    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-28.2/BUILD")
+    repository_ctx.download_and_extract(
         sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
-        strip_prefix = "emacs-29.1/",
-        urls = [
+        url = [
             "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
             "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz",
         ],
     )
-    _toolchains(name = "phst_rules_elisp_toolchains")
+    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-29.1/BUILD")
+    _toolchains_impl(repository_ctx)
 
-def non_module_dev_deps():
-    """Installs development dependencies that are not available as modules."""
-    maybe(
-        http_archive,
-        name = "junit_xsd",
-        build_file = Label("//:junit_xsd.BUILD"),
+non_module_deps = repository_rule(
+    doc = """Installs dependencies that are not available as modules.""",
+    implementation = _non_module_deps_impl,
+)
+
+def _non_module_dev_deps_impl(repository_ctx):
+    repository_ctx.download_and_extract(
         sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
-        strip_prefix = "JUnit-Schema-1.0.0/",
-        urls = [
+        url = [
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
     )
-    _bazel_version(name = "phst_rules_elisp_bazel_version")
+    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "JUnit-Schema-1.0.0/BUILD")
+    _bazel_version_impl(repository_ctx)
+
+non_module_dev_deps = repository_rule(
+    doc = """Installs development dependencies that are not available as modules.""",
+    implementation = _non_module_dev_deps_impl,
+    local = True,  # always reevaluate in case the Bazel version changes
+)
 
 def _toolchains_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
     repository_ctx.symlink(target, "BUILD")
 
-_toolchains = repository_rule(
-    implementation = _toolchains_impl,
-)
-
 def _bazel_version_impl(repository_ctx):
+    """Workaround for https://github.com/bazelbuild/bazel/issues/8305."""
     repository_ctx.file(
         "WORKSPACE.bazel",
         "workspace(name = %r)\n" % repository_ctx.name,
@@ -97,12 +88,6 @@ def _bazel_version_impl(repository_ctx):
         "BAZEL_VERSION = %r\n" % native.bazel_version,
         executable = False,
     )
-
-_bazel_version = repository_rule(
-    doc = "Workaround for https://github.com/bazelbuild/bazel/issues/8305",
-    implementation = _bazel_version_impl,
-    local = True,  # always reevaluate in case the Bazel version changes
-)
 
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
 available as an `elisp_library`.  This {kind} is very similar to

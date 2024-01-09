@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "a11acbb44c7d517f3857cbf3ac37420e45e6d9d30dd3fd04aa19a612cdbebac2"
+    "phst_rules_elisp": "3e0f7b4c42a0557a13f287a6d6e4034d307a4eddd1cb86274b35fb352ecdf5c1"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -107,10 +107,7 @@
             "column": 32
           },
           "imports": {
-            "gnu_emacs_28.1": "gnu_emacs_28.1",
-            "gnu_emacs_28.2": "gnu_emacs_28.2",
-            "gnu_emacs_29.1": "gnu_emacs_29.1",
-            "phst_rules_elisp_toolchains": "phst_rules_elisp_toolchains"
+            "phst_rules_elisp_deps": "phst_rules_elisp_deps"
           },
           "devImports": [],
           "tags": [],
@@ -123,7 +120,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 62,
+            "line": 59,
             "column": 23
           },
           "imports": {
@@ -140,7 +137,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 63,
+                "line": 60,
                 "column": 17
               }
             }
@@ -154,7 +151,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 69,
+            "line": 66,
             "column": 20
           },
           "imports": {
@@ -174,7 +171,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 70,
+                "line": 67,
                 "column": 10
               }
             }
@@ -1308,7 +1305,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "8bIdVPmSHF+R3oPAC86fxQ3fscN2v5UkeptMmV8Voq4=",
+        "bzlTransitiveDigest": "uq7UKC+0qxu3rptlRfZ3qe3Y347FSC5Oh8ySzX7DAsM=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1332,57 +1329,15 @@
     },
     "@@phst_rules_elisp~override//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "t1f/ZSsNf1mmbcpzrEI47o/7Hxvolegffm8Vo5xu8tE=",
+        "bzlTransitiveDigest": "3D7/it/n8gro4DKVwWyDnvhb4eRt7M+c1AmGI0BzYEs=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "phst_rules_elisp_toolchains": {
+          "phst_rules_elisp_deps": {
             "bzlFile": "@@phst_rules_elisp~override//private:repositories.bzl",
-            "ruleClassName": "_toolchains",
+            "ruleClassName": "non_module_deps",
             "attributes": {
-              "name": "phst_rules_elisp~override~non_module_deps~phst_rules_elisp_toolchains"
-            }
-          },
-          "gnu_emacs_28.2": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "phst_rules_elisp~override~non_module_deps~gnu_emacs_28.2",
-              "build_file": "@@phst_rules_elisp~override//:emacs.BUILD",
-              "sha256": "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
-              "strip_prefix": "emacs-28.2/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-28.2.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz"
-              ]
-            }
-          },
-          "gnu_emacs_29.1": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "phst_rules_elisp~override~non_module_deps~gnu_emacs_29.1",
-              "build_file": "@@phst_rules_elisp~override//:emacs.BUILD",
-              "sha256": "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
-              "strip_prefix": "emacs-29.1/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz"
-              ]
-            }
-          },
-          "gnu_emacs_28.1": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "phst_rules_elisp~override~non_module_deps~gnu_emacs_28.1",
-              "build_file": "@@phst_rules_elisp~override//:emacs.BUILD",
-              "sha256": "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
-              "strip_prefix": "emacs-28.1/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz"
-              ]
+              "name": "phst_rules_elisp~override~non_module_deps~phst_rules_elisp_deps"
             }
           }
         }

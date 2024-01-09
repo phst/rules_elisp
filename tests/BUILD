@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,7 +94,7 @@ config_setting(
 copy_file(
     name = "copy_junit_xsd",
     testonly = True,
-    src = "@junit_xsd//:JUnit.xsd",
+    src = "@phst_rules_elisp_dev_deps//JUnit-Schema-1.0.0:JUnit.xsd",
     out = "JUnit.xsd",
 )
 

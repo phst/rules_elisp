@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
-load("@phst_rules_elisp_bazel_version//:defs.bzl", "BAZEL_VERSION")
+load("@phst_rules_elisp_dev_deps//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")

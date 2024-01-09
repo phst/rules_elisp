@@ -88,7 +88,7 @@ def rules_elisp_dependencies():
             "https://github.com/protocolbuffers/upb/archive/61a97efa24a5ce01fb8cc73c9d1e6e7060f8ea98.zip",  # 2023-05-16
         ],
     )
-    non_module_deps()
+    non_module_deps(name = "phst_rules_elisp_deps")
 
 # buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():

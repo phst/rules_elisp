@@ -100,7 +100,7 @@ This is used by Gazelle.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_cc_toolchain": attr.label(
-            default = Label("@phst_rules_elisp_toolchains//:emacs_cc_toolchain"),
+            default = Label("@phst_rules_elisp_deps//:emacs_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_libs": attr.label_list(
