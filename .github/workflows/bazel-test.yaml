@@ -76,14 +76,6 @@ jobs:
           choco install visualstudio2019buildtools
           choco install visualstudio2019-workload-vctools
         if: runner.os == 'Windows'
-      - name: Create output base
-        # Work around https://github.com/protocolbuffers/protobuf/issues/12947.
-        # See https://bazel.build/configure/windows#long-path-issues.
-        run: |
-          MKDIR %RUNNER_TEMP%\output-base
-          SUBST O: %RUNNER_TEMP%\output-base
-        if: runner.os == 'Windows'
-        shell: cmd
       - name: Cache Bazel repositories
         uses: actions/cache@v3
         with:
@@ -106,7 +98,6 @@ jobs:
           --bazel=bazelisk
           --action-cache=~/bazel-action-cache
           --repository-cache=~/bazel-repository-cache
-          ${{ runner.os == 'Windows' && '--output-base=O:\\' || '' }}
           -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}

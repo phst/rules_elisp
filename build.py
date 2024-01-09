@@ -31,6 +31,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+import tempfile
 from typing import Optional
 
 _Target = Callable[['Builder'], None]
@@ -64,17 +65,16 @@ class Builder:
 
     def __init__(self, *,
                  bazel: pathlib.Path,
-                 output_base: Optional[pathlib.Path] = None,
                  action_cache: Optional[pathlib.Path] = None,
                  repository_cache: Optional[pathlib.Path] = None) -> None:
         self._bazel_program = bazel
-        self._output_base = output_base
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
+        self._output_base = self._init_output_base()
         self._workspace = self._info('workspace')
         version = _parse_version(
             self._run([str(bazel), '--version'], capture=_Capture.STDOUT))
@@ -304,6 +304,16 @@ class Builder:
         assert output is not None
         return pathlib.Path(output.rstrip('\n'))
 
+    def _init_output_base(self) -> Optional[pathlib.Path]:
+        if not self._github or platform.system() != 'Windows':
+            return None
+        # Work around https://github.com/protocolbuffers/protobuf/issues/12947.
+        # See https://bazel.build/configure/windows#long-path-issues.
+        base = pathlib.Path(
+            tempfile.mkdtemp(prefix='ob-', dir=os.getenv('RUNNER_TEMP')))
+        self._run(['SUBST', 'O:', str(base)])
+        return pathlib.Path('O:\\')
+
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
              env: Optional[Mapping[str, str]] = None,
@@ -327,13 +337,11 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--output-base', type=pathlib.Path)
     parser.add_argument('--action-cache', type=pathlib.PurePosixPath)
     parser.add_argument('--repository-cache', type=pathlib.PurePosixPath)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
-                      output_base=args.output_base,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache)
     try:
