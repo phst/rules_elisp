@@ -70,6 +70,23 @@ def non_module_dev_deps():
     )
     _bazel_version(name = "phst_rules_elisp_bazel_version")
 
+def label_str(label):
+    """Return a unique string form of a label.
+
+    Args:
+      label: a Label object
+
+    Returns:
+      a string representing an absolute form of the label
+    """
+
+    # TODO: Replace with plain ‘str’ once we drop support for Bazel 5.
+    ret = str(label)
+    if not ret.startswith("@"):
+        # Work around https://github.com/bazelbuild/bazel/issues/15916.
+        ret = "@" + ret
+    return ret
+
 def _toolchains_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")

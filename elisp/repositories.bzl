@@ -16,7 +16,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "non_module_deps")
+load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "label_str", "non_module_deps")
 
 def rules_elisp_dependencies():
     """Installs necessary dependencies for Emacs Lisp rules.
@@ -100,10 +100,6 @@ def _elisp_http_archive_impl(repository_ctx):
         integrity = repository_ctx.attr.integrity or fail("missing archive checksum"),
         stripPrefix = repository_ctx.attr.strip_prefix,
     )
-    defs_bzl = str(repository_ctx.attr._defs_bzl)
-    if not defs_bzl.startswith("@"):
-        # Work around https://github.com/bazelbuild/bazel/issues/15916.
-        defs_bzl = "@" + defs_bzl
     repository_ctx.template(
         "WORKSPACE.bazel",
         Label("//elisp:WORKSPACE.template"),
@@ -116,7 +112,7 @@ def _elisp_http_archive_impl(repository_ctx):
         "BUILD.bazel",
         Label("//elisp:BUILD.template"),
         {
-            "[[defs_bzl]]": repr(defs_bzl),
+            "[[defs_bzl]]": repr(label_str(repository_ctx.attr._defs_bzl)),
             "[[exclude]]": repr(repository_ctx.attr.exclude),
         },
         executable = False,
