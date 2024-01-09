@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 alias(
     name = "emacs_cc_toolchain",
     actual = "@bazel_tools//tools/cpp:current_cc_toolchain",
-    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
+    visibility = [[[emacs_pkg]]],
 )
 
 # Local Variables:
