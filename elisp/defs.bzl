@@ -424,7 +424,7 @@ The source files in `srcs` can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
-    toolchains = ["//elisp:toolchain_type"],
+    toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_library_impl,
 )
 
@@ -449,7 +449,7 @@ _elisp_proto_aspect = aspect(
     },
     required_providers = [ProtoInfo],
     provides = [EmacsLispInfo],
-    toolchains = ["//elisp:toolchain_type"],
+    toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_proto_aspect_impl,
 )
 
@@ -475,7 +475,7 @@ direct and indirect dependencies.  The feature symbol for `require` is
 <code>//<var>package</var>:<var>name</var></code> is the label of the
 corresponding `proto_library` rule.""",
     provides = [EmacsLispInfo],
-    toolchains = ["//elisp:toolchain_type"],
+    toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_proto_library_impl,
 )
 
@@ -540,7 +540,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchain() + ["//elisp:toolchain_type"],
+    toolchains = use_cpp_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_binary_impl,
 )
 
@@ -630,7 +630,7 @@ the `:nocover` tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
-    toolchains = use_cpp_toolchain() + ["//elisp:toolchain_type"],
+    toolchains = use_cpp_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_test_impl,
 )
 
