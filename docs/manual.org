@@ -661,7 +661,6 @@ This function removes the range delineated by {{{var(from)}}} and {{{var(to)}}}
 from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 #+END_defun
 
-
 * Starlark symbol reference
 
 ** Symbols defined in =//elisp:defs.bzl=
