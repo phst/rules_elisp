@@ -455,7 +455,7 @@ bootstrap = rule(
         ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
-    toolchains = ["//elisp:toolchain_type"],
+    toolchains = [Label("//elisp:toolchain_type")],
 )
 
 def _merged_manual_impl(ctx):
