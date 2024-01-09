@@ -151,7 +151,7 @@ class Builder:
     @target
     def versions(self) -> None:
         """Runs the Bazel tests for all supported Emacs versions."""
-        for version in sorted(_versions()):
+        for version in sorted(_VERSIONS):
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
     def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
@@ -307,16 +307,8 @@ class Builder:
         return result.stdout if capture == _Capture.STDOUT else result.stderr
 
 
-def _versions() -> frozenset[str]:
-    # All potentially supported Emacs versions.
-    ret = {'28.1', '28.2', '29.1'}
-    uname = platform.uname()
-    if uname.system in ('Linux', 'Darwin', 'Windows'):
-        # GNU/Linux, macOS, and Windows support all Emacs versions.
-        pass
-    else:
-        raise ValueError(f'unsupported kernel {uname.system}')
-    return frozenset(ret)
+# All potentially supported Emacs versions.
+_VERSIONS = frozenset({'28.1', '28.2', '29.1'})
 
 
 def main() -> None:
