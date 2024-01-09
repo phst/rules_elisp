@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -201,6 +201,38 @@ class Builder:
         print(f'coverage report written to {directory}')
 
     @target
+    def lock(self) -> None:
+        """Manually update MODULE.bazel.lock for all supported systems."""
+        kernel = platform.system()
+        if kernel not in ('Linux', 'Darwin'):
+            raise ValueError(f'can’t fake MODULE.bazel.lock update on {os}')
+        cwds = (
+            self._workspace,
+            self._workspace / 'examples' / 'ext',
+        )
+        # Operating system names from the Bazel enumeration
+        # com.google.devtools.build.lib.util.OS.  Architecture names derived by
+        # trial and error.
+        systems = [
+            ('Linux', 'x86_64'),
+            ('Mac OS X', 'aarch64'),
+            ('Mac OS X', 'x86_64'),
+            # We can’t do this trick for Windows due to filesystem
+            # incompatibility.
+            # ('Windows', 'x86_64'),
+        ]
+        for cwd in cwds:
+            for kernel, arch in systems:
+                self._bazel(
+                    'build', ['//...'],
+                    startup_options=[f'--host_jvm_args=-Dblaze.os={kernel}',
+                                     f'--host_jvm_args=-Dos.arch={arch}'],
+                    options=['--nobuild',
+                             '--experimental_enable_bzlmod',
+                             '--lockfile_mode=update'],
+                    cwd=cwd)
+
+    @target
     def install(self) -> None:
         """Installs the Info manual."""
         self._bazel('build', ['//docs:rules_elisp.info'])
@@ -213,12 +245,14 @@ class Builder:
         self._run(['install-info', '--', str(dest), str(info_dir / 'dir')])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
+               startup_options: Iterable[str] = (),
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
                capture: _Capture = _Capture.NONE) -> Optional[str]:
         args = [str(self._bazel_program)]
         if self._output_base:
             args.append('--output_base=' + str(self._output_base))
+        args.extend(startup_options)
         args.append(command)
         args.extend(self._bazel_options())
         args.extend(options)
