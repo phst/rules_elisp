@@ -18,13 +18,13 @@ filegroup(
         ["**"],
         allow_empty = False,
     ),
-    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
+    visibility = [[[emacs_pkg]]],
 )
 
 filegroup(
     name = "readme",
     srcs = ["README"],
-    visibility = ["@phst_rules_elisp//emacs:__pkg__"],
+    visibility = [[[emacs_pkg]]],
 )
 
 # Local Variables:

@@ -26,7 +26,14 @@ def _non_module_deps_impl(repository_ctx):
             "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
         ],
     )
-    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-28.1/BUILD")
+    repository_ctx.template(
+        "emacs-28.1/BUILD",
+        Label("//:emacs.BUILD"),
+        {
+            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
     repository_ctx.download_and_extract(
         sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
         url = [
@@ -34,7 +41,14 @@ def _non_module_deps_impl(repository_ctx):
             "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz",
         ],
     )
-    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-28.2/BUILD")
+    repository_ctx.template(
+        "emacs-28.2/BUILD",
+        Label("//:emacs.BUILD"),
+        {
+            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
     repository_ctx.download_and_extract(
         sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
         url = [
@@ -42,10 +56,24 @@ def _non_module_deps_impl(repository_ctx):
             "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz",
         ],
     )
-    repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-29.1/BUILD")
+    repository_ctx.template(
+        "emacs-29.1/BUILD",
+        Label("//:emacs.BUILD"),
+        {
+            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
-    repository_ctx.symlink(target, "BUILD.bazel")
+    repository_ctx.template(
+        "BUILD.bazel",
+        target,
+        {
+            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
