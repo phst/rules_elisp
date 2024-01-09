@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "56b8cdc5f1d69c26369be6753b62e8f67dded9ce050b387fca979cc4ca54ab44",
+  "moduleFileHash": "63c0dc40dc96074eb755792e54b48d941bd86d14b7eb71a0f175d53e191d2388",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -45,7 +45,7 @@
           "hasNonDevUseExtension": true
         },
         {
-          "extensionBzlFile": "@phst_rules_elisp//private:non_module_deps.bzl",
+          "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
           "extensionName": "non_module_deps",
           "usingModule": "<root>",
           "location": {
@@ -65,7 +65,7 @@
           "hasNonDevUseExtension": true
         },
         {
-          "extensionBzlFile": "@phst_rules_elisp//private:non_module_deps.bzl",
+          "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
           "extensionName": "non_module_dev_deps",
           "usingModule": "<root>",
           "location": {
@@ -1779,7 +1779,7 @@
         }
       }
     },
-    "//private:non_module_deps.bzl%non_module_deps": {
+    "//private:extensions.bzl%non_module_deps": {
       "general": {
         "bzlTransitiveDigest": "+ujkSHA9D5KZX/YVsxoLIPa/JtvlyD94AcKWGY/iUc0=",
         "accumulatedFileDigests": {},
@@ -1837,7 +1837,7 @@
         }
       }
     },
-    "//private:non_module_deps.bzl%non_module_dev_deps": {
+    "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
         "bzlTransitiveDigest": "+ujkSHA9D5KZX/YVsxoLIPa/JtvlyD94AcKWGY/iUc0=",
         "accumulatedFileDigests": {},

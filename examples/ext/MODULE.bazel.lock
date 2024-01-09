@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "56b8cdc5f1d69c26369be6753b62e8f67dded9ce050b387fca979cc4ca54ab44"
+    "phst_rules_elisp": "63c0dc40dc96074eb755792e54b48d941bd86d14b7eb71a0f175d53e191d2388"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -98,7 +98,7 @@
           "hasNonDevUseExtension": true
         },
         {
-          "extensionBzlFile": "@phst_rules_elisp//private:non_module_deps.bzl",
+          "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
           "extensionName": "non_module_deps",
           "usingModule": "phst_rules_elisp@_",
           "location": {
@@ -1330,7 +1330,7 @@
         }
       }
     },
-    "@@phst_rules_elisp~override//private:non_module_deps.bzl%non_module_deps": {
+    "@@phst_rules_elisp~override//private:extensions.bzl%non_module_deps": {
       "general": {
         "bzlTransitiveDigest": "+ujkSHA9D5KZX/YVsxoLIPa/JtvlyD94AcKWGY/iUc0=",
         "accumulatedFileDigests": {},

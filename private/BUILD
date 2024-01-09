@@ -46,8 +46,8 @@ bzl_library(
 )
 
 bzl_library(
-    name = "non_module_deps_bzl",
-    srcs = ["non_module_deps.bzl"],
+    name = "extensions_bzl",
+    srcs = ["extensions.bzl"],
     deps = [":repositories_bzl"],
 )
 

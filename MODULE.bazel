@@ -46,13 +46,13 @@ cc_configure = use_extension("@bazel_tools//tools/cpp:cc_configure.bzl", "cc_con
 use_repo(cc_configure, "local_config_cc")
 
 # Non-module dependencies
-non_module_deps = use_extension("//private:non_module_deps.bzl", "non_module_deps")
+non_module_deps = use_extension("//private:extensions.bzl", "non_module_deps")
 use_repo(non_module_deps, "gnu_emacs_28.1")
 use_repo(non_module_deps, "gnu_emacs_28.2")
 use_repo(non_module_deps, "gnu_emacs_29.1")
 use_repo(non_module_deps, "phst_rules_elisp_toolchains")
 
-non_module_dev_deps = use_extension("//private:non_module_deps.bzl", "non_module_dev_deps", dev_dependency = True)
+non_module_dev_deps = use_extension("//private:extensions.bzl", "non_module_dev_deps", dev_dependency = True)
 use_repo(non_module_dev_deps, "junit_xsd", "phst_rules_elisp_bazel_version")
 
 # Local toolchains
