@@ -121,7 +121,7 @@ googletest_deps()
 
 load("//private:repositories.bzl", "non_module_dev_deps")
 
-non_module_dev_deps()
+non_module_dev_deps(name = "phst_rules_elisp_dev_deps")
 
 http_archive(
     name = "io_bazel_rules_go",

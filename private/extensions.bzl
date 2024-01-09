@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,10 +19,10 @@ load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev
 visibility("private")
 
 def _non_module_deps_impl(_ctx):
-    _deps()
+    _deps(name = "phst_rules_elisp_deps")
 
 def _non_module_dev_deps_impl(_ctx):
-    _dev_deps()
+    _dev_deps(name = "phst_rules_elisp_dev_deps")
 
 non_module_deps = module_extension(implementation = _non_module_deps_impl)
 non_module_dev_deps = module_extension(implementation = _non_module_dev_deps_impl)

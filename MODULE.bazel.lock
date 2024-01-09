@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "a11acbb44c7d517f3857cbf3ac37420e45e6d9d30dd3fd04aa19a612cdbebac2",
+  "moduleFileHash": "3e0f7b4c42a0557a13f287a6d6e4034d307a4eddd1cb86274b35fb352ecdf5c1",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -54,10 +54,7 @@
             "column": 32
           },
           "imports": {
-            "gnu_emacs_28.1": "gnu_emacs_28.1",
-            "gnu_emacs_28.2": "gnu_emacs_28.2",
-            "gnu_emacs_29.1": "gnu_emacs_29.1",
-            "phst_rules_elisp_toolchains": "phst_rules_elisp_toolchains"
+            "phst_rules_elisp_deps": "phst_rules_elisp_deps"
           },
           "devImports": [],
           "tags": [],
@@ -70,16 +67,14 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 55,
+            "line": 52,
             "column": 36
           },
           "imports": {
-            "junit_xsd": "junit_xsd",
-            "phst_rules_elisp_bazel_version": "phst_rules_elisp_bazel_version"
+            "phst_rules_elisp_dev_deps": "phst_rules_elisp_dev_deps"
           },
           "devImports": [
-            "junit_xsd",
-            "phst_rules_elisp_bazel_version"
+            "phst_rules_elisp_dev_deps"
           ],
           "tags": [],
           "hasDevUseExtension": true,
@@ -91,7 +86,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 62,
+            "line": 59,
             "column": 23
           },
           "imports": {
@@ -108,7 +103,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 63,
+                "line": 60,
                 "column": 17
               }
             }
@@ -122,7 +117,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 69,
+            "line": 66,
             "column": 20
           },
           "imports": {
@@ -142,7 +137,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 70,
+                "line": 67,
                 "column": 10
               }
             }
@@ -156,7 +151,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 80,
+            "line": 77,
             "column": 23
           },
           "imports": {},
@@ -170,7 +165,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 81,
+                "line": 78,
                 "column": 12
               }
             }
@@ -184,7 +179,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 83,
+            "line": 80,
             "column": 24
           },
           "imports": {
@@ -208,7 +203,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 84,
+                "line": 81,
                 "column": 15
               }
             },
@@ -222,7 +217,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 89,
+                "line": 86,
                 "column": 15
               }
             },
@@ -236,7 +231,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 94,
+                "line": 91,
                 "column": 15
               }
             }
@@ -1757,7 +1752,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "8bIdVPmSHF+R3oPAC86fxQ3fscN2v5UkeptMmV8Voq4=",
+        "bzlTransitiveDigest": "uq7UKC+0qxu3rptlRfZ3qe3Y347FSC5Oh8ySzX7DAsM=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1781,57 +1776,15 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "t1f/ZSsNf1mmbcpzrEI47o/7Hxvolegffm8Vo5xu8tE=",
+        "bzlTransitiveDigest": "3D7/it/n8gro4DKVwWyDnvhb4eRt7M+c1AmGI0BzYEs=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "phst_rules_elisp_toolchains": {
+          "phst_rules_elisp_deps": {
             "bzlFile": "@@//private:repositories.bzl",
-            "ruleClassName": "_toolchains",
+            "ruleClassName": "non_module_deps",
             "attributes": {
-              "name": "_main~non_module_deps~phst_rules_elisp_toolchains"
-            }
-          },
-          "gnu_emacs_28.2": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~non_module_deps~gnu_emacs_28.2",
-              "build_file": "@@//:emacs.BUILD",
-              "sha256": "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
-              "strip_prefix": "emacs-28.2/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-28.2.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz"
-              ]
-            }
-          },
-          "gnu_emacs_29.1": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~non_module_deps~gnu_emacs_29.1",
-              "build_file": "@@//:emacs.BUILD",
-              "sha256": "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
-              "strip_prefix": "emacs-29.1/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz"
-              ]
-            }
-          },
-          "gnu_emacs_28.1": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~non_module_deps~gnu_emacs_28.1",
-              "build_file": "@@//:emacs.BUILD",
-              "sha256": "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
-              "strip_prefix": "emacs-28.1/",
-              "urls": [
-                "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
-                "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz"
-              ]
+              "name": "_main~non_module_deps~phst_rules_elisp_deps"
             }
           }
         }
@@ -1839,28 +1792,15 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "t1f/ZSsNf1mmbcpzrEI47o/7Hxvolegffm8Vo5xu8tE=",
+        "bzlTransitiveDigest": "3D7/it/n8gro4DKVwWyDnvhb4eRt7M+c1AmGI0BzYEs=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "junit_xsd": {
-            "bzlFile": "@@bazel_tools//tools/build_defs/repo:http.bzl",
-            "ruleClassName": "http_archive",
-            "attributes": {
-              "name": "_main~non_module_dev_deps~junit_xsd",
-              "build_file": "@@//:junit_xsd.BUILD",
-              "sha256": "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
-              "strip_prefix": "JUnit-Schema-1.0.0/",
-              "urls": [
-                "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz"
-              ]
-            }
-          },
-          "phst_rules_elisp_bazel_version": {
+          "phst_rules_elisp_dev_deps": {
             "bzlFile": "@@//private:repositories.bzl",
-            "ruleClassName": "_bazel_version",
+            "ruleClassName": "non_module_dev_deps",
             "attributes": {
-              "name": "_main~non_module_dev_deps~phst_rules_elisp_bazel_version"
+              "name": "_main~non_module_dev_deps~phst_rules_elisp_dev_deps"
             }
           }
         }
