@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@
 
 namespace phst_rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunBinary(const NativeString& argv0,
+ABSL_MUST_USE_RESULT int RunBinary(NativeStringView argv0,
                                    absl::Span<const NativeString> args);
 
 }  // namespace phst_rules_elisp

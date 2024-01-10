@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ using Environment = absl::flat_hash_map<NativeString, NativeString>;
 class Runfiles final {
  public:
   static absl::StatusOr<Runfiles> Create(std::string_view source_repository,
-                                         const NativeString& argv0);
+                                         NativeStringView argv0);
   static absl::StatusOr<Runfiles> CreateForTest(
       std::string_view source_repository);
   absl::StatusOr<NativeString> Resolve(std::string_view name) const;

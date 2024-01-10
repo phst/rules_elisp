@@ -42,14 +42,14 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunBinaryImpl(
-    const NativeString& argv0, const absl::Span<const NativeString> args) {
+    const NativeStringView argv0, const absl::Span<const NativeString> args) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_binary", args, *runfiles);
 }
 
-int RunBinary(const NativeString& argv0,
+int RunBinary(const NativeStringView argv0,
               const absl::Span<const NativeString> args) {
   const absl::StatusOr<int> status_or_code = RunBinaryImpl(argv0, args);
   if (!status_or_code.ok()) {
