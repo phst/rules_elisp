@@ -3384,10 +3384,10 @@ static emacs_value MapGet(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   if (type.key == NULL) return NULL;
   upb_MessageValue key = AdoptScalar(ctx, map.arena.ptr, type.key, args[1]);
   if (!Success(ctx)) return NULL;
-  emacs_value default_val = OptionalArg(ctx, nargs, args, 2);
   upb_MessageValue value;
   bool ok = upb_Map_Get(map.value, key, &value);
-  return ok ? MakeSingular(ctx, map.arena, type.value, value) : default_val;
+  return ok ? MakeSingular(ctx, map.arena, type.value, value)
+            : OptionalArg(ctx, nargs, args, 2);
 }
 
 static emacs_value MapPut(emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
