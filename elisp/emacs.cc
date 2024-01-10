@@ -42,14 +42,14 @@
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(
-    const NativeString& argv0, const absl::Span<const NativeString> args) {
+    const NativeStringView argv0, const absl::Span<const NativeString> args) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
   return Run(PHST_RULES_ELISP_RUN_EMACS, args, *runfiles);
 }
 
-int RunEmacs(const NativeString& argv0,
+int RunEmacs(const NativeStringView argv0,
              const absl::Span<const NativeString> args) {
   const absl::StatusOr<int> status_or_code = RunEmacsImpl(argv0, args);
   if (!status_or_code.ok()) {

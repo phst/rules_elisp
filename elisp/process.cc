@@ -333,11 +333,11 @@ absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
 #endif
 }
 
-static absl::StatusOr<std::string> ToNarrow(const NativeString& string) {
+static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
 #ifdef PHST_RULES_ELISP_WINDOWS
   return ConvertASCII<std::string>(string);
 #else
-  return string;
+  return std::string(string);
 #endif
 }
 
@@ -350,7 +350,7 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 }
 
 absl::StatusOr<Runfiles> Runfiles::Create(
-    const std::string_view source_repository, const NativeString& argv0) {
+    const std::string_view source_repository, const NativeStringView argv0) {
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
