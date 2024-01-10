@@ -43,7 +43,9 @@ def _non_module_deps_impl(repository_ctx):
         ],
     )
     repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-29.1/BUILD")
-    _toolchains_impl(repository_ctx)
+    windows = repository_ctx.os.name.startswith("windows")
+    target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
+    repository_ctx.symlink(target, "BUILD")
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
@@ -65,11 +67,6 @@ non_module_dev_deps = repository_rule(
     implementation = _non_module_dev_deps_impl,
     local = True,  # always reevaluate in case the Bazel version changes
 )
-
-def _toolchains_impl(repository_ctx):
-    windows = repository_ctx.os.name.startswith("windows")
-    target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
-    repository_ctx.symlink(target, "BUILD")
 
 def _bazel_version_impl(repository_ctx):
     """Workaround for https://github.com/bazelbuild/bazel/issues/8305."""
