@@ -45,7 +45,7 @@ def _non_module_deps_impl(repository_ctx):
     repository_ctx.symlink(Label("//:emacs.BUILD"), "emacs-29.1/BUILD")
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
-    repository_ctx.symlink(target, "BUILD")
+    repository_ctx.symlink(target, "BUILD.bazel")
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
@@ -60,7 +60,7 @@ def _non_module_dev_deps_impl(repository_ctx):
         ],
         stripPrefix = "JUnit-Schema-1.0.0/",
     )
-    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "BUILD")
+    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "BUILD.bazel")
 
     # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
     repository_ctx.template(
