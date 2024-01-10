@@ -60,16 +60,8 @@ def _non_module_dev_deps_impl(repository_ctx):
         ],
     )
     repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "JUnit-Schema-1.0.0/BUILD")
-    _bazel_version_impl(repository_ctx)
 
-non_module_dev_deps = repository_rule(
-    doc = """Installs development dependencies that are not available as modules.""",
-    implementation = _non_module_dev_deps_impl,
-    local = True,  # always reevaluate in case the Bazel version changes
-)
-
-def _bazel_version_impl(repository_ctx):
-    """Workaround for https://github.com/bazelbuild/bazel/issues/8305."""
+    # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
     repository_ctx.file(
         "WORKSPACE.bazel",
         "workspace(name = %r)\n" % repository_ctx.name,
@@ -85,6 +77,12 @@ def _bazel_version_impl(repository_ctx):
         "BAZEL_VERSION = %r\n" % native.bazel_version,
         executable = False,
     )
+
+non_module_dev_deps = repository_rule(
+    doc = """Installs development dependencies that are not available as modules.""",
+    implementation = _non_module_dev_deps_impl,
+    local = True,  # always reevaluate in case the Bazel version changes
+)
 
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
 available as an `elisp_library`.  This {kind} is very similar to
