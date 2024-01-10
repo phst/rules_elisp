@@ -58,15 +58,11 @@ def _non_module_dev_deps_impl(repository_ctx):
         url = [
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
+        stripPrefix = "JUnit-Schema-1.0.0/",
     )
-    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "JUnit-Schema-1.0.0/BUILD")
+    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "BUILD")
 
     # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
-    repository_ctx.file(
-        "BUILD.bazel",
-        "",
-        executable = False,
-    )
     repository_ctx.file(
         "defs.bzl",
         "BAZEL_VERSION = %r\n" % native.bazel_version,
