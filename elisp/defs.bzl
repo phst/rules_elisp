@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ load(
     "runfile_location",
     "workspace_relative_filename",
 )
+
+visibility("public")
 
 EmacsLispInfo = provider(
     doc = """Provider for Emacs Lisp libraries.

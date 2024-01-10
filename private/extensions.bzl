@@ -16,6 +16,8 @@
 
 load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
 
+visibility("private")
+
 def _non_module_deps_impl(_ctx):
     _deps()
 

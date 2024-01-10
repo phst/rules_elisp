@@ -18,6 +18,8 @@ These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
+visibility(["//docs", "//elisp", "//elisp/proto", "//emacs"])
+
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
     if "no-python-check" in tags:

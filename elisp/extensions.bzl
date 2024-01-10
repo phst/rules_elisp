@@ -17,6 +17,8 @@
 load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC")
 load(":repositories.bzl", "elisp_http_archive")
 
+visibility("public")
+
 _http_archive = tag_class(
     doc = HTTP_ARCHIVE_DOC.format(kind = "tag class"),
     attrs = dict(

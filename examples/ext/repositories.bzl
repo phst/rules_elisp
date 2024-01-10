@@ -17,6 +17,8 @@
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@phst_rules_elisp//elisp:repositories.bzl", "elisp_http_archive")
 
+visibility("public")
+
 def example_dependencies():
     """Installs necessary dependencies for the example."""
     maybe(

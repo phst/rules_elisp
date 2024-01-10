@@ -28,6 +28,8 @@ load(
     "runfile_location",
 )
 
+visibility("public")
+
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
     cc_toolchain = find_cpp_toolchain(ctx)
