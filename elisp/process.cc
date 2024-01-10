@@ -347,13 +347,13 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 #endif
 }
 
-absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
-                                          const NativeString& argv0) {
+absl::StatusOr<Runfiles> Runfiles::Create(
+    const absl::string_view source_repository, const NativeString& argv0) {
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
   absl::Nullable<std::unique_ptr<Impl>> impl(
-      Impl::Create(*narrow_argv0, source_repository, &error));
+      Impl::Create(*narrow_argv0, std::string(source_repository), &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
@@ -362,10 +362,10 @@ absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
 }
 
 absl::StatusOr<Runfiles> Runfiles::CreateForTest(
-    const std::string& source_repository) {
+    const absl::string_view source_repository) {
   std::string error;
   absl::Nullable<std::unique_ptr<Impl>> impl(
-      Impl::CreateForTest(source_repository, &error));
+      Impl::CreateForTest(std::string(source_repository), &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles for test: ", error));
@@ -376,10 +376,11 @@ absl::StatusOr<Runfiles> Runfiles::CreateForTest(
 Runfiles::Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl)
     : impl_(std::move(impl)) {}
 
-absl::StatusOr<NativeString> Runfiles::Resolve(const std::string& name) const {
+absl::StatusOr<NativeString> Runfiles::Resolve(
+    const absl::string_view name) const {
   const absl::Status status = CheckASCII(name);
   if (!status.ok()) return status;
-  std::string resolved = impl_->Rlocation(name);
+  std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
@@ -402,13 +403,14 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
   return map;
 }
 
-absl::StatusOr<int> Run(std::string binary,
+absl::StatusOr<int> Run(const absl::string_view binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles) {
+  std::string binary_str(binary);
 #ifdef PHST_RULES_ELISP_WINDOWS
-  binary += ".exe";
+  binary_str += ".exe";
 #endif
-  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
+  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary_str);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   absl::StatusOr<Environment> map = runfiles.Environment();
@@ -477,7 +479,7 @@ absl::StatusOr<int> Run(std::string binary,
       ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
                        nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
                        envp.data(), nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", binary);
+  if (!success) return WindowsStatus("CreateProcessW", binary_str);
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
     ::CloseHandle(process_info.hThread);
@@ -496,7 +498,7 @@ absl::StatusOr<int> Run(std::string binary,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", binary);
+                       "posix_spawn", binary_str);
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);
