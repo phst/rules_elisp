@@ -39,10 +39,6 @@
 
 #include "elisp/process.h"
 
-#ifndef BAZEL_CURRENT_REPOSITORY
-#define BAZEL_CURRENT_REPOSITORY ""
-#endif
-
 namespace phst_rules_elisp {
 
 static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
