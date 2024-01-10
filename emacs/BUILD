@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load("//private:defs.bzl", "cc_defaults")
+load("//private:defs.bzl", "FEATURES", "cc_defaults")
 load(":defs.bzl", "emacs_binary")
 
 package(
@@ -49,7 +49,7 @@ py_test(
 cc_library(
     name = "module_header",
     srcs = ["emacs-module.h"],
-    features = ["-default_link_libs"],
+    features = FEATURES + ["-default_link_libs"],
     includes = ["."],
     linkstatic = True,
     visibility = ["//visibility:public"],
