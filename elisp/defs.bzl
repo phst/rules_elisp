@@ -495,9 +495,9 @@ elisp_binary = rule(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
-        _template = attr.label(
-            default = Label("//elisp:binary.template"),
-            allow_single_file = [".template"],
+        _launcher_src = attr.label(
+            default = Label("//elisp:binary_main.cc"),
+            allow_single_file = [".cc"],
         ),
         _launcher_defaults = attr.label(
             default = Label("//elisp:launcher_defaults"),
@@ -565,9 +565,9 @@ elisp_test = rule(
             default = [Label("//elisp:test")],
             providers = [CcInfo],
         ),
-        _template = attr.label(
-            default = Label("//elisp:test.template"),
-            allow_single_file = [".template"],
+        _launcher_src = attr.label(
+            default = Label("//elisp:test_main.cc"),
+            allow_single_file = [".cc"],
         ),
         _launcher_defaults = attr.label(
             default = Label("//elisp:launcher_defaults"),
@@ -905,8 +905,8 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
 def _binary(ctx, *, srcs, tags, args, libs):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
-    The rule should define a “_template” attribute containing the C++ template
-    file to be expanded.
+    The rule should define a “_launcher_src” attribute containing the main C++
+    program source file.
 
     Args:
       ctx: rule context
@@ -984,12 +984,14 @@ def _binary(ctx, *, srcs, tags, args, libs):
     # of misinterpreting special characters in a filename.
     # check_relative_filename should already reject all special characters, but
     # better be sure.
-    launcher_src = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
-    ctx.actions.expand_template(
-        template = ctx.file._template,
-        output = launcher_src,
-        substitutions = {
-            "[[args]]": cpp_strings([
+    cc_toolchain = find_cpp_toolchain(ctx)
+    executable, launcher_runfiles = cc_launcher(
+        ctx,
+        cc_toolchain,
+        ctx.file._launcher_src,
+        libs,
+        defines = [
+            "PHST_RULES_ELISP_ARGS=" + cpp_strings([
                 "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
                 "--mode=" + ("wrap" if toolchain.wrap else "direct"),
             ] + [
@@ -1005,14 +1007,7 @@ def _binary(ctx, *, srcs, tags, args, libs):
                 "--data-file=" + runfile_location(ctx, file)
                 for file in data_files_for_manifest
             ] + args),
-        },
-    )
-    cc_toolchain = find_cpp_toolchain(ctx)
-    executable, launcher_runfiles = cc_launcher(
-        ctx,
-        cc_toolchain,
-        launcher_src,
-        libs,
+        ],
     )
     bin_runfiles = ctx.runfiles(
         files = [emacs.files_to_run.executable] + result.outs,

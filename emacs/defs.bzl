@@ -40,21 +40,16 @@ def _emacs_binary_impl(ctx):
     readme = ctx.file.readme
     source = "./{}/{}".format(readme.root.path, readme.dirname)
     install = _install(ctx, emacs_cc_toolchain, source)
-    launcher_src = ctx.actions.declare_file("_" + ctx.label.name + ".cc")
-    ctx.actions.expand_template(
-        template = ctx.file._template,
-        output = launcher_src,
-        substitutions = {
-            "[[args]]": cpp_strings([
-                "--install=" + runfile_location(ctx, install),
-            ]),
-        },
-    )
     executable, runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        launcher_src,
+        ctx.file._launcher_src,
         ctx.attr._emacs_libs,
+        defines = [
+            "PHST_RULES_ELISP_ARGS=" + cpp_strings([
+                "--install=" + runfile_location(ctx, install),
+            ]),
+        ],
     )
     return [DefaultInfo(
         executable = executable,
@@ -107,9 +102,9 @@ This is used by Gazelle.""",
             default = [Label("//elisp:emacs")],
             providers = [CcInfo],
         ),
-        "_template": attr.label(
-            default = Label("//emacs:launcher.template"),
-            allow_single_file = [".template"],
+        "_launcher_src": attr.label(
+            default = Label("//emacs:launcher.cc"),
+            allow_single_file = [".cc"],
         ),
         "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),

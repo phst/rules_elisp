@@ -174,7 +174,7 @@ def workspace_relative_filename(file):
             fail("invalid name {}", file.short_path)
     return name
 
-def cc_launcher(ctx, cc_toolchain, src, deps):
+def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
     """Builds a launcher executable that starts Emacs.
 
     You can use `find_cpp_toolchain` to construct an appropriate value for
@@ -185,6 +185,8 @@ def cc_launcher(ctx, cc_toolchain, src, deps):
       cc_toolchain (Provider): the C++ toolchain to use to compile the launcher
       src (File): C++ source file to compile; should contain a `main` function
       deps (list of Targets): `cc_library` targets to add as dependencies
+      defines (list of strings): additional preprocessor definitions for
+          compiling `src`
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
@@ -197,7 +199,8 @@ def cc_launcher(ctx, cc_toolchain, src, deps):
         ctx = ctx,
         cc_toolchain = cc_toolchain,
         requested_features = defaults.features + ctx.features,
-        unsupported_features = ctx.disabled_features,
+        # On Windows, Bazel generates incorrectly-escaped parameter files.
+        unsupported_features = ctx.disabled_features + ["compiler_param_file"],
     )
     _, objs = cc_common.compile(
         name = ctx.label.name,
@@ -206,7 +209,7 @@ def cc_launcher(ctx, cc_toolchain, src, deps):
         cc_toolchain = cc_toolchain,
         srcs = [src],
         compilation_contexts = [info.compilation_context for info in infos],
-        local_defines = defaults.defines,
+        local_defines = defaults.defines + defines,
         user_compile_flags = defaults.copts,
     )
     bin = cc_common.link(

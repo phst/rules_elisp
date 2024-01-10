@@ -87,8 +87,8 @@ elisp_toolchain(
 )
 
 exports_files([
-    "binary.template",
-    "test.template",
+    "binary_main.cc",
+    "test_main.cc",
 ])
 
 sh_binary(

@@ -92,7 +92,7 @@ py_binary(
     visibility = ["//visibility:public"],
 )
 
-exports_files(srcs = ["launcher.template"])
+exports_files(srcs = ["launcher.cc"])
 
 bzl_library(
     name = "defs_bzl",
