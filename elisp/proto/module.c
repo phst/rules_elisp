@@ -878,6 +878,11 @@ static void PrincString(struct Context ctx, upb_StringView string,
   Princ(ctx, MakeString(ctx, string), stream);
 }
 
+static void PrincChar(struct Context ctx, char ch, emacs_value stream) {
+  upb_StringView string = UPB_STRINGVIEW_INIT(&ch, 1);
+  PrincString(ctx, string, stream);
+}
+
 static void PrincLiteral(struct Context ctx, const char* string,
                          emacs_value stream) {
   PrincString(ctx, upb_StringView_FromString(string), stream);
@@ -1701,7 +1706,7 @@ static void Prin1Singular(struct Context ctx, const upb_FieldDef* type,
   if (upb_FieldDef_IsSubMessage(type)) {
     PrincLiteral(ctx, "{ ", stream);
     PrincFields(ctx, upb_FieldDef_MessageSubDef(type), value.msg_val, stream);
-    PrincLiteral(ctx, "}", stream);
+    PrincChar(ctx, '}', stream);
   } else {
     Prin1Scalar(ctx, type, value, stream);
   }
@@ -3255,7 +3260,7 @@ static emacs_value PrintArray(emacs_env* env, ptrdiff_t nargs,
   Princ(ctx, MakeUInteger(ctx, array_length), stream);
   PrincLiteral(ctx, array_length == 1 ? " element [" : " elements [", stream);
   for (size_t i = 0; i < limit; ++i) {
-    if (i > 0) PrincLiteral(ctx, " ", stream);
+    if (i > 0) PrincChar(ctx, ' ', stream);
     Prin1Singular(ctx, array.type, upb_Array_Get(array.value, i), stream);
   }
   PrincLiteral(ctx, abbreviate ? "...]>" : "]>", stream);
@@ -3536,13 +3541,13 @@ static emacs_value PrintMap(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   size_t iter = kUpb_Map_Begin;
   size_t i = 0;
   while (i < limit && upb_MapIterator_Next(map.value, &iter)) {
-    if (i > 0) PrincLiteral(ctx, " ", stream);
-    PrincLiteral(ctx, "(", stream);
+    if (i > 0) PrincChar(ctx, ' ', stream);
+    PrincChar(ctx, '(', stream);
     Prin1Scalar(ctx, type.key, upb_MapIterator_Key(map.value, iter), stream);
-    PrincLiteral(ctx, " ", stream);
+    PrincChar(ctx, ' ', stream);
     Prin1Singular(ctx, type.value, upb_MapIterator_Value(map.value, iter),
                   stream);
-    PrincLiteral(ctx, ")", stream);
+    PrincChar(ctx, ')', stream);
     ++i;
   }
   PrincLiteral(ctx, abbreviate ? "...]>" : "]>", stream);
