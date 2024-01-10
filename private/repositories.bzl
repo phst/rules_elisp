@@ -63,9 +63,12 @@ def _non_module_dev_deps_impl(repository_ctx):
     repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "BUILD")
 
     # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
-    repository_ctx.file(
+    repository_ctx.template(
         "defs.bzl",
-        "BAZEL_VERSION = %r\n" % native.bazel_version,
+        Label("//private:dev.template.bzl"),
+        {
+            "[[bazel_version]]": repr(native.bazel_version),
+        },
         executable = False,
     )
 
