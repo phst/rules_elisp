@@ -19,6 +19,8 @@ These definitions are internal and subject to change without notice."""
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 
+visibility(["//", "//elisp"])
+
 def non_module_deps():
     """Installs dependencies that are not available as modules."""
     maybe(

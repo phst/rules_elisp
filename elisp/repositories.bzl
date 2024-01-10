@@ -18,6 +18,8 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "non_module_deps")
 
+visibility("public")
+
 def rules_elisp_dependencies():
     """Installs necessary dependencies for Emacs Lisp rules.
 
