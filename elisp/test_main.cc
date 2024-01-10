@@ -1,4 +1,4 @@
-// Copyright 2020, 2021 Google LLC
+// Copyright 2020, 2021, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,17 +14,15 @@
 
 #include <vector>
 
-#include "elisp/emacs.h"
+#include "elisp/test.h"
 
 int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
-  using phst_rules_elisp::NativeString;
-  using phst_rules_elisp::RunEmacs;
-  std::vector<NativeString> args = {
-    [[args]],
+  std::vector<phst_rules_elisp::NativeString> args = {
+    PHST_RULES_ELISP_ARGS,
     PHST_RULES_ELISP_NATIVE_LITERAL("--")
   };
   args.insert(args.end(), argv, argv + argc);
-  return RunEmacs(argc == 0 ? NativeString() : argv[0], args);
+  return phst_rules_elisp::RunTest(args);
 }
 
 // Local Variables:
