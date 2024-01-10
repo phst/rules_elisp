@@ -44,10 +44,6 @@
 #include "elisp/platform.h"
 #include "elisp/process.h"
 
-#ifndef BAZEL_CURRENT_REPOSITORY
-#define BAZEL_CURRENT_REPOSITORY ""
-#endif
-
 // IWYU pragma: no_include "gtest/gtest_pred_impl.h"
 // IWYU pragma: no_include <gmock/gmock-matchers.h>
 // IWYU pragma: no_include <gtest/gtest-matchers.h>

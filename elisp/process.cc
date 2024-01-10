@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -349,17 +349,11 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 
 absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
                                           const NativeString& argv0) {
-#ifndef BAZEL_CURRENT_REPOSITORY
-  CHECK(source_repository.empty());
-#endif
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Impl>> impl(Impl::Create(*narrow_argv0,
-#ifdef BAZEL_CURRENT_REPOSITORY
-                                                          source_repository,
-#endif
-                                                          &error));
+  absl::Nullable<std::unique_ptr<Impl>> impl(
+      Impl::Create(*narrow_argv0, source_repository, &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
@@ -369,15 +363,9 @@ absl::StatusOr<Runfiles> Runfiles::Create(const std::string& source_repository,
 
 absl::StatusOr<Runfiles> Runfiles::CreateForTest(
     const std::string& source_repository) {
-#ifndef BAZEL_CURRENT_REPOSITORY
-  CHECK(source_repository.empty());
-#endif
   std::string error;
-  absl::Nullable<std::unique_ptr<Impl>> impl(Impl::CreateForTest(
-#ifdef BAZEL_CURRENT_REPOSITORY
-      source_repository,
-#endif
-      &error));
+  absl::Nullable<std::unique_ptr<Impl>> impl(
+      Impl::CreateForTest(source_repository, &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles for test: ", error));
