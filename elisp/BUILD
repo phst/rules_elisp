@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "bootstrap", "cc_defaults")
+load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "bootstrap", "cc_defaults")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(
@@ -133,7 +133,7 @@ bzl_library(
     ],
 )
 
-LAUNCHER_FEATURES = []
+LAUNCHER_FEATURES = FEATURES
 
 LAUNCHER_DEFINES = DEFINES
 
@@ -152,6 +152,7 @@ cc_library(
     hdrs = ["emacs.h"],
     copts = COPTS + CXXOPTS,
     data = [":run_emacs"],
+    features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
@@ -181,6 +182,7 @@ cc_library(
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [":run_binary"],
+    features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
@@ -244,6 +246,7 @@ cc_library(
     hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
     data = [":run_test"],
+    features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
@@ -330,6 +333,7 @@ cc_library(
     srcs = ["process.cc"],
     hdrs = ["process.h"],
     copts = COPTS + CXXOPTS,
+    features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
@@ -353,6 +357,7 @@ cc_library(
     name = "platform",
     hdrs = ["platform.h"],
     copts = COPTS + CXXOPTS,
+    features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,

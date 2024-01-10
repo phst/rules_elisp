@@ -334,6 +334,15 @@ def run_emacs(
         toolchain = Label("//elisp:toolchain_type"),
     )
 
+FEATURES = select({
+    # We can’t use treat_warnings_as_errors on macOS yet because it tries to
+    # pass a flag -fatal-warnings to the linker, but the macOS linker accepts
+    # -fatal_warnings instead.
+    # TODO: File bug against Bazel.
+    "@platforms//os:macos": [],
+    "//conditions:default": ["treat_warnings_as_errors"],
+})
+
 # Shared C++ compilation options.
 COPTS = select({
     Label("//private:msvc-cl"): [

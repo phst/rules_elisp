@@ -15,7 +15,7 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
-load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES")
+load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -138,7 +138,7 @@ cc_binary(
         "//private:msvc-cl": ["/wd4100"],
         "//private:gcc_or_clang": ["-fvisibility=hidden"],
     }),
-    features = ["-default_link_libs"],
+    features = FEATURES + ["-default_link_libs"],
     linkopts = select({
         # Export only symbols that make up the module interface.
         "@platforms//os:linux": [
