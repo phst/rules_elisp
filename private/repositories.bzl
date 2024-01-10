@@ -63,11 +63,6 @@ def _non_module_dev_deps_impl(repository_ctx):
 
     # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
     repository_ctx.file(
-        "WORKSPACE.bazel",
-        "workspace(name = %r)\n" % repository_ctx.name,
-        executable = False,
-    )
-    repository_ctx.file(
         "BUILD.bazel",
         "",
         executable = False,

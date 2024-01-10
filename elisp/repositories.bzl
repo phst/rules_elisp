@@ -107,14 +107,6 @@ def _elisp_http_archive_impl(repository_ctx):
         # Work around https://github.com/bazelbuild/bazel/issues/15916.
         defs_bzl = "@" + defs_bzl
     repository_ctx.template(
-        "WORKSPACE.bazel",
-        Label("//elisp:WORKSPACE.template"),
-        {
-            "[[name]]": repr(repository_ctx.attr.name),
-        },
-        executable = False,
-    )
-    repository_ctx.template(
         "BUILD.bazel",
         Label("//elisp:BUILD.template"),
         {
