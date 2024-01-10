@@ -174,7 +174,7 @@ class Builder:
             prefix = '' if bzlmod else 'no'
             options = [
                 '--test_output=errors',
-                f'--{prefix}experimental_enable_bzlmod',
+                f'--{prefix}enable_bzlmod',
             ]
             if bzlmod and self._github and not self._ignore_lockfile:
                 options.append('--lockfile_mode=error')
@@ -190,7 +190,7 @@ class Builder:
     def compdb(self) -> None:
         """Generates a compilation database for clangd."""
         options = (
-            '--experimental_enable_bzlmod',
+            '--enable_bzlmod',
             '--lockfile_mode=off',
             '--output_groups=-check_python',
         )
@@ -206,7 +206,7 @@ class Builder:
         self._bazel('run',
                     ['@phst_bazelcov//:bazelcov',
                      f'--bazel={self._bazel_program}', f'--output={directory}'],
-                    options=['--experimental_enable_bzlmod',
+                    options=['--enable_bzlmod',
                              '--lockfile_mode=off'])
         print(f'coverage report written to {directory}')
 
@@ -238,7 +238,7 @@ class Builder:
                     startup_options=[f'--host_jvm_args=-Dblaze.os={kernel}',
                                      f'--host_jvm_args=-Dos.arch={arch}'],
                     options=['--nobuild',
-                             '--experimental_enable_bzlmod',
+                             '--enable_bzlmod',
                              '--lockfile_mode=update'],
                     cwd=cwd)
 
