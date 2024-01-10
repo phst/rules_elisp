@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -87,6 +87,7 @@ elisp_binary(
 cc_binary(
     name = "module.so",
     srcs = ["module.c"],
+    features = ["-default_link_libs"],
     linkshared = True,
     linkstatic = True,
     win_def_file = "module.def",

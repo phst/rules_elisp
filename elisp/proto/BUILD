@@ -138,6 +138,7 @@ cc_binary(
         "//private:msvc-cl": ["/wd4100"],
         "//private:gcc_or_clang": ["-fvisibility=hidden"],
     }),
+    features = ["-default_link_libs"],
     linkopts = select({
         # Export only symbols that make up the module interface.
         "@platforms//os:linux": [
