@@ -1,10 +1,10 @@
-# Copyright 2021, 2022, 2024 Google LLC
+# Copyright 2024 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,17 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-alias(
-    name = "emacs_cc_toolchain",
-    actual = "@bazel_tools//tools/cpp:current_cc_toolchain",
-    visibility = [[[emacs_pkg]]],
-)
+# Generated file; do not edit.
 
-exports_files(
-    ["defs.bzl"],
-    visibility = [[[private_pkg]]],
-)
+"""Internal definitions for the `phst_rules_elisp_deps` repository."""
 
-# Local Variables:
-# mode: bazel-build
-# End:
+# Starlark doesn’t have `chr` or `ord` functions, so we replicate them here.
+# CHR maps ordinals to single-character strings, and ORD does the reverse.  This
+# only works for single-byte characters.
+CHR = [[[chr]]]
+ORD = {[[ord]]}

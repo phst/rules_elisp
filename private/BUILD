@@ -31,6 +31,7 @@ bzl_library(
         "//emacs:__pkg__",
     ],
     deps = [
+        ":deps_defs_bzl",
         "//elisp:builtin_bzl",
         "@bazel_skylib//lib:paths",
     ],
@@ -49,6 +50,11 @@ bzl_library(
     name = "extensions_bzl",
     srcs = ["extensions.bzl"],
     deps = [":repositories_bzl"],
+)
+
+bzl_library(
+    name = "deps_defs_bzl",
+    srcs = ["@phst_rules_elisp_deps//:defs.bzl"],
 )
 
 selects.config_setting_group(

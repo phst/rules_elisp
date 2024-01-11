@@ -71,6 +71,16 @@ def _non_module_deps_impl(repository_ctx):
         target,
         {
             "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+            "[[private_pkg]]": repr(str(Label("//private:__pkg__"))),
+        },
+        executable = False,
+    )
+    repository_ctx.template(
+        "defs.bzl",
+        Label("//private:prod.template.bzl"),
+        {
+            "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
+            "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
         },
         executable = False,
     )
