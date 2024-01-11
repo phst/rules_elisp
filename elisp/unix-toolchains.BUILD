@@ -18,11 +18,6 @@ alias(
     visibility = [[[emacs_pkg]]],
 )
 
-exports_files(
-    ["defs.bzl"],
-    visibility = [[[private_pkg]]],
-)
-
 # Local Variables:
 # mode: bazel-build
 # End:

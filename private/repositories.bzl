@@ -67,10 +67,17 @@ def _non_module_deps_impl(repository_ctx):
     windows = repository_ctx.os.name.startswith("windows")
     target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
     repository_ctx.template(
-        "BUILD.bazel",
+        "toolchains/BUILD.bazel",
         target,
         {
             "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
+    repository_ctx.template(
+        "BUILD.bazel",
+        Label("//private:prod.template.BUILD"),
+        {
             "[[private_pkg]]": repr(str(Label("//private:__pkg__"))),
         },
         executable = False,
