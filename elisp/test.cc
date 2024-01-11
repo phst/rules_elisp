@@ -15,7 +15,6 @@
 #include "elisp/test.h"
 
 #include <cstdlib>
-#include <vector>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -30,6 +29,7 @@
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/types/span.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -41,14 +41,15 @@
 
 namespace phst_rules_elisp {
 
-static absl::StatusOr<int> RunTestImpl(const std::vector<NativeString>& args) {
+static absl::StatusOr<int> RunTestImpl(
+    const absl::Span<const NativeString> args) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   if (!runfiles.ok()) return runfiles.status();
   return Run("phst_rules_elisp/elisp/run_test", args, *runfiles);
 }
 
-int RunTest(const std::vector<NativeString>& args) {
+int RunTest(const absl::Span<const NativeString> args) {
   const absl::StatusOr<int> status_or_code = RunTestImpl(args);
   if (!status_or_code.ok()) {
     LOG(ERROR) << status_or_code.status();

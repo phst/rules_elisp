@@ -21,7 +21,6 @@
 
 #include <memory>
 #include <string_view>
-#include <vector>
 
 #ifdef __GNUC__
 #pragma GCC diagnostic push
@@ -36,6 +35,7 @@
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
+#include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -66,7 +66,7 @@ class Runfiles final {
 };
 
 absl::StatusOr<int> Run(std::string_view binary,
-                        const std::vector<NativeString>& args,
+                        absl::Span<const NativeString> args,
                         const Runfiles& runfiles);
 
 }  // namespace phst_rules_elisp

@@ -19,8 +19,6 @@
 #error this file requires at least C++17
 #endif
 
-#include <vector>
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -32,6 +30,7 @@
 #pragma warning(push, 3)
 #endif
 #include "absl/base/attributes.h"
+#include "absl/types/span.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -44,7 +43,7 @@
 namespace phst_rules_elisp {
 
 ABSL_MUST_USE_RESULT int RunEmacs(const NativeString& argv0,
-                                  const std::vector<NativeString>& args);
+                                  absl::Span<const NativeString> args);
 
 }  // namespace phst_rules_elisp
 

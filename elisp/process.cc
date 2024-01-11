@@ -71,6 +71,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -92,7 +93,8 @@ namespace phst_rules_elisp {
 // https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
 // and
 // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw.
-static std::wstring BuildCommandLine(const std::vector<std::wstring>& args) {
+static std::wstring BuildCommandLine(
+    const absl::Span<const std::wstring> args) {
   std::wstring result;
   bool first = true;
   for (const std::wstring& arg : args) {
@@ -140,7 +142,7 @@ static std::wstring BuildCommandLine(const std::vector<std::wstring>& args) {
 // Build an environment block that CreateProcessW can use.  See
 // https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw.
 static std::wstring BuildEnvironmentBlock(
-    const std::vector<std::wstring>& vars) {
+    const absl::Span<const std::wstring> vars) {
   std::wstring result;
   for (const std::wstring& var : vars) {
     if (var.find(L'\0') != var.npos) {
@@ -404,7 +406,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
 }
 
 absl::StatusOr<int> Run(const std::string_view binary,
-                        const std::vector<NativeString>& args,
+                        const absl::Span<const NativeString> args,
                         const Runfiles& runfiles) {
   std::string binary_str(binary);
 #ifdef PHST_RULES_ELISP_WINDOWS
