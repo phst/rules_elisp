@@ -20,6 +20,7 @@
 #endif
 
 #include <memory>
+#include <string_view>
 #include <vector>
 
 #ifdef __GNUC__
@@ -35,7 +36,6 @@
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/string_view.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -52,11 +52,11 @@ using Environment = absl::flat_hash_map<NativeString, NativeString>;
 
 class Runfiles final {
  public:
-  static absl::StatusOr<Runfiles> Create(absl::string_view source_repository,
+  static absl::StatusOr<Runfiles> Create(std::string_view source_repository,
                                          const NativeString& argv0);
   static absl::StatusOr<Runfiles> CreateForTest(
-      absl::string_view source_repository);
-  absl::StatusOr<NativeString> Resolve(absl::string_view name) const;
+      std::string_view source_repository);
+  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
   absl::StatusOr<phst_rules_elisp::Environment> Environment() const;
 
  private:
@@ -65,7 +65,7 @@ class Runfiles final {
   absl::Nonnull<std::unique_ptr<Impl>> impl_;
 };
 
-absl::StatusOr<int> Run(absl::string_view binary,
+absl::StatusOr<int> Run(std::string_view binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles);
 
