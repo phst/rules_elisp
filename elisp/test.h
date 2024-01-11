@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@
 #error this file requires at least C++17
 #endif
 
-#include <vector>
-
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
@@ -32,6 +30,7 @@
 #pragma warning(push, 3)
 #endif
 #include "absl/base/attributes.h"
+#include "absl/types/span.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
 #endif
@@ -43,7 +42,7 @@
 
 namespace phst_rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunTest(const std::vector<NativeString>& args);
+ABSL_MUST_USE_RESULT int RunTest(absl::Span<const NativeString> args);
 
 }  // namespace phst_rules_elisp
 
