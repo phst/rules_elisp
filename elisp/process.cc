@@ -45,6 +45,7 @@
 #include <limits>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
@@ -70,7 +71,6 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
-#include "absl/strings/string_view.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #pragma GCC diagnostic pop
@@ -253,8 +253,8 @@ static absl::StatusCode MapErrorCode(const std::error_code& code) {
 }
 
 static absl::Status MakeErrorStatus(const std::error_code& code,
-                                    const absl::string_view function,
-                                    const absl::string_view args) {
+                                    const std::string_view function,
+                                    const std::string_view args) {
   if (!code) return absl::OkStatus();
   return absl::Status(
       MapErrorCode(code),
@@ -265,7 +265,7 @@ static absl::Status MakeErrorStatus(const std::error_code& code,
 
 template <typename... Ts>
 absl::Status ErrorStatus(const std::error_code& code,
-                         const absl::string_view function, Ts&&... args) {
+                         const std::string_view function, Ts&&... args) {
   return MakeErrorStatus(code, function,
                          absl::StrJoin(std::forward_as_tuple(args...), ", "));
 }
@@ -274,7 +274,7 @@ absl::Status ErrorStatus(const std::error_code& code,
 static constexpr const unsigned int kMaxInt = std::numeric_limits<int>::max();
 
 template <typename... Ts>
-absl::Status WindowsStatus(const absl::string_view function, Ts&&... args) {
+absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
   const DWORD error = ::GetLastError();
   if (error > kMaxInt) {
     return absl::InvalidArgumentError(
@@ -286,7 +286,7 @@ absl::Status WindowsStatus(const absl::string_view function, Ts&&... args) {
 }
 #else
 template <typename... Ts>
-absl::Status ErrnoStatus(const absl::string_view function, Ts&&... args) {
+absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(std::error_code(errno, std::system_category()), function,
                      std::forward<Ts>(args)...);
 }
@@ -348,7 +348,7 @@ static absl::StatusOr<NativeString> ToNative(const std::string& string) {
 }
 
 absl::StatusOr<Runfiles> Runfiles::Create(
-    const absl::string_view source_repository, const NativeString& argv0) {
+    const std::string_view source_repository, const NativeString& argv0) {
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
@@ -362,7 +362,7 @@ absl::StatusOr<Runfiles> Runfiles::Create(
 }
 
 absl::StatusOr<Runfiles> Runfiles::CreateForTest(
-    const absl::string_view source_repository) {
+    const std::string_view source_repository) {
   std::string error;
   absl::Nullable<std::unique_ptr<Impl>> impl(
       Impl::CreateForTest(std::string(source_repository), &error));
@@ -377,7 +377,7 @@ Runfiles::Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl)
     : impl_(std::move(impl)) {}
 
 absl::StatusOr<NativeString> Runfiles::Resolve(
-    const absl::string_view name) const {
+    const std::string_view name) const {
   const absl::Status status = CheckASCII(name);
   if (!status.ok()) return status;
   std::string resolved = impl_->Rlocation(std::string(name));
@@ -403,7 +403,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
   return map;
 }
 
-absl::StatusOr<int> Run(const absl::string_view binary,
+absl::StatusOr<int> Run(const std::string_view binary,
                         const std::vector<NativeString>& args,
                         const Runfiles& runfiles) {
   std::string binary_str(binary);
