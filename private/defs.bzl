@@ -17,6 +17,7 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@phst_rules_elisp_deps//:defs.bzl", "CHR", "ORD")
 
 visibility(["//docs", "//elisp", "//elisp/proto", "//emacs"])
 
@@ -248,16 +249,51 @@ def cpp_string(string):
     """
     if "\000" in string:
         fail("String {} can’t be transferred to C++".format(string))
-    string = (
-        string
-            .replace("\\", "\\\\")
-            .replace("\n", "\\n")
-            .replace("\r", "\\r")
-            .replace("\t", "\\t")
-    )
-    for char in ("?", "'", '"'):
-        string = string.replace(char, "\\" + char)
+
+    # Interpret the string as UTF-8.  That’s not really correct,
+    # cf. https://bazel.build/concepts/build-files.  However, we assume that in
+    # practice all BUILD files do in fact use UTF-8 instead of Latin-1.  Due to
+    # the implementation of Starlark strings, the string will actually be a
+    # sequence of UTF-8 code units (and not code points), so we have to decode
+    # it first.
+    string = "".join([_cpp_char(c) for c in _decode_utf8(string)])
     return 'PHST_RULES_ELISP_NATIVE_LITERAL("' + string + '")'
+
+def _cpp_char(point):
+    """Returns a C++ representation of a Unicode code point.
+
+    The return value can be used in character and string literals.
+
+    Args:
+      point (int): a Unicode code point
+
+    Returns:
+      a C++ string literal representation of `point`
+    """
+    if point == 0:
+        fail("can’t have embedded null characters in C++ literals")
+
+    # See https://en.cppreference.com/w/cpp/language/escape.
+    esc = _CPP_ESCAPES.get(point)
+    if esc != None:  # special treatment
+        return esc
+    if 0x20 <= point and point <= 0x7F:  # ASCII, no need to escape
+        return CHR[point]
+    if point <= 0xFFFF:  # BMP character
+        return "\\u" + _hex(point, pad = 4)
+    if point <= 0x10FFFF:  # Non-BMP character
+        return "\\U" + _hex(point, pad = 8)
+    fail("invalid code point U+%X" % point)
+
+_CPP_ESCAPES = {
+    ORD["\\"]: "\\\\",
+    ORD["\n"]: "\\n",
+    ORD["\r"]: "\\r",
+    ORD["\t"]: "\\t",
+    ORD["?"]: "\\?",
+    ORD["'"]: "\\'",
+    ORD['"']: '\\"',
+}
 
 def run_emacs(
         ctx,
@@ -546,3 +582,115 @@ merged_manual = rule(
 def _workspace_name(file):
     # Skip empty string for main repository.
     return file.owner.workspace_name or None
+
+def _decode_utf8(string):
+    """Decodes an UTF-8 string into a list of Unicode codepoints.
+
+    Args:
+      string: a string that is assumed to be a valid UTF-8 string, i.e., each
+          character in the string should be a UTF-8 code unit
+
+    Returns:
+      a list of Unicode code points (integers)
+    """
+    ret = []
+    skip = 0
+    for i in range(len(string)):
+        # Starlark doesn’t allow us to modify the loop variable here (to
+        # guarantee termination), so we skip iterations as necessary instead.
+        if skip == 0:
+            n, c = _decode_utf8_seq(string, i)
+            ret.append(c)
+            skip = n - 1
+        else:
+            skip -= 1
+    return ret
+
+def _decode_utf8_seq(string, index):
+    """Decodes an UTF-8 code unit sequence into a Unicode codepoints.
+
+    Args:
+      string: a string that is assumed to be a valid UTF-8 string, i.e., each
+          character in the string should be a UTF-8 code unit
+      index: zero-based starting position of the UTF-8 code unit sequence
+
+    Returns:
+      a tuple (length, point) of two integers, where `length` is the length of
+      the code unit sequence and `point` is the corresponding Unicode code point
+    """
+
+    # See the Unicode standard, chapter 3, clause D92, especially the tables 3-6
+    # and 3-7.
+    a = _utf8_code_unit(string, index)
+    if 0x00 <= a and a <= 0x7F:  # one byte
+        return 1, a
+    trail = lambda off, min = 0x80, max = 0xBF: _utf8_trailing_code_unit(string, index + off, min, max)
+    if 0xC2 <= a and a <= 0xDF:  # two bytes
+        b = trail(1)
+        return 2, ((a & 0x1F) << 6) | (b & 0x3F)
+    if 0xE0 <= a and a <= 0xEF:  # three bytes
+        b = trail(1, 0xA0 if a == 0xE0 else 0x80, 0x9F if a == 0xED else 0xBF)
+        c = trail(2)
+        return 3, ((a & 0x0F) << 12) | ((b & 0x3F) << 6) | (c & 0x3F)
+    if 0xF0 <= a and a <= 0xF4:  # four bytes
+        b = trail(1, 0x90 if a == 0xF0 else 0x80, 0x8F if a == 0xF4 else 0xBF)
+        c = trail(2)
+        d = trail(3)
+        return 4, ((a & 0x07) << 18) | ((b & 0x3F) << 12) | ((c & 0x3F) << 6) | (d & 0x3F)
+    fail("invalid leading UTF-8 code unit 0x%X at position %d in string %r" % (a, index, string))
+
+def _utf8_code_unit(string, index):
+    """Returns a single UTF-8 code unit in a string.
+
+    Args:
+      string: a string that is assumed to be a valid UTF-8 string, i.e., each
+          character in the string should be a UTF-8 code unit
+      index: zero-based position of the UTF-8 code unit to retrieve
+
+    Returns:
+      the UTF-8 code unit as an integer
+    """
+    c = string[index]
+    u = ORD.get(c)
+    if u == None or u < 0x00 or u > 0xFF:
+        fail("invalid UTF-8 code unit %r at position %d in string %r" % (c, index, string))
+    return u
+
+def _utf8_trailing_code_unit(string, index, min, max):
+    """Returns a single trailing UTF-8 code unit in a string.
+
+    Checks that the code unit is in a valid range.
+
+    Args:
+      string: a string that is assumed to be a valid UTF-8 string, i.e., each
+          character in the string should be a UTF-8 code unit
+      index: zero-based position of the UTF-8 code unit to retrieve
+      min: lowest allowed code unit, inclusive
+      max: highest allowed code unit, inclusive
+
+    Returns:
+      the UTF-8 code unit as an integer
+    """
+    if index >= len(string):
+        fail("incomplete UTF-8 code unit sequence in string %r" % string)
+    u = _utf8_code_unit(string, index)
+    if u < min or u > max:
+        fail("invalid UTF-8 code unit 0x%X at position %d in string %r" % (u, index, string))
+    return u
+
+def _hex(num, *, pad):
+    """Converts a number to a hexadecimal string with padding.
+
+    Args:
+      num: a nonnegative integer
+      pad: minimum number of digits to return
+
+    Returns:
+      a string that’s at least `pad` digits long
+    """
+    if num < 0:
+        fail("can’t convert negative number %d to hexadecimal" % num)
+    ret = "%X" % num
+    if len(ret) < pad:
+        ret = (pad - len(ret)) * "0" + ret
+    return ret
