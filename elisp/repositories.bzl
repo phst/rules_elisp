@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,10 +62,10 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_absl",
-        sha256 = "2942db09db29359e0c1982986167167d226e23caac50eea1f07b2eb2181169cf",
-        strip_prefix = "abseil-cpp-20230802.0/",
+        sha256 = "497ebdc3a4885d9209b9bd416e8c3f71e7a1fb8af249f6c2a80b7cbeefcd7e21",
+        strip_prefix = "abseil-cpp-20230802.1/",
         urls = [
-            "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.0.zip",  # 2023-08-07
+            "https://github.com/abseil/abseil-cpp/archive/refs/tags/20230802.1.zip",  # 2023-09-18
         ],
     )
     maybe(
