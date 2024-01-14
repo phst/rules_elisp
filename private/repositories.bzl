@@ -137,7 +137,8 @@ except that it always generates a BUILD file containing a single `elisp_library`
 rule in the root package for all Emacs Lisp files in the archive.
 Test files (`…-test.el`, `…-tests.el`) and package metadata files (`…-pkg.el`)
 are excluded.
-The `elisp_library` rule is always named `library`."""
+The `elisp_library` rule is named `library` by default, unless overridden
+by the `target_name` attribute."""
 
 HTTP_ARCHIVE_ATTRS = {
     "urls": attr.string_list(
@@ -158,6 +159,10 @@ See the [corresponding attribute for
         doc = """Directory prefix to strip from the archive contents.
 See the [corresponding attribute for
 `http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
+    ),
+    "target_name": attr.string(
+        doc = """Name of the `elisp_library` target to generate.""",
+        default = "library",
     ),
     "exclude": attr.string_list(
         doc = """Glob patterns of additional files to exclude from

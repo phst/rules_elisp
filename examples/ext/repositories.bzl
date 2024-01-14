@@ -27,6 +27,7 @@ def example_dependencies():
         exclude = ["dash-functional.el"],
         integrity = "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
         strip_prefix = "dash.el-2.19.1/",
+        target_name = "dash",
         urls = [
             "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip",  # 2021-08-26
         ],

@@ -38,6 +38,7 @@ def _elisp_impl(module_ctx):
                 urls = arch.urls,
                 integrity = arch.integrity,
                 strip_prefix = arch.strip_prefix,
+                target_name = arch.target_name,
                 exclude = arch.exclude,
             )
 

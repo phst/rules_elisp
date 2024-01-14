@@ -108,6 +108,7 @@ def _elisp_http_archive_impl(repository_ctx):
         Label("//elisp:BUILD.template"),
         {
             '"[defs_bzl]"': repr(defs_bzl),
+            '"[target_name]"': repr(repository_ctx.attr.target_name),
             "[[exclude]]": repr(repository_ctx.attr.exclude),
         },
         executable = False,

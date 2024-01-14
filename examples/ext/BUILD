@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023 Google LLC
+# Copyright 2020, 2021, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ elisp_library(
     srcs = ["lib-4.el"],
     load_path = ["."],
     visibility = ["//visibility:public"],
-    deps = ["@dash//:library"],
+    deps = ["@dash"],
 )
 
 elisp_test(

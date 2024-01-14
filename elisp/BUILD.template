@@ -17,7 +17,7 @@
 load("[defs_bzl]", "elisp_library")
 
 elisp_library(
-    name = "library",
+    name = "[target_name]",
     srcs = glob(
         ["*.el"],
         allow_empty = False,

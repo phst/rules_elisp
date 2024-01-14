@@ -13,7 +13,7 @@
     "compatibilityMode": "ERROR"
   },
   "localOverrideHashes": {
-    "phst_rules_elisp_example": "af93cb966401072cf57ae8f7efc1ff5aa104f28e21c36f3bdf292e19d997e646",
+    "phst_rules_elisp_example": "facb8cf77f5827e1690c14126c03303d9fa56faa0b28ebde01a4848aeba2ed73",
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787"
   },
   "moduleDepGraph": {
@@ -1147,6 +1147,7 @@
                 ],
                 "integrity": "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
                 "strip_prefix": "dash.el-2.19.1/",
+                "target_name": "dash",
                 "urls": [
                   "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip"
                 ]
@@ -1752,7 +1753,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "q4123Edi4KVTx2wwFxDWdQ6l2AZrYanoWjTXvBNDE+M=",
+        "bzlTransitiveDigest": "lQimqk9JxCJ5jeBu9MENWPWqNbZkgPSdBp1aY3PJU2s=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1766,6 +1767,7 @@
               ],
               "integrity": "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
               "strip_prefix": "dash.el-2.19.1/",
+              "target_name": "dash",
               "exclude": [
                 "dash-functional.el"
               ]
@@ -1776,7 +1778,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "0Qhy9dtTg0QuLyGexF3ZC7NRPAvqMJQygJVmJabWZXo=",
+        "bzlTransitiveDigest": "vJROBm7KMwChIpk8nebgo5RujBfKN0m7f+Ry0s+sX0c=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1792,7 +1794,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "0Qhy9dtTg0QuLyGexF3ZC7NRPAvqMJQygJVmJabWZXo=",
+        "bzlTransitiveDigest": "vJROBm7KMwChIpk8nebgo5RujBfKN0m7f+Ry0s+sX0c=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
