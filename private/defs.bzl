@@ -199,9 +199,7 @@ def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
         ctx = ctx,
         cc_toolchain = cc_toolchain,
         requested_features = defaults.features + ctx.features,
-        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
-        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
-        unsupported_features = ctx.disabled_features + ["compiler_param_file"],
+        unsupported_features = defaults.disabled_features + ctx.disabled_features,
     )
     _, objs = cc_common.compile(
         name = ctx.label.name,
@@ -436,6 +434,7 @@ CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
     fields = {
         "features": "Default features",
+        "disabled_features": "Features to disable",
         "defines": "Local preprocessor definitions",
         "copts": "Default compiler flags",
         "linkopts": "Default linker flags",
@@ -444,7 +443,8 @@ CcDefaultInfo = provider(
 
 def _cc_defaults_impl(ctx):
     return CcDefaultInfo(
-        features = ctx.attr.features,
+        features = [f for f in ctx.attr.features if not f.startswith("-")],
+        disabled_features = [f.removeprefix("-") for f in ctx.attr.features if f.startswith("-")],
         defines = ctx.attr.defines,
         copts = ctx.attr.copts,
         linkopts = ctx.attr.linkopts,
