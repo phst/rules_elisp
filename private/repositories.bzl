@@ -106,7 +106,14 @@ def _non_module_dev_deps_impl(repository_ctx):
         ],
         stripPrefix = "JUnit-Schema-1.0.0/",
     )
-    repository_ctx.symlink(Label("//:junit_xsd.BUILD"), "BUILD.bazel")
+    repository_ctx.template(
+        "BUILD.bazel",
+        Label("//:junit_xsd.BUILD"),
+        {
+            '"[tests_pkg]"': repr(str(Label("//tests:__pkg__"))),
+        },
+        executable = False,
+    )
 
     # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
     repository_ctx.template(
