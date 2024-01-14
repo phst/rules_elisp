@@ -14,7 +14,7 @@
 
 exports_files(
     ["defs.bzl"],
-    visibility = [[[private_pkg]]],
+    visibility = ["[private_pkg]"],
 )
 
 # Local Variables:

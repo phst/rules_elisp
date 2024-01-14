@@ -18,7 +18,7 @@ cc_toolchain_suite(
         "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
         "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
     },
-    visibility = [[[emacs_pkg]]],
+    visibility = ["[emacs_pkg]"],
 )
 
 # Local Variables:

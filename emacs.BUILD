@@ -18,13 +18,13 @@ filegroup(
         ["**"],
         allow_empty = False,
     ),
-    visibility = [[[emacs_pkg]]],
+    visibility = ["[emacs_pkg]"],
 )
 
 filegroup(
     name = "readme",
     srcs = ["README"],
-    visibility = [[[emacs_pkg]]],
+    visibility = ["[emacs_pkg]"],
 )
 
 # Local Variables:
