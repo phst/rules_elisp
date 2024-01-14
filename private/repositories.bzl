@@ -30,7 +30,7 @@ def _non_module_deps_impl(repository_ctx):
         "emacs-28.1/BUILD",
         Label("//:emacs.BUILD"),
         {
-            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
         executable = False,
     )
@@ -45,7 +45,7 @@ def _non_module_deps_impl(repository_ctx):
         "emacs-28.2/BUILD",
         Label("//:emacs.BUILD"),
         {
-            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
         executable = False,
     )
@@ -60,7 +60,7 @@ def _non_module_deps_impl(repository_ctx):
         "emacs-29.1/BUILD",
         Label("//:emacs.BUILD"),
         {
-            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
         executable = False,
     )
@@ -70,7 +70,7 @@ def _non_module_deps_impl(repository_ctx):
         "toolchains/BUILD.bazel",
         target,
         {
-            "[[emacs_pkg]]": repr(str(Label("//emacs:__pkg__"))),
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
         executable = False,
     )
@@ -78,7 +78,7 @@ def _non_module_deps_impl(repository_ctx):
         "BUILD.bazel",
         Label("//private:prod.template.BUILD"),
         {
-            "[[private_pkg]]": repr(str(Label("//private:__pkg__"))),
+            '"[private_pkg]"': repr(str(Label("//private:__pkg__"))),
         },
         executable = False,
     )
@@ -112,7 +112,7 @@ def _non_module_dev_deps_impl(repository_ctx):
         "defs.bzl",
         Label("//private:dev.template.bzl"),
         {
-            "[[bazel_version]]": repr(native.bazel_version),
+            '"[bazel_version]"': repr(native.bazel_version),
         },
         executable = False,
     )

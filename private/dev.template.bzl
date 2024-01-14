@@ -16,4 +16,4 @@
 
 """Internal definitions for the `phst_rules_elisp_dev_deps` repository."""
 
-BAZEL_VERSION = [[bazel_version]]
+BAZEL_VERSION = "[bazel_version]"

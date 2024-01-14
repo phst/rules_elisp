@@ -14,7 +14,7 @@
 
 # Generated file; do not edit.
 
-load([[defs_bzl]], "elisp_library")
+load("[defs_bzl]", "elisp_library")
 
 elisp_library(
     name = "library",

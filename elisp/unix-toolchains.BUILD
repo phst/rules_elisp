@@ -15,7 +15,7 @@
 alias(
     name = "emacs_cc_toolchain",
     actual = "@bazel_tools//tools/cpp:current_cc_toolchain",
-    visibility = [[[emacs_pkg]]],
+    visibility = ["[emacs_pkg]"],
 )
 
 # Local Variables:
