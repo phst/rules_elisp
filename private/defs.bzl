@@ -381,6 +381,15 @@ FEATURES = select({
     "//conditions:default": ["treat_warnings_as_errors"],
 })
 
+LAUNCHER_FEATURES = FEATURES + select({
+    Label("//private:msvc-cl"): [
+        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
+        "-compiler_param_file",
+    ],
+    Label("//private:gcc_or_clang"): [],
+})
+
 # Shared C++ compilation options.
 COPTS = select({
     Label("//private:msvc-cl"): [
@@ -418,6 +427,8 @@ CONLYOPTS = select({
     Label("//private:gcc_or_clang"): ["-Wvla"],
 })
 
+LAUNCHER_COPTS = COPTS + CXXOPTS
+
 DEFINES = ["_GNU_SOURCE"] + select({
     Label("@platforms//os:linux"): [],
     Label("@platforms//os:macos"): [],
@@ -428,6 +439,15 @@ DEFINES = ["_GNU_SOURCE"] + select({
         "NOMINMAX",
         "WIN32_LEAN_AND_MEAN",
     ],
+})
+
+LAUNCHER_DEFINES = DEFINES
+
+LINKOPTS = []
+
+LAUNCHER_LINKOPTS = LINKOPTS + select({
+    Label("//private:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
+    Label("//private:gcc_or_clang"): [],
 })
 
 CcDefaultInfo = provider(
