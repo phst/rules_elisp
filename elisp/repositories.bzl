@@ -102,12 +102,11 @@ def _elisp_http_archive_impl(repository_ctx):
         integrity = repository_ctx.attr.integrity or fail("missing archive checksum"),
         stripPrefix = repository_ctx.attr.strip_prefix,
     )
-    defs_bzl = str(repository_ctx.attr._defs_bzl)
     repository_ctx.template(
         "BUILD.bazel",
         Label("//elisp:BUILD.template"),
         {
-            '"[defs_bzl]"': repr(defs_bzl),
+            '"[defs_bzl]"': repr(str(repository_ctx.attr._defs_bzl)),
             '"[target_name]"': repr(repository_ctx.attr.target_name),
             "[[exclude]]": repr(repository_ctx.attr.exclude),
         },

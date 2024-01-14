@@ -1306,7 +1306,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "lQimqk9JxCJ5jeBu9MENWPWqNbZkgPSdBp1aY3PJU2s=",
+        "bzlTransitiveDigest": "FP+6ptuYzdZ0S9PB7jGa+0/VZ0CCCY60HyjJK8m2+rU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
