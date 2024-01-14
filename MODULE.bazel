@@ -123,7 +123,7 @@ git_override(
 )
 
 # We want to test the external example without adding its repository to the
-# registry.  So we use override the dependency immediately locally.
+# registry.  So we override the dependency immediately locally.
 bazel_dep(name = "phst_rules_elisp_example", dev_dependency = True, repo_name = "example")
 local_path_override(
     module_name = "phst_rules_elisp_example",
