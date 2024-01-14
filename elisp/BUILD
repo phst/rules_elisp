@@ -173,6 +173,26 @@ executable_only(
     src = ":run_emacs",
 )
 
+cc_binary(
+    name = "binary_main",
+    srcs = ["binary_main.cc"],
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    linkstatic = True,
+    local_defines = LAUNCHER_DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        """PHST_RULES_ELISP_ARGS='PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'""",
+    ],
+    deps = [":binary"],
+)
+
+build_test(
+    name = "binary_main_test",
+    targets = [":binary_main"],
+)
+
 cc_library(
     name = "binary",
     srcs = ["binary.cc"],
@@ -244,6 +264,27 @@ py_binary(
 executable_only(
     name = "run_binary_stripped",
     src = ":run_binary",
+)
+
+cc_binary(
+    name = "test_main",
+    testonly = True,
+    srcs = ["test_main.cc"],
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    linkstatic = True,
+    local_defines = LAUNCHER_DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        """PHST_RULES_ELISP_ARGS='PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'""",
+    ],
+    deps = [":test"],
+)
+
+build_test(
+    name = "test_main_test",
+    targets = [":test_main"],
 )
 
 cc_library(

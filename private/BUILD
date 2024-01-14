@@ -76,6 +76,7 @@ config_setting(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
+        "//emacs:__pkg__",
     ],
 )
 
@@ -89,6 +90,7 @@ config_setting(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
+        "//emacs:__pkg__",
     ],
 )
 
@@ -98,6 +100,7 @@ config_setting(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
+        "//emacs:__pkg__",
     ],
 )
 
@@ -107,5 +110,6 @@ config_setting(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
+        "//emacs:__pkg__",
     ],
 )
