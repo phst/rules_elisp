@@ -133,7 +133,14 @@ bzl_library(
     ],
 )
 
-LAUNCHER_FEATURES = FEATURES
+LAUNCHER_FEATURES = FEATURES + select({
+    "//private:msvc-cl": [
+        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
+        "-compiler_param_file",
+    ],
+    "//private:gcc_or_clang": [],
+})
 
 LAUNCHER_DEFINES = DEFINES
 
