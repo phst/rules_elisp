@@ -65,10 +65,9 @@ def _non_module_deps_impl(repository_ctx):
         executable = False,
     )
     windows = repository_ctx.os.name.startswith("windows")
-    target = Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD")
     repository_ctx.template(
         "toolchains/BUILD.bazel",
-        target,
+        Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD"),
         {
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
