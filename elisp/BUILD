@@ -163,8 +163,8 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
-        # additional quoting.
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
         """PHST_RULES_ELISP_RUN_EMACS='R"*($(rlocationpath :run_emacs_stripped))*"'""",
     ],
     visibility = ["//visibility:public"],
@@ -203,8 +203,8 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
-        # additional quoting.
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
         """PHST_RULES_ELISP_RUN_BINARY='R"*($(rlocationpath :run_binary_stripped))*"'""",
     ],
     visibility = ["//visibility:public"],
@@ -277,8 +277,8 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/8380 why we need to add
-        # additional quoting.
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
         """PHST_RULES_ELISP_RUN_TEST='R"*($(rlocationpath :run_test_stripped))*"'""",
     ],
     visibility = ["//visibility:public"],
