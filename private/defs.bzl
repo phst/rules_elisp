@@ -199,7 +199,8 @@ def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
         ctx = ctx,
         cc_toolchain = cc_toolchain,
         requested_features = defaults.features + ctx.features,
-        # On Windows, Bazel generates incorrectly-escaped parameter files.
+        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
         unsupported_features = ctx.disabled_features + ["compiler_param_file"],
     )
     _, objs = cc_common.compile(
