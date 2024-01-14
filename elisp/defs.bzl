@@ -372,9 +372,8 @@ compile cleanly and that you don’t control.""",
 }
 
 elisp_library = rule(
-    attrs = dict(
-        _COMPILE_ATTRS,
-        srcs = attr.label_list(
+    attrs = _COMPILE_ATTRS | {
+        "srcs": attr.label_list(
             allow_empty = False,
             doc = """List of source files.  These must either be Emacs Lisp
 files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
@@ -386,26 +385,26 @@ files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
             # https://github.com/bazelbuild/bazel/blob/6.4.0/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L73.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
-        outs = attr.output_list(
+        "outs": attr.output_list(
             doc = """List of byte-compiled Emacs Lisp files to be made available
 as targets.""",
         ),
-        data = attr.label_list(
+        "data": attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
         ),
-        load_path = attr.string_list(
+        "load_path": attr.string_list(
             doc = """List of additional load path elements.
 The elements are directory names, which can be either relative or absolute.
 Relative names are relative to the current package.
 Absolute names are relative to the workspace root.
 To add a load path entry for the current package, specify `.` here.""",
         ),
-        deps = attr.label_list(
+        "deps": attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
         ),
-    ),
+    },
     doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
 available to dependencies.  All sources are byte-compiled.
 `elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
@@ -480,41 +479,40 @@ corresponding `proto_library` rule.""",
 )
 
 elisp_binary = rule(
-    attrs = dict(
-        _COMPILE_ATTRS,
-        src = attr.label(
+    attrs = _COMPILE_ATTRS | {
+        "src": attr.label(
             doc = "Source file to load.",
             allow_single_file = [".el"],
             mandatory = True,
         ),
-        _cc_toolchain = attr.label(
+        "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        _binary_libs = attr.label_list(
+        "_binary_libs": attr.label_list(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
-        _launcher_src = attr.label(
+        "_launcher_src": attr.label(
             default = Label("//elisp:binary_main.cc"),
             allow_single_file = [".cc"],
         ),
-        _launcher_defaults = attr.label(
+        "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),
             providers = [CcDefaultInfo],
         ),
-        data = attr.label_list(
+        "data": attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
         ),
-        deps = attr.label_list(
+        "deps": attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
         ),
-        interactive = attr.bool(
+        "interactive": attr.bool(
             doc = "Run Emacs in interactive instead of batch mode.",
         ),
-        input_args = attr.int_list(
+        "input_args": attr.int_list(
             doc = """Indices of command-line arguments that represent input
 filenames.  These numbers specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
@@ -524,7 +522,7 @@ command line, the corresponding arguments are treated as filenames for input
 files and added to the `inputFiles` field of the manifest.  This only has an
 effect for toolchains that specify `wrap = True`.""",
         ),
-        output_args = attr.int_list(
+        "output_args": attr.int_list(
             doc = """Indices of command-line arguments that represent output
 filenames.  These numbers specify indices into the `argv` array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
@@ -534,7 +532,7 @@ command line, the corresponding arguments are treated as filenames for output
 files and added to the `outputFiles` field of the manifest.  This only has an
 effect for toolchains that specify `wrap = True`.""",
         ),
-    ),
+    },
     doc = """Binary rule that loads a single Emacs Lisp file.
 The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
@@ -545,9 +543,8 @@ in batch mode unless `interactive` is `True`.""",
 )
 
 elisp_test = rule(
-    attrs = dict(
-        _COMPILE_ATTRS,
-        srcs = attr.label_list(
+    attrs = _COMPILE_ATTRS | {
+        "srcs": attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",
             allow_files = [".el"],
@@ -557,19 +554,19 @@ elisp_test = rule(
             # https://github.com/bazelbuild/bazel/blob/6.4.0/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L73.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
-        _cc_toolchain = attr.label(
+        "_cc_toolchain": attr.label(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        _test_libs = attr.label_list(
+        "_test_libs": attr.label_list(
             default = [Label("//elisp:test")],
             providers = [CcInfo],
         ),
-        _launcher_src = attr.label(
+        "_launcher_src": attr.label(
             default = Label("//elisp:test_main.cc"),
             allow_single_file = [".cc"],
         ),
-        _launcher_defaults = attr.label(
+        "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),
             providers = [CcDefaultInfo],
         ),
@@ -577,25 +574,25 @@ elisp_test = rule(
         # (https://bazel.build/rules/lib/coverage#output_generator), but we can
         # take over the values from
         # https://github.com/bazelbuild/bazel/blob/7.0.0-pre.20231018.3/src/main/starlark/builtins_bzl/common/python/py_test_bazel.bzl.
-        _lcov_merger = attr.label(
+        "_lcov_merger": attr.label(
             default = configuration_field("coverage", "output_generator"),
             executable = True,
             cfg = "exec",
         ),
-        _collect_cc_coverage = attr.label(
+        "_collect_cc_coverage": attr.label(
             default = Label("@bazel_tools//tools/test:collect_cc_coverage"),
             executable = True,
             cfg = "exec",
         ),
-        data = attr.label_list(
+        "data": attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
         ),
-        deps = attr.label_list(
+        "deps": attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
         ),
-        skip_tests = attr.string_list(
+        "skip_tests": attr.string_list(
             doc = """List of tests to skip.  This attribute contains a list of
 ERT test symbols; when running the test rule, these tests are skipped.
 
@@ -604,14 +601,14 @@ Most of the time, you should use the `skip-unless` macro instead; see
 The `skip_tests` attribute is mainly useful for third-party code that
 you don’t control.""",
         ),
-        skip_tags = attr.string_list(
+        "skip_tags": attr.string_list(
             doc = """List of test tags to skip.  This attribute contains a list
 of tag names; if a test is tagged with one of the tags from this list, it is
 skipped.  This can be useful to e.g. skip tests that are flaky or only work in
 interactive mode.  Use the `:tags` keyword argument to `ert-deftest` to tag
 tests.""",
         ),
-    ),
+    },
     doc = """Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with `ert-deftest`.
 For details, see [How to Write Tests](<info:ert#How to Write Tests>).

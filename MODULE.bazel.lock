@@ -1752,7 +1752,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "QxspmaeTMeC6rsbWhOaaF509j6uN1YustHeoAcly4y4=",
+        "bzlTransitiveDigest": "q4123Edi4KVTx2wwFxDWdQ6l2AZrYanoWjTXvBNDE+M=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

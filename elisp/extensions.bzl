@@ -21,13 +21,12 @@ visibility("public")
 
 _http_archive = tag_class(
     doc = HTTP_ARCHIVE_DOC.format(kind = "tag class"),
-    attrs = dict(
-        HTTP_ARCHIVE_ATTRS,
-        name = attr.string(
+    attrs = HTTP_ARCHIVE_ATTRS | {
+        "name": attr.string(
             doc = """Name of the workspace to generate.""",
             mandatory = True,
         ),
-    ),
+    },
 )
 
 def _elisp_impl(module_ctx):

@@ -115,9 +115,8 @@ def _elisp_http_archive_impl(repository_ctx):
 
 elisp_http_archive = repository_rule(
     doc = HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
-    attrs = dict(
-        HTTP_ARCHIVE_ATTRS,
-        _defs_bzl = attr.label(default = Label("//elisp:defs.bzl")),
-    ),
+    attrs = HTTP_ARCHIVE_ATTRS | {
+        "_defs_bzl": attr.label(default = Label("//elisp:defs.bzl")),
+    },
     implementation = _elisp_http_archive_impl,
 )
