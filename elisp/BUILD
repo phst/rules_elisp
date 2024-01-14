@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "bootstrap", "cc_defaults", "executable_only")
+load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "bootstrap", "cc_defaults", "executable_only")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(
@@ -132,26 +132,6 @@ bzl_library(
         "//private:__pkg__",
     ],
 )
-
-LAUNCHER_FEATURES = FEATURES + select({
-    "//private:msvc-cl": [
-        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
-        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
-        "-compiler_param_file",
-    ],
-    "//private:gcc_or_clang": [],
-})
-
-LAUNCHER_DEFINES = DEFINES
-
-LAUNCHER_COPTS = COPTS + CXXOPTS
-
-LINKOPTS = []
-
-LAUNCHER_LINKOPTS = LINKOPTS + select({
-    "//private:msvc-cl": ["/SUBSYSTEM:CONSOLE"],
-    "//private:gcc_or_clang": [],
-})
 
 cc_library(
     name = "emacs",
