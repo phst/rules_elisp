@@ -12,8 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-exports_files(
-    ["defs.bzl"],
+load("[bzl_library]", "bzl_library")
+
+bzl_library(
+    name = "defs_bzl",
+    srcs = ["defs.bzl"],
     visibility = ["[private_pkg]"],
 )
 

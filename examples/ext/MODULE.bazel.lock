@@ -1305,7 +1305,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "RHL9misGTZdCqsXVq99wkR2amrHJGOAu55bkzZ4nkl8=",
+        "bzlTransitiveDigest": "CeE+BmWATIZqW62aCkxeRxLfycRmk+b2djyGspSXNvE=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1329,7 +1329,7 @@
     },
     "@@phst_rules_elisp~override//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "/Z18utEXI623lkk78e12MyNKCxa2cmnR3Aiq86Fmp/4=",
+        "bzlTransitiveDigest": "Ti5VUXC4mCxtyw9YFRg8s0rmpHM0EVLn71vq7NFLm3Y=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

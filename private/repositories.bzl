@@ -78,6 +78,7 @@ def _non_module_deps_impl(repository_ctx):
         "BUILD.bazel",
         Label("//private:prod.template.BUILD"),
         {
+            '"[bzl_library]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
             '"[private_pkg]"': repr(str(Label("//private:__pkg__"))),
         },
         executable = False,
