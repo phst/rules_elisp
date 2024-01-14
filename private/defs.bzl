@@ -377,8 +377,8 @@ FEATURES = select({
     # pass a flag -fatal-warnings to the linker, but the macOS linker accepts
     # -fatal_warnings instead.
     # TODO: File bug against Bazel.
-    "@platforms//os:macos": [],
-    "//conditions:default": ["treat_warnings_as_errors"],
+    Label("@platforms//os:macos"): [],
+    Label("//conditions:default"): ["treat_warnings_as_errors"],
 })
 
 LAUNCHER_FEATURES = FEATURES + select({
