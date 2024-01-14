@@ -27,7 +27,7 @@ def _non_module_deps_impl(repository_ctx):
         ],
     )
     repository_ctx.template(
-        "emacs-28.1/BUILD",
+        "emacs-28.1/BUILD.bazel",
         Label("//:emacs.BUILD"),
         {
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
@@ -42,7 +42,7 @@ def _non_module_deps_impl(repository_ctx):
         ],
     )
     repository_ctx.template(
-        "emacs-28.2/BUILD",
+        "emacs-28.2/BUILD.bazel",
         Label("//:emacs.BUILD"),
         {
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
@@ -57,7 +57,7 @@ def _non_module_deps_impl(repository_ctx):
         ],
     )
     repository_ctx.template(
-        "emacs-29.1/BUILD",
+        "emacs-29.1/BUILD.bazel",
         Label("//:emacs.BUILD"),
         {
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
