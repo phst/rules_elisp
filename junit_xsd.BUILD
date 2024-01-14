@@ -1,4 +1,4 @@
-# Copyright 2022, 2023 Google LLC
+# Copyright 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,7 @@
 
 exports_files(
     ["JUnit.xsd"],
-    # FIXME: Restrict visibility to @phst_rules_elisp//tests:__pkg__ once we
-    # drop support for Bazel 5.
-    visibility = ["//visibility:public"],
+    visibility = ["[tests_pkg]"],
 )
 
 # Local Variables:
