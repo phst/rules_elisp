@@ -631,8 +631,6 @@ corresponding element in the return value will be nil."
                                                  index nil nil))
        branches))
     (`(,(or 'if-let 'when-let) (,(pred symbolp) ,expr) . ,_)
-     ;; This flavor doesn’t actually work right due to
-     ;; https://debbugs.gnu.org/48489.
      (let ((branches (vector nil nil)))
        (elisp/ert/instrument--branch vector branches (list expr) nil 0 1)
        branches))
