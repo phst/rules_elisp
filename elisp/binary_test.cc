@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/binary.h"
-
-#include <string>
-#include <utility>
 #include <vector>
 
 #ifdef __GNUC__
@@ -55,22 +51,10 @@ TEST(RunBinary, Wrapped) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   ASSERT_TRUE(runfiles.ok()) << runfiles.status();
-  const NativeString argv0 = PHST_RULES_ELISP_NATIVE_LITERAL("unused");
   const absl::StatusOr<NativeString> input_file =
       runfiles->Resolve("phst_rules_elisp/elisp/binary.cc");
   ASSERT_TRUE(input_file.ok()) << input_file.status();
   const std::vector<NativeString> args = {
-      PHST_RULES_ELISP_NATIVE_LITERAL("--wrapper=") PHST_RULES_ELISP_WRAPPER,
-      PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp"),
-      PHST_RULES_ELISP_NATIVE_LITERAL(
-          "--data-file=phst_rules_elisp/elisp/binary.h"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1"),
-      PHST_RULES_ELISP_NATIVE_LITERAL("--"),
-      argv0,
       PHST_RULES_ELISP_NATIVE_LITERAL("--option"),
       *input_file,
       PHST_RULES_ELISP_NATIVE_LITERAL(" \t\n\r\f äα𝐴🐈'\\\""),
@@ -80,7 +64,10 @@ TEST(RunBinary, Wrapped) {
       "/:/tmp/output.dat",
 #endif
   };
-  EXPECT_THAT(RunBinary(argv0, args), Eq(0));
+  absl::StatusOr<int> result =
+      phst_rules_elisp::Run(PHST_RULES_ELISP_BINARY, args, *runfiles, false);
+  ASSERT_TRUE(result.ok()) << result.status();
+  EXPECT_THAT(*result, Eq(0));
 }
 
 }  // namespace

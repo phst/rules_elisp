@@ -67,7 +67,9 @@ class Runfiles final {
 
 absl::StatusOr<int> Run(std::string_view binary,
                         absl::Span<const NativeString> args,
-                        const Runfiles& runfiles);
+                        const Runfiles& runfiles,
+                        // TODO: remove next parameter
+                        bool add_runfiles_env = true);
 
 }  // namespace phst_rules_elisp
 

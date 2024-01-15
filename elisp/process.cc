@@ -407,7 +407,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
 
 absl::StatusOr<int> Run(const std::string_view binary,
                         const absl::Span<const NativeString> args,
-                        const Runfiles& runfiles) {
+                        const Runfiles& runfiles, const bool add_runfiles_env) {
   absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
@@ -424,10 +424,12 @@ absl::StatusOr<int> Run(const std::string_view binary,
   // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher_main.cc.
   // Once we drop support for Bazel 6.0 and below, we should be able to modify
   // argv[0] to make this launcher more transparent.
-  for (const auto& p : *map) {
-    runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
-                            p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
-                            p.second);
+  if (add_runfiles_env) {
+    for (const auto& p : *map) {
+      runfiles_args.push_back(
+          PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") + p.first +
+          PHST_RULES_ELISP_NATIVE_LITERAL('=') + p.second);
+    }
   }
   // Sort entries for hermeticity.
   absl::c_sort(runfiles_args);
