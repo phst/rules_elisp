@@ -19,7 +19,7 @@ These definitions are internal and subject to change without notice."""
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@phst_rules_elisp_deps//:defs.bzl", "CHR", "ORD")
 
-visibility(["//docs", "//elisp", "//elisp/proto", "//emacs"])
+visibility(["//docs", "//elisp", "//elisp/proto", "//emacs", "//tests/wrap"])
 
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags

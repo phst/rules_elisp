@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023 Google LLC
+# Copyright 2020, 2021, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//private:defs.bzl", "executable_only")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -20,6 +21,13 @@ package(
 )
 
 licenses(["notice"])
+
+executable_only(
+    name = "stripped",
+    testonly = True,
+    src = ":wrap",
+    visibility = ["//elisp:__pkg__"],
+)
 
 py_binary(
     name = "wrap",
@@ -32,6 +40,5 @@ py_binary(
     ],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = ["//elisp:__pkg__"],
     deps = ["//elisp:runfiles"],
 )

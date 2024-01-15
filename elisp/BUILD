@@ -225,32 +225,27 @@ cc_test(
     name = "binary_test",
     size = "small",
     srcs = ["binary_test.cc"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        "'$(rlocationpath //tests/wrap)'",
-    ],
     copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",
         "binary.h",
-        "//tests/wrap",
+        "//tests/wrap:stripped",
     ],
     features = LAUNCHER_FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = LAUNCHER_DEFINES,
+    local_defines = LAUNCHER_DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        """PHST_RULES_ELISP_WRAPPER='R"*($(rlocationpath //tests/wrap:stripped))*"'""",
+    ],
     deps = [
         ":binary",
         ":platform",
         ":process",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/log:check",
-        "@com_google_absl//absl/status",
         "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/synchronization",
-        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
 )
 
