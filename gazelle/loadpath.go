@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,9 @@ import (
 // loadDirectory names a directory in the Emacs load path.  See
 // https://www.gnu.org/software/emacs/manual/html_node/emacs/Lisp-Libraries.html.
 // By convention, a load directory is a nonempty clean slash-separated directory
-// name (without leading or trailing slash) relative to the main workspace root.
-// The main workspace root itself is represented using a single dot.  An empty
-// load directory is invalid.
+// name (without leading or trailing slash) relative to the main repository
+// root.  The main repository root itself is represented using a single dot.  An
+// empty load directory is invalid.
 type loadDirectory string
 
 // loadDirFromAttr returns the load directory that corresponds to the given

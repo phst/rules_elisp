@@ -23,7 +23,7 @@ _http_archive = tag_class(
     doc = HTTP_ARCHIVE_DOC.format(kind = "tag class"),
     attrs = HTTP_ARCHIVE_ATTRS | {
         "name": attr.string(
-            doc = """Name of the workspace to generate.""",
+            doc = """Name of the repository to generate.""",
             mandatory = True,
         ),
     },

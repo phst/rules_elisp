@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Tests for Emacs Lisp Bazel rules.  These tests are outside the //elisp
-# package so that they can use external workspaces loaded in our WORKSPACE file
-# only, e.g. the Go rules.
+# Tests for Emacs Lisp Bazel rules.  These tests are outside the //elisp package
+# so that they can use external repositories loaded in our WORKSPACE file only,
+# e.g. the Go rules.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")

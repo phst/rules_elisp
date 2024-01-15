@@ -53,7 +53,7 @@ def _check_python_impl(target, ctx):
     )
     args.add_all(
         info.transitive_sources,
-        map_each = _workspace_name,
+        map_each = _repository_name,
         format_each = "--import=%s",
         uniquify = True,
         expand_directories = False,
@@ -138,36 +138,36 @@ def runfile_location(ctx, file):
     """
 
     # It might seem surprising that we can use “ctx.workspace_name”
-    # unconditionally.  However, for files in external workspaces, “short_path”
-    # will start with “../〈workspace〉/…”, so the logic here is correct.
-    # “check_relative_filename” not only ensures that the filename is relative,
-    # but also canonicalizes it.
+    # unconditionally.  However, for files in external repositories,
+    # “short_path” will start with “../〈repository〉/…”, so the logic here is
+    # correct.  “check_relative_filename” not only ensures that the filename is
+    # relative, but also canonicalizes it.
     return check_relative_filename(
         paths.join(ctx.workspace_name, file.short_path),
     )
 
-def workspace_relative_filename(file):
-    """Return the filename of the given file relative to its workspace root.
+def repository_relative_filename(file):
+    """Return the filename of the given file relative to its repository root.
 
     Within an action, the file doesn’t necessarily exist at that location since
     it could be generated; use `file.path` instead to obtain a location that’s
     guaranteed to exist.  Within the runfiles tree, the file will be placed
-    under the workspace directory for its owning target.  Since files can be
-    present in multiple workspaces, the resulting name isn’t necessarily
+    under the repository directory for its owning target.  Since files can be
+    present in multiple repositories, the resulting name isn’t necessarily
     globally unique.
 
     Args:
       file (File): any file object
 
     Returns:
-      a string representing the filename of the file relative to its workspace
+      a string representing the filename of the file relative to its repository
       root
     """
     name = file.short_path
     if name.startswith("../"):
-        # If the file is from another workspace, its short_path is of the form
-        # “../WORKSPACE/PACKAGE/FILE.el”.  Strip off the leading “../WORKSPACE”
-        # part.
+        # If the file is from another repository, its short_path is of the form
+        # “../REPOSITORY/PACKAGE/FILE.el”.  Strip off the leading
+        # “../REPOSITORY” part.
         name = name[3:]
         ws, sep, name = name.partition("/")
         if not ws or not sep:
@@ -603,7 +603,7 @@ merged_manual = rule(
     implementation = _merged_manual_impl,
 )
 
-def _workspace_name(file):
+def _repository_name(file):
     # Skip empty string for main repository.
     return file.owner.workspace_name or None
 

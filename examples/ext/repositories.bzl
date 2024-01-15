@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Contains workspace functions for the example repository."""
+"""Contains repository functions for the example repository."""
 
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
 load("@phst_rules_elisp//elisp:repositories.bzl", "elisp_http_archive")

@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ def main() -> None:
     module_space = pathlib.Path(dirs[0]).parent
     module_space_stat = module_space.stat()
     # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
-    # main and external workspaces.
+    # main and external repositories.
     params = json.loads(args.params.read_text(encoding='utf-8'))
     srcs = []
     tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
@@ -63,7 +63,7 @@ def main() -> None:
             # https://github.com/bazelbuild/bazel/issues/10076.
             (dirpath / '__init__.py').touch()
     srcs = frozenset(srcs)
-    workspace_path = [str(tempdir / d) for d in args.path]
+    repository_path = [str(tempdir / d) for d in args.path]
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
     bindir = tempdir / 'bin'
@@ -85,7 +85,7 @@ def main() -> None:
     cwd = tempdir / workspace_name
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
-               PYTHONPATH=os.pathsep.join(orig_path + workspace_path))
+               PYTHONPATH=os.pathsep.join(orig_path + repository_path))
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
          # We’d like to add “--” after the options, but that’s not possible due
@@ -101,7 +101,7 @@ def main() -> None:
     if os.name == 'posix' and args.pytype:
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
-             '--pythonpath=' + os.pathsep.join(workspace_path),
+             '--pythonpath=' + os.pathsep.join(repository_path),
              '--no-cache', '--'] + [str(file.relative_to(cwd))
                                     for file in sorted(srcs)],
             check=False, cwd=cwd, env=env,

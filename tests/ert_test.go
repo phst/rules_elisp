@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,7 +43,7 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Use the ancestor of the source file as workspace directory so that
+	// Use the ancestor of the source file as repository directory so that
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)

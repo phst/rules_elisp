@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -76,29 +76,29 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory
           (file-name-as-directory (concat "/:" temp-dir)))
-         ;; We could get the workspace name from the TEST_WORKSPACE environment
+         ;; We could get the repository name from the TEST_WORKSPACE environment
          ;; variable, but that one’s optional
          ;; (cf. https://bazel.build/reference/test-encyclopedia#initial-conditions).
-         (workspace-name (file-name-nondirectory
-                          (directory-file-name default-directory)))
+         (repository-name (file-name-nondirectory
+                           (directory-file-name default-directory)))
          (runfiles-handler-installed
           (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
          ;; If the runfiles filename handler is installed, use that.  It’s more
          ;; correct and should also work on Windows.
          (resource-root (file-name-as-directory
                          (if runfiles-handler-installed
-                             (concat "/bazel-runfile:" workspace-name)
+                             (concat "/bazel-runfile:" repository-name)
                            default-directory)))
          ;; Best-effort support for ‘ert-resource-directory’ and
          ;; ‘ert-resource-file’.  The directory returned by
          ;; ‘ert-resource-directory’ will typically be in the execution root and
          ;; no longer be valid when the test runs.  Therefore, strip out
-         ;; everything up to the workspace directory in the execution root
+         ;; everything up to the repository directory in the execution root
          ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
          ;; and replace it with the default directory.  Robust tests should use
          ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
          (ert-resource-directory-trim-left-regexp
-          (rx-to-string `(seq (* nonl) ?/ ,workspace-name ?/) :no-group))
+          (rx-to-string `(seq (* nonl) ?/ ,repository-name ?/) :no-group))
          (ert-resource-directory-format
           (concat (replace-regexp-in-string (rx ?%) "%%" resource-root
                                             :fixedcase :literal)
@@ -993,16 +993,16 @@ be determined, return nil."
       ;; Try to resolve it to a source file.  See
       ;; https://bazel.build/remote/output-directories#layout-diagram.
       (when (string-match (rx "/execroot/"
-                              (+ (not (any ?/))) ?/ ; workspace
+                              (+ (not (any ?/))) ?/ ; repository
                               (+ (not (any ?/))) ?/ ; bazel-out
                               (+ (not (any ?/))) ?/ ; configuration
                               "bin/"
                               (group (+ nonl)) ".elc" eos)
                           file)
         ;; We can use the filename relative to the Bazel binary directory since
-        ;; that corresponds to a source filename relative to some workspace
+        ;; that corresponds to a source filename relative to some repository
         ;; root.  ‘find-library-name’ will find the corresponding source file
-        ;; because all workspace roots are in the ‘load-path’.
+        ;; because all repository roots are in the ‘load-path’.
         (cl-callf2 match-string-no-properties 1 file))
       ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
       ;; we’re only attempting to print a log message here, ignore them and move
@@ -1044,10 +1044,10 @@ DIRECTORY is the directory that could contain FILENAME."
   ;; educated guess about the location relative to the test working directory.
   (and (string-prefix-p "/bazel-runfile:" filename)
        (not (string-prefix-p "/bazel-runfile:" directory))
-       (let ((workspace (file-name-nondirectory
-                         (directory-file-name directory))))
-         (setq directory (concat "/bazel-runfile:" workspace
-                                 (unless (string-empty-p workspace) "/")))))
+       (let ((repository (file-name-nondirectory
+                          (directory-file-name directory))))
+         (setq directory (concat "/bazel-runfile:" repository
+                                 (unless (string-empty-p repository) "/")))))
   ;; Work around https://debbugs.gnu.org/46219.
   (unless (file-remote-p filename)
     (setq filename (file-name-quote (expand-file-name filename))))

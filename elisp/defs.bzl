@@ -23,9 +23,9 @@ load(
     "cc_launcher",
     "check_relative_filename",
     "cpp_strings",
+    "repository_relative_filename",
     "run_emacs",
     "runfile_location",
-    "workspace_relative_filename",
 )
 
 visibility("public")
@@ -165,7 +165,7 @@ def _elisp_proto_aspect_impl(target, ctx):
 
 def _elisp_proto_feature(file):
     """Returns the Emacs feature name for a protocol buffer library."""
-    stem, ext = paths.split_extension(workspace_relative_filename(file))
+    stem, ext = paths.split_extension(repository_relative_filename(file))
     if ext != ".el":
         fail("invalid extension {}".format(ext))
 
@@ -397,7 +397,7 @@ as targets.""",
             doc = """List of additional load path elements.
 The elements are directory names, which can be either relative or absolute.
 Relative names are relative to the current package.
-Absolute names are relative to the workspace root.
+Absolute names are relative to the repository root.
 To add a load path entry for the current package, specify `.` here.""",
         ),
         "deps": attr.label_list(
@@ -411,7 +411,7 @@ available to dependencies.  All sources are byte-compiled.
 can then use `load` or `require` to load them.
 
 By default, libraries need to be loaded using a filename relative to the
-workspace root, i.e., <var>package</var>/<var>file</var>.  If you want to add
+repository root, i.e., <var>package</var>/<var>file</var>.  If you want to add
 further elements to the load path, use the `load_path` attribute.
 
 If there are multiple source files specified in `srcs`, these source files can
@@ -726,7 +726,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         if mod.root != ctx.bin_dir or relocate_output:
             fail("module object {} in unsupported location".format(mod.path))
 
-    # Directory relative to the workspace root where outputs should be stored.
+    # Directory relative to the repository root where outputs should be stored.
     # We prefer storing them adjacent to source files to reduce the number of
     # load path entries, but if necessary, we generate a subdirectory in the
     # current package.
@@ -754,7 +754,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         # At least some of the sources must be reachable from the directory.
         # FIXME: Ugly special-casing necessary for built-in protocol buffer
         # libraries since they unexpectedly generate source files in external
-        # workspaces.
+        # repositories.
         prefix = "./" if dir == "." else "./" + dir + "/"
         if dir != "src/google/protobuf" and not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
             fail("None of the files [{}] are reachable from load path directory {}"
@@ -762,28 +762,30 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
 
         # If we’re compiling source files from another package, we need to
         # insert the output base directory for this rule.  In that case, we
-        # still have to append the workspace-relative directory, so that
-        # filenames relative to the (relocated) workspace root work.
+        # still have to append the repository-relative directory, so that
+        # filenames relative to the (relocated) repository root work.
         dir = check_relative_filename(paths.join(output_base, dir))
         resolved = struct(
             # Actions should load byte-compiled files.  Since we place them into
             # the bin directory, we need to start from there, append the
-            # workspace root (see
+            # repository root (see
             # https://bazel.build/rules/lib/Label#workspace_root), and then the
-            # directory name relative to the workspace root.  The workspace root
-            # will only be nonempty if the current rule lives in a different
-            # workspace than the one that Bazel is run from.  This approach also
-            # works for dynamic modules placed in the bin directory.
+            # directory name relative to the repository root.  The repository
+            # root will only be nonempty if the current rule lives in a
+            # different repository than the one that Bazel is run from.  This
+            # approach also works for dynamic modules placed in the bin
+            # directory.
             for_actions = check_relative_filename(
                 paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
             ),
             # The runfiles tree looks different, see
             # https://bazel.build/remote/output-directories#layout-diagram.  The
             # top-level directories in the runfiles root are always the
-            # workspace names, and the load directories are relative to those.
-            # The workspace name is the workspace part of the lexical label, see
-            # https://bazel.build/rules/lib/Label#workspace_name.  Therefore, it
-            # can be empty, in which case we need to use the current workspace.
+            # repository names, and the load directories are relative to those.
+            # The repository name is the repository part of the lexical label,
+            # see https://bazel.build/rules/lib/Label#workspace_name.
+            # Therefore, it can be empty, in which case we need to use the
+            # current repository.
             for_runfiles = check_relative_filename(
                 paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
             ),

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Internal-only workspace functions.
+"""Internal-only repository functions.
 
 These definitions are internal and subject to change without notice."""
 

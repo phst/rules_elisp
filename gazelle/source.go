@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ import (
 )
 
 // sourceFile names an Emacs Lisp source file.  By convention, it’s a
-// slash-separated clean filename relative to the main workspace root.  The
+// slash-separated clean filename relative to the main repository root.  The
 // extension should always be “.el”.
 type sourceFile string
 
@@ -30,7 +30,7 @@ const sourceExt = ".el"
 
 // srcFile returns the source file for the given label.  The label must be
 // absolute.  srcFile returns an empty string if the label isn’t in the main
-// workspace or doesn’t refer to an Emacs Lisp source file.
+// repository or doesn’t refer to an Emacs Lisp source file.
 func srcFile(lbl label.Label) sourceFile {
 	if lbl.Repo != "" {
 		// Currently we don’t support sources from other repositories.

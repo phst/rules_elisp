@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# examples/ext contains another Bazel workspace, it should be ignored when
-# building the main workspace.
+# examples/ext contains another Bazel repository, it should be ignored when
+# building the main repository.
 examples/ext
