@@ -98,7 +98,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          ;; and replace it with the default directory.  Robust tests should use
          ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
          (ert-resource-directory-trim-left-regexp
-          (rx-to-string `(seq (* nonl) ?/ ,repository-name ?/) :no-group))
+          (rx (* nonl) ?/ (literal repository-name) ?/))
          (ert-resource-directory-format
           (concat (replace-regexp-in-string (rx ?%) "%%" resource-root
                                             :fixedcase :literal)
@@ -1015,8 +1015,8 @@ be determined, return nil."
             (insert-file-contents file))
           (emacs-lisp-mode)
           (when (re-search-forward
-                 (rx-to-string `(seq bol (* space) "(ert-deftest" (+ space)
-                                     ,(symbol-name test) (or space eol)))
+                 (rx bol (* space) "(ert-deftest" (+ space)
+                     (literal (symbol-name test)) (or space eol))
                  nil t)
             ;; Try to print nice and short filenames.  We do this by using the
             ;; filename relative to the test working directory
