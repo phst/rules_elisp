@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -67,14 +67,10 @@ treat warnings as errors."
             ;; directory.
             (byte-compile-root-dir default-directory)
             (warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
-            ;; Write output to a temporary file (https://debbugs.gnu.org/44631).
-            (temp (make-temp-file "compile-" nil ".elc"))
-            (byte-compile-dest-file-function (lambda (_) temp))
+            (byte-compile-dest-file-function (lambda (_) out))
             (byte-compile-error-on-warn elisp/fatal--warnings)
             (elisp/current-repository current-repo)
             (success (byte-compile-file src)))
-       (when success (copy-file temp out :overwrite))
-       (delete-file temp)
        (kill-emacs (if success 0 1))))
     (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT"))))
 
