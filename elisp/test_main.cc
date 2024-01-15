@@ -24,7 +24,3 @@ int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
   args.insert(args.end(), argv, argv + argc);
   return phst_rules_elisp::RunTest(args);
 }
-
-// Local Variables:
-// mode: c++
-// End:
