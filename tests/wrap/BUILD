@@ -23,7 +23,7 @@ licenses(["notice"])
 
 py_binary(
     name = "wrap",
-    testonly = 1,
+    testonly = True,
     srcs = ["wrap.py"],
     data = [
         "//elisp:binary.cc",

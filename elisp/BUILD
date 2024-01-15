@@ -289,7 +289,7 @@ build_test(
 
 cc_library(
     name = "test",
-    testonly = 1,
+    testonly = True,
     srcs = ["test.cc"],
     hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
@@ -317,7 +317,7 @@ cc_library(
 
 py_binary(
     name = "run_test",
-    testonly = 1,
+    testonly = True,
     srcs = ["run_test.py"],
     data = ["//elisp/ert:runner.elc"],
     python_version = "PY3",

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023 Google LLC
+# Copyright 2020, 2021, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ licenses(["notice"])
 
 elisp_library(
     name = "runner",
-    testonly = 1,
+    testonly = True,
     srcs = ["runner.el"],
     outs = ["runner.elc"],
     visibility = ["//visibility:public"],
