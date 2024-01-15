@@ -122,7 +122,7 @@ py_test(
     timeout = "short",
     srcs = ["bin_test.py"],
     args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         "--bin='$(rlocationpath :bin)'",
     ],

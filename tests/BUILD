@@ -37,7 +37,7 @@ go_test(
     timeout = "short",
     srcs = ["ert_test.go"],
     args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         "--binary='$(rlocationpath :test_test)'",
     ],
@@ -117,7 +117,7 @@ py_test(
     timeout = "short",
     srcs = ["empty_test.py"],
     args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         "--binary='$(rlocationpath :empty)'",
     ],

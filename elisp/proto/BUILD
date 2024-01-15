@@ -142,7 +142,7 @@ cc_binary(
     linkopts = select({
         # Export only symbols that make up the module interface.
         "@platforms//os:linux": [
-            # See https://github.com/bazelbuild/bazel/issues/10859 why we need
+            # See https://github.com/bazelbuild/bazel/issues/12313 why we need
             # to add additional quoting.
             "-Wl,--version-script='$(execpath :module.lds)'",
             "-Wl,--no-undefined",

@@ -37,7 +37,7 @@ py_test(
     timeout = "short",
     srcs = ["emacs_test.py"],
     args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         "--emacs='$(rlocationpath :emacs)'",
     ],
