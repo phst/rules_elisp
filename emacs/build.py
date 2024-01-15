@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,7 +80,9 @@ def main() -> None:
     run('./configure', '--prefix=' + install.as_posix(),
         '--without-all', '--without-ns', '--without-x', '--with-x-toolkit=no',
         '--without-libgmp',
-        '--with-modules',
+        # Enable toolkit scrollbars to work around
+        # https://debbugs.gnu.org/37042.
+        '--with-modules', '--with-toolkit-scroll-bars',
         '--disable-build-details',
         'CC=' + args.cc.resolve().as_posix(),
         'CFLAGS=' + args.cflags,
