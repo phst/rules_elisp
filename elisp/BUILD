@@ -231,29 +231,25 @@ cc_library(
     ],
 )
 
-cc_test(
+py_test(
     name = "binary_test",
     size = "small",
-    srcs = ["binary_test.cc"],
-    copts = COPTS + CXXOPTS,
+    srcs = ["binary_test.py"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "--binary='$(rlocationpath :binary_main)'",
+    ],
     data = [
         "binary.cc",
         ":binary_main",
     ],
-    features = LAUNCHER_FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        """PHST_RULES_ELISP_BINARY='R"*($(rlocationpath :binary_main))*"'""",
-    ],
+    python_version = "PY3",
+    srcs_version = "PY3",
     deps = [
-        ":platform",
-        ":process",
-        "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_googletest//:gtest_main",
+        ":runfiles",
+        "@io_abseil_py//absl/flags",
+        "@io_abseil_py//absl/testing:absltest",
     ],
 )
 
