@@ -36,7 +36,11 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = ["ert_test.go"],
-    args = ["--binary=$(rlocationpath :test_test)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "--binary='$(rlocationpath :test_test)'",
+    ],
     data = [":test_test"],
     embedsrcs = [
         "JUnit.xsd",
@@ -112,7 +116,11 @@ py_test(
     size = "medium",
     timeout = "short",
     srcs = ["empty_test.py"],
-    args = ["--binary=$(rlocationpath :empty)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "--binary='$(rlocationpath :empty)'",
+    ],
     data = [":empty"],
     python_version = "PY3",
     srcs_version = "PY3",

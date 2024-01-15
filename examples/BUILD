@@ -121,7 +121,11 @@ py_test(
     size = "medium",
     timeout = "short",
     srcs = ["bin_test.py"],
-    args = ["--bin=$(rlocationpath :bin)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "--bin='$(rlocationpath :bin)'",
+    ],
     data = ["bin"],
     python_version = "PY3",
     srcs_version = "PY3",

@@ -225,7 +225,11 @@ cc_test(
     name = "binary_test",
     size = "small",
     srcs = ["binary_test.cc"],
-    args = ["$(rlocationpath //tests/wrap)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "'$(rlocationpath //tests/wrap)'",
+    ],
     copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",

@@ -36,7 +36,11 @@ py_test(
     size = "medium",
     timeout = "short",
     srcs = ["emacs_test.py"],
-    args = ["--emacs=$(rlocationpath :emacs)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        "--emacs='$(rlocationpath :emacs)'",
+    ],
     data = [":emacs"],
     python_version = "PY3",
     srcs_version = "PY3",
