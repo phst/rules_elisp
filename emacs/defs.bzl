@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ load(
     "//private:defs.bzl",
     "CcDefaultInfo",
     "cc_launcher",
-    "cpp_strings",
+    "cpp_string",
     "runfile_location",
 )
 
@@ -46,9 +46,9 @@ def _emacs_binary_impl(ctx):
         ctx.file._launcher_src,
         ctx.attr._emacs_libs,
         defines = [
-            "PHST_RULES_ELISP_ARGS=" + cpp_strings([
+            "PHST_RULES_ELISP_ARGS=" + cpp_string(
                 "--install=" + runfile_location(ctx, install),
-            ]),
+            ),
         ],
     )
     return [DefaultInfo(
