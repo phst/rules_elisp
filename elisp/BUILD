@@ -178,13 +178,23 @@ cc_binary(
     testonly = True,
     srcs = ["binary_main.cc"],
     copts = LAUNCHER_COPTS,
+    data = ["//tests/wrap:stripped"],
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_ARGS='PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'""",
+        "PHST_RULES_ELISP_ARGS='" + ", ".join([
+            'PHST_RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath //tests/wrap:stripped))*")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
+        ]) + "'",
     ],
     deps = [":binary"],
 )
@@ -228,8 +238,7 @@ cc_test(
     copts = COPTS + CXXOPTS,
     data = [
         "binary.cc",
-        "binary.h",
-        "//tests/wrap:stripped",
+        ":binary_main",
     ],
     features = LAUNCHER_FEATURES,
     linkopts = LINKOPTS,
@@ -237,10 +246,9 @@ cc_test(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_WRAPPER='R"*($(rlocationpath //tests/wrap:stripped))*"'""",
+        """PHST_RULES_ELISP_BINARY='R"*($(rlocationpath :binary_main))*"'""",
     ],
     deps = [
-        ":binary",
         ":platform",
         ":process",
         "@bazel_tools//tools/cpp/runfiles",
