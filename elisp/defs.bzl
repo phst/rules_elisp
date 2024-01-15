@@ -873,7 +873,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         if fatal_warnings:
             args.add("--fatal-warnings")
         args.add("--funcall=elisp/compile-batch-and-exit")
-        args.add(ctx.label.workspace_name)
+        args.add(src.owner.workspace_name)
         args.add(src)
         args.add(out)
         run_emacs(

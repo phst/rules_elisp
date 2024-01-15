@@ -489,7 +489,7 @@ def _bootstrap_impl(ctx):
     args.add(compile, format = "--load=%s")
     args.add("--fatal-warnings")
     args.add("--funcall=elisp/compile-batch-and-exit")
-    args.add(ctx.label.workspace_name)
+    args.add(src.owner.workspace_name)
     args.add(src)
     args.add(out)
     run_emacs(
