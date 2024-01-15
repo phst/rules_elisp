@@ -95,6 +95,7 @@ py_binary(
 
 cc_binary(
     name = "launcher",
+    testonly = True,
     srcs = ["launcher.cc"],
     copts = LAUNCHER_COPTS,
     features = LAUNCHER_FEATURES,

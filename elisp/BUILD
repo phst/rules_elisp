@@ -175,6 +175,7 @@ executable_only(
 
 cc_binary(
     name = "binary_main",
+    testonly = True,
     srcs = ["binary_main.cc"],
     copts = LAUNCHER_COPTS,
     features = LAUNCHER_FEATURES,
