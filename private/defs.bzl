@@ -464,9 +464,10 @@ CcDefaultInfo = provider(
 )
 
 def _cc_defaults_impl(ctx):
+    features, disabled_features = _parse_features(ctx.attr.features)
     return CcDefaultInfo(
-        features = [f for f in ctx.attr.features if not f.startswith("-")],
-        disabled_features = [f.removeprefix("-") for f in ctx.attr.features if f.startswith("-")],
+        features = features,
+        disabled_features = disabled_features,
         defines = ctx.attr.defines,
         copts = ctx.attr.copts,
         linkopts = ctx.attr.linkopts,
@@ -720,3 +721,9 @@ def _hex(num, *, pad):
     if len(ret) < pad:
         ret = (pad - len(ret)) * "0" + ret
     return ret
+
+def _parse_features(features):
+    return (
+        [f for f in features if not f.startswith("-")],
+        [f.removeprefix("-") for f in features if f.startswith("-")],
+    )
