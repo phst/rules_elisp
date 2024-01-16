@@ -484,6 +484,53 @@ cc_defaults = rule(
     provides = [CcDefaultInfo],
 )
 
+ModuleConfigInfo = provider(
+    doc = "Internal provider for system-specific Emacs module configuration",
+    fields = {
+        "suffix": "Filename suffix for Emacs modules",
+        "additional_linker_inputs": "Additional inputs for the linker to build Emacs modules",
+    },
+)
+
+def _module_config_impl(ctx):
+    """Implementation of the `module_config` rule."""
+    features, disabled_features = _parse_features(ctx.attr.features)
+    return [
+        CcDefaultInfo(
+            features = features,
+            disabled_features = disabled_features,
+            defines = [],
+            copts = [],
+            linkopts = [ctx.expand_location(s) for s in ctx.attr.linkopts],
+        ),
+        ModuleConfigInfo(
+            suffix = ctx.attr.suffix,
+            additional_linker_inputs = ctx.files.srcs,
+        ),
+    ]
+
+module_config = rule(
+    doc = "Internal rule to configure Emacs modules",
+    attrs = {
+        "suffix": attr.string(
+            doc = "Filename suffix for Emacs modules",
+            mandatory = True,
+            values = [".so", ".dll", ".dylib"],
+        ),
+        "linkopts": attr.string_list(mandatory = True),
+        # This ought to be called “additional_linker_inputs”, but
+        # ctx.expand_location scans only a hard-coded list of attributes for
+        # valid files, among them “srcs”.
+        "srcs": attr.label_list(
+            doc = "Additional linker inputs for linking Emacs modules",
+            mandatory = True,
+            allow_files = [".lds", ".def"],
+        ),
+    },
+    provides = [CcDefaultInfo, ModuleConfigInfo],
+    implementation = _module_config_impl,
+)
+
 def _bootstrap_impl(ctx):
     src = ctx.file.src
     out = ctx.outputs.out

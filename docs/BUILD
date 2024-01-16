@@ -71,6 +71,7 @@ stardoc(
     format = "proto",
     input = "//elisp:defs.bzl",
     deps = [
+        "//elisp:features_bzl",
         "//private:defs_bzl",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",

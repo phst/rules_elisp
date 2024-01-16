@@ -16,7 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "bootstrap", "cc_defaults", "executable_only")
+load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "bootstrap", "cc_defaults", "executable_only", "module_config")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(
@@ -113,6 +113,7 @@ bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
     deps = [
+        ":features_bzl",
         "//private:defs_bzl",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
@@ -143,6 +144,12 @@ bzl_library(
         "//emacs:__pkg__",
         "//private:__pkg__",
     ],
+)
+
+bzl_library(
+    name = "features_bzl",
+    srcs = ["@bazel_features//:bzl_files"],
+    visibility = ["//docs:__pkg__"],
 )
 
 cc_library(
@@ -480,6 +487,38 @@ cc_defaults(
     defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
+    visibility = ["//visibility:public"],
+)
+
+module_config(
+    name = "module_config",
+    srcs = select({
+        "@platforms//os:linux": [":module.lds"],
+        "@platforms//os:windows": [":module.def"],
+        "@platforms//os:macos": [],
+    }),
+    linkopts = select({
+        # Export only symbols that make up the module interface.
+        "@platforms//os:linux": [
+            # See https://github.com/bazelbuild/bazel/issues/12313 why we need
+            # to add additional quoting.
+            shell.quote("-Wl,--version-script=$(execpath :module.lds)"),
+            "-Wl,--no-undefined",
+        ],
+        "@platforms//os:windows": [
+            "/DEF:$(execpath :module.def)",
+        ],
+        "@platforms//os:macos": [
+            "-Wl,-exported_symbol,_emacs_module_init",
+            "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
+            "-Wl,-undefined,error",
+        ],
+    }),
+    suffix = select({
+        "@platforms//os:linux": ".so",
+        "@platforms//os:windows": ".dll",
+        "@platforms//os:macos": ".dylib",
+    }),
     visibility = ["//visibility:public"],
 )
 

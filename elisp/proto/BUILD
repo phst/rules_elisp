@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
 
 package(
@@ -123,43 +121,15 @@ elisp_proto_library(
     deps = ["@com_google_protobuf//:wrappers_proto"],
 )
 
-elisp_library(
+elisp_cc_module(
     name = "module",
-    srcs = select({
-        "@platforms//os:linux": ["module.so"],
-        "@platforms//os:macos": ["module.so"],
-        "@platforms//os:windows": ["module.dll"],
-    }),
-)
-
-cc_binary(
-    name = "module.so",
     srcs = ["module.c"],
-    additional_linker_inputs = [":module.lds"],
     copts = COPTS + CONLYOPTS + select({
         "//private:msvc-cl": ["/wd4100"],
         "//private:gcc_or_clang": ["-fvisibility=hidden"],
     }),
     features = FEATURES + ["-default_link_libs"],
-    linkopts = select({
-        # Export only symbols that make up the module interface.
-        "@platforms//os:linux": [
-            # See https://github.com/bazelbuild/bazel/issues/12313 why we need
-            # to add additional quoting.
-            shell.quote("-Wl,--version-script=$(execpath :module.lds)"),
-            "-Wl,--no-undefined",
-        ],
-        "@platforms//os:windows": [],  # uses ‘win_def_file’
-        "@platforms//os:macos": [
-            "-Wl,-exported_symbol,_emacs_module_init",
-            "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
-            "-Wl,-undefined,error",
-        ],
-    }),
-    linkshared = True,
-    linkstatic = True,
     local_defines = DEFINES,
-    win_def_file = "module.def",
     deps = [
         ":any_upb_proto",
         ":any_upbdefs_proto",
@@ -181,15 +151,6 @@ cc_binary(
         "@upb//:wire",
         "@upb//upb/util:required_fields",
     ],
-)
-
-# Make a copy with the proper suffix for Windows.
-copy_file(
-    name = "module_dll",
-    src = "module.so",
-    out = "module.dll",
-    allow_symlink = True,
-    is_executable = False,
 )
 
 elisp_binary(

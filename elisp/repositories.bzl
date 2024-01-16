@@ -36,6 +36,13 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
+        name = "bazel_features",
+        sha256 = "53182a68f172a2af4ad37051f82201e222bc19f7a40825b877da3ff4c922b9e0",
+        strip_prefix = "bazel_features-1.3.0",
+        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.3.0/bazel_features-v1.3.0.tar.gz",
+    )
+    maybe(
+        http_archive,
         name = "bazel_skylib",
         sha256 = "cd55a062e763b9349921f0f5db8c3933288dc8ba4f76dd9416aac68acee3cb94",
         urls = [
