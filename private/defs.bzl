@@ -723,6 +723,14 @@ def _hex(num, *, pad):
     return ret
 
 def _parse_features(features):
+    """Parse a list of feature strings.
+
+    Args:
+      features (list of str): feature strings from some `features` attribute
+
+    Returns:
+      a pair (features, disabled_features) of lists of strings
+    """
     return (
         [f for f in features if not f.startswith("-")],
         [f.removeprefix("-") for f in features if f.startswith("-")],
