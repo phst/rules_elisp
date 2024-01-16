@@ -769,32 +769,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         # still have to append the repository-relative directory, so that
         # filenames relative to the (relocated) repository root work.
         dir = check_relative_filename(paths.join(output_base, dir))
-        resolved = struct(
-            # Actions should load byte-compiled files.  Since we place them into
-            # the bin directory, we need to start from there, append the
-            # repository root (see
-            # https://bazel.build/rules/lib/Label#workspace_root), and then the
-            # directory name relative to the repository root.  The repository
-            # root will only be nonempty if the current rule lives in a
-            # different repository than the one that Bazel is run from.  This
-            # approach also works for dynamic modules placed in the bin
-            # directory.
-            for_actions = check_relative_filename(
-                paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
-            ),
-            # The runfiles tree looks different, see
-            # https://bazel.build/remote/output-directories#layout-diagram.  The
-            # top-level directories in the runfiles root are always the
-            # repository names, and the load directories are relative to those.
-            # The repository name is the repository part of the lexical label,
-            # see https://bazel.build/rules/lib/Label#workspace_name.
-            # Therefore, it can be empty, in which case we need to use the
-            # current repository.
-            for_runfiles = check_relative_filename(
-                paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
-            ),
-        )
-        resolved_load_path.append(resolved)
+        resolved_load_path.append(_resolve_load_path(ctx, dir))
 
     indirect_srcs = [
         dep[EmacsLispInfo].transitive_source_files
@@ -1037,6 +1012,40 @@ def _load_directory_for_actions(directory):
     # This trivial function exists because we have to pass a function to
     # map_each above.
     return check_relative_filename(directory.for_actions)
+
+def _resolve_load_path(ctx, dir):
+    """Return an entry for the load path suitable for `EmacsLispInfo`.
+
+    Args:
+      ctx (ctx): action context
+      dir (string): directory relative to the workspace root
+
+    Returns:
+      a load directory structure as described in the `EmacsLispInfo`
+      documentation
+    """
+    return struct(
+        # Actions should load byte-compiled files.  Since we place them into the
+        # bin directory, we need to start from there, append the repository root
+        # (see https://bazel.build/rules/lib/Label#workspace_root), and then the
+        # directory name relative to the repository root.  The repository root
+        # will only be nonempty if the current rule lives in a different
+        # repository than the one that Bazel is run from.  This approach also
+        # works for dynamic modules placed in the bin directory.
+        for_actions = check_relative_filename(
+            paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
+        ),
+        # The runfiles tree looks different, see
+        # https://bazel.build/remote/output-directories#layout-diagram.  The
+        # top-level directories in the runfiles root are always the repository
+        # names, and the load directories are relative to those.  The repository
+        # name is the repository part of the lexical label, see
+        # https://bazel.build/rules/lib/Label#workspace_name.  Therefore, it can
+        # be empty, in which case we need to use the current repository.
+        for_runfiles = check_relative_filename(
+            paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
+        ),
+    )
 
 # Directory relative to the current package where to store compiled files.  This
 # is equivalent to _objs for C++ rules.  See
