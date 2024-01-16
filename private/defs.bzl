@@ -76,7 +76,9 @@ def _check_python_impl(target, ctx):
         input_manifests = input_manifests,
         toolchain = None,
     )
-    return [OutputGroupInfo(check_python = depset([output_file]))]
+    return [
+        OutputGroupInfo(check_python = depset([output_file])),
+    ]
 
 check_python = aspect(
     implementation = _check_python_impl,

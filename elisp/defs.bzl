@@ -65,12 +65,14 @@ described in the provider documentation.""",
 
 def _elisp_toolchain_impl(ctx):
     """Rule implementation for the “elisp_toolchain” toolchain rule."""
-    return [platform_common.ToolchainInfo(
-        emacs = ctx.attr.emacs,
-        use_default_shell_env = ctx.attr.use_default_shell_env,
-        execution_requirements = ctx.attr.execution_requirements,
-        wrap = ctx.attr.wrap,
-    )]
+    return [
+        platform_common.ToolchainInfo(
+            emacs = ctx.attr.emacs,
+            use_default_shell_env = ctx.attr.use_default_shell_env,
+            execution_requirements = ctx.attr.execution_requirements,
+            wrap = ctx.attr.wrap,
+        ),
+    ]
 
 def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
@@ -211,10 +213,12 @@ def _elisp_binary_impl(ctx):
         args = args,
         libs = ctx.attr._binary_libs,
     )
-    return [DefaultInfo(
-        executable = executable,
-        runfiles = runfiles,
-    )]
+    return [
+        DefaultInfo(
+            executable = executable,
+            runfiles = runfiles,
+        ),
+    ]
 
 def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""

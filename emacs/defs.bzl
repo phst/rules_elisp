@@ -51,11 +51,13 @@ def _emacs_binary_impl(ctx):
             ),
         ],
     )
-    return [DefaultInfo(
-        executable = executable,
-        files = depset(direct = [executable]),
-        runfiles = ctx.runfiles(files = [install]).merge(runfiles),
-    )]
+    return [
+        DefaultInfo(
+            executable = executable,
+            files = depset(direct = [executable]),
+            runfiles = ctx.runfiles(files = [install]).merge(runfiles),
+        ),
+    ]
 
 emacs_binary = rule(
     attrs = {
