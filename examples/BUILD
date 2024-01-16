@@ -13,9 +13,8 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_python//python:defs.bzl", "py_test")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -50,11 +49,8 @@ elisp_library(
     srcs = [
         "lib-2-a.el",
         "lib-2-b.el",
-    ] + select({
-        "@platforms//os:linux": ["module.so"],
-        "@platforms//os:macos": ["module.so"],
-        "@platforms//os:windows": ["module.dll"],
-    }),
+        ":module",
+    ],
     fatal_warnings = False,
     load_path = ["."],
 )
@@ -86,23 +82,10 @@ elisp_binary(
     deps = [":lib_1"],
 )
 
-cc_binary(
-    name = "module.so",
+elisp_cc_module(
+    name = "module",
     srcs = ["module.c"],
     features = ["-default_link_libs"],
-    linkshared = True,
-    linkstatic = True,
-    win_def_file = "module.def",
-    deps = ["//emacs:module_header"],
-)
-
-# Make a copy with the proper suffix for Windows.
-copy_file(
-    name = "module_dll",
-    src = "module.so",
-    out = "module.dll",
-    allow_symlink = True,
-    is_executable = False,
 )
 
 elisp_manual(

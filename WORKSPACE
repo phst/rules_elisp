@@ -34,6 +34,10 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 # https://github.com/bazelbuild/bazel/issues/8305.
 versions.check("6.0.0")
 
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
+
 load("@rules_python//python:repositories.bzl", "py_repositories", "python_register_toolchains")
 
 py_repositories()

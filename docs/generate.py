@@ -252,7 +252,10 @@ def _fill(text: str, *,
 
 class _OrgRenderer(commonmark.render.renderer.Renderer):
 
-    _LANGUAGE = {'bash': 'sh'}
+    _LANGUAGE = {
+        'bash': 'sh',
+        'c': 'c',
+    }
 
     def __init__(self):
         super().__init__()

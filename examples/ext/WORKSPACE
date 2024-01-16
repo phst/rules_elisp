@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023 Google LLC
+# Copyright 2020, 2021, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@ load(
 rules_elisp_dependencies()
 
 rules_elisp_toolchains()
+
+load("@bazel_features//:deps.bzl", "bazel_features_deps")
+
+bazel_features_deps()
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
