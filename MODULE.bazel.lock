@@ -1752,7 +1752,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "cW0JemSUpLJMquvGmiQoe19pw2IK5pKzOd/g+qbolXA=",
+        "bzlTransitiveDigest": "D149eA3CFcne6Tnbk8/gmNTT0phzYr15mNW5Ki8xhnc=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1777,7 +1777,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "g/c54IP4ZhDGoDGEkS5OuI0ipMaO92oWIkazDqV9PbE=",
+        "bzlTransitiveDigest": "OIocjQem2ZHj38YHSwQV5PW5cFA63/43+l/uh02jzsU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1793,7 +1793,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "g/c54IP4ZhDGoDGEkS5OuI0ipMaO92oWIkazDqV9PbE=",
+        "bzlTransitiveDigest": "OIocjQem2ZHj38YHSwQV5PW5cFA63/43+l/uh02jzsU=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

@@ -86,6 +86,8 @@ def _non_module_deps_impl(repository_ctx):
         "defs.bzl",
         Label("//private:prod.template.bzl"),
         {
+            # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
+            '"[bazel_version]"': repr(native.bazel_version),
             "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
             "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
         },
@@ -95,6 +97,7 @@ def _non_module_deps_impl(repository_ctx):
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
     implementation = _non_module_deps_impl,
+    local = True,  # always reevaluate in case the Bazel version changes
 )
 
 def _non_module_dev_deps_impl(repository_ctx):
@@ -114,20 +117,9 @@ def _non_module_dev_deps_impl(repository_ctx):
         executable = False,
     )
 
-    # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
-    repository_ctx.template(
-        "defs.bzl",
-        Label("//private:dev.template.bzl"),
-        {
-            '"[bazel_version]"': repr(native.bazel_version),
-        },
-        executable = False,
-    )
-
 non_module_dev_deps = repository_rule(
     doc = """Installs development dependencies that are not available as modules.""",
     implementation = _non_module_dev_deps_impl,
-    local = True,  # always reevaluate in case the Bazel version changes
 )
 
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
