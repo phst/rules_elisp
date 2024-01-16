@@ -653,7 +653,13 @@ def _decode_utf8_seq(string, index):
         return 1, a
 
     def trail(off, min = 0x80, max = 0xBF):
-        return _utf8_trailing_code_unit(string, index + off, min, max)
+        i = index + off
+        if i >= len(string):
+            fail("incomplete UTF-8 code unit sequence in string %r" % string)
+        u = _utf8_code_unit(string, i)
+        if u < min or u > max:
+            fail("invalid UTF-8 code unit 0x%X at position %d in string %r" % (u, i, string))
+        return u
 
     if 0xC2 <= a and a <= 0xDF:  # two bytes
         b = trail(1)
@@ -684,28 +690,6 @@ def _utf8_code_unit(string, index):
     u = ORD.get(c)
     if u == None or u < 0x00 or u > 0xFF:
         fail("invalid UTF-8 code unit %r at position %d in string %r" % (c, index, string))
-    return u
-
-def _utf8_trailing_code_unit(string, index, min, max):
-    """Returns a single trailing UTF-8 code unit in a string.
-
-    Checks that the code unit is in a valid range.
-
-    Args:
-      string: a string that is assumed to be a valid UTF-8 string, i.e., each
-          character in the string should be a UTF-8 code unit
-      index: zero-based position of the UTF-8 code unit to retrieve
-      min: lowest allowed code unit, inclusive
-      max: highest allowed code unit, inclusive
-
-    Returns:
-      the UTF-8 code unit as an integer
-    """
-    if index >= len(string):
-        fail("incomplete UTF-8 code unit sequence in string %r" % string)
-    u = _utf8_code_unit(string, index)
-    if u < min or u > max:
-        fail("invalid UTF-8 code unit 0x%X at position %d in string %r" % (u, index, string))
     return u
 
 def _hex(num, *, pad):
