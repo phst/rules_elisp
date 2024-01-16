@@ -651,7 +651,10 @@ def _decode_utf8_seq(string, index):
     a = _utf8_code_unit(string, index)
     if 0x00 <= a and a <= 0x7F:  # one byte
         return 1, a
-    trail = lambda off, min = 0x80, max = 0xBF: _utf8_trailing_code_unit(string, index + off, min, max)
+
+    def trail(off, min = 0x80, max = 0xBF):
+        return _utf8_trailing_code_unit(string, index + off, min, max)
+
     if 0xC2 <= a and a <= 0xDF:  # two bytes
         b = trail(1)
         return 2, ((a & 0x1F) << 6) | (b & 0x3F)
