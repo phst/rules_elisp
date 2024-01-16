@@ -222,9 +222,7 @@ def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
         linking_contexts = [info.linking_context for info in infos],
         user_link_flags = defaults.linkopts,
     )
-    runfiles = ctx.runfiles()
-    for dep in deps:
-        runfiles = runfiles.merge(dep[DefaultInfo].default_runfiles)
+    runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])
     return bin.executable, runfiles
 
 def cpp_strings(strings):
