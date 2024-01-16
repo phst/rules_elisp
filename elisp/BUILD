@@ -233,7 +233,8 @@ cc_library(
 
 py_test(
     name = "binary_test",
-    size = "small",
+    size = "medium",
+    timeout = "short",
     srcs = ["binary_test.py"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
