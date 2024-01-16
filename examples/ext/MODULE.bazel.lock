@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "cc406d43cd95fb2a84a1ada85fb21a4d0211fca77ff5d307c91f91b4c42ac579"
+    "phst_rules_elisp": "a6de7640df96ccc17e91a45a6e05b1a6e633f12c24e1914f32315a7cf0eab661"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -87,7 +87,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 45,
+            "line": 44,
             "column": 29
           },
           "imports": {
@@ -104,7 +104,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 49,
+            "line": 48,
             "column": 32
           },
           "imports": {
@@ -121,7 +121,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 59,
+            "line": 58,
             "column": 23
           },
           "imports": {
@@ -138,7 +138,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 60,
+                "line": 59,
                 "column": 17
               }
             }
@@ -152,7 +152,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 66,
+            "line": 65,
             "column": 20
           },
           "imports": {
@@ -172,7 +172,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 67,
+                "line": 66,
                 "column": 10
               }
             }

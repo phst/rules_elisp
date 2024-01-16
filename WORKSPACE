@@ -106,19 +106,6 @@ load("@example//:repositories.bzl", "example_dependencies")
 
 example_dependencies()
 
-http_archive(
-    name = "com_google_googletest",
-    sha256 = "1f357c27ca988c3f7c6b4bf68a9395005ac6761f034046e9dde0896e3aba00e4",
-    strip_prefix = "googletest-1.14.0/",
-    urls = [
-        "https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip",  # 2023-08-02
-    ],
-)
-
-load("@com_google_googletest//:googletest_deps.bzl", "googletest_deps")
-
-googletest_deps()
-
 load("//private:repositories.bzl", "non_module_dev_deps")
 
 non_module_dev_deps(name = "phst_rules_elisp_dev_deps")
