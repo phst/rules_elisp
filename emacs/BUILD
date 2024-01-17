@@ -148,6 +148,9 @@ cc_defaults(
     defines = [],
     features = [
         "-treat_warnings_as_errors",
+        "-layering_check",
+        "-parse_headers",
+        "-module_maps",
         # Never instrument Emacs itself for coverage collection.  It doesn’t
         # hurt, but leads to needless reinstall actions when switching between
         # “bazel test” and “bazel coverage”.
