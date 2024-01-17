@@ -18,6 +18,10 @@ load("//private:defs.bzl", "executable_only")
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
+    features = [
+        "-macos_default_link_flags",
+        "-macos_minimum_os",
+    ],
 )
 
 licenses(["notice"])
