@@ -19,6 +19,10 @@ load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
+    features = [
+        "-macos_default_link_flags",
+        "-macos_minimum_os",
+    ],
 )
 
 licenses(["notice"])

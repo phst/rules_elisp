@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
+    features = [
+        "-macos_default_link_flags",
+        "-macos_minimum_os",
+    ],
 )
 
 licenses(["notice"])
