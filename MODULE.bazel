@@ -40,7 +40,7 @@ bazel_dep(name = "abseil-py", version = "1.4.0", dev_dependency = True, repo_nam
 bazel_dep(name = "gazelle", version = "0.35.0", dev_dependency = True, repo_name = "bazel_gazelle")
 
 # Bring in the local_config_cc repository.  It’s needed for
-# phst_rules_elisp_deps on Windows.
+# //emacs:windows_cc_toolchain.
 cc_configure = use_extension("@bazel_tools//tools/cpp:cc_configure.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc")
 
