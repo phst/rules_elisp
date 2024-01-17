@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
@@ -124,7 +125,7 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        "--bin='$(rlocationpath :bin)'",
+        shell.quote("--bin=$(rlocationpath :bin)"),
     ],
     data = ["bin"],
     python_version = "PY3",

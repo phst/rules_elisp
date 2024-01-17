@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_proto_library", "elisp_test")
@@ -144,7 +145,7 @@ cc_binary(
         "@platforms//os:linux": [
             # See https://github.com/bazelbuild/bazel/issues/12313 why we need
             # to add additional quoting.
-            "-Wl,--version-script='$(execpath :module.lds)'",
+            shell.quote("-Wl,--version-script=$(execpath :module.lds)"),
             "-Wl,--no-undefined",
         ],
         "@platforms//os:windows": [],  # uses ‘win_def_file’

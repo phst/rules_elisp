@@ -16,6 +16,7 @@
 # so that they can use external repositories loaded in our WORKSPACE file only,
 # e.g. the Go rules.
 
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:defs.bzl", "py_test")
@@ -39,7 +40,7 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        "--binary='$(rlocationpath :test_test)'",
+        shell.quote("--binary=$(rlocationpath :test_test)"),
     ],
     data = [":test_test"],
     embedsrcs = [
@@ -119,7 +120,7 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        "--binary='$(rlocationpath :empty)'",
+        shell.quote("--binary=$(rlocationpath :empty)"),
     ],
     data = [":empty"],
     python_version = "PY3",

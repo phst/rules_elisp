@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("//private:defs.bzl", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "cc_defaults")
@@ -39,7 +40,7 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        "--emacs='$(rlocationpath :emacs)'",
+        shell.quote("--emacs=$(rlocationpath :emacs)"),
     ],
     data = [":emacs"],
     python_version = "PY3",
@@ -108,7 +109,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_ARGS='PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'""",
+        shell.quote('PHST_RULES_ELISP_ARGS=PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'),
     ],
     deps = ["//elisp:emacs"],
 )
