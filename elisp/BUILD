@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
 load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "bootstrap", "cc_defaults", "executable_only")
@@ -148,7 +149,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_RUN_EMACS='R"*($(rlocationpath :run_emacs_stripped))*"'""",
+        shell.quote('PHST_RULES_ELISP_RUN_EMACS=R"*($(rlocationpath :run_emacs_stripped))*"'),
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -188,7 +189,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        "PHST_RULES_ELISP_ARGS='" + ", ".join([
+        shell.quote("PHST_RULES_ELISP_ARGS=" + ", ".join([
             'PHST_RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath //tests/wrap:stripped))*")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
@@ -197,7 +198,7 @@ cc_binary(
             'PHST_RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
-        ]) + "'",
+        ])),
     ],
     deps = [":binary"],
 )
@@ -219,7 +220,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_RUN_BINARY='R"*($(rlocationpath :run_binary_stripped))*"'""",
+        shell.quote('PHST_RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
     ],
     visibility = ["//visibility:public"],
     deps = [
@@ -242,7 +243,7 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        "--binary='$(rlocationpath :binary_main)'",
+        shell.quote("--binary=$(rlocationpath :binary_main)"),
     ],
     data = [
         "binary.cc",
@@ -285,7 +286,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_ARGS='PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'""",
+        shell.quote('PHST_RULES_ELISP_ARGS=PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'),
     ],
     deps = [":test"],
 )
@@ -308,7 +309,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        """PHST_RULES_ELISP_RUN_TEST='R"*($(rlocationpath :run_test_stripped))*"'""",
+        shell.quote('PHST_RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
     ],
     visibility = ["//visibility:public"],
     deps = [
