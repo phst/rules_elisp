@@ -19,6 +19,8 @@ package(
     default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = [
+        "layering_check",
+        "parse_headers",
         # On Windows, Bazel generates incorrectly-escaped parameter files.  See
         # https://github.com/bazelbuild/bazel/issues/21029.
         "-compiler_param_file",
