@@ -17,9 +17,15 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:versions.bzl", "versions")
+load("@phst_rules_elisp_deps//:defs.bzl", "BAZEL_VERSION")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//docs", "//elisp", "//elisp/proto", "//emacs", "//tests/wrap"])
+
+def bazel_is_at_least(version):
+    """Return `True` if the Bazel version is at least <var>version</var>."""
+    return versions.is_at_least(version, BAZEL_VERSION)
 
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
