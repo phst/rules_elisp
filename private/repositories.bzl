@@ -88,8 +88,6 @@ def _non_module_deps_impl(repository_ctx):
         {
             # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
             '"[bazel_version]"': repr(native.bazel_version),
-            "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
-            "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
         },
         executable = False,
     )

@@ -14,6 +14,8 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -31,9 +33,9 @@ bzl_library(
         "//emacs:__pkg__",
     ],
     deps = [
+        ":generated_bzl",
         "//elisp:builtin_bzl",
         "@bazel_skylib//lib:paths",
-        "@phst_rules_elisp_deps//:defs_bzl",
     ],
 )
 
@@ -50,6 +52,32 @@ bzl_library(
     name = "extensions_bzl",
     srcs = ["extensions.bzl"],
     deps = [":repositories_bzl"],
+)
+
+bzl_library(
+    name = "generated_bzl",
+    srcs = ["generated.bzl"],
+)
+
+expand_template(
+    name = "expand",
+    out = "generated.expanded.bzl",
+    substitutions = {
+        "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
+        "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
+    },
+    template = "generated.template.bzl",
+)
+
+diff_test(
+    name = "generated_test",
+    failure_message = """Please run
+
+    bazel build //private:generated.expanded.bzl
+
+and copy the generated file to //private:generated.bzl.""",
+    file1 = "generated.bzl",
+    file2 = "generated.expanded.bzl",
 )
 
 selects.config_setting_group(
