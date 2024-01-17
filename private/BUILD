@@ -36,6 +36,8 @@ bzl_library(
         ":generated_bzl",
         "//elisp:builtin_bzl",
         "@bazel_skylib//lib:paths",
+        "@bazel_skylib//lib:versions",
+        "@phst_rules_elisp_deps//:defs_bzl",
     ],
 )
 

@@ -12,14 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
-load("@phst_rules_elisp_deps//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "merged_manual")
+load("//private:defs.bzl", "bazel_is_at_least", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -42,7 +40,7 @@ genrule(
     cmd = "makeinfo --no-split --output=$@ -- $<",
 )
 
-DOCUMENT_EXTENSIONS = versions.is_at_least("7", BAZEL_VERSION)
+DOCUMENT_EXTENSIONS = bazel_is_at_least("7")
 
 DOCS = [
     "elisp",
