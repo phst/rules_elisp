@@ -49,7 +49,15 @@ bzl_library(
 bzl_library(
     name = "extensions_bzl",
     srcs = ["extensions.bzl"],
-    deps = [":repositories_bzl"],
+    deps = [
+        ":features_bzl",
+        ":repositories_bzl",
+    ],
+)
+
+bzl_library(
+    name = "features_bzl",
+    srcs = ["@bazel_features//:bzl_files"],
 )
 
 selects.config_setting_group(

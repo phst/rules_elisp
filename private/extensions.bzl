@@ -14,6 +14,7 @@
 
 """Non-module dependencies."""
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load(":repositories.bzl", _config = "config", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
 
 visibility("private")
@@ -29,4 +30,8 @@ def _config_impl(_ctx):
 
 non_module_deps = module_extension(implementation = _non_module_deps_impl)
 non_module_dev_deps = module_extension(implementation = _non_module_dev_deps_impl)
-config = module_extension(implementation = _config_impl)
+
+config = module_extension(
+    implementation = _config_impl,
+    **({"os_dependent": True} if bazel_features.external_deps.module_extension_has_os_arch_dependent else {})
+)
