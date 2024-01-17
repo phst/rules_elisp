@@ -140,6 +140,23 @@ exports_files(
     visibility = ["//docs:__pkg__"],
 )
 
+alias(
+    name = "cc_toolchain",
+    actual = select({
+        "@platforms//os:windows": ":windows_cc_toolchain",
+        "//conditions:default": "@bazel_tools//tools/cpp:current_cc_toolchain",
+    }),
+)
+
+cc_toolchain_suite(
+    name = "windows_cc_toolchain",
+    target_compatible_with = ["@platforms//os:windows"],
+    toolchains = {
+        "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
+        "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
+    },
+)
+
 cc_defaults(
     name = "defaults",
     copts = [],

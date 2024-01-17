@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "a6de7640df96ccc17e91a45a6e05b1a6e633f12c24e1914f32315a7cf0eab661",
+  "moduleFileHash": "b125dc1a4dffce987590639f7c9206e658809b321df456845dbd100c2ba1ad51",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -1752,7 +1752,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "+c/ZVbDiHj2bF5/xHsK8Qjugzg0l3B1zg+7bERrbuHg=",
+        "bzlTransitiveDigest": "XQSCsn/Kna0QGa0QFoo5m0uCTKD1kvQ3xrpZEw2sL2E=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1777,7 +1777,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "qaKQ9MKdP/+tJO5Q3ljpmS7zhTWrPUVeQd/kCQlH5w0=",
+        "bzlTransitiveDigest": "Wirf1wVI3gKrPt6kso1qiCYu/Nr54t2vuAjLnAkoi+M=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1793,7 +1793,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "qaKQ9MKdP/+tJO5Q3ljpmS7zhTWrPUVeQd/kCQlH5w0=",
+        "bzlTransitiveDigest": "Wirf1wVI3gKrPt6kso1qiCYu/Nr54t2vuAjLnAkoi+M=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
