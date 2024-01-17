@@ -375,8 +375,8 @@ def run_emacs(
 FEATURES = select({
     # We can’t use treat_warnings_as_errors on macOS yet because it tries to
     # pass a flag -fatal-warnings to the linker, but the macOS linker accepts
-    # -fatal_warnings instead.
-    # TODO: File bug against Bazel.
+    # -fatal_warnings instead.  See
+    # https://github.com/bazelbuild/bazel/issues/20919.
     Label("@platforms//os:macos"): [],
     Label("//conditions:default"): ["treat_warnings_as_errors"],
 })
