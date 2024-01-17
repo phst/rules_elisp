@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//lib:versions.bzl", "versions")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
-load("@phst_rules_elisp_deps//:defs.bzl", "BAZEL_VERSION")
+load("@phst_rules_elisp_config//:defs.bzl", "BAZEL_VERSION")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")

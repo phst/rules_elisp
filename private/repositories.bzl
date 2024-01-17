@@ -64,40 +64,10 @@ def _non_module_deps_impl(repository_ctx):
         },
         executable = False,
     )
-    windows = repository_ctx.os.name.startswith("windows")
-    repository_ctx.template(
-        "toolchains/BUILD.bazel",
-        Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD"),
-        {
-            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.template(
-        "BUILD.bazel",
-        Label("//private:prod.template.BUILD"),
-        {
-            '"[bzl_library]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
-            '"[private_pkg]"': repr(str(Label("//private:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.template(
-        "defs.bzl",
-        Label("//private:prod.template.bzl"),
-        {
-            # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
-            '"[bazel_version]"': repr(native.bazel_version),
-            "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
-            "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
-        },
-        executable = False,
-    )
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
     implementation = _non_module_deps_impl,
-    local = True,  # always reevaluate in case the Bazel version changes
 )
 
 def _non_module_dev_deps_impl(repository_ctx):
@@ -120,6 +90,45 @@ def _non_module_dev_deps_impl(repository_ctx):
 non_module_dev_deps = repository_rule(
     doc = """Installs development dependencies that are not available as modules.""",
     implementation = _non_module_dev_deps_impl,
+)
+
+def _config_impl(repository_ctx):
+    windows = repository_ctx.os.name.startswith("windows")
+    repository_ctx.template(
+        "toolchains/BUILD.bazel",
+        Label("//elisp:windows-toolchains.BUILD" if windows else "//elisp:unix-toolchains.BUILD"),
+        {
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
+    repository_ctx.template(
+        "BUILD.bazel",
+        Label("//private:config.template.BUILD"),
+        {
+            '"[bzl_library]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
+            '"[private_pkg]"': repr(str(Label("//private:__pkg__"))),
+        },
+        executable = False,
+    )
+    repository_ctx.template(
+        "defs.bzl",
+        Label("//private:config.template.bzl"),
+        {
+            # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
+            '"[bazel_version]"': repr(native.bazel_version),
+            "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
+            "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
+        },
+        executable = False,
+    )
+
+config = repository_rule(
+    doc = """Generates a repository with configuration data.
+
+This repository is a workaround for various Bazel limitations.""",
+    implementation = _config_impl,
+    local = True,  # always reevaluate in case the Bazel version changes
 )
 
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents

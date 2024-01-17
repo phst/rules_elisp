@@ -16,7 +16,7 @@
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "maybe")
-load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "non_module_deps")
+load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC", "config", "non_module_deps")
 
 visibility("public")
 
@@ -89,6 +89,7 @@ def rules_elisp_dependencies():
         ],
     )
     non_module_deps(name = "phst_rules_elisp_deps")
+    config(name = "phst_rules_elisp_config")
 
 # buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():

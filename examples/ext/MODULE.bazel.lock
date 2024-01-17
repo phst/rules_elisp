@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "922ea6752dc9105de5af957f7a99a6933c0a6a712d23df6aad16a9c399f7e787",
-    "phst_rules_elisp": "a6de7640df96ccc17e91a45a6e05b1a6e633f12c24e1914f32315a7cf0eab661"
+    "phst_rules_elisp": "b9d88c364c4eaccc0f6b5778f71532dc5f2a676bd9aea97cda2842d7f8bb0b58"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -116,12 +116,29 @@
           "hasNonDevUseExtension": true
         },
         {
+          "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
+          "extensionName": "config",
+          "usingModule": "phst_rules_elisp@_",
+          "location": {
+            "file": "@@phst_rules_elisp~override//:MODULE.bazel",
+            "line": 54,
+            "column": 23
+          },
+          "imports": {
+            "phst_rules_elisp_config": "phst_rules_elisp_config"
+          },
+          "devImports": [],
+          "tags": [],
+          "hasDevUseExtension": false,
+          "hasNonDevUseExtension": true
+        },
+        {
           "extensionBzlFile": "@rules_python//python/extensions:python.bzl",
           "extensionName": "python",
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 58,
+            "line": 61,
             "column": 23
           },
           "imports": {
@@ -138,7 +155,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 59,
+                "line": 62,
                 "column": 17
               }
             }
@@ -152,7 +169,7 @@
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-            "line": 65,
+            "line": 68,
             "column": 20
           },
           "imports": {
@@ -172,7 +189,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@phst_rules_elisp~override//:MODULE.bazel",
-                "line": 66,
+                "line": 69,
                 "column": 10
               }
             }
@@ -1306,7 +1323,7 @@
     },
     "@@phst_rules_elisp~override//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "D149eA3CFcne6Tnbk8/gmNTT0phzYr15mNW5Ki8xhnc=",
+        "bzlTransitiveDigest": "IAAQa2+dlByCy2paOej1YwJGjVAM+12Ak/j5udcLgeo=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1329,9 +1346,25 @@
         }
       }
     },
+    "@@phst_rules_elisp~override//private:extensions.bzl%config": {
+      "general": {
+        "bzlTransitiveDigest": "egn7DrgAe3uh3q4roqQ3fIeXxv/Mpr1sU8uqdT2+IF8=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "phst_rules_elisp_config": {
+            "bzlFile": "@@phst_rules_elisp~override//private:repositories.bzl",
+            "ruleClassName": "config",
+            "attributes": {
+              "name": "phst_rules_elisp~override~config~phst_rules_elisp_config"
+            }
+          }
+        }
+      }
+    },
     "@@phst_rules_elisp~override//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "OIocjQem2ZHj38YHSwQV5PW5cFA63/43+l/uh02jzsU=",
+        "bzlTransitiveDigest": "egn7DrgAe3uh3q4roqQ3fIeXxv/Mpr1sU8uqdT2+IF8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

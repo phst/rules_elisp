@@ -14,7 +14,7 @@
 
 # Generated file; do not edit.
 
-"""Internal definitions for the `phst_rules_elisp_deps` repository."""
+"""Internal definitions for the `phst_rules_elisp_config` repository."""
 
 BAZEL_VERSION = "[bazel_version]"
 
