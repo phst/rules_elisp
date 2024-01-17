@@ -14,7 +14,7 @@
 
 """Non-module dependencies."""
 
-load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
+load(":repositories.bzl", _config = "config", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
 
 visibility("private")
 
@@ -24,5 +24,9 @@ def _non_module_deps_impl(_ctx):
 def _non_module_dev_deps_impl(_ctx):
     _dev_deps(name = "phst_rules_elisp_dev_deps")
 
+def _config_impl(_ctx):
+    _config(name = "phst_rules_elisp_config")
+
 non_module_deps = module_extension(implementation = _non_module_deps_impl)
 non_module_dev_deps = module_extension(implementation = _non_module_dev_deps_impl)
+config = module_extension(implementation = _config_impl)
