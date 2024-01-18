@@ -92,5 +92,5 @@ jobs:
       - name: Upload lockfiles
         uses: actions/upload-artifact@v4
         with:
-          name: lockfiles
+          name: lockfiles-${{runner.os}}
           path: '**/MODULE.bazel.lock'
