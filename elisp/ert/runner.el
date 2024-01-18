@@ -196,7 +196,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
-      (write-region "" nil (concat "/:" shard-status-file) :append))
+      ;; Work around https://bugs.gnu.org/54294.
+      (let ((create-lockfiles (and create-lockfiles
+                                   (>= emacs-major-version 29))))
+        (write-region "" nil (concat "/:" shard-status-file) :append)))
     (mapc #'load (reverse elisp/ert/test--sources))
     (let ((tests (ert-select-tests selector t))
           (total 0)
@@ -312,7 +315,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                (system-out) (system-err)))))
           (let ((coding-system-for-write 'utf-8-unix)
                 (write-region-annotate-functions nil)
-                (write-region-post-annotation-function nil))
+                (write-region-post-annotation-function nil)
+                ;; Work around https://bugs.gnu.org/54294.
+                (create-lockfiles (and create-lockfiles
+                                       (>= emacs-major-version 29))))
             (write-region nil nil (concat "/:" report-file)))))
       (when coverage-enabled
         (when verbose-coverage
@@ -804,6 +810,8 @@ instrumented using Edebug."
     (let ((coding-system-for-write 'utf-8-unix)
           (write-region-annotate-functions nil)
           (write-region-post-annotation-function nil)
+          ;; Work around https://bugs.gnu.org/54294.
+          (create-lockfiles (and create-lockfiles (>= emacs-major-version 29)))
           (test-name (getenv "TEST_TARGET")))
       (unless (member test-name '(nil ""))
         (insert "TN:" (elisp/ert/sanitize--string test-name) ?\n))
