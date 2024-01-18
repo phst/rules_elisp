@@ -1,0 +1,70 @@
+# Copyright 2021, 2022, 2023, 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Set up Bazel workspace
+description: Install necessary dependencies and load remote caches
+
+runs:
+  using: composite
+  steps:
+    - name: Install Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    - name: Install APT packages
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install libxml2-utils
+      if: runner.os == 'Linux'
+    - name: Install Homebrew packages
+      # The Protocol Buffer rules need ‘realpath’ from the GNU coreutils.
+      shell: bash
+      run: brew update && brew install coreutils
+      if: runner.os == 'macOS'
+    - name: Install MSYS2
+      uses: msys2/setup-msys2@v2
+      with:
+        update: false
+        release: true
+        # Work around https://github.com/bazelbuild/bazel/issues/15919.
+        location: C:\Tools\
+        # See nt/INSTALL.W64 for the list of required MSYS2 packages
+        install: >
+          base-devel
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-xpm-nox
+      if: runner.os == 'Windows'
+    - name: Install Visual C++ build tools
+      # Install the 2019 version because Bazel doesn’t support anything newer
+      # in most versions; see
+      # https://bazel.build/install/windows#install-compilers.
+      shell: cmd
+      run: |
+        choco install visualstudio2019buildtools
+        choco install visualstudio2019-workload-vctools
+      if: runner.os == 'Windows'
+    - name: Cache Bazel repositories
+      uses: actions/cache@v3
+      with:
+        path: ~/bazel-repository-cache
+        key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
+        restore-keys: |
+          bazel-repositories-
+    - name: Cache Bazel results
+      uses: actions/cache@v3
+      with:
+        path: ~/bazel-action-cache
+        key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
+        restore-keys: |
+          bazel-actions-${{runner.os}}-${{matrix.bazel}}-
+          bazel-actions-${{runner.os}}-
