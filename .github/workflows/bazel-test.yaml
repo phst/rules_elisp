@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -41,8 +41,56 @@ jobs:
           - bazel: 6.2.1
             os: windows-latest
     runs-on: ${{matrix.os}}
-    uses: ./.github/workflows/set-up.yaml
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: Install APT packages
+        run: sudo apt-get update && sudo apt-get install libxml2-utils
+        if: runner.os == 'Linux'
+      - name: Install Homebrew packages
+        # The Protocol Buffer rules need ‘realpath’ from the GNU coreutils.
+        run: brew update && brew install coreutils
+        if: runner.os == 'macOS'
+      - name: Install MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          update: false
+          release: true
+          # Work around https://github.com/bazelbuild/bazel/issues/15919.
+          location: C:\Tools\
+          # See nt/INSTALL.W64 for the list of required MSYS2 packages
+          install: >
+            base-devel
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-xpm-nox
+        if: runner.os == 'Windows'
+      - name: Install Visual C++ build tools
+        # Install the 2019 version because Bazel doesn’t support anything newer
+        # in most versions; see
+        # https://bazel.build/install/windows#install-compilers.
+        run: |
+          choco install visualstudio2019buildtools
+          choco install visualstudio2019-workload-vctools
+        if: runner.os == 'Windows'
+      - name: Cache Bazel repositories
+        uses: actions/cache@v3
+        with:
+          path: ~/bazel-repository-cache
+          key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
+          restore-keys: |
+            bazel-repositories-
+      - name: Cache Bazel results
+        uses: actions/cache@v3
+        with:
+          path: ~/bazel-action-cache
+          key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
+          restore-keys: |
+            bazel-actions-${{runner.os}}-${{matrix.bazel}}-
+            bazel-actions-${{runner.os}}-
       - name: Run Bazel tests
         # Use disk cache to speed up runs.
         run: >
