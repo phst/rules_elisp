@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "927aa45c954c0272b8cc4ffe44871ef27ff1b91744c06131304512539316f894",
+  "moduleFileHash": "b125dc1a4dffce987590639f7c9206e658809b321df456845dbd100c2ba1ad51",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -81,29 +81,12 @@
           "hasNonDevUseExtension": false
         },
         {
-          "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
-          "extensionName": "config",
-          "usingModule": "<root>",
-          "location": {
-            "file": "@@//:MODULE.bazel",
-            "line": 54,
-            "column": 23
-          },
-          "imports": {
-            "phst_rules_elisp_config": "phst_rules_elisp_config"
-          },
-          "devImports": [],
-          "tags": [],
-          "hasDevUseExtension": false,
-          "hasNonDevUseExtension": true
-        },
-        {
           "extensionBzlFile": "@rules_python//python/extensions:python.bzl",
           "extensionName": "python",
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 61,
+            "line": 58,
             "column": 23
           },
           "imports": {
@@ -120,7 +103,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 62,
+                "line": 59,
                 "column": 17
               }
             }
@@ -134,7 +117,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 68,
+            "line": 65,
             "column": 20
           },
           "imports": {
@@ -154,7 +137,7 @@
               "devDependency": false,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 69,
+                "line": 66,
                 "column": 10
               }
             }
@@ -168,7 +151,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 79,
+            "line": 76,
             "column": 23
           },
           "imports": {},
@@ -182,7 +165,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 80,
+                "line": 77,
                 "column": 12
               }
             }
@@ -196,7 +179,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 82,
+            "line": 79,
             "column": 24
           },
           "imports": {
@@ -220,7 +203,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 83,
+                "line": 80,
                 "column": 15
               }
             },
@@ -234,7 +217,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 88,
+                "line": 85,
                 "column": 15
               }
             },
@@ -248,7 +231,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 93,
+                "line": 90,
                 "column": 15
               }
             }
@@ -1769,7 +1752,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "CqDOlKA9hYHYAcguTn8MUHmBomhqT5uTX2AGnX0rlXQ=",
+        "bzlTransitiveDigest": "hxVFtlv4++43aV2BkKlno8qeGo+V5D7jFv6CTDliv2w=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1792,25 +1775,9 @@
         }
       }
     },
-    "//private:extensions.bzl%config": {
-      "general": {
-        "bzlTransitiveDigest": "upV4uidZMwNMUXEUdvseOLvYb117H1PfFpy0VbEus94=",
-        "accumulatedFileDigests": {},
-        "envVariables": {},
-        "generatedRepoSpecs": {
-          "phst_rules_elisp_config": {
-            "bzlFile": "@@//private:repositories.bzl",
-            "ruleClassName": "config",
-            "attributes": {
-              "name": "_main~config~phst_rules_elisp_config"
-            }
-          }
-        }
-      }
-    },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "upV4uidZMwNMUXEUdvseOLvYb117H1PfFpy0VbEus94=",
+        "bzlTransitiveDigest": "MHy1jObVwCbvVpluDNS6gwjnpIJWYXbwz/HeRUruQeA=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -1826,7 +1793,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "upV4uidZMwNMUXEUdvseOLvYb117H1PfFpy0VbEus94=",
+        "bzlTransitiveDigest": "MHy1jObVwCbvVpluDNS6gwjnpIJWYXbwz/HeRUruQeA=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {

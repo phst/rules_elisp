@@ -51,9 +51,6 @@ use_repo(non_module_deps, "phst_rules_elisp_deps")
 non_module_dev_deps = use_extension("//private:extensions.bzl", "non_module_dev_deps", dev_dependency = True)
 use_repo(non_module_dev_deps, "phst_rules_elisp_dev_deps")
 
-config = use_extension("//private:extensions.bzl", "config")
-use_repo(config, "phst_rules_elisp_config")
-
 # Local toolchains
 register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
 
