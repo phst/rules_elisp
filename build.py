@@ -212,35 +212,18 @@ class Builder:
 
     @target
     def lock(self) -> None:
-        """Manually update MODULE.bazel.lock for all supported systems."""
-        kernel = platform.system()
-        if kernel not in ('Linux', 'Darwin'):
-            raise ValueError(f'can’t fake MODULE.bazel.lock update on {os}')
+        """Manually update MODULE.bazel.lock."""
         cwds = (
             self._workspace,
             self._workspace / 'examples' / 'ext',
         )
-        # Operating system names from the Bazel enumeration
-        # com.google.devtools.build.lib.util.OS.  Architecture names derived by
-        # trial and error.
-        systems = [
-            ('Linux', 'x86_64'),
-            ('Mac OS X', 'aarch64'),
-            ('Mac OS X', 'x86_64'),
-            # We can’t do this trick for Windows due to filesystem
-            # incompatibility.
-            # ('Windows', 'x86_64'),
-        ]
         for cwd in cwds:
-            for kernel, arch in systems:
-                self._bazel(
-                    'build', ['//...'],
-                    startup_options=[f'--host_jvm_args=-Dblaze.os={kernel}',
-                                     f'--host_jvm_args=-Dos.arch={arch}'],
-                    options=['--nobuild',
-                             '--enable_bzlmod',
-                             '--lockfile_mode=update'],
-                    cwd=cwd)
+            self._bazel(
+                'build', ['//...'],
+                options=['--nobuild',
+                         '--enable_bzlmod',
+                         '--lockfile_mode=update'],
+                cwd=cwd)
 
     @target
     def install(self) -> None:
