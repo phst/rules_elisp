@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,6 +40,10 @@ py_repositories()
 
 python_register_toolchains(
     name = "hermetic_python",
+    # Attempt to work around nondeterminism on Windows.  See
+    # https://github.com/bazelbuild/rules_python/pull/713 and
+    # https://github.com/bazelbuild/rules_python/pull/907.
+    ignore_root_user_error = True,
     python_version = "3.10",
     register_coverage_tool = True,
 )
