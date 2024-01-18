@@ -20,10 +20,7 @@ load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
-    features = [
-        "-macos_default_link_flags",
-        "-macos_minimum_os",
-    ],
+    features = ["-macos_default_link_flags"],
 )
 
 licenses(["notice"])
