@@ -64,6 +64,21 @@ def _non_module_deps_impl(repository_ctx):
         },
         executable = False,
     )
+    repository_ctx.download_and_extract(
+        sha256 = "7d3d2448988720bf4bf57ad77a5a08bf22df26160f90507a841ba986be2670dc",
+        url = [
+            "https://ftpmirror.gnu.org/emacs/emacs-29.2.tar.xz",
+            "https://ftp.gnu.org/gnu/emacs/emacs-29.2.tar.xz",
+        ],
+    )
+    repository_ctx.template(
+        "emacs-29.2/BUILD.bazel",
+        Label("//:emacs.BUILD"),
+        {
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
