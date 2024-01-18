@@ -218,12 +218,8 @@ class Builder:
             self._workspace / 'examples' / 'ext',
         )
         for cwd in cwds:
-            self._bazel(
-                'build', ['//...'],
-                options=['--nobuild',
-                         '--enable_bzlmod',
-                         '--lockfile_mode=update'],
-                cwd=cwd)
+            self._bazel('mod', [], options=['deps', '--lockfile_mode=update'],
+                        cwd=cwd)
 
     @target
     def install(self) -> None:
