@@ -2709,7 +2709,13 @@
           ],
           "useAllRepos": "NO"
         },
-        "recordedRepoMappingEntries": []
+        "recordedRepoMappingEntries": [
+          [
+            "gazelle~0.35.0",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
       }
     },
     "@@gazelle~0.35.0//internal/bzlmod:non_module_deps.bzl%non_module_deps": {
@@ -3516,6 +3522,203 @@
                 "https://dl.google.com/go/{}"
               ],
               "version": "1.21.1"
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "bazel_features~1.1.1",
+            "bazel_features_globals",
+            "bazel_features~1.1.1~version_extension~bazel_features_globals"
+          ],
+          [
+            "bazel_features~1.1.1",
+            "bazel_features_version",
+            "bazel_features~1.1.1~version_extension~bazel_features_version"
+          ],
+          [
+            "rules_go~0.44.0",
+            "bazel_features",
+            "bazel_features~1.1.1"
+          ],
+          [
+            "rules_go~0.44.0",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "rules_go~0.44.0",
+            "io_bazel_rules_go",
+            "rules_go~0.44.0"
+          ]
+        ]
+      },
+      "os:windows,arch:amd64": {
+        "bzlTransitiveDigest": "pV3xukn4sznDuleA4hMk/l/O3E3vfCqfyU/shuIth1I=",
+        "accumulatedFileDigests": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "io_bazel_rules_nogo": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:nogo.bzl",
+            "ruleClassName": "go_register_nogo",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~io_bazel_rules_nogo",
+              "nogo": "'@@//dev:nogo'",
+              "includes": [
+                "'@@//:__subpackages__'"
+              ],
+              "excludes": []
+            }
+          },
+          "rules_go__download_0_windows_arm64": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~rules_go__download_0_windows_arm64",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1"
+            }
+          },
+          "rules_go__download_0_linux_arm64": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~rules_go__download_0_linux_arm64",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1"
+            }
+          },
+          "go_default_sdk": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~go_default_sdk",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "experiments": [],
+              "patches": [],
+              "patch_strip": 0,
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1",
+              "strip_prefix": "go"
+            }
+          },
+          "rules_go__download_0_darwin_arm64": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~rules_go__download_0_darwin_arm64",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1"
+            }
+          },
+          "go_host_compatible_sdk_label": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:extensions.bzl",
+            "ruleClassName": "host_compatible_toolchain",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~go_host_compatible_sdk_label",
+              "toolchain": "@go_default_sdk//:ROOT"
+            }
+          },
+          "rules_go__download_0_linux_amd64": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~rules_go__download_0_linux_amd64",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1"
+            }
+          },
+          "rules_go__download_0_darwin_amd64": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_download_sdk_rule",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~rules_go__download_0_darwin_amd64",
+              "goos": "",
+              "goarch": "",
+              "sdks": {},
+              "urls": [
+                "https://dl.google.com/go/{}"
+              ],
+              "version": "1.21.1"
+            }
+          },
+          "go_toolchains": {
+            "bzlFile": "@@rules_go~0.44.0//go/private:sdk.bzl",
+            "ruleClassName": "go_multiple_toolchains",
+            "attributes": {
+              "name": "rules_go~0.44.0~go_sdk~go_toolchains",
+              "prefixes": [
+                "_0000_go_default_sdk_",
+                "_0001_rules_go__download_0_darwin_amd64_",
+                "_0002_rules_go__download_0_darwin_arm64_",
+                "_0003_rules_go__download_0_linux_amd64_",
+                "_0004_rules_go__download_0_linux_arm64_",
+                "_0005_rules_go__download_0_windows_arm64_"
+              ],
+              "geese": [
+                "",
+                "darwin",
+                "darwin",
+                "linux",
+                "linux",
+                "windows"
+              ],
+              "goarchs": [
+                "",
+                "amd64",
+                "arm64",
+                "amd64",
+                "arm64",
+                "arm64"
+              ],
+              "sdk_repos": [
+                "go_default_sdk",
+                "rules_go__download_0_darwin_amd64",
+                "rules_go__download_0_darwin_arm64",
+                "rules_go__download_0_linux_amd64",
+                "rules_go__download_0_linux_arm64",
+                "rules_go__download_0_windows_arm64"
+              ],
+              "sdk_types": [
+                "remote",
+                "remote",
+                "remote",
+                "remote",
+                "remote",
+                "remote"
+              ],
+              "sdk_versions": [
+                "1.21.1",
+                "1.21.1",
+                "1.21.1",
+                "1.21.1",
+                "1.21.1",
+                "1.21.1"
+              ]
             }
           }
         },
@@ -7857,6 +8060,449 @@
             "rules_python~0.28.0~python~pythons_hub",
             "python_3_11_x86_64-apple-darwin",
             "rules_python~0.28.0~python~python_3_11_x86_64-apple-darwin"
+          ]
+        ]
+      },
+      "os:windows,arch:amd64": {
+        "bzlTransitiveDigest": "hfUzegdgk3mFER6QnvMbVVYXv4Gp0Ldu18Sta3/Wv7I=",
+        "accumulatedFileDigests": {
+          "@@//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
+        },
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "pip_310_tomlkit": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_tomlkit",
+              "requirement": "tomlkit==0.11.0     --hash=sha256:0f4050db66fd445b885778900ce4dd9aea8c90c4721141fde0d6ade893820ef1     --hash=sha256:71ceb10c0eefd8b8f11fe34e8a51ad07812cb1dc3de23247425fbc9ddc47b9dd",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_tomli": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_tomli",
+              "requirement": "tomli==2.0.1     --hash=sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc     --hash=sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_typing_extensions": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_typing_extensions",
+              "requirement": "typing-extensions==4.3.0     --hash=sha256:25642c956049920a5aa49edcdd6ab1e06d7e5d467fc00e0506c44ac86fbfca02     --hash=sha256:e6d2677a32f47fc7eb2795db1dd15c1f34eff616bcaf2cfb5e997f854fa1c4a6",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_isort": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_isort",
+              "requirement": "isort==5.10.1     --hash=sha256:6f62d78e2f89b4500b080fe3a81690850cd254227f27f75c3a0c491a1f351ba7     --hash=sha256:e8443a5e7a020e9d7f97f1d7d9cd17c88bcb3bc7e218bf9cf5095fe550be2951",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_mccabe": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_mccabe",
+              "requirement": "mccabe==0.6.1     --hash=sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42     --hash=sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_astroid": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_astroid",
+              "requirement": "astroid==3.0.1     --hash=sha256:7d5895c9825e18079c5aeac0572bc2e4c83205c95d416e0b4fee8bc361d2d9ca     --hash=sha256:86b0bb7d7da0be1a7c4aedb7974e391b32d4ed89e33de6ed6902b4b15c97577e",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_platformdirs": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_platformdirs",
+              "requirement": "platformdirs==2.4.0     --hash=sha256:367a5e80b3d04d2428ffa76d33f124cf11e8fff2acdaa9b43d545f5c7d661ef2     --hash=sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_dill": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_dill",
+              "requirement": "dill==0.3.5.1     --hash=sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302     --hash=sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip": {
+            "bzlFile": "@@rules_python~0.28.0//python/private/bzlmod:pip_repository.bzl",
+            "ruleClassName": "pip_repository",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip",
+              "repo_name": "pip",
+              "whl_map": {
+                "astroid": [
+                  "3.10.13"
+                ],
+                "colorama": [
+                  "3.10.13"
+                ],
+                "commonmark": [
+                  "3.10.13"
+                ],
+                "dill": [
+                  "3.10.13"
+                ],
+                "isort": [
+                  "3.10.13"
+                ],
+                "mccabe": [
+                  "3.10.13"
+                ],
+                "platformdirs": [
+                  "3.10.13"
+                ],
+                "pylint": [
+                  "3.10.13"
+                ],
+                "tomli": [
+                  "3.10.13"
+                ],
+                "tomlkit": [
+                  "3.10.13"
+                ],
+                "typing_extensions": [
+                  "3.10.13"
+                ]
+              },
+              "default_version": "3.10.13"
+            }
+          },
+          "pip_310_colorama": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_colorama",
+              "requirement": "colorama==0.4.5     --hash=sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da     --hash=sha256:e6c6b4334fc50988a639d9b98aa429a0b57da6e17b9a44f0451f930b6967b7a4",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310__groups": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "group_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310__groups",
+              "repo_prefix": "pip_310_",
+              "groups": {}
+            }
+          },
+          "pip_310_pylint": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_pylint",
+              "requirement": "pylint==3.0.3     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_commonmark": {
+            "bzlFile": "@@rules_python~0.28.0//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "name": "rules_python~0.28.0~pip~pip_310_commonmark",
+              "requirement": "commonmark==0.9.1     --hash=sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60     --hash=sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc//:python.exe",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "group_name": "",
+              "group_deps": []
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "bazel_features~1.1.1",
+            "bazel_features_globals",
+            "bazel_features~1.1.1~version_extension~bazel_features_globals"
+          ],
+          [
+            "bazel_features~1.1.1",
+            "bazel_features_version",
+            "bazel_features~1.1.1~version_extension~bazel_features_version"
+          ],
+          [
+            "rules_python~0.28.0",
+            "bazel_features",
+            "bazel_features~1.1.1"
+          ],
+          [
+            "rules_python~0.28.0",
+            "bazel_skylib",
+            "bazel_skylib~1.5.0"
+          ],
+          [
+            "rules_python~0.28.0",
+            "bazel_tools",
+            "bazel_tools"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__build",
+            "rules_python~0.28.0~internal_deps~pypi__build"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__click",
+            "rules_python~0.28.0~internal_deps~pypi__click"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__colorama",
+            "rules_python~0.28.0~internal_deps~pypi__colorama"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__importlib_metadata",
+            "rules_python~0.28.0~internal_deps~pypi__importlib_metadata"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__installer",
+            "rules_python~0.28.0~internal_deps~pypi__installer"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__more_itertools",
+            "rules_python~0.28.0~internal_deps~pypi__more_itertools"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__packaging",
+            "rules_python~0.28.0~internal_deps~pypi__packaging"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__pep517",
+            "rules_python~0.28.0~internal_deps~pypi__pep517"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__pip",
+            "rules_python~0.28.0~internal_deps~pypi__pip"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__pip_tools",
+            "rules_python~0.28.0~internal_deps~pypi__pip_tools"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__pyproject_hooks",
+            "rules_python~0.28.0~internal_deps~pypi__pyproject_hooks"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__setuptools",
+            "rules_python~0.28.0~internal_deps~pypi__setuptools"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__tomli",
+            "rules_python~0.28.0~internal_deps~pypi__tomli"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__wheel",
+            "rules_python~0.28.0~internal_deps~pypi__wheel"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pypi__zipp",
+            "rules_python~0.28.0~internal_deps~pypi__zipp"
+          ],
+          [
+            "rules_python~0.28.0",
+            "pythons_hub",
+            "rules_python~0.28.0~python~pythons_hub"
+          ],
+          [
+            "rules_python~0.28.0~python~pythons_hub",
+            "python_3_10_x86_64-pc-windows-msvc",
+            "rules_python~0.28.0~python~python_3_10_x86_64-pc-windows-msvc"
+          ],
+          [
+            "rules_python~0.28.0~python~pythons_hub",
+            "python_3_11_x86_64-pc-windows-msvc",
+            "rules_python~0.28.0~python~python_3_11_x86_64-pc-windows-msvc"
           ]
         ]
       }
