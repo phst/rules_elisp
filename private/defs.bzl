@@ -23,6 +23,8 @@ load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//docs", "//elisp", "//elisp/proto", "//emacs", "//tests/wrap"])
 
+DOCUMENT_EXTENSIONS = hasattr(native, "starlark_doc_extract")
+
 def bazel_is_at_least(version):
     """Return `True` if the Bazel version is at least <var>version</var>."""
     return versions.is_at_least(version, BAZEL_VERSION)

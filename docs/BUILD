@@ -17,7 +17,7 @@ load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "bazel_is_at_least", "merged_manual")
+load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -40,8 +40,6 @@ genrule(
     outs = ["rules_elisp.info"],
     cmd = "makeinfo --no-split --output=$@ -- $<",
 )
-
-DOCUMENT_EXTENSIONS = bazel_is_at_least("7")
 
 DOCS = [
     "elisp",
