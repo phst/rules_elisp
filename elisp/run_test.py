@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ def main() -> None:
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
     with manifest.add(opts.mode, args) as manifest_file:
-        args += ['--quick', '--batch']
+        args += ['--quick', '--batch', '--no-build-details']
         if opts.module_assertions:
             args.append('--module-assertions')
         load.add_path(run_files, args, opts.load_directory)
