@@ -54,6 +54,7 @@ jobs:
           --bazel=bazelisk
           --action-cache=${{steps.setup.outputs.action-cache}}
           --repository-cache=${{steps.setup.outputs.repository-cache}}
+          --profiles=${{steps.setup.outputs.profiles}}
           -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
@@ -61,3 +62,8 @@ jobs:
             C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC
           # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
           BAZELISK_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Upload profiles
+        uses: actions/upload-artifact@v4
+        with:
+          name: profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
+          path: ${{steps.setup.outputs.profiles}}/*.json.gz

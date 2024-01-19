@@ -22,6 +22,9 @@ outputs:
   action-cache:
     description: Bazel action cache directory
     value: ${{runner.temp}}/bazel-action-cache
+  profiles:
+    description: Directory where to store Bazel JSON profile files
+    value: ${{runner.temp}}/profiles
 
 runs:
   using: composite
@@ -77,3 +80,13 @@ runs:
         restore-keys: |
           bazel-actions-${{runner.os}}-${{matrix.bazel}}-
           bazel-actions-${{runner.os}}-
+    - name: Create profile directory (Unix)
+      if: runner.os != 'Windows'
+      shell: bash
+      run: >
+        mkdir -- "${RUNNER_TEMP:?}/profiles"
+    - name: Create profile directory (Windows)
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: >
+        MKDIR %RUNNER_TEMP%\profiles
