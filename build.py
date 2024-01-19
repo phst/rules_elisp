@@ -67,8 +67,8 @@ class Builder:
                  bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path],
                  repository_cache: Optional[pathlib.Path],
-                 execution_log: Optional[pathlib.PurePosixPath],
-                 profiles: Optional[pathlib.PurePosixPath]) -> None:
+                 execution_log: Optional[pathlib.Path],
+                 profiles: Optional[pathlib.Path]) -> None:
         self._bazel_program = bazel
         self._action_cache = action_cache
         self._repository_cache = repository_cache
@@ -339,8 +339,8 @@ def main() -> None:
     parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action-cache', type=pathlib.Path)
     parser.add_argument('--repository-cache', type=pathlib.Path)
-    parser.add_argument('--execution-log', type=pathlib.PurePosixPath)
-    parser.add_argument('--profiles', type=pathlib.PurePosixPath)
+    parser.add_argument('--execution-log', type=pathlib.Path)
+    parser.add_argument('--profiles', type=pathlib.Path)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
