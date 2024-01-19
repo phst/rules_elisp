@@ -1,0 +1,50 @@
+# Copyright 2024 Philipp Stephani
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.5.0
+  hooks:
+    - id: check-added-large-files
+    - id: check-ast
+    - id: check-case-conflict
+    - id: check-docstring-first
+    - id: check-executables-have-shebangs
+    - id: check-json
+    - id: check-merge-conflict
+    - id: check-shebang-scripts-are-executable
+    - id: check-symlinks
+    - id: check-toml
+    - id: check-vcs-permalinks
+    - id: check-xml
+    - id: check-yaml
+    - id: debug-statements
+    - id: destroyed-symlinks
+    - id: detect-private-key
+    - id: double-quote-string-fixer
+    - id: end-of-file-fixer
+    - id: fix-byte-order-marker
+      exclude: '\.def$'
+    - id: fix-encoding-pragma
+      args: [--remove]
+    - id: forbid-submodules
+    - id: mixed-line-ending
+    - id: name-tests-test
+      exclude: '^tests/wrap/wrap\.py$'
+    - id: pretty-format-json
+    - id: requirements-txt-fixer
+    - id: trailing-whitespace
+      exclude: '(\.(el|patch)|^elisp/runfiles/test-manifest)$'
