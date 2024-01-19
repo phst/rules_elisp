@@ -65,8 +65,8 @@ class Builder:
 
     def __init__(self, *,
                  bazel: pathlib.Path,
-                 action_cache: Optional[pathlib.Path] = None,
-                 repository_cache: Optional[pathlib.Path] = None,
+                 action_cache: Optional[pathlib.PurePosixPath] = None,
+                 repository_cache: Optional[pathlib.PurePosixPath] = None,
                  execution_log: Optional[pathlib.PurePosixPath] = None) -> None:
         self._bazel_program = bazel
         self._action_cache = action_cache
