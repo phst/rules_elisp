@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,8 @@
 """This program configures and builds Emacs.
 
 It’s an internal implementation detail of the Bazel rules for Emacs Lisp; don’t
-use it outside the rules or depend on its behavior."""
+use it outside the rules or depend on its behavior.
+"""
 
 import argparse
 import json
