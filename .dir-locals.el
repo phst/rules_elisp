@@ -22,6 +22,7 @@
               (mode . subword)))
  (c-mode . ((page-delimiter . "^///")
             (mode . subword)))
+ (js-json-mode . ((js-indent-level . 2)))
  ("elisp/proto/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../" "../../bazel-bin/" "../../bazel-bin/external/com_google_protobuf/")))))
  ("elisp/runfiles/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../")))))
  ("examples/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../" "./" "ext/" "../bazel-bin/" "../bazel-bin/external/com_google_protobuf/")))))
