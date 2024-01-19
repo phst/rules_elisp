@@ -337,10 +337,10 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
-    parser.add_argument('--action-cache', type=pathlib.Path)
-    parser.add_argument('--repository-cache', type=pathlib.Path)
-    parser.add_argument('--execution-log', type=pathlib.Path)
-    parser.add_argument('--profiles', type=pathlib.Path)
+    parser.add_argument('--action-cache', type=_path)
+    parser.add_argument('--repository-cache', type=_path)
+    parser.add_argument('--execution-log', type=_path)
+    parser.add_argument('--profiles', type=_path)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
@@ -360,6 +360,10 @@ def _program(name: str) -> pathlib.Path:
     if not file:
         raise FileNotFoundError(f'program {name} not found')
     return pathlib.Path(file)
+
+
+def _path(value: str) -> pathlib.Path:
+    return pathlib.Path(value).absolute()
 
 
 if __name__ == '__main__':
