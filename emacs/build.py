@@ -31,7 +31,7 @@ import tempfile
 def main() -> None:
     """Configures and builds Emacs."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--source', type=pathlib.Path, required=True)
+    parser.add_argument('--readme', type=pathlib.Path, required=True)
     parser.add_argument('--install', type=pathlib.Path, required=True)
     parser.add_argument('--cc', type=pathlib.Path, required=True)
     parser.add_argument('--cflags', required=True)
@@ -42,10 +42,11 @@ def main() -> None:
     windows = os.name == 'nt'
     if windows:
         bash = _find_bash(args.cc)
+    source = args.readme.resolve().parent
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
     install = args.install.resolve()
-    shutil.copytree(args.source, build)
+    shutil.copytree(source, build)
 
     def run(*command: str) -> None:
         env = None

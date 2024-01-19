@@ -37,9 +37,7 @@ def _emacs_binary_impl(ctx):
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
-    readme = ctx.file.readme
-    source = "./{}/{}".format(readme.root.path, readme.dirname)
-    install = _install(ctx, emacs_cc_toolchain, source)
+    install = _install(ctx, emacs_cc_toolchain, ctx.file.readme)
     executable, runfiles = cc_launcher(
         ctx,
         cc_toolchain,
@@ -125,13 +123,13 @@ The resulting executable can be used to run the compiled Emacs.""",
     implementation = _emacs_binary_impl,
 )
 
-def _install(ctx, cc_toolchain, source):
+def _install(ctx, cc_toolchain, readme):
     """Builds and install Emacs.
 
     Args:
       ctx (ctx): rule context
       cc_toolchain (Provider): the C toolchain to use to compile Emacs
-      source (File): the directory containing the Emacs source tree
+      readme (File): location of the README file in the Emacs source tree
 
     Returns:
       a File representing the Emacs installation directory
@@ -183,7 +181,7 @@ def _install(ctx, cc_toolchain, source):
         ))
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
-    args.add(source, format = "--source=%s")
+    args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
     args.add(cc, format = "--cc=%s")
     args.add_joined(
