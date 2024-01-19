@@ -67,11 +67,13 @@ class Builder:
                  bazel: pathlib.Path,
                  action_cache: Optional[pathlib.PurePosixPath] = None,
                  repository_cache: Optional[pathlib.PurePosixPath] = None,
-                 execution_log: Optional[pathlib.PurePosixPath] = None) -> None:
+                 execution_log: Optional[pathlib.PurePosixPath] = None,
+                 profiles: Optional[pathlib.PurePosixPath] = None) -> None:
         self._bazel_program = bazel
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._execution_log = execution_log
+        self._profiles = profiles
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
@@ -163,15 +165,17 @@ class Builder:
     @target
     def test(self) -> None:
         """Runs the Bazel tests."""
-        self._test()
+        self._test(profile='test')
 
     @target
     def versions(self) -> None:
         """Runs the Bazel tests for all supported Emacs versions."""
         for version in sorted(_VERSIONS):
-            self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
+            self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain',
+                       profile=version)
 
-    def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
+    def _test(self, *args: str, profile: str,
+              cwd: Optional[pathlib.Path] = None) -> None:
         bzlmods = {
             _Bzlmod.NO: [False],
             _Bzlmod.YES: [True],
@@ -185,13 +189,20 @@ class Builder:
             ]
             if bzlmod and self._github and not self._ignore_lockfile:
                 options.append('--lockfile_mode=error')
+            if bzlmod and self._profiles:
+                profile_file = self._profiles / (profile + '.json.gz')
+                options += [
+                    '--generate_json_trace_profile',
+                    '--experimental_announce_profile_path',
+                    '--profile=' + str(profile_file),
+                ]
             options.extend(args)
             self._bazel('test', ['//...'], options=options, cwd=cwd)
 
     @target
     def ext(self) -> None:
         """Run the tests in the example workspace."""
-        self._test(cwd=self._workspace / 'examples' / 'ext')
+        self._test(cwd=self._workspace / 'examples' / 'ext', profile='ext')
 
     @target
     def compdb(self) -> None:
@@ -329,12 +340,14 @@ def main() -> None:
     parser.add_argument('--action-cache', type=pathlib.PurePosixPath)
     parser.add_argument('--repository-cache', type=pathlib.PurePosixPath)
     parser.add_argument('--execution-log', type=pathlib.PurePosixPath)
+    parser.add_argument('--profiles', type=pathlib.PurePosixPath)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache,
-                      execution_log=args.execution_log)
+                      execution_log=args.execution_log,
+                      profiles=args.profiles)
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
