@@ -49,9 +49,10 @@ runs:
       # in most versions; see
       # https://bazel.build/install/windows#install-compilers.
       shell: cmd
-      run: |
-        choco install visualstudio2019buildtools
-        choco install visualstudio2019-workload-vctools
+      run: >
+        choco install
+        visualstudio2019buildtools
+        visualstudio2019-workload-vctools
       if: runner.os == 'Windows'
     - name: Cache Bazel repositories
       uses: actions/cache@v3
