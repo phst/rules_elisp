@@ -66,10 +66,12 @@ class Builder:
     def __init__(self, *,
                  bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path] = None,
-                 repository_cache: Optional[pathlib.Path] = None) -> None:
+                 repository_cache: Optional[pathlib.Path] = None,
+                 execution_log: Optional[pathlib.PurePosixPath] = None) -> None:
         self._bazel_program = bazel
         self._action_cache = action_cache
         self._repository_cache = repository_cache
+        self._execution_log = execution_log
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
         self._env = dict(os.environ)
@@ -281,6 +283,9 @@ class Builder:
             opts.append('--disk_cache=' + str(self._action_cache))
         if self._repository_cache:
             opts.append('--repository_cache=' + str(self._repository_cache))
+        if self._execution_log:
+            opts.append(
+                '--execution_log_binary_file=' + str(self._execution_log))
         return opts
 
     def _info(self, key: str) -> pathlib.Path:
@@ -323,11 +328,13 @@ def main() -> None:
     parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action-cache', type=pathlib.PurePosixPath)
     parser.add_argument('--repository-cache', type=pathlib.PurePosixPath)
+    parser.add_argument('--execution-log', type=pathlib.PurePosixPath)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
                       action_cache=args.action_cache,
-                      repository_cache=args.repository_cache)
+                      repository_cache=args.repository_cache,
+                      execution_log=args.execution_log)
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
