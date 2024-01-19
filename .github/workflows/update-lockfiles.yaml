@@ -28,15 +28,16 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Set up workspace
+      - id: setup
+        name: Set up workspace
         uses: ./.github/actions/set-up
       - name: Regenerate lockfiles
         # Use disk cache to speed up runs.
         run: >
           python build.py
           --bazel=bazelisk
-          --action-cache=~/bazel-action-cache
-          --repository-cache=~/bazel-repository-cache
+          --action-cache=${{steps.setup.outputs.action-cache}}
+          --repository-cache=${{steps.setup.outputs.repository-cache}}
           -- lock
         env:
           USE_BAZEL_VERSION: latest

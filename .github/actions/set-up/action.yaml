@@ -15,6 +15,14 @@
 name: Set up Bazel workspace
 description: Install necessary dependencies and load remote caches
 
+outputs:
+  repository-cache:
+    description: Bazel repository cache directory
+    value: ${{runner.temp}}/bazel-repository-cache
+  action-cache:
+    description: Bazel action cache directory
+    value: ${{runner.temp}}/bazel-action-cache
+
 runs:
   using: composite
   steps:
@@ -57,14 +65,14 @@ runs:
     - name: Cache Bazel repositories
       uses: actions/cache@v3
       with:
-        path: ~/bazel-repository-cache
+        path: ${{runner.temp}}/bazel-repository-cache
         key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
         restore-keys: |
           bazel-repositories-
     - name: Cache Bazel results
       uses: actions/cache@v3
       with:
-        path: ~/bazel-action-cache
+        path: ${{runner.temp}}/bazel-action-cache
         key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
         restore-keys: |
           bazel-actions-${{runner.os}}-${{matrix.bazel}}-
