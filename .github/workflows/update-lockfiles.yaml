@@ -36,9 +36,9 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
-          --msys2=${{steps.setup.outputs.msys2}}
-          --action-cache=${{steps.setup.outputs.action-cache}}
-          --repository-cache=${{steps.setup.outputs.repository-cache}}
+          --msys2="${{steps.setup.outputs.msys2}}"
+          --action-cache="${{steps.setup.outputs.action-cache}}"
+          --repository-cache="${{steps.setup.outputs.repository-cache}}"
           -- lock
         env:
           USE_BAZEL_VERSION: latest
