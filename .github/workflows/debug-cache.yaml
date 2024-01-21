@@ -36,7 +36,7 @@ jobs:
           --bazel=bazelisk
           --action-cache=${{steps.setup.outputs.action-cache}}
           --repository-cache=${{steps.setup.outputs.repository-cache}}
-          --execution-log=~/execution-log.binpb
+          --execution-log=${{runner.temp}}/execution-log.binpb
           -- emacs
         env:
           USE_BAZEL_VERSION: latest
@@ -48,5 +48,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: binary execution log, ${{runner.os}}
-          path: ~/execution-log.binpb
+          path: ${{runner.temp}}/execution-log.binpb
           if-no-files-found: error
