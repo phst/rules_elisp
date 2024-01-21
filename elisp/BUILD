@@ -486,7 +486,7 @@ py_binary(
     srcs = ["copy_file.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = [":__pkg__"],
+    visibility = ["//visibility:public"],
 )
 
 cc_defaults(
