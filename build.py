@@ -65,11 +65,13 @@ class Builder:
 
     def __init__(self, *,
                  bazel: pathlib.Path,
+                 msys2: pathlib.Path,
                  action_cache: Optional[pathlib.Path],
                  repository_cache: Optional[pathlib.Path],
                  execution_log: Optional[pathlib.Path],
                  profiles: Optional[pathlib.Path]) -> None:
         self._bazel_program = bazel
+        self._msys2 = msys2
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._execution_log = execution_log
@@ -277,10 +279,8 @@ class Builder:
                 env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
             # Hacks so that Bazel finds the right binaries on GitHub.  See
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
-            # Note that due to https://github.com/bazelbuild/bazel/issues/15919
-            # we have to install MSYS2 in C:\Tools.
             if self._kernel == 'Windows':
-                env['BAZEL_SH'] = r'C:\Tools\msys64\usr\bin\bash.exe'
+                env['BAZEL_SH'] = str(self._msys2 / 'usr' / 'bin' / 'bash.exe')
         return self._run(args, cwd=cwd, env=env, capture=capture)
 
     def _bazel_options(self) -> Sequence[str]:
@@ -337,6 +337,8 @@ def main() -> None:
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--bazel', type=_program, default='bazel')
+    parser.add_argument('--msys2', type=_path,
+                        default=pathlib.Path('C:/MSYS64'))
     parser.add_argument('--action-cache', type=_path)
     parser.add_argument('--repository-cache', type=_path)
     parser.add_argument('--execution-log', type=_path)
@@ -344,6 +346,7 @@ def main() -> None:
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
+                      msys2=args.msys2,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache,
                       execution_log=args.execution_log,

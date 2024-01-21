@@ -52,6 +52,7 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
+          --msys2=${{steps.setup.outputs.msys2}}
           --action-cache=${{steps.setup.outputs.action-cache}}
           --repository-cache=${{steps.setup.outputs.repository-cache}}
           --profiles=${{steps.setup.outputs.profiles}}
