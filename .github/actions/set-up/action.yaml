@@ -18,7 +18,7 @@ description: Install necessary dependencies and load remote caches
 outputs:
   msys2:
     description: Directory where MSYS2 is installed on Windows
-    value: 'C:\Tools\msys64'
+    value: ${{runner.temp}}/MSYS64
   repository-cache:
     description: Bazel repository cache directory
     value: ${{runner.temp}}/bazel-repository-cache
@@ -50,8 +50,6 @@ runs:
       with:
         update: false
         release: true
-        # Work around https://github.com/bazelbuild/bazel/issues/15919.
-        location: C:\Tools\
         # See nt/INSTALL.W64 for the list of required MSYS2 packages
         install: >
           base-devel
