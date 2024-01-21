@@ -73,13 +73,3 @@ runs:
         restore-keys: |
           bazel-actions-${{runner.os}}-${{matrix.bazel}}-
           bazel-actions-${{runner.os}}-
-    - name: Create profile directory (Unix)
-      if: runner.os != 'Windows'
-      shell: bash
-      run: >
-        mkdir -- "${RUNNER_TEMP:?}/profiles"
-    - name: Create profile directory (Windows)
-      if: runner.os == 'Windows'
-      shell: cmd
-      run: >
-        MKDIR %RUNNER_TEMP%\profiles

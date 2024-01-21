@@ -192,6 +192,7 @@ class Builder:
             if bzlmod and self._github and not self._ignore_lockfile:
                 options.append('--lockfile_mode=error')
             if bzlmod and self._profiles:
+                self._profiles.mkdir(exist_ok=True)
                 profile_file = self._profiles / (profile + '.json.gz')
                 options += [
                     '--generate_json_trace_profile',
