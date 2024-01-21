@@ -197,7 +197,7 @@ cc_binary(
     testonly = True,
     srcs = ["binary_main.cc"],
     copts = LAUNCHER_COPTS,
-    data = ["//tests/wrap:stripped"],
+    data = [":wrap_stripped"],
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
@@ -205,7 +205,7 @@ cc_binary(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote("PHST_RULES_ELISP_ARGS=" + ", ".join([
-            'PHST_RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath //tests/wrap:stripped))*")',
+            'PHST_RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
             'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
@@ -271,6 +271,26 @@ py_test(
         "@io_abseil_py//absl/flags",
         "@io_abseil_py//absl/testing:absltest",
     ],
+)
+
+executable_only(
+    name = "wrap_stripped",
+    testonly = True,
+    src = ":wrap",
+)
+
+py_binary(
+    name = "wrap",
+    testonly = True,
+    srcs = ["wrap.py"],
+    data = [
+        ":binary.cc",
+        ":binary.h",
+        "//elisp/runfiles:runfiles.elc",
+    ],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = ["//elisp:runfiles"],
 )
 
 py_binary(
@@ -528,12 +548,4 @@ module_config(
         "@platforms//os:macos": ".dylib",
     }),
     visibility = ["//visibility:public"],
-)
-
-exports_files(
-    [
-        "binary.cc",
-        "binary.h",
-    ],
-    visibility = ["//tests/wrap:__pkg__"],
 )
