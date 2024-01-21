@@ -67,3 +67,4 @@ jobs:
         with:
           name: profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
           path: ${{steps.setup.outputs.profiles}}/*.json.gz
+          if-no-files-found: ignore
