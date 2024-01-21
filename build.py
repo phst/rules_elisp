@@ -356,6 +356,8 @@ def main() -> None:
 
 
 def _program(name: str) -> pathlib.Path:
+    if not name:
+        raise ValueError('missing program name')
     file = shutil.which(name)
     if not file:
         raise FileNotFoundError(f'program {name} not found')
@@ -363,6 +365,8 @@ def _program(name: str) -> pathlib.Path:
 
 
 def _path(value: str) -> pathlib.Path:
+    if not value:
+        raise ValueError('missing file name')
     return pathlib.Path(value).absolute()
 
 
