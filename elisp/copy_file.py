@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Trivial internal utility to copy a file in a cross-platform way."""
+
 import argparse
 import pathlib
 import shutil
