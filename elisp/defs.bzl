@@ -527,10 +527,13 @@ def _elisp_cc_module_impl(ctx):
         lib = out.library_to_link.dynamic_library
     else:
         lib = ctx.actions.declare_file(filename)
-        ctx.actions.symlink(
-            output = lib,
-            target_file = out.library_to_link.dynamic_library,
-            progress_message = "Creating symbolic link " + lib.short_path,
+        ctx.actions.run(
+            executable = ctx.executable._copy_file,
+            arguments = [ctx.actions.args().add("--").add(out.library_to_link.dynamic_library).add(lib)],
+            inputs = [out.library_to_link.dynamic_library],
+            outputs = [lib],
+            mnemonic = "Copy",
+            progress_message = "Copying %{input} to %{output}",
         )
 
     # Replicate some implementation details of cc_binary to make coverage work,
@@ -644,6 +647,11 @@ C/C++ compiler.  See the [corresponding attribute for
         "_module_config": attr.label(
             default = Label("//elisp:module_config"),
             providers = [CcDefaultInfo, ModuleConfigInfo],
+        ),
+        "_copy_file": attr.label(
+            default = Label("//elisp:copy_file"),
+            executable = True,
+            cfg = "exec",
         ),
     },
     provides = [EmacsLispInfo],

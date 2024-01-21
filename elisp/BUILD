@@ -481,6 +481,14 @@ elisp_binary(
     visibility = ["//visibility:public"],
 )
 
+py_binary(
+    name = "copy_file",
+    srcs = ["copy_file.py"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    visibility = [":__pkg__"],
+)
+
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
