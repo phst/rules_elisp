@@ -122,7 +122,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('PHST_RULES_ELISP_ARGS=PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'),
+        shell.quote('RULES_ELISP_ARGS=RULES_ELISP_NATIVE_LITERAL("dummy")'),
     ],
     deps = ["//elisp:emacs"],
 )

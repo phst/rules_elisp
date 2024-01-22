@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_ELISP_PROCESS_H
-#define PHST_RULES_ELISP_ELISP_PROCESS_H
+#ifndef RULES_ELISP_ELISP_PROCESS_H
+#define RULES_ELISP_ELISP_PROCESS_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #error this file requires at least C++17
@@ -46,7 +46,7 @@
 
 #include "elisp/platform.h"
 
-namespace phst_rules_elisp {
+namespace rules_elisp {
 
 using Environment = absl::flat_hash_map<NativeString, NativeString>;
 
@@ -57,7 +57,7 @@ class Runfiles final {
   static absl::StatusOr<Runfiles> CreateForTest(
       std::string_view source_repository);
   absl::StatusOr<NativeString> Resolve(std::string_view name) const;
-  absl::StatusOr<phst_rules_elisp::Environment> Environment() const;
+  absl::StatusOr<rules_elisp::Environment> Environment() const;
 
  private:
   using Impl = bazel::tools::cpp::runfiles::Runfiles;
@@ -69,6 +69,6 @@ absl::StatusOr<int> Run(std::string_view binary,
                         absl::Span<const NativeString> args,
                         const Runfiles& runfiles);
 
-}  // namespace phst_rules_elisp
+}  // namespace rules_elisp
 
 #endif

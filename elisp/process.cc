@@ -14,7 +14,7 @@
 
 #include "elisp/process.h"
 
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
 #ifndef UNICODE
 #define UNICODE
 #endif
@@ -86,9 +86,9 @@
 
 #include "elisp/platform.h"
 
-namespace phst_rules_elisp {
+namespace rules_elisp {
 
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
 // Build a command line that follows the Windows conventions.  See
 // https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
 // and
@@ -179,7 +179,7 @@ static std::vector<absl::Nonnull<char*>> Pointers(
 
 static Environment CopyEnv() {
   Environment map;
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
   struct Free {
     void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
       ::FreeEnvironmentStrings(p);
@@ -272,7 +272,7 @@ absl::Status ErrorStatus(const std::error_code& code,
                          absl::StrJoin(std::forward_as_tuple(args...), ", "));
 }
 
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
 static constexpr const unsigned int kMaxInt = std::numeric_limits<int>::max();
 
 template <typename... Ts>
@@ -334,7 +334,7 @@ absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
 }
 
 static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
   return ConvertASCII<std::string>(string);
 #else
   return std::string(string);
@@ -342,7 +342,7 @@ static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
 }
 
 static absl::StatusOr<NativeString> ToNative(const std::string& string) {
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
   return ConvertASCII<std::wstring>(string);
 #else
   return string;
@@ -386,7 +386,7 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
   absl::c_replace(resolved, '/', '\\');
 #endif
   return ToNative(resolved);
@@ -394,7 +394,7 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
 
 absl::StatusOr<Environment> Runfiles::Environment() const {
   const auto& pairs = impl_->EnvVars();
-  phst_rules_elisp::Environment map;
+  rules_elisp::Environment map;
   for (const auto& p : pairs) {
     const absl::StatusOr<NativeString> key = ToNative(p.first);
     if (!key.ok()) return key.status();
@@ -425,8 +425,8 @@ absl::StatusOr<int> Run(const std::string_view binary,
   // Once we drop support for Bazel 6.0 and below, we should be able to modify
   // argv[0] to make this launcher more transparent.
   for (const auto& p : *map) {
-    runfiles_args.push_back(PHST_RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
-                            p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
+    runfiles_args.push_back(RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
+                            p.first + RULES_ELISP_NATIVE_LITERAL('=') +
                             p.second);
   }
   // Sort entries for hermeticity.
@@ -444,24 +444,23 @@ absl::StatusOr<int> Run(const std::string_view binary,
   // variable.  Our wrapper binaries then need to reinstate it for the actual
   // Emacs process to fulfill the coverage protocol.
   if (const auto node =
-          orig_env.extract(PHST_RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"))) {
-    final_args.push_back(
-        PHST_RULES_ELISP_NATIVE_LITERAL("--env=COVERAGE_DIR=") + node.mapped());
+          orig_env.extract(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"))) {
+    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--env=COVERAGE_DIR=") +
+                         node.mapped());
   }
   final_args.insert(final_args.end(), args.begin(), args.end());
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
-  orig_env.erase(PHST_RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
+  orig_env.erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
   map->insert(orig_env.begin(), orig_env.end());
   std::vector<NativeString> final_env;
   for (const auto& p : *map) {
-    final_env.push_back(p.first + PHST_RULES_ELISP_NATIVE_LITERAL('=') +
-                        p.second);
+    final_env.push_back(p.first + RULES_ELISP_NATIVE_LITERAL('=') + p.second);
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
-#ifdef PHST_RULES_ELISP_WINDOWS
+#ifdef RULES_ELISP_WINDOWS
   std::wstring command_line = BuildCommandLine(final_args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
   STARTUPINFOW startup_info;
@@ -505,4 +504,4 @@ absl::StatusOr<int> Run(const std::string_view binary,
 #endif
 }
 
-}  // namespace phst_rules_elisp
+}  // namespace rules_elisp

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_ELISP_PLATFORM_H
-#define PHST_RULES_ELISP_ELISP_PLATFORM_H
+#ifndef RULES_ELISP_ELISP_PLATFORM_H
+#define RULES_ELISP_ELISP_PLATFORM_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #error this file requires at least C++17
@@ -22,22 +22,22 @@
 #include <string>
 #include <string_view>
 
-namespace phst_rules_elisp {
+namespace rules_elisp {
 
 #if defined _WIN32 || defined _WIN64
-#define PHST_RULES_ELISP_WINDOWS
+#define RULES_ELISP_WINDOWS
 using NativeChar = wchar_t;
-#define PHST_RULES_ELISP_NATIVE_LITERAL(literal) L##literal
-#define PHST_RULES_ELISP_MAIN wmain
+#define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
+#define RULES_ELISP_MAIN wmain
 #else
 using NativeChar = char;
-#define PHST_RULES_ELISP_NATIVE_LITERAL(literal) literal
-#define PHST_RULES_ELISP_MAIN main
+#define RULES_ELISP_NATIVE_LITERAL(literal) literal
+#define RULES_ELISP_MAIN main
 #endif
 
 using NativeString = std::basic_string<NativeChar>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
-}  // namespace phst_rules_elisp
+}  // namespace rules_elisp
 
 #endif

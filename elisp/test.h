@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef PHST_RULES_ELISP_ELISP_TEST_H
-#define PHST_RULES_ELISP_ELISP_TEST_H
+#ifndef RULES_ELISP_ELISP_TEST_H
+#define RULES_ELISP_ELISP_TEST_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #error this file requires at least C++17
@@ -40,10 +40,10 @@
 
 #include "elisp/platform.h"  // IWYU pragma: export
 
-namespace phst_rules_elisp {
+namespace rules_elisp {
 
 ABSL_MUST_USE_RESULT int RunTest(absl::Span<const NativeString> args);
 
-}  // namespace phst_rules_elisp
+}  // namespace rules_elisp
 
 #endif

@@ -1147,7 +1147,7 @@ def _binary(ctx, *, srcs, tags, args, libs):
         ctx.file._launcher_src,
         libs,
         defines = [
-            "PHST_RULES_ELISP_ARGS=" + cpp_strings([
+            "RULES_ELISP_ARGS=" + cpp_strings([
                 "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
                 "--mode=" + ("wrap" if toolchain.wrap else "direct"),
             ] + [

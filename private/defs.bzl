@@ -261,7 +261,7 @@ def cpp_string(string):
     # sequence of UTF-8 code units (and not code points), so we have to decode
     # it first.
     string = "".join([_cpp_char(c) for c in _decode_utf8(string)])
-    return 'PHST_RULES_ELISP_NATIVE_LITERAL("' + string + '")'
+    return 'RULES_ELISP_NATIVE_LITERAL("' + string + '")'
 
 def _cpp_char(point):
     """Returns a C++ representation of a Unicode code point.

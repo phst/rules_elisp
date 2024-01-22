@@ -16,13 +16,11 @@
 
 #include "elisp/binary.h"
 
-int PHST_RULES_ELISP_MAIN(int argc, phst_rules_elisp::NativeChar** argv) {
-  using phst_rules_elisp::NativeString;
-  using phst_rules_elisp::RunBinary;
-  std::vector<NativeString> args = {
-    PHST_RULES_ELISP_ARGS,
-    PHST_RULES_ELISP_NATIVE_LITERAL("--")
-  };
+int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
+  using rules_elisp::NativeString;
+  using rules_elisp::RunBinary;
+  std::vector<NativeString> args = {RULES_ELISP_ARGS,
+                                    RULES_ELISP_NATIVE_LITERAL("--")};
   args.insert(args.end(), argv, argv + argc);
   return RunBinary(argc == 0 ? NativeString() : argv[0], args);
 }

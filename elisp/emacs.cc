@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,14 +39,14 @@
 
 #include "elisp/process.h"
 
-namespace phst_rules_elisp {
+namespace rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(
     const NativeStringView argv0, const absl::Span<const NativeString> args) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run(PHST_RULES_ELISP_RUN_EMACS, args, *runfiles);
+  return Run(RULES_ELISP_RUN_EMACS, args, *runfiles);
 }
 
 int RunEmacs(const NativeStringView argv0,
@@ -59,4 +59,4 @@ int RunEmacs(const NativeStringView argv0,
   return status_or_code.value();
 }
 
-}  // namespace phst_rules_elisp
+}  // namespace rules_elisp

@@ -44,7 +44,7 @@ def _emacs_binary_impl(ctx):
         ctx.file._launcher_src,
         ctx.attr._emacs_libs,
         defines = [
-            "PHST_RULES_ELISP_ARGS=" + cpp_string(
+            "RULES_ELISP_ARGS=" + cpp_string(
                 "--install=" + runfile_location(ctx, install),
             ),
         ],

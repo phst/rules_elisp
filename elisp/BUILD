@@ -164,7 +164,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('PHST_RULES_ELISP_RUN_EMACS=R"*($(rlocationpath :run_emacs_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_EMACS=R"*($(rlocationpath :run_emacs_stripped))*"'),
     ],
     visibility = [
         # FIXME: Make private once
@@ -209,15 +209,15 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote("PHST_RULES_ELISP_ARGS=" + ", ".join([
-            'PHST_RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
-            'PHST_RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
+        shell.quote("RULES_ELISP_ARGS=" + ", ".join([
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
+            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
+            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
+            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
+            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
+            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
+            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
+            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
     deps = [":binary"],
@@ -240,7 +240,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('PHST_RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
     ],
     visibility = [
         # FIXME: Make private once
@@ -331,7 +331,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('PHST_RULES_ELISP_ARGS=PHST_RULES_ELISP_NATIVE_LITERAL("dummy")'),
+        shell.quote('RULES_ELISP_ARGS=RULES_ELISP_NATIVE_LITERAL("dummy")'),
     ],
     deps = [":test"],
 )
@@ -354,7 +354,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('PHST_RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
     ],
     visibility = [
         # FIXME: Make private once
