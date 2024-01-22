@@ -158,7 +158,12 @@ elisp_binary(
     src = "generate.el",
     input_args = [1],
     output_args = [2],
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
     deps = [":proto"],
 )
 

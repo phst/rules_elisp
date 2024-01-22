@@ -166,7 +166,12 @@ cc_library(
         # add additional quoting.
         shell.quote('PHST_RULES_ELISP_RUN_EMACS=R"*($(rlocationpath :run_emacs_stripped))*"'),
     ],
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
     deps = [
         ":platform",
         ":process",
@@ -237,7 +242,12 @@ cc_library(
         # add additional quoting.
         shell.quote('PHST_RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
     ],
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
     deps = [
         ":platform",
         ":process",
@@ -346,7 +356,12 @@ cc_library(
         # add additional quoting.
         shell.quote('PHST_RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
     ],
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
     deps = [
         ":platform",
         ":process",
@@ -485,7 +500,12 @@ bootstrap(
     name = "compile",
     src = "compile.el",
     out = "compile.elc",
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 build_test(
@@ -498,7 +518,12 @@ elisp_binary(
     src = "export-org.el",
     input_args = [1],
     output_args = [2],
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 py_binary(
@@ -506,7 +531,12 @@ py_binary(
     srcs = ["copy_file.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 cc_defaults(
@@ -515,7 +545,12 @@ cc_defaults(
     defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 module_config(
@@ -547,5 +582,10 @@ module_config(
         "@platforms//os:windows": ".dll",
         "@platforms//os:macos": ".dylib",
     }),
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )

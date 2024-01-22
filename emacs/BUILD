@@ -103,7 +103,12 @@ py_binary(
     srcs = ["build.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = ["//visibility:public"],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 cc_binary(
