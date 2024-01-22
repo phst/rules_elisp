@@ -196,9 +196,12 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                          cl-declarations-or-string def-body)))))
     (random random-seed)
     (when shard-status-file
-      ;; Work around https://bugs.gnu.org/54294.
-      (let ((create-lockfiles (and create-lockfiles
-                                   (>= emacs-major-version 29))))
+      (let ((coding-system-for-write 'no-conversion)
+            (write-region-annotate-functions nil)
+            (write-region-post-annotation-function nil)
+            ;; Work around https://bugs.gnu.org/54294.
+            (create-lockfiles (and create-lockfiles
+                                     (>= emacs-major-version 29))))
         (write-region "" nil (concat "/:" shard-status-file) :append)))
     (mapc #'load (reverse elisp/ert/test--sources))
     (let ((tests (ert-select-tests selector t))
@@ -439,6 +442,8 @@ visiting the file."
         (load-file-name fullname)
         (set-auto-coding-for-load t)
         (inhibit-file-name-operation nil)
+        (format-alist nil)
+        (after-insert-file-functions nil)
         (edebug-all-defs t)
         (edebug-new-definition-function #'elisp/ert/new--definition)
         (edebug-after-instrumentation-function

@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -41,7 +41,10 @@
     (unwind-protect
         (let ((filename (expand-file-name "testäα𝐴🐈'.txt" directory))
               (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
-                                             :directory directory)))
+                                             :directory directory))
+              (coding-system-for-write 'utf-8-unix)
+              (write-region-annotate-functions nil)
+              (write-region-post-annotation-function nil))
           (write-region "contents\n" nil filename nil nil nil 'excl)
           (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
                          filename)))

@@ -1,6 +1,6 @@
 ;;; merge.el --- merge generated documentation into combined manual  -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022, 2023 Google LLC
+;; Copyright 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -30,6 +30,10 @@
    (setq command-line-args-left nil)
    (let ((coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
+         (format-alist nil)
+         (after-insert-file-functions nil)
+         (write-region-annotate-functions nil)
+         (write-region-post-annotation-function nil)
          (temp-dir (file-name-as-directory (make-temp-file "merge" :dir))))
      (dolist (file includes)
        (copy-file file temp-dir))
