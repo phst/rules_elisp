@@ -28,7 +28,8 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Set up workspace
+      - id: setup
+        name: Set up workspace
         uses: ./.github/actions/set-up
       - name: Build Emacs
         run: >
