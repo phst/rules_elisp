@@ -38,7 +38,6 @@ _Target = Callable[['Builder'], None]
 _targets: dict[str, _Target] = {}
 
 _Bzlmod = enum.Enum('_Bzlmod', ['NO', 'YES', 'BOTH'])
-_Capture = enum.Enum('_Capture', ['NONE', 'STDOUT', 'STDERR'])
 
 
 def target(func: _Target) -> _Target:
@@ -83,7 +82,7 @@ class Builder:
         self._output_base = self._init_output_base()
         self._workspace = self._info('workspace')
         version = _parse_version(
-            self._run([str(bazel), '--version'], capture=_Capture.STDOUT))
+            self._run([str(bazel), '--version'], capture_stdout=True))
         # Older Bazel versions don’t support Bzlmod properly.
         self._bzlmod = _Bzlmod.BOTH if version >= (6, 3) else _Bzlmod.NO
         self._ignore_lockfile = version < (7, 0)
@@ -258,7 +257,7 @@ class Builder:
                startup_options: Iterable[str] = (),
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None,
-               capture: _Capture = _Capture.NONE) -> Optional[str]:
+               capture_stdout: bool = False) -> Optional[str]:
         args = [str(self._bazel_program)]
         if self._output_base:
             args.append('--output_base=' + str(self._output_base))
@@ -282,7 +281,7 @@ class Builder:
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
             if self._kernel == 'Windows':
                 env['BAZEL_SH'] = str(self._msys2 / 'usr' / 'bin' / 'bash.exe')
-        return self._run(args, cwd=cwd, env=env, capture=capture)
+        return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
@@ -301,7 +300,7 @@ class Builder:
         return opts
 
     def _info(self, key: str) -> pathlib.Path:
-        output = self._bazel('info', [key], capture=_Capture.STDOUT)
+        output = self._bazel('info', [key], capture_stdout=True)
         assert output is not None
         return pathlib.Path(output.rstrip('\n'))
 
@@ -318,14 +317,13 @@ class Builder:
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
              env: Optional[Mapping[str, str]] = None,
-             capture: _Capture = _Capture.NONE) -> Optional[str]:
+             capture_stdout: bool = False) -> Optional[str]:
         print(*map(shlex.quote, args))
         result = subprocess.run(
             args, check=True, cwd=cwd or self._cwd, env=env or self._env,
-            stdout=subprocess.PIPE if capture == _Capture.STDOUT else None,
-            stderr=subprocess.PIPE if capture == _Capture.STDERR else None,
+            stdout=subprocess.PIPE if capture_stdout else None,
             encoding='utf-8')
-        return result.stdout if capture == _Capture.STDOUT else result.stderr
+        return result.stdout
 
 
 # All potentially supported Emacs versions.
