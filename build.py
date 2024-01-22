@@ -176,7 +176,7 @@ class Builder:
               cwd: Optional[pathlib.Path] = None) -> None:
         bzlmods = {
             False: [False],
-            True: [False, True],
+            True: [True, False],
         }
         for bzlmod in bzlmods[self._bzlmod]:
             prefix = '' if bzlmod else 'no'
