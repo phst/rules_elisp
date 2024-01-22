@@ -17,8 +17,10 @@
 #include "elisp/test.h"
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
-  std::vector<rules_elisp::NativeString> args = {
-      RULES_ELISP_ARGS, RULES_ELISP_NATIVE_LITERAL("--")};
+  using rules_elisp::NativeString;
+  using rules_elisp::RunEmacs;
+  std::vector<NativeString> args = {RULES_ELISP_ARGS,
+                                    RULES_ELISP_NATIVE_LITERAL("--")};
   args.insert(args.end(), argv, argv + argc);
-  return rules_elisp::RunTest(args);
+  return RunTest(args);
 }
