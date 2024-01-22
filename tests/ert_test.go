@@ -70,6 +70,7 @@ func Test(t *testing.T) {
 	env = append(env,
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
+		"TEST_TARGET=//tests:test_test",
 		"COVERAGE=1",
 		"COVERAGE_MANIFEST="+coverageManifest,
 		"COVERAGE_DIR="+coverageDir,

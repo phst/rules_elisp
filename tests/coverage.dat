@@ -1,4 +1,4 @@
-TN://tests:go_default_test
+TN://tests:test_test
 SF:tests/test-lib.el
 FN:27,tests/test-function
 FN:39,foo@cl-flet@0
