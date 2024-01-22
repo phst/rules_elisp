@@ -20,7 +20,6 @@ Mimics a trivial version of Make."""
 
 import argparse
 from collections.abc import Callable, Iterable, Mapping, Sequence
-import enum
 import functools
 import io
 import os
@@ -36,8 +35,6 @@ from typing import Optional
 
 _Target = Callable[['Builder'], None]
 _targets: dict[str, _Target] = {}
-
-_Bzlmod = enum.Enum('_Bzlmod', ['NO', 'YES', 'BOTH'])
 
 
 def target(func: _Target) -> _Target:
@@ -84,7 +81,7 @@ class Builder:
         version = _parse_version(
             self._run([str(bazel), '--version'], capture_stdout=True))
         # Older Bazel versions don’t support Bzlmod properly.
-        self._bzlmod = _Bzlmod.BOTH if version >= (6, 3) else _Bzlmod.NO
+        self._bzlmod = version >= (6, 3)
         self._ignore_lockfile = version < (7, 0)
 
     def build(self, goals: Sequence[str]) -> None:
@@ -178,9 +175,8 @@ class Builder:
     def _test(self, *args: str, profile: str,
               cwd: Optional[pathlib.Path] = None) -> None:
         bzlmods = {
-            _Bzlmod.NO: [False],
-            _Bzlmod.YES: [True],
-            _Bzlmod.BOTH: [False, True],
+            False: [False],
+            True: [False, True],
         }
         for bzlmod in bzlmods[self._bzlmod]:
             prefix = '' if bzlmod else 'no'
