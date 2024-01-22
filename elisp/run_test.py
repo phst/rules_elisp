@@ -181,7 +181,7 @@ def _env_var(arg: str) -> tuple[str, str]:
 
 
 _WINDOWS = os.name == 'nt'
-_logger = logging.getLogger('phst_rules_elisp.elisp.run_test')
+_logger = logging.getLogger('elisp.run_test')
 
 
 if __name__ == '__main__':
