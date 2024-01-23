@@ -50,3 +50,30 @@ jobs:
           name: lockfiles-${{runner.os}}
           path: '**/MODULE.bazel.lock'
           if-no-files-found: error
+  merge:
+    name: Merge lockfiles
+    needs: update
+    runs-on: ubuntu-latest
+    steps:
+      - id: download
+        name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: lockfiles-*
+      - name: Merge lockfiles
+        shell: bash
+        run: |
+          set -euxC
+          for dir in . examples/ext; do
+            mkdir -p -- "${dir}"
+            out="${dir}/MODULE.bazel.lock"
+            in=(lockfiles-*/"${out}")
+            jq -s -e 'reduce .[] as $i ({}; . * $i)' -- "${in[@]}" > "${out}"
+            rm -- "${in[@]}"
+          done
+      - name: Upload merged files
+        uses: actions/upload-artifact@v4
+        with:
+          name: lockfiles
+          path: '**/MODULE.bazel.lock'
+          if-no-files-found: error
