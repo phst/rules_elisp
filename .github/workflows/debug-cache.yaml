@@ -19,7 +19,7 @@ permissions:
   contents: read
 
 jobs:
-  build-emacs:
+  build:
     name: Build Emacs
     strategy:
       matrix:

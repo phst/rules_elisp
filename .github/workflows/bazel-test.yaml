@@ -23,7 +23,7 @@ permissions:
   contents: read
 
 jobs:
-  bazel-versions:
+  test:
     name: Test
     strategy:
       matrix:
