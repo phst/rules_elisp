@@ -14,4 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-gh workflow run debug-cache.yaml
+set -eu
+
+branch="$(git branch --show-current)"
+
+gh workflow run debug-cache.yaml --ref="${branch:?}"
