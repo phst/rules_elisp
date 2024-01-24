@@ -25,7 +25,6 @@ licenses(["notice"])
 elisp_library(
     name = "lib_4",
     srcs = ["lib-4.el"],
-    load_path = ["."],
     visibility = ["//visibility:public"],
     deps = ["@dash"],
 )
