@@ -24,8 +24,7 @@
 
 namespace rules_elisp {
 
-#if defined _WIN32 || defined _WIN64
-#define RULES_ELISP_WINDOWS
+#if defined _WIN32
 using NativeChar = wchar_t;
 #define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
 #define RULES_ELISP_MAIN wmain

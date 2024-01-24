@@ -14,7 +14,7 @@
 
 #include "elisp/process.h"
 
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
 #ifndef UNICODE
 #define UNICODE
 #endif
@@ -88,7 +88,7 @@
 
 namespace rules_elisp {
 
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
 // Build a command line that follows the Windows conventions.  See
 // https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
 // and
@@ -179,7 +179,7 @@ static std::vector<absl::Nonnull<char*>> Pointers(
 
 static Environment CopyEnv() {
   Environment map;
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
   struct Free {
     void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
       ::FreeEnvironmentStrings(p);
@@ -272,7 +272,7 @@ absl::Status ErrorStatus(const std::error_code& code,
                          absl::StrJoin(std::forward_as_tuple(args...), ", "));
 }
 
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
 static constexpr const unsigned int kMaxInt = std::numeric_limits<int>::max();
 
 template <typename... Ts>
@@ -334,7 +334,7 @@ absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
 }
 
 static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
   return ConvertASCII<std::string>(string);
 #else
   return std::string(string);
@@ -342,7 +342,7 @@ static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
 }
 
 static absl::StatusOr<NativeString> ToNative(const std::string& string) {
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
   return ConvertASCII<std::wstring>(string);
 #else
   return string;
@@ -386,7 +386,7 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
   absl::c_replace(resolved, '/', '\\');
 #endif
   return ToNative(resolved);
@@ -460,7 +460,7 @@ absl::StatusOr<int> Run(const std::string_view binary,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
-#ifdef RULES_ELISP_WINDOWS
+#ifdef _WIN32
   std::wstring command_line = BuildCommandLine(final_args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
   STARTUPINFOW startup_info;
