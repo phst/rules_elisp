@@ -1,4 +1,4 @@
-// Copyright 2022, 2023 Google LLC
+// Copyright 2022, 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -73,11 +73,11 @@
 // and
 // https://docs.microsoft.com/en-us/cpp/overview/visual-cpp-language-conformance?view=msvc-160#c-standard-library-features-1.
 #if !(defined __STDC__ || (defined _MSC_VER && _MSC_VER >= 1900))
-#error this file requires a standards-conformant C compiler
+#  error this file requires a standards-conformant C compiler
 #endif
 
 #if !defined __STDC_VERSION__ || __STDC_VERSION__ < 201112L
-#error this file requires at least C11
+#  error this file requires at least C11
 #endif
 
 #include <assert.h>
@@ -90,55 +90,55 @@
 #include <time.h>
 
 #ifndef INT32_MAX
-#error this file requires the int32_t type
+#  error this file requires the int32_t type
 #endif
 
 #ifndef UINT32_MAX
-#error this file requires the uint32_t type
+#  error this file requires the uint32_t type
 #endif
 
 #ifndef INT64_MAX
-#error this file requires the int64_t type
+#  error this file requires the int64_t type
 #endif
 
 #ifndef UINT64_MAX
-#error this file requires the uint64_t type
+#  error this file requires the uint64_t type
 #endif
 
 #if INTMAX_MAX > UINTMAX_MAX
-#error unsupported architecture
+#  error unsupported architecture
 #endif
 
 #if PTRDIFF_MAX > SIZE_MAX
-#error unsupported architecture
+#  error unsupported architecture
 #endif
 
 #if SIZE_MAX > UINTMAX_MAX
-#error unsupported architecture
+#  error unsupported architecture
 #endif
 
 #if LLONG_MAX > INTMAX_MAX || LLONG_MIN < INTMAX_MIN
-#error unsupported architecture
+#  error unsupported architecture
 #endif
 
 #if INT_MAX > SIZE_MAX
-#error unsupported architecture
+#  error unsupported architecture
 #endif
 
 #include "emacs-module.h"
 
 #if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 28
-#error Emacs module header too old
+#  error Emacs module header too old
 #endif
 
 #ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #ifdef _MSC_VER
-#pragma warning(push, 3)
-#pragma warning(disable: 4090 4244 4267 4334)
+#  pragma warning(push, 3)
+#  pragma warning(disable : 4090 4244 4267 4334)
 #endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
@@ -166,10 +166,10 @@
 #include "upb/wire/decode.h"
 #include "upb/wire/encode.h"
 #ifdef __GNUC__
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif
 #ifdef _MSC_VER
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 /// Global variables
@@ -3884,9 +3884,9 @@ enum InitializationResult {
 
 // Make the module work even if we compile with -fvisibility=hidden.
 #if ABSL_HAVE_ATTRIBUTE(visibility)
-#define VISIBLE __attribute__((visibility("default")))
+#  define VISIBLE __attribute__((visibility("default")))
 #else
-#define VISIBLE
+#  define VISIBLE
 #endif
 
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {

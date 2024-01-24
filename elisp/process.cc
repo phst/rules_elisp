@@ -15,26 +15,26 @@
 #include "elisp/process.h"
 
 #ifdef _WIN32
-#ifndef UNICODE
-#define UNICODE
-#endif
-#ifndef _UNICODE
-#define _UNICODE
-#endif
-#ifndef STRICT
-#define STRICT
-#endif
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
+#  ifndef UNICODE
+#    define UNICODE
+#  endif
+#  ifndef _UNICODE
+#    define _UNICODE
+#  endif
+#  ifndef STRICT
+#    define STRICT
+#  endif
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  include <windows.h>
 #else
-#include <spawn.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#  include <spawn.h>
+#  include <sys/wait.h>
+#  include <unistd.h>
 #endif
 
 #include <algorithm>
@@ -52,14 +52,14 @@
 #include <vector>
 
 #ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Woverflow"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Woverflow"
 #endif
 #ifdef _MSC_VER
-#pragma warning(push, 3)
+#  pragma warning(push, 3)
 #endif
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
@@ -74,14 +74,14 @@
 #include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif
 #ifdef _MSC_VER
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 #ifdef __APPLE__
-#include <crt_externs.h>  // for _NSGetEnviron
+#  include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
 #include "elisp/platform.h"
@@ -210,12 +210,12 @@ static Environment CopyEnv() {
   }
 #else
   const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
-#ifdef __APPLE__
+#  ifdef __APPLE__
       // See environ(7) why this is necessary.
       *_NSGetEnviron()
-#else
+#  else
       environ
-#endif
+#  endif
       ;
   for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
        *pp != nullptr; ++pp) {
@@ -324,12 +324,12 @@ absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
   const absl::Status status = CheckASCII(string);
   if (!status.ok()) return status;
 #ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable: 4244)
+#  pragma warning(push)
+#  pragma warning(disable : 4244)
 #endif
   return ToString(string.begin(), string.end());
 #ifdef _MSC_VER
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 }
 

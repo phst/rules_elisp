@@ -16,7 +16,7 @@
 #define RULES_ELISP_ELISP_PLATFORM_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
-#error this file requires at least C++17
+#  error this file requires at least C++17
 #endif
 
 #include <string>
@@ -26,12 +26,12 @@ namespace rules_elisp {
 
 #if defined _WIN32
 using NativeChar = wchar_t;
-#define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
-#define RULES_ELISP_MAIN wmain
+#  define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
+#  define RULES_ELISP_MAIN wmain
 #else
 using NativeChar = char;
-#define RULES_ELISP_NATIVE_LITERAL(literal) literal
-#define RULES_ELISP_MAIN main
+#  define RULES_ELISP_NATIVE_LITERAL(literal) literal
+#  define RULES_ELISP_MAIN main
 #endif
 
 using NativeString = std::basic_string<NativeChar>;

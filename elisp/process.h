@@ -16,21 +16,21 @@
 #define RULES_ELISP_ELISP_PROCESS_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
-#error this file requires at least C++17
+#  error this file requires at least C++17
 #endif
 
 #include <memory>
 #include <string_view>
 
 #ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wconversion"
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#pragma GCC diagnostic ignored "-Woverflow"
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Woverflow"
 #endif
 #ifdef _MSC_VER
-#pragma warning(push, 3)
+#  pragma warning(push, 3)
 #endif
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
@@ -38,10 +38,10 @@
 #include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
-#pragma GCC diagnostic pop
+#  pragma GCC diagnostic pop
 #endif
 #ifdef _MSC_VER
-#pragma warning(pop)
+#  pragma warning(pop)
 #endif
 
 #include "elisp/platform.h"
