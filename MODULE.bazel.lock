@@ -3359,7 +3359,7 @@
         "recordedRepoMappingEntries": []
       },
       "os:osx,arch:x86_64": {
-        "bzlTransitiveDigest": "pV3xukn4sznDuleA4hMk/l/O3E3vfCqfyU/shuIth1I=",
+        "bzlTransitiveDigest": "30uj2FA+MYn2RhACwZLNQ9T3Xf30b6Ru2irOKpH5Oco=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -3529,19 +3529,19 @@
         },
         "recordedRepoMappingEntries": [
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.3.0",
             "bazel_features_globals",
-            "bazel_features~1.1.1~version_extension~bazel_features_globals"
+            "bazel_features~1.3.0~version_extension~bazel_features_globals"
           ],
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.3.0",
             "bazel_features_version",
-            "bazel_features~1.1.1~version_extension~bazel_features_version"
+            "bazel_features~1.3.0~version_extension~bazel_features_version"
           ],
           [
             "rules_go~0.44.0",
             "bazel_features",
-            "bazel_features~1.1.1"
+            "bazel_features~1.3.0"
           ],
           [
             "rules_go~0.44.0",
