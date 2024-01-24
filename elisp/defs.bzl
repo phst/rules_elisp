@@ -34,7 +34,8 @@ visibility("public")
 
 EmacsLispInfo = provider(
     doc = """Provider for Emacs Lisp libraries.
-The `elisp_library` rule produces this provider.
+The `elisp_library`, `elisp_proto_library`, and `elisp_cc_module` rules
+produce this provider.
 
 Load path directory entries are structures with the following fields:
 - `for_actions` is a string specifying the load directory to use for actions,
