@@ -16,7 +16,23 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "PACKAGE_FEATURES", "bootstrap", "cc_defaults", "executable_only", "module_config")
+load(
+    "//private:defs.bzl",
+    "COPTS",
+    "CXXOPTS",
+    "DEFINES",
+    "FEATURES",
+    "LAUNCHER_COPTS",
+    "LAUNCHER_DEFINES",
+    "LAUNCHER_FEATURES",
+    "LAUNCHER_LINKOPTS",
+    "LINKOPTS",
+    "PACKAGE_FEATURES",
+    "bootstrap",
+    "cc_defaults",
+    "executable_only",
+    "module_config",
+)
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(

@@ -16,7 +16,16 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load("//private:defs.bzl", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "PACKAGE_FEATURES", "cc_defaults")
+load(
+    "//private:defs.bzl",
+    "FEATURES",
+    "LAUNCHER_COPTS",
+    "LAUNCHER_DEFINES",
+    "LAUNCHER_FEATURES",
+    "LAUNCHER_LINKOPTS",
+    "PACKAGE_FEATURES",
+    "cc_defaults",
+)
 load(":defs.bzl", "emacs_binary")
 
 package(

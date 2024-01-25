@@ -476,7 +476,10 @@ def _elisp_cc_module_impl(ctx):
     return [
         DefaultInfo(
             files = depset([lib]),
-            runfiles = ctx.runfiles(ctx.files.data).merge_all([dep[DefaultInfo].default_runfiles for dep in ctx.attr.deps]),
+            runfiles = ctx.runfiles(ctx.files.data).merge_all([
+                dep[DefaultInfo].default_runfiles
+                for dep in ctx.attr.deps
+            ]),
         ),
         EmacsLispInfo(
             source_files = [lib],
