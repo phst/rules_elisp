@@ -33,8 +33,7 @@ class AddPathTest(absltest.TestCase):
             load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
                           [pathlib.PurePosixPath('foo'),
                            pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
-                          pathlib.PurePosixPath(
-                              'phst_rules_elisp/elisp/runfiles/runfiles.elc'))
+                          pathlib.PurePosixPath('unused/runfiles.elc'))
         base = pathlib.Path(directory)
         self.assertListEqual(
             args,
@@ -51,16 +50,15 @@ class AddPathTest(absltest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             manifest = pathlib.Path(directory) / 'manifest'
             # Runfiles manifests contain POSIX-style filenames even on Windows.
-            manifest.write_text('phst_rules_elisp/elisp/runfiles/runfiles.elc '
-                                + runfiles_elc.as_posix() + '\n',
-                                encoding='ascii')
+            manifest.write_text(
+                'repository/runfiles.elc ' + runfiles_elc.as_posix() + '\n',
+                encoding='ascii')
             load.add_path(
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
                 args,
                 [pathlib.PurePosixPath('foo'),
                  pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
-                pathlib.PurePosixPath(
-                    'phst_rules_elisp/elisp/runfiles/runfiles.elc'))
+                pathlib.PurePosixPath('repository/runfiles.elc'))
         self.assertListEqual(
             args,
             ['--foo',
