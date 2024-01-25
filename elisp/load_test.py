@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,9 @@ class AddPathTest(absltest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
                           [pathlib.PurePosixPath('foo'),
-                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
+                          pathlib.PurePosixPath(
+                              'phst_rules_elisp/elisp/runfiles/runfiles.elc'))
         base = pathlib.Path(directory)
         self.assertListEqual(
             args,
@@ -56,7 +58,9 @@ class AddPathTest(absltest.TestCase):
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
                 args,
                 [pathlib.PurePosixPath('foo'),
-                 pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+                 pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
+                pathlib.PurePosixPath(
+                    'phst_rules_elisp/elisp/runfiles/runfiles.elc'))
         self.assertListEqual(
             args,
             ['--foo',

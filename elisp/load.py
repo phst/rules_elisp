@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ import pathlib
 from elisp import runfiles
 
 def add_path(run_files: runfiles.Runfiles, args: list[str],
-             load_path: Iterable[pathlib.PurePosixPath]) -> None:
+             load_path: Iterable[pathlib.PurePosixPath],
+             runfiles_elc: pathlib.PurePosixPath) -> None:
     """Add load path elements to the given args list."""
-    runfiles_elc = pathlib.PurePosixPath(
-        'phst_rules_elisp/elisp/runfiles/runfiles.elc')
     runfile_handler_installed = False
     for directory in load_path:
         try:

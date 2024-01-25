@@ -15,6 +15,7 @@
 #include "elisp/binary.h"
 
 #include <cstdlib>
+#include <vector>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -46,7 +47,9 @@ static absl::StatusOr<int> RunBinaryImpl(
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
-  return Run(RULES_ELISP_RUN_BINARY, args, *runfiles);
+  std::vector<NativeString> all_args = {RULES_ELISP_BINARY_ARGS};
+  all_args.insert(all_args.end(), args.begin(), args.end());
+  return Run(RULES_ELISP_RUN_BINARY, all_args, *runfiles);
 }
 
 int RunBinary(const NativeStringView argv0,

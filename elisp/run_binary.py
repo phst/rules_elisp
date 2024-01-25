@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ def main() -> None:
                         default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
+    parser.add_argument('--runfiles-elc', type=pathlib.PurePosixPath,
+                        required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
     parser.add_argument('--load-directory', action='append',
                         type=pathlib.PurePosixPath, default=[])
@@ -62,7 +64,7 @@ def main() -> None:
         args.append('--quick')
         if not opts.interactive:
             args.append('--batch')
-        load.add_path(run_files, args, opts.load_directory)
+        load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
             args.append('--load=' + str(abs_name))

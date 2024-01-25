@@ -27,6 +27,7 @@ from elisp import runfiles
 
 
 flags.DEFINE_string('binary', '', 'location of the //elisp:binary_main target')
+flags.DEFINE_string('binary-cc', None, 'location of the //elisp:binary.cc file')
 
 
 class BinaryTest(absltest.TestCase):
@@ -36,7 +37,7 @@ class BinaryTest(absltest.TestCase):
         """Test that running a binary with a wrapper works."""
         run_files = runfiles.Runfiles()
         input_file = run_files.resolve(
-            pathlib.PurePosixPath('phst_rules_elisp/elisp/binary.cc'))
+            pathlib.PurePosixPath(getattr(FLAGS, 'binary-cc')))
         windows = platform.system() == 'Windows'
         args = [
             run_files.resolve(pathlib.PurePosixPath(FLAGS.binary)),
@@ -57,4 +58,5 @@ class BinaryTest(absltest.TestCase):
 
 
 if __name__ == '__main__':
+    flags.mark_flag_as_required('binary-cc')
     absltest.main()
