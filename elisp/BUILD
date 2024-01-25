@@ -233,7 +233,10 @@ cc_library(
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_binary_stripped"],
+    data = [
+        ":run_binary_stripped",
+        "//elisp/runfiles:runfiles.elc",
+    ],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -241,6 +244,7 @@ cc_library(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
+        shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
     visibility = [
         # FIXME: Make private once
@@ -269,6 +273,7 @@ py_test(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote("--binary=$(rlocationpath :binary_main)"),
+        shell.quote("--binary-cc=$(rlocationpath :binary.cc)"),
     ],
     data = [
         "binary.cc",
@@ -347,7 +352,11 @@ cc_library(
     srcs = ["test.cc"],
     hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_test_stripped"],
+    data = [
+        ":run_test_stripped",
+        "//elisp/ert:runner.elc",
+        "//elisp/runfiles:runfiles.elc",
+    ],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -355,6 +364,10 @@ cc_library(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
+        shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/ert:runner.elc))*")',
+        ])),
     ],
     visibility = [
         # FIXME: Make private once
@@ -378,7 +391,6 @@ py_binary(
     name = "run_test",
     testonly = True,
     srcs = ["run_test.py"],
-    data = ["//elisp/ert:runner.elc"],
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
@@ -415,7 +427,6 @@ py_test(
 py_library(
     name = "load",
     srcs = ["load.py"],
-    data = ["//elisp/runfiles:runfiles.elc"],
     srcs_version = "PY3",
     deps = [":runfiles"],
 )

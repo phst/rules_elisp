@@ -32,14 +32,17 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
-var binary = flag.String("binary", "", "location of the binary file relative to the runfiles root")
+var (
+	binary  = flag.String("binary", "", "location of the binary file relative to the runfiles root")
+	test_el = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+)
 
 func Test(t *testing.T) {
 	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	source, err := rf.Rlocation("phst_rules_elisp/tests/test.el")
+	source, err := rf.Rlocation(*test_el)
 	if err != nil {
 		t.Fatal(err)
 	}

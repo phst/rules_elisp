@@ -40,6 +40,10 @@ def main() -> None:
                         default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
+    parser.add_argument('--runfiles-elc', type=pathlib.PurePosixPath,
+                        required=True)
+    parser.add_argument('--runner-elc', type=pathlib.PurePosixPath,
+                        required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
     parser.add_argument('--load-directory', action='append',
                         type=pathlib.PurePosixPath, default=[])
@@ -69,9 +73,8 @@ def main() -> None:
         args += ['--quick', '--batch', '--no-build-details']
         if opts.module_assertions:
             args.append('--module-assertions')
-        load.add_path(run_files, args, opts.load_directory)
-        runner = run_files.resolve(
-            pathlib.PurePosixPath('phst_rules_elisp/elisp/ert/runner.elc'))
+        load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
+        runner = run_files.resolve(opts.runner_elc)
         args.append('--load=' + str(runner))
         # Note that using equals signs for --test-source, --skip-test, and
         # --skip-tag doesn’t work.

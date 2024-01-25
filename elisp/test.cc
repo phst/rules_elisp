@@ -15,6 +15,7 @@
 #include "elisp/test.h"
 
 #include <cstdlib>
+#include <vector>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -46,7 +47,9 @@ static absl::StatusOr<int> RunTestImpl(
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   if (!runfiles.ok()) return runfiles.status();
-  return Run(RULES_ELISP_RUN_TEST, args, *runfiles);
+  std::vector<NativeString> all_args = {RULES_ELISP_TEST_ARGS};
+  all_args.insert(all_args.end(), args.begin(), args.end());
+  return Run(RULES_ELISP_RUN_TEST, all_args, *runfiles);
 }
 
 int RunTest(const absl::Span<const NativeString> args) {
