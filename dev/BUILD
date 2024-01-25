@@ -17,11 +17,12 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = PACKAGE_FEATURES,
 )
 
 licenses(["notice"])
