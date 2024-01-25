@@ -33,7 +33,7 @@ runs:
   using: composite
   steps:
     - name: Install Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.10'
     - name: Install APT packages
@@ -57,14 +57,14 @@ runs:
           mingw-w64-x86_64-xpm-nox
       if: runner.os == 'Windows'
     - name: Cache Bazel repositories
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{runner.temp}}/bazel-repository-cache
         key: bazel-repositories-${{hashFiles('**/WORKSPACE', '**.bzl')}}
         restore-keys: |
           bazel-repositories-
     - name: Cache Bazel results
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ${{runner.temp}}/bazel-action-cache
         key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
