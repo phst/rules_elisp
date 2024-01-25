@@ -3359,7 +3359,7 @@
         "recordedRepoMappingEntries": []
       },
       "os:osx,arch:x86_64": {
-        "bzlTransitiveDigest": "30uj2FA+MYn2RhACwZLNQ9T3Xf30b6Ru2irOKpH5Oco=",
+        "bzlTransitiveDigest": "GI6yMOM2hDU7hVAHmfnV90TgIqJguaDlemn2az5C07E=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -6486,7 +6486,7 @@
         ]
       },
       "os:osx,arch:x86_64": {
-        "bzlTransitiveDigest": "LOWKv1+PD0X8qimiMCsxBrpZNChM/prQddzyNZo5DqM=",
+        "bzlTransitiveDigest": "bKQmgjp5dIfu9GCKCyjzjNzIgtQJehM/GHLL9qE1Qf0=",
         "accumulatedFileDigests": {
           "@@//dev:macos-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
         },

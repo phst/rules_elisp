@@ -4038,7 +4038,7 @@
         ]
       },
       "os:osx,arch:x86_64": {
-        "bzlTransitiveDigest": "Eht+ITItz1jGfnXT92ysY285UeNNT3JeruhvmItzLdY=",
+        "bzlTransitiveDigest": "y83SpR/5LgGqFP58HGuI5DaS+gCqWjBRSVcqPjIKL54=",
         "accumulatedFileDigests": {
           "@@phst_rules_elisp~override//dev:macos-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
         },
