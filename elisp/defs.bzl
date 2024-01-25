@@ -466,15 +466,13 @@ def _elisp_cc_module_impl(ctx):
     # coverage_common.instrumented_files_info.  See
     # https://github.com/bazelbuild/bazel/issues/15974.
     instrumented_files_info_kwargs = {}
-    if bazel_features.rules.instrumented_files_info_has_metadata_files:
-        coverage_metadata = [lib]
-        if ctx.configuration.coverage_enabled and ctx.coverage_instrumented():
-            # collect_cc_coverage.sh requires a file whose name ends in
-            # “runtime_objects_list.txt”.
-            objects_list = ctx.actions.declare_file(ctx.label.name + ".runtime_objects_list.txt")
-            ctx.actions.write(objects_list, lib.path + "\n")
-            coverage_metadata.append(objects_list)
-        instrumented_files_info_kwargs["metadata_files"] = coverage_metadata
+    if (bazel_features.rules.instrumented_files_info_has_metadata_files and
+        ctx.configuration.coverage_enabled and ctx.coverage_instrumented()):
+        # collect_cc_coverage.sh requires a file whose name ends in
+        # “runtime_objects_list.txt”.
+        objects_list = ctx.actions.declare_file(ctx.label.name + ".runtime_objects_list.txt")
+        ctx.actions.write(objects_list, lib.path + "\n")
+        instrumented_files_info_kwargs["metadata_files"] = [lib, objects_list]
 
     load_path = [_resolve_load_path(ctx, "")]
     return [
