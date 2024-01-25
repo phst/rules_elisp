@@ -14,7 +14,15 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_python//python:defs.bzl", "py_test")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_manual", "elisp_proto_library", "elisp_test")
+load(
+    "//elisp:defs.bzl",
+    "elisp_binary",
+    "elisp_cc_module",
+    "elisp_library",
+    "elisp_manual",
+    "elisp_proto_library",
+    "elisp_test",
+)
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(

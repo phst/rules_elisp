@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,7 +28,10 @@ import (
 // Resolve implements Resolver.Resolve.  It adds a deps attribute to the given
 // rule.  imports should be an Imports object, and ix should contain mappings
 // for the features in imports.
-func (elisp) Resolve(c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache, r *rule.Rule, imports interface{}, from label.Label) {
+func (elisp) Resolve(
+	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
+	r *rule.Rule, imports interface{}, from label.Label,
+) {
 	imp, ok := imports.(Imports)
 	if !ok {
 		return

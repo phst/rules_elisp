@@ -185,54 +185,110 @@ func Test(t *testing.T) {
 		Properties: properties{[]property{{"emacs-version", emacsVersion}}},
 		TestCases: []testCase{
 			{
-				Name: "abort", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `peculiar error: "Boo"`, Type: `undefined-error-symbol`, Description: "something"},
+				Name:      "abort",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `peculiar error: "Boo"`,
+					Type:        `undefined-error-symbol`,
+					Description: "something",
+				},
 			},
 			{
-				Name: "command-line", ClassName: "ERT", Time: wantElapsed,
+				Name:      "command-line",
+				ClassName: "ERT",
+				Time:      wantElapsed,
 			},
 			{
-				Name: "coverage", ClassName: "ERT", Time: wantElapsed,
+				Name:      "coverage",
+				ClassName: "ERT",
+				Time:      wantElapsed,
 			},
 			{
-				Name: "error", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `Boo`, Type: `error`, Description: "something"},
+				Name:      "error",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `Boo`,
+					Type:        `error`,
+					Description: "something",
+				},
 			},
 			{
-				Name: "ert-fail", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `Test failed: "Fail!"`, Type: `ert-test-failed`, Description: "something"},
+				Name:      "ert-fail",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `Test failed: "Fail!"`,
+					Type:        `ert-test-failed`,
+					Description: "something",
+				},
 			},
 			{
-				Name: "expect-failure", ClassName: "ERT", Time: wantElapsed,
+				Name:      "expect-failure",
+				ClassName: "ERT",
+				Time:      wantElapsed,
 			},
 			{
-				Name: "expect-failure-but-pass", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `Test passed unexpectedly`, Type: `error`},
+				Name:      "expect-failure-but-pass",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message: `Test passed unexpectedly`,
+					Type:    `error`,
+				},
 			},
 			{
-				Name: "fail", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`, Type: `ert-test-failed`, Description: "something"},
+				Name:      "fail",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
+					Type:        `ert-test-failed`,
+					Description: "something",
+				},
 			},
 			{
-				Name: "pass", ClassName: "ERT", Time: wantElapsed,
+				Name:      "pass",
+				ClassName: "ERT",
+				Time:      wantElapsed,
 			},
 			{
-				Name: "skip", ClassName: "ERT", Time: wantElapsed,
-				Skipped: message{Message: "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)", Description: "something"},
+				Name:      "skip",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Skipped: message{
+					Message:     "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)",
+					Description: "something",
+				},
 			},
 			{
-				Name: "special-chars", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->", Type: `error`, Description: "something"},
+				Name:      "special-chars",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->",
+					Type:        `error`,
+					Description: "something",
+				},
 			},
 			{
-				Name: "throw", ClassName: "ERT", Time: wantElapsed,
-				Failure: message{Message: `No catch for tag: unknown-tag, hi`, Type: `no-catch`, Description: "something"},
+				Name:      "throw",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `No catch for tag: unknown-tag, hi`,
+					Type:        `no-catch`,
+					Description: "something",
+				},
 			},
 		},
 	}
 	if diff := cmp.Diff(
 		gotReport, wantReport,
-		cmp.Transformer("time.Time", toTime), cmpopts.EquateApprox(0, wantElapsed), cmpopts.EquateApproxTime(margin),
+		cmp.Transformer("time.Time", toTime),
+		cmpopts.EquateApprox(0, wantElapsed),
+		cmpopts.EquateApproxTime(margin),
 		// We only check that the description isn’t absent or empty.
 		cmp.FilterPath(isDescription, cmp.Comparer(bothEmpty)),
 	); diff != "" {

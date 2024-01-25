@@ -19,7 +19,21 @@ These definitions are internal and subject to change without notice."""
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(":generated.bzl", "CHR", "ORD")
 
-visibility(["//", "//dev", "//docs", "//elisp", "//elisp/ert", "//elisp/proto", "//elisp/runfiles", "//emacs", "//examples", "//gazelle", "//tests", "//tests/pkg", "//tests/wrap"])
+visibility([
+    "//",
+    "//dev",
+    "//docs",
+    "//elisp",
+    "//elisp/ert",
+    "//elisp/proto",
+    "//elisp/runfiles",
+    "//emacs",
+    "//examples",
+    "//gazelle",
+    "//tests",
+    "//tests/pkg",
+    "//tests/wrap",
+])
 
 DOCUMENT_EXTENSIONS = hasattr(native, "starlark_doc_extract")
 
