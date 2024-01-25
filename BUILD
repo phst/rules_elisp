@@ -14,11 +14,12 @@
 
 load("@rules_license//rules:license.bzl", "license")
 load("@rules_python//python:defs.bzl", "py_binary")
+load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = [":license"],
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = PACKAGE_FEATURES,
 )
 
 licenses(["notice"])

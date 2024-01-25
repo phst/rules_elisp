@@ -19,7 +19,7 @@ These definitions are internal and subject to change without notice."""
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(":generated.bzl", "CHR", "ORD")
 
-visibility(["//docs", "//elisp", "//elisp/proto", "//emacs", "//tests/wrap"])
+visibility(["//", "//dev", "//docs", "//elisp", "//elisp/ert", "//elisp/proto", "//elisp/runfiles", "//emacs", "//examples", "//gazelle", "//tests", "//tests/pkg", "//tests/wrap"])
 
 DOCUMENT_EXTENSIONS = hasattr(native, "starlark_doc_extract")
 
@@ -373,6 +373,11 @@ def run_emacs(
         input_manifests = input_manifests,
         toolchain = Label("//elisp:toolchain_type"),
     )
+
+# Features for all packages.  These may not contain select expressions.
+# FIXME: Once all supported Bazel versions parse REPO.bazel, move these features
+# there, and remove them from BUILD files.
+PACKAGE_FEATURES = ["-macos_default_link_flags"]
 
 FEATURES = select({
     Label("//private:msvc-cl"): [

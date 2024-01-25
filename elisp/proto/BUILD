@@ -14,12 +14,12 @@
 
 load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
-load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
+load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = PACKAGE_FEATURES,
 )
 
 licenses(["notice"])

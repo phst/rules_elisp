@@ -13,11 +13,12 @@
 # limitations under the License.
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
+load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = PACKAGE_FEATURES,
 )
 
 licenses(["notice"])

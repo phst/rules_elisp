@@ -17,12 +17,12 @@ load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "merged_manual")
+load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "PACKAGE_FEATURES", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = PACKAGE_FEATURES,
 )
 
 licenses(["notice"])
