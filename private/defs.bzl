@@ -20,6 +20,7 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility([
+    # keep sorted
     "//",
     "//dev",
     "//docs",
