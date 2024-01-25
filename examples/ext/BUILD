@@ -18,7 +18,12 @@ package(
     default_applicable_licenses = ["@phst_rules_elisp//:license"],
     default_testonly = True,
     default_visibility = ["//visibility:private"],
-    features = ["-macos_default_link_flags"],
+    features = [
+        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+        # https://github.com/bazelbuild/bazel/issues/21029.
+        "-compiler_param_file",
+        "-macos_default_link_flags",
+    ],
 )
 
 licenses(["notice"])
