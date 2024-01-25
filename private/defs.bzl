@@ -388,14 +388,14 @@ def run_emacs(
 # Features for all packages.  These may not contain select expressions.
 # FIXME: Once all supported Bazel versions parse REPO.bazel, move these features
 # there, and remove them from BUILD files.
-PACKAGE_FEATURES = ["-macos_default_link_flags"]
+PACKAGE_FEATURES = [
+    # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+    # https://github.com/bazelbuild/bazel/issues/21029.
+    "-compiler_param_file",
+    "-macos_default_link_flags",
+]
 
 FEATURES = select({
-    Label("//private:msvc-cl"): [
-        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
-        # https://github.com/bazelbuild/bazel/issues/21029.
-        "-compiler_param_file",
-    ],
     # We can’t use treat_warnings_as_errors on macOS yet because it tries to
     # pass a flag -fatal-warnings to the linker, but the macOS linker accepts
     # -fatal_warnings instead.  See
