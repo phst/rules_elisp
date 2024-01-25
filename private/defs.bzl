@@ -32,7 +32,6 @@ visibility([
     "//gazelle",
     "//tests",
     "//tests/pkg",
-    "//tests/wrap",
 ])
 
 DOCUMENT_EXTENSIONS = hasattr(native, "starlark_doc_extract")
