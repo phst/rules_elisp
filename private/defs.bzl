@@ -377,7 +377,7 @@ def run_emacs(
 FEATURES = select({
     Label("//private:msvc-cl"): [
         # On Windows, Bazel generates incorrectly-escaped parameter files.  See
-        # https://groups.google.com/g/bazel-discuss/c/xQMWQcgnP30.
+        # https://github.com/bazelbuild/bazel/issues/21029.
         "-compiler_param_file",
     ],
     # We can’t use treat_warnings_as_errors on macOS yet because it tries to
