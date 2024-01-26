@@ -26,7 +26,8 @@ from absl.testing import absltest
 from elisp import runfiles
 
 
-flags.DEFINE_string('binary', '', 'location of the //elisp:binary_main target')
+flags.DEFINE_string('binary', None, 'location of the //elisp:binary_main target',
+                    required=True)
 flags.DEFINE_string('binary-cc', None, 'location of the //elisp:binary.cc file',
                     required=True)
 
