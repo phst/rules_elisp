@@ -2794,7 +2794,7 @@
     },
     "@@rules_go~0.44.0//go:extensions.bzl%go_sdk": {
       "os:osx,arch:aarch64": {
-        "bzlTransitiveDigest": "30uj2FA+MYn2RhACwZLNQ9T3Xf30b6Ru2irOKpH5Oco=",
+        "bzlTransitiveDigest": "GI6yMOM2hDU7hVAHmfnV90TgIqJguaDlemn2az5C07E=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -7797,7 +7797,7 @@
         ]
       },
       "os:osx,arch:aarch64": {
-        "bzlTransitiveDigest": "CUZIrD/D69Rh2b2dKHSHM9shcgZQo/XR9EXeyVSZmyQ=",
+        "bzlTransitiveDigest": "SVbQ3te0BXEjv2AuWe3Zr3uX4EkdYPCFHz+PI+umP44=",
         "accumulatedFileDigests": {
           "@@//dev:macos-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
         },
