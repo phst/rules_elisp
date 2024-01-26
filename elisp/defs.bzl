@@ -597,9 +597,9 @@ elisp_binary = rule(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
-        "_launcher_src": attr.label(
-            default = Label("//elisp:binary_main.cc"),
-            allow_single_file = [".cc"],
+        "_launcher_srcs": attr.label_list(
+            default = [Label("//elisp:binary_main.cc")],
+            allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),
@@ -666,9 +666,9 @@ elisp_test = rule(
             default = [Label("//elisp:test")],
             providers = [CcInfo],
         ),
-        "_launcher_src": attr.label(
-            default = Label("//elisp:test_main.cc"),
-            allow_single_file = [".cc"],
+        "_launcher_srcs": attr.label_list(
+            default = [Label("//elisp:test_main.cc")],
+            allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),
@@ -1060,7 +1060,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
 def _binary(ctx, *, srcs, tags, args, libs):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
-    The rule should define a “_launcher_src” attribute containing the main C++
+    The rule should define a “_launcher_srcs” attribute containing the main C++
     program source file.
 
     Args:
@@ -1143,7 +1143,7 @@ def _binary(ctx, *, srcs, tags, args, libs):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        ctx.files._launcher_src,
+        ctx.files._launcher_srcs,
         libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_strings([

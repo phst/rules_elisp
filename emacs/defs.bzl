@@ -41,7 +41,7 @@ def _emacs_binary_impl(ctx):
     executable, runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        ctx.files._launcher_src,
+        ctx.files._launcher_srcs,
         ctx.attr._emacs_libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_string(
@@ -102,9 +102,9 @@ This is used by Gazelle.""",
             default = [Label("//elisp:emacs")],
             providers = [CcInfo],
         ),
-        "_launcher_src": attr.label(
-            default = Label("//emacs:launcher.cc"),
-            allow_single_file = [".cc"],
+        "_launcher_srcs": attr.label_list(
+            default = [Label("//emacs:launcher.cc")],
+            allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
             default = Label("//elisp:launcher_defaults"),
