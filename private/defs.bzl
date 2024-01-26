@@ -773,3 +773,10 @@ def _parse_features(features):
         [f for f in features if not f.startswith("-")],
         [f.removeprefix("-") for f in features if f.startswith("-")],
     )
+
+EMACS_LAUNCHER_SRCS = [Label("//emacs:launcher.cc")]
+EMACS_LAUNCHER_DEPS = [Label("//elisp:emacs")]
+BINARY_LAUNCHER_SRCS = [Label("//elisp:binary_main.cc")]
+BINARY_LAUNCHER_DEPS = [Label("//elisp:binary")]
+TEST_LAUNCHER_SRCS = [Label("//elisp:test_main.cc")]
+TEST_LAUNCHER_DEPS = [Label("//elisp:test")]

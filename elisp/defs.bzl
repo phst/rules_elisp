@@ -20,8 +20,12 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
+    "BINARY_LAUNCHER_DEPS",
+    "BINARY_LAUNCHER_SRCS",
     "CcDefaultInfo",
     "ModuleConfigInfo",
+    "TEST_LAUNCHER_DEPS",
+    "TEST_LAUNCHER_SRCS",
     "cc_launcher",
     "check_relative_filename",
     "cpp_strings",
@@ -594,11 +598,11 @@ elisp_binary = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_binary_libs": attr.label_list(
-            default = [Label("//elisp:binary")],
+            default = BINARY_LAUNCHER_DEPS,
             providers = [CcInfo],
         ),
         "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:binary_main.cc")],
+            default = BINARY_LAUNCHER_SRCS,
             allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
@@ -663,11 +667,11 @@ elisp_test = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_test_libs": attr.label_list(
-            default = [Label("//elisp:test")],
+            default = TEST_LAUNCHER_DEPS,
             providers = [CcInfo],
         ),
         "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:test_main.cc")],
+            default = TEST_LAUNCHER_SRCS,
             allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(

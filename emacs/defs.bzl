@@ -23,6 +23,8 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_c
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
+    "EMACS_LAUNCHER_DEPS",
+    "EMACS_LAUNCHER_SRCS",
     "cc_launcher",
     "cpp_string",
     "runfile_location",
@@ -99,11 +101,11 @@ This is used by Gazelle.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_libs": attr.label_list(
-            default = [Label("//elisp:emacs")],
+            default = EMACS_LAUNCHER_DEPS,
             providers = [CcInfo],
         ),
         "_launcher_srcs": attr.label_list(
-            default = [Label("//emacs:launcher.cc")],
+            default = EMACS_LAUNCHER_SRCS,
             allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(

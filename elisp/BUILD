@@ -16,7 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_library", "py_test")
-load("//private:defs.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "PACKAGE_FEATURES", "bootstrap", "cc_defaults", "executable_only", "module_config")
+load("//private:defs.bzl", "BINARY_LAUNCHER_DEPS", "BINARY_LAUNCHER_SRCS", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS", "LINKOPTS", "PACKAGE_FEATURES", "TEST_LAUNCHER_DEPS", "TEST_LAUNCHER_SRCS", "bootstrap", "cc_defaults", "executable_only", "module_config")
 load(":defs.bzl", "elisp_binary", "elisp_toolchain")
 
 package(
@@ -200,7 +200,7 @@ executable_only(
 cc_binary(
     name = "binary_main",
     testonly = True,
-    srcs = ["binary_main.cc"],
+    srcs = BINARY_LAUNCHER_SRCS,
     copts = LAUNCHER_COPTS,
     data = [":wrap_stripped"],
     features = LAUNCHER_FEATURES,
@@ -220,7 +220,7 @@ cc_binary(
             'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
-    deps = [":binary"],
+    deps = BINARY_LAUNCHER_DEPS,
 )
 
 build_test(
@@ -328,7 +328,7 @@ executable_only(
 cc_binary(
     name = "test_main",
     testonly = True,
-    srcs = ["test_main.cc"],
+    srcs = TEST_LAUNCHER_SRCS,
     copts = LAUNCHER_COPTS,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
@@ -338,7 +338,7 @@ cc_binary(
         # add additional quoting.
         shell.quote('RULES_ELISP_ARGS=RULES_ELISP_NATIVE_LITERAL("dummy")'),
     ],
-    deps = [":test"],
+    deps = TEST_LAUNCHER_DEPS,
 )
 
 build_test(
