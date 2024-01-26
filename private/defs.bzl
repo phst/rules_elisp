@@ -178,7 +178,7 @@ def repository_relative_filename(file):
             fail("invalid name {}", file.short_path)
     return name
 
-def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
+def cc_launcher(ctx, cc_toolchain, srcs, deps, *, defines):
     """Builds a launcher executable that starts Emacs.
 
     You can use `find_cpp_toolchain` to construct an appropriate value for
@@ -187,7 +187,8 @@ def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
     Args:
       ctx (ctx): rule context
       cc_toolchain (Provider): the C++ toolchain to use to compile the launcher
-      src (File): C++ source file to compile; should contain a `main` function
+      srcs (list of Files): C++ source file to compile; exactly one should
+          contain a `main` function
       deps (list of Targets): `cc_library` targets to add as dependencies
       defines (list of strings): additional preprocessor definitions for
           compiling `src`
@@ -210,7 +211,7 @@ def cc_launcher(ctx, cc_toolchain, src, deps, *, defines):
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
-        srcs = [src],
+        srcs = srcs,
         compilation_contexts = [info.compilation_context for info in infos],
         local_defines = defaults.defines + defines,
         user_compile_flags = defaults.copts,

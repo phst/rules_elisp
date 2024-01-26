@@ -41,7 +41,7 @@ def _emacs_binary_impl(ctx):
     executable, runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        ctx.file._launcher_src,
+        ctx.files._launcher_src,
         ctx.attr._emacs_libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_string(

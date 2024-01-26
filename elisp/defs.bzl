@@ -1143,7 +1143,7 @@ def _binary(ctx, *, srcs, tags, args, libs):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         cc_toolchain,
-        ctx.file._launcher_src,
+        ctx.files._launcher_src,
         libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_strings([
