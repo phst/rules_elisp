@@ -27,7 +27,8 @@ from elisp import runfiles
 
 
 flags.DEFINE_string('binary', '', 'location of the //elisp:binary_main target')
-flags.DEFINE_string('binary-cc', None, 'location of the //elisp:binary.cc file')
+flags.DEFINE_string('binary-cc', None, 'location of the //elisp:binary.cc file',
+                    required=True)
 
 
 class BinaryTest(absltest.TestCase):
@@ -58,5 +59,4 @@ class BinaryTest(absltest.TestCase):
 
 
 if __name__ == '__main__':
-    flags.mark_flag_as_required('binary-cc')
     absltest.main()
