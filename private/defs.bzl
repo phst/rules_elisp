@@ -17,6 +17,7 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//", "//dev", "//docs", "//elisp", "//elisp/ert", "//elisp/proto", "//elisp/runfiles", "//emacs", "//examples", "//gazelle", "//tests", "//tests/pkg", "//tests/wrap"])
@@ -178,18 +179,11 @@ def repository_relative_filename(file):
             fail("invalid name {}", file.short_path)
     return name
 
-def cc_launcher(ctx, cc_toolchain, srcs, deps, *, defines):
+def cc_launcher(ctx, *, defines):
     """Builds a launcher executable that starts Emacs.
-
-    You can use `find_cpp_toolchain` to construct an appropriate value for
-    `cc_toolchain`.
 
     Args:
       ctx (ctx): rule context
-      cc_toolchain (Provider): the C++ toolchain to use to compile the launcher
-      srcs (list of Files): C++ source file to compile; exactly one should
-          contain a `main` function
-      deps (list of Targets): `cc_library` targets to add as dependencies
       defines (list of strings): additional preprocessor definitions for
           compiling `src`
 
@@ -198,6 +192,8 @@ def cc_launcher(ctx, cc_toolchain, srcs, deps, *, defines):
       representing the executable that starts Emacs and `runfiles` is a
       `runfiles` object for the runfiles that the executable will need
     """
+    cc_toolchain = find_cpp_toolchain(ctx)
+    deps = ctx.attr._launcher_deps
     infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._launcher_defaults[CcDefaultInfo]
     feature_configuration = cc_common.configure_features(
@@ -211,7 +207,7 @@ def cc_launcher(ctx, cc_toolchain, srcs, deps, *, defines):
         actions = ctx.actions,
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
-        srcs = srcs,
+        srcs = ctx.files._launcher_srcs,
         compilation_contexts = [info.compilation_context for info in infos],
         local_defines = defaults.defines + defines,
         user_compile_flags = defaults.copts,

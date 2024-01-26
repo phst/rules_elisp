@@ -19,7 +19,7 @@ load(
     "CPP_LINK_EXECUTABLE_ACTION_NAME",
     "C_COMPILE_ACTION_NAME",
 )
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -32,7 +32,6 @@ visibility("public")
 
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
-    cc_toolchain = find_cpp_toolchain(ctx)
     emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
 
     # It’s not possible to refer to a directory as a label, so we refer to a
@@ -40,9 +39,6 @@ def _emacs_binary_impl(ctx):
     install = _install(ctx, emacs_cc_toolchain, ctx.file.readme)
     executable, runfiles = cc_launcher(
         ctx,
-        cc_toolchain,
-        ctx.files._launcher_srcs,
-        ctx.attr._emacs_libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_string(
                 "--install=" + runfile_location(ctx, install),
@@ -98,7 +94,7 @@ This is used by Gazelle.""",
             default = Label("//emacs:cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        "_emacs_libs": attr.label_list(
+        "_launcher_deps": attr.label_list(
             default = [Label("//elisp:emacs")],
             providers = [CcInfo],
         ),

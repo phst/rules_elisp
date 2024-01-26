@@ -203,7 +203,6 @@ def _elisp_binary_impl(ctx):
         srcs = ctx.files.src,
         tags = [],
         args = args,
-        libs = ctx.attr._binary_libs,
     )
     return [
         DefaultInfo(
@@ -232,7 +231,6 @@ def _elisp_test_impl(ctx):
         # cf. https://bazel.build/reference/be/common-definitions#test.local.
         tags = ["local"] if ctx.attr.local else [],
         args = args,
-        libs = ctx.attr._test_libs,
     )
 
     # We include the original source files in the runfiles so that error
@@ -593,7 +591,7 @@ elisp_binary = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        "_binary_libs": attr.label_list(
+        "_launcher_deps": attr.label_list(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
@@ -662,7 +660,7 @@ elisp_test = rule(
             default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        "_test_libs": attr.label_list(
+        "_launcher_deps": attr.label_list(
             default = [Label("//elisp:test")],
             providers = [CcInfo],
         ),
@@ -1057,7 +1055,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, *, srcs, tags, args, libs):
+def _binary(ctx, *, srcs, tags, args):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_launcher_srcs” attribute containing the main C++
@@ -1068,7 +1066,6 @@ def _binary(ctx, *, srcs, tags, args, libs):
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
       args: a list of rule-specific program arguments
-      libs (list of Targets): `cc_library` targets to be added as dependencies
 
     Returns:
       a pair (executable, runfiles) containing the compiled binary and the
@@ -1139,12 +1136,8 @@ def _binary(ctx, *, srcs, tags, args, libs):
     # of misinterpreting special characters in a filename.
     # check_relative_filename should already reject all special characters, but
     # better be sure.
-    cc_toolchain = find_cpp_toolchain(ctx)
     executable, launcher_runfiles = cc_launcher(
         ctx,
-        cc_toolchain,
-        ctx.files._launcher_srcs,
-        libs,
         defines = [
             "RULES_ELISP_ARGS=" + cpp_strings([
                 "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
