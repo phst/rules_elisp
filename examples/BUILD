@@ -18,6 +18,7 @@ load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "el
 
 package(
     default_applicable_licenses = ["//:license"],
+    default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = ["-macos_default_link_flags"],
 )

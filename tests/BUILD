@@ -25,6 +25,7 @@ load(":private/defs.bzl", "elisp_test_suite")
 
 package(
     default_applicable_licenses = ["//:license"],
+    default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = ["-macos_default_link_flags"],
 )

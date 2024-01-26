@@ -16,6 +16,7 @@ load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
 
 package(
     default_applicable_licenses = ["@phst_rules_elisp//:license"],
+    default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = ["-macos_default_link_flags"],
 )
