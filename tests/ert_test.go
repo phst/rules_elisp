@@ -310,7 +310,6 @@ func Test(t *testing.T) {
 	gotCoverage := string(b)
 	// See geninfo(1) for the coverage file format.  The function hit count
 	// doesn’t work yet for nested functions.
-	wantCoverage := wantCoverage // make local copy
 	// Depending on the exact runfiles layout, the test runner might have
 	// printed different representations of test filenames.
 	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
