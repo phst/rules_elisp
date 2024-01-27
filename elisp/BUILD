@@ -129,8 +129,8 @@ bzl_library(
     name = "defs_bzl",
     srcs = ["defs.bzl"],
     deps = [
-        ":features_bzl",
         "//private:defs_bzl",
+        "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
     ],
@@ -160,12 +160,6 @@ bzl_library(
         "//emacs:__pkg__",
         "//private:__pkg__",
     ],
-)
-
-bzl_library(
-    name = "features_bzl",
-    srcs = ["@bazel_features//:bzl_files"],
-    visibility = ["//docs:__pkg__"],
 )
 
 cc_library(
