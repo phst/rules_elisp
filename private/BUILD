@@ -73,6 +73,7 @@ expand_template(
 
 diff_test(
     name = "generated_test",
+    timeout = "short",
     failure_message = """Please run
 
     bazel build //private:generated.expanded.bzl
