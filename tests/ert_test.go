@@ -33,8 +33,9 @@ import (
 )
 
 var (
-	binary  = flag.String("binary", "", "location of the binary file relative to the runfiles root")
-	test_el = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	binary                = flag.String("binary", "", "location of the binary file relative to the runfiles root")
+	test_el               = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
 func Test(t *testing.T) {
@@ -314,6 +315,16 @@ func Test(t *testing.T) {
 	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
 	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
 		t.Error("coverage report (-got +want):\n", diff)
+	}
+
+	if *regenerateCoverageDat {
+		workspace := os.Getenv("BUILD_WORKSPACE_DIRECTORY")
+		if workspace == "" {
+			t.Fatal("to regenerate //tests:coverage.dat, run “bazel run -- //tests:go_default_test --regenerate-coverage-dat”")
+		}
+		if err := os.WriteFile(filepath.Join(workspace, "tests", "coverage.dat"), []byte(gotCoverage), 0644); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 
