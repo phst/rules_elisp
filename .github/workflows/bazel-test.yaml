@@ -61,6 +61,12 @@ jobs:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
           # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
           BAZELISK_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          # We don’t need XCode, and using the Unix toolchain tends to be less
+          # flaky.  See
+          # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
+          # Use the Unix toolchain only on Github to make coverage generation
+          # work locally; see https://github.com/bazelbuild/bazel/issues/14970.
+          BAZEL_USE_CPP_ONLY_TOOLCHAIN: '1'
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:
