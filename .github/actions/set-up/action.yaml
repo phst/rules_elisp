@@ -15,6 +15,11 @@
 name: Set up Bazel workspace
 description: Install necessary dependencies and load remote caches
 
+inputs:
+  github-token:
+    description: GitHub authentication token from secrets.GITHUB_TOKEN
+    required: true
+
 outputs:
   repository-cache:
     description: Bazel repository cache directory
@@ -83,4 +88,19 @@ runs:
         common --show_result=0
         common --nostamp
         test --test_output=errors
+        EOF
+    - name: Set up environment
+      # BAZELISK_GITHUB_TOKEN: See
+      # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467.
+      #
+      # BAZEL_USE_CPP_ONLY_TOOLCHAIN: We don’t need XCode, and using the Unix
+      # toolchain tends to be less flaky.  See
+      # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
+      # Use the Unix toolchain only on Github to make coverage generation work
+      # locally; see https://github.com/bazelbuild/bazel/issues/14970.
+      shell: bash
+      run: |
+        cat >> "${GITHUB_ENV:?}" <<'EOF'
+        BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
+        BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
         EOF
