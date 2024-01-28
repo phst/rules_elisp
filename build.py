@@ -265,14 +265,6 @@ class Builder:
         args.extend(targets)
         env = dict(self._env)
         if self._github:
-            if self._kernel == 'Darwin':
-                # We don’t need XCode, and using the Unix toolchain tends to be
-                # less flaky.  See
-                # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
-                # Use the Unix toolchain only on Github to make coverage
-                # generation work locally; see
-                # https://github.com/bazelbuild/bazel/issues/14970.
-                env['BAZEL_USE_CPP_ONLY_TOOLCHAIN'] = '1'
             # Hacks so that Bazel finds the right binaries on GitHub.  See
             # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
             if self._kernel == 'Windows':
