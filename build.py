@@ -265,8 +265,8 @@ class Builder:
         args.extend(targets)
         env = dict(self._env)
         if self._github:
-            # Hacks so that Bazel finds the right binaries on GitHub.  See
-            # https://docs.github.com/en/actions/learn-github-actions/environment-variables#default-environment-variables.
+            # Make Bazel find the right binaries on GitHub.  See
+            # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
             if self._kernel == 'Windows':
                 env['BAZEL_SH'] = str(self._msys2 / 'usr' / 'bin' / 'bash.exe')
         return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
