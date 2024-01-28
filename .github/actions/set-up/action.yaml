@@ -46,7 +46,7 @@ runs:
       uses: msys2/setup-msys2@v2
       with:
         update: false
-        release: true
+        release: false
         # See nt/INSTALL.W64 for the list of required MSYS2 packages
         install: >
           base-devel
@@ -58,7 +58,7 @@ runs:
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
       shell: cmd
       run: |
-        ECHO BAZEL_SH=%RUNNER_TEMP%\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
+        ECHO BAZEL_SH=C:\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
       if: runner.os == 'Windows'
     - name: Cache Bazel repositories
       uses: actions/cache@v4
