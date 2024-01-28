@@ -68,12 +68,7 @@ jobs:
           BAZEL_USE_CPP_ONLY_TOOLCHAIN: '1'
           # Make Bazel find the right binaries on GitHub.  See
           # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
-          BAZEL_SH: >-
-            ${{
-            steps.setup.outputs.msys2
-            && steps.setup.outputs.msys2 + '\usr\bin\bash.exe'
-            || '/bin/bash'
-            }}
+          BAZEL_SH: ${{steps.setup.outputs.bash}}
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:
