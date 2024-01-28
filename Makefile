@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SHELL := /bin/sh
+.POSIX:
 
-MAKEFLAGS += --always-make
+SHELL = /bin/sh
 
 .DEFAULT:
 	./build.py -- $@
@@ -22,5 +22,4 @@ MAKEFLAGS += --always-make
 all:
 	./build.py
 
-.PHONY: all
 .SUFFIXES:
