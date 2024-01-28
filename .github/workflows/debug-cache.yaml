@@ -44,9 +44,6 @@ jobs:
           USE_BAZEL_VERSION: latest
           # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
           BAZELISK_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          # Make Bazel find the right binaries on GitHub.  See
-          # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
-          BAZEL_SH: ${{steps.setup.outputs.bash}}
       - name: Upload binary execution log
         uses: actions/upload-artifact@v4
         with:

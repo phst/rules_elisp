@@ -16,14 +16,6 @@ name: Set up Bazel workspace
 description: Install necessary dependencies and load remote caches
 
 outputs:
-  bash:
-    description: Location of the Bash program
-    value: >-
-      ${{
-      runner.os == 'Windows'
-      && format('{0}\MSYS64\usr\bin\bash.exe', runner.temp)
-      || '/bin/bash'
-      }}
   repository-cache:
     description: Bazel repository cache directory
     value: ${{runner.temp}}/bazel-repository-cache
@@ -60,6 +52,13 @@ runs:
           base-devel
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-xpm-nox
+      if: runner.os == 'Windows'
+    - name: Set up MSYS2 environment
+      # Make Bazel find the right binaries on GitHub.  See
+      # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
+      shell: cmd
+      run: |
+        ECHO BAZEL_SH=%RUNNER_TEMP%\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
       if: runner.os == 'Windows'
     - name: Cache Bazel repositories
       uses: actions/cache@v4
