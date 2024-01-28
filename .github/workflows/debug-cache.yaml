@@ -31,6 +31,8 @@ jobs:
       - id: setup
         name: Set up workspace
         uses: ./.github/actions/set-up
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Make Bazel write an execution log
         shell: bash
         # The .bazelrc parser treats backslashes as escape characters, so
@@ -50,8 +52,6 @@ jobs:
           -- emacs
         env:
           USE_BAZEL_VERSION: latest
-          # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467
-          BAZELISK_GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Upload binary execution log
         uses: actions/upload-artifact@v4
         with:
