@@ -18,7 +18,7 @@ description: Install necessary dependencies and load remote caches
 outputs:
   msys2:
     description: Directory where MSYS2 is installed on Windows
-    value: ${{runner.temp}}/MSYS64
+    value: ${{runner.os == 'Windows' && format('{0}\MSYS64', runner.temp) || null}}
   repository-cache:
     description: Bazel repository cache directory
     value: ${{runner.temp}}/bazel-repository-cache
