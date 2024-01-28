@@ -101,12 +101,6 @@ class Builder:
             func(self)
 
     @target
-    def all(self) -> None:
-        """Builds all targets."""
-        self.generate()
-        self.check()
-
-    @target
     def check(self) -> None:
         """Builds and tests the project."""
         self.buildifier()
@@ -116,12 +110,6 @@ class Builder:
         self.test()
         self.versions()
         self.ext()
-
-    @target
-    def generate(self) -> None:
-        """Generates files to be checked in."""
-        self.compdb()
-        self.coverage()
 
     @target
     def buildifier(self) -> None:
@@ -201,30 +189,6 @@ class Builder:
         self._test(cwd=self._workspace / 'examples' / 'ext', profile='ext')
 
     @target
-    def compdb(self) -> None:
-        """Generates a compilation database for clangd."""
-        options = (
-            '--enable_bzlmod',
-            '--lockfile_mode=off',
-            '--output_groups=-check_python',
-        )
-        args = ['@hedron_compile_commands//:refresh_all']
-        args.extend(self._bazel_options())
-        args.extend(options)
-        self._bazel('run', args, options=options)
-
-    @target
-    def coverage(self) -> None:
-        """Generates a coverage report."""
-        directory = self._workspace / 'coverage-report'
-        self._bazel('run',
-                    ['@phst_bazelcov//:bazelcov',
-                     f'--bazel={self._bazel_program}', f'--output={directory}'],
-                    options=['--enable_bzlmod',
-                             '--lockfile_mode=off'])
-        print(f'coverage report written to {directory}')
-
-    @target
     def lock(self) -> None:
         """Manually update MODULE.bazel.lock."""
         cwds = (
@@ -234,18 +198,6 @@ class Builder:
         for cwd in cwds:
             _run([str(self._bazel_program), 'mod', 'deps',
                   '--lockfile_mode=update'], cwd=cwd)
-
-    @target
-    def install(self) -> None:
-        """Installs the Info manual."""
-        self._bazel('build', ['//docs:rules_elisp.info'])
-        bin_dir = self._workspace / 'bazel-bin'
-        info_dir = pathlib.Path('/usr/local/share/info')
-        src = bin_dir / 'docs' / 'rules_elisp.info'
-        dest = info_dir / 'rules_elisp.info'
-        _run(['install', '-d', '--', str(info_dir)])
-        _run(['install', '-m', '0644', '--', str(src), str(dest)])
-        _run(['install-info', '--', str(dest), str(info_dir / 'dir')])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (),
@@ -290,7 +242,7 @@ def main() -> None:
     parser.add_argument('--action-cache', type=_path)
     parser.add_argument('--repository-cache', type=_path)
     parser.add_argument('--profiles', type=_path)
-    parser.add_argument('goals', nargs='*', default=['all'])
+    parser.add_argument('goals', nargs='*', default=['check'])
     args = parser.parse_args()
     builder = Builder(action_cache=args.action_cache,
                       repository_cache=args.repository_cache,
