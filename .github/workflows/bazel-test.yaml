@@ -52,7 +52,6 @@ jobs:
         run: >
           python build.py
           --bazel=bazelisk
-          --msys2="${{steps.setup.outputs.msys2}}"
           --action-cache="${{steps.setup.outputs.action-cache}}"
           --repository-cache="${{steps.setup.outputs.repository-cache}}"
           --profiles="${{steps.setup.outputs.profiles}}"
@@ -67,6 +66,14 @@ jobs:
           # Use the Unix toolchain only on Github to make coverage generation
           # work locally; see https://github.com/bazelbuild/bazel/issues/14970.
           BAZEL_USE_CPP_ONLY_TOOLCHAIN: '1'
+          # Make Bazel find the right binaries on GitHub.  See
+          # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
+          BAZEL_SH: >-
+            ${{
+            steps.setup.outputs.msys2
+            && steps.setup.outputs.msys2 + '\usr\bin\bash.exe'
+            || '/bin/bash'
+            }}
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:
