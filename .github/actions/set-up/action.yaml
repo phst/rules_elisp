@@ -20,14 +20,6 @@ inputs:
     description: GitHub authentication token from secrets.GITHUB_TOKEN
     required: true
 
-outputs:
-  repository-cache:
-    description: Bazel repository cache directory
-    value: ${{runner.temp}}/bazel-repository-cache
-  action-cache:
-    description: Bazel action cache directory
-    value: ${{runner.temp}}/bazel-action-cache
-
 runs:
   using: composite
   steps:
@@ -79,14 +71,18 @@ runs:
           bazel-actions-${{runner.os}}-
     - name: Set up .bazelrc
       shell: bash
+      # The .bazelrc parser treats backslashes as escape characters, so replace
+      # them with forward slashes, which also works on Windows.
       run: |
-        cat >> github.bazelrc <<'EOF'
+        tr '\\' '/' >> github.bazelrc <<'EOF'
         common --announce_rc
         common --verbose_failures
         common --experimental_convenience_symlinks=ignore
         common --show_progress_rate_limit=10
         common --show_result=0
         common --nostamp
+        common --repository_cache='${{runner.temp}}/bazel-repository-cache'
+        common --disk_cache='${{runner.temp}}/bazel-action-cache'
         test --test_output=errors
         EOF
     - name: Set up environment
