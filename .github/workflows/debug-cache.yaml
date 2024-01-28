@@ -46,8 +46,6 @@ jobs:
         run: >
           echo common --lockfile_mode=off>> github.bazelrc
           && python build.py
-          --action-cache="${{steps.setup.outputs.action-cache}}"
-          --repository-cache="${{steps.setup.outputs.repository-cache}}"
           -- emacs
         env:
           USE_BAZEL_VERSION: latest

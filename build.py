@@ -57,15 +57,11 @@ class Builder:
     """Builds the project."""
 
     def __init__(self, *,
-                 action_cache: Optional[pathlib.Path],
-                 repository_cache: Optional[pathlib.Path],
                  profiles: Optional[pathlib.Path]) -> None:
         bazel = shutil.which('bazelisk') or shutil.which('bazel')
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
         self._bazel_program = pathlib.Path(bazel)
-        self._action_cache = action_cache
-        self._repository_cache = repository_cache
         self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
         self._workspace = pathlib.Path(
@@ -209,10 +205,6 @@ class Builder:
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
-        if self._action_cache:
-            opts.append('--disk_cache=' + str(self._action_cache))
-        if self._repository_cache:
-            opts.append('--repository_cache=' + str(self._repository_cache))
         return opts
 
 
@@ -225,14 +217,10 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--action-cache', type=_path)
-    parser.add_argument('--repository-cache', type=_path)
     parser.add_argument('--profiles', type=_path)
     parser.add_argument('goals', nargs='*', default=['check'])
     args = parser.parse_args()
-    builder = Builder(action_cache=args.action_cache,
-                      repository_cache=args.repository_cache,
-                      profiles=args.profiles)
+    builder = Builder(profiles=args.profiles)
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
