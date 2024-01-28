@@ -16,10 +16,37 @@
 
 SHELL = /bin/sh
 
-.DEFAULT:
-	./build.py -- $@
+BAZEL = bazel
+BAZELFLAGS =
 
-all:
-	./build.py
+all: generate check
+
+generate: compdb coverage
+
+check:
+	./build.py -- check
+
+GENERATE_BAZELFLAGS = $(BAZELFLAGS) --enable_bzlmod --lockfile_mode=off
+COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python
+COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
+
+compdb:
+	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
+	  -- @hedron_compile_commands//:refresh_all $(COMPDB_BAZELFLAGS)
+
+coverage:
+	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
+	  -- @phst_bazelcov//:bazelcov \
+	  --bazel='$(BAZEL)' --output=coverage-report
+
+INFODIR = /usr/local/share/info
+
+install:
+	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
+	install -d -- '$(INFODIR)'
+	install -m 0644 -- \
+	  bazel-bin/docs/rules_elisp.info \
+	  '$(INFODIR)/rules_elisp.info'
+	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
 
 .SUFFIXES:
