@@ -75,7 +75,10 @@ class Builder:
         self._env = dict(os.environ)
         self._github = self._env.get('CI') == 'true'
         self._output_base = self._init_output_base()
-        self._workspace = self._info('workspace')
+        self._workspace = pathlib.Path(
+            os.getenv('BUILD_WORKSPACE_DIRECTORY')
+            or pathlib.Path(__file__).parent
+        ).absolute()
         version = _parse_version(
             self._run([str(bazel), '--version'], capture_stdout=True))
         # Older Bazel versions don’t support Bzlmod properly.
