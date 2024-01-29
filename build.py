@@ -242,7 +242,7 @@ class Builder:
     def install(self) -> None:
         """Installs the Info manual."""
         self._bazel('build', ['//docs:rules_elisp.info'])
-        bin_dir = self._info('bazel-bin')
+        bin_dir = self._workspace / 'bazel-bin'
         info_dir = pathlib.Path('/usr/local/share/info')
         src = bin_dir / 'docs' / 'rules_elisp.info'
         dest = info_dir / 'rules_elisp.info'
