@@ -80,7 +80,8 @@ class Builder:
             or pathlib.Path(__file__).parent
         ).absolute()
         version = _parse_version(
-            self._run([str(bazel), '--version'], capture_stdout=True))
+            subprocess.run([str(bazel), '--version'], check=True,
+                           stdout=subprocess.PIPE, encoding='utf-8').stdout)
         # Older Bazel versions don’t support Bzlmod properly.
         self._bzlmod = version >= (6, 3)
         self._ignore_lockfile = version < (7, 0)
