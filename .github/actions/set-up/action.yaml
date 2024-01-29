@@ -76,3 +76,11 @@ runs:
         restore-keys: |
           bazel-actions-${{runner.os}}-${{matrix.bazel}}-
           bazel-actions-${{runner.os}}-
+    - name: Set up .bazelrc
+      shell: bash
+      run: |
+        cat >> github.bazelrc <<'EOF'
+        common --announce_rc
+        common --verbose_failures
+        common --experimental_convenience_symlinks=ignore
+        EOF
