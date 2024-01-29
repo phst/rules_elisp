@@ -269,12 +269,6 @@ class Builder:
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
-        if self._github:
-            opts += [
-                '--announce_rc',
-                '--verbose_failures',
-                '--experimental_convenience_symlinks=ignore',
-            ]
         if self._action_cache:
             opts.append('--disk_cache=' + str(self._action_cache))
         if self._repository_cache:
