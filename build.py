@@ -283,6 +283,7 @@ class Builder:
         opts = []
         if self._github:
             opts += [
+                '--announce_rc',
                 '--verbose_failures',
                 '--experimental_convenience_symlinks=ignore',
             ]
