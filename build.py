@@ -284,11 +284,6 @@ class Builder:
                 '--execution_log_binary_file=' + str(self._execution_log))
         return opts
 
-    def _info(self, key: str) -> pathlib.Path:
-        output = self._bazel('info', [key], capture_stdout=True)
-        assert output is not None
-        return pathlib.Path(output.rstrip('\n'))
-
     def _init_output_base(self) -> Optional[pathlib.Path]:
         if not self._github or platform.system() != 'Windows':
             return None
