@@ -68,10 +68,10 @@ runs:
       # Note that the .bazelrc parser treats backslashes as escape characters,
       # so we have to escape them.
       shell: cmd
-      run: |
+      run: >
         MKDIR %RUNNER_TEMP%\output-base
-        SUBST O: %RUNNER_TEMP%\output-base
-        ECHO startup --output_base='O:\\'>> github.bazelrc
+        && SUBST O: %RUNNER_TEMP%\output-base
+        && ECHO startup --output_base='O:\\'>> github.bazelrc
       if: runner.os == 'Windows'
     - name: Cache Bazel repositories
       uses: actions/cache@v4
