@@ -17,3 +17,5 @@ build --aspects='//private:defs.bzl%check_python'
 build --output_groups='+check_python'
 
 import %workspace%/c-std.bazelrc
+
+try-import %workspace%/github.bazelrc
