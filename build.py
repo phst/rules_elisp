@@ -253,8 +253,7 @@ class Builder:
     def _bazel(self, command: str, targets: Iterable[str], *,
                startup_options: Iterable[str] = (),
                options: Iterable[str] = (),
-               cwd: Optional[pathlib.Path] = None,
-               capture_stdout: bool = False) -> Optional[str]:
+               cwd: Optional[pathlib.Path] = None) -> Optional[str]:
         args = [str(self._bazel_program)]
         if self._output_base:
             args.append('--output_base=' + str(self._output_base))
@@ -265,7 +264,7 @@ class Builder:
         args.append('--')
         args.extend(targets)
         env = dict(self._env)
-        return self._run(args, cwd=cwd, env=env, capture_stdout=capture_stdout)
+        return self._run(args, cwd=cwd, env=env)
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
