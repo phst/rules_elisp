@@ -296,14 +296,10 @@ class Builder:
 
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None,
-             env: Optional[Mapping[str, str]] = None,
-             capture_stdout: bool = False) -> Optional[str]:
+             env: Optional[Mapping[str, str]] = None) -> None:
         print(*map(shlex.quote, args))
-        result = subprocess.run(
-            args, check=True, cwd=cwd or self._cwd, env=env or self._env,
-            stdout=subprocess.PIPE if capture_stdout else None,
-            encoding='utf-8')
-        return result.stdout
+        subprocess.run(
+            args, check=True, cwd=cwd or self._cwd, env=env or self._env)
 
 
 # All potentially supported Emacs versions.
