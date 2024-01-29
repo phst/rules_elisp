@@ -24,13 +24,11 @@ import functools
 import io
 import os
 import pathlib
-import platform
 import re
 import shlex
 import shutil
 import subprocess
 import sys
-import tempfile
 from typing import Optional
 
 _Target = Callable[['Builder'], None]
@@ -70,7 +68,6 @@ class Builder:
         self._repository_cache = repository_cache
         self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
-        self._output_base = self._init_output_base()
         self._workspace = pathlib.Path(
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
             or pathlib.Path(__file__).parent
@@ -203,8 +200,6 @@ class Builder:
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None) -> Optional[str]:
         args = [str(self._bazel_program)]
-        if self._output_base:
-            args.append('--output_base=' + str(self._output_base))
         args.append(command)
         args.extend(self._bazel_options())
         args.extend(options)
@@ -220,15 +215,6 @@ class Builder:
             opts.append('--repository_cache=' + str(self._repository_cache))
         return opts
 
-    def _init_output_base(self) -> Optional[pathlib.Path]:
-        if not self._github or platform.system() != 'Windows':
-            return None
-        # Work around https://github.com/protocolbuffers/protobuf/issues/12947.
-        # See https://bazel.build/configure/windows#long-path-issues.
-        base = pathlib.Path(
-            tempfile.mkdtemp(prefix='ob-', dir=os.getenv('RUNNER_TEMP')))
-        _run(['SUBST', 'O:', str(base)])
-        return pathlib.Path('O:\\')
 
 # All potentially supported Emacs versions.
 _VERSIONS = frozenset({'28.1', '28.2', '29.1', '29.2'})
