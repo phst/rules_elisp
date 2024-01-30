@@ -40,8 +40,10 @@ jobs:
           build --execution_log_binary_file='${{runner.temp}}/execution-log.binpb'
           EOF
       - name: Build Emacs
+        # We don’t care about lockfiles here.
         run: >
-          python build.py
+          echo --lockfile_mode=off>> github.bazelrc
+          && python build.py
           --bazel=bazelisk
           --action-cache="${{steps.setup.outputs.action-cache}}"
           --repository-cache="${{steps.setup.outputs.repository-cache}}"

@@ -47,6 +47,19 @@ jobs:
       - id: setup
         name: Set up workspace
         uses: ./.github/actions/set-up
+      - name: Set lockfile mode
+        # The lockfile format differs between the Bazel versions, so only for
+        # one version --lockfile_mode=error can work.  --lockfile_mode=update
+        # would be useless since we never use the updated lockfiles, so switch
+        # lockfiles off entirely in other Bazel versions.
+        run: >-
+          echo --lockfile_mode=${{
+            matrix.bazel == 'latest' && 'error' || 'off'
+          }}>> github.bazelrc
+        # The --lockfile_mode flag was introduced in Bazel 6.2.
+        if: >-
+          !startsWith(matrix.bazel, '6.0.') &&
+          !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
         # Use disk cache to speed up runs.
         run: >
