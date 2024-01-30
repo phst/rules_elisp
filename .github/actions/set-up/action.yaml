@@ -82,4 +82,5 @@ runs:
         common --announce_rc
         common --verbose_failures
         common --experimental_convenience_symlinks=ignore
+        test --test_output=errors
         EOF

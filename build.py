@@ -180,10 +180,7 @@ class Builder:
         }
         for bzlmod in bzlmods[self._bzlmod]:
             prefix = '' if bzlmod else 'no'
-            options = [
-                '--test_output=errors',
-                f'--{prefix}enable_bzlmod',
-            ]
+            options = [f'--{prefix}enable_bzlmod']
             if bzlmod and self._github and not self._ignore_lockfile:
                 options.append('--lockfile_mode=error')
             if bzlmod and self._profiles:
