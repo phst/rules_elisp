@@ -49,6 +49,8 @@ def target(func: _Target) -> _Target:
 
 
 def _run(args: Sequence[str], *, cwd: Optional[pathlib.Path] = None) -> None:
+    if cwd:
+        print('cd', shlex.quote(str(cwd)), '&&', end=' ')
     print(*map(shlex.quote, args))
     subprocess.run(args, check=True, cwd=cwd)
 
