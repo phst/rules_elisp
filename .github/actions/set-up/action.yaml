@@ -84,5 +84,6 @@ runs:
         common --experimental_convenience_symlinks=ignore
         common --show_progress_rate_limit=10
         common --show_result=0
+        common --nostamp
         test --test_output=errors
         EOF
