@@ -60,10 +60,29 @@ jobs:
           for dir in . examples/ext; do
             mkdir -p -- "${dir}"
             out="${dir}/MODULE.bazel.lock"
-            in=(lockfiles-*/"${out}")
-            jq -s -e 'reduce .[] as $i ({}; . * $i)' -- "${in[@]}" > "${out}"
+            # No globbing so that the order is obvious.
+            in=(
+              "lockfiles-Linux/${out}"
+              "lockfiles-macOS/${out}"
+              "lockfiles-Windows/${out}"
+            )
+            jq -s -e -f /dev/stdin -- "${in[@]}" > "${out}" <<'EOF'
+            def keep_ext_keys(f):
+              .moduleExtensions[]
+              |= with_entries(select(.key | split(",") | any(f)));
+            .[0]
+            # For macOS and Windows, keep only extension keys that match the OS.
+            # Other entries will be stale or identical to GNU/Linux.
+            * (.[1] | keep_ext_keys(. == "os:macos" or . == "os:osx"))
+            * (.[2] | keep_ext_keys(. == "os:windows"))
+          EOF
             rm -- "${in[@]}"
           done
+          # This will fail if we forgot some OS above.
+          rmdir -v -- \
+            lockfiles-*/examples/ext \
+            lockfiles-*/examples \
+            lockfiles-*
       - name: Upload merged files
         uses: actions/upload-artifact@v4
         with:
