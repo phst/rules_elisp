@@ -59,11 +59,13 @@ class Builder:
     """Builds the project."""
 
     def __init__(self, *,
-                 bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path],
                  repository_cache: Optional[pathlib.Path],
                  profiles: Optional[pathlib.Path]) -> None:
-        self._bazel_program = bazel
+        bazel = shutil.which('bazelisk') or shutil.which('bazel')
+        if not bazel:
+            raise FileNotFoundError('neither Bazelisk nor Bazel found')
+        self._bazel_program = pathlib.Path(bazel)
         self._action_cache = action_cache
         self._repository_cache = repository_cache
         self._profiles = profiles
@@ -285,14 +287,12 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action-cache', type=_path)
     parser.add_argument('--repository-cache', type=_path)
     parser.add_argument('--profiles', type=_path)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
-    builder = Builder(bazel=args.bazel,
-                      action_cache=args.action_cache,
+    builder = Builder(action_cache=args.action_cache,
                       repository_cache=args.repository_cache,
                       profiles=args.profiles)
     try:
@@ -300,15 +300,6 @@ def main() -> None:
     except subprocess.CalledProcessError as ex:
         print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
-
-
-def _program(name: str) -> pathlib.Path:
-    if not name:
-        raise ValueError('missing program name')
-    file = shutil.which(name)
-    if not file:
-        raise FileNotFoundError(f'program {name} not found')
-    return pathlib.Path(file)
 
 
 def _path(value: str) -> pathlib.Path:
