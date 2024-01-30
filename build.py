@@ -48,6 +48,11 @@ def target(func: _Target) -> _Target:
     return wrapper
 
 
+def _run(args: Sequence[str], *, cwd: Optional[pathlib.Path] = None) -> None:
+    print(*map(shlex.quote, args))
+    subprocess.run(args, check=True, cwd=cwd)
+
+
 class Builder:
     """Builds the project."""
 
@@ -223,8 +228,8 @@ class Builder:
             self._workspace / 'examples' / 'ext',
         )
         for cwd in cwds:
-            self._run([str(self._bazel_program), 'mod', 'deps',
-                       '--lockfile_mode=update'], cwd=cwd)
+            _run([str(self._bazel_program), 'mod', 'deps',
+                  '--lockfile_mode=update'], cwd=cwd)
 
     @target
     def install(self) -> None:
@@ -234,9 +239,9 @@ class Builder:
         info_dir = pathlib.Path('/usr/local/share/info')
         src = bin_dir / 'docs' / 'rules_elisp.info'
         dest = info_dir / 'rules_elisp.info'
-        self._run(['install', '-d', '--', str(info_dir)])
-        self._run(['install', '-m', '0644', '--', str(src), str(dest)])
-        self._run(['install-info', '--', str(dest), str(info_dir / 'dir')])
+        _run(['install', '-d', '--', str(info_dir)])
+        _run(['install', '-m', '0644', '--', str(src), str(dest)])
+        _run(['install-info', '--', str(dest), str(info_dir / 'dir')])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
                options: Iterable[str] = (),
@@ -249,7 +254,7 @@ class Builder:
         args.extend(options)
         args.append('--')
         args.extend(targets)
-        return self._run(args, cwd=cwd)
+        return _run(args, cwd=cwd)
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
@@ -266,14 +271,8 @@ class Builder:
         # See https://bazel.build/configure/windows#long-path-issues.
         base = pathlib.Path(
             tempfile.mkdtemp(prefix='ob-', dir=os.getenv('RUNNER_TEMP')))
-        self._run(['SUBST', 'O:', str(base)])
+        _run(['SUBST', 'O:', str(base)])
         return pathlib.Path('O:\\')
-
-    def _run(self, args: Sequence[str], *,
-             cwd: Optional[pathlib.Path] = None) -> None:
-        print(*map(shlex.quote, args))
-        subprocess.run(args, check=True, cwd=cwd)
-
 
 # All potentially supported Emacs versions.
 _VERSIONS = frozenset({'28.1', '28.2', '29.1', '29.2'})
