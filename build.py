@@ -70,7 +70,6 @@ class Builder:
         self._repository_cache = repository_cache
         self._execution_log = execution_log
         self._profiles = profiles
-        self._cwd = pathlib.Path(os.getcwd())
         self._github = os.getenv('CI') == 'true'
         self._output_base = self._init_output_base()
         self._workspace = pathlib.Path(
@@ -283,7 +282,7 @@ class Builder:
     def _run(self, args: Sequence[str], *,
              cwd: Optional[pathlib.Path] = None) -> None:
         print(*map(shlex.quote, args))
-        subprocess.run(args, check=True, cwd=cwd or self._cwd)
+        subprocess.run(args, check=True, cwd=cwd)
 
 
 # All potentially supported Emacs versions.
