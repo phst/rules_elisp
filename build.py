@@ -81,7 +81,6 @@ class Builder:
                            stdout=subprocess.PIPE, encoding='utf-8').stdout)
         # Older Bazel versions don’t support Bzlmod properly.
         self._bzlmod = version >= (6, 3)
-        self._ignore_lockfile = version < (7, 0)
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -180,8 +179,6 @@ class Builder:
         for bzlmod in bzlmods[self._bzlmod]:
             prefix = '' if bzlmod else 'no'
             options = [f'--{prefix}enable_bzlmod']
-            if bzlmod and self._github and not self._ignore_lockfile:
-                options.append('--lockfile_mode=error')
             if bzlmod and self._profiles:
                 self._profiles.mkdir(exist_ok=True)
                 profile_file = self._profiles / (profile + '.json.gz')
