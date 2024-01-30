@@ -31,13 +31,20 @@ jobs:
       - id: setup
         name: Set up workspace
         uses: ./.github/actions/set-up
+      - name: Make Bazel write an execution log
+        shell: bash
+        # The .bazelrc parser treats backslashes as escape characters, so
+        # replace them with forward slashes, which also works on Windows.
+        run: |
+          tr '\\' '/' >> github.bazelrc <<'EOF'
+          build --execution_log_binary_file='${{runner.temp}}/execution-log.binpb'
+          EOF
       - name: Build Emacs
         run: >
           python build.py
           --bazel=bazelisk
           --action-cache="${{steps.setup.outputs.action-cache}}"
           --repository-cache="${{steps.setup.outputs.repository-cache}}"
-          --execution-log="${{runner.temp}}/execution-log.binpb"
           -- emacs
         env:
           USE_BAZEL_VERSION: latest

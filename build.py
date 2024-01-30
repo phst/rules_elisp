@@ -63,12 +63,10 @@ class Builder:
                  bazel: pathlib.Path,
                  action_cache: Optional[pathlib.Path],
                  repository_cache: Optional[pathlib.Path],
-                 execution_log: Optional[pathlib.Path],
                  profiles: Optional[pathlib.Path]) -> None:
         self._bazel_program = bazel
         self._action_cache = action_cache
         self._repository_cache = repository_cache
-        self._execution_log = execution_log
         self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
         self._output_base = self._init_output_base()
@@ -264,9 +262,6 @@ class Builder:
             opts.append('--disk_cache=' + str(self._action_cache))
         if self._repository_cache:
             opts.append('--repository_cache=' + str(self._repository_cache))
-        if self._execution_log:
-            opts.append(
-                '--execution_log_binary_file=' + str(self._execution_log))
         return opts
 
     def _init_output_base(self) -> Optional[pathlib.Path]:
@@ -297,14 +292,12 @@ def main() -> None:
     parser.add_argument('--bazel', type=_program, default='bazel')
     parser.add_argument('--action-cache', type=_path)
     parser.add_argument('--repository-cache', type=_path)
-    parser.add_argument('--execution-log', type=_path)
     parser.add_argument('--profiles', type=_path)
     parser.add_argument('goals', nargs='*', default=['all'])
     args = parser.parse_args()
     builder = Builder(bazel=args.bazel,
                       action_cache=args.action_cache,
                       repository_cache=args.repository_cache,
-                      execution_log=args.execution_log,
                       profiles=args.profiles)
     try:
         builder.build(args.goals)
