@@ -22,9 +22,6 @@ outputs:
   action-cache:
     description: Bazel action cache directory
     value: ${{runner.temp}}/bazel-action-cache
-  profiles:
-    description: Directory where to store Bazel JSON profile files
-    value: ${{runner.temp}}/profiles
 
 runs:
   using: composite
