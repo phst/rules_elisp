@@ -19,7 +19,7 @@
 Mimics a trivial version of Make."""
 
 import argparse
-from collections.abc import Callable, Iterable, Mapping, Sequence
+from collections.abc import Callable, Iterable, Sequence
 import functools
 import io
 import os
@@ -72,8 +72,7 @@ class Builder:
         self._profiles = profiles
         self._kernel = platform.system()
         self._cwd = pathlib.Path(os.getcwd())
-        self._env = dict(os.environ)
-        self._github = self._env.get('CI') == 'true'
+        self._github = os.getenv('CI') == 'true'
         self._output_base = self._init_output_base()
         self._workspace = pathlib.Path(
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
@@ -264,8 +263,7 @@ class Builder:
         args.extend(options)
         args.append('--')
         args.extend(targets)
-        env = dict(self._env)
-        return self._run(args, cwd=cwd, env=env)
+        return self._run(args, cwd=cwd)
 
     def _bazel_options(self) -> Sequence[str]:
         opts = []
@@ -289,11 +287,9 @@ class Builder:
         return pathlib.Path('O:\\')
 
     def _run(self, args: Sequence[str], *,
-             cwd: Optional[pathlib.Path] = None,
-             env: Optional[Mapping[str, str]] = None) -> None:
+             cwd: Optional[pathlib.Path] = None) -> None:
         print(*map(shlex.quote, args))
-        subprocess.run(
-            args, check=True, cwd=cwd or self._cwd, env=env or self._env)
+        subprocess.run(args, check=True, cwd=cwd or self._cwd)
 
 
 # All potentially supported Emacs versions.
