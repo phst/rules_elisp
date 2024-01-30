@@ -3180,7 +3180,7 @@
     },
     "@@rules_python~0.29.0//python/extensions:pip.bzl%pip": {
       "os:linux,arch:amd64": {
-        "bzlTransitiveDigest": "XFXqdSwezg8bh9max6JjiAF9Bu9AaZKn0bSGbQSc4Cg=",
+        "bzlTransitiveDigest": "oK6zSCQO4Zvzo7CqMMhVOBussofs2htj+AaaN+GCdnA=",
         "accumulatedFileDigests": {
           "@@phst_rules_elisp~override//dev:linux-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
         },
