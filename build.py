@@ -48,14 +48,6 @@ def target(func: _Target) -> _Target:
     return wrapper
 
 
-def _parse_version(string: str) -> tuple[int, int]:
-    # https://www.gnu.org/prep/standards/html_node/_002d_002dversion.html
-    match = re.match(r'.+ (\d+)\.(\d+)[^ ]*$', string, re.ASCII | re.MULTILINE)
-    if not match:
-        raise ValueError(f'invalid version string {string}')
-    return int(match[1]), int(match[2])
-
-
 class Builder:
     """Builds the project."""
 
@@ -74,9 +66,15 @@ class Builder:
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
             or pathlib.Path(__file__).parent
         ).absolute()
-        version = _parse_version(
-            subprocess.run([str(bazel), '--version'], check=True,
-                           stdout=subprocess.PIPE, encoding='utf-8').stdout)
+        version_str = subprocess.run([str(bazel), '--version'], check=True,
+                                     stdout=subprocess.PIPE,
+                                     encoding='utf-8').stdout
+        # https://www.gnu.org/prep/standards/html_node/_002d_002dversion.html
+        match = re.match(r'.+ (\d+)\.(\d+)[^ ]*$', version_str,
+                         re.ASCII | re.MULTILINE)
+        if not match:
+            raise ValueError(f'invalid version string {version_str}')
+        version = (int(match[1]), int(match[2]))
         # Older Bazel versions don’t support Bzlmod properly.
         self._bzlmod = version >= (6, 3)
 
