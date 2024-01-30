@@ -67,7 +67,7 @@ jobs:
           --bazel=bazelisk
           --action-cache="${{steps.setup.outputs.action-cache}}"
           --repository-cache="${{steps.setup.outputs.repository-cache}}"
-          --profiles="${{steps.setup.outputs.profiles}}"
+          --profiles="${{runner.temp}}/profiles"
           -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
@@ -83,5 +83,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
-          path: ${{steps.setup.outputs.profiles}}/*.json.gz
+          path: ${{runner.temp}}/profiles/*.json.gz
           if-no-files-found: ignore
