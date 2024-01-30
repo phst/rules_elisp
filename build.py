@@ -251,13 +251,11 @@ class Builder:
         self._run(['install-info', '--', str(dest), str(info_dir / 'dir')])
 
     def _bazel(self, command: str, targets: Iterable[str], *,
-               startup_options: Iterable[str] = (),
                options: Iterable[str] = (),
                cwd: Optional[pathlib.Path] = None) -> Optional[str]:
         args = [str(self._bazel_program)]
         if self._output_base:
             args.append('--output_base=' + str(self._output_base))
-        args.extend(startup_options)
         args.append(command)
         args.extend(self._bazel_options())
         args.extend(options)
