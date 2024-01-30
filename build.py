@@ -84,6 +84,9 @@ class Builder:
         version = (int(match[1]), int(match[2]))
         # Older Bazel versions don’t support Bzlmod properly.
         self._bzlmod = version >= (6, 3)
+        # The --lockfile_mode flag was introduced in Bazel 6.2.
+        self._ignore_lockfiles = (
+            ('--lockfile_mode=off',) if version >= (6, 2) else ())
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -128,7 +131,8 @@ class Builder:
                     ['@com_github_bazelbuild_buildtools//buildifier',
                      '--mode=check', '--lint=warn',
                      '--warnings=+native-py,+out-of-order-load', '-r', '--',
-                     str(self._workspace)])
+                     str(self._workspace)],
+                    options=self._ignore_lockfiles)
 
     @target
     def nogo(self) -> None:
@@ -154,7 +158,8 @@ class Builder:
                      '--check',
                      '--ignore=**/coverage-report/**',
                      '--',
-                     str(self._workspace)])
+                     str(self._workspace)],
+                    options=self._ignore_lockfiles)
 
     @target
     def emacs(self) -> None:
