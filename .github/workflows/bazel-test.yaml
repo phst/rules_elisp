@@ -53,7 +53,7 @@ jobs:
         # would be useless since we never use the updated lockfiles, so switch
         # lockfiles off entirely in other Bazel versions.
         run: >-
-          echo --lockfile_mode=${{
+          echo common --lockfile_mode=${{
             matrix.bazel == 'latest' && 'error' || 'off'
           }}>> github.bazelrc
         # The --lockfile_mode flag was introduced in Bazel 6.2.

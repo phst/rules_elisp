@@ -42,7 +42,7 @@ jobs:
       - name: Build Emacs
         # We don’t care about lockfiles here.
         run: >
-          echo --lockfile_mode=off>> github.bazelrc
+          echo common --lockfile_mode=off>> github.bazelrc
           && python build.py
           --bazel=bazelisk
           --action-cache="${{steps.setup.outputs.action-cache}}"
