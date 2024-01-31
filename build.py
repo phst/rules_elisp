@@ -19,7 +19,7 @@
 Mimics a trivial version of Make."""
 
 import argparse
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Sequence
 import functools
 import io
 import os
@@ -107,11 +107,11 @@ class Builder:
     @target
     def buildifier(self) -> None:
         """Checks that all BUILD files are formatted correctly."""
-        self._bazel('run',
-                    ['@com_github_bazelbuild_buildtools//buildifier',
-                     '--mode=check', '--lint=warn',
-                     '--warnings=+native-py,+out-of-order-load', '-r', '--',
-                     str(self._workspace)])
+        _run([str(self._bazel_program), 'run', '--',
+              '@com_github_bazelbuild_buildtools//buildifier',
+              '--mode=check', '--lint=warn',
+              '--warnings=+native-py,+out-of-order-load', '-r', '--',
+              str(self._workspace)])
 
     @target
     def nogo(self) -> None:
@@ -132,17 +132,17 @@ class Builder:
     @target
     def license(self) -> None:
         """Checks that all source files have a license header."""
-        self._bazel('run',
-                    ['@com_github_google_addlicense//:addlicense',
-                     '--check',
-                     '--ignore=**/coverage-report/**',
-                     '--',
-                     str(self._workspace)])
+        _run([str(self._bazel_program), 'run', '--',
+              '@com_github_google_addlicense//:addlicense',
+              '--check',
+              '--ignore=**/coverage-report/**',
+              '--',
+              str(self._workspace)])
 
     @target
     def emacs(self) -> None:
         """Builds just the Emacs binary."""
-        self._bazel('build', ['//emacs'])
+        _run([str(self._bazel_program), 'build', '--', '//emacs'])
 
     @target
     def test(self) -> None:
@@ -174,7 +174,8 @@ class Builder:
                     '--profile=' + str(profile_file),
                 ]
             options.extend(args)
-            self._bazel('test', ['//...'], options=options, cwd=cwd)
+            _run([str(self._bazel_program), 'test'] + options + ['--', '//...'],
+                 cwd=cwd)
 
     @target
     def ext(self) -> None:
@@ -191,16 +192,6 @@ class Builder:
         for cwd in cwds:
             _run([str(self._bazel_program), 'mod', 'deps',
                   '--lockfile_mode=update'], cwd=cwd)
-
-    def _bazel(self, command: str, targets: Iterable[str], *,
-               options: Iterable[str] = (),
-               cwd: Optional[pathlib.Path] = None) -> Optional[str]:
-        args = [str(self._bazel_program)]
-        args.append(command)
-        args.extend(options)
-        args.append('--')
-        args.extend(targets)
-        return _run(args, cwd=cwd)
 
 
 # All potentially supported Emacs versions.
