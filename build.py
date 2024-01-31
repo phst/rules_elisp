@@ -46,10 +46,11 @@ def target(func: _Target) -> _Target:
     return wrapper
 
 
-def _run(args: Sequence[str], *, cwd: Optional[pathlib.Path] = None) -> None:
+def _run(args: Sequence[str | pathlib.Path], *,
+         cwd: Optional[pathlib.Path] = None) -> None:
     if cwd:
         print('cd', shlex.quote(str(cwd)), '&&', end=' ')
-    print(*map(shlex.quote, args))
+    print(*(shlex.quote(str(arg)) for arg in args))
     subprocess.run(args, check=True, cwd=cwd)
 
 
@@ -107,11 +108,11 @@ class Builder:
     @target
     def buildifier(self) -> None:
         """Checks that all BUILD files are formatted correctly."""
-        _run([str(self._bazel), 'run', '--',
+        _run([self._bazel, 'run', '--',
               '@com_github_bazelbuild_buildtools//buildifier',
               '--mode=check', '--lint=warn',
               '--warnings=+native-py,+out-of-order-load', '-r', '--',
-              str(self._workspace)])
+              self._workspace])
 
     @target
     def nogo(self) -> None:
@@ -132,17 +133,17 @@ class Builder:
     @target
     def license(self) -> None:
         """Checks that all source files have a license header."""
-        _run([str(self._bazel), 'run', '--',
+        _run([self._bazel, 'run', '--',
               '@com_github_google_addlicense//:addlicense',
               '--check',
               '--ignore=**/coverage-report/**',
               '--',
-              str(self._workspace)])
+              self._workspace])
 
     @target
     def emacs(self) -> None:
         """Builds just the Emacs binary."""
-        _run([str(self._bazel), 'build', '--', '//emacs'])
+        _run([self._bazel, 'build', '--', '//emacs'])
 
     @target
     def test(self) -> None:
@@ -174,8 +175,7 @@ class Builder:
                     '--profile=' + str(profile_file),
                 ]
             options.extend(args)
-            _run([str(self._bazel), 'test'] + options + ['--', '//...'],
-                 cwd=cwd)
+            _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd)
 
     @target
     def ext(self) -> None:
@@ -190,7 +190,7 @@ class Builder:
             self._workspace / 'examples' / 'ext',
         )
         for cwd in cwds:
-            _run([str(self._bazel), 'mod', 'deps', '--lockfile_mode=update'],
+            _run([self._bazel, 'mod', 'deps', '--lockfile_mode=update'],
                  cwd=cwd)
 
 
