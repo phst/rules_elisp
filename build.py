@@ -61,7 +61,7 @@ class Builder:
         bazel = shutil.which('bazelisk') or shutil.which('bazel')
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
-        self._bazel_program = pathlib.Path(bazel)
+        self._bazel = pathlib.Path(bazel)
         self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
         self._workspace = pathlib.Path(
@@ -107,7 +107,7 @@ class Builder:
     @target
     def buildifier(self) -> None:
         """Checks that all BUILD files are formatted correctly."""
-        _run([str(self._bazel_program), 'run', '--',
+        _run([str(self._bazel), 'run', '--',
               '@com_github_bazelbuild_buildtools//buildifier',
               '--mode=check', '--lint=warn',
               '--warnings=+native-py,+out-of-order-load', '-r', '--',
@@ -132,7 +132,7 @@ class Builder:
     @target
     def license(self) -> None:
         """Checks that all source files have a license header."""
-        _run([str(self._bazel_program), 'run', '--',
+        _run([str(self._bazel), 'run', '--',
               '@com_github_google_addlicense//:addlicense',
               '--check',
               '--ignore=**/coverage-report/**',
@@ -142,7 +142,7 @@ class Builder:
     @target
     def emacs(self) -> None:
         """Builds just the Emacs binary."""
-        _run([str(self._bazel_program), 'build', '--', '//emacs'])
+        _run([str(self._bazel), 'build', '--', '//emacs'])
 
     @target
     def test(self) -> None:
@@ -174,7 +174,7 @@ class Builder:
                     '--profile=' + str(profile_file),
                 ]
             options.extend(args)
-            _run([str(self._bazel_program), 'test'] + options + ['--', '//...'],
+            _run([str(self._bazel), 'test'] + options + ['--', '//...'],
                  cwd=cwd)
 
     @target
@@ -190,8 +190,8 @@ class Builder:
             self._workspace / 'examples' / 'ext',
         )
         for cwd in cwds:
-            _run([str(self._bazel_program), 'mod', 'deps',
-                  '--lockfile_mode=update'], cwd=cwd)
+            _run([str(self._bazel), 'mod', 'deps', '--lockfile_mode=update'],
+                 cwd=cwd)
 
 
 # All potentially supported Emacs versions.
