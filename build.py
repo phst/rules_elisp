@@ -197,15 +197,10 @@ class Builder:
                cwd: Optional[pathlib.Path] = None) -> Optional[str]:
         args = [str(self._bazel_program)]
         args.append(command)
-        args.extend(self._bazel_options())
         args.extend(options)
         args.append('--')
         args.extend(targets)
         return _run(args, cwd=cwd)
-
-    def _bazel_options(self) -> Sequence[str]:
-        opts = []
-        return opts
 
 
 # All potentially supported Emacs versions.
