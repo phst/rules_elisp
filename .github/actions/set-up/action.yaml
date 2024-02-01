@@ -73,6 +73,7 @@ runs:
         restore-keys: |
           bazel-repositories-
     - name: Cache Bazel results
+      # Use disk cache to speed up runs.
       uses: actions/cache@v4
       with:
         path: ${{runner.temp}}/bazel-action-cache
