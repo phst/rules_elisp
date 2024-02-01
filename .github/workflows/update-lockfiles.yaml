@@ -32,11 +32,10 @@ jobs:
         name: Set up workspace
         uses: ./.github/actions/set-up
         with:
+          bazel-version: latest
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Regenerate lockfiles
         run: python build.py -- lock
-        env:
-          USE_BAZEL_VERSION: latest
       - name: Upload lockfiles
         uses: actions/upload-artifact@v4
         with:
