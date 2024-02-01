@@ -34,6 +34,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Build Emacs
+        shell: pwsh
         # We don’t care about lockfiles here.
         run: >
           bazelisk build

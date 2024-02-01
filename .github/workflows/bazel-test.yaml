@@ -63,6 +63,7 @@ jobs:
           !startsWith(matrix.bazel, '6.0.') &&
           !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
+        shell: pwsh
         run: python build.py --profiles="${{runner.temp}}/profiles" -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}

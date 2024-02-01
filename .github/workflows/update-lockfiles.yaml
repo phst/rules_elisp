@@ -34,6 +34,7 @@ jobs:
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Regenerate lockfiles
+        shell: pwsh
         run: python build.py -- lock
         env:
           USE_BAZEL_VERSION: latest
