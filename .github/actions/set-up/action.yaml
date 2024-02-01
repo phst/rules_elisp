@@ -16,6 +16,9 @@ name: Set up Bazel workspace
 description: Install necessary dependencies and load remote caches
 
 inputs:
+  bazel-version:
+    description: Bazel version to use
+    required: true
   github-token:
     description: GitHub authentication token from secrets.GITHUB_TOKEN
     required: true
@@ -77,9 +80,9 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{runner.temp}}/bazel-action-cache
-        key: bazel-actions-${{runner.os}}-${{matrix.bazel}}-${{hashFiles('**')}}
+        key: bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{hashFiles('**')}}
         restore-keys: |
-          bazel-actions-${{runner.os}}-${{matrix.bazel}}-
+          bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-
           bazel-actions-${{runner.os}}-
     - name: Set up .bazelrc
       shell: bash
@@ -109,6 +112,7 @@ runs:
       shell: bash
       run: |
         cat >> "${GITHUB_ENV:?}" <<'EOF'
+        USE_BAZEL_VERSION=${{inputs.bazel-version}}
         BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
         BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
         EOF

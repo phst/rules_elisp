@@ -48,6 +48,7 @@ jobs:
         name: Set up workspace
         uses: ./.github/actions/set-up
         with:
+          bazel-version: ${{matrix.bazel}}
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Set lockfile mode
         # The lockfile format differs between the Bazel versions, so only for
@@ -64,8 +65,6 @@ jobs:
           !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
         run: python build.py --profiles="${{runner.temp}}/profiles" -- check
-        env:
-          USE_BAZEL_VERSION: ${{matrix.bazel}}
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:

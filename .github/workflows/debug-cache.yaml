@@ -32,6 +32,7 @@ jobs:
         name: Set up workspace
         uses: ./.github/actions/set-up
         with:
+          bazel-version: latest
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Build Emacs
         # We don’t care about lockfiles here.
@@ -40,8 +41,6 @@ jobs:
           --lockfile_mode=off
           --execution_log_binary_file="${{runner.temp}}/execution-log.binpb"
           -- //emacs
-        env:
-          USE_BAZEL_VERSION: latest
       - name: Upload binary execution log
         uses: actions/upload-artifact@v4
         with:
