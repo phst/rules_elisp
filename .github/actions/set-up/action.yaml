@@ -88,13 +88,13 @@ runs:
       run: |
         tr '\\' '/' >> github.bazelrc <<'EOF'
         common --announce_rc
-        build --verbose_failures
-        build --experimental_convenience_symlinks=ignore
         common --show_progress_rate_limit=10
-        build --show_result=0
-        build --nostamp
         common --repository_cache='${{runner.temp}}/bazel-repository-cache'
         common --disk_cache='${{runner.temp}}/bazel-action-cache'
+        build --verbose_failures
+        build --experimental_convenience_symlinks=ignore
+        build --show_result=0
+        build --nostamp
         test --test_output=errors
         EOF
     - name: Set up environment
