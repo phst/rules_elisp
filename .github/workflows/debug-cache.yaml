@@ -33,17 +33,13 @@ jobs:
         uses: ./.github/actions/set-up
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
-      - name: Make Bazel write an execution log
-        shell: bash
-        # The .bazelrc parser treats backslashes as escape characters, so
-        # replace them with forward slashes, which also works on Windows.
-        run: |
-          tr '\\' '/' >> github.bazelrc <<'EOF'
-          build --execution_log_binary_file='${{runner.temp}}/execution-log.binpb'
-          EOF
       - name: Build Emacs
         # We don’t care about lockfiles here.
-        run: bazelisk build --lockfile_mode=off -- //emacs
+        run: >
+          bazelisk build
+          --lockfile_mode=off
+          --execution_log_binary_file="${{runner.temp}}/execution-log.binpb"
+          -- //emacs
         env:
           USE_BAZEL_VERSION: latest
       - name: Upload binary execution log
