@@ -88,11 +88,11 @@ runs:
       run: |
         tr '\\' '/' >> github.bazelrc <<'EOF'
         common --announce_rc
-        common --verbose_failures
-        common --experimental_convenience_symlinks=ignore
+        build --verbose_failures
+        build --experimental_convenience_symlinks=ignore
         common --show_progress_rate_limit=10
-        common --show_result=0
-        common --nostamp
+        build --show_result=0
+        build --nostamp
         common --repository_cache='${{runner.temp}}/bazel-repository-cache'
         common --disk_cache='${{runner.temp}}/bazel-action-cache'
         test --test_output=errors
