@@ -205,7 +205,8 @@ def main() -> None:
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
-        print(*map(shlex.quote, ex.cmd), 'failed with exit code', ex.returncode)
+        print(*(shlex.quote(str(arg)) for arg in ex.cmd),
+              'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
 
 
