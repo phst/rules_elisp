@@ -216,7 +216,7 @@ def _path(value: str) -> pathlib.Path:
 
 
 def _quote(args: Iterable[str | pathlib.Path]) -> str:
-    return ' '.join(shlex.quote(str(arg)) for arg in args)
+    return shlex.join(map(str, args))
 
 
 if __name__ == '__main__':
