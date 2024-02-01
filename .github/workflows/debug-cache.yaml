@@ -43,10 +43,7 @@ jobs:
           EOF
       - name: Build Emacs
         # We don’t care about lockfiles here.
-        run: >
-          echo common --lockfile_mode=off>> github.bazelrc
-          && python build.py
-          -- emacs
+        run: bazelisk build --lockfile_mode=off -- //emacs
         env:
           USE_BAZEL_VERSION: latest
       - name: Upload binary execution log

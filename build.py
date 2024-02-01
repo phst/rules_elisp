@@ -141,11 +141,6 @@ class Builder:
               self._workspace])
 
     @target
-    def emacs(self) -> None:
-        """Builds just the Emacs binary."""
-        _run([self._bazel, 'build', '--', '//emacs'])
-
-    @target
     def test(self) -> None:
         """Runs the Bazel tests."""
         self._test(profile='test')
