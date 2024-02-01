@@ -64,10 +64,7 @@ jobs:
           !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
         # Use disk cache to speed up runs.
-        run: >
-          python build.py
-          --profiles="${{runner.temp}}/profiles"
-          -- check
+        run: python build.py --profiles="${{runner.temp}}/profiles" -- check
         env:
           USE_BAZEL_VERSION: ${{matrix.bazel}}
       - name: Upload profiles

@@ -35,9 +35,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Regenerate lockfiles
         # Use disk cache to speed up runs.
-        run: >
-          python build.py
-          -- lock
+        run: python build.py -- lock
         env:
           USE_BAZEL_VERSION: latest
       - name: Upload lockfiles
