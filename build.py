@@ -19,7 +19,7 @@
 Mimics a trivial version of Make."""
 
 import argparse
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 import functools
 import io
 import os
@@ -50,7 +50,7 @@ def _run(args: Sequence[str | pathlib.Path], *,
          cwd: Optional[pathlib.Path] = None) -> None:
     if cwd:
         print('cd', shlex.quote(str(cwd)), '&&', end=' ')
-    print(*(shlex.quote(str(arg)) for arg in args))
+    print(_quote(args))
     subprocess.run(args, check=True, cwd=cwd)
 
 
@@ -205,8 +205,7 @@ def main() -> None:
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
-        print(*(shlex.quote(str(arg)) for arg in ex.cmd),
-              'failed with exit code', ex.returncode)
+        print(_quote(ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
 
 
@@ -214,6 +213,10 @@ def _path(value: str) -> pathlib.Path:
     if not value:
         raise ValueError('missing file name')
     return pathlib.Path(value).absolute()
+
+
+def _quote(args: Iterable[str | pathlib.Path]) -> str:
+    return ' '.join(shlex.quote(str(arg)) for arg in args)
 
 
 if __name__ == '__main__':
