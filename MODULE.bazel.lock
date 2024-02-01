@@ -3556,7 +3556,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "pV3xukn4sznDuleA4hMk/l/O3E3vfCqfyU/shuIth1I=",
+        "bzlTransitiveDigest": "GI6yMOM2hDU7hVAHmfnV90TgIqJguaDlemn2az5C07E=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -3726,19 +3726,19 @@
         },
         "recordedRepoMappingEntries": [
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.3.0",
             "bazel_features_globals",
-            "bazel_features~1.1.1~version_extension~bazel_features_globals"
+            "bazel_features~1.3.0~version_extension~bazel_features_globals"
           ],
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.3.0",
             "bazel_features_version",
-            "bazel_features~1.1.1~version_extension~bazel_features_version"
+            "bazel_features~1.3.0~version_extension~bazel_features_version"
           ],
           [
             "rules_go~0.44.0",
             "bazel_features",
-            "bazel_features~1.1.1"
+            "bazel_features~1.3.0"
           ],
           [
             "rules_go~0.44.0",
@@ -7344,7 +7344,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "bvnQTNRXNnbF2Y1hUv1l4Me+jkhmUbjWvgT32IRrdu0=",
+        "bzlTransitiveDigest": "6D8xJFv7xIS1gCom6rw+UP7OW12YjjfGZlCG6+7LHv4=",
         "accumulatedFileDigests": {
           "@@//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
         },

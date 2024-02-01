@@ -4896,7 +4896,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "tecIf7NsYPlRqvcx4VSQxuepxwyeuBEv6wLP9aPYtOY=",
+        "bzlTransitiveDigest": "rurfc28FWBH82gPo1tL8OohTWtXKqaEkRL5KgJWo1W8=",
         "accumulatedFileDigests": {
           "@@phst_rules_elisp~override//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
         },
