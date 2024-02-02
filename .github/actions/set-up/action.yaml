@@ -116,3 +116,11 @@ runs:
         BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
         BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
         EOF
+    - name: Configure Git
+      # If we don’t have consistent line endings across the operating systems,
+      # the MODULE.bazel.lock hashes will diverge for external repositories
+      # using git_override.
+      shell: bash
+      run: |
+        git config --global core.autocrlf false
+        git config --global core.eol lf
