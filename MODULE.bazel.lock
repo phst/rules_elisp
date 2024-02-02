@@ -1990,12 +1990,12 @@
       "general": {
         "bzlTransitiveDigest": "zP01muRk4s4xWGK3gNPXOyDMQkOPsIhu99akeKWFFQ0=",
         "accumulatedFileDigests": {
-          "@@phst_update_workspace_snippets~override//:go.sum": "f69daa38eb5dc6af75d9812a48acdf3977039d938349c35bb080205070572e4c",
+          "@@phst_update_workspace_snippets~override//:go.sum": "34c1ebe445e467c5f1b8f4f5405446eff354dc635f80611f47bd5209eb7d4b24",
           "@@rules_go~0.44.0//:go.mod": "15454724af1504c4ce1782c2a7f423d596a1d8490125eb7c5bd9c95fea1991f0",
           "@@gazelle~0.35.0//:go.mod": "48dc6e771c3028ee1c18b9ffc81e596fd5f6d7e0016c5ef280e30f2821f60473",
           "@@rules_go~0.44.0//:go.sum": "b5938730bf7d3581421928b0385d99648dd9634becead96fca0594ac491b2f49",
           "@@gazelle~0.35.0//:go.sum": "7c4460e8ecb5dd8691a51d4fa2e9e4751108b933636497ce46db499fc2e7a88d",
-          "@@phst_update_workspace_snippets~override//:go.mod": "d4b4c5656729ac7daef0928b4ac4b3e29804d02e0f60912431bb283d9a3ef218"
+          "@@phst_update_workspace_snippets~override//:go.mod": "54f759d7accb36179d312966c80c491658b48c78d3e90d2be1fac53fa343538f"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -2757,7 +2757,7 @@
     },
     "@@hedron_compile_commands~override//:workspace_setup.bzl%hedron_compile_commands_extension": {
       "general": {
-        "bzlTransitiveDigest": "VYsbf/V1v3V5TDFZ2riUvy3/is1118QpHOrxcytCrW0=",
+        "bzlTransitiveDigest": "54AgIPNxud0pTq8Nxh5b+3pYMHRfFFmOl+E7LFid/J4=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {},
