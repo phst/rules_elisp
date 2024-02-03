@@ -50,21 +50,17 @@ runs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-xpm-nox
       if: runner.os == 'Windows'
-    - name: Set up MSYS2 environment
+    - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
-      shell: cmd
-      run: |
-        ECHO BAZEL_SH=C:\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
-      if: runner.os == 'Windows'
-    - name: Create output base
       # Work around https://github.com/protocolbuffers/protobuf/issues/12947.
-      # See https://bazel.build/configure/windows#long-path-issues.
-      # Note that the .bazelrc parser treats backslashes as escape characters,
-      # so we have to escape them.
+      # See https://bazel.build/configure/windows#long-path-issues.  Note that
+      # the .bazelrc parser treats backslashes as escape characters, so we have
+      # to escape them.
       shell: cmd
-      run: >
-        MKDIR %RUNNER_TEMP%\output-base
+      run: >-
+        ECHO BAZEL_SH=C:\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
+        && MKDIR %RUNNER_TEMP%\output-base
         && SUBST O: %RUNNER_TEMP%\output-base
         && ECHO startup --output_base='O:\\'>> github.bazelrc
       if: runner.os == 'Windows'
@@ -84,11 +80,12 @@ runs:
         restore-keys: |
           bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-
           bazel-actions-${{runner.os}}-
-    - name: Set up .bazelrc
+    - name: Configure system (all platforms)
       shell: bash
-      # The .bazelrc parser treats backslashes as escape characters, so replace
-      # them with forward slashes, which also works on Windows.
       run: |
+        set -euxC
+        # The .bazelrc parser treats backslashes as escape characters, so
+        # replace them with forward slashes, which also works on Windows.
         tr '\\' '/' >> github.bazelrc <<'EOF'
         common --announce_rc
         common --show_progress_rate_limit=10
@@ -100,27 +97,21 @@ runs:
         build --nostamp
         test --test_output=errors
         EOF
-    - name: Set up environment
-      # BAZELISK_GITHUB_TOKEN: See
-      # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467.
-      #
-      # BAZEL_USE_CPP_ONLY_TOOLCHAIN: We don’t need XCode, and using the Unix
-      # toolchain tends to be less flaky.  See
-      # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
-      # Use the Unix toolchain only on Github to make coverage generation work
-      # locally; see https://github.com/bazelbuild/bazel/issues/14970.
-      shell: bash
-      run: |
+        # BAZELISK_GITHUB_TOKEN: See
+        # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467.
+        #
+        # BAZEL_USE_CPP_ONLY_TOOLCHAIN: We don’t need XCode, and using the Unix
+        # toolchain tends to be less flaky.  See
+        # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
+        # Use the Unix toolchain only on Github to make coverage generation work
+        # locally; see https://github.com/bazelbuild/bazel/issues/14970.
         cat >> "${GITHUB_ENV:?}" <<'EOF'
         USE_BAZEL_VERSION=${{inputs.bazel-version}}
         BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
         BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
         EOF
-    - name: Configure Git
-      # If we don’t have consistent line endings across the operating systems,
-      # the MODULE.bazel.lock hashes will diverge for external repositories
-      # using git_override.
-      shell: bash
-      run: |
+        # If we don’t have consistent line endings across the operating systems,
+        # the MODULE.bazel.lock hashes will diverge for external repositories
+        # using git_override.
         git config --global core.autocrlf false
         git config --global core.eol lf
