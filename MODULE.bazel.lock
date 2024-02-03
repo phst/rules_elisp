@@ -3557,7 +3557,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "pV3xukn4sznDuleA4hMk/l/O3E3vfCqfyU/shuIth1I=",
+        "bzlTransitiveDigest": "7Ihs0xT5tTGIntxFUoRfstLClVGeke5IiFL6uQrwrI8=",
         "accumulatedFileDigests": {},
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -3727,19 +3727,19 @@
         },
         "recordedRepoMappingEntries": [
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.4.1",
             "bazel_features_globals",
-            "bazel_features~1.1.1~version_extension~bazel_features_globals"
+            "bazel_features~1.4.1~version_extension~bazel_features_globals"
           ],
           [
-            "bazel_features~1.1.1",
+            "bazel_features~1.4.1",
             "bazel_features_version",
-            "bazel_features~1.1.1~version_extension~bazel_features_version"
+            "bazel_features~1.4.1~version_extension~bazel_features_version"
           ],
           [
             "rules_go~0.44.0",
             "bazel_features",
-            "bazel_features~1.1.1"
+            "bazel_features~1.4.1"
           ],
           [
             "rules_go~0.44.0",
@@ -7345,7 +7345,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "bvnQTNRXNnbF2Y1hUv1l4Me+jkhmUbjWvgT32IRrdu0=",
+        "bzlTransitiveDigest": "GRjNYLCZCy/Yd4c0rm7a4l3L9Lto2hkU/HtaKGe460Q=",
         "accumulatedFileDigests": {
           "@@//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
         },
@@ -7671,19 +7671,19 @@
         },
         "recordedRepoMappingEntries": [
           [
-            "bazel_features~1.3.0",
+            "bazel_features~1.4.1",
             "bazel_features_globals",
-            "bazel_features~1.3.0~version_extension~bazel_features_globals"
+            "bazel_features~1.4.1~version_extension~bazel_features_globals"
           ],
           [
-            "bazel_features~1.3.0",
+            "bazel_features~1.4.1",
             "bazel_features_version",
-            "bazel_features~1.3.0~version_extension~bazel_features_version"
+            "bazel_features~1.4.1~version_extension~bazel_features_version"
           ],
           [
             "rules_python~0.29.0",
             "bazel_features",
-            "bazel_features~1.3.0"
+            "bazel_features~1.4.1"
           ],
           [
             "rules_python~0.29.0",

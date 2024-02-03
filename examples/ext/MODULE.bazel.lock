@@ -4897,7 +4897,7 @@
         ]
       },
       "os:windows,arch:amd64": {
-        "bzlTransitiveDigest": "tecIf7NsYPlRqvcx4VSQxuepxwyeuBEv6wLP9aPYtOY=",
+        "bzlTransitiveDigest": "F5PiubOPuoV1hM4tsEPFBL9HVs45PryuWVwRMGibV9E=",
         "accumulatedFileDigests": {
           "@@phst_rules_elisp~override//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
         },
@@ -5223,19 +5223,19 @@
         },
         "recordedRepoMappingEntries": [
           [
-            "bazel_features~1.3.0",
+            "bazel_features~1.4.1",
             "bazel_features_globals",
-            "bazel_features~1.3.0~version_extension~bazel_features_globals"
+            "bazel_features~1.4.1~version_extension~bazel_features_globals"
           ],
           [
-            "bazel_features~1.3.0",
+            "bazel_features~1.4.1",
             "bazel_features_version",
-            "bazel_features~1.3.0~version_extension~bazel_features_version"
+            "bazel_features~1.4.1~version_extension~bazel_features_version"
           ],
           [
             "rules_python~0.29.0",
             "bazel_features",
-            "bazel_features~1.3.0"
+            "bazel_features~1.4.1"
           ],
           [
             "rules_python~0.29.0",
