@@ -40,7 +40,7 @@ jobs:
         run: >
           bazelisk build
           --lockfile_mode=off
-          --execution_log_binary_file="${{runner.temp}}/execution-log.binpb"
+          --execution_log_binary_file='${{runner.temp}}/execution-log.binpb'
           -- //emacs
       - name: Upload binary execution log
         uses: actions/upload-artifact@v4

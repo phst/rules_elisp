@@ -65,7 +65,7 @@ jobs:
           !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
         shell: pwsh
-        run: python build.py --profiles="${{runner.temp}}/profiles" -- check
+        run: python build.py --profiles='${{runner.temp}}/profiles' -- check
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:
