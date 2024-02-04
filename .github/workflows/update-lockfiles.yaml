@@ -47,6 +47,13 @@ jobs:
     needs: update
     runs-on: ubuntu-latest
     steps:
+      - name: Download merge script
+        uses: actions/checkout@v4
+        with:
+          repository: phst/merge-bazel-lockfiles
+          ref: 0735ba33451558108723420098f13e0ece92bda2
+          sparse-checkout: /merge.py
+          sparse-checkout-cone-mode: false
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
@@ -58,23 +65,12 @@ jobs:
           for dir in . examples/ext; do
             mkdir -p -- "${dir}"
             out="${dir}/MODULE.bazel.lock"
-            # No globbing so that the order is obvious.
-            in=(
-              "lockfiles-Linux/${out}"
-              "lockfiles-macOS/${out}"
-              "lockfiles-Windows/${out}"
-            )
-            jq -s -e -f /dev/stdin -- "${in[@]}" > "${out}" <<'EOF'
-            def keep_ext_keys(f):
-              .moduleExtensions[]
-              |= with_entries(select(.key | split(",") | any(f)));
-            .[0]
-            # For macOS and Windows, keep only extension keys that match the OS.
-            # Other entries will be stale or identical to GNU/Linux.
-            * (.[1] | keep_ext_keys(. == "os:macos" or . == "os:osx"))
-            * (.[2] | keep_ext_keys(. == "os:windows"))
-          EOF
-            rm -- "${in[@]}"
+            ./merge.py \
+              --linux="lockfiles-Linux/${out}" \
+              --macos="lockfiles-macOS/${out}" \
+              --windows="lockfiles-Windows/${out}" \
+              --output="${out}"
+            rm -- lockfiles-{Linux,macOS,Windows}/"${out}"
           done
           # This will fail if we forgot some OS above.
           rmdir -v -- \
