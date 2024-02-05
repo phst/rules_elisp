@@ -60,7 +60,7 @@ bazel_dep(name = "phst_rules_elisp")
 git_override(
     module_name = "phst_rules_elisp",
     remote = "https://github.com/phst/rules_elisp.git",
-    commit = "4fae310464968ae451b3b172832233fe160dbc2f",
+    commit = "30e571b6e69be2dcc782325834792d79c245d30d",
 )
 #+END_SRC
 
@@ -77,10 +77,10 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
     name = "phst_rules_elisp",
-    integrity = "sha384-bphZJnQMjhnW5mBvaW5q8UqmgS1C7H5pn8kam0jxKysi2MLmKUyf9j9Oj7cNZTeC",
-    strip_prefix = "rules_elisp-4fae310464968ae451b3b172832233fe160dbc2f",
+    integrity = "sha384-QVJcZ4h8j8t9fjaddWCGssqBjUexRReKR53Th9XG1xPYXN/2eiWP1Is5pIfElsA5",
+    strip_prefix = "rules_elisp-30e571b6e69be2dcc782325834792d79c245d30d",
     urls = [
-        "https://github.com/phst/rules_elisp/archive/4fae310464968ae451b3b172832233fe160dbc2f.zip",  # 2024-01-08
+        "https://github.com/phst/rules_elisp/archive/30e571b6e69be2dcc782325834792d79c245d30d.zip",  # 2024-02-04
     ],
 )
 
