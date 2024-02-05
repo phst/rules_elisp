@@ -13,6 +13,7 @@
 # limitations under the License.
 
 .POSIX:
+.SUFFIXES:
 
 SHELL = /bin/sh
 
@@ -48,5 +49,3 @@ install:
 	  bazel-bin/docs/rules_elisp.info \
 	  '$(INFODIR)/rules_elisp.info'
 	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
-
-.SUFFIXES:
