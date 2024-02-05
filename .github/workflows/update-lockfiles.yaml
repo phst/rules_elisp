@@ -47,17 +47,17 @@ jobs:
     needs: update
     runs-on: ubuntu-latest
     steps:
-      - name: Download merge script
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          repository: phst/merge-bazel-lockfiles
-          ref: 0735ba33451558108723420098f13e0ece92bda2
-          sparse-checkout: /merge.py
-          sparse-checkout-cone-mode: false
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: lockfiles-*
+      - name: Set up workspace
+        uses: ./.github/actions/set-up
+        with:
+          bazel-version: latest
+          github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Merge lockfiles
         shell: bash
         run: |
@@ -65,11 +65,15 @@ jobs:
           for dir in . examples/ext; do
             mkdir -p -- "${dir}"
             out="${dir}/MODULE.bazel.lock"
-            ./merge.py \
-              --linux="lockfiles-Linux/${out}" \
-              --macos="lockfiles-macOS/${out}" \
-              --windows="lockfiles-Windows/${out}" \
-              --output="${out}"
+            bazelisk run \
+              --lockfile_mode=off \
+              --output_groups='-check_python' \
+              -- \
+              @phst_merge_bazel_lockfiles//:merge \
+              --linux="${PWD}/lockfiles-Linux/${out}" \
+              --macos="${PWD}/lockfiles-macOS/${out}" \
+              --windows="${PWD}/lockfiles-Windows/${out}" \
+              --output="${PWD}/${out}"
             rm -- lockfiles-{Linux,macOS,Windows}/"${out}"
           done
           # This will fail if we forgot some OS above.

@@ -126,6 +126,13 @@ git_override(
     remote = "https://github.com/phst/bazelcov.git",
 )
 
+bazel_dep(name = "phst_merge_bazel_lockfiles", dev_dependency = True)
+git_override(
+    module_name = "phst_merge_bazel_lockfiles",
+    commit = "2c29e76acf0fd35700059e97925258b6874e49de",
+    remote = "https://github.com/phst/merge-bazel-lockfiles.git",
+)
+
 # We want to test the external example without adding its repository to the
 # registry.  So we override the dependency immediately locally.
 bazel_dep(name = "phst_rules_elisp_example", dev_dependency = True, repo_name = "example")

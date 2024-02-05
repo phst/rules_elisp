@@ -1,4 +1,4 @@
-// Copyright 2023 Google LLC
+// Copyright 2023, 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,7 @@ func TestDependencyVersions(t *testing.T) {
 		// legacy WORKSPACE dependency.
 		"hedron_compile_commands",
 		"phst_bazelcov",
+		"phst_merge_bazel_lockfiles",
 		"phst_update_workspace_snippets",
 	}
 	for _, rule := range moduleFile.Rules("bazel_dep") {
