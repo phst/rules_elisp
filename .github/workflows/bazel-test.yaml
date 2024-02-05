@@ -44,8 +44,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - id: setup
-        name: Set up workspace
+      - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
           bazel-version: ${{matrix.bazel}}

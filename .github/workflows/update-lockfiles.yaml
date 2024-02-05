@@ -28,8 +28,7 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - id: setup
-        name: Set up workspace
+      - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
           bazel-version: latest
@@ -48,8 +47,7 @@ jobs:
     needs: update
     runs-on: ubuntu-latest
     steps:
-      - id: download
-        name: Download artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           pattern: lockfiles-*
