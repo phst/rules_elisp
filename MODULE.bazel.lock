@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 3,
-  "moduleFileHash": "4a061335d5dc4c9eeaa1fe7adc4d0f9112660af6c5f8fe639d24a08da58eb313",
+  "moduleFileHash": "83ac6c133be97030442131d3113784097c31fd80d0b50dfbad4dfd6f02a49b50",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -92,7 +92,9 @@
           "imports": {
             "hermetic_python": "python_3_10"
           },
-          "devImports": [],
+          "devImports": [
+            "python_3_10"
+          ],
           "tags": [
             {
               "tagName": "toolchain",
@@ -101,7 +103,7 @@
                 "ignore_root_user_error": true,
                 "python_version": "3.10"
               },
-              "devDependency": false,
+              "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
                 "line": 60,
@@ -109,8 +111,8 @@
               }
             }
           ],
-          "hasDevUseExtension": false,
-          "hasNonDevUseExtension": true
+          "hasDevUseExtension": true,
+          "hasNonDevUseExtension": false
         },
         {
           "extensionBzlFile": "@rules_python//python/extensions:pip.bzl",
@@ -124,7 +126,9 @@
           "imports": {
             "pip_deps": "pip"
           },
-          "devImports": [],
+          "devImports": [
+            "pip"
+          ],
           "tags": [
             {
               "tagName": "parse",
@@ -135,7 +139,7 @@
                 "requirements_linux": "//dev:linux-requirements.txt",
                 "requirements_windows": "//dev:windows-requirements.txt"
               },
-              "devDependency": false,
+              "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
                 "line": 71,
@@ -143,8 +147,8 @@
               }
             }
           ],
-          "hasDevUseExtension": false,
-          "hasNonDevUseExtension": true
+          "hasDevUseExtension": true,
+          "hasNonDevUseExtension": false
         },
         {
           "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
