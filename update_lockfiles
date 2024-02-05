@@ -16,6 +16,30 @@
 
 set -eu
 
+workflow=update-lockfiles.yaml
 branch="$(git branch --show-current)"
+now="$(date -u -Iseconds)"
 
-gh workflow run update-lockfiles.yaml --ref="${branch:?}"
+gh workflow run "${workflow:?}" --ref="${branch:?}"
+
+fetch_run_id() {
+  gh run list \
+    --workflow="${workflow:?}" \
+    --event=workflow_dispatch \
+    --branch="${branch:?}" \
+    --created=">=${now:?}" \
+    --limit=1 \
+    --json=databaseId \
+    --jq='.[].databaseId'
+}
+
+while id="$(fetch_run_id)" && [[ -z "${id}" ]]; do
+  sleep 1
+done
+
+gh run watch "${id:?}"
+
+dir="$(mktemp -d)"
+gh run download "${id:?}" --dir="${dir:?}" --name=lockfiles
+cp -R -i -v -- "${dir:?}/" ./
+rm -r -- "${dir:?}"
