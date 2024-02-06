@@ -50,10 +50,26 @@ else
 fi
 
 gh run watch "${id:?}"
+gh run download "${id:?}"
 
-dir="$(mktemp -d)"
-gh run download "${id:?}" --dir="${dir:?}" --name=lockfiles
-cp -R -i -v -- "${dir:?}/" ./
-rm -r -- "${dir:?}"
+for dir in . examples/ext; do
+  out="${dir:?}/MODULE.bazel.lock"
+  bazel run \
+    --lockfile_mode=off \
+    --output_groups='-check_python' \
+    -- \
+    @phst_merge_bazel_lockfiles//:merge \
+    --linux="${PWD:?}/lockfiles-Linux/${out:?}" \
+    --macos="${PWD:?}/lockfiles-macOS/${out:?}" \
+    --windows="${PWD:?}/lockfiles-Windows/${out:?}" \
+    --output="${PWD:?}/${out:?}"
+  rm -- lockfiles-{Linux,macOS,Windows}/"${out:?}"
+done
+
+# This will fail if we forgot some OS above.
+rmdir -v -- \
+  lockfiles-*/examples/ext \
+  lockfiles-*/examples \
+  lockfiles-*
 
 rm -- "${stamp:?}" "${run:?}"
