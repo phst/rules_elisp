@@ -14,28 +14,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-set -eu
+set -euC
 
 workflow=update-lockfiles.yaml
-branch="$(git branch --show-current)"
-now="$(date -u -Iseconds)"
+stamp=lock.stamp
+run=lock.run
 
-gh workflow run "${workflow:?}" --ref="${branch:?}"
+if [[ -f "${stamp:?}" ]]; then
+  read -r branch time < "${stamp:?}"
+else
+  branch="$(git branch --show-current)"
+  time="$(date -u -Iseconds)"
+  gh workflow run "${workflow:?}" --ref="${branch:?}"
+  echo "${branch:?} ${time:?}" > "${stamp:?}"
+fi
 
 fetch_run_id() {
   gh run list \
     --workflow="${workflow:?}" \
     --event=workflow_dispatch \
     --branch="${branch:?}" \
-    --created=">=${now:?}" \
+    --created=">=${time:?}" \
     --limit=1 \
     --json=databaseId \
     --jq='.[].databaseId'
 }
 
-while id="$(fetch_run_id)" && [[ -z "${id}" ]]; do
-  sleep 1
-done
+if [[ -f "${run:?}" ]]; then
+  read -r id < "${run:?}"
+else
+  while id="$(fetch_run_id)" && [[ -z "${id}" ]]; do
+    sleep 1
+  done
+  echo "${id:?}" > "${run:?}"
+fi
 
 gh run watch "${id:?}"
 
@@ -43,3 +55,5 @@ dir="$(mktemp -d)"
 gh run download "${id:?}" --dir="${dir:?}" --name=lockfiles
 cp -R -i -v -- "${dir:?}/" ./
 rm -r -- "${dir:?}"
+
+rm -- "${stamp:?}" "${run:?}"
