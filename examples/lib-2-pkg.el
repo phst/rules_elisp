@@ -1,6 +1,4 @@
-;;; lib-3.el --- example library 3 -*- lexical-binding: t; -*-
-
-;; Copyright 2020, 2021 Google LLC
+;; Copyright 2023 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -14,16 +12,4 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
-;; Version: 0.1.0
-
-;;; Commentary:
-
-;; Example library in a subdirectory.
-
-;;; Code:
-
-(defun lib-3-func ()
-  (message "hi from lib-3"))
-
-(provide 'lib-3)
-;;; lib-3.el ends here
+(define-package "lib-2" "0.1.0")
