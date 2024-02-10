@@ -59,11 +59,11 @@ for dir in . examples/ext; do
     --output_groups='-check_python' \
     -- \
     @phst_merge_bazel_lockfiles//:merge \
-    --linux-amd64="${PWD:?}/lockfiles-Linux/${out:?}" \
-    --darwin-amd64="${PWD:?}/lockfiles-macOS/${out:?}" \
-    --windows-amd64="${PWD:?}/lockfiles-Windows/${out:?}" \
-    --local="${PWD:?}/${out:?}" \
-    --output="${PWD:?}/${out:?}"
+    --linux-amd64="lockfiles-Linux/${out:?}" \
+    --darwin-amd64="lockfiles-macOS/${out:?}" \
+    --windows-amd64="lockfiles-Windows/${out:?}" \
+    --local="${out:?}" \
+    --output="${out:?}"
   rm -- lockfiles-{Linux,macOS,Windows}/"${out:?}"
 done
 
