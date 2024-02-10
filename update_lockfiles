@@ -68,7 +68,7 @@ for dir in . examples/ext; do
 done
 
 # This will fail if we forgot some OS above.
-rmdir -v -- \
+rmdir -- \
   lockfiles-*/examples/ext \
   lockfiles-*/examples \
   lockfiles-*
