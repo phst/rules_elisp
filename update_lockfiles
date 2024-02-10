@@ -49,7 +49,7 @@ else
   echo "${id:?}" > "${run:?}"
 fi
 
-gh run watch "${id:?}"
+gh run watch "${id:?}" --exit-status
 gh run download "${id:?}"
 
 for dir in . examples/ext; do
