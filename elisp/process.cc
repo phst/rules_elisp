@@ -204,7 +204,7 @@ static absl::StatusOr<Environment> CopyEnv() {
       return absl::FailedPreconditionError("Invalid environment block entry");
     }
     const std::wstring key(p, q);
-    const auto [it, ok] = map.emplace(key, std::wstring(q + 1));
+    const auto [it, ok] = map.try_emplace(key, std::wstring(q + 1));
     if (!ok) {
       std::wcerr << L"Duplicate environment variable " << key << std::endl;
       return absl::AlreadyExistsError("Duplicate environment variable");
@@ -233,7 +233,7 @@ static absl::StatusOr<Environment> CopyEnv() {
     const absl::Nullable<const char*> q = std::strchr(p, '=');
     if (q != nullptr) {
       const std::string key(p, q);
-      const auto [it, ok] = map.emplace(key, std::string(q + 1));
+      const auto [it, ok] = map.try_emplace(key, std::string(q + 1));
       if (!ok) {
         return absl::AlreadyExistsError(
             absl::StrCat("Duplicate environment variable ", key));
@@ -414,7 +414,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
     if (!value.ok()) return value.status();
-    const auto [it, ok] = map.emplace(*key, *value);
+    const auto [it, ok] = map.try_emplace(*key, *value);
     if (!ok) {
       return absl::AlreadyExistsError(
           absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
