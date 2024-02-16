@@ -19,6 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
+#include <map>
 #include <memory>
 #include <string_view>
 
@@ -33,7 +34,6 @@
 #  pragma warning(push, 3)
 #endif
 #include "absl/base/nullability.h"
-#include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -48,7 +48,7 @@
 
 namespace rules_elisp {
 
-using Environment = absl::flat_hash_map<NativeString, NativeString>;
+using Environment = std::map<NativeString, NativeString>;
 
 class Runfiles final {
  public:
