@@ -48,6 +48,7 @@
 #include <string_view>
 #include <system_error>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -69,6 +70,7 @@
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"
@@ -298,14 +300,15 @@ enum { kMaxASCII = 0x7F };
 
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
-  using Traits = typename std::basic_string_view<Char>::traits_type;
   const auto it = absl::c_find_if(string, [](const Char ch) {
-    return Traits::lt(ch, 0) || Traits::lt(kMaxASCII, ch);
+    return ch < 0 || ch > std::numeric_limits<unsigned char>::max() ||
+           !absl::ascii_isascii(static_cast<unsigned char>(ch));
   });
   if (it != string.end()) {
-    return absl::InvalidArgumentError(absl::StrCat(
-        "non-ASCII character U+",
-        absl::Hex(Traits::to_int_type(*it), absl::kZeroPad4), " in string"));
+    const auto val = static_cast<std::make_unsigned_t<Char>>(*it);
+    return absl::InvalidArgumentError(
+        absl::StrCat("non-ASCII character U+", absl::Hex(val, absl::kZeroPad4),
+                     " in string"));
   }
   return absl::OkStatus();
 }
