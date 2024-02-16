@@ -299,7 +299,7 @@ enum { kMaxASCII = 0x7F };
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   using Traits = typename std::basic_string_view<Char>::traits_type;
-  const auto it = absl::c_find_if(string, [](const Char& ch) {
+  const auto it = absl::c_find_if(string, [](const Char ch) {
     return Traits::lt(ch, 0) || Traits::lt(kMaxASCII, ch);
   });
   if (it != string.end()) {
