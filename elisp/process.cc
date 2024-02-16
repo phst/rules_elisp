@@ -433,22 +433,8 @@ absl::StatusOr<int> Run(const std::string_view binary,
   absl::c_sort(runfiles_args);
   final_args.insert(final_args.end(), runfiles_args.begin(),
                     runfiles_args.end());
-  Environment orig_env = CopyEnv();
-  // Work around a bug (https://github.com/bazelbuild/rules_python/issues/1394)
-  // in the Python rules implementation in Bazel: nested invocations of Python
-  // binaries with coverage instrumentation enabled don’t work because the inner
-  // binary will delete a temporary .coveragerc file that the outer binary still
-  // needs.  Moreover, coverage information for the intermediate Python scripts
-  // will probably not be very interesting for users anyway, so pretend that we
-  // don’t want to instrument them by removing the COVERAGE_DIR environment
-  // variable.  Our wrapper binaries then need to reinstate it for the actual
-  // Emacs process to fulfill the coverage protocol.
-  if (const auto node =
-          orig_env.extract(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"))) {
-    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--env=COVERAGE_DIR=") +
-                         node.mapped());
-  }
   final_args.insert(final_args.end(), args.begin(), args.end());
+  Environment orig_env = CopyEnv();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
