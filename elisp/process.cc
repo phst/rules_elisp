@@ -189,8 +189,9 @@ static absl::StatusOr<Environment> CopyEnv() {
   };
   const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
       ::GetEnvironmentStringsW());
-  // This cannot really happen in practice.
-  CHECK(envp != nullptr) << L"GetEnvironmentStringsW failed";
+  if (envp == nullptr) {
+    return absl::OutOfMemoryError("GetEnvironmentStringsW failed");
+  }
   absl::Nonnull<const wchar_t*> p = envp.get();
   while (*p != L'\0') {
     // Skip over the first character to properly deal with the magic “per-drive
@@ -200,7 +201,7 @@ static absl::StatusOr<Environment> CopyEnv() {
     const absl::Nullable<const wchar_t*> q = std::wcschr(p + 1, L'=');
     if (q == nullptr) {
       std::wcerr << L"Invalid environment block entry " << p << std::endl;
-      LOG(FATAL) << "Invalid environment block entry";
+      return absl::FailedPreconditionError("Invalid environment block entry");
     }
     const std::wstring key(p, q);
     const auto [it, ok] = map.emplace(key, std::wstring(q + 1));
@@ -209,10 +210,12 @@ static absl::StatusOr<Environment> CopyEnv() {
       return absl::AlreadyExistsError("Duplicate environment variable");
     }
     p = std::wcschr(p, L'\0');
-    // This can’t happen because the environment block is terminated by a double
-    // null character.
-    CHECK(p != nullptr)
-        << L"GetEnvironmentStringsW returned an invalid environment block";
+    if (p == nullptr) {
+      // This can’t happen because the environment block is terminated by a
+      // double null character.
+      return absl::FailedPreconditionError(
+          "GetEnvironmentStringsW returned an invalid environment block");
+    }
     ++p;
   }
 #else
