@@ -297,7 +297,7 @@ func Test(t *testing.T) {
 	}
 
 	t.Logf("looking for coverage files in %s", coverageDir)
-	files, err := filepath.Glob(filepath.Join(coverageDir, "*.dat"))
+	files, err := filepath.Glob(filepath.Join(coverageDir, "e*.dat"))
 	if err != nil {
 		t.Error(err)
 	}
