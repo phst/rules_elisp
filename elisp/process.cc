@@ -179,7 +179,7 @@ static std::vector<absl::Nonnull<char*>> Pointers(
 }
 #endif
 
-static Environment CopyEnv() {
+static absl::StatusOr<Environment> CopyEnv() {
   Environment map;
 #ifdef _WIN32
   struct Free {
@@ -202,7 +202,12 @@ static Environment CopyEnv() {
       std::wcerr << L"Invalid environment block entry " << p << std::endl;
       LOG(FATAL) << "Invalid environment block entry";
     }
-    map.emplace(std::wstring(p, q), std::wstring(q + 1));
+    const std::wstring key(p, q);
+    const auto [it, ok] = map.emplace(key, std::wstring(q + 1));
+    if (!ok) {
+      std::wcerr << L"Duplicate environment variable " << key << std::endl;
+      return absl::AlreadyExistsError("Duplicate environment variable");
+    }
     p = std::wcschr(p, L'\0');
     // This can’t happen because the environment block is terminated by a double
     // null character.
@@ -224,7 +229,12 @@ static Environment CopyEnv() {
     const absl::Nonnull<const char*> p = *pp;
     const absl::Nullable<const char*> q = std::strchr(p, '=');
     if (q != nullptr) {
-      map.emplace(std::string(p, q), std::string(q + 1));
+      const std::string key(p, q);
+      const auto [it, ok] = map.emplace(key, std::string(q + 1));
+      if (!ok) {
+        return absl::AlreadyExistsError(
+            absl::StrCat("Duplicate environment variable ", key));
+      }
     }
   }
 #endif
@@ -401,7 +411,11 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
     if (!value.ok()) return value.status();
-    map.emplace(*key, *value);
+    const auto [it, ok] = map.emplace(*key, *value);
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
+    }
   }
   return map;
 }
@@ -434,12 +448,13 @@ absl::StatusOr<int> Run(const std::string_view binary,
   final_args.insert(final_args.end(), runfiles_args.begin(),
                     runfiles_args.end());
   final_args.insert(final_args.end(), args.begin(), args.end());
-  Environment orig_env = CopyEnv();
+  absl::StatusOr<Environment> orig_env = CopyEnv();
+  if (!orig_env.ok()) return orig_env.status();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
-  orig_env.erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
-  map->insert(orig_env.begin(), orig_env.end());
+  orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
+  map->insert(orig_env->begin(), orig_env->end());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : *map) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
