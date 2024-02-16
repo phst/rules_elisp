@@ -62,10 +62,6 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(name)s %(message)s')
     env: dict[str, str] = dict(os.environ)
-    # We don’t want the Python launcher to change the current working directory,
-    # otherwise relative filenames will be all messed up.  See
-    # https://github.com/bazelbuild/bazel/issues/7190.
-    env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
