@@ -53,10 +53,6 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     env: dict[str, str] = dict(os.environ)
-    # We don’t want the Python launcher to change the current working directory,
-    # otherwise relative filenames will be all messed up.  See
-    # https://github.com/bazelbuild/bazel/issues/7190.
-    env.pop('RUN_UNDER_RUNFILES', None)
     run_files = runfiles.Runfiles(dict(opts.runfiles_env))
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]

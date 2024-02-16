@@ -451,12 +451,8 @@ absl::StatusOr<int> Run(const std::string_view binary,
   final_args.insert(final_args.end(), runfiles_args.begin(),
                     runfiles_args.end());
   final_args.insert(final_args.end(), args.begin(), args.end());
-  absl::StatusOr<Environment> orig_env = CopyEnv();
+  const absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
-  // We don’t want the Python launcher to change the current working directory,
-  // otherwise relative filenames will be all messed up.  See
-  // https://github.com/bazelbuild/bazel/issues/7190.
-  orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
   map->insert(orig_env->begin(), orig_env->end());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : *map) {
