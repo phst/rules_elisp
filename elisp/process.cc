@@ -447,8 +447,6 @@ absl::StatusOr<int> Run(const std::string_view binary,
     runfiles_args.push_back(RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
                             key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
-  // Sort entries for hermeticity.
-  absl::c_sort(runfiles_args);
   final_args.insert(final_args.end(), runfiles_args.begin(),
                     runfiles_args.end());
   final_args.insert(final_args.end(), args.begin(), args.end());
@@ -463,8 +461,6 @@ absl::StatusOr<int> Run(const std::string_view binary,
   for (const auto& [key, value] : *map) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
-  // Sort entries for hermeticity.
-  absl::c_sort(final_env);
 #ifdef _WIN32
   std::wstring command_line = BuildCommandLine(final_args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
