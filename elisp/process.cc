@@ -317,7 +317,7 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
 // cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
 template <typename ToString, typename FromString>
 absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
-  using ToChar = typename ToString::traits_type::char_type;
+  using ToChar = typename ToString::value_type;
   static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
