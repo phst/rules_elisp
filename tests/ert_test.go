@@ -78,10 +78,6 @@ func Test(t *testing.T) {
 		"COVERAGE=1",
 		"COVERAGE_MANIFEST="+coverageManifest,
 		"COVERAGE_DIR="+coverageDir,
-		// Don’t have the Python launcher change the current directory,
-		// otherwise our fake environment setup won’t work.  See
-		// https://github.com/bazelbuild/bazel/issues/7190.
-		"RUN_UNDER_RUNFILES=0",
 	)
 	cmd.Env = env
 	cmd.Stdout = os.Stdout
