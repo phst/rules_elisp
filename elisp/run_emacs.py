@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,10 +55,6 @@ def main() -> None:
                    EMACSDOC=str(etc),
                    EMACSLOADPATH=str(shared / 'lisp'),
                    EMACSPATH=str(libexec))
-        # We don’t want the Python launcher to change the current working
-        # directory, otherwise relative filenames will be all messed up.  See
-        # https://github.com/bazelbuild/bazel/issues/7190.
-        env.pop('RUN_UNDER_RUNFILES', None)
         env.update(opts.env)
         env.update(run_files.environment())
         if os.name == 'nt':
