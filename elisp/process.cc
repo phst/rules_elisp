@@ -190,7 +190,7 @@ static absl::StatusOr<Environment> CopyEnv() {
   const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
       ::GetEnvironmentStringsW());
   if (envp == nullptr) {
-    return absl::OutOfMemoryError("GetEnvironmentStringsW failed");
+    return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
   }
   absl::Nonnull<const wchar_t*> p = envp.get();
   while (*p != L'\0') {
