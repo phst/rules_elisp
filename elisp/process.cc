@@ -329,8 +329,9 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
 // ASCII strings are supported so that we don’t have to deal with codepages.
 // All Windows codepages should be ASCII-compatible;
 // cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
-template <typename ToString, typename FromString>
-absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
+template <typename ToString, typename FromChar>
+absl::StatusOr<ToString> ConvertASCII(
+    const std::basic_string_view<FromChar> string) {
   enum { kMaxASCII = 0x7F };
   using ToChar = typename ToString::value_type;
   static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
@@ -355,11 +356,11 @@ static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
 #endif
 }
 
-static absl::StatusOr<NativeString> ToNative(const std::string& string) {
+static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #ifdef _WIN32
   return ConvertASCII<std::wstring>(string);
 #else
-  return string;
+  return std::string(string);
 #endif
 }
 
