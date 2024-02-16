@@ -296,8 +296,6 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 }
 #endif
 
-enum { kMaxASCII = 0x7F };
-
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   const auto it = absl::c_find_if(string, [](const Char ch) {
@@ -320,6 +318,7 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
 // cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
 template <typename ToString, typename FromString>
 absl::StatusOr<ToString> ConvertASCII(const FromString& string) {
+  enum { kMaxASCII = 0x7F };
   using ToChar = typename ToString::value_type;
   static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
                 "destination character type too small");
