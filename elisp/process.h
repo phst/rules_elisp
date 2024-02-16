@@ -19,8 +19,10 @@
 #  error this file requires at least C++17
 #endif
 
+#include <functional>
 #include <map>
 #include <memory>
+#include <string>
 #include <string_view>
 
 #ifdef __GNUC__
@@ -48,7 +50,13 @@
 
 namespace rules_elisp {
 
-using Environment = std::map<NativeString, NativeString>;
+#ifdef _WIN32
+struct NativeComp;
+#else
+using NativeComp = std::less<std::string>;
+#endif
+
+using Environment = std::map<NativeString, NativeString, NativeComp>;
 
 class Runfiles final {
  public:

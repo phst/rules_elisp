@@ -91,6 +91,10 @@
 namespace rules_elisp {
 
 #ifdef _WIN32
+struct NativeComp {
+  bool operator()(std::wstring_view a, std::wstring_view b) const;
+};
+
 // Build a command line that follows the Windows conventions.  See
 // https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
 // and
@@ -490,5 +494,21 @@ absl::StatusOr<int> Run(const std::string_view binary,
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 #endif
 }
+
+#ifdef _WIN32
+static int CastToIntOrDie(const std::wstring_view::size_type n) {
+  if (n > kMaxInt) LOG(FATAL) << "Number " << n << " doesn’t fit in an int";
+  return static_cast<int>(n);
+}
+
+bool NativeComp::operator()(const std::wstring_view a,
+                            const std::wstring_view b) const {
+  const int result = ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,
+                                      a.data(), CastToIntOrDie(a.length()),
+                                      b.data(), CastToIntOrDie(b.length()));
+  if (result == 0) LOG(FATAL) << WindowsStatus("CompareStringW");
+  return result == CSTR_LESS_THAN;
+}
+#endif
 
 }  // namespace rules_elisp
