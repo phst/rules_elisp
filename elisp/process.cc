@@ -395,10 +395,10 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
 absl::StatusOr<Environment> Runfiles::Environment() const {
   const auto& pairs = impl_->EnvVars();
   rules_elisp::Environment map;
-  for (const auto& p : pairs) {
-    const absl::StatusOr<NativeString> key = ToNative(p.first);
+  for (const auto& [narrow_key, narrow_value] : pairs) {
+    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
     if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value = ToNative(p.second);
+    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
     if (!value.ok()) return value.status();
     map.emplace(*key, *value);
   }
@@ -424,10 +424,9 @@ absl::StatusOr<int> Run(const std::string_view binary,
   // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher_main.cc.
   // Once we drop support for Bazel 6.0 and below, we should be able to modify
   // argv[0] to make this launcher more transparent.
-  for (const auto& p : *map) {
+  for (const auto& [key, value] : *map) {
     runfiles_args.push_back(RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
-                            p.first + RULES_ELISP_NATIVE_LITERAL('=') +
-                            p.second);
+                            key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
   // Sort entries for hermeticity.
   absl::c_sort(runfiles_args);
@@ -455,8 +454,8 @@ absl::StatusOr<int> Run(const std::string_view binary,
   orig_env.erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
   map->insert(orig_env.begin(), orig_env.end());
   std::vector<NativeString> final_env;
-  for (const auto& p : *map) {
-    final_env.push_back(p.first + RULES_ELISP_NATIVE_LITERAL('=') + p.second);
+  for (const auto& [key, value] : *map) {
+    final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
