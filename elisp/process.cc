@@ -100,7 +100,7 @@ static std::wstring BuildCommandLine(
   std::wstring result;
   bool first = true;
   for (const std::wstring& arg : args) {
-    if (!absl::exchange(first, false)) {
+    if (!std::exchange(first, false)) {
       result.push_back(L' ');
     }
     if (!arg.empty() && arg.find_first_of(L" \t\n\v\"") == arg.npos) {
