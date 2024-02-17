@@ -244,23 +244,17 @@ static absl::StatusOr<Environment> CopyEnv() {
   return map;
 }
 
-static absl::StatusCode MapErrorCode(const std::error_code& code) {
-  const std::error_condition condition = code.default_error_condition();
-  if (condition.category() != std::generic_category()) {
-    return absl::StatusCode::kUnknown;
-  }
-  return absl::ErrnoToStatusCode(condition.value());
-}
-
 static absl::Status MakeErrorStatus(const std::error_code& code,
                                     const std::string_view function,
                                     const std::string_view args) {
   if (!code) return absl::OkStatus();
-  return absl::Status(
-      MapErrorCode(code),
-      absl::StrCat(function, args.empty() ? args : absl::StrCat("(", args, ")"),
-                   ": ", code.category().name(), "/", code.value(), ": ",
-                   code.message()));
+  const std::error_condition condition = code.default_error_condition();
+  const std::string message = absl::StrCat(
+      function, args.empty() ? args : absl::StrCat("(", args, ")"), ": ",
+      code.category().name(), "/", code.value(), ": ", code.message());
+  return condition.category() == std::generic_category()
+             ? absl::ErrnoToStatus(condition.value(), message)
+             : absl::UnknownError(message);
 }
 
 template <typename... Ts>
