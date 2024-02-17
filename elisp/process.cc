@@ -194,29 +194,27 @@ static absl::StatusOr<Environment> CopyEnv() {
   }
   absl::Nonnull<const wchar_t*> p = envp.get();
   while (*p != L'\0') {
+    const std::wstring_view var = p;
+    if (var.length() < 2) {
+      std::wcerr << L"Invalid environment block entry " << var << std::endl;
+      return absl::FailedPreconditionError("Invalid environment block entry");
+    }
     // Skip over the first character to properly deal with the magic “per-drive
     // current directory” variables,
     // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
     // Their names start with an equals sign.
-    const absl::Nullable<const wchar_t*> q = std::wcschr(p + 1, L'=');
-    if (q == nullptr) {
-      std::wcerr << L"Invalid environment block entry " << p << std::endl;
+    const std::size_t i = var.find(L'=', 1);
+    if (i == var.npos) {
+      std::wcerr << L"Invalid environment block entry " << var << std::endl;
       return absl::FailedPreconditionError("Invalid environment block entry");
     }
-    const std::wstring key(p, q);
-    const auto [it, ok] = map.try_emplace(key, std::wstring(q + 1));
+    const std::wstring_view key = var.substr(0, i);
+    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
     if (!ok) {
       std::wcerr << L"Duplicate environment variable " << key << std::endl;
       return absl::AlreadyExistsError("Duplicate environment variable");
     }
-    p = std::wcschr(p, L'\0');
-    if (p == nullptr) {
-      // This can’t happen because the environment block is terminated by a
-      // double null character.
-      return absl::FailedPreconditionError(
-          "GetEnvironmentStringsW returned an invalid environment block");
-    }
-    ++p;
+    p += var.length() + 1;
   }
 #else
   const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
@@ -229,11 +227,15 @@ static absl::StatusOr<Environment> CopyEnv() {
       ;
   for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
        *pp != nullptr; ++pp) {
-    const absl::Nonnull<const char*> p = *pp;
-    const absl::Nullable<const char*> q = std::strchr(p, '=');
-    if (q != nullptr) {
-      const std::string key(p, q);
-      const auto [it, ok] = map.try_emplace(key, std::string(q + 1));
+    const std::string_view var = *pp;
+    if (var.length() < 2) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", var));
+    }
+    const std::size_t i = var.find('=');
+    if (i > 0 && i != var.npos) {
+      const std::string_view key = var.substr(0, i);
+      const auto [it, ok] = map.emplace(key, var.substr(i + 1));
       if (!ok) {
         return absl::AlreadyExistsError(
             absl::StrCat("Duplicate environment variable ", key));
