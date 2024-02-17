@@ -249,24 +249,7 @@ static absl::StatusCode MapErrorCode(const std::error_code& code) {
   if (condition.category() != std::generic_category()) {
     return absl::StatusCode::kUnknown;
   }
-  switch (static_cast<std::errc>(condition.value())) {
-    case std::errc::file_exists:
-      return absl::StatusCode::kAlreadyExists;
-    case std::errc::function_not_supported:
-      return absl::StatusCode::kUnimplemented;
-    case std::errc::no_space_on_device:
-      return absl::StatusCode::kResourceExhausted;
-    case std::errc::no_such_file_or_directory:
-      return absl::StatusCode::kNotFound;
-    case std::errc::operation_canceled:
-      return absl::StatusCode::kCancelled;
-    case std::errc::permission_denied:
-      return absl::StatusCode::kPermissionDenied;
-    case std::errc::timed_out:
-      return absl::StatusCode::kDeadlineExceeded;
-    default:
-      return absl::StatusCode::kUnknown;
-  }
+  return absl::ErrnoToStatusCode(condition.value());
 }
 
 static absl::Status MakeErrorStatus(const std::error_code& code,
