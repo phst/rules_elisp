@@ -233,13 +233,15 @@ static absl::StatusOr<Environment> CopyEnv() {
           absl::StrCat("Invalid environment block entry ", var));
     }
     const std::size_t i = var.find('=');
-    if (i > 0 && i != var.npos) {
-      const std::string_view key = var.substr(0, i);
-      const auto [it, ok] = map.emplace(key, var.substr(i + 1));
-      if (!ok) {
-        return absl::AlreadyExistsError(
-            absl::StrCat("Duplicate environment variable ", key));
-      }
+    if (i == 0 || i == var.npos) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", var));
+    }
+    const std::string_view key = var.substr(0, i);
+    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate environment variable ", key));
     }
   }
 #endif
