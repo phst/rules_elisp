@@ -311,9 +311,9 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
-  const auto it = absl::c_find_if(string, [](const Char ch) {
-    return ch < 0 || ch > std::numeric_limits<unsigned char>::max() ||
-           !absl::ascii_isascii(static_cast<unsigned char>(ch));
+  const auto it = absl::c_find_if_not(string, [](const Char ch) {
+    return ch >= 0 && ch <= std::numeric_limits<unsigned char>::max() &&
+           absl::ascii_isascii(static_cast<unsigned char>(ch));
   });
   if (it != string.end()) {
     const auto val = static_cast<std::make_unsigned_t<Char>>(*it);
