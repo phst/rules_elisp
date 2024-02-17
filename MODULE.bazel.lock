@@ -5483,7 +5483,7 @@
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "h/83o+d3U0LhREk15oGYkp3r8IxjUsb7OvNEKJKtbxo=",
         "accumulatedFileDigests": {
-          "@@//dev:macos-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
+          "@@//dev:macos-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -5592,7 +5592,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pytype",
-              "requirement": "pytype==2023.12.18 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0c83832f915fcdf991f6463881022fb704af54b9138af469ed47b55292b34b6b     --hash=sha256:14a9bacb67eb841c4db3f9f5b200f257b6b556bc91172eada7caa1e07b4b762e     --hash=sha256:1ccc14ae3e76794b750d04a25cbe09803a54fe1638b514d539130802d49192d6     --hash=sha256:3f42107fbac9b15458b3c7b94d3b86b3fe99566a5dad72ee86e9be8b2199c457     --hash=sha256:5df2aaf8331f87d280480da2626eecba8992a04fefd82b060dbde2a55166862e     --hash=sha256:6014cc7e750da1c1c5af5f3428da1f2ee0c6921903a9ea6eaee0a975a4c5f11d     --hash=sha256:835b13b232005fe23f75f5f4958243f5833f028acc78fc7e7c3e45288e2d59a3     --hash=sha256:8cd1a8f6039abe5a15af8c98d3c6cd896c820ea40d472b21efd701ddd855f7f3     --hash=sha256:a3ffb2dcee71ddf95b4321b8eff066826a02e99336baa4d47851091a6bcc3457     --hash=sha256:a5409ff4816e6cfca22c248d1bea4c152dce0c4dc4ec65a527238d6ce0b270e7     --hash=sha256:cf0d02e5385725fff2b177ed945792407139a13c3f34e7218a0cb6c3026c8563     --hash=sha256:dd1a76226ab2e1891eee561d606c8542e49287dbf72fe8dcf010459e2867e4ac     --hash=sha256:f48410a73e14fd863da3b3d3ff5d01716cd6b3ae1ceb23db577d6aed9629aab6",
+              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6367,7 +6367,7 @@
       "os:linux,arch:amd64": {
         "bzlTransitiveDigest": "NCIbPNvDdMKZ0PBxV7+AxwFNSknu7P/Oc6vFNbX2WM8=",
         "accumulatedFileDigests": {
-          "@@//dev:linux-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
+          "@@//dev:linux-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -6476,7 +6476,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pytype",
-              "requirement": "pytype==2023.12.18 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0c83832f915fcdf991f6463881022fb704af54b9138af469ed47b55292b34b6b     --hash=sha256:14a9bacb67eb841c4db3f9f5b200f257b6b556bc91172eada7caa1e07b4b762e     --hash=sha256:1ccc14ae3e76794b750d04a25cbe09803a54fe1638b514d539130802d49192d6     --hash=sha256:3f42107fbac9b15458b3c7b94d3b86b3fe99566a5dad72ee86e9be8b2199c457     --hash=sha256:5df2aaf8331f87d280480da2626eecba8992a04fefd82b060dbde2a55166862e     --hash=sha256:6014cc7e750da1c1c5af5f3428da1f2ee0c6921903a9ea6eaee0a975a4c5f11d     --hash=sha256:835b13b232005fe23f75f5f4958243f5833f028acc78fc7e7c3e45288e2d59a3     --hash=sha256:8cd1a8f6039abe5a15af8c98d3c6cd896c820ea40d472b21efd701ddd855f7f3     --hash=sha256:a3ffb2dcee71ddf95b4321b8eff066826a02e99336baa4d47851091a6bcc3457     --hash=sha256:a5409ff4816e6cfca22c248d1bea4c152dce0c4dc4ec65a527238d6ce0b270e7     --hash=sha256:cf0d02e5385725fff2b177ed945792407139a13c3f34e7218a0cb6c3026c8563     --hash=sha256:dd1a76226ab2e1891eee561d606c8542e49287dbf72fe8dcf010459e2867e4ac     --hash=sha256:f48410a73e14fd863da3b3d3ff5d01716cd6b3ae1ceb23db577d6aed9629aab6",
+              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7251,7 +7251,7 @@
       "os:osx,arch:x86_64": {
         "bzlTransitiveDigest": "O9ahXBjOEY2KXbHmgcWVQK8Pe0w8BC1iLY66SXcvnZ8=",
         "accumulatedFileDigests": {
-          "@@//dev:macos-requirements.txt": "20a6187011171789bb69615c7895557cfabffd93f9c39c986a20c72757d13ffc"
+          "@@//dev:macos-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -7360,7 +7360,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pytype",
-              "requirement": "pytype==2023.12.18 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0c83832f915fcdf991f6463881022fb704af54b9138af469ed47b55292b34b6b     --hash=sha256:14a9bacb67eb841c4db3f9f5b200f257b6b556bc91172eada7caa1e07b4b762e     --hash=sha256:1ccc14ae3e76794b750d04a25cbe09803a54fe1638b514d539130802d49192d6     --hash=sha256:3f42107fbac9b15458b3c7b94d3b86b3fe99566a5dad72ee86e9be8b2199c457     --hash=sha256:5df2aaf8331f87d280480da2626eecba8992a04fefd82b060dbde2a55166862e     --hash=sha256:6014cc7e750da1c1c5af5f3428da1f2ee0c6921903a9ea6eaee0a975a4c5f11d     --hash=sha256:835b13b232005fe23f75f5f4958243f5833f028acc78fc7e7c3e45288e2d59a3     --hash=sha256:8cd1a8f6039abe5a15af8c98d3c6cd896c820ea40d472b21efd701ddd855f7f3     --hash=sha256:a3ffb2dcee71ddf95b4321b8eff066826a02e99336baa4d47851091a6bcc3457     --hash=sha256:a5409ff4816e6cfca22c248d1bea4c152dce0c4dc4ec65a527238d6ce0b270e7     --hash=sha256:cf0d02e5385725fff2b177ed945792407139a13c3f34e7218a0cb6c3026c8563     --hash=sha256:dd1a76226ab2e1891eee561d606c8542e49287dbf72fe8dcf010459e2867e4ac     --hash=sha256:f48410a73e14fd863da3b3d3ff5d01716cd6b3ae1ceb23db577d6aed9629aab6",
+              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
