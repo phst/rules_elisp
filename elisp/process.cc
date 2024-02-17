@@ -90,6 +90,35 @@
 
 namespace rules_elisp {
 
+template <typename To, typename From>
+ABSL_MUST_USE_RESULT bool Overflow(const From n) {
+  static_assert(std::is_integral_v<To>);
+  static_assert(std::is_integral_v<From>);
+  using ToLimits = std::numeric_limits<To>;
+  using FromLimits = std::numeric_limits<From>;
+  if constexpr (ToLimits::is_signed == FromLimits::is_signed) {
+    return n < ToLimits::min() || n > ToLimits::max();
+  }
+  if constexpr (ToLimits::is_signed && !FromLimits::is_signed) {
+    return n > static_cast<std::make_unsigned_t<To>>(ToLimits::max());
+  }
+  if constexpr (!ToLimits::is_signed && FromLimits::is_signed) {
+    return n < 0 ||
+           static_cast<std::make_unsigned_t<From>>(n) > ToLimits::max();
+  }
+}
+
+template <typename To, typename From>
+absl::StatusOr<To> CastNumber(const From n) {
+  using Limits = std::numeric_limits<To>;
+  if (Overflow<To>(n)) {
+    return absl::OutOfRangeError(absl::StrCat("Number ", n, " out of range [",
+                                              Limits::min(), ", ",
+                                              Limits::max(), "]"));
+  }
+  return static_cast<To>(n);
+}
+
 #ifdef _WIN32
 struct NativeComp {
   bool operator()(std::wstring_view a, std::wstring_view b) const;
@@ -273,18 +302,12 @@ absl::Status ErrorStatus(const std::error_code& code,
 }
 
 #ifdef _WIN32
-static constexpr const unsigned int kMaxInt = std::numeric_limits<int>::max();
-
 template <typename... Ts>
 absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
-  const DWORD error = ::GetLastError();
-  if (error > kMaxInt) {
-    return absl::InvalidArgumentError(
-        absl::StrCat("error code ", error, " too large"));
-  }
-  return ErrorStatus(
-      std::error_code(static_cast<int>(error), std::system_category()),
-      function, std::forward<Ts>(args)...);
+  const absl::StatusOr<int> code = CastNumber<int>(::GetLastError());
+  if (!code.ok()) return code.status();
+  return ErrorStatus(std::error_code(*code, std::system_category()), function,
+                     std::forward<Ts>(args)...);
 }
 #else
 template <typename... Ts>
@@ -477,7 +500,7 @@ absl::StatusOr<int> Run(const std::string_view binary,
   DWORD code;
   success = ::GetExitCodeProcess(process_info.hProcess, &code);
   if (!success) return WindowsStatus("GetExitCodeProcess");
-  return code <= kMaxInt ? code : 0xFF;
+  return CastNumber<int>(code);
 #else
   const std::vector<absl::Nonnull<char*>> argv = Pointers(final_args);
   const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
@@ -496,16 +519,12 @@ absl::StatusOr<int> Run(const std::string_view binary,
 }
 
 #ifdef _WIN32
-static int CastToIntOrDie(const std::wstring_view::size_type n) {
-  if (n > kMaxInt) LOG(FATAL) << "Number " << n << " doesn’t fit in an int";
-  return static_cast<int>(n);
-}
-
 bool NativeComp::operator()(const std::wstring_view a,
                             const std::wstring_view b) const {
-  const int result = ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,
-                                      a.data(), CastToIntOrDie(a.length()),
-                                      b.data(), CastToIntOrDie(b.length()));
+  const int result =
+      ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,              //
+                       a.data(), CastNumber<int>(a.length()).value(),  //
+                       b.data(), CastNumber<int>(b.length()).value());
   if (result == 0) LOG(FATAL) << WindowsStatus("CompareStringW");
   return result == CSTR_LESS_THAN;
 }
