@@ -366,6 +366,9 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 
 absl::StatusOr<Runfiles> Runfiles::Create(
     const std::string_view source_repository, const NativeStringView argv0) {
+  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
+    return status;
+  }
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
@@ -380,6 +383,9 @@ absl::StatusOr<Runfiles> Runfiles::Create(
 
 absl::StatusOr<Runfiles> Runfiles::CreateForTest(
     const std::string_view source_repository) {
+  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
+    return status;
+  }
   std::string error;
   absl::Nullable<std::unique_ptr<Impl>> impl(
       Impl::CreateForTest(std::string(source_repository), &error));
