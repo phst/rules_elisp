@@ -395,8 +395,7 @@ Runfiles::Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl)
 
 absl::StatusOr<NativeString> Runfiles::Resolve(
     const std::string_view name) const {
-  const absl::Status status = CheckASCII(name);
-  if (!status.ok()) return status;
+  if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
   std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
