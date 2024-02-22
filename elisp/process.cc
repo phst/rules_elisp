@@ -44,6 +44,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -109,14 +110,20 @@ ABSL_MUST_USE_RESULT bool Overflow(const From n) {
 }
 
 template <typename To, typename From>
+std::optional<To> CastNumberOpt(const From n) {
+  return Overflow<To>(n) ? std::optional<To>() : static_cast<To>(n);
+}
+
+template <typename To, typename From>
 absl::StatusOr<To> CastNumber(const From n) {
   using Limits = std::numeric_limits<To>;
-  if (Overflow<To>(n)) {
+  const std::optional<To> ret = CastNumberOpt<To>(n);
+  if (!ret) {
     return absl::OutOfRangeError(absl::StrCat("Number ", n, " out of range [",
                                               Limits::min(), ", ",
                                               Limits::max(), "]"));
   }
-  return static_cast<To>(n);
+  return *ret;
 }
 
 #ifdef _WIN32
@@ -320,8 +327,8 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   const auto it = absl::c_find_if_not(string, [](const Char ch) {
-    return ch >= 0 && ch <= std::numeric_limits<unsigned char>::max() &&
-           absl::ascii_isascii(static_cast<unsigned char>(ch));
+    const auto u = CastNumberOpt<unsigned char>(ch);
+    return u && absl::ascii_isascii(*u);
   });
   if (it != string.end()) {
     const auto val = static_cast<std::make_unsigned_t<Char>>(*it);
@@ -522,9 +529,9 @@ absl::StatusOr<int> Run(const std::string_view binary,
 bool NativeComp::operator()(const std::wstring_view a,
                             const std::wstring_view b) const {
   const int result =
-      ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,              //
-                       a.data(), CastNumber<int>(a.length()).value(),  //
-                       b.data(), CastNumber<int>(b.length()).value());
+      ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,                 //
+                       a.data(), CastNumberOpt<int>(a.length()).value(),  //
+                       b.data(), CastNumberOpt<int>(b.length()).value());
   if (result == 0) LOG(FATAL) << WindowsStatus("CompareStringW");
   return result == CSTR_LESS_THAN;
 }
