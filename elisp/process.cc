@@ -39,6 +39,7 @@
 
 #include <algorithm>
 #include <cerrno>
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -127,8 +128,18 @@ absl::StatusOr<To> CastNumber(const From n) {
 }
 
 #ifdef _WIN32
-struct NativeComp {
-  bool operator()(std::wstring_view a, std::wstring_view b) const;
+static std::string SortKey(std::wstring_view string);
+
+struct CaseInsensitiveHash {
+  std::size_t operator()(const std::wstring_view string) const {
+    return absl::HashOf(SortKey(string));
+  }
+};
+
+struct CaseInsensitiveEqual {
+  bool operator()(const std::wstring_view a, const std::wstring_view b) const {
+    return SortKey(a) == SortKey(b);
+  }
 };
 
 // Build a command line that follows the Windows conventions.  See
@@ -435,7 +446,7 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
     if (!value.ok()) return value.status();
-    const auto [it, ok] = map.try_emplace(*key, *value);
+    const auto [it, ok] = map.emplace(*key, *value);
     if (!ok) {
       return absl::AlreadyExistsError(
           absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
@@ -464,6 +475,8 @@ absl::StatusOr<int> Run(const std::string_view binary,
   for (const auto& [key, value] : *map) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
+  // Sort entries for hermeticity.
+  absl::c_sort(final_env);
 #ifdef _WIN32
   std::wstring command_line = BuildCommandLine(final_args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
@@ -509,14 +522,25 @@ absl::StatusOr<int> Run(const std::string_view binary,
 }
 
 #ifdef _WIN32
-bool NativeComp::operator()(const std::wstring_view a,
-                            const std::wstring_view b) const {
-  const int result =
-      ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE,                 //
-                       a.data(), CastNumberOpt<int>(a.length()).value(),  //
-                       b.data(), CastNumberOpt<int>(b.length()).value());
-  if (result == 0) LOG(FATAL) << WindowsStatus("CompareStringW");
-  return result == CSTR_LESS_THAN;
+static std::string SortKey(const std::wstring_view string) {
+  if (string.empty()) return {};
+  constexpr LCID locale = LOCALE_INVARIANT;
+  constexpr DWORD flags = LCMAP_SORTKEY | NORM_IGNORECASE | SORT_STRINGSORT;
+  const int length = CastNumberOpt<int>(string.length()).value();
+  int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
+  if (result == 0) {
+    LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
+                                nullptr, 0);
+  }
+  std::string buffer(result, '\0');
+  result = ::LCMapStringW(locale, flags, string.data(), length,
+                          reinterpret_cast<LPWSTR>(buffer.data()),
+                          CastNumberOpt<int>(buffer.size()).value());
+  if (result == 0) {
+    LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
+                                "...", buffer.size());
+  }
+  return buffer.substr(0, result);
 }
 #endif
 

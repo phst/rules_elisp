@@ -19,8 +19,6 @@
 #  error this file requires at least C++17
 #endif
 
-#include <functional>
-#include <map>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -36,6 +34,7 @@
 #  pragma warning(push, 3)
 #endif
 #include "absl/base/nullability.h"
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
@@ -51,12 +50,14 @@
 namespace rules_elisp {
 
 #ifdef _WIN32
-struct NativeComp;
+struct CaseInsensitiveHash;
+struct CaseInsensitiveEqual;
+using Environment =
+    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                        CaseInsensitiveEqual>;
 #else
-using NativeComp = std::less<std::string>;
+using Environment = absl::flat_hash_map<std::string, std::string>;
 #endif
-
-using Environment = std::map<NativeString, NativeString, NativeComp>;
 
 class Runfiles final {
  public:
