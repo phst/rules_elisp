@@ -33,7 +33,6 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--env', action='append', type=_env_var, default=[])
     parser.add_argument('--runfiles-env', action='append', type=_env_var,
                         default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
@@ -70,7 +69,6 @@ def main() -> None:
             output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
             manifest.write(opts, input_files, output_files, manifest_file)
         args.extend(opts.argv[1:])
-        env.update(opts.env)
         env.update(run_files.environment())
         try:
             subprocess.run(args, env=env, check=True)
