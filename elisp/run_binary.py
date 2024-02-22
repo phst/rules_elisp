@@ -33,8 +33,6 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--runfiles-env', action='append', type=_env_var,
-                        default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--runfiles-elc', type=pathlib.PurePosixPath,
@@ -52,7 +50,7 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     env: dict[str, str] = dict(os.environ)
-    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
+    run_files = runfiles.Runfiles()
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
     with manifest.add(opts.mode, args) as manifest_file:
@@ -110,11 +108,6 @@ def _arg_files(argv: Sequence[str], root: pathlib.Path,
                     pass
             result.append(file)
     return tuple(result)
-
-
-def _env_var(arg: str) -> tuple[str, str]:
-    key, _, value = arg.partition('=')
-    return key, value
 
 
 if __name__ == '__main__':

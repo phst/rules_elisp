@@ -35,8 +35,6 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--runfiles-env', action='append', type=_env_var,
-                        default=[])
     parser.add_argument('--wrapper', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--runfiles-elc', type=pathlib.PurePosixPath,
@@ -61,7 +59,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO,
                         format='%(asctime)s %(levelname)s %(name)s %(message)s')
     env: dict[str, str] = dict(os.environ)
-    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
+    run_files = runfiles.Runfiles()
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
     with manifest.add(opts.mode, args) as manifest_file:
@@ -170,11 +168,6 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                                 newline='\n') as stream:
             for file in files:
                 stream.write(file + '\n')
-
-
-def _env_var(arg: str) -> tuple[str, str]:
-    key, _, value = arg.partition('=')
-    return key, value
 
 
 _WINDOWS = os.name == 'nt'

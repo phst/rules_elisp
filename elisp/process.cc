@@ -450,26 +450,9 @@ absl::StatusOr<int> Run(const std::string_view binary,
   absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
+  final_args.insert(final_args.end(), args.begin(), args.end());
   absl::StatusOr<Environment> map = runfiles.Environment();
   if (!map.ok()) return map.status();
-  std::vector<NativeString> runfiles_args;
-  // Pass the runfiles environment variables as separate arguments.  This is
-  // necessary because the binary launcher unconditionally sets the runfiles
-  // environment variables based on its own argv[0]; see
-  // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher.cc
-  // and https://github.com/bazelbuild/bazel/pull/16916.  We also can’t set
-  // argv[0] to this binary because the launcher uses it to find its own binary;
-  // see
-  // https://github.com/bazelbuild/bazel/blob/5.4.1/src/tools/launcher/launcher_main.cc.
-  // Once we drop support for Bazel 6.0 and below, we should be able to modify
-  // argv[0] to make this launcher more transparent.
-  for (const auto& [key, value] : *map) {
-    runfiles_args.push_back(RULES_ELISP_NATIVE_LITERAL("--runfiles-env=") +
-                            key + RULES_ELISP_NATIVE_LITERAL('=') + value);
-  }
-  final_args.insert(final_args.end(), runfiles_args.begin(),
-                    runfiles_args.end());
-  final_args.insert(final_args.end(), args.begin(), args.end());
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   // We don’t want the Python launcher to change the current working directory,

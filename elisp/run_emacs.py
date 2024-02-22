@@ -34,12 +34,10 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--runfiles-env', action='append', type=_env_var,
-                        default=[])
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
-    run_files = runfiles.Runfiles(dict(opts.runfiles_env))
+    run_files = runfiles.Runfiles()
     install = run_files.resolve(opts.install)
     exe_suffix = '.exe' if os.name == 'nt' else ''
     emacs = install / 'bin' / ('emacs' + exe_suffix)
@@ -103,11 +101,6 @@ def _check_codepage(description: str, values: Iterable[str]) -> None:
         except UnicodeEncodeError as ex:
             raise ValueError(
                 f'can’t encode {description} “{value}” for Windows') from ex
-
-
-def _env_var(arg: str) -> tuple[str, str]:
-    key, _, value = arg.partition('=')
-    return key, value
 
 
 if __name__ == '__main__':
