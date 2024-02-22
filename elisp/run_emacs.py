@@ -34,7 +34,6 @@ from elisp import runfiles
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--env', action='append', type=_env_var, default=[])
     parser.add_argument('--runfiles-env', action='append', type=_env_var,
                         default=[])
     parser.add_argument('--install', type=pathlib.PurePosixPath, required=True)
@@ -55,7 +54,6 @@ def main() -> None:
                    EMACSDOC=str(etc),
                    EMACSLOADPATH=str(shared / 'lisp'),
                    EMACSPATH=str(libexec))
-        env.update(opts.env)
         env.update(run_files.environment())
         if os.name == 'nt':
             # On Windows, Emacs doesn’t support Unicode arguments or environment
