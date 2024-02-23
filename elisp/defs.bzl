@@ -112,18 +112,13 @@ def _elisp_proto_aspect_impl(target, ctx):
     args.add(str(ctx.label))
     args.add(_elisp_proto_feature(src))
     args.add_all(deps, map_each = _elisp_proto_feature)
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._generate])
     ctx.actions.run(
         outputs = [src],
-        inputs = depset(
-            direct = [info.direct_descriptor_set],
-            transitive = [tool_inputs],
-        ),
+        inputs = [info.direct_descriptor_set],
         executable = ctx.executable._generate,
         arguments = [args],
         mnemonic = "GenElispProto",
         progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
-        input_manifests = input_manifests,
         toolchain = None,
     )
     load_path = []
@@ -742,15 +737,13 @@ def _elisp_manual_impl(ctx):
     out = ctx.outputs.out
     if out.extension != "texi":
         fail("Output filename {} doesn’t end in “.texi”".format(out.short_path))
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._export])
     ctx.actions.run(
         outputs = [out],
-        inputs = depset(direct = [src], transitive = [tool_inputs]),
+        inputs = [src],
         executable = ctx.executable._export,
         arguments = [ctx.actions.args().add(src).add(out)],
         mnemonic = "Export",
         progress_message = "Exporting {} into Texinfo file".format(src.short_path),
-        input_manifests = input_manifests,
         toolchain = None,
     )
 

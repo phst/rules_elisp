@@ -202,12 +202,11 @@ def _install(ctx, cc_toolchain, readme):
     if ctx.outputs.builtin_features:
         args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
         outs.append(ctx.outputs.builtin_features)
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._build])
     ctx.actions.run(
         outputs = outs,
         inputs = depset(
             direct = ctx.files.srcs,
-            transitive = [cc_toolchain.all_files, tool_inputs],
+            transitive = [cc_toolchain.all_files],
         ),
         executable = ctx.executable._build,
         arguments = [args],
@@ -216,7 +215,6 @@ def _install(ctx, cc_toolchain, readme):
             "Installing Emacs into {}".format(install.short_path)
         ),
         env = env,
-        input_manifests = input_manifests,
         toolchain = None,
     )
     return install

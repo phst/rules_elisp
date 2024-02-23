@@ -79,18 +79,16 @@ def _check_python_impl(target, ctx):
     args.add(ctx.workspace_name, format = "--workspace-name=%s")
     if "no-pytype" not in tags:
         args.add("--pytype")
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._check])
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
             direct = [params_file, pylintrc],
-            transitive = [info.transitive_sources, tool_inputs],
+            transitive = [info.transitive_sources],
         ),
         executable = ctx.executable._check,
         arguments = [args],
         mnemonic = "PythonCheck",
         progress_message = "Performing static analysis of target {}".format(target.label),
-        input_manifests = input_manifests,
         toolchain = None,
     )
     return [
@@ -346,8 +344,7 @@ def run_emacs(
     arguments = [
         ctx.actions.args().add("--quick").add("--batch").add("--no-build-details"),
     ] + arguments
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [emacs])
-    inputs = depset(transitive = [inputs, tool_inputs])
+    inputs = depset(transitive = [inputs])
     if toolchain.wrap:
         manifest = ctx.actions.declare_file(
             manifest_basename + ".manifest.json",
@@ -381,7 +378,6 @@ def run_emacs(
         progress_message = progress_message,
         use_default_shell_env = toolchain.use_default_shell_env,
         execution_requirements = toolchain.execution_requirements,
-        input_manifests = input_manifests,
         toolchain = Label("//elisp:toolchain_type"),
     )
 
@@ -607,18 +603,16 @@ additional file to build.
 )
 
 def _merged_manual_impl(ctx):
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._generate])
     orgs = []
     for bin in ctx.files.includes:
         org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"))
         ctx.actions.run(
             outputs = [org],
-            inputs = depset(direct = [bin], transitive = [tool_inputs]),
+            inputs = [bin],
             executable = ctx.executable._generate,
             arguments = [ctx.actions.args().add("--").add(bin).add(org)],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file {}".format(org.short_path),
-            input_manifests = input_manifests,
             toolchain = None,
         )
         orgs.append(org)
@@ -628,15 +622,13 @@ def _merged_manual_impl(ctx):
     args.add(ctx.outputs.out)
     args.add(ctx.file.main)
     args.add_all(orgs, expand_directories = False)
-    tool_inputs, input_manifests = ctx.resolve_tools(tools = [ctx.attr._merge])
     ctx.actions.run(
         outputs = [ctx.outputs.out],
-        inputs = depset(direct = [ctx.file.main] + orgs, transitive = [tool_inputs]),
+        inputs = [ctx.file.main] + orgs,
         executable = ctx.executable._merge,
         arguments = [args],
         mnemonic = "MergeManual",
         progress_message = "Generating merged manual {}".format(ctx.outputs.out.short_path),
-        input_manifests = input_manifests,
         toolchain = None,
     )
 
