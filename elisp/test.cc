@@ -46,12 +46,12 @@ namespace rules_elisp {
 absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const absl::Nonnull<const NativeChar*>> original_args) {
-  std::vector<NativeString> all_args = {RULES_ELISP_TEST_ARGS};
-  all_args.insert(all_args.end(), launcher_args.begin(), launcher_args.end());
-  all_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
-  all_args.insert(all_args.end(), original_args.begin(), original_args.end());
+  std::vector<NativeString> args = {RULES_ELISP_TEST_ARGS};
+  args.insert(args.end(), launcher_args.begin(), launcher_args.end());
+  args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  args.insert(args.end(), original_args.begin(), original_args.end());
   return Run(
-      RULES_ELISP_RUN_TEST, all_args, ExecutableKind::kTest,
+      RULES_ELISP_RUN_TEST, args, ExecutableKind::kTest,
       original_args.empty() ? NativeStringView() : original_args.front());
 }
 
