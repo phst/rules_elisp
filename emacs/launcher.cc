@@ -18,9 +18,8 @@
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   using rules_elisp::NativeString;
-  using rules_elisp::RunEmacs;
   std::vector<NativeString> args = {RULES_ELISP_ARGS,
                                     RULES_ELISP_NATIVE_LITERAL("--")};
   args.insert(args.end(), argv, argv + argc);
-  return RunEmacs(argc == 0 ? NativeString() : argv[0], args);
+  return rules_elisp::RunEmacs(argc == 0 ? NativeString() : argv[0], args);
 }
