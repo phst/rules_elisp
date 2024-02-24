@@ -15,6 +15,8 @@
 #include "elisp/emacs.h"
 
 #include <cstdlib>
+#include <initializer_list>
+#include <vector>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -37,21 +39,28 @@
 #  pragma warning(pop)
 #endif
 
+#include "elisp/platform.h"
 #include "elisp/process.h"
 
 namespace rules_elisp {
 
 static absl::StatusOr<int> RunEmacsImpl(
-    const NativeStringView argv0, const absl::Span<const NativeString> args) {
+    const std::initializer_list<NativeStringView> prefix,
+    const absl::Span<const NativeChar* const> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY,
+                       suffix.empty() ? NativeStringView() : suffix.front());
   if (!runfiles.ok()) return runfiles.status();
+  std::vector<NativeString> args(prefix.begin(), prefix.end());
+  args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  args.insert(args.end(), suffix.begin(), suffix.end());
   return Run(RULES_ELISP_RUN_EMACS, args, *runfiles);
 }
 
-int RunEmacs(const NativeStringView argv0,
-             const absl::Span<const NativeString> args) {
-  const absl::StatusOr<int> code = RunEmacsImpl(argv0, args);
+int RunEmacs(const std::initializer_list<NativeStringView> prefix,
+             const int argc, const NativeChar* const* const argv) {
+  const absl::StatusOr<int> code =
+      RunEmacsImpl(prefix, absl::MakeConstSpan(argv, argv + argc));
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;

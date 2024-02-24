@@ -15,6 +15,7 @@
 #include "elisp/test.h"
 
 #include <cstdlib>
+#include <initializer_list>
 #include <vector>
 
 #ifdef __GNUC__
@@ -38,22 +39,28 @@
 #  pragma warning(pop)
 #endif
 
+#include "elisp/platform.h"
 #include "elisp/process.h"
 
 namespace rules_elisp {
 
 static absl::StatusOr<int> RunTestImpl(
-    const absl::Span<const NativeString> args) {
+    const std::initializer_list<NativeStringView> prefix,
+    const absl::Span<const NativeChar* const> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
   if (!runfiles.ok()) return runfiles.status();
   std::vector<NativeString> all_args = {RULES_ELISP_TEST_ARGS};
-  all_args.insert(all_args.end(), args.begin(), args.end());
+  all_args.insert(all_args.end(), prefix.begin(), prefix.end());
+  all_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  all_args.insert(all_args.end(), suffix.begin(), suffix.end());
   return Run(RULES_ELISP_RUN_TEST, all_args, *runfiles);
 }
 
-int RunTest(const absl::Span<const NativeString> args) {
-  const absl::StatusOr<int> code = RunTestImpl(args);
+int RunTest(const std::initializer_list<NativeStringView> prefix,
+            const int argc, const NativeChar* const* const argv) {
+  const absl::StatusOr<int> code =
+      RunTestImpl(prefix, absl::MakeConstSpan(argv, argv + argc));
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;
