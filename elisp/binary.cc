@@ -54,12 +54,12 @@ static absl::StatusOr<int> RunBinaryImpl(
 
 int RunBinary(const NativeStringView argv0,
               const absl::Span<const NativeString> args) {
-  const absl::StatusOr<int> status_or_code = RunBinaryImpl(argv0, args);
-  if (!status_or_code.ok()) {
-    LOG(ERROR) << status_or_code.status();
+  const absl::StatusOr<int> code = RunBinaryImpl(argv0, args);
+  if (!code.ok()) {
+    LOG(ERROR) << code.status();
     return EXIT_FAILURE;
   }
-  return *status_or_code;
+  return *code;
 }
 
 }  // namespace rules_elisp

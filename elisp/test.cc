@@ -53,12 +53,12 @@ static absl::StatusOr<int> RunTestImpl(
 }
 
 int RunTest(const absl::Span<const NativeString> args) {
-  const absl::StatusOr<int> status_or_code = RunTestImpl(args);
-  if (!status_or_code.ok()) {
-    LOG(ERROR) << status_or_code.status();
+  const absl::StatusOr<int> code = RunTestImpl(args);
+  if (!code.ok()) {
+    LOG(ERROR) << code.status();
     return EXIT_FAILURE;
   }
-  return *status_or_code;
+  return *code;
 }
 
 }  // namespace rules_elisp
