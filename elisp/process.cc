@@ -211,7 +211,7 @@ static std::vector<absl::Nonnull<char*>> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<absl::Nonnull<char*>> ptrs;
   for (std::string& s : strings) {
-    CHECK(s.find('\0') == s.npos) << s << " contains null character";
+    CHECK_EQ(s.find('\0'), s.npos) << s << " contains null character";
     ptrs.push_back(s.data());
   }
   ptrs.push_back(nullptr);
