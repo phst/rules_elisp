@@ -56,7 +56,7 @@ int RunEmacs(const NativeStringView argv0,
     LOG(ERROR) << status_or_code.status();
     return EXIT_FAILURE;
   }
-  return status_or_code.value();
+  return *status_or_code;
 }
 
 }  // namespace rules_elisp
