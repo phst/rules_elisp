@@ -19,6 +19,8 @@
 #  error this file requires at least C++17
 #endif
 
+#include <initializer_list>
+
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wpedantic"
@@ -30,7 +32,6 @@
 #  pragma warning(push, 3)
 #endif
 #include "absl/base/attributes.h"
-#include "absl/types/span.h"
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop
 #endif
@@ -42,7 +43,8 @@
 
 namespace rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunTest(absl::Span<const NativeString> args);
+ABSL_MUST_USE_RESULT int RunTest(std::initializer_list<NativeStringView> prefix,
+                                 int argc, const NativeChar* const* argv);
 
 }  // namespace rules_elisp
 

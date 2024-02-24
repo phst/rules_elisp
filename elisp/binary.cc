@@ -15,6 +15,7 @@
 #include "elisp/binary.h"
 
 #include <cstdlib>
+#include <initializer_list>
 #include <vector>
 
 #ifdef __GNUC__
@@ -38,23 +39,29 @@
 #  pragma warning(pop)
 #endif
 
+#include "elisp/platform.h"
 #include "elisp/process.h"
 
 namespace rules_elisp {
 
 static absl::StatusOr<int> RunBinaryImpl(
-    const NativeStringView argv0, const absl::Span<const NativeString> args) {
+    const std::initializer_list<NativeStringView> prefix,
+    const absl::Span<const NativeChar* const> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, argv0);
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY,
+                       suffix.empty() ? NativeStringView() : suffix.front());
   if (!runfiles.ok()) return runfiles.status();
   std::vector<NativeString> all_args = {RULES_ELISP_BINARY_ARGS};
-  all_args.insert(all_args.end(), args.begin(), args.end());
+  all_args.insert(all_args.end(), prefix.begin(), prefix.end());
+  all_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  all_args.insert(all_args.end(), suffix.begin(), suffix.end());
   return Run(RULES_ELISP_RUN_BINARY, all_args, *runfiles);
 }
 
-int RunBinary(const NativeStringView argv0,
-              const absl::Span<const NativeString> args) {
-  const absl::StatusOr<int> code = RunBinaryImpl(argv0, args);
+int RunBinary(const std::initializer_list<NativeStringView> prefix,
+              const int argc, const NativeChar* const* const argv) {
+  const absl::StatusOr<int> code =
+      RunBinaryImpl(prefix, absl::MakeConstSpan(argv, argv + argc));
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;
