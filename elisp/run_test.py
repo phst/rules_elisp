@@ -98,6 +98,16 @@ def main() -> None:
                     outputs.append(
                         pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
             manifest.write(opts, inputs, outputs, manifest_file)
+        test_srcdir = os.getenv('TEST_SRCDIR')
+        if not test_srcdir:
+            raise ValueError('environment variable TEST_SRCDIR not set')
+        test_workspace = os.getenv('TEST_WORKSPACE')
+        if not test_workspace:
+            # TEST_WORKSPACE is technically optional (see
+            # https://bazel.build/reference/test-encyclopedia#initial-conditions),
+            # but in practice always set.
+            raise ValueError('environment variable TEST_WORKSPACE not set')
+        cwd = pathlib.Path(test_srcdir, test_workspace)
         timeout_secs = None
         kwargs = {}
         if _WINDOWS:
@@ -114,7 +124,7 @@ def main() -> None:
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
-        with subprocess.Popen(args, env=env, **kwargs) as process:
+        with subprocess.Popen(args, env=env, cwd=cwd, **kwargs) as process:
             try:
                 process.communicate(timeout=timeout_secs)
             except subprocess.TimeoutExpired:
