@@ -14,7 +14,6 @@
 
 """Unit tests for the elisp_binary rule."""
 
-import os
 import pathlib
 import platform
 import subprocess
@@ -48,15 +47,7 @@ class BinaryTest(absltest.TestCase):
             ''' \t\n\r\f äα𝐴🐈'\\\"''',
             r'/:C:\Temp\output.dat' if windows else '/:/tmp/output.dat',
         ]
-        env = dict(os.environ)
-        # Work around a bug
-        # (https://github.com/bazelbuild/rules_python/issues/1394) in the Python
-        # rules implementation in Bazel: nested invocations of Python binaries
-        # with coverage instrumentation enabled don’t work because the inner
-        # binary will delete a temporary .coveragerc file that the outer binary
-        # still needs.
-        env.pop('COVERAGE_DIR', None)
-        subprocess.run(args, env=env, check=True)
+        subprocess.run(args, check=True)
 
 
 if __name__ == '__main__':
