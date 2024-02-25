@@ -194,10 +194,14 @@ def repository_relative_filename(file):
 def cc_launcher(ctx, *, defines):
     """Builds a launcher executable that starts Emacs.
 
+    The current rule must provide the following attributes:
+    - `_launcher_srcs`: a list of C++ source files to be compiled
+    - `_launcher_defaults`: a `cc_defaults` rule to provide default settings
+
     Args:
       ctx (ctx): rule context
       defines (list of strings): additional preprocessor definitions for
-          compiling `src`
+          compiling the launcher sources
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
