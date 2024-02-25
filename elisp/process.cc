@@ -93,7 +93,7 @@
 namespace rules_elisp {
 
 template <typename To, typename From>
-ABSL_MUST_USE_RESULT bool Overflow(const From n) {
+[[nodiscard]] bool Overflow(const From n) {
   static_assert(std::is_integral_v<To>);
   static_assert(std::is_integral_v<From>);
   using ToLimits = std::numeric_limits<To>;
