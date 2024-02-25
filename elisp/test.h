@@ -21,30 +21,12 @@
 
 #include <initializer_list>
 
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wpedantic"
-#  pragma GCC diagnostic ignored "-Wconversion"
-#  pragma GCC diagnostic ignored "-Wsign-conversion"
-#  pragma GCC diagnostic ignored "-Woverflow"
-#endif
-#ifdef _MSC_VER
-#  pragma warning(push, 3)
-#endif
-#include "absl/base/attributes.h"
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
-
 #include "elisp/platform.h"  // IWYU pragma: export
 
 namespace rules_elisp {
 
-ABSL_MUST_USE_RESULT int RunTest(std::initializer_list<NativeStringView> prefix,
-                                 int argc, const NativeChar* const* argv);
+[[nodiscard]] int RunTest(std::initializer_list<NativeStringView> prefix,
+                          int argc, const NativeChar* const* argv);
 
 }  // namespace rules_elisp
 
