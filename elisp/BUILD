@@ -115,10 +115,15 @@ elisp_toolchain(
     emacs = "//emacs:emacs_29.2",
 )
 
-exports_files([
-    "binary_main.cc",
-    "test_main.cc",
-])
+exports_files(
+    ["launcher.cc"],
+    visibility = [
+        # FIXME: Make internal once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
+)
 
 sh_binary(
     name = "local_emacs",
@@ -160,6 +165,39 @@ bzl_library(
         "//emacs:__pkg__",
         "//private:__pkg__",
     ],
+)
+
+cc_binary(
+    name = "launcher",
+    testonly = True,
+    srcs = ["launcher.cc"],
+    copts = LAUNCHER_COPTS,
+    data = [":wrap_stripped"],
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    linkstatic = True,
+    local_defines = LAUNCHER_DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        shell.quote('RULES_ELISP_HEADER="elisp/binary.h"'),
+        shell.quote("RULES_ELISP_FUNCTION=RunBinary"),
+        shell.quote("RULES_ELISP_ARGS=" + ", ".join([
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
+            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
+            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
+            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
+            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
+            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
+            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
+            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
+        ])),
+    ],
+    deps = [":binary"],
+)
+
+build_test(
+    name = "launcher_test",
+    targets = [":launcher"],
 )
 
 cc_library(
@@ -207,37 +245,6 @@ executable_only(
     src = ":run_emacs",
 )
 
-cc_binary(
-    name = "binary_main",
-    testonly = True,
-    srcs = ["binary_main.cc"],
-    copts = LAUNCHER_COPTS,
-    data = [":wrap_stripped"],
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote("RULES_ELISP_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
-            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
-            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
-            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
-            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
-        ])),
-    ],
-    deps = [":binary"],
-)
-
-build_test(
-    name = "binary_main_test",
-    targets = [":binary_main"],
-)
-
 cc_library(
     name = "binary",
     srcs = ["binary.cc"],
@@ -282,12 +289,12 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote("--binary=$(rlocationpath :binary_main)"),
+        shell.quote("--launcher=$(rlocationpath :launcher)"),
         shell.quote("--binary-cc=$(rlocationpath :binary.cc)"),
     ],
     data = [
         "binary.cc",
-        ":binary_main",
+        ":launcher",
     ],
     python_version = "PY3",
     srcs_version = "PY3",
@@ -333,27 +340,6 @@ py_binary(
 executable_only(
     name = "run_binary_stripped",
     src = ":run_binary",
-)
-
-cc_binary(
-    name = "test_main",
-    testonly = True,
-    srcs = ["test_main.cc"],
-    copts = LAUNCHER_COPTS,
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_ARGS=RULES_ELISP_NATIVE_LITERAL("dummy")'),
-    ],
-    deps = [":test"],
-)
-
-build_test(
-    name = "test_main_test",
-    targets = [":test_main"],
 )
 
 cc_library(
