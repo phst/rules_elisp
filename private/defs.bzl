@@ -191,7 +191,7 @@ def repository_relative_filename(file):
             fail("invalid name {}", file.short_path)
     return name
 
-def cc_launcher(ctx, *, defines):
+def cc_launcher(ctx, *, header, function, args):
     """Builds a launcher executable that starts Emacs.
 
     The current rule must provide the following attributes:
@@ -202,8 +202,9 @@ def cc_launcher(ctx, *, defines):
 
     Args:
       ctx (ctx): rule context
-      defines (list of strings): additional preprocessor definitions for
-          compiling the launcher sources
+      header (string): header file to include, relative to the repository root
+      function (string): function in the `rules_elisp` namespace to invoke
+      args (list of strings): additional arguments for the function
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
@@ -227,7 +228,11 @@ def cc_launcher(ctx, *, defines):
         cc_toolchain = cc_toolchain,
         srcs = ctx.files._launcher_srcs,
         compilation_contexts = [info.compilation_context for info in infos],
-        local_defines = defaults.defines + defines,
+        local_defines = defaults.defines + [
+            'RULES_ELISP_HEADER="' + header + '"',
+            "RULES_ELISP_FUNCTION=" + function,
+            "RULES_ELISP_ARGS=" + cpp_strings(args),
+        ],
         user_compile_flags = defaults.copts,
     )
     bin = cc_common.link(

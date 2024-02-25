@@ -26,7 +26,6 @@ load(
     "LAUNCHER_ATTRS",
     "LAUNCHER_DEPS",
     "cc_launcher",
-    "cpp_string",
     "runfile_location",
 )
 
@@ -41,12 +40,10 @@ def _emacs_binary_impl(ctx):
     install = _install(ctx, emacs_cc_toolchain, ctx.file.readme)
     executable, runfiles = cc_launcher(
         ctx,
-        defines = [
-            'RULES_ELISP_HEADER="elisp/emacs.h"',
-            "RULES_ELISP_FUNCTION=RunEmacs",
-            "RULES_ELISP_ARGS=" + cpp_string(
-                "--install=" + runfile_location(ctx, install),
-            ),
+        header = "elisp/emacs.h",
+        function = "RunEmacs",
+        args = [
+            "--install=" + runfile_location(ctx, install),
         ],
     )
     return [
