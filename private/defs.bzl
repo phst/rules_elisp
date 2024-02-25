@@ -442,14 +442,19 @@ CONLYOPTS = select({
 LAUNCHER_COPTS = COPTS + CXXOPTS
 
 DEFINES = ["_GNU_SOURCE"] + select({
-    Label("@platforms//os:linux"): [],
-    Label("@platforms//os:macos"): [],
+    Label("@platforms//os:linux"): [
+        "RULES_ELISP_NATIVE_LITERAL(literal)=literal",
+    ],
+    Label("@platforms//os:macos"): [
+        "RULES_ELISP_NATIVE_LITERAL(literal)=literal",
+    ],
     Label("@platforms//os:windows"): [
         "_UNICODE",
         "UNICODE",
         "STRICT",
         "NOMINMAX",
         "WIN32_LEAN_AND_MEAN",
+        "RULES_ELISP_NATIVE_LITERAL(literal)=L##literal",
     ],
 })
 

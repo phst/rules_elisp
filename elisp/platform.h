@@ -26,11 +26,9 @@ namespace rules_elisp {
 
 #if defined _WIN32
 using NativeChar = wchar_t;
-#  define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
 #  define RULES_ELISP_MAIN wmain
 #else
 using NativeChar = char;
-#  define RULES_ELISP_NATIVE_LITERAL(literal) literal
 #  define RULES_ELISP_MAIN main
 #endif
 
