@@ -14,18 +14,8 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load(
-    "//private:defs.bzl",
-    "FEATURES",
-    "LAUNCHER_COPTS",
-    "LAUNCHER_DEFINES",
-    "LAUNCHER_FEATURES",
-    "LAUNCHER_LINKOPTS",
-    "PACKAGE_FEATURES",
-    "cc_defaults",
-)
+load("//private:defs.bzl", "FEATURES", "PACKAGE_FEATURES", "cc_defaults")
 load(":defs.bzl", "emacs_binary")
 
 package(
@@ -119,29 +109,6 @@ py_binary(
         "//visibility:public",
     ],
 )
-
-cc_binary(
-    name = "launcher",
-    testonly = True,
-    srcs = ["launcher.cc"],
-    copts = LAUNCHER_COPTS,
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_ARGS=RULES_ELISP_NATIVE_LITERAL("dummy")'),
-    ],
-    deps = ["//elisp:emacs"],
-)
-
-build_test(
-    name = "launcher_test",
-    targets = [":launcher"],
-)
-
-exports_files(srcs = ["launcher.cc"])
 
 bzl_library(
     name = "defs_bzl",

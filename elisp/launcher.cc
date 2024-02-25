@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/test.h"
+#include RULES_ELISP_HEADER
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
-  return rules_elisp::RunTest({RULES_ELISP_ARGS}, argc, argv);
+  return rules_elisp::RULES_ELISP_FUNCTION({RULES_ELISP_ARGS}, argc, argv);
 }

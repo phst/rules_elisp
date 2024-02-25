@@ -26,7 +26,7 @@ from elisp import runfiles
 
 
 flags.DEFINE_string(
-    'binary', None, 'location of the //elisp:binary_main target', required=True)
+    'launcher', None, 'location of the //elisp:launcher target', required=True)
 flags.DEFINE_string(
     'binary-cc', None, 'location of the //elisp:binary.cc file', required=True)
 
@@ -41,7 +41,7 @@ class BinaryTest(absltest.TestCase):
             pathlib.PurePosixPath(getattr(FLAGS, 'binary-cc')))
         windows = platform.system() == 'Windows'
         args = [
-            run_files.resolve(pathlib.PurePosixPath(FLAGS.binary)),
+            run_files.resolve(pathlib.PurePosixPath(FLAGS.launcher)),
             '--option',
             input_file,
             ''' \t\n\r\f äα𝐴🐈'\\\"''',

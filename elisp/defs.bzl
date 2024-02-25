@@ -197,6 +197,8 @@ def _elisp_binary_impl(ctx):
         ctx,
         srcs = ctx.files.src,
         tags = [],
+        header = "elisp/binary.h",
+        function = "RunBinary",
         args = args,
     )
     return [
@@ -225,6 +227,8 @@ def _elisp_test_impl(ctx):
         # “local = 1” is equivalent to adding a “local” tag,
         # cf. https://bazel.build/reference/be/common-definitions#test.local.
         tags = ["local"] if ctx.attr.local else [],
+        header = "elisp/test.h",
+        function = "RunTest",
         args = args,
     )
 
@@ -594,7 +598,7 @@ elisp_binary = rule(
             providers = [CcInfo],
         ),
         "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:binary_main.cc")],
+            default = [Label("//elisp:launcher.cc")],
             allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
@@ -663,7 +667,7 @@ elisp_test = rule(
             providers = [CcInfo],
         ),
         "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:test_main.cc")],
+            default = [Label("//elisp:launcher.cc")],
             allow_files = [".cc"],
         ),
         "_launcher_defaults": attr.label(
@@ -1051,7 +1055,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, *, srcs, tags, args):
+def _binary(ctx, *, srcs, tags, header, function, args):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_launcher_srcs” attribute containing the main C++
@@ -1061,6 +1065,8 @@ def _binary(ctx, *, srcs, tags, args):
       ctx: rule context
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
+      header: filename of a header file to include
+      function: name of a function to call
       args: a list of rule-specific program arguments
 
     Returns:
@@ -1135,6 +1141,8 @@ def _binary(ctx, *, srcs, tags, args):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         defines = [
+            'RULES_ELISP_HEADER="' + header + '"',
+            "RULES_ELISP_FUNCTION=" + function,
             "RULES_ELISP_ARGS=" + cpp_strings([
                 "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
                 "--mode=" + ("wrap" if toolchain.wrap else "direct"),
