@@ -128,17 +128,17 @@ absl::StatusOr<To> CastNumber(const From n) {
 }
 
 #ifdef _WIN32
-static std::string SortKey(std::wstring_view string);
+static std::wstring ToUpper(std::wstring_view string);
 
 struct CaseInsensitiveHash {
   std::size_t operator()(const std::wstring_view string) const {
-    return absl::HashOf(SortKey(string));
+    return absl::HashOf(ToUpper(string));
   }
 };
 
 struct CaseInsensitiveEqual {
   bool operator()(const std::wstring_view a, const std::wstring_view b) const {
-    return SortKey(a) == SortKey(b);
+    return ToUpper(a) == ToUpper(b);
   }
 };
 
@@ -522,20 +522,19 @@ absl::StatusOr<int> Run(const std::string_view binary,
 }
 
 #ifdef _WIN32
-static std::string SortKey(const std::wstring_view string) {
+static std::wstring ToUpper(const std::wstring_view string) {
   if (string.empty()) return {};
   constexpr LCID locale = LOCALE_INVARIANT;
-  constexpr DWORD flags = LCMAP_SORTKEY | NORM_IGNORECASE | SORT_STRINGSORT;
+  constexpr DWORD flags = LCMAP_UPPERCASE;
   const int length = CastNumberOpt<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
   if (result == 0) {
     LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
                                 nullptr, 0);
   }
-  std::string buffer(result, '\0');
-  result = ::LCMapStringW(locale, flags, string.data(), length,
-                          reinterpret_cast<LPWSTR>(buffer.data()),
-                          CastNumberOpt<int>(buffer.size()).value());
+  std::wstring buffer(result, L'\0');
+  result = ::LCMapStringW(locale, flags, string.data(), length, buffer.data(),
+                          result);
   if (result == 0) {
     LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
                                 "...", buffer.size());
