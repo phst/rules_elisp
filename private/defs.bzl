@@ -196,6 +196,8 @@ def cc_launcher(ctx, *, defines):
 
     The current rule must provide the following attributes:
     - `_launcher_srcs`: a list of C++ source files to be compiled
+    - `_launcher_deps`: a list of `cc_library` targets that the launcher depends
+      on
     - `_launcher_defaults`: a `cc_defaults` rule to provide default settings
 
     Args:
