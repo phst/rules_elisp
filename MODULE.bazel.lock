@@ -5483,7 +5483,7 @@
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "h/83o+d3U0LhREk15oGYkp3r8IxjUsb7OvNEKJKtbxo=",
         "accumulatedFileDigests": {
-          "@@//dev:macos-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
+          "@@//dev:macos-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -5692,7 +5692,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_astroid",
-              "requirement": "astroid==3.0.1     --hash=sha256:7d5895c9825e18079c5aeac0572bc2e4c83205c95d416e0b4fee8bc361d2d9ca     --hash=sha256:86b0bb7d7da0be1a7c4aedb7974e391b32d4ed89e33de6ed6902b4b15c97577e",
+              "requirement": "astroid==3.1.0     --hash=sha256:951798f922990137ac090c53af473db7ab4e70c770e6d7fae0cec59f74411819     --hash=sha256:ac248253bfa4bd924a0de213707e7ebeeb3138abeb48d798784ead1e56d419d4",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6140,7 +6140,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pylint",
-              "requirement": "pylint==3.0.3     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810",
+              "requirement": "pylint==3.1.0     --hash=sha256:507a5b60953874766d8a366e8e8c7af63e058b26345cfcb5f91f89d987fd6b74     --hash=sha256:6a69beb4a6f63debebaab0a3477ecd0f559aa726af4954fc948c51f7a2549e23",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6367,7 +6367,7 @@
       "os:linux,arch:amd64": {
         "bzlTransitiveDigest": "NCIbPNvDdMKZ0PBxV7+AxwFNSknu7P/Oc6vFNbX2WM8=",
         "accumulatedFileDigests": {
-          "@@//dev:linux-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
+          "@@//dev:linux-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -6576,7 +6576,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_astroid",
-              "requirement": "astroid==3.0.1     --hash=sha256:7d5895c9825e18079c5aeac0572bc2e4c83205c95d416e0b4fee8bc361d2d9ca     --hash=sha256:86b0bb7d7da0be1a7c4aedb7974e391b32d4ed89e33de6ed6902b4b15c97577e",
+              "requirement": "astroid==3.1.0     --hash=sha256:951798f922990137ac090c53af473db7ab4e70c770e6d7fae0cec59f74411819     --hash=sha256:ac248253bfa4bd924a0de213707e7ebeeb3138abeb48d798784ead1e56d419d4",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7024,7 +7024,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pylint",
-              "requirement": "pylint==3.0.3     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810",
+              "requirement": "pylint==3.1.0     --hash=sha256:507a5b60953874766d8a366e8e8c7af63e058b26345cfcb5f91f89d987fd6b74     --hash=sha256:6a69beb4a6f63debebaab0a3477ecd0f559aa726af4954fc948c51f7a2549e23",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7251,7 +7251,7 @@
       "os:osx,arch:x86_64": {
         "bzlTransitiveDigest": "O9ahXBjOEY2KXbHmgcWVQK8Pe0w8BC1iLY66SXcvnZ8=",
         "accumulatedFileDigests": {
-          "@@//dev:macos-requirements.txt": "cc48e05ba032c3d0ddf5d118bd23edae4054fb607349ffb404b66fb3253042e2"
+          "@@//dev:macos-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -7460,7 +7460,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_astroid",
-              "requirement": "astroid==3.0.1     --hash=sha256:7d5895c9825e18079c5aeac0572bc2e4c83205c95d416e0b4fee8bc361d2d9ca     --hash=sha256:86b0bb7d7da0be1a7c4aedb7974e391b32d4ed89e33de6ed6902b4b15c97577e",
+              "requirement": "astroid==3.1.0     --hash=sha256:951798f922990137ac090c53af473db7ab4e70c770e6d7fae0cec59f74411819     --hash=sha256:ac248253bfa4bd924a0de213707e7ebeeb3138abeb48d798784ead1e56d419d4",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7908,7 +7908,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pylint",
-              "requirement": "pylint==3.0.3     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810",
+              "requirement": "pylint==3.1.0     --hash=sha256:507a5b60953874766d8a366e8e8c7af63e058b26345cfcb5f91f89d987fd6b74     --hash=sha256:6a69beb4a6f63debebaab0a3477ecd0f559aa726af4954fc948c51f7a2549e23",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -8135,7 +8135,7 @@
       "os:windows,arch:amd64": {
         "bzlTransitiveDigest": "ajII0Q/7YNYRwbv7o4PE+AILY63w1iWRcyxHYP0vqd4=",
         "accumulatedFileDigests": {
-          "@@//dev:windows-requirements.txt": "d3297e7cbf545ca85b521825afe68d286c5952b5f7ded426688dfbec9f4e7315"
+          "@@//dev:windows-requirements.txt": "5672974a768820fd0ef98c8877d2909c5c7be6f7ebd33fc9bdf0c2fb3167a005"
         },
         "envVariables": {},
         "generatedRepoSpecs": {
@@ -8269,7 +8269,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_astroid",
-              "requirement": "astroid==3.0.1     --hash=sha256:7d5895c9825e18079c5aeac0572bc2e4c83205c95d416e0b4fee8bc361d2d9ca     --hash=sha256:86b0bb7d7da0be1a7c4aedb7974e391b32d4ed89e33de6ed6902b4b15c97577e",
+              "requirement": "astroid==3.1.0     --hash=sha256:951798f922990137ac090c53af473db7ab4e70c770e6d7fae0cec59f74411819     --hash=sha256:ac248253bfa4bd924a0de213707e7ebeeb3138abeb48d798784ead1e56d419d4",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -8422,7 +8422,7 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "name": "rules_python~0.31.0~pip~pip_310_pylint",
-              "requirement": "pylint==3.0.3     --hash=sha256:58c2398b0301e049609a8429789ec6edf3aabe9b6c5fec916acd18639c16de8b     --hash=sha256:7a1585285aefc5165db81083c3e06363a27448f6b467b3b0f30dbd0ac1f73810",
+              "requirement": "pylint==3.1.0     --hash=sha256:507a5b60953874766d8a366e8e8c7af63e058b26345cfcb5f91f89d987fd6b74     --hash=sha256:6a69beb4a6f63debebaab0a3477ecd0f559aa726af4954fc948c51f7a2549e23",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
