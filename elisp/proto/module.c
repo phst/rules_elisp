@@ -491,7 +491,7 @@ static void OverflowError1(struct Context ctx, emacs_value arg) {
 
 // Returns whether a + b would overflow.  If not, set *r to a + b.  Otherwise,
 // the value of *r is unspecified.
-static ABSL_MUST_USE_RESULT bool AddOverflowSize(struct Context ctx, size_t a,
+ABSL_MUST_USE_RESULT static bool AddOverflowSize(struct Context ctx, size_t a,
                                                  size_t b, size_t* r) {
   bool overflow;
 #if ABSL_HAVE_BUILTIN(__builtin_add_overflow)
@@ -1013,7 +1013,7 @@ static struct LispArena ExtractArena(struct Context ctx, emacs_value value) {
 
 // Fuses the given arenas, and signals an error if that failed.  The two
 // arguments may refer to the same arena, in which case the function is a no-op.
-static ABSL_MUST_USE_RESULT bool FuseArenas(struct Context ctx, upb_Arena* a,
+ABSL_MUST_USE_RESULT static bool FuseArenas(struct Context ctx, upb_Arena* a,
                                             upb_Arena* b) {
   bool ok = upb_Arena_Fuse(a, b);
   if (!ok) Signal0(ctx, kArenaFusionFailed);
@@ -2733,7 +2733,7 @@ static ptrdiff_t FindKey(struct Context ctx, ptrdiff_t nspecs,
 
 // Parses keyword arguments.  Calls the functions specified in the ‘specs’ array
 // for each actual keyword argument.  Returns ‘false’ if something went wrong.
-static ABSL_MUST_USE_RESULT bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
+ABSL_MUST_USE_RESULT static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
                                            const struct KeySpec* specs,
                                            ptrdiff_t nargs, emacs_value* args) {
   assert(nargs >= 0);
