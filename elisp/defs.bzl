@@ -25,7 +25,6 @@ load(
     "ModuleConfigInfo",
     "cc_launcher",
     "check_relative_filename",
-    "cpp_strings",
     "repository_relative_filename",
     "run_emacs",
     "runfile_location",
@@ -1125,26 +1124,24 @@ def _binary(ctx, *, srcs, tags, header, function, args):
     # better be sure.
     executable, launcher_runfiles = cc_launcher(
         ctx,
-        defines = [
-            'RULES_ELISP_HEADER="' + header + '"',
-            "RULES_ELISP_FUNCTION=" + function,
-            "RULES_ELISP_ARGS=" + cpp_strings([
-                "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
-                "--mode=" + ("wrap" if toolchain.wrap else "direct"),
-            ] + [
-                "--rule-tag=" + tag
-                for tag in collections.uniq(ctx.attr.tags + tags)
-            ] + [
-                "--load-directory=" + check_relative_filename(dir.for_runfiles)
-                for dir in result.transitive_load_path.to_list()
-            ] + [
-                "--load-file=" + runfile_location(ctx, src)
-                for src in result.outs
-            ] + [
-                "--data-file=" + runfile_location(ctx, file)
-                for file in data_files_for_manifest
-            ] + args),
-        ],
+        header = header,
+        function = function,
+        args = [
+            "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
+            "--mode=" + ("wrap" if toolchain.wrap else "direct"),
+        ] + [
+            "--rule-tag=" + tag
+            for tag in collections.uniq(ctx.attr.tags + tags)
+        ] + [
+            "--load-directory=" + check_relative_filename(dir.for_runfiles)
+            for dir in result.transitive_load_path.to_list()
+        ] + [
+            "--load-file=" + runfile_location(ctx, src)
+            for src in result.outs
+        ] + [
+            "--data-file=" + runfile_location(ctx, file)
+            for file in data_files_for_manifest
+        ] + args,
     )
     bin_runfiles = ctx.runfiles(
         files = [emacs.files_to_run.executable] + result.outs,
