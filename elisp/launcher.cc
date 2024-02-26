@@ -38,6 +38,12 @@
 #include "elisp/platform.h"
 #include "elisp/main.h"
 
+#ifdef _WIN32
+#  define RULES_ELISP_MAIN wmain
+#else
+#  define RULES_ELISP_MAIN main
+#endif
+
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   const absl::StatusOr<int> code = rules_elisp::Main(
       {RULES_ELISP_LAUNCHER_ARGS}, absl::MakeConstSpan(argv, argv + argc));
