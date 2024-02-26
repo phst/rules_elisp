@@ -396,6 +396,7 @@ def run_emacs(
 # FIXME: Once all supported Bazel versions parse REPO.bazel, move these features
 # there, and remove them from BUILD files.
 PACKAGE_FEATURES = [
+    "no_copts_tokenization",
     # On Windows, Bazel generates incorrectly-escaped parameter files.  See
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
