@@ -23,6 +23,7 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "use_cpp_toolchain")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
+    "LAUNCHER_ATTRS",
     "cc_launcher",
     "cpp_string",
     "runfile_location",
@@ -56,7 +57,7 @@ def _emacs_binary_impl(ctx):
     ]
 
 emacs_binary = rule(
-    attrs = {
+    attrs = LAUNCHER_ATTRS | {
         "srcs": attr.label_list(
             allow_files = True,
             allow_empty = False,
@@ -99,14 +100,6 @@ This is used by Gazelle.""",
         "_launcher_deps": attr.label_list(
             default = [Label("//elisp:emacs")],
             providers = [CcInfo],
-        ),
-        "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:launcher.cc")],
-            allow_files = [".cc"],
-        ),
-        "_launcher_defaults": attr.label(
-            default = Label("//elisp:launcher_defaults"),
-            providers = [CcDefaultInfo],
         ),
         "_emacs_defaults": attr.label(
             default = Label("//emacs:defaults"),

@@ -665,6 +665,17 @@ merged_manual = rule(
     implementation = _merged_manual_impl,
 )
 
+LAUNCHER_ATTRS = {
+    "_launcher_srcs": attr.label_list(
+        default = [Label("//elisp:launcher.cc")],
+        allow_files = [".cc"],
+    ),
+    "_launcher_defaults": attr.label(
+        default = Label("//elisp:launcher_defaults"),
+        providers = [CcDefaultInfo],
+    ),
+}
+
 def _repository_name(file):
     # Skip empty string for main repository.
     return file.owner.workspace_name or None

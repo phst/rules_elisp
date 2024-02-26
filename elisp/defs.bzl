@@ -21,6 +21,7 @@ load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_c
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
+    "LAUNCHER_ATTRS",
     "ModuleConfigInfo",
     "cc_launcher",
     "check_relative_filename",
@@ -282,7 +283,7 @@ def _elisp_test_impl(ctx):
 
 # Compilation-related attributes shared between elisp_library, elisp_binary,
 # and elisp_test.
-_COMPILE_ATTRS = {
+_COMPILE_ATTRS = LAUNCHER_ATTRS | {
     "fatal_warnings": attr.bool(
         doc = """If `True` (the default), then byte compile warnings should be
 treated as errors.  If `False`, they still show up in the output, but don’t
@@ -597,14 +598,6 @@ elisp_binary = rule(
             default = [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
-        "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:launcher.cc")],
-            allow_files = [".cc"],
-        ),
-        "_launcher_defaults": attr.label(
-            default = Label("//elisp:launcher_defaults"),
-            providers = [CcDefaultInfo],
-        ),
         "data": attr.label_list(
             doc = "List of files to be made available at runtime.",
             allow_files = True,
@@ -665,14 +658,6 @@ elisp_test = rule(
         "_launcher_deps": attr.label_list(
             default = [Label("//elisp:test")],
             providers = [CcInfo],
-        ),
-        "_launcher_srcs": attr.label_list(
-            default = [Label("//elisp:launcher.cc")],
-            allow_files = [".cc"],
-        ),
-        "_launcher_defaults": attr.label(
-            default = Label("//elisp:launcher_defaults"),
-            providers = [CcDefaultInfo],
         ),
         # Magic coverage attributes.  This is only partially documented
         # (https://bazel.build/rules/lib/coverage#output_generator), but we can
