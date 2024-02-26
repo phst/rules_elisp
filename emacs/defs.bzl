@@ -24,6 +24,7 @@ load(
     "//private:defs.bzl",
     "CcDefaultInfo",
     "LAUNCHER_ATTRS",
+    "LAUNCHER_DEPS",
     "cc_launcher",
     "cpp_string",
     "runfile_location",
@@ -98,7 +99,7 @@ This is used by Gazelle.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = [Label("//elisp:emacs")],
+            default = LAUNCHER_DEPS + [Label("//elisp:emacs")],
             providers = [CcInfo],
         ),
         "_emacs_defaults": attr.label(

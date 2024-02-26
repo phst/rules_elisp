@@ -676,6 +676,10 @@ LAUNCHER_ATTRS = {
     ),
 }
 
+LAUNCHER_DEPS = [
+    Label("//elisp:platform"),
+]
+
 def _repository_name(file):
     # Skip empty string for main repository.
     return file.owner.workspace_name or None

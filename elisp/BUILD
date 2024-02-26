@@ -24,6 +24,7 @@ load(
     "FEATURES",
     "LAUNCHER_COPTS",
     "LAUNCHER_DEFINES",
+    "LAUNCHER_DEPS",
     "LAUNCHER_FEATURES",
     "LAUNCHER_LINKOPTS",
     "LINKOPTS",
@@ -192,7 +193,7 @@ cc_binary(
             'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
-    deps = [":binary"],
+    deps = LAUNCHER_DEPS + [":binary"],
 )
 
 build_test(
@@ -487,6 +488,12 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    visibility = [
+        # FIXME: Make internal once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
 )
 
 exports_files(
