@@ -450,6 +450,15 @@ COPTS = select({
         "-pedantic",
         "-pedantic-errors",
     ],
+}) + select({
+    Label("//private:clang"): [
+        # This shouldn’t be needed, but the external_include_paths feature
+        # doesn’t work on macOS.
+        # TODO: File bug against Bazel.
+        "--system-header-prefix=absl/",
+        "--system-header-prefix=upb/",
+    ],
+    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
