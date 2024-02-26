@@ -22,6 +22,7 @@ load(
     "//private:defs.bzl",
     "CcDefaultInfo",
     "LAUNCHER_ATTRS",
+    "LAUNCHER_DEPS",
     "ModuleConfigInfo",
     "cc_launcher",
     "check_relative_filename",
@@ -595,7 +596,7 @@ elisp_binary = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = [Label("//elisp:binary")],
+            default = LAUNCHER_DEPS + [Label("//elisp:binary")],
             providers = [CcInfo],
         ),
         "data": attr.label_list(
@@ -656,7 +657,7 @@ elisp_test = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = [Label("//elisp:test")],
+            default = LAUNCHER_DEPS + [Label("//elisp:test")],
             providers = [CcInfo],
         ),
         # Magic coverage attributes.  This is only partially documented

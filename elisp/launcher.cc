@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "elisp/platform.h"
+
 #include RULES_ELISP_HEADER
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {

@@ -21,7 +21,7 @@
 
 #include <initializer_list>
 
-#include "elisp/platform.h"  // IWYU pragma: export
+#include "elisp/platform.h"
 
 namespace rules_elisp {
 
