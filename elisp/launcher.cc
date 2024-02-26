@@ -25,6 +25,7 @@
 #  pragma warning(push, 3)
 #endif
 #include "absl/log/log.h"
+#include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #ifdef __GNUC__

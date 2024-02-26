@@ -37,18 +37,16 @@
 #  include <unistd.h>
 #endif
 
-#include <algorithm>
-#include <cerrno>
+#include <algorithm>  // IWYU pragma: keep
+#include <cerrno>     // IWYU pragma: keep
 #include <cstddef>
-#include <cstdlib>
-#include <cstring>
-#include <iostream>
+#include <iostream>  // IWYU pragma: keep
 #include <limits>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
+#include <system_error>  // IWYU pragma: keep
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -69,7 +67,7 @@
 #include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/log/check.h"
-#include "absl/log/log.h"
+#include "absl/log/log.h"  // IWYU pragma: keep
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
@@ -89,6 +87,11 @@
 #endif
 
 #include "elisp/platform.h"
+
+// IWYU pragma: no_include <__system_error/error_category.h>
+// IWYU pragma: no_include <__system_error/error_code.h>
+// IWYU pragma: no_include <__system_error/error_condition.h>
+// IWYU pragma: no_include <sys/errno.h>
 
 namespace rules_elisp {
 

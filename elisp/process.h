@@ -21,7 +21,7 @@
 
 #include <memory>
 #include <string>
-#include <string_view>
+#include <string_view>  // IWYU pragma: keep
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -46,6 +46,8 @@
 #endif
 
 #include "elisp/platform.h"
+
+// IWYU pragma: no_include <__fwd/string_view.h>
 
 namespace rules_elisp {
 
