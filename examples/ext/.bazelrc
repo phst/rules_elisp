@@ -12,4 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# The external_include_paths feature has to be specified in .bazelrc because it
+# needs to apply to all compile actions in all repositories.
+# TODO: File bug against Bazel to make this work as repository-level feature.
+build --features=external_include_paths --host_features=external_include_paths
+
 import %workspace%/../../c-std.bazelrc
