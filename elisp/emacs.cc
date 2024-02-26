@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/emacs.h"
+#include "elisp/main.h"
 
 #include <initializer_list>
 #include <string>

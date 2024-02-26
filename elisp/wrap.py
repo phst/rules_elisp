@@ -84,7 +84,7 @@ def main() -> None:
                 'tags': ['local', 'mytag'],
                 'loadPath': ['phst_rules_elisp'],
                 'inputFiles': ['phst_rules_elisp/elisp/binary.cc',
-                               'phst_rules_elisp/elisp/binary.h'],
+                               'phst_rules_elisp/elisp/main.h'],
                 'outputFiles': [str(output_file)],
             }
             for var in (got, want):
