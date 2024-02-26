@@ -67,7 +67,7 @@ elisp_binary(
 
 stardoc(
     name = "elisp",
-    out = "elisp.bin",
+    out = "elisp.binpb",
     format = "proto",
     input = "//elisp:defs.bzl",
     deps = [
@@ -80,7 +80,7 @@ stardoc(
 
 stardoc(
     name = "emacs",
-    out = "emacs.bin",
+    out = "emacs.binpb",
     format = "proto",
     input = "//emacs:defs.bzl",
     deps = [
@@ -92,7 +92,7 @@ stardoc(
 
 stardoc(
     name = "repositories",
-    out = "repositories.bin",
+    out = "repositories.binpb",
     format = "proto",
     input = "//elisp:repositories.bzl",
     deps = [
@@ -103,7 +103,7 @@ stardoc(
 
 stardoc(
     name = "extensions",
-    out = "extensions.bin",
+    out = "extensions.binpb",
     format = "proto",
     input = "//elisp:extensions.bzl",
     tags = [

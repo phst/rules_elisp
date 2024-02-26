@@ -645,7 +645,7 @@ merged_manual = rule(
             mandatory = True,
         ),
         "includes": attr.label_list(
-            allow_files = [".bin"],
+            allow_files = [".binpb"],
             mandatory = True,
             allow_empty = False,
         ),
