@@ -15,7 +15,7 @@
 #include "elisp/main.h"
 
 #include <initializer_list>
-#include <string>
+#include <string_view>
 #include <vector>
 
 #ifdef __GNUC__
@@ -45,7 +45,7 @@ namespace rules_elisp {
 absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args) {
-  std::vector<NativeString> args = {RULES_ELISP_BINARY_ARGS};
+  std::vector<NativeStringView> args = {RULES_ELISP_BINARY_ARGS};
   args.insert(args.end(), launcher_args.begin(), launcher_args.end());
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
   args.insert(args.end(), original_args.begin(), original_args.end());

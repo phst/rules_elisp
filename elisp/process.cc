@@ -455,7 +455,7 @@ static absl::StatusOr<NativeString> ResolveRunfile(
 
 absl::StatusOr<int> Run(const std::string_view source_repository,
                         const std::string_view binary,
-                        const absl::Span<const NativeString> args,
+                        const absl::Span<const NativeStringView> args,
                         const ExecutableKind kind,
                         const NativeStringView argv0) {
   const absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> runfiles =
