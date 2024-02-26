@@ -21,12 +21,31 @@
 
 #include <initializer_list>
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Woverflow"
+#endif
+#ifdef _MSC_VER
+#  pragma warning(push, 3)
+#endif
+#include "absl/status/statusor.h"
+#include "absl/types/span.h"
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 #include "elisp/platform.h"
 
 namespace rules_elisp {
 
-[[nodiscard]] int RunBinary(std::initializer_list<NativeStringView> prefix,
-                            int argc, const NativeChar* const* argv);
+absl::StatusOr<int> RunBinary(std::initializer_list<NativeStringView> prefix,
+                              absl::Span<const NativeChar* const> suffix);
 
 }  // namespace rules_elisp
 

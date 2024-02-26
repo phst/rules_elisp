@@ -44,7 +44,7 @@
 
 namespace rules_elisp {
 
-static absl::StatusOr<int> RunEmacsImpl(
+absl::StatusOr<int> RunEmacs(
     const std::initializer_list<NativeStringView> prefix,
     const absl::Span<const NativeChar* const> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
@@ -55,17 +55,6 @@ static absl::StatusOr<int> RunEmacsImpl(
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
   args.insert(args.end(), suffix.begin(), suffix.end());
   return Run(RULES_ELISP_RUN_EMACS, args, *runfiles);
-}
-
-int RunEmacs(const std::initializer_list<NativeStringView> prefix,
-             const int argc, const NativeChar* const* const argv) {
-  const absl::StatusOr<int> code =
-      RunEmacsImpl(prefix, absl::MakeConstSpan(argv, argv + argc));
-  if (!code.ok()) {
-    LOG(ERROR) << code.status();
-    return EXIT_FAILURE;
-  }
-  return *code;
 }
 
 }  // namespace rules_elisp
