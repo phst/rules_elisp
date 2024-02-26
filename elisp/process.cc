@@ -313,14 +313,14 @@ absl::StatusOr<ToString> ConvertString(
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
   if (!status.ok()) return status;
-#ifdef _MSC_VER
-#  pragma warning(push)
-#  pragma warning(disable : 4244)
-#endif
-  return ToString(string.begin(), string.end());
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
+  ToString ret;
+  ret.reserve(string.length());
+  for (FromChar ch : string) {
+    const std::optional<ToChar> to = CastNumberOpt<ToChar>(ch);
+    CHECK(to.has_value()) << "character " << ch << " too large";
+    ret.push_back(*to);
+  }
+  return ret;
 }
 
 static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
