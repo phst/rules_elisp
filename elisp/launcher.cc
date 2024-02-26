@@ -24,7 +24,9 @@
 #ifdef _MSC_VER
 #  pragma warning(push, 3)
 #endif
+#include "absl/container/fixed_array.h"
 #include "absl/log/log.h"
+#include "absl/meta/type_traits.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
@@ -45,8 +47,10 @@
 #endif
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
-  const absl::StatusOr<int> code = rules_elisp::Main(
-      {RULES_ELISP_LAUNCHER_ARGS}, absl::MakeConstSpan(argv, argv + argc));
+  const absl::FixedArray<rules_elisp::NativeStringView> original_args(
+      argv, argv + argc);
+  const absl::StatusOr<int> code =
+      rules_elisp::Main({RULES_ELISP_LAUNCHER_ARGS}, original_args);
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;
