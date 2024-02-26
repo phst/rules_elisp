@@ -40,7 +40,7 @@
 #include RULES_ELISP_HEADER
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
-  const absl::StatusOr<int> code = rules_elisp::RULES_ELISP_FUNCTION(
+  const absl::StatusOr<int> code = rules_elisp::Main(
       {RULES_ELISP_LAUNCHER_ARGS}, absl::MakeConstSpan(argv, argv + argc));
   if (!code.ok()) {
     LOG(ERROR) << code.status();

@@ -199,7 +199,6 @@ def _elisp_binary_impl(ctx):
         srcs = ctx.files.src,
         tags = [],
         header = "elisp/binary.h",
-        function = "Main",
         args = args,
     )
     return [
@@ -229,7 +228,6 @@ def _elisp_test_impl(ctx):
         # cf. https://bazel.build/reference/be/common-definitions#test.local.
         tags = ["local"] if ctx.attr.local else [],
         header = "elisp/test.h",
-        function = "Main",
         args = args,
     )
 
@@ -1040,7 +1038,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         transitive_outs = depset(direct = outs, transitive = indirect_outs),
     )
 
-def _binary(ctx, *, srcs, tags, header, function, args):
+def _binary(ctx, *, srcs, tags, header, args):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_launcher_srcs” attribute containing the main C++
@@ -1051,7 +1049,6 @@ def _binary(ctx, *, srcs, tags, header, function, args):
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
       header: filename of a header file to include
-      function: name of a function to call
       args: a list of rule-specific program arguments
 
     Returns:
@@ -1126,7 +1123,6 @@ def _binary(ctx, *, srcs, tags, header, function, args):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         header = header,
-        function = function,
         args = [
             "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
             "--mode=" + ("wrap" if toolchain.wrap else "direct"),
