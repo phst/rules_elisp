@@ -231,7 +231,7 @@ def cc_launcher(ctx, *, header, function, args):
         local_defines = defaults.defines + [
             'RULES_ELISP_HEADER="' + header + '"',
             "RULES_ELISP_FUNCTION=" + function,
-            "RULES_ELISP_ARGS=" + cpp_strings(args),
+            "RULES_ELISP_ARGS=" + _cpp_strings(args),
         ],
         user_compile_flags = defaults.copts,
     )
@@ -247,7 +247,7 @@ def cc_launcher(ctx, *, header, function, args):
     runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])
     return bin.executable, runfiles
 
-def cpp_strings(strings):
+def _cpp_strings(strings):
     """Formats the given string list as C++ initializer list.
 
     This function makes an effort to support strings with special characters.
@@ -258,9 +258,9 @@ def cpp_strings(strings):
     Returns:
       a string containing C++ code representing the given string list
     """
-    return ", ".join([cpp_string(s) for s in strings])
+    return ", ".join([_cpp_string(s) for s in strings])
 
-def cpp_string(string):
+def _cpp_string(string):
     """Formats the given string as C++ string literal.
 
     This function makes an effort to support strings with special characters.
