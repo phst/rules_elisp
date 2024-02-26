@@ -199,7 +199,7 @@ def _elisp_binary_impl(ctx):
         srcs = ctx.files.src,
         tags = [],
         header = "elisp/binary.h",
-        function = "RunBinary",
+        function = "Main",
         args = args,
     )
     return [
@@ -229,7 +229,7 @@ def _elisp_test_impl(ctx):
         # cf. https://bazel.build/reference/be/common-definitions#test.local.
         tags = ["local"] if ctx.attr.local else [],
         header = "elisp/test.h",
-        function = "RunTest",
+        function = "Main",
         args = args,
     )
 

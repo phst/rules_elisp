@@ -45,7 +45,7 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> RunEmacs(
+absl::StatusOr<int> Main(
     std::initializer_list<NativeStringView> prefix,
     absl::Span<const absl::Nonnull<const NativeChar*>> suffix);
 
