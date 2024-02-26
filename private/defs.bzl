@@ -683,7 +683,9 @@ LAUNCHER_ATTRS = {
 
 LAUNCHER_DEPS = [
     Label("//elisp:platform"),
+    Label("@com_google_absl//absl/container:fixed_array"),
     Label("@com_google_absl//absl/log"),
+    Label("@com_google_absl//absl/meta:type_traits"),
     Label("@com_google_absl//absl/status"),
     Label("@com_google_absl//absl/status:statusor"),
     Label("@com_google_absl//absl/types:span"),
