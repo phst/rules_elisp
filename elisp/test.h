@@ -31,6 +31,7 @@
 #ifdef _MSC_VER
 #  pragma warning(push, 3)
 #endif
+#include "absl/base/nullability.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #ifdef __GNUC__
@@ -44,8 +45,9 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> RunTest(std::initializer_list<NativeStringView> prefix,
-                            absl::Span<const NativeChar* const> suffix);
+absl::StatusOr<int> RunTest(
+    std::initializer_list<NativeStringView> prefix,
+    absl::Span<const absl::Nonnull<const NativeChar*>> suffix);
 
 }  // namespace rules_elisp
 
