@@ -66,6 +66,7 @@
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
+#include "absl/hash/hash.h"        // IWYU pragma: keep
 #include "absl/log/check.h"
 #include "absl/log/log.h"  // IWYU pragma: keep
 #include "absl/status/status.h"
