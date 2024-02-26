@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RULES_ELISP_ELISP_TEST_H
-#define RULES_ELISP_ELISP_TEST_H
+#ifndef RULES_ELISP_ELISP_MAIN_H
+#define RULES_ELISP_ELISP_MAIN_H
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17

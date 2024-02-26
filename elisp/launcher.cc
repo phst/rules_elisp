@@ -36,8 +36,7 @@
 #endif
 
 #include "elisp/platform.h"
-
-#include RULES_ELISP_HEADER
+#include "elisp/main.h"
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   const absl::StatusOr<int> code = rules_elisp::Main(
