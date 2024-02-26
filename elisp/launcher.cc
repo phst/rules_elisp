@@ -12,10 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <cstdlib>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wpedantic"
+#  pragma GCC diagnostic ignored "-Wconversion"
+#  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Woverflow"
+#endif
+#ifdef _MSC_VER
+#  pragma warning(push, 3)
+#endif
+#include "absl/log/log.h"
+#include "absl/status/statusor.h"
+#include "absl/types/span.h"
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+#ifdef _MSC_VER
+#  pragma warning(pop)
+#endif
+
 #include "elisp/platform.h"
 
 #include RULES_ELISP_HEADER
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
-  return rules_elisp::RULES_ELISP_FUNCTION({RULES_ELISP_ARGS}, argc, argv);
+  const absl::StatusOr<int> code = rules_elisp::RULES_ELISP_FUNCTION(
+      {RULES_ELISP_ARGS}, absl::MakeConstSpan(argv, argv + argc));
+  if (!code.ok()) {
+    LOG(ERROR) << code.status();
+    return EXIT_FAILURE;
+  }
+  return *code;
 }
