@@ -181,7 +181,7 @@ cc_binary(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_HEADER="elisp/binary.h"'),
-        shell.quote("RULES_ELISP_FUNCTION=RunBinary"),
+        shell.quote("RULES_ELISP_FUNCTION=Main"),
         shell.quote("RULES_ELISP_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
             'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',

@@ -43,7 +43,7 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> RunTest(
+absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> prefix,
     const absl::Span<const absl::Nonnull<const NativeChar*>> suffix) {
   const absl::StatusOr<Runfiles> runfiles =

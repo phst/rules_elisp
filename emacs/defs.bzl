@@ -41,7 +41,7 @@ def _emacs_binary_impl(ctx):
     executable, runfiles = cc_launcher(
         ctx,
         header = "elisp/emacs.h",
-        function = "RunEmacs",
+        function = "Main",
         args = [
             "--install=" + runfile_location(ctx, install),
         ],
