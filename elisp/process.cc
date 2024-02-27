@@ -402,21 +402,9 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #endif
 }
 
-class Runfiles final {
- public:
-  static absl::StatusOr<Runfiles> Create(ExecutableKind kind,
-                                         std::string_view source_repository,
-                                         NativeStringView argv0);
-  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
-  absl::StatusOr<rules_elisp::Environment> Environment() const;
+using bazel::tools::cpp::runfiles::Runfiles;
 
- private:
-  using Impl = bazel::tools::cpp::runfiles::Runfiles;
-  explicit Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl);
-  absl::Nonnull<std::unique_ptr<Impl>> impl_;
-};
-
-static absl::Nullable<bazel::tools::cpp::runfiles::Runfiles*> CreateRunfiles(
+static absl::Nullable<Runfiles*> CreateRunfiles(
     const ExecutableKind kind, const std::string& argv0,
     const std::string& source_repository, std::string& error) {
   switch (kind) {
@@ -431,7 +419,7 @@ static absl::Nullable<bazel::tools::cpp::runfiles::Runfiles*> CreateRunfiles(
              << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
 }
 
-absl::StatusOr<Runfiles> Runfiles::Create(
+static absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> CreateRunfiles(
     const ExecutableKind kind, const std::string_view source_repository,
     const NativeStringView argv0) {
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
@@ -440,22 +428,19 @@ absl::StatusOr<Runfiles> Runfiles::Create(
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Impl>> impl(CreateRunfiles(
+  absl::Nullable<std::unique_ptr<Runfiles>> impl(CreateRunfiles(
       kind, *narrow_argv0, std::string(source_repository), error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
   }
-  return Runfiles(std::move(impl));
+  return impl;
 }
 
-Runfiles::Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl)
-    : impl_(std::move(impl)) {}
-
-absl::StatusOr<NativeString> Runfiles::Resolve(
-    const std::string_view name) const {
+static absl::StatusOr<NativeString> ResolveRunfile(
+    const Runfiles& runfiles, const std::string_view name) {
   if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
-  std::string resolved = impl_->Rlocation(std::string(name));
+  std::string resolved = runfiles.Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
@@ -465,8 +450,9 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
   return ToNative(resolved);
 }
 
-absl::StatusOr<Environment> Runfiles::Environment() const {
-  const auto& pairs = impl_->EnvVars();
+static absl::StatusOr<Environment> RunfilesEnvironment(
+    const Runfiles& runfiles) {
+  const auto& pairs = runfiles.EnvVars();
   rules_elisp::Environment map;
   for (const auto& [narrow_key, narrow_value] : pairs) {
     const absl::StatusOr<NativeString> key = ToNative(narrow_key);
@@ -486,14 +472,15 @@ absl::StatusOr<int> Run(const std::string_view binary,
                         const absl::Span<const NativeString> args,
                         const ExecutableKind kind,
                         const NativeStringView argv0) {
-  const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(kind, BAZEL_CURRENT_REPOSITORY, argv0);
+  const absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> runfiles =
+      CreateRunfiles(kind, BAZEL_CURRENT_REPOSITORY, argv0);
   if (!runfiles.ok()) return runfiles.status();
-  absl::StatusOr<NativeString> resolved_binary = runfiles->Resolve(binary);
+  absl::StatusOr<NativeString> resolved_binary =
+      ResolveRunfile(**runfiles, binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  absl::StatusOr<Environment> map = runfiles->Environment();
+  absl::StatusOr<Environment> map = RunfilesEnvironment(**runfiles);
   if (!map.ok()) return map.status();
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
