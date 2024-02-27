@@ -47,7 +47,8 @@ absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> prefix,
     const absl::Span<const absl::Nonnull<const NativeChar*>> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::CreateForTest(BAZEL_CURRENT_REPOSITORY);
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY,
+                       suffix.empty() ? NativeStringView() : suffix.front());
   if (!runfiles.ok()) return runfiles.status();
   std::vector<NativeString> all_args = {RULES_ELISP_TEST_ARGS};
   all_args.insert(all_args.end(), prefix.begin(), prefix.end());

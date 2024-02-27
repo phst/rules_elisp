@@ -61,12 +61,13 @@ using Environment =
 using Environment = absl::flat_hash_map<std::string, std::string>;
 #endif
 
+enum class ExecutableKind { kBinary, kTest };
+
 class Runfiles final {
  public:
-  static absl::StatusOr<Runfiles> Create(std::string_view source_repository,
+  static absl::StatusOr<Runfiles> Create(ExecutableKind kind,
+                                         std::string_view source_repository,
                                          NativeStringView argv0);
-  static absl::StatusOr<Runfiles> CreateForTest(
-      std::string_view source_repository);
   absl::StatusOr<NativeString> Resolve(std::string_view name) const;
   absl::StatusOr<rules_elisp::Environment> Environment() const;
 

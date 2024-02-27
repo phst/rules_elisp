@@ -47,7 +47,7 @@ absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> prefix,
     const absl::Span<const absl::Nonnull<const NativeChar*>> suffix) {
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY,
+      Runfiles::Create(ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY,
                        suffix.empty() ? NativeStringView() : suffix.front());
   if (!runfiles.ok()) return runfiles.status();
   std::vector<NativeString> args(prefix.begin(), prefix.end());

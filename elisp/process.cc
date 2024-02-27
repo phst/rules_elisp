@@ -394,34 +394,35 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #endif
 }
 
+static absl::Nullable<bazel::tools::cpp::runfiles::Runfiles*> CreateRunfiles(
+    const ExecutableKind kind, const std::string& argv0,
+    const std::string& source_repository, std::string& error) {
+  switch (kind) {
+    case ExecutableKind::kBinary:
+      return bazel::tools::cpp::runfiles::Runfiles::Create(
+          argv0, source_repository, &error);
+    case ExecutableKind::kTest:
+      return bazel::tools::cpp::runfiles::Runfiles::CreateForTest(
+          source_repository, &error);
+  }
+  LOG(FATAL) << "invalid runfiles mode "
+             << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
+}
+
 absl::StatusOr<Runfiles> Runfiles::Create(
-    const std::string_view source_repository, const NativeStringView argv0) {
+    const ExecutableKind kind, const std::string_view source_repository,
+    const NativeStringView argv0) {
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
     return status;
   }
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Impl>> impl(
-      Impl::Create(*narrow_argv0, std::string(source_repository), &error));
+  absl::Nullable<std::unique_ptr<Impl>> impl(CreateRunfiles(
+      kind, *narrow_argv0, std::string(source_repository), error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
-  }
-  return Runfiles(std::move(impl));
-}
-
-absl::StatusOr<Runfiles> Runfiles::CreateForTest(
-    const std::string_view source_repository) {
-  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
-    return status;
-  }
-  std::string error;
-  absl::Nullable<std::unique_ptr<Impl>> impl(
-      Impl::CreateForTest(std::string(source_repository), &error));
-  if (impl == nullptr) {
-    return absl::FailedPreconditionError(
-        absl::StrCat("couldn’t create runfiles for test: ", error));
   }
   return Runfiles(std::move(impl));
 }
