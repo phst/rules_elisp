@@ -19,7 +19,8 @@ import pathlib
 import shutil
 
 
-def _main() -> None:
+def main() -> None:
+    """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('source', type=pathlib.Path)
     parser.add_argument('dest', type=pathlib.Path)
@@ -28,4 +29,4 @@ def _main() -> None:
 
 
 if __name__ == '__main__':
-    _main()
+    main()
