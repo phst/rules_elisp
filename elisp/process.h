@@ -19,8 +19,6 @@
 #  error this file requires at least C++17
 #endif
 
-#include <memory>
-#include <string>
 #include <string_view>  // IWYU pragma: keep
 
 #ifdef __GNUC__
@@ -33,11 +31,8 @@
 #ifdef _MSC_VER
 #  pragma warning(push, 3)
 #endif
-#include "absl/base/nullability.h"
-#include "absl/container/flat_hash_map.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
-#include "tools/cpp/runfiles/runfiles.h"
 #ifdef __GNUC__
 #  pragma GCC diagnostic pop
 #endif
