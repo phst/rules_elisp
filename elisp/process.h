@@ -19,6 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
+#include <initializer_list>
 #include <string_view>  // IWYU pragma: keep
 
 #ifdef __GNUC__
@@ -50,8 +51,10 @@ enum class ExecutableKind { kBinary, kTest };
 
 absl::StatusOr<int> Run(std::string_view source_repository,
                         std::string_view binary,
-                        absl::Span<const NativeStringView> args,
-                        ExecutableKind kind, NativeStringView argv0);
+                        std::initializer_list<NativeStringView> common_args,
+                        std::initializer_list<NativeStringView> launcher_args,
+                        absl::Span<const NativeStringView> original_args,
+                        ExecutableKind kind);
 
 }  // namespace rules_elisp
 

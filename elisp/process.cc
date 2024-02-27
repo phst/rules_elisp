@@ -453,19 +453,27 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return ToNative(resolved);
 }
 
-absl::StatusOr<int> Run(const std::string_view source_repository,
-                        const std::string_view binary,
-                        const absl::Span<const NativeStringView> args,
-                        const ExecutableKind kind,
-                        const NativeStringView argv0) {
+absl::StatusOr<int> Run(
+    const std::string_view source_repository, const std::string_view binary,
+    const std::initializer_list<NativeStringView> common_args,
+    const std::initializer_list<NativeStringView> launcher_args,
+    const absl::Span<const NativeStringView> original_args,
+    const ExecutableKind kind) {
   const absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> runfiles =
-      CreateRunfiles(kind, source_repository, argv0);
+      CreateRunfiles(
+          kind, source_repository,
+          original_args.empty() ? NativeStringView() : original_args.front());
   if (!runfiles.ok()) return runfiles.status();
   absl::StatusOr<NativeString> resolved_binary =
       ResolveRunfile(**runfiles, binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
-  final_args.insert(final_args.end(), args.begin(), args.end());
+  final_args.insert(final_args.end(), common_args.begin(), common_args.end());
+  final_args.insert(final_args.end(), launcher_args.begin(),
+                    launcher_args.end());
+  final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  final_args.insert(final_args.end(), original_args.begin(),
+                    original_args.end());
   Environment merged_env;
   for (const auto& [narrow_key, narrow_value] : (*runfiles)->EnvVars()) {
     const absl::StatusOr<NativeString> key = ToNative(narrow_key);

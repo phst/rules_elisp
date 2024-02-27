@@ -15,8 +15,6 @@
 #include "elisp/main.h"
 
 #include <initializer_list>
-#include <string_view>
-#include <vector>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -45,14 +43,9 @@ namespace rules_elisp {
 absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args) {
-  std::vector<NativeStringView> args = {RULES_ELISP_TEST_ARGS};
-  args.insert(args.end(), launcher_args.begin(), launcher_args.end());
-  args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
-  args.insert(args.end(), original_args.begin(), original_args.end());
-  return Run(
-      BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST, args,
-      ExecutableKind::kTest,
-      original_args.empty() ? NativeStringView() : original_args.front());
+  return Run(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
+             {RULES_ELISP_TEST_ARGS}, launcher_args, original_args,
+             ExecutableKind::kTest);
 }
 
 }  // namespace rules_elisp
