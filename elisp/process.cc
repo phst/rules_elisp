@@ -452,9 +452,8 @@ static absl::StatusOr<NativeString> ResolveRunfile(
 
 static absl::StatusOr<Environment> RunfilesEnvironment(
     const Runfiles& runfiles) {
-  const auto& pairs = runfiles.EnvVars();
   rules_elisp::Environment map;
-  for (const auto& [narrow_key, narrow_value] : pairs) {
+  for (const auto& [narrow_key, narrow_value] : runfiles.EnvVars()) {
     const absl::StatusOr<NativeString> key = ToNative(narrow_key);
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
