@@ -234,6 +234,14 @@ static std::vector<absl::Nonnull<char*>> Pointers(
 }
 #endif
 
+#ifdef _WIN32
+using Environment =
+    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                        CaseInsensitiveEqual>;
+#else
+using Environment = absl::flat_hash_map<std::string, std::string>;
+#endif
+
 static absl::StatusOr<Environment> CopyEnv() {
   Environment map;
 #ifdef _WIN32
@@ -393,6 +401,20 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
   return std::string(string);
 #endif
 }
+
+class Runfiles final {
+ public:
+  static absl::StatusOr<Runfiles> Create(ExecutableKind kind,
+                                         std::string_view source_repository,
+                                         NativeStringView argv0);
+  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
+  absl::StatusOr<rules_elisp::Environment> Environment() const;
+
+ private:
+  using Impl = bazel::tools::cpp::runfiles::Runfiles;
+  explicit Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl);
+  absl::Nonnull<std::unique_ptr<Impl>> impl_;
+};
 
 static absl::Nullable<bazel::tools::cpp::runfiles::Runfiles*> CreateRunfiles(
     const ExecutableKind kind, const std::string& argv0,

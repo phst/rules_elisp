@@ -51,31 +51,7 @@
 
 namespace rules_elisp {
 
-#ifdef _WIN32
-struct CaseInsensitiveHash;
-struct CaseInsensitiveEqual;
-using Environment =
-    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                        CaseInsensitiveEqual>;
-#else
-using Environment = absl::flat_hash_map<std::string, std::string>;
-#endif
-
 enum class ExecutableKind { kBinary, kTest };
-
-class Runfiles final {
- public:
-  static absl::StatusOr<Runfiles> Create(ExecutableKind kind,
-                                         std::string_view source_repository,
-                                         NativeStringView argv0);
-  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
-  absl::StatusOr<rules_elisp::Environment> Environment() const;
-
- private:
-  using Impl = bazel::tools::cpp::runfiles::Runfiles;
-  explicit Runfiles(absl::Nonnull<std::unique_ptr<Impl>> impl);
-  absl::Nonnull<std::unique_ptr<Impl>> impl_;
-};
 
 absl::StatusOr<int> Run(std::string_view binary,
                         absl::Span<const NativeString> args,
