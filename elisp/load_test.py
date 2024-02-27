@@ -23,6 +23,7 @@ from absl.testing import absltest
 from elisp import load
 from elisp import runfiles
 
+
 class AddPathTest(absltest.TestCase):
     """Unit tests for the load.add_path function."""
 
