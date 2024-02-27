@@ -65,6 +65,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
+#include "absl/base/optimization.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/container/flat_hash_map.h"
 #include "absl/hash/hash.h"  // IWYU pragma: keep
@@ -418,6 +419,7 @@ static absl::Nullable<Runfiles*> CreateRunfiles(
   }
   LOG(FATAL) << "invalid runfiles mode "
              << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
+  ABSL_UNREACHABLE();
 }
 
 static absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> CreateRunfiles(
