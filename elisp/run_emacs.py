@@ -40,7 +40,7 @@ def main() -> None:
     opts = parser.parse_args()
     run_files = runfiles.Runfiles()
     install = run_files.resolve(opts.install)
-    exe_suffix = '.exe' if platform.system() == 'Windows' else ''
+    exe_suffix = '.exe' if _WINDOWS else ''
     emacs = install / 'bin' / ('emacs' + exe_suffix)
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
@@ -54,7 +54,7 @@ def main() -> None:
                    EMACSLOADPATH=str(shared / 'lisp'),
                    EMACSPATH=str(libexec))
         env.update(run_files.environment())
-        if platform.system() == 'Windows':
+        if _WINDOWS:
             # On Windows, Emacs doesn’t support Unicode arguments or environment
             # variables.  Check here rather than sending over garbage.
             _check_codepage('argument', args)
@@ -86,7 +86,7 @@ _MAX_PATH: int = 260
 
 @contextlib.contextmanager
 def _shorten(filename: pathlib.Path) -> Generator[pathlib.Path, None, None]:
-    if platform.system() != 'Windows' or len(str(filename)) < _MAX_PATH:
+    if not _WINDOWS or len(str(filename)) < _MAX_PATH:
         yield filename
     else:
         with tempfile.TemporaryDirectory() as directory:
@@ -102,6 +102,9 @@ def _check_codepage(description: str, values: Iterable[str]) -> None:
         except UnicodeEncodeError as ex:
             raise ValueError(
                 f'can’t encode {description} “{value}” for Windows') from ex
+
+
+_WINDOWS = platform.system() == 'Windows'
 
 
 if __name__ == '__main__':
