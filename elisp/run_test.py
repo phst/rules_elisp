@@ -22,6 +22,7 @@ import logging
 import os
 import os.path
 import pathlib
+import platform
 import signal
 import subprocess
 import sys
@@ -170,7 +171,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                 stream.write(file + '\n')
 
 
-_WINDOWS = os.name == 'nt'
+_WINDOWS = platform.system() == 'Windows'
 _logger = logging.getLogger('elisp.run_test')
 
 

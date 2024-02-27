@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import pathlib
+import platform
 import re
 import shlex
 import shutil
@@ -39,7 +40,7 @@ def main() -> None:
     parser.add_argument('--module-header', type=pathlib.Path)
     parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
-    windows = os.name == 'nt'
+    windows = platform.system() == 'Windows'
     if windows:
         bash = _find_bash(args.cc)
     source = args.readme.resolve().parent

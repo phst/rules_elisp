@@ -24,6 +24,7 @@ import glob
 import os
 import os.path
 import pathlib
+import platform
 import shutil
 import subprocess
 import sys
@@ -39,7 +40,7 @@ def main() -> None:
     opts = parser.parse_args()
     run_files = runfiles.Runfiles()
     install = run_files.resolve(opts.install)
-    exe_suffix = '.exe' if os.name == 'nt' else ''
+    exe_suffix = '.exe' if platform.system() == 'Windows' else ''
     emacs = install / 'bin' / ('emacs' + exe_suffix)
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     etc = shared / 'etc'
@@ -53,7 +54,7 @@ def main() -> None:
                    EMACSLOADPATH=str(shared / 'lisp'),
                    EMACSPATH=str(libexec))
         env.update(run_files.environment())
-        if os.name == 'nt':
+        if platform.system() == 'Windows':
             # On Windows, Emacs doesn’t support Unicode arguments or environment
             # variables.  Check here rather than sending over garbage.
             _check_codepage('argument', args)
@@ -85,7 +86,7 @@ _MAX_PATH: int = 260
 
 @contextlib.contextmanager
 def _shorten(filename: pathlib.Path) -> Generator[pathlib.Path, None, None]:
-    if os.name != 'nt' or len(str(filename)) < _MAX_PATH:
+    if platform.system() != 'Windows' or len(str(filename)) < _MAX_PATH:
         yield filename
     else:
         with tempfile.TemporaryDirectory() as directory:

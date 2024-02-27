@@ -19,6 +19,7 @@ import io
 import json
 import os
 import pathlib
+import platform
 import sys
 from typing import Any
 import unittest
@@ -37,8 +38,9 @@ def main() -> None:
     parser.add_argument('rest', nargs='+')
     args = parser.parse_args()
     run_files = runfiles.Runfiles()
-    output_file = pathlib.PurePath(
-        r'C:\Temp\output.dat' if os.name == 'nt' else '/tmp/output.dat')
+    output_file = pathlib.PurePath(r'C:\Temp\output.dat'
+                                   if platform.system() == 'Windows'
+                                   else '/tmp/output.dat')
 
     class Test(unittest.TestCase):
         """Unit tests for the command line and manifest."""

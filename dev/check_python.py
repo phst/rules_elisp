@@ -19,6 +19,7 @@ import json
 import os
 import os.path
 import pathlib
+import platform
 import shutil
 import sys
 import subprocess
@@ -98,7 +99,7 @@ def main() -> None:
     if result.returncode:
         print(result.stdout)
         sys.exit(result.returncode)
-    if os.name == 'posix' and args.pytype:
+    if platform.system() != 'Windows' and args.pytype:
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
              '--pythonpath=' + os.pathsep.join(repository_path),

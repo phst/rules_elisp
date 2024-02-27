@@ -14,8 +14,8 @@
 
 """Unit tests for elisp.load."""
 
-import os
 import pathlib
+import platform
 import tempfile
 
 from absl.testing import absltest
@@ -44,7 +44,7 @@ class AddPathTest(absltest.TestCase):
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
         runfiles_dir = pathlib.Path(
-            r'C:\Runfiles' if os.name == 'nt' else '/runfiles')
+            r'C:\Runfiles' if platform.system() == 'Windows' else '/runfiles')
         runfiles_elc = runfiles_dir / 'runfiles.elc'
         args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
