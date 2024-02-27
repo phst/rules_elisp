@@ -415,10 +415,9 @@ static absl::Nullable<Runfiles*> CreateRunfiles(
     case ExecutableKind::kTest:
       return bazel::tools::cpp::runfiles::Runfiles::CreateForTest(
           source_repository, &error);
-    default:
-      LOG(FATAL) << "invalid runfiles mode "
-                 << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
   }
+  LOG(FATAL) << "invalid runfiles mode "
+             << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
 }
 
 static absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> CreateRunfiles(
