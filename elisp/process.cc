@@ -450,23 +450,6 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return ToNative(resolved);
 }
 
-static absl::StatusOr<Environment> RunfilesEnvironment(
-    const Runfiles& runfiles) {
-  Environment map;
-  for (const auto& [narrow_key, narrow_value] : runfiles.EnvVars()) {
-    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
-    if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
-    if (!value.ok()) return value.status();
-    const auto [it, ok] = map.emplace(*key, *value);
-    if (!ok) {
-      return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
-    }
-  }
-  return map;
-}
-
 absl::StatusOr<int> Run(const std::string_view binary,
                         const absl::Span<const NativeString> args,
                         const ExecutableKind kind,
@@ -479,17 +462,27 @@ absl::StatusOr<int> Run(const std::string_view binary,
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  absl::StatusOr<Environment> map = RunfilesEnvironment(**runfiles);
-  if (!map.ok()) return map.status();
+  Environment map;
+  for (const auto& [narrow_key, narrow_value] : (*runfiles)->EnvVars()) {
+    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
+    if (!key.ok()) return key.status();
+    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
+    if (!value.ok()) return value.status();
+    const auto [it, ok] = map.emplace(*key, *value);
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
+    }
+  }
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
   orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
-  map->insert(orig_env->begin(), orig_env->end());
+  map.insert(orig_env->begin(), orig_env->end());
   std::vector<NativeString> final_env;
-  for (const auto& [key, value] : *map) {
+  for (const auto& [key, value] : map) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
   }
   // Sort entries for hermeticity.
