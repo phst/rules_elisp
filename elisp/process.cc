@@ -428,13 +428,13 @@ static absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> CreateRunfiles(
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Runfiles>> impl(CreateRunfiles(
+  absl::Nullable<std::unique_ptr<Runfiles>> runfiles(CreateRunfiles(
       kind, *narrow_argv0, std::string(source_repository), error));
-  if (impl == nullptr) {
+  if (runfiles == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
   }
-  return impl;
+  return runfiles;
 }
 
 static absl::StatusOr<NativeString> ResolveRunfile(
