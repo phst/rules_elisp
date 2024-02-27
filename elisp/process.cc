@@ -462,12 +462,16 @@ absl::StatusOr<Environment> Runfiles::Environment() const {
 
 absl::StatusOr<int> Run(const std::string_view binary,
                         const absl::Span<const NativeString> args,
-                        const Runfiles& runfiles) {
-  absl::StatusOr<NativeString> resolved_binary = runfiles.Resolve(binary);
+                        const ExecutableKind kind,
+                        const NativeStringView argv0) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(kind, BAZEL_CURRENT_REPOSITORY, argv0);
+  if (!runfiles.ok()) return runfiles.status();
+  absl::StatusOr<NativeString> resolved_binary = runfiles->Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), args.begin(), args.end());
-  absl::StatusOr<Environment> map = runfiles.Environment();
+  absl::StatusOr<Environment> map = runfiles->Environment();
   if (!map.ok()) return map.status();
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();

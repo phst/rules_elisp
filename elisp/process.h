@@ -79,7 +79,7 @@ class Runfiles final {
 
 absl::StatusOr<int> Run(std::string_view binary,
                         absl::Span<const NativeString> args,
-                        const Runfiles& runfiles);
+                        ExecutableKind kind, NativeStringView argv0);
 
 }  // namespace rules_elisp
 
