@@ -2665,7 +2665,7 @@ static void RegisterFileDescriptors(
 
 /// Function definitions
 
-enum Declarations { kNoSideEffects = 0x01 };
+enum Declarations { kDefault = 0, kNoSideEffects = 0x01 };
 
 // Defines an exported function, like ‘defun’.  The name may only contain ASCII
 // characters.  The documentation string is required.  If the function accepts
