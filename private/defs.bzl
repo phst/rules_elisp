@@ -231,7 +231,7 @@ def cc_launcher(ctx, *, header, function, args):
         local_defines = defaults.defines + [
             'RULES_ELISP_HEADER="' + header + '"',
             "RULES_ELISP_FUNCTION=" + function,
-            "RULES_ELISP_ARGS=" + _cpp_strings(args),
+            "RULES_ELISP_LAUNCHER_ARGS=" + _cpp_strings(args),
         ],
         user_compile_flags = defaults.copts,
     )

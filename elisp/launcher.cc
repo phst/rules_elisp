@@ -41,7 +41,7 @@
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   const absl::StatusOr<int> code = rules_elisp::RULES_ELISP_FUNCTION(
-      {RULES_ELISP_ARGS}, absl::MakeConstSpan(argv, argv + argc));
+      {RULES_ELISP_LAUNCHER_ARGS}, absl::MakeConstSpan(argv, argv + argc));
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;

@@ -182,7 +182,7 @@ cc_binary(
         # add additional quoting.
         shell.quote('RULES_ELISP_HEADER="elisp/binary.h"'),
         shell.quote("RULES_ELISP_FUNCTION=Main"),
-        shell.quote("RULES_ELISP_ARGS=" + ", ".join([
+        shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
             'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
             'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
