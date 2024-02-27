@@ -44,13 +44,14 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    const std::initializer_list<NativeStringView> prefix,
-    const absl::Span<const absl::Nonnull<const NativeChar*>> suffix) {
-  std::vector<NativeString> args(prefix.begin(), prefix.end());
+    const std::initializer_list<NativeStringView> launcher_args,
+    const absl::Span<const absl::Nonnull<const NativeChar*>> original_args) {
+  std::vector<NativeString> args(launcher_args.begin(), launcher_args.end());
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
-  args.insert(args.end(), suffix.begin(), suffix.end());
-  return Run(RULES_ELISP_RUN_EMACS, args, ExecutableKind::kBinary,
-             suffix.empty() ? NativeStringView() : suffix.front());
+  args.insert(args.end(), original_args.begin(), original_args.end());
+  return Run(
+      RULES_ELISP_RUN_EMACS, args, ExecutableKind::kBinary,
+      original_args.empty() ? NativeStringView() : original_args.front());
 }
 
 }  // namespace rules_elisp

@@ -46,8 +46,8 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    std::initializer_list<NativeStringView> prefix,
-    absl::Span<const absl::Nonnull<const NativeChar*>> suffix);
+    std::initializer_list<NativeStringView> launcher_args,
+    absl::Span<const absl::Nonnull<const NativeChar*>> original_args);
 
 }  // namespace rules_elisp
 
