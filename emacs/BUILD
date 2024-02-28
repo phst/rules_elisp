@@ -146,6 +146,14 @@ cc_defaults(
     name = "defaults",
     copts = [],
     defines = [],
+    features = [
+        # Never instrument Emacs itself for coverage collection.  It doesn’t
+        # hurt, but leads to needless reinstall actions when switching between
+        # “bazel test” and “bazel coverage”.
+        "-coverage",
+        # Don’t link against the C++ standard library, as Emacs is pure C code.
+        "-default_link_libs",
+    ],
     linkopts = select({
         "@platforms//os:macos": [
             # Override the toolchain’s “-undefined dynamic_lookup” option so
