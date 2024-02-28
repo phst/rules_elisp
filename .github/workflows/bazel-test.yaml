@@ -36,6 +36,7 @@ jobs:
         exclude:
           - bazel: 6.0.0
             os: windows-latest
+      fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
       - name: Check out repository
