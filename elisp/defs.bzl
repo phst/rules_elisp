@@ -989,8 +989,8 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             )
         )
         inputs = depset(
-            # Add all source files as input files so they can load each other
-            # if necessary.
+            # Add all source files as input files so they can load each other if
+            # necessary.
             direct = srcs + [ctx.file._compile],
             transitive = indirect_outs + [transitive_data],
         )
