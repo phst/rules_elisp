@@ -180,15 +180,15 @@ def _install(ctx, cc_toolchain, readme):
         omit_if_empty = False,
         expand_directories = False,
     )
-    outs = [install]
+    secondary_outs = []
     if ctx.outputs.module_header:
         args.add(ctx.outputs.module_header, format = "--module-header=%s")
-        outs.append(ctx.outputs.module_header)
+        secondary_outs.append(ctx.outputs.module_header)
     if ctx.outputs.builtin_features:
         args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
-        outs.append(ctx.outputs.builtin_features)
+        secondary_outs.append(ctx.outputs.builtin_features)
     ctx.actions.run(
-        outputs = outs,
+        outputs = [install] + secondary_outs,
         inputs = depset(
             direct = ctx.files.srcs,
             transitive = [cc_toolchain.all_files],
