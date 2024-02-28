@@ -579,7 +579,8 @@ module_config(
         "@platforms//os:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
-            "-Wl,-undefined,error",
+            "-undefined",
+            "error",
         ],
     }),
     suffix = select({
