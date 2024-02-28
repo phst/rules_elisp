@@ -168,6 +168,15 @@ def _install(ctx, cc_toolchain, *, archive, strip_prefix, readme):
         variables = vars,
     ) + fragment.linkopts + defaults.linkopts
 
+    # Override the toolchain’s “-undefined dynamic_lookup” option so that the
+    # configure script doesn’t incorrectly detect absent functions as present.
+    remove = []
+    for i, s in enumerate(ldflags[:-1]):
+        if s == "-undefined" and ldflags[i + 1] == "dynamic_lookup":
+            remove += [i, i + 1]
+    for i in reversed(remove):
+        ldflags.pop(i)
+
     # The build process needs to find some common binaries like “make” or the
     # GNU coreutils.
     env = {"PATH": "/usr/bin:/bin"}
