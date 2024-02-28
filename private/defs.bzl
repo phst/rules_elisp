@@ -16,6 +16,7 @@
 
 These definitions are internal and subject to change without notice."""
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 load(":generated.bzl", "CHR", "ORD")
@@ -400,12 +401,18 @@ PACKAGE_FEATURES = [
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
     "-macos_default_link_flags",
-]
+] + (
+    # We can’t use treat_warnings_as_errors on macOS unconditionally yet because
+    # it tries to pass a flag -fatal-warnings to the linker, but the macOS
+    # linker accepts -fatal_warnings instead.  See
+    # https://github.com/bazelbuild/bazel/issues/20919.
+    ["treat_warnings_as_errors"] if bazel_features.cc.treat_warnings_as_errors_works_on_macos else []
+)
 
 FEATURES = select({
-    # We can’t use treat_warnings_as_errors on macOS yet because it tries to
-    # pass a flag -fatal-warnings to the linker, but the macOS linker accepts
-    # -fatal_warnings instead.  See
+    # We can’t use treat_warnings_as_errors on macOS unconditionally yet because
+    # it tries to pass a flag -fatal-warnings to the linker, but the macOS
+    # linker accepts -fatal_warnings instead.  See
     # https://github.com/bazelbuild/bazel/issues/20919.
     Label("@platforms//os:macos"): [],
     Label("//conditions:default"): ["treat_warnings_as_errors"],
