@@ -355,7 +355,6 @@ def run_emacs(
     arguments = [
         ctx.actions.args().add("--quick").add("--batch").add("--no-build-details"),
     ] + arguments
-    inputs = depset(transitive = [inputs])
     if toolchain.wrap:
         manifest = ctx.actions.declare_file(
             manifest_basename + ".manifest.json",
