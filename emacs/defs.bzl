@@ -128,7 +128,7 @@ def _install(ctx, cc_toolchain, readme):
         ctx = ctx,
         cc_toolchain = cc_toolchain,
         requested_features = defaults.features + ctx.features,
-        unsupported_features = ctx.disabled_features + [
+        unsupported_features = defaults.disabled_features + ctx.disabled_features + [
             # Never instrument Emacs itself for coverage collection.  It doesn’t
             # hurt, but leads to needless reinstall actions when switching
             # between “bazel test” and “bazel coverage”.
