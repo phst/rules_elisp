@@ -378,10 +378,14 @@ def run_emacs(
         arguments = [
             ctx.actions.args().add(manifest, format = "--manifest=%s").add("--"),
         ] + arguments
-        inputs = depset(direct = [manifest], transitive = [inputs])
+        manifests = depset([manifest])
+    else:
+        manifests = depset()
     ctx.actions.run(
         outputs = outputs,
-        inputs = inputs,
+        # Add manifest after the actual inputs so that the progress message can
+        # use %{input} as usual.
+        inputs = depset(transitive = [inputs, manifests], order = "preorder"),
         executable = emacs.files_to_run,
         arguments = arguments,
         mnemonic = mnemonic,
