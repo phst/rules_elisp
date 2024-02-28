@@ -1024,6 +1024,9 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             arguments = [args],
             tags = tags,
             mnemonic = "ElispCompile",
+            # We can’t use %{input} here because the inputs set might contain
+            # the input files in any order.
+            # FIXME: Change inputs set so that src is first.
             progress_message = "Compiling {}".format(src.short_path),
             manifest_basename = out.basename,
             manifest_sibling = out,
