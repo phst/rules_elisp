@@ -204,9 +204,7 @@ def _install(ctx, cc_toolchain, readme):
         executable = ctx.executable._build,
         arguments = [args],
         mnemonic = "EmacsInstall",
-        progress_message = (
-            "Installing Emacs into {}".format(install.short_path)
-        ),
+        progress_message = "Installing Emacs into %{output}",
         env = env,
         toolchain = None,
     )

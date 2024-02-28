@@ -119,7 +119,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         executable = ctx.executable._generate,
         arguments = [args],
         mnemonic = "GenElispProto",
-        progress_message = "Generating Emacs Lisp protocol buffer library {}".format(src.short_path),
+        progress_message = "Generating Emacs Lisp protocol buffer library %{output}",
         toolchain = None,
     )
     load_path = []
@@ -732,7 +732,7 @@ def _elisp_manual_impl(ctx):
         executable = ctx.executable._export,
         arguments = [ctx.actions.args().add(src).add(out)],
         mnemonic = "Export",
-        progress_message = "Exporting {} into Texinfo file".format(src.short_path),
+        progress_message = "Exporting %{input} into Texinfo file",
         toolchain = None,
     )
 

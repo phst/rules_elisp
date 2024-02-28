@@ -88,7 +88,7 @@ def _check_python_impl(target, ctx):
         executable = ctx.executable._check,
         arguments = [args],
         mnemonic = "PythonCheck",
-        progress_message = "Performing static analysis of target {}".format(target.label),
+        progress_message = "Performing static analysis of target %{label}",
         toolchain = None,
     )
     return [
@@ -624,7 +624,7 @@ def _merged_manual_impl(ctx):
             executable = ctx.executable._generate,
             arguments = [ctx.actions.args().add("--").add(bin).add(org)],
             mnemonic = "GenOrg",
-            progress_message = "Generating Org file {}".format(org.short_path),
+            progress_message = "Generating Org file %{output}",
             toolchain = None,
         )
         orgs.append(org)
@@ -640,7 +640,7 @@ def _merged_manual_impl(ctx):
         executable = ctx.executable._merge,
         arguments = [args],
         mnemonic = "MergeManual",
-        progress_message = "Generating merged manual {}".format(ctx.outputs.out.short_path),
+        progress_message = "Generating merged manual %{output}",
         toolchain = None,
     )
 
