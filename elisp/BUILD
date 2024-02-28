@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
@@ -581,9 +582,15 @@ module_config(
         "@platforms//os:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
-            "-undefined",
-            "error",
-        ],
+        ] + (
+            # Pass “-undefined error” to the linker to find undefined symbols at
+            # link time.  Do that only if the toolchain passes “-undefined
+            # dynamic_lookup” to avoid a warning on newer macOS versions.
+            [
+                "-undefined",
+                "error",
+            ] if bazel_features.cc.undefined_dynamic_lookup else []
+        ),
     }),
     suffix = select({
         "@platforms//os:linux": ".so",
