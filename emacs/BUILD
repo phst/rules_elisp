@@ -147,6 +147,7 @@ cc_defaults(
     copts = [],
     defines = [],
     features = [
+        "-treat_warnings_as_errors",
         # Never instrument Emacs itself for coverage collection.  It doesn’t
         # hurt, but leads to needless reinstall actions when switching between
         # “bazel test” and “bazel coverage”.
