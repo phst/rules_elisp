@@ -570,11 +570,11 @@ def _bootstrap_impl(ctx):
     run_emacs(
         ctx,
         arguments = [args],
-        inputs = depset([src, compile]),
+        inputs = depset([src, compile], order = "preorder"),
         outputs = [out],
         tags = ctx.attr.tags,
         mnemonic = "ElispCompile",
-        progress_message = "Compiling {}".format(src.short_path),
+        progress_message = "Compiling %{input}",
         manifest_basename = out.basename,
         manifest_sibling = out,
     )
