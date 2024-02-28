@@ -988,12 +988,6 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
                 sibling = src,
             )
         )
-        inputs = depset(
-            # Add all source files as input files so they can load each other if
-            # necessary.
-            direct = srcs + [ctx.file._compile],
-            transitive = indirect_outs + [transitive_data],
-        )
         args = ctx.actions.args()
         args.add(ctx.file._compile, format = "--load=%s")
         args.add_all(
@@ -1020,14 +1014,18 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         run_emacs(
             ctx = ctx,
             outputs = [out],
-            inputs = inputs,
+            # Add all other source files as secondary input files so they can
+            # load each other if necessary.  The main source file needs to come
+            # first for %{input} to work.
+            inputs = depset(
+                direct = [src, ctx.file._compile] + [s for s in srcs if s != src],
+                transitive = indirect_outs + [transitive_data],
+                order = "preorder",
+            ),
             arguments = [args],
             tags = tags,
             mnemonic = "ElispCompile",
-            # We can’t use %{input} here because the inputs set might contain
-            # the input files in any order.
-            # FIXME: Change inputs set so that src is first.
-            progress_message = "Compiling {}".format(src.short_path),
+            progress_message = "Compiling %{input}",
             manifest_basename = out.basename,
             manifest_sibling = out,
             manifest_load_path = flat_load_path,
