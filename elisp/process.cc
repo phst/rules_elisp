@@ -453,12 +453,13 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return ToNative(resolved);
 }
 
-absl::StatusOr<int> Run(const std::string_view binary,
+absl::StatusOr<int> Run(const std::string_view source_repository,
+                        const std::string_view binary,
                         const absl::Span<const NativeString> args,
                         const ExecutableKind kind,
                         const NativeStringView argv0) {
   const absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> runfiles =
-      CreateRunfiles(kind, BAZEL_CURRENT_REPOSITORY, argv0);
+      CreateRunfiles(kind, source_repository, argv0);
   if (!runfiles.ok()) return runfiles.status();
   absl::StatusOr<NativeString> resolved_binary =
       ResolveRunfile(**runfiles, binary);

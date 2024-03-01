@@ -48,7 +48,8 @@ namespace rules_elisp {
 
 enum class ExecutableKind { kBinary, kTest };
 
-absl::StatusOr<int> Run(std::string_view binary,
+absl::StatusOr<int> Run(std::string_view source_repository,
+                        std::string_view binary,
                         absl::Span<const NativeString> args,
                         ExecutableKind kind, NativeStringView argv0);
 

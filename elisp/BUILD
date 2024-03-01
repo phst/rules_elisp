@@ -222,6 +222,7 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:nullability",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:span",
@@ -268,6 +269,7 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:nullability",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:span",
@@ -367,6 +369,7 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@bazel_tools//tools/cpp/runfiles",
         "@com_google_absl//absl/base:nullability",
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:span",

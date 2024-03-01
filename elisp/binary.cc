@@ -50,7 +50,8 @@ absl::StatusOr<int> Main(
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
   args.insert(args.end(), original_args.begin(), original_args.end());
   return Run(
-      RULES_ELISP_RUN_BINARY, args, ExecutableKind::kBinary,
+      BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY, args,
+      ExecutableKind::kBinary,
       original_args.empty() ? NativeStringView() : original_args.front());
 }
 
