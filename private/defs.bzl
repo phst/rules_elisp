@@ -433,6 +433,8 @@ LAUNCHER_FEATURES = FEATURES
 COPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [
         "/W4",
+        "/external:W3",  # TODO: shouldn’t be needed; file bug against Bazel
+        "/external:Iexternal",  # TODO: shouldn’t be needed; file bug against Bazel
         "/utf-8",
         "/permissive-",
         "/Zc:__cplusplus",
