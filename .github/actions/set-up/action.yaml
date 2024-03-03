@@ -129,3 +129,14 @@ runs:
         startsWith(inputs.bazel-version, '6.3.') ||
         startsWith(inputs.bazel-version, '6.4.')
         )
+    - name: Remove unsupported options
+      shell: bash
+      # --host_features was introduced in Bazel 6.1.
+      run: |
+        set -efuC
+        for file in .bazelrc examples/ext/.bazelrc; do
+          sed -- 's/--host_features=[_[:alnum:]]*//g' "${file}" > "${file}.temp"
+          mv -- "${file}.temp" "${file}"
+        done
+      if: >-
+        startsWith(inputs.bazel-version, '6.0.')
