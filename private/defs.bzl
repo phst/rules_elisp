@@ -397,6 +397,7 @@ def run_emacs(
 # there, and remove them from BUILD files.
 PACKAGE_FEATURES = [
     "no_copts_tokenization",
+    "external_include_paths",
     # On Windows, Bazel generates incorrectly-escaped parameter files.  See
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
@@ -425,6 +426,8 @@ COPTS = select({
     Label("//private:msvc-cl"): [
         "/WX",
         "/W4",
+        "/external:W3",  # TODO: shouldn’t be needed; file bug against Bazel
+        "/external:Iexternal",  # TODO: shouldn’t be needed; file bug against Bazel
         "/utf-8",
         "/permissive-",
         "/Zc:__cplusplus",
@@ -440,6 +443,15 @@ COPTS = select({
         "-pedantic",
         "-pedantic-errors",
     ],
+}) + select({
+    Label("//private:clang"): [
+        # This shouldn’t be needed, but the external_include_paths feature
+        # doesn’t work on macOS.
+        # TODO: File bug against Bazel.
+        "--system-header-prefix=absl/",
+        "--system-header-prefix=upb/",
+    ],
+    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
