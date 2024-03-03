@@ -131,15 +131,6 @@
 #  error Emacs module header too old
 #endif
 
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wconversion"
-#  pragma GCC diagnostic ignored "-Wsign-conversion"
-#endif
-#ifdef _MSC_VER
-#  pragma warning(push, 3)
-#  pragma warning(disable : 4090 4244 4267 4334)
-#endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "google/protobuf/any.upb.h"
@@ -165,12 +156,6 @@
 #include "upb/util/required_fields.h"
 #include "upb/wire/decode.h"
 #include "upb/wire/encode.h"
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
 
 /// Global variables
 
