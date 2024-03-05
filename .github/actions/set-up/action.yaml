@@ -22,6 +22,14 @@ inputs:
   github-token:
     description: GitHub authentication token from secrets.GITHUB_TOKEN
     required: true
+  cc:
+    description: C/C++ compiler to use
+    required: false
+    default: >-
+      ${{
+      runner.os == 'Linux' && 'gcc'
+      || (runner.os == 'macOS' && 'clang' || 'msvc')
+      }}
 
 runs:
   using: composite
@@ -109,6 +117,7 @@ runs:
         USE_BAZEL_VERSION=${{inputs.bazel-version}}
         BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
         BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
+        CC=${{inputs.cc}}
         EOF
         # If we don’t have consistent line endings across the operating systems,
         # the MODULE.bazel.lock hashes will diverge for external repositories
