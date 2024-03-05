@@ -153,11 +153,11 @@ def _install(ctx, cc_toolchain, readme):
     # GNU coreutils.
     env = {"PATH": "/usr/bin:/bin"}
     for action in (C_COMPILE_ACTION_NAME, CPP_LINK_EXECUTABLE_ACTION_NAME):
-        env.update(cc_common.get_environment_variables(
+        env |= cc_common.get_environment_variables(
             feature_configuration = feature_configuration,
             action_name = action,
             variables = vars,
-        ))
+        )
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add(readme, format = "--readme=%s")
