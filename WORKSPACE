@@ -48,7 +48,7 @@ python_register_toolchains(
     # https://github.com/bazelbuild/rules_python/pull/713 and
     # https://github.com/bazelbuild/rules_python/pull/907.
     ignore_root_user_error = True,
-    python_version = "3.10",
+    python_version = "3.12",
     register_coverage_tool = True,
 )
 
