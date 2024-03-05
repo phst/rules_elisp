@@ -20,7 +20,6 @@ it in any way outside the rule implementation."""
 import argparse
 from collections.abc import Generator, Iterable
 import contextlib
-import glob
 import os
 import os.path
 import pathlib
@@ -39,19 +38,18 @@ def main() -> None:
     parser.add_argument('argv', nargs='+')
     opts = parser.parse_args()
     run_files = runfiles.Runfiles()
-    install = run_files.resolve(opts.install)
-    exe_suffix = '.exe' if _WINDOWS else ''
-    emacs = install / 'bin' / ('emacs' + exe_suffix)
-    shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
-    etc = shared / 'etc'
-    libexec = install / 'libexec'
-    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs*.pdmp')
+    install = opts.install
+    emacs = run_files.resolve(install / 'emacs.exe')
+    etc = run_files.resolve(install / 'etc')
+    libexec = run_files.resolve(install / 'libexec')
+    dump = run_files.resolve(install / 'emacs.pdmp')
+    lisp = run_files.resolve(install / 'lisp')
     with _shorten(dump) as dump:
         args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
         env = dict(os.environ,
                    EMACSDATA=str(etc),
                    EMACSDOC=str(etc),
-                   EMACSLOADPATH=str(shared / 'lisp'),
+                   EMACSLOADPATH=str(lisp),
                    EMACSPATH=str(libexec))
         env.update(run_files.environment())
         if _WINDOWS:
@@ -68,16 +66,6 @@ def main() -> None:
                 # code.
                 sys.exit(ex.returncode)
             raise
-
-
-def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
-    # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
-    files = glob.glob(str(pattern))
-    if not files:
-        raise FileNotFoundError(f'no file matches {pattern}')
-    if len(files) > 1:
-        raise OSError(f'multiple files match {pattern}: {files}')
-    return pathlib.Path(files[0])
 
 
 # https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
