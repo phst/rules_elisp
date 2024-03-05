@@ -48,8 +48,6 @@ jobs:
           - os: windows-latest
             cc: clang
           # Exclude non-default compilers for now.  We should add them later.
-          - os: ubuntu-latest
-            cc: clang
           - os: macos-latest
             cc: gcc
       fail-fast: false
