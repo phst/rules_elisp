@@ -534,19 +534,6 @@ elisp_binary(
     ],
 )
 
-py_binary(
-    name = "copy_file",
-    srcs = ["copy_file.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
-        "//visibility:public",
-    ],
-)
-
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
