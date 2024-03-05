@@ -36,9 +36,9 @@ jobs:
             cc: gcc
           - os: macos-latest
             cc: clang
-        # We can’t support older Bazel versions on Windows due to
-        # https://github.com/bazelbuild/bazel/issues/15073.
         exclude:
+          # We can’t support older Bazel versions on Windows due to
+          # https://github.com/bazelbuild/bazel/issues/15073.
           - bazel: 6.0.0
             os: windows-latest
       fail-fast: false
