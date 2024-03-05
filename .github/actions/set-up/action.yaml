@@ -84,8 +84,9 @@ runs:
       uses: actions/cache@v4
       with:
         path: ${{runner.temp}}/bazel-action-cache
-        key: bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{hashFiles('**')}}
+        key: bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{inputs.cc}}-${{hashFiles('**')}}
         restore-keys: |
+          bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{inputs.cc}}-
           bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-
           bazel-actions-${{runner.os}}-
     - name: Configure system (all platforms)
