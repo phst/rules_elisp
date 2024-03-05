@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load("//private:defs.bzl", "FEATURES", "PACKAGE_FEATURES", "cc_defaults")
+load("//private:defs.bzl", "FEATURES", "PACKAGE_FEATURES", "UNDEFINED_ERROR", "cc_defaults")
 load(":defs.bzl", "emacs_binary")
 
 package(
@@ -156,16 +155,8 @@ cc_defaults(
         # Don’t link against the C++ standard library, as Emacs is pure C code.
         "-default_link_libs",
     ],
-    linkopts = select({
-        "@platforms//os:macos": [
-            # Override the toolchain’s “-undefined dynamic_lookup” option so
-            # that the configure script doesn’t incorrectly detect absent
-            # functions as present.  Do that only if the toolchain passes
-            # “-undefined dynamic_lookup” to avoid a warning on newer macOS
-            # versions.
-            "-undefined",
-            "error",
-        ] if bazel_features.cc.undefined_dynamic_lookup else [],
-        "//conditions:default": [],
-    }),
+    # On macOS, override the toolchain’s “-undefined dynamic_lookup” option so
+    # that the configure script doesn’t incorrectly detect absent functions as
+    # present.
+    linkopts = UNDEFINED_ERROR,
 )
