@@ -19,8 +19,10 @@ use it outside the rules or depend on its behavior.
 """
 
 import argparse
+import glob
 import json
 import os
+import os.path
 import pathlib
 import platform
 import re
@@ -107,10 +109,20 @@ def main() -> None:
 
     # Build directory no longer needed, delete it.
     shutil.rmtree(temp, ignore_errors=True)
+    # Move files into hard-coded subdirectories so that run_emacs.py has less
+    # work to do.
+    exe_suffix = '.exe' if windows else ''
+    _rename(install / 'bin' / ('emacs' + exe_suffix), install / 'emacs.exe')
+    shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
+    _rename(shared / 'etc', install / 'etc')
+    libexec = install / 'libexec'
+    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs*.pdmp')
+    _rename(dump, install / 'emacs.pdmp')
+    lisp = _rename(shared / 'lisp', install / 'lisp')
     # Delete source files that have a corresponding compiled file, as these
     # files don’t work well with Coverage (see
     # e.g. https://debbugs.gnu.org/40766).
-    for compiled in install.glob('share/emacs/*/lisp/**/*.elc'):
+    for compiled in lisp.glob('**/*.elc'):
         compiled.with_suffix('.el').unlink()
     if args.module_header:
         # Copy emacs-module.h to the desired location.
@@ -125,6 +137,26 @@ def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
     if not bash.is_file():
         raise FileNotFoundError(f'no Bash program found in {msys}')
     return bash
+
+
+def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
+    # Don’t use pathlib’s globbing functions because we want to skip dotfiles.
+    files = glob.glob(str(pattern))
+    if not files:
+        raise FileNotFoundError(f'no file matches {pattern}')
+    if len(files) > 1:
+        raise OSError(f'multiple files match {pattern}: {files}')
+    return pathlib.Path(files[0])
+
+
+def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
+    # Once we require Python 3.12, we can use
+    # dest.exists(resolve_symlink=False).
+    if os.path.lexists(dest):
+        raise FileExistsError(f'destination file {dest} already exists')
+    ret = src.resolve(strict=True).rename(dest)
+    src.unlink(missing_ok=True)
+    return ret
 
 
 if __name__ == '__main__':
