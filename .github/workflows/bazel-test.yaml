@@ -31,16 +31,22 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         bazel: [6.0.0, 6.3.2, 6.5.0, 7.0.2, latest]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        include:
-          - os: ubuntu-latest
-            cc: gcc
-          - os: macos-latest
-            cc: clang
+        cc: [gcc, clang]
         exclude:
           # We can’t support older Bazel versions on Windows due to
           # https://github.com/bazelbuild/bazel/issues/15073.
           - bazel: 6.0.0
             os: windows-latest
+          # Windows doesn’t use the CC environment variable and always uses
+          # Visual C++ by default.  Remove one of the entries for the C/C++
+          # compiler to avoid duplicate builds.
+          - os: windows-latest
+            cc: clang
+          # Exclude non-default compilers for now.  We should add them later.
+          - os: ubuntu-latest
+            cc: clang
+          - os: macos-latest
+            cc: gcc
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
