@@ -249,7 +249,7 @@ static absl::StatusOr<Environment> CopyEnv() {
 #ifdef _WIN32
   struct Free {
     void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
-      const BOOL ok = ::FreeEnvironmentStrings(p);
+      const BOOL ok = ::FreeEnvironmentStringsW(p);
       // If this fails, we can’t really do much except logging the error.
       if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
     }
