@@ -115,9 +115,9 @@ def main() -> None:
     _rename(install / 'bin' / ('emacs' + exe_suffix), install / 'emacs.exe')
     shared = _glob_unique(install / 'share' / 'emacs' / '[0-9]*')
     _rename(shared / 'etc', install / 'etc')
-    libexec = install / 'libexec'
-    dump = _glob_unique(libexec / 'emacs' / '*' / '*' / 'emacs*.pdmp')
-    _rename(dump, install / 'emacs.pdmp')
+    _rename(
+        _glob_unique(install / 'libexec' / 'emacs' / '*' / '*' / 'emacs*.pdmp'),
+        install / 'emacs.pdmp')
     lisp = _rename(shared / 'lisp', install / 'lisp')
     # Delete source files that have a corresponding compiled file, as these
     # files don’t work well with Coverage (see
