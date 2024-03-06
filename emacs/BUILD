@@ -54,7 +54,7 @@ py_test(
 
 cc_library(
     name = "module_header",
-    srcs = ["emacs-module.h"],
+    hdrs = ["emacs-module.h"],
     features = FEATURES + ["-default_link_libs"],
     includes = ["."],
     linkstatic = True,
