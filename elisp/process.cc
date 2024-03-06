@@ -335,26 +335,25 @@ static absl::Status MakeErrorStatus(const std::error_code& code,
 }
 
 template <typename T>
-std::enable_if_t<!std::is_convertible_v<T, std::wstring_view>, T&&> Escape(
-    T&& value ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  return std::forward<T>(value);
-}
-
-template <typename T>
-std::enable_if_t<std::is_convertible_v<T, std::wstring_view>, std::string>
-Escape(const T& value) {
-  const std::wstring_view string = value;
-  std::string result;
-  result.reserve(string.length());
-  for (const wchar_t ch : string) {
-    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
-    if (u && absl::ascii_isprint(*u)) {
-      result.push_back(static_cast<char>(*u));
-    } else {
-      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
+std::conditional_t<std::is_convertible_v<T, std::wstring_view>, std::string,
+                   T&&>
+Escape(T&& value ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  if constexpr (std::is_convertible_v<T, std::wstring_view>) {
+    const std::wstring_view string = value;
+    std::string result;
+    result.reserve(string.length());
+    for (const wchar_t ch : string) {
+      const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
+      if (u && absl::ascii_isprint(*u)) {
+        result.push_back(static_cast<char>(*u));
+      } else {
+        absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
+      }
     }
+    return result;
+  } else {
+    return std::forward<T>(value);
   }
-  return result;
 }
 
 template <typename... Ts>
