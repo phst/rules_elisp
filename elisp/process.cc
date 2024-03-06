@@ -326,11 +326,35 @@ static absl::Status MakeErrorStatus(const std::error_code& code,
              : absl::UnknownError(message);
 }
 
+template <typename T>
+std::enable_if_t<!std::is_convertible_v<T, std::wstring_view>, T&&> Escape(
+    T&& value ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  return std::forward<T>(value);
+}
+
+template <typename T>
+std::enable_if_t<std::is_convertible_v<T, std::wstring_view>, std::string>
+Escape(const T& value) {
+  const std::wstring_view string = value;
+  std::string result;
+  result.reserve(string.length());
+  for (const wchar_t ch : string) {
+    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
+    if (u && absl::ascii_isprint(*u)) {
+      result.push_back(static_cast<char>(*u));
+    } else {
+      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
+    }
+  }
+  return result;
+}
+
 template <typename... Ts>
 absl::Status ErrorStatus(const std::error_code& code,
                          const std::string_view function, Ts&&... args) {
-  return MakeErrorStatus(code, function,
-                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
+  return MakeErrorStatus(
+      code, function,
+      absl::StrJoin(std::forward_as_tuple(Escape(args)...), ", "));
 }
 
 #ifdef _WIN32
@@ -515,7 +539,7 @@ absl::StatusOr<int> Run(
       ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
                        nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
                        envp.data(), nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", binary);
+  if (!success) return WindowsStatus("CreateProcessW", *resolved_binary);
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
     ::CloseHandle(process_info.hThread);
