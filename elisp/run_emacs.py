@@ -18,16 +18,13 @@ This is an internal helper binary for the Emacs Lisp Bazel rules.  Don’t rely 
 it in any way outside the rule implementation."""
 
 import argparse
-from collections.abc import Generator, Iterable
-import contextlib
+from collections.abc import Iterable
 import os
 import os.path
 import pathlib
 import platform
-import shutil
 import subprocess
 import sys
-import tempfile
 
 from elisp import runfiles
 
@@ -44,43 +41,27 @@ def main() -> None:
     libexec = run_files.resolve(install / 'libexec')
     dump = run_files.resolve(install / 'emacs.pdmp')
     lisp = run_files.resolve(install / 'lisp')
-    with _shorten(dump) as dump:
-        args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
-        env = dict(os.environ,
-                   EMACSDATA=str(etc),
-                   EMACSDOC=str(etc),
-                   EMACSLOADPATH=str(lisp),
-                   EMACSPATH=str(libexec))
-        env.update(run_files.environment())
-        if _WINDOWS:
-            # On Windows, Emacs doesn’t support Unicode arguments or environment
-            # variables.  Check here rather than sending over garbage.
-            _check_codepage('argument', args)
-            _check_codepage('environment variable name', env.keys())
-            _check_codepage('environment variable value', env.values())
-        try:
-            subprocess.run(args, env=env, check=True)
-        except subprocess.CalledProcessError as ex:
-            if 0 < ex.returncode < 0x100:
-                # Don’t print a stacktrace if Emacs exited with a non-zero exit
-                # code.
-                sys.exit(ex.returncode)
-            raise
-
-
-# https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
-_MAX_PATH: int = 260
-
-
-@contextlib.contextmanager
-def _shorten(filename: pathlib.Path) -> Generator[pathlib.Path, None, None]:
-    if not _WINDOWS or len(str(filename)) < _MAX_PATH:
-        yield filename
-    else:
-        with tempfile.TemporaryDirectory() as directory:
-            short = pathlib.Path(directory) / 'emacs.pdmp'
-            shutil.copyfile(filename, short)
-            yield short
+    args = [str(emacs), '--dump-file=' + str(dump)] + opts.argv[1:]
+    env = dict(os.environ,
+               EMACSDATA=str(etc),
+               EMACSDOC=str(etc),
+               EMACSLOADPATH=str(lisp),
+               EMACSPATH=str(libexec))
+    env.update(run_files.environment())
+    if _WINDOWS:
+        # On Windows, Emacs doesn’t support Unicode arguments or environment
+        # variables.  Check here rather than sending over garbage.
+        _check_codepage('argument', args)
+        _check_codepage('environment variable name', env.keys())
+        _check_codepage('environment variable value', env.values())
+    try:
+        subprocess.run(args, env=env, check=True)
+    except subprocess.CalledProcessError as ex:
+        if 0 < ex.returncode < 0x100:
+            # Don’t print a stacktrace if Emacs exited with a non-zero exit
+            # code.
+            sys.exit(ex.returncode)
+        raise
 
 
 def _check_codepage(description: str, values: Iterable[str]) -> None:
