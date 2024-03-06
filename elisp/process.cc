@@ -134,6 +134,20 @@ absl::StatusOr<To> CastNumber(const From n) {
 }
 
 #ifdef _WIN32
+static std::string Escape(const std::wstring_view string) {
+  std::string result;
+  result.reserve(string.length());
+  for (const wchar_t ch : string) {
+    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
+    if (u && absl::ascii_isprint(*u)) {
+      result.push_back(static_cast<char>(*u));
+    } else {
+      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
+    }
+  }
+  return result;
+}
+
 static std::wstring ToUpper(std::wstring_view string);
 
 struct CaseInsensitiveHash {
@@ -333,22 +347,6 @@ static absl::Status MakeErrorStatus(const std::error_code& code,
              ? absl::ErrnoToStatus(condition.value(), message)
              : absl::UnknownError(message);
 }
-
-#ifdef _WIN32
-static std::string Escape(const std::wstring_view string) {
-  std::string result;
-  result.reserve(string.length());
-  for (const wchar_t ch : string) {
-    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
-    if (u && absl::ascii_isprint(*u)) {
-      result.push_back(static_cast<char>(*u));
-    } else {
-      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
-    }
-  }
-  return result;
-}
-#endif
 
 template <typename... Ts>
 absl::Status ErrorStatus(const std::error_code& code,
