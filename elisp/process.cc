@@ -257,6 +257,9 @@ static absl::StatusOr<Environment> CopyEnv() {
   const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
       ::GetEnvironmentStringsW());
   if (envp == nullptr) {
+    // Don’t use WindowsStatus since the documentation
+    // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
+    // doesn’t say we can use GetLastError.
     return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
   }
   absl::Nonnull<const wchar_t*> p = envp.get();
