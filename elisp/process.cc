@@ -40,7 +40,6 @@
 #include <algorithm>  // IWYU pragma: keep
 #include <cerrno>     // IWYU pragma: keep
 #include <cstddef>
-#include <iostream>  // IWYU pragma: keep
 #include <limits>
 #include <memory>
 #include <optional>
@@ -219,9 +218,8 @@ static std::wstring BuildEnvironmentBlock(
   std::wstring result;
   for (const std::wstring& var : vars) {
     if (var.find(L'\0') != var.npos) {
-      std::wcerr << L"Environment variable " << var
-                 << L" contains a null character" << std::endl;
-      LOG(FATAL) << "Environment variable contains a null character";
+      LOG(FATAL) << "Environment variable " << Escape(var)
+                 << " contains a null character";
     }
     result.append(var);
     result.push_back(L'\0');
@@ -232,8 +230,7 @@ static std::wstring BuildEnvironmentBlock(
 static absl::Nonnull<wchar_t*> Pointer(
     std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   if (string.find(L'\0') != string.npos) {
-    std::wcerr << string << L" contains null character" << std::endl;
-    LOG(FATAL) << "string contains null character";
+    LOG(FATAL) << Escape(string) << " contains null character";
   }
   return string.data();
 }
@@ -280,8 +277,8 @@ static absl::StatusOr<Environment> CopyEnv() {
   while (*p != L'\0') {
     const std::wstring_view var = p;
     if (var.length() < 2) {
-      std::wcerr << L"Invalid environment block entry " << var << std::endl;
-      return absl::FailedPreconditionError("Invalid environment block entry");
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", Escape(var)));
     }
     // Ignore magic “per-drive current directory” variables,
     // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
@@ -291,14 +288,14 @@ static absl::StatusOr<Environment> CopyEnv() {
     if (var.front() != L'=') {
       const std::size_t i = var.find(L'=', 1);
       if (i == var.npos) {
-        std::wcerr << L"Invalid environment block entry " << var << std::endl;
-        return absl::FailedPreconditionError("Invalid environment block entry");
+        return absl::FailedPreconditionError(
+            absl::StrCat("Invalid environment block entry ", Escape(var)));
       }
       const std::wstring_view key = var.substr(0, i);
       const auto [it, ok] = map.emplace(key, var.substr(i + 1));
       if (!ok) {
-        std::wcerr << L"Duplicate environment variable " << key << std::endl;
-        return absl::AlreadyExistsError("Duplicate environment variable");
+        return absl::AlreadyExistsError(
+            absl::StrCat("Duplicate environment variable ", key));
       }
     }
     p += var.length() + 1;
