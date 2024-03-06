@@ -540,7 +540,8 @@ absl::StatusOr<int> Run(
                        nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
                        envp.data(), nullptr, &startup_info, &process_info);
   if (!success) {
-    return WindowsStatus("CreateProcessW", Escape(*resolved_binary));
+    return WindowsStatus("CreateProcessW", Escape(*resolved_binary),
+                         Escape(command_line));
   }
   const auto close_handles = absl::MakeCleanup([&process_info] {
     ::CloseHandle(process_info.hProcess);
