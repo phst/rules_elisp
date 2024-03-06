@@ -463,6 +463,63 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return ToNative(resolved);
 }
 
+static absl::StatusOr<int> Run(std::vector<NativeString>& args,
+                               const Environment& env) {
+  CHECK(!args.empty());
+  CHECK(!env.empty());
+  std::vector<NativeString> final_env;
+  for (const auto& [key, value] : env) {
+    final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
+  }
+  // Sort entries for hermeticity.
+  absl::c_sort(final_env);
+#ifdef _WIN32
+  std::wstring command_line = BuildCommandLine(args);
+  std::wstring envp = BuildEnvironmentBlock(final_env);
+  STARTUPINFOW startup_info;
+  startup_info.cb = sizeof startup_info;
+  startup_info.lpReserved = nullptr;
+  startup_info.lpDesktop = nullptr;
+  startup_info.lpTitle = nullptr;
+  startup_info.dwFlags = 0;
+  startup_info.cbReserved2 = 0;
+  startup_info.lpReserved2 = nullptr;
+  PROCESS_INFORMATION process_info;
+  BOOL success =
+      ::CreateProcessW(Pointer(args.front()), Pointer(command_line), nullptr,
+                       nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp.data(),
+                       nullptr, &startup_info, &process_info);
+  if (!success) {
+    return WindowsStatus("CreateProcessW", Escape(args.front()),
+                         Escape(command_line));
+  }
+  const auto close_handles = absl::MakeCleanup([&process_info] {
+    ::CloseHandle(process_info.hProcess);
+    ::CloseHandle(process_info.hThread);
+  });
+  const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
+  if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
+  DWORD code;
+  success = ::GetExitCodeProcess(process_info.hProcess, &code);
+  if (!success) return WindowsStatus("GetExitCodeProcess");
+  return CastNumber<int>(code);
+#else
+  const std::vector<absl::Nonnull<char*>> argv = Pointers(args);
+  const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
+  pid_t pid;
+  const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
+                                argv.data(), envp.data());
+  if (error != 0) {
+    return ErrorStatus(std::error_code(error, std::system_category()),
+                       "posix_spawn", argv.front());
+  }
+  int wstatus;
+  const pid_t status = waitpid(pid, &wstatus, 0);
+  if (status != pid) return ErrnoStatus("waitpid", pid);
+  return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
+#endif
+}
+
 absl::StatusOr<int> Run(
     const std::string_view source_repository, const std::string_view binary,
     const std::initializer_list<NativeStringView> common_args,
@@ -503,57 +560,7 @@ absl::StatusOr<int> Run(
   // https://github.com/bazelbuild/bazel/issues/7190.
   orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
   merged_env.insert(orig_env->begin(), orig_env->end());
-  std::vector<NativeString> final_env;
-  for (const auto& [key, value] : merged_env) {
-    final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
-  }
-  // Sort entries for hermeticity.
-  absl::c_sort(final_env);
-#ifdef _WIN32
-  std::wstring command_line = BuildCommandLine(final_args);
-  std::wstring envp = BuildEnvironmentBlock(final_env);
-  STARTUPINFOW startup_info;
-  startup_info.cb = sizeof startup_info;
-  startup_info.lpReserved = nullptr;
-  startup_info.lpDesktop = nullptr;
-  startup_info.lpTitle = nullptr;
-  startup_info.dwFlags = 0;
-  startup_info.cbReserved2 = 0;
-  startup_info.lpReserved2 = nullptr;
-  PROCESS_INFORMATION process_info;
-  BOOL success =
-      ::CreateProcessW(Pointer(*resolved_binary), Pointer(command_line),
-                       nullptr, nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT,
-                       envp.data(), nullptr, &startup_info, &process_info);
-  if (!success) {
-    return WindowsStatus("CreateProcessW", Escape(*resolved_binary),
-                         Escape(command_line));
-  }
-  const auto close_handles = absl::MakeCleanup([&process_info] {
-    ::CloseHandle(process_info.hProcess);
-    ::CloseHandle(process_info.hThread);
-  });
-  const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
-  if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
-  DWORD code;
-  success = ::GetExitCodeProcess(process_info.hProcess, &code);
-  if (!success) return WindowsStatus("GetExitCodeProcess");
-  return CastNumber<int>(code);
-#else
-  const std::vector<absl::Nonnull<char*>> argv = Pointers(final_args);
-  const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
-  pid_t pid;
-  const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
-                                argv.data(), envp.data());
-  if (error != 0) {
-    return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", binary);
-  }
-  int wstatus;
-  const pid_t status = waitpid(pid, &wstatus, 0);
-  if (status != pid) return ErrnoStatus("waitpid", pid);
-  return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
-#endif
+  return Run(final_args, merged_env);
 }
 
 #ifdef _WIN32
