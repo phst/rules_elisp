@@ -389,7 +389,7 @@ static absl::StatusOr<Environment> CopyEnv() {
       const auto [it, ok] = map.emplace(key, var.substr(i + 1));
       if (!ok) {
         return absl::AlreadyExistsError(
-            absl::StrCat("Duplicate environment variable ", key));
+            absl::StrCat("Duplicate environment variable ", Escape(key)));
       }
     }
     p += var.length() + 1;
