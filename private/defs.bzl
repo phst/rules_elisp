@@ -359,7 +359,7 @@ def run_emacs(
         )
         ctx.actions.write(
             output = manifest,
-            content = struct(
+            content = json.encode(struct(
                 root = "EXECUTION_ROOT",
                 loadPath = manifest_load_path,
                 inputFiles = [
@@ -370,7 +370,7 @@ def run_emacs(
                 ],
                 outputFiles = [f.path for f in outputs],
                 tags = tags,
-            ).to_json(),
+            )),
         )
         arguments = [
             ctx.actions.args().add(manifest, format = "--manifest=%s").add("--"),
