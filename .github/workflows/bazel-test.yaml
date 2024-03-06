@@ -84,6 +84,8 @@ jobs:
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:
-          name: profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
+          name: >-
+            profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
+            compiled with ${{matrix.cc}}
           path: ${{runner.temp}}/profiles/*.json.gz
           if-no-files-found: ignore
