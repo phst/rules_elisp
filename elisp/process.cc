@@ -247,91 +247,6 @@ static std::vector<absl::Nonnull<char*>> Pointers(
 }
 #endif
 
-#ifdef _WIN32
-using Environment =
-    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                        CaseInsensitiveEqual>;
-#else
-using Environment = absl::flat_hash_map<std::string, std::string>;
-#endif
-
-static absl::StatusOr<Environment> CopyEnv() {
-  Environment map;
-#ifdef _WIN32
-  struct Free {
-    void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
-      const BOOL ok = ::FreeEnvironmentStringsW(p);
-      // If this fails, we can’t really do much except logging the error.
-      if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
-    }
-  };
-  const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
-      ::GetEnvironmentStringsW());
-  if (envp == nullptr) {
-    // Don’t use WindowsStatus since the documentation
-    // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
-    // doesn’t say we can use GetLastError.
-    return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
-  }
-  absl::Nonnull<const wchar_t*> p = envp.get();
-  while (*p != L'\0') {
-    const std::wstring_view var = p;
-    if (var.length() < 2) {
-      return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", Escape(var)));
-    }
-    // Ignore magic “per-drive current directory” variables,
-    // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
-    // Their names start with an equals sign.  Also see the commentary about
-    // hidden variables in
-    // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Environment.Variables.Windows.cs.
-    if (var.front() != L'=') {
-      const std::size_t i = var.find(L'=', 1);
-      if (i == var.npos) {
-        return absl::FailedPreconditionError(
-            absl::StrCat("Invalid environment block entry ", Escape(var)));
-      }
-      const std::wstring_view key = var.substr(0, i);
-      const auto [it, ok] = map.emplace(key, var.substr(i + 1));
-      if (!ok) {
-        return absl::AlreadyExistsError(
-            absl::StrCat("Duplicate environment variable ", key));
-      }
-    }
-    p += var.length() + 1;
-  }
-#else
-  const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
-#  ifdef __APPLE__
-      // See environ(7) why this is necessary.
-      *_NSGetEnviron()
-#  else
-      environ
-#  endif
-      ;
-  for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
-       *pp != nullptr; ++pp) {
-    const std::string_view var = *pp;
-    if (var.length() < 2) {
-      return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", var));
-    }
-    const std::size_t i = var.find('=');
-    if (i == 0 || i == var.npos) {
-      return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", var));
-    }
-    const std::string_view key = var.substr(0, i);
-    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
-    if (!ok) {
-      return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate environment variable ", key));
-    }
-  }
-#endif
-  return map;
-}
-
 static absl::Status MakeErrorStatus(const std::error_code& code,
                                     const std::string_view function,
                                     const std::string_view args) {
@@ -421,6 +336,91 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #else
   return std::string(string);
 #endif
+}
+
+#ifdef _WIN32
+using Environment =
+    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                        CaseInsensitiveEqual>;
+#else
+using Environment = absl::flat_hash_map<std::string, std::string>;
+#endif
+
+static absl::StatusOr<Environment> CopyEnv() {
+  Environment map;
+#ifdef _WIN32
+  struct Free {
+    void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
+      const BOOL ok = ::FreeEnvironmentStringsW(p);
+      // If this fails, we can’t really do much except logging the error.
+      if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
+    }
+  };
+  const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
+      ::GetEnvironmentStringsW());
+  if (envp == nullptr) {
+    // Don’t use WindowsStatus since the documentation
+    // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
+    // doesn’t say we can use GetLastError.
+    return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
+  }
+  absl::Nonnull<const wchar_t*> p = envp.get();
+  while (*p != L'\0') {
+    const std::wstring_view var = p;
+    if (var.length() < 2) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", Escape(var)));
+    }
+    // Ignore magic “per-drive current directory” variables,
+    // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
+    // Their names start with an equals sign.  Also see the commentary about
+    // hidden variables in
+    // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Environment.Variables.Windows.cs.
+    if (var.front() != L'=') {
+      const std::size_t i = var.find(L'=', 1);
+      if (i == var.npos) {
+        return absl::FailedPreconditionError(
+            absl::StrCat("Invalid environment block entry ", Escape(var)));
+      }
+      const std::wstring_view key = var.substr(0, i);
+      const auto [it, ok] = map.emplace(key, var.substr(i + 1));
+      if (!ok) {
+        return absl::AlreadyExistsError(
+            absl::StrCat("Duplicate environment variable ", key));
+      }
+    }
+    p += var.length() + 1;
+  }
+#else
+  const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
+#  ifdef __APPLE__
+      // See environ(7) why this is necessary.
+      *_NSGetEnviron()
+#  else
+      environ
+#  endif
+      ;
+  for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
+       *pp != nullptr; ++pp) {
+    const std::string_view var = *pp;
+    if (var.length() < 2) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", var));
+    }
+    const std::size_t i = var.find('=');
+    if (i == 0 || i == var.npos) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", var));
+    }
+    const std::string_view key = var.substr(0, i);
+    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate environment variable ", key));
+    }
+  }
+#endif
+  return map;
 }
 
 using bazel::tools::cpp::runfiles::Runfiles;
