@@ -69,6 +69,7 @@
 #include "absl/container/flat_hash_map.h"
 #include "absl/hash/hash.h"  // IWYU pragma: keep
 #include "absl/log/check.h"
+#include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -341,19 +342,9 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
   return ConvertString<NativeString>(string);
 }
 
-using Environment = std::conditional_t<
-    Windows,
-    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                        CaseInsensitiveEqual>,
-    absl::flat_hash_map<std::string, std::string>>;
-
-static absl::StatusOr<Environment> CopyEnv() {
-  Environment map;
-  // Skip over the first character to properly deal with the magic “per-drive
-  // current directory” variables on Windows,
-  // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
-  // names start with an equals sign.
-  constexpr std::size_t skip = Windows ? 1 : 0;
+class EnvironmentBlock final {
+ private:
+  struct Free;
 #ifdef _WIN32
   struct Free {
     void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
@@ -362,29 +353,111 @@ static absl::StatusOr<Environment> CopyEnv() {
       if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
     }
   };
-  const absl::Nullable<std::unique_ptr<wchar_t, Free>> envp(
-      ::GetEnvironmentStringsW());
-  if (envp == nullptr) {
-    // Don’t use WindowsStatus since the documentation
-    // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
-    // doesn’t say we can use GetLastError.
-    return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
-  }
-  for (std::wstring_view var = envp.get(); !var.empty();
-       var = var.data() + var.length() + 1) {
-#else
-  const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
-#  ifdef __APPLE__
-      // See environ(7) why this is necessary.
-      *_NSGetEnviron()
-#  else
-      environ
-#  endif
-      ;
-  for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
-       *pp != nullptr; ++pp) {
-    const std::string_view var = *pp;
 #endif
+
+  using Pointer = std::conditional_t<Windows, std::unique_ptr<wchar_t, Free>,
+                                     const absl::Nullable<const char*>*>;
+
+ public:
+  static absl::StatusOr<EnvironmentBlock> Current() {
+#ifdef _WIN32
+    absl::Nullable<Pointer> envp(::GetEnvironmentStringsW());
+    if (envp == nullptr) {
+      // Don’t use WindowsStatus since the documentation
+      // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
+      // doesn’t say we can use GetLastError.
+      return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
+    }
+    return EnvironmentBlock(std::move(envp));
+#else
+#  ifdef __APPLE__
+    // See environ(7) why this is necessary.
+    return EnvironmentBlock(*_NSGetEnviron());
+#  else
+    return EnvironmentBlock(environ);
+#  endif
+#endif
+  }
+
+  struct Sentinel final {};
+
+  class Iterator final {
+   private:
+    using Environ = absl::Nonnull<const absl::Nullable<const char*>*>;
+    using Pointer =
+        std::conditional_t<Windows, absl::Nonnull<const wchar_t*>, Environ>;
+
+   public:
+    explicit Iterator(const Pointer ptr) : cur_(ABSL_DIE_IF_NULL(ptr)) {}
+
+    NativeStringView operator*() const {
+      CHECK(!AtEnd());
+#ifdef _WIN32
+      return cur_;
+#else
+      return *cur_;
+#endif
+    }
+
+    Iterator& operator++() {
+      CHECK(!AtEnd());
+#ifdef _WIN32
+      cur_ = cur_.data() + cur_.length() + 1;
+#else
+      ++cur_;
+#endif
+      return *this;
+    }
+
+    bool operator!=(Sentinel) const {
+      return !AtEnd();
+    }
+
+   private:
+    std::conditional_t<Windows, std::wstring_view, Environ> cur_;
+
+    ABSL_MUST_USE_RESULT bool AtEnd() const {
+#ifdef _WIN32
+      return cur_.empty();
+#else
+      return *cur_ == nullptr;
+#endif
+    }
+  };
+
+  Iterator begin() const {
+#ifdef _WIN32
+    return Iterator(ptr_.get());
+#else
+    return Iterator(ptr_);
+#endif
+  }
+
+  Sentinel end() const { return {}; }
+
+ private:
+  explicit EnvironmentBlock(absl::Nonnull<Pointer> ptr)
+      : ptr_(std::move(ABSL_DIE_IF_NULL(ptr))) {}
+
+  absl::Nonnull<Pointer> ptr_;
+};
+
+using Environment = std::conditional_t<
+    Windows,
+    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                        CaseInsensitiveEqual>,
+    absl::flat_hash_map<std::string, std::string>>;
+
+static absl::StatusOr<Environment> CopyEnv() {
+  const absl::StatusOr<EnvironmentBlock> block = EnvironmentBlock::Current();
+  if (!block.ok()) return block.status();
+  Environment map;
+  // Skip over the first character to properly deal with the magic “per-drive
+  // current directory” variables on Windows,
+  // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
+  // names start with an equals sign.
+  constexpr std::size_t skip = Windows ? 1 : 0;
+  for (const NativeStringView var : *block) {
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
           absl::StrCat("Invalid environment block entry ", Escape(var)));
