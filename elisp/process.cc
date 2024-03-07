@@ -367,23 +367,20 @@ static absl::StatusOr<Environment> CopyEnv() {
       return absl::FailedPreconditionError(
           absl::StrCat("Invalid environment block entry ", Escape(var)));
     }
-    // Ignore magic “per-drive current directory” variables,
+    // Skip over the first character to properly deal with the magic “per-drive
+    // current directory” variables,
     // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
-    // Their names start with an equals sign.  Also see the commentary about
-    // hidden variables in
-    // https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Environment.Variables.Windows.cs.
-    if (var.front() != L'=') {
-      const std::size_t i = var.find(L'=', 1);
-      if (i == var.npos) {
-        return absl::FailedPreconditionError(
-            absl::StrCat("Invalid environment block entry ", Escape(var)));
-      }
-      const std::wstring_view key = var.substr(0, i);
-      const auto [it, ok] = map.emplace(key, var.substr(i + 1));
-      if (!ok) {
-        return absl::AlreadyExistsError(
-            absl::StrCat("Duplicate environment variable ", Escape(key)));
-      }
+    // Their names start with an equals sign.
+    const std::size_t i = var.find(L'=', 1);
+    if (i == var.npos) {
+      return absl::FailedPreconditionError(
+          absl::StrCat("Invalid environment block entry ", Escape(var)));
+    }
+    const std::wstring_view key = var.substr(0, i);
+    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate environment variable ", Escape(key)));
     }
     p += var.length() + 1;
   }
