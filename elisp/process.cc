@@ -151,7 +151,14 @@ static std::string Escape(const std::wstring_view string) {
   }
   return result;
 }
+#else
+static std::string_view Escape(
+    const std::string_view string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  return string;
+}
+#endif
 
+#ifdef _WIN32
 static std::wstring ToUpper(std::wstring_view string);
 
 struct CaseInsensitiveHash {
@@ -342,6 +349,11 @@ using Environment = std::conditional_t<
 
 static absl::StatusOr<Environment> CopyEnv() {
   Environment map;
+  // Skip over the first character to properly deal with the magic “per-drive
+  // current directory” variables on Windows,
+  // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
+  // names start with an equals sign.
+  constexpr std::size_t skip = Windows ? 1 : 0;
 #ifdef _WIN32
   struct Free {
     void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
@@ -358,30 +370,8 @@ static absl::StatusOr<Environment> CopyEnv() {
     // doesn’t say we can use GetLastError.
     return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
   }
-  absl::Nonnull<const wchar_t*> p = envp.get();
-  while (*p != L'\0') {
-    const std::wstring_view var = p;
-    if (var.length() < 2) {
-      return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", Escape(var)));
-    }
-    // Skip over the first character to properly deal with the magic “per-drive
-    // current directory” variables,
-    // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.
-    // Their names start with an equals sign.
-    const std::size_t i = var.find(L'=', 1);
-    if (i == var.npos) {
-      return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", Escape(var)));
-    }
-    const std::wstring_view key = var.substr(0, i);
-    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
-    if (!ok) {
-      return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate environment variable ", Escape(key)));
-    }
-    p += var.length() + 1;
-  }
+  for (std::wstring_view var = envp.get(); !var.empty();
+       var = var.data() + var.length() + 1) {
 #else
   const absl::Nonnull<const absl::Nonnull<const char*>*> envp =
 #  ifdef __APPLE__
@@ -394,23 +384,23 @@ static absl::StatusOr<Environment> CopyEnv() {
   for (absl::Nonnull<const absl::Nullable<const char*>*> pp = envp;
        *pp != nullptr; ++pp) {
     const std::string_view var = *pp;
+#endif
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", var));
+          absl::StrCat("Invalid environment block entry ", Escape(var)));
     }
-    const std::size_t i = var.find('=');
+    const std::size_t i = var.find(RULES_ELISP_NATIVE_LITERAL('='), skip);
     if (i == 0 || i == var.npos) {
       return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", var));
+          absl::StrCat("Invalid environment block entry ", Escape(var)));
     }
-    const std::string_view key = var.substr(0, i);
+    const NativeStringView key = var.substr(0, i);
     const auto [it, ok] = map.emplace(key, var.substr(i + 1));
     if (!ok) {
       return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate environment variable ", key));
+          absl::StrCat("Duplicate environment variable ", Escape(key)));
     }
   }
-#endif
   return map;
 }
 
