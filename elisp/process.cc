@@ -222,10 +222,9 @@ static std::wstring BuildEnvironmentBlock(
     const absl::Span<const std::wstring> vars) {
   std::wstring result;
   for (const std::wstring& var : vars) {
-    if (var.find(L'\0') != var.npos) {
-      LOG(FATAL) << "Environment variable " << Escape(var)
-                 << " contains a null character";
-    }
+    CHECK_EQ(var.find(L'\0'), var.npos)
+        << "Environment variable " << Escape(var)
+        << " contains a null character";
     result.append(var);
     result.push_back(L'\0');
   }
@@ -234,9 +233,8 @@ static std::wstring BuildEnvironmentBlock(
 }
 static absl::Nonnull<wchar_t*> Pointer(
     std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  if (string.find(L'\0') != string.npos) {
-    LOG(FATAL) << Escape(string) << " contains null character";
-  }
+  CHECK_EQ(string.find(L'\0'), string.npos)
+      << Escape(string) << " contains null character";
   return string.data();
 }
 #else
@@ -565,17 +563,13 @@ static std::wstring ToUpper(const std::wstring_view string) {
   constexpr DWORD flags = LCMAP_UPPERCASE;
   const int length = CastNumberOpt<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
-  if (result == 0) {
-    LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
-                                nullptr, 0);
-  }
+  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, flags, "...",
+                                       length, nullptr, 0);
   std::wstring buffer(result, L'\0');
   result = ::LCMapStringW(locale, flags, string.data(), length, buffer.data(),
                           result);
-  if (result == 0) {
-    LOG(FATAL) << WindowsStatus("LCMapStringW", locale, flags, "...", length,
-                                "...", buffer.size());
-  }
+  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, flags, "...",
+                                       length, "...", buffer.size());
   return buffer.substr(0, result);
 }
 #endif
