@@ -303,16 +303,17 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   return absl::OkStatus();
 }
 
-// Convert ASCII strings between std::string and std::wstring.  This is only
-// useful on Windows, where the native string type is std::wstring.  Only pure
-// ASCII strings are supported so that we don’t have to deal with codepages.
-// All Windows codepages should be ASCII-compatible;
+// Convert strings between std::string and std::wstring.  This is only useful on
+// Windows, where the native string type is std::wstring.  Only pure ASCII
+// strings are supported so that we don’t have to deal with codepages.  All
+// Windows codepages should be ASCII-compatible;
 // cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
 template <typename ToString, typename FromChar>
-absl::StatusOr<ToString> ConvertASCII(
+absl::StatusOr<ToString> ConvertString(
     const std::basic_string_view<FromChar> string) {
   enum { kMaxASCII = 0x7F };
   using ToChar = typename ToString::value_type;
+  if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
   static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
@@ -328,19 +329,11 @@ absl::StatusOr<ToString> ConvertASCII(
 }
 
 static absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
-#ifdef _WIN32
-  return ConvertASCII<std::string>(string);
-#else
-  return std::string(string);
-#endif
+  return ConvertString<std::string>(string);
 }
 
 static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
-#ifdef _WIN32
-  return ConvertASCII<std::wstring>(string);
-#else
-  return std::string(string);
-#endif
+  return ConvertString<NativeString>(string);
 }
 
 using Environment = std::conditional_t<
