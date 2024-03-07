@@ -132,6 +132,9 @@ absl::StatusOr<To> CastNumber(const From n) {
   return *ret;
 }
 
+struct CaseInsensitiveHash;
+struct CaseInsensitiveEqual;
+
 #ifdef _WIN32
 static std::string Escape(const std::wstring_view string) {
   std::string result;
@@ -338,13 +341,11 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #endif
 }
 
-#ifdef _WIN32
-using Environment =
+using Environment = std::conditional_t<
+    Windows,
     absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                        CaseInsensitiveEqual>;
-#else
-using Environment = absl::flat_hash_map<std::string, std::string>;
-#endif
+                        CaseInsensitiveEqual>,
+    absl::flat_hash_map<std::string, std::string>>;
 
 static absl::StatusOr<Environment> CopyEnv() {
   Environment map;

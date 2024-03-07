@@ -21,17 +21,25 @@
 
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace rules_elisp {
 
+constexpr inline bool Windows =
 #ifdef _WIN32
-using NativeChar = wchar_t;
+    true
+#else
+    false
+#endif
+    ;
+
+#ifdef _WIN32
 #  define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
 #else
-using NativeChar = char;
 #  define RULES_ELISP_NATIVE_LITERAL(literal) literal
 #endif
 
+using NativeChar = std::conditional_t<Windows, wchar_t, char>;
 using NativeString = std::basic_string<NativeChar>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
