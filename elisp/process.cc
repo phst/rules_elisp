@@ -132,6 +132,8 @@ absl::StatusOr<To> CastNumber(const From n) {
   return *ret;
 }
 
+using NativeString = std::basic_string<NativeChar>;
+
 struct CaseInsensitiveHash;
 struct CaseInsensitiveEqual;
 

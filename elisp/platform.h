@@ -40,7 +40,6 @@ constexpr inline bool Windows =
 #endif
 
 using NativeChar = std::conditional_t<Windows, wchar_t, char>;
-using NativeString = std::basic_string<NativeChar>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
 }  // namespace rules_elisp
