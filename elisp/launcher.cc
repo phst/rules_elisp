@@ -40,13 +40,13 @@
 #include "elisp/platform.h"
 #include "elisp/main.h"
 
+int
 #ifdef _WIN32
-#  define RULES_ELISP_MAIN wmain
+    wmain
 #else
-#  define RULES_ELISP_MAIN main
+    main
 #endif
-
-int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
+(int argc, rules_elisp::NativeChar** argv) {
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
   const absl::StatusOr<int> code =
