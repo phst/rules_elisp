@@ -381,6 +381,9 @@ class EnvironmentBlock final {
 #endif
   }
 
+  EnvironmentBlock(EnvironmentBlock&&) = default;
+  EnvironmentBlock& operator=(EnvironmentBlock&&) = default;
+
   struct Sentinel final {};
 
   class Iterator final {
@@ -391,6 +394,9 @@ class EnvironmentBlock final {
 
    public:
     explicit Iterator(const Pointer ptr) : cur_(ABSL_DIE_IF_NULL(ptr)) {}
+
+    Iterator(const Iterator&) = default;
+    Iterator& operator=(const Iterator&) = default;
 
     NativeStringView operator*() const {
       CHECK(!AtEnd());
