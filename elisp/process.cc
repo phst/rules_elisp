@@ -526,6 +526,23 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return ToNative(resolved);
 }
 
+static absl::StatusOr<Environment> RunfilesEnvironment(
+    const Runfiles& runfiles) {
+  Environment map;
+  for (const auto& [narrow_key, narrow_value] : runfiles.EnvVars()) {
+    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
+    if (!key.ok()) return key.status();
+    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
+    if (!value.ok()) return value.status();
+    const auto [it, ok] = map.emplace(*key, *value);
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
+    }
+  }
+  return map;
+}
+
 static absl::StatusOr<int> Run(std::vector<NativeString>& args,
                                const Environment& env) {
   CHECK(!args.empty());
@@ -604,26 +621,16 @@ absl::StatusOr<int> Run(
   final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
   final_args.insert(final_args.end(), original_args.begin(),
                     original_args.end());
-  Environment merged_env;
-  for (const auto& [narrow_key, narrow_value] : (*runfiles)->EnvVars()) {
-    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
-    if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
-    if (!value.ok()) return value.status();
-    const auto [it, ok] = merged_env.emplace(*key, *value);
-    if (!ok) {
-      return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
-    }
-  }
+  absl::StatusOr<Environment> merged_env = RunfilesEnvironment(**runfiles);
+  if (!merged_env.ok()) return merged_env.status();
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
   orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
-  merged_env.insert(orig_env->begin(), orig_env->end());
-  return Run(final_args, merged_env);
+  merged_env->insert(orig_env->begin(), orig_env->end());
+  return Run(final_args, *merged_env);
 }
 
 #ifdef _WIN32
