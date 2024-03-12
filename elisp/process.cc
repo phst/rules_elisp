@@ -498,10 +498,12 @@ static absl::Nullable<Runfiles*> CreateRunfiles(
 
 static absl::StatusOr<RunfilesPtr> CreateRunfiles(
     const ExecutableKind kind, const std::string_view source_repository,
-    const NativeStringView argv0) {
+    const absl::Span<const NativeStringView> original_argv) {
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
     return status;
   }
+  const NativeStringView argv0 =
+      original_argv.empty() ? NativeStringView() : original_argv.front();
   const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
   if (!narrow_argv0.ok()) return narrow_argv0.status();
   std::string error;
@@ -607,9 +609,8 @@ absl::StatusOr<int> Run(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args,
     const ExecutableKind kind) {
-  const absl::StatusOr<RunfilesPtr> runfiles = CreateRunfiles(
-      kind, source_repository,
-      original_args.empty() ? NativeStringView() : original_args.front());
+  const absl::StatusOr<RunfilesPtr> runfiles =
+      CreateRunfiles(kind, source_repository, original_args);
   if (!runfiles.ok()) return runfiles.status();
   absl::StatusOr<NativeString> resolved_binary =
       ResolveRunfile(**runfiles, binary);
