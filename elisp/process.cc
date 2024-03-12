@@ -98,6 +98,8 @@
 
 namespace rules_elisp {
 
+namespace {
+
 template <typename To, typename From>
 [[nodiscard]] constexpr bool Overflow(const From n) {
   static_assert(std::is_integral_v<To>);
@@ -602,6 +604,8 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
 #endif
 }
 
+}  // namespace
+
 absl::StatusOr<int> Run(
     const std::string_view source_repository, const std::string_view binary,
     const std::initializer_list<NativeStringView> common_args,
@@ -633,6 +637,8 @@ absl::StatusOr<int> Run(
   return Run(final_args, *merged_env);
 }
 
+namespace {
+
 #ifdef _WIN32
 static std::wstring ToUpper(const std::wstring_view string) {
   if (string.empty()) return {};
@@ -650,5 +656,7 @@ static std::wstring ToUpper(const std::wstring_view string) {
   return buffer.substr(0, result);
 }
 #endif
+
+}  // namespace
 
 }  // namespace rules_elisp
