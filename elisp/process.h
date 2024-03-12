@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RULES_ELISP_ELISP_PROCESS_H
-#define RULES_ELISP_ELISP_PROCESS_H
+#ifndef ELISP_PROCESS_H_
+#define ELISP_PROCESS_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -58,4 +58,4 @@ absl::StatusOr<int> Run(std::string_view source_repository,
 
 }  // namespace rules_elisp
 
-#endif
+#endif  // ELISP_PROCESS_H_

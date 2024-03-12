@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef RULES_ELISP_ELISP_PLATFORM_H
-#define RULES_ELISP_ELISP_PLATFORM_H
+#ifndef ELISP_PLATFORM_H_
+#define ELISP_PLATFORM_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -44,4 +44,4 @@ using NativeStringView = std::basic_string_view<NativeChar>;
 
 }  // namespace rules_elisp
 
-#endif
+#endif  // ELISP_PLATFORM_H_
