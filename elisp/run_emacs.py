@@ -66,11 +66,9 @@ def main() -> None:
 
 def _check_codepage(description: str, values: Iterable[str]) -> None:
     for value in values:
-        try:
-            value.encode('ansi')
-        except UnicodeEncodeError as ex:
+        if not value.isascii():
             raise ValueError(
-                f'can’t encode {description} “{value}” for Windows') from ex
+                f'can’t encode {description} “{value}” for Windows')
 
 
 _WINDOWS = platform.system() == 'Windows'
