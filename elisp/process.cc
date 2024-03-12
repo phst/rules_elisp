@@ -294,6 +294,8 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 }
 #endif
 
+static constexpr unsigned int kMaxASCII{0x7F};
+
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   const auto it = absl::c_find_if_not(string, [](const Char ch) {
@@ -317,7 +319,6 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
 template <typename ToString, typename FromChar>
 absl::StatusOr<ToString> ConvertString(
     const std::basic_string_view<FromChar> string) {
-  constexpr unsigned int kMaxASCII{0x7F};
   using ToChar = typename ToString::value_type;
   if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
   static_assert(!Overflow<ToChar>(kMaxASCII),
