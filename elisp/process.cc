@@ -502,13 +502,12 @@ static absl::StatusOr<RunfilesPtr> CreateRunfiles(
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
     return status;
   }
-  const NativeStringView argv0 =
-      original_argv.empty() ? NativeStringView() : original_argv.front();
-  const absl::StatusOr<std::string> narrow_argv0 = ToNarrow(argv0);
-  if (!narrow_argv0.ok()) return narrow_argv0.status();
+  const absl::StatusOr<std::string> argv0 =
+      original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
+  if (!argv0.ok()) return argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Runfiles>> runfiles(CreateRunfiles(
-      kind, *narrow_argv0, std::string(source_repository), error));
+  absl::Nullable<std::unique_ptr<Runfiles>> runfiles(
+      CreateRunfiles(kind, *argv0, std::string(source_repository), error));
   if (runfiles == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
