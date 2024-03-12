@@ -478,6 +478,7 @@ static absl::StatusOr<Environment> CopyEnv() {
 }
 
 using bazel::tools::cpp::runfiles::Runfiles;
+using RunfilesPtr = absl::Nonnull<std::unique_ptr<Runfiles>>;
 
 static absl::Nullable<Runfiles*> CreateRunfiles(
     const ExecutableKind kind, const std::string& argv0,
@@ -495,7 +496,7 @@ static absl::Nullable<Runfiles*> CreateRunfiles(
   ABSL_UNREACHABLE();
 }
 
-static absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> CreateRunfiles(
+static absl::StatusOr<RunfilesPtr> CreateRunfiles(
     const ExecutableKind kind, const std::string_view source_repository,
     const NativeStringView argv0) {
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
@@ -606,10 +607,9 @@ absl::StatusOr<int> Run(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args,
     const ExecutableKind kind) {
-  const absl::StatusOr<absl::Nonnull<std::unique_ptr<Runfiles>>> runfiles =
-      CreateRunfiles(
-          kind, source_repository,
-          original_args.empty() ? NativeStringView() : original_args.front());
+  const absl::StatusOr<RunfilesPtr> runfiles = CreateRunfiles(
+      kind, source_repository,
+      original_args.empty() ? NativeStringView() : original_args.front());
   if (!runfiles.ok()) return runfiles.status();
   absl::StatusOr<NativeString> resolved_binary =
       ResolveRunfile(**runfiles, binary);
