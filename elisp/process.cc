@@ -299,8 +299,7 @@ static constexpr unsigned int kMaxASCII{0x7F};
 template <typename Char>
 absl::Status CheckASCII(const std::basic_string_view<Char> string) {
   const auto it = absl::c_find_if_not(string, [](const Char ch) {
-    const auto u = CastNumberOpt<unsigned char>(ch);
-    return u && absl::ascii_isascii(*u);
+    return ch >= Char{0} && ch <= Char{kMaxASCII};
   });
   if (it != string.end()) {
     const auto val = static_cast<std::make_unsigned_t<Char>>(*it);
