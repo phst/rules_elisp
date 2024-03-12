@@ -524,6 +524,10 @@ to implement module functions.""",
 See the [corresponding attribute for
 `cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.srcs).""",
             allow_files = [".cc", ".c"],
+            # Undocumented flag to make these rules work with
+            # “bazel build --compile_one_dependency”.  See
+            # https://github.com/bazelbuild/bazel/blob/6.4.0/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L73.
+            flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         "deps": attr.label_list(
             doc = """`cc_library` targets that the module depends on.
