@@ -99,7 +99,7 @@
 namespace rules_elisp {
 
 template <typename To, typename From>
-[[nodiscard]] bool Overflow(const From n) {
+[[nodiscard]] constexpr bool Overflow(const From n) {
   static_assert(std::is_integral_v<To>);
   static_assert(std::is_integral_v<From>);
   using ToLimits = std::numeric_limits<To>;
@@ -317,10 +317,10 @@ absl::Status CheckASCII(const std::basic_string_view<Char> string) {
 template <typename ToString, typename FromChar>
 absl::StatusOr<ToString> ConvertString(
     const std::basic_string_view<FromChar> string) {
-  enum { kMaxASCII = 0x7F };
+  constexpr unsigned int kMaxASCII{0x7F};
   using ToChar = typename ToString::value_type;
   if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
-  static_assert(std::numeric_limits<ToChar>::max() >= kMaxASCII,
+  static_assert(!Overflow<ToChar>(kMaxASCII),
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
   if (!status.ok()) return status;
