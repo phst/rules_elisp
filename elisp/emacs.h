@@ -19,7 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
-#include <initializer_list>
+#include <string_view>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -44,7 +44,7 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(std::initializer_list<NativeStringView> launcher_args,
+absl::StatusOr<int> Main(std::string_view install,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp
