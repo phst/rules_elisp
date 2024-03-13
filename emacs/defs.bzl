@@ -40,6 +40,7 @@ def _emacs_binary_impl(ctx):
     install = _install(ctx, emacs_cc_toolchain, ctx.file.readme)
     executable, runfiles = cc_launcher(
         ctx,
+        header = "elisp/emacs.h",
         args = [
             "--install=" + runfile_location(ctx, install),
         ],

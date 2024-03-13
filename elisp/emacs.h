@@ -12,7 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/binary.h"
+#ifndef ELISP_EMACS_H_
+#define ELISP_EMACS_H_
+
+#if !defined __cplusplus || __cplusplus < 201703L
+#  error this file requires at least C++17
+#endif
 
 #include <initializer_list>
 
@@ -36,16 +41,12 @@
 #endif
 
 #include "elisp/platform.h"
-#include "elisp/process.h"
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(
-    const std::initializer_list<NativeStringView> launcher_args,
-    const absl::Span<const NativeStringView> original_args) {
-  return Run(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
-             {RULES_ELISP_TEST_ARGS}, launcher_args, original_args,
-             ExecutableKind::kTest);
-}
+absl::StatusOr<int> Main(std::initializer_list<NativeStringView> launcher_args,
+                         absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp
+
+#endif  // ELISP_EMACS_H_

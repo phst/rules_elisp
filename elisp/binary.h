@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_MAIN_H_
-#define ELISP_MAIN_H_
+#ifndef ELISP_BINARY_H_
+#define ELISP_BINARY_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -49,4 +49,4 @@ absl::StatusOr<int> Main(std::initializer_list<NativeStringView> launcher_args,
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_MAIN_H_
+#endif  // ELISP_BINARY_H_

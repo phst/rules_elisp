@@ -38,7 +38,8 @@
 #endif
 
 #include "elisp/platform.h"
-#include "elisp/main.h"
+
+#include RULES_ELISP_HEADER
 
 int
 #ifdef _WIN32

@@ -181,13 +181,14 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
+        shell.quote('RULES_ELISP_HEADER="elisp/binary.h"'),
         shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
             'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
             'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
             'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
             'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/main.h")',
+            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
             'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
             'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
@@ -203,7 +204,7 @@ build_test(
 cc_library(
     name = "emacs",
     srcs = ["emacs.cc"],
-    hdrs = ["main.h"],
+    hdrs = ["emacs.h"],
     copts = COPTS + CXXOPTS,
     data = [":run_emacs_stripped"],
     features = FEATURES,
@@ -246,7 +247,7 @@ executable_only(
 cc_library(
     name = "binary",
     srcs = ["binary.cc"],
-    hdrs = ["main.h"],
+    hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [
         ":run_binary_stripped",
@@ -313,7 +314,7 @@ py_binary(
     srcs = ["wrap.py"],
     data = [
         ":binary.cc",
-        ":main.h",
+        ":binary.h",
         "//elisp/runfiles:runfiles.elc",
     ],
     python_version = "PY3",
@@ -342,7 +343,7 @@ cc_library(
     name = "test",
     testonly = True,
     srcs = ["test.cc"],
-    hdrs = ["main.h"],
+    hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [
         ":run_test_stripped",
