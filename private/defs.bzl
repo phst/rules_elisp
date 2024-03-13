@@ -192,7 +192,7 @@ def repository_relative_filename(file):
             fail("invalid name {}", file.short_path)
     return name
 
-def cc_launcher(ctx, *, header, args):
+def cc_launcher(ctx, *, header, args, native = True):
     """Builds a launcher executable that starts Emacs.
 
     The current rule must provide the following attributes:
@@ -205,6 +205,8 @@ def cc_launcher(ctx, *, header, args):
       ctx (ctx): rule context
       header (string): header file to include, relative to the repository root
       args (list of strings): additional arguments for the function
+      native (bool): whether the arguments should be wrapped in
+        `RULES_ELISP_NATIVE_LITERAL`
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
@@ -230,7 +232,7 @@ def cc_launcher(ctx, *, header, args):
         compilation_contexts = [info.compilation_context for info in infos],
         local_defines = defaults.defines + [
             'RULES_ELISP_HEADER="' + header + '"',
-            "RULES_ELISP_LAUNCHER_ARGS=" + _cpp_strings(args),
+            "RULES_ELISP_LAUNCHER_ARGS=" + _cpp_strings(args, native = native),
         ],
         user_compile_flags = defaults.copts,
     )
@@ -246,26 +248,30 @@ def cc_launcher(ctx, *, header, args):
     runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])
     return bin.executable, runfiles
 
-def _cpp_strings(strings):
+def _cpp_strings(strings, *, native):
     """Formats the given string list as C++ initializer list.
 
     This function makes an effort to support strings with special characters.
 
     Args:
       strings (list of string): strings to be formatted
+      native (bool): whether the strings should be wrapped in
+        `RULES_ELISP_NATIVE_LITERAL`
 
     Returns:
       a string containing C++ code representing the given string list
     """
-    return ", ".join([_cpp_string(s) for s in strings])
+    return ", ".join([_cpp_string(s, native = native) for s in strings])
 
-def _cpp_string(string):
+def _cpp_string(string, *, native):
     """Formats the given string as C++ string literal.
 
     This function makes an effort to support strings with special characters.
 
     Args:
       string: any string
+      native (bool): whether the string should be wrapped in
+        `RULES_ELISP_NATIVE_LITERAL`
 
     Returns:
       a string containing a properly escaped C++ string literal
@@ -280,7 +286,10 @@ def _cpp_string(string):
     # sequence of UTF-8 code units (and not code points), so we have to decode
     # it first.
     string = "".join([_cpp_char(c) for c in _decode_utf8(string)])
-    return 'RULES_ELISP_NATIVE_LITERAL("' + string + '")'
+    string = '"' + string + '"'
+    if native:
+        string = "RULES_ELISP_NATIVE_LITERAL(" + string + ")"
+    return string
 
 def _cpp_char(point):
     """Returns a C++ representation of a Unicode code point.
