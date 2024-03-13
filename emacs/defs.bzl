@@ -42,8 +42,9 @@ def _emacs_binary_impl(ctx):
         ctx,
         header = "elisp/emacs.h",
         args = [
-            "--install=" + runfile_location(ctx, install),
+            runfile_location(ctx, install),
         ],
+        native = False,
     )
     return [
         DefaultInfo(

@@ -14,7 +14,7 @@
 
 #include "elisp/emacs.h"
 
-#include <initializer_list>
+#include <string_view>
 
 #ifdef __GNUC__
 #  pragma GCC diagnostic push
@@ -41,10 +41,9 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    const std::initializer_list<NativeStringView> launcher_args,
+    const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
-  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_EMACS, {},
-                     launcher_args, original_args, ExecutableKind::kBinary);
+  return RunEmacs(BAZEL_CURRENT_REPOSITORY, install, original_args);
 }
 
 }  // namespace rules_elisp

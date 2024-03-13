@@ -217,15 +217,10 @@ cc_library(
     srcs = ["emacs.cc"],
     hdrs = ["emacs.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_emacs_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_EMACS=R"*($(rlocationpath :run_emacs_stripped))*"'),
-    ],
+    local_defines = DEFINES,
     visibility = [
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
@@ -239,19 +234,6 @@ cc_library(
         "@com_google_absl//absl/status:statusor",
         "@com_google_absl//absl/types:span",
     ],
-)
-
-py_binary(
-    name = "run_emacs",
-    srcs = ["run_emacs.py"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    deps = [":runfiles"],
-)
-
-executable_only(
-    name = "run_emacs_stripped",
-    src = ":run_emacs",
 )
 
 cc_library(

@@ -689,6 +689,64 @@ absl::StatusOr<int> RunLauncher(
   return Run(final_args, *merged_env);
 }
 
+absl::StatusOr<int> RunEmacs(
+    const std::string_view source_repository, const std::string_view install,
+    const absl::Span<const NativeStringView> original_args) {
+  const absl::StatusOr<RunfilesPtr> runfiles =
+      CreateRunfiles(ExecutableKind::kBinary, source_repository, original_args);
+  if (!runfiles.ok()) return runfiles.status();
+  const absl::StatusOr<NativeString> emacs =
+      ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.exe"));
+  if (!emacs.ok()) return emacs.status();
+  const absl::StatusOr<NativeString> dump =
+      ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
+  if (!dump.ok()) return dump.status();;
+  const absl::StatusOr<NativeString> etc =
+      ResolveRunfile(**runfiles, absl::StrCat(install, "/etc"));
+  if (!etc.ok()) return etc.status();;
+  const absl::StatusOr<NativeString> lisp =
+      ResolveRunfile(**runfiles, absl::StrCat(install, "/lisp"));
+  if (!lisp.ok()) return lisp.status();;
+  const absl::StatusOr<NativeString> libexec =
+      ResolveRunfile(**runfiles, absl::StrCat(install, "/libexec"));
+  if (!libexec.ok()) return libexec.status();;
+  std::vector<NativeString> args = {
+      *emacs,
+      RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump,
+  };
+  if (!original_args.empty()) {
+    args.insert(args.end(), std::next(original_args.begin()),
+                original_args.end());
+  }
+  absl::StatusOr<Environment> env = RunfilesEnvironment(**runfiles);
+  if (!env.ok()) return env.status();
+  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
+  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
+  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
+  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
+  absl::StatusOr<Environment> orig_env = CopyEnv();
+  if (!orig_env.ok()) return orig_env.status();
+  env->insert(orig_env->begin(), orig_env->end());
+#ifdef _WIN32
+  // On Windows, Emacs doesn’t support Unicode arguments or environment
+  // variables.  Check here rather than sending over garbage.
+  for (const std::wstring& arg : args) {
+    if (const absl::Status status = CheckASCII(arg); !status.ok()) {
+      return status;
+    }
+  }
+  for (const auto& [name, value] : *env) {
+    if (const absl::Status status = CheckASCII(name); !status.ok()) {
+      return status;
+    }
+    if (const absl::Status status = CheckASCII(value); !status.ok()) {
+      return status;
+    }
+  }
+#endif
+  return Run(args, *env);
+}
+
 namespace {
 
 #ifdef _WIN32
