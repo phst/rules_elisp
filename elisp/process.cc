@@ -656,7 +656,7 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
 
 }  // namespace
 
-absl::StatusOr<int> Run(
+absl::StatusOr<int> RunLauncher(
     const std::string_view source_repository, const std::string_view binary,
     const std::initializer_list<NativeStringView> common_args,
     const std::initializer_list<NativeStringView> launcher_args,

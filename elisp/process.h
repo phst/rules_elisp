@@ -49,12 +49,11 @@ namespace rules_elisp {
 
 enum class ExecutableKind { kBinary, kTest };
 
-absl::StatusOr<int> Run(std::string_view source_repository,
-                        std::string_view binary,
-                        std::initializer_list<NativeStringView> common_args,
-                        std::initializer_list<NativeStringView> launcher_args,
-                        absl::Span<const NativeStringView> original_args,
-                        ExecutableKind kind);
+absl::StatusOr<int> RunLauncher(
+    std::string_view source_repository, std::string_view binary,
+    std::initializer_list<NativeStringView> common_args,
+    std::initializer_list<NativeStringView> launcher_args,
+    absl::Span<const NativeStringView> original_args, ExecutableKind kind);
 
 }  // namespace rules_elisp
 

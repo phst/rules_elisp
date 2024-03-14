@@ -43,9 +43,9 @@ namespace rules_elisp {
 absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args) {
-  return Run(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY,
-             {RULES_ELISP_BINARY_ARGS}, launcher_args, original_args,
-             ExecutableKind::kBinary);
+  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY,
+                     {RULES_ELISP_BINARY_ARGS}, launcher_args, original_args,
+                     ExecutableKind::kBinary);
 }
 
 }  // namespace rules_elisp
