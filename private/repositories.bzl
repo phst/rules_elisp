@@ -19,65 +19,25 @@ These definitions are internal and subject to change without notice."""
 visibility(["//", "//elisp"])
 
 def _non_module_deps_impl(repository_ctx):
-    repository_ctx.download_and_extract(
+    _emacs(
+        repository_ctx,
+        version = "28.1",
         sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
-        url = [
-            "https://ftpmirror.gnu.org/emacs/emacs-28.1.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-28.1.tar.xz",
-        ],
     )
-    repository_ctx.template(
-        "emacs-28.1/BUILD.bazel",
-        Label("//:emacs.BUILD"),
-        {
-            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.download_and_extract(
+    _emacs(
+        repository_ctx,
+        version = "28.2",
         sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
-        url = [
-            "https://ftpmirror.gnu.org/emacs/emacs-28.2.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-28.2.tar.xz",
-        ],
     )
-    repository_ctx.template(
-        "emacs-28.2/BUILD.bazel",
-        Label("//:emacs.BUILD"),
-        {
-            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.download_and_extract(
+    _emacs(
+        repository_ctx,
+        version = "29.1",
         sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
-        url = [
-            "https://ftpmirror.gnu.org/emacs/emacs-29.1.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-29.1.tar.xz",
-        ],
     )
-    repository_ctx.template(
-        "emacs-29.1/BUILD.bazel",
-        Label("//:emacs.BUILD"),
-        {
-            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.download_and_extract(
+    _emacs(
+        repository_ctx,
+        version = "29.2",
         sha256 = "7d3d2448988720bf4bf57ad77a5a08bf22df26160f90507a841ba986be2670dc",
-        url = [
-            "https://ftpmirror.gnu.org/emacs/emacs-29.2.tar.xz",
-            "https://ftp.gnu.org/gnu/emacs/emacs-29.2.tar.xz",
-        ],
-    )
-    repository_ctx.template(
-        "emacs-29.2/BUILD.bazel",
-        Label("//:emacs.BUILD"),
-        {
-            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-        },
-        executable = False,
     )
 
 non_module_deps = repository_rule(
@@ -174,3 +134,20 @@ See the [corresponding attribute for
 the library.""",
     ),
 }
+
+def _emacs(repository_ctx, *, version, sha256):
+    repository_ctx.download_and_extract(
+        sha256 = sha256,
+        url = [
+            "https://ftpmirror.gnu.org/emacs/emacs-{}.tar.xz".format(version),
+            "https://ftp.gnu.org/gnu/emacs/emacs-{}.tar.xz".format(version),
+        ],
+    )
+    repository_ctx.template(
+        "emacs-{}/BUILD.bazel".format(version),
+        Label("//:emacs.BUILD"),
+        {
+            '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
+        },
+        executable = False,
+    )
