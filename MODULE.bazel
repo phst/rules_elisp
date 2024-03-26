@@ -24,15 +24,7 @@ bazel_dep(name = "rules_license", version = "0.0.8")
 bazel_dep(name = "rules_python", version = "0.31.0")
 bazel_dep(name = "abseil-cpp", version = "20230802.1", repo_name = "com_google_absl")
 bazel_dep(name = "protobuf", version = "23.1", repo_name = "com_google_protobuf")
-bazel_dep(name = "upb", version = "0.0.0-20230516-61a97ef")
-
-# Necessary patch for μpb; to be removed once
-# https://github.com/protocolbuffers/protobuf/issues/13741 and
-# https://github.com/protocolbuffers/protobuf/issues/14564 are fixed.
-single_version_override(
-    module_name = "upb",
-    patches = ["//:upb.patch"],
-)
+bazel_dep(name = "upb", version = "0.0.0-20230907-e7430e6")
 
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
