@@ -28,7 +28,7 @@ licenses(["notice"])
 
 alias(
     name = "emacs",
-    actual = ":emacs_29.2",
+    actual = ":emacs_29.3",
     visibility = ["//visibility:public"],
 )
 
@@ -91,9 +91,16 @@ emacs_binary(
 emacs_binary(
     name = "emacs_29.2",
     srcs = ["@phst_rules_elisp_deps//emacs-29.2:srcs"],
+    readme = "@phst_rules_elisp_deps//emacs-29.2:readme",
+    visibility = ["//visibility:public"],
+)
+
+emacs_binary(
+    name = "emacs_29.3",
+    srcs = ["@phst_rules_elisp_deps//emacs-29.3:srcs"],
     builtin_features = "builtin_features.json",
     module_header = "emacs-module.h",
-    readme = "@phst_rules_elisp_deps//emacs-29.2:readme",
+    readme = "@phst_rules_elisp_deps//emacs-29.3:readme",
     visibility = ["//visibility:public"],
 )
 
