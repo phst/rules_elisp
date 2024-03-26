@@ -153,14 +153,7 @@ func TestOverrides(t *testing.T) {
 		}
 		// Overrides only work in root modules, so this dependency
 		// wouldn’t work outside of our own workspace.
-		// μpb must be overridden due to
-		// https://github.com/protocolbuffers/protobuf/issues/13741.
-		// This is unfortunate but currently required.  The
-		// special-casing for μpb should be removed once both
-		// https://github.com/protocolbuffers/protobuf/issues/13741 and
-		// https://github.com/protocolbuffers/protobuf/issues/14564 are
-		// fixed.
-		if !dev && name != "upb" {
+		if !dev {
 			t.Errorf("production dependency %s is overridden using %s", name, kind)
 		}
 	}
