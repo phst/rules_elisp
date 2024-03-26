@@ -190,7 +190,7 @@ class Builder:
 
 
 # All potentially supported Emacs versions.
-_VERSIONS = frozenset({'28.1', '28.2', '29.1', '29.2'})
+_VERSIONS = frozenset({'28.1', '28.2', '29.1', '29.2', '29.3'})
 
 
 def main() -> None:

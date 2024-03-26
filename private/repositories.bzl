@@ -39,6 +39,11 @@ def _non_module_deps_impl(repository_ctx):
         version = "29.2",
         sha256 = "7d3d2448988720bf4bf57ad77a5a08bf22df26160f90507a841ba986be2670dc",
     )
+    _emacs(
+        repository_ctx,
+        version = "29.3",
+        sha256 = "c34c05d3ace666ed9c7f7a0faf070fea3217ff1910d004499bd5453233d742a0",
+    )
 
 non_module_deps = repository_rule(
     doc = """Installs dependencies that are not available as modules.""",
