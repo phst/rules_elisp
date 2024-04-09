@@ -75,6 +75,7 @@ stardoc(
         "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
+        "@rules_proto//proto:defs",
     ],
 )
 

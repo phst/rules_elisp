@@ -18,6 +18,7 @@ load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
+load("@rules_proto//proto:defs.bzl", "proto_common")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -102,23 +103,15 @@ def _elisp_library_impl(ctx):
 def _elisp_proto_aspect_impl(target, ctx):
     """Aspect implementation for the “elisp_proto_aspect” aspect."""
     info = target[ProtoInfo]
-    srcs = []
-    for proto in info.direct_sources:
-        src = ctx.actions.declare_file(proto.basename + ".el", sibling = proto)
-        srcs.append(src)
-        args = ctx.actions.args()
-        args.add(info.direct_descriptor_set)
-        args.add(src)
-        args.add(paths.relativize(proto.path, info.proto_source_root))
-        ctx.actions.run(
-            outputs = [src],
-            inputs = [info.direct_descriptor_set],
-            executable = ctx.executable._generate,
-            arguments = [args],
-            mnemonic = "GenElispProto",
-            progress_message = "Generating Emacs Lisp protocol buffer library %{output}",
-            toolchain = None,
-        )
+    srcs = proto_common.declare_generated_files(ctx.actions, info, ".proto.el")
+    proto_common.compile(
+        actions = ctx.actions,
+        proto_info = info,
+        proto_lang_toolchain_info = ctx.attr._proto_toolchain[proto_common.ProtoLangToolchainInfo],
+        generated_files = srcs,
+        additional_args = ctx.actions.args().add(ctx.executable._generate, format = "--elisp_opt=%s"),
+        additional_tools = [ctx.executable._generate],
+    )
 
     # TODO: We probably shouldn’t generate this bundle, but right now it’s
     # needed for compatibility.
@@ -394,6 +387,10 @@ _elisp_proto_aspect = aspect(
         "_protobuf_lib": attr.label(
             default = Label("//elisp/proto"),
             providers = [EmacsLispInfo],
+        ),
+        "_proto_toolchain": attr.label(
+            default = Label("//elisp/proto:toolchain"),
+            providers = [proto_common.ProtoLangToolchainInfo],
         ),
     },
     required_providers = [ProtoInfo],
