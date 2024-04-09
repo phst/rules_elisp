@@ -551,9 +551,7 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-#ifdef _WIN32
-  absl::c_replace(resolved, '/', '\\');
-#endif
+  if constexpr (Windows) absl::c_replace(resolved, '/', '\\');
   absl::StatusOr<NativeString> native = ToNative(resolved);
   if (!native.ok()) return native.status();
 #ifdef _WIN32
@@ -727,23 +725,23 @@ absl::StatusOr<int> RunEmacs(
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   env->insert(orig_env->begin(), orig_env->end());
-#ifdef _WIN32
-  // On Windows, Emacs doesn’t support Unicode arguments or environment
-  // variables.  Check here rather than sending over garbage.
-  for (const std::wstring& arg : args) {
-    if (const absl::Status status = CheckASCII(arg); !status.ok()) {
-      return status;
+  if constexpr (Windows) {
+    // On Windows, Emacs doesn’t support Unicode arguments or environment
+    // variables.  Check here rather than sending over garbage.
+    for (const NativeString& arg : args) {
+      if (const absl::Status status = CheckASCII(arg); !status.ok()) {
+        return status;
+      }
+    }
+    for (const auto& [name, value] : *env) {
+      if (const absl::Status status = CheckASCII(name); !status.ok()) {
+        return status;
+      }
+      if (const absl::Status status = CheckASCII(value); !status.ok()) {
+        return status;
+      }
     }
   }
-  for (const auto& [name, value] : *env) {
-    if (const absl::Status status = CheckASCII(name); !status.ok()) {
-      return status;
-    }
-    if (const absl::Status status = CheckASCII(value); !status.ok()) {
-      return status;
-    }
-  }
-#endif
   return Run(args, *env);
 }
 
