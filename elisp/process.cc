@@ -514,11 +514,9 @@ static absl::Nullable<Runfiles*> CreateRunfiles(
     const std::string& source_repository, std::string& error) {
   switch (kind) {
     case ExecutableKind::kBinary:
-      return bazel::tools::cpp::runfiles::Runfiles::Create(
-          argv0, source_repository, &error);
+      return Runfiles::Create(argv0, source_repository, &error);
     case ExecutableKind::kTest:
-      return bazel::tools::cpp::runfiles::Runfiles::CreateForTest(
-          source_repository, &error);
+      return Runfiles::CreateForTest(source_repository, &error);
   }
   LOG(FATAL) << "invalid runfiles mode "
              << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
