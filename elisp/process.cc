@@ -559,7 +559,7 @@ static absl::StatusOr<NativeString> ResolveRunfile(
 #ifdef _WIN32
   // 0x8000 is the maximum length of a filename on Windows.  See
   // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
-  constexpr DWORD size = 0x8000;
+  constexpr DWORD size{0x8000};
   std::wstring buffer(size, L'\0');
   const DWORD result =
       ::GetFullPathNameW(Pointer(*native), size, buffer.data(), nullptr);
