@@ -5349,7 +5349,7 @@
       "os:linux,arch:amd64": {
         "bzlTransitiveDigest": "C6w/pBz/oGPcBrX0q3vGHWFpHv19nh+8v7Qzv2wP290=",
         "recordedFileInputs": {
-          "@@//dev/linux-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
+          "@@//dev/linux-requirements.txt": "347e9498d731f57a3dd6ae66eb03e2cea1bf58c802161c972943689c8b97c55a"
         },
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -5454,7 +5454,7 @@
             "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
             "ruleClassName": "whl_library",
             "attributes": {
-              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
+              "requirement": "pytype==2024.3.19 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0245a209d521b59b919c09f7509a77f680f223108af8cccd3404533ba7aef7ba     --hash=sha256:07e66d9f907efd7e343364b7026ee6a06f477dc8d67aa7aaecca1e9cc3d45d20     --hash=sha256:0fdb883c88c55a7aa990266c920715f84c17405c9c3e090dc5505bdf67253482     --hash=sha256:2e1d69460cc5762954215a76f4dcc997d66875ea59e8db2b5edf26dbafa42b5e     --hash=sha256:80c694440aa6e4bc0e31fbec83d3b2bc6f7f0118fe59fda099641a466b4aed2a     --hash=sha256:9aa97b2dcd9945dea98f0a7a454626033f67f078156754d9ff657fcae2c42f60     --hash=sha256:ac3240ead0f7e5ce6fb74e4c7516c5db5ddacf5ef69851ac488321d53fefa1c6     --hash=sha256:acddb21ca98ff922cf6894c5da398a14e12d62f81b7749ed5abd7d014f8d6f38     --hash=sha256:ad12c110a4ec0a4132a6b26a2f28d513400f08f4751e32df18f880a68d055740     --hash=sha256:e2f9e8663bb1ded66d5854bb46f4947eb9bb25af42511a5ef5784f61b3bca3e5     --hash=sha256:e535b7caa8788a572177368721cc15492a988e6d9a2b401ed3bb3c43a4e88b4e     --hash=sha256:ef3e0de4f076a2adefde21e703cc25495e7b705e4cb2caa819375a33e238002f     --hash=sha256:ff874303b49cfcc4c08c7ea9b24495f134e4d9904f2cc1286c213c5932fd1fd9",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -5612,6 +5612,9 @@
                 "dill": [
                   "3.10"
                 ],
+                "immutabledict": [
+                  "3.10"
+                ],
                 "importlab": [
                   "3.10"
                 ],
@@ -5628,6 +5631,9 @@
                   "3.10"
                 ],
                 "mccabe": [
+                  "3.10"
+                ],
+                "msgspec": [
                   "3.10"
                 ],
                 "mypy_extensions": [
@@ -5687,6 +5693,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "toml==0.10.2     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_immutabledict": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "immutabledict==4.2.0     --hash=sha256:d728b2c2410d698d95e6200237feb50a695584d20289ad3379a439aa3d90baba     --hash=sha256:e003fd81aad2377a5a758bf7e1086cf3b70b63e9a5cc2f46bce8d0a2b4727c5f",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -5951,6 +5981,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "dill==0.3.5.1     --hash=sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302     --hash=sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_msgspec": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "msgspec==0.18.6     --hash=sha256:06acbd6edf175bee0e36295d6b0302c6de3aaf61246b46f9549ca0041a9d7177     --hash=sha256:0e24539b25c85c8f0597274f11061c102ad6b0c56af053373ba4629772b407be     --hash=sha256:1003c20bfe9c6114cc16ea5db9c5466e49fae3d7f5e2e59cb70693190ad34da0     --hash=sha256:1a76b60e501b3932782a9da039bd1cd552b7d8dec54ce38332b87136c64852dd     --hash=sha256:37f67c1d81272131895bb20d388dd8d341390acd0e192a55ab02d4d6468b434c     --hash=sha256:3ac4dd63fd5309dd42a8c8c36c1563531069152be7819518be0a9d03be9788e4     --hash=sha256:40a4df891676d9c28a67c2cc39947c33de516335680d1316a89e8f7218660410     --hash=sha256:41cf758d3f40428c235c0f27bc6f322d43063bc32da7b9643e3f805c21ed57b4     --hash=sha256:46eb2f6b22b0e61c137e65795b97dc515860bf6ec761d8fb65fdb62aa094ba61     --hash=sha256:6aa85198f8f154cf35d6f979998f6dadd3dc46a8a8c714632f53f5d65b315c07     --hash=sha256:7481355a1adcf1f08dedd9311193c674ffb8bf7b79314b4314752b89a2cf7f1c     --hash=sha256:77f30b0234eceeff0f651119b9821ce80949b4d667ad38f3bfed0d0ebf9d6d8f     --hash=sha256:9080eb12b8f59e177bd1eb5c21e24dd2ba2fa88a1dbc9a98e05ad7779b54c681     --hash=sha256:974d3520fcc6b824a6dedbdf2b411df31a73e6e7414301abac62e6b8d03791b4     --hash=sha256:9da21f804c1a1471f26d32b5d9bc0480450ea77fbb8d9db431463ab64aaac2cf     --hash=sha256:a59fc3b4fcdb972d09138cb516dbde600c99d07c38fd9372a6ef500d2d031b4e     --hash=sha256:a6896f4cd5b4b7d688018805520769a8446df911eb93b421c6c68155cdf9dd5a     --hash=sha256:ad237100393f637b297926cae1868b0d500f764ccd2f0623a380e2bcfb2809ca     --hash=sha256:b5c390b0b0b7da879520d4ae26044d74aeee5144f83087eb7842ba59c02bc090     --hash=sha256:c3232fabacef86fe8323cecbe99abbc5c02f7698e3f5f2e248e3480b66a3596b     --hash=sha256:c61ee4d3be03ea9cd089f7c8e36158786cd06e51fbb62529276452bbf2d52ece     --hash=sha256:c8355b55c80ac3e04885d72db515817d9fbb0def3bab936bba104e99ad22cf46     --hash=sha256:cc001cf39becf8d2dcd3f413a4797c55009b3a3cdbf78a8bf5a7ca8fdb76032c     --hash=sha256:ce13981bfa06f5eb126a3a5a38b1976bddb49a36e4f46d8e6edecf33ccf11df1     --hash=sha256:d0feb7a03d971c1c0353de1a8fe30bb6579c2dc5ccf29b5f7c7ab01172010492     --hash=sha256:d5351afb216b743df4b6b147691523697ff3a2fc5f3d54f771e91219f5c23aaa     --hash=sha256:d70cb3d00d9f4de14d0b31d38dfe60c88ae16f3182988246a9861259c6722af6     --hash=sha256:d86f5071fe33e19500920333c11e2267a31942d18fed4d9de5bc2fbab267d28c     --hash=sha256:db1d8626748fa5d29bbd15da58b2d73af25b10aa98abf85aab8028119188ed57     --hash=sha256:e3b524df6ea9998bbc99ea6ee4d0276a101bcc1aa8d14887bb823914d9f60d07     --hash=sha256:e77e56ffe2701e83a96e35770c6adb655ffc074d530018d1b584a8e635b4f36f     --hash=sha256:e97dec6932ad5e3ee1e3c14718638ba333befc45e0661caa57033cd4cc489466     --hash=sha256:f7d9faed6dfff654a9ca7d9b0068456517f63dbc3aa704a527f493b9200b210a     --hash=sha256:fac5834e14ac4da1fca373753e0c4ec9c8069d1fe5f534fa5208453b6065d5be     --hash=sha256:fd62e5818731a66aaa8e9b0a1e5543dc979a46278da01e85c3c9a1a4f047ef7e     --hash=sha256:fda4c357145cf0b760000c4ad597e19b53adf01382b711f281720a10a0fe72b7",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6206,7 +6260,7 @@
       "os:osx,arch:aarch64": {
         "bzlTransitiveDigest": "LBHFe4NB4b0TnmknPEUL1oNYrDkeKvuazrW+sTYQVaM=",
         "recordedFileInputs": {
-          "@@//dev/macos-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
+          "@@//dev/macos-requirements.txt": "347e9498d731f57a3dd6ae66eb03e2cea1bf58c802161c972943689c8b97c55a"
         },
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -6311,7 +6365,7 @@
             "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
             "ruleClassName": "whl_library",
             "attributes": {
-              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
+              "requirement": "pytype==2024.3.19 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0245a209d521b59b919c09f7509a77f680f223108af8cccd3404533ba7aef7ba     --hash=sha256:07e66d9f907efd7e343364b7026ee6a06f477dc8d67aa7aaecca1e9cc3d45d20     --hash=sha256:0fdb883c88c55a7aa990266c920715f84c17405c9c3e090dc5505bdf67253482     --hash=sha256:2e1d69460cc5762954215a76f4dcc997d66875ea59e8db2b5edf26dbafa42b5e     --hash=sha256:80c694440aa6e4bc0e31fbec83d3b2bc6f7f0118fe59fda099641a466b4aed2a     --hash=sha256:9aa97b2dcd9945dea98f0a7a454626033f67f078156754d9ff657fcae2c42f60     --hash=sha256:ac3240ead0f7e5ce6fb74e4c7516c5db5ddacf5ef69851ac488321d53fefa1c6     --hash=sha256:acddb21ca98ff922cf6894c5da398a14e12d62f81b7749ed5abd7d014f8d6f38     --hash=sha256:ad12c110a4ec0a4132a6b26a2f28d513400f08f4751e32df18f880a68d055740     --hash=sha256:e2f9e8663bb1ded66d5854bb46f4947eb9bb25af42511a5ef5784f61b3bca3e5     --hash=sha256:e535b7caa8788a572177368721cc15492a988e6d9a2b401ed3bb3c43a4e88b4e     --hash=sha256:ef3e0de4f076a2adefde21e703cc25495e7b705e4cb2caa819375a33e238002f     --hash=sha256:ff874303b49cfcc4c08c7ea9b24495f134e4d9904f2cc1286c213c5932fd1fd9",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6469,6 +6523,9 @@
                 "dill": [
                   "3.10"
                 ],
+                "immutabledict": [
+                  "3.10"
+                ],
                 "importlab": [
                   "3.10"
                 ],
@@ -6485,6 +6542,9 @@
                   "3.10"
                 ],
                 "mccabe": [
+                  "3.10"
+                ],
+                "msgspec": [
                   "3.10"
                 ],
                 "mypy_extensions": [
@@ -6544,6 +6604,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "toml==0.10.2     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_immutabledict": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "immutabledict==4.2.0     --hash=sha256:d728b2c2410d698d95e6200237feb50a695584d20289ad3379a439aa3d90baba     --hash=sha256:e003fd81aad2377a5a758bf7e1086cf3b70b63e9a5cc2f46bce8d0a2b4727c5f",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -6808,6 +6892,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "dill==0.3.5.1     --hash=sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302     --hash=sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_msgspec": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "msgspec==0.18.6     --hash=sha256:06acbd6edf175bee0e36295d6b0302c6de3aaf61246b46f9549ca0041a9d7177     --hash=sha256:0e24539b25c85c8f0597274f11061c102ad6b0c56af053373ba4629772b407be     --hash=sha256:1003c20bfe9c6114cc16ea5db9c5466e49fae3d7f5e2e59cb70693190ad34da0     --hash=sha256:1a76b60e501b3932782a9da039bd1cd552b7d8dec54ce38332b87136c64852dd     --hash=sha256:37f67c1d81272131895bb20d388dd8d341390acd0e192a55ab02d4d6468b434c     --hash=sha256:3ac4dd63fd5309dd42a8c8c36c1563531069152be7819518be0a9d03be9788e4     --hash=sha256:40a4df891676d9c28a67c2cc39947c33de516335680d1316a89e8f7218660410     --hash=sha256:41cf758d3f40428c235c0f27bc6f322d43063bc32da7b9643e3f805c21ed57b4     --hash=sha256:46eb2f6b22b0e61c137e65795b97dc515860bf6ec761d8fb65fdb62aa094ba61     --hash=sha256:6aa85198f8f154cf35d6f979998f6dadd3dc46a8a8c714632f53f5d65b315c07     --hash=sha256:7481355a1adcf1f08dedd9311193c674ffb8bf7b79314b4314752b89a2cf7f1c     --hash=sha256:77f30b0234eceeff0f651119b9821ce80949b4d667ad38f3bfed0d0ebf9d6d8f     --hash=sha256:9080eb12b8f59e177bd1eb5c21e24dd2ba2fa88a1dbc9a98e05ad7779b54c681     --hash=sha256:974d3520fcc6b824a6dedbdf2b411df31a73e6e7414301abac62e6b8d03791b4     --hash=sha256:9da21f804c1a1471f26d32b5d9bc0480450ea77fbb8d9db431463ab64aaac2cf     --hash=sha256:a59fc3b4fcdb972d09138cb516dbde600c99d07c38fd9372a6ef500d2d031b4e     --hash=sha256:a6896f4cd5b4b7d688018805520769a8446df911eb93b421c6c68155cdf9dd5a     --hash=sha256:ad237100393f637b297926cae1868b0d500f764ccd2f0623a380e2bcfb2809ca     --hash=sha256:b5c390b0b0b7da879520d4ae26044d74aeee5144f83087eb7842ba59c02bc090     --hash=sha256:c3232fabacef86fe8323cecbe99abbc5c02f7698e3f5f2e248e3480b66a3596b     --hash=sha256:c61ee4d3be03ea9cd089f7c8e36158786cd06e51fbb62529276452bbf2d52ece     --hash=sha256:c8355b55c80ac3e04885d72db515817d9fbb0def3bab936bba104e99ad22cf46     --hash=sha256:cc001cf39becf8d2dcd3f413a4797c55009b3a3cdbf78a8bf5a7ca8fdb76032c     --hash=sha256:ce13981bfa06f5eb126a3a5a38b1976bddb49a36e4f46d8e6edecf33ccf11df1     --hash=sha256:d0feb7a03d971c1c0353de1a8fe30bb6579c2dc5ccf29b5f7c7ab01172010492     --hash=sha256:d5351afb216b743df4b6b147691523697ff3a2fc5f3d54f771e91219f5c23aaa     --hash=sha256:d70cb3d00d9f4de14d0b31d38dfe60c88ae16f3182988246a9861259c6722af6     --hash=sha256:d86f5071fe33e19500920333c11e2267a31942d18fed4d9de5bc2fbab267d28c     --hash=sha256:db1d8626748fa5d29bbd15da58b2d73af25b10aa98abf85aab8028119188ed57     --hash=sha256:e3b524df6ea9998bbc99ea6ee4d0276a101bcc1aa8d14887bb823914d9f60d07     --hash=sha256:e77e56ffe2701e83a96e35770c6adb655ffc074d530018d1b584a8e635b4f36f     --hash=sha256:e97dec6932ad5e3ee1e3c14718638ba333befc45e0661caa57033cd4cc489466     --hash=sha256:f7d9faed6dfff654a9ca7d9b0068456517f63dbc3aa704a527f493b9200b210a     --hash=sha256:fac5834e14ac4da1fca373753e0c4ec9c8069d1fe5f534fa5208453b6065d5be     --hash=sha256:fd62e5818731a66aaa8e9b0a1e5543dc979a46278da01e85c3c9a1a4f047ef7e     --hash=sha256:fda4c357145cf0b760000c4ad597e19b53adf01382b711f281720a10a0fe72b7",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7063,7 +7171,7 @@
       "os:osx,arch:x86_64": {
         "bzlTransitiveDigest": "jDiFdKRFlhY0RvMWPS2HWGUPAAaKYDnZpTrvvym4NVk=",
         "recordedFileInputs": {
-          "@@//dev/macos-requirements.txt": "2a71e65b74b2af628c5747699fa7ac2ff41a262e3ee959ca1fccf4e1453cd35c"
+          "@@//dev/macos-requirements.txt": "347e9498d731f57a3dd6ae66eb03e2cea1bf58c802161c972943689c8b97c55a"
         },
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -7168,7 +7276,7 @@
             "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
             "ruleClassName": "whl_library",
             "attributes": {
-              "requirement": "pytype==2024.2.13 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0842b4e5611d1c2533e2c4f432bfe94483632f7b27eb5081573f90d8b939c1c3     --hash=sha256:108fbd615e2ed97ab7d7895d4e60c703af0534f60fc23826daa6b5c516155777     --hash=sha256:2a707c4480ca909301fc98d5e69486eec8f7a6020ea2885ee9112d94d8b9aca1     --hash=sha256:42074f97ab46a76d77c160364a62ca95c5d58bb5f3ba45cb2e65b01b3663801b     --hash=sha256:5a2bf755b6a62c3f4c2ae7a5102c8da04011d94646a4faf3c6bcc3b44fbb0ced     --hash=sha256:5c739230fb52fcc4a52f46396627982ade99a349edccecc4dfd572c22279a382     --hash=sha256:6186ad48824a26b23ce2d5fb7f874c29bed1fbf655cb4e4342eec623d9fd7192     --hash=sha256:a3fc8ecda755e041b78e80966bc000eb5cc491b2912dfa3d20022b1ed5d205ec     --hash=sha256:b11bdeb8b8137e0aa3de71d77d2085a17733e29c3b9edf70aa4194fccb2e762d     --hash=sha256:b543d1c8435e5ecad1341619b5de0fbc5e96999db8b427c779719c9615035ca4     --hash=sha256:c3fe3cbc5b20e719b95b3cc84a8a631994ebf78d5fabb43f624d2c8ca1d0fc3f     --hash=sha256:dad172615419a21c6b2f37a8a4ff85d3d46d317137844f6b2721b732a415ef38     --hash=sha256:e3c6c097ae2654db35c8c09b58dd63092fb7d5791ab937903e93bc2f6aa65c59",
+              "requirement": "pytype==2024.3.19 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0245a209d521b59b919c09f7509a77f680f223108af8cccd3404533ba7aef7ba     --hash=sha256:07e66d9f907efd7e343364b7026ee6a06f477dc8d67aa7aaecca1e9cc3d45d20     --hash=sha256:0fdb883c88c55a7aa990266c920715f84c17405c9c3e090dc5505bdf67253482     --hash=sha256:2e1d69460cc5762954215a76f4dcc997d66875ea59e8db2b5edf26dbafa42b5e     --hash=sha256:80c694440aa6e4bc0e31fbec83d3b2bc6f7f0118fe59fda099641a466b4aed2a     --hash=sha256:9aa97b2dcd9945dea98f0a7a454626033f67f078156754d9ff657fcae2c42f60     --hash=sha256:ac3240ead0f7e5ce6fb74e4c7516c5db5ddacf5ef69851ac488321d53fefa1c6     --hash=sha256:acddb21ca98ff922cf6894c5da398a14e12d62f81b7749ed5abd7d014f8d6f38     --hash=sha256:ad12c110a4ec0a4132a6b26a2f28d513400f08f4751e32df18f880a68d055740     --hash=sha256:e2f9e8663bb1ded66d5854bb46f4947eb9bb25af42511a5ef5784f61b3bca3e5     --hash=sha256:e535b7caa8788a572177368721cc15492a988e6d9a2b401ed3bb3c43a4e88b4e     --hash=sha256:ef3e0de4f076a2adefde21e703cc25495e7b705e4cb2caa819375a33e238002f     --hash=sha256:ff874303b49cfcc4c08c7ea9b24495f134e4d9904f2cc1286c213c5932fd1fd9",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7326,6 +7434,9 @@
                 "dill": [
                   "3.10"
                 ],
+                "immutabledict": [
+                  "3.10"
+                ],
                 "importlab": [
                   "3.10"
                 ],
@@ -7342,6 +7453,9 @@
                   "3.10"
                 ],
                 "mccabe": [
+                  "3.10"
+                ],
+                "msgspec": [
                   "3.10"
                 ],
                 "mypy_extensions": [
@@ -7401,6 +7515,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "toml==0.10.2     --hash=sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b     --hash=sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_immutabledict": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "immutabledict==4.2.0     --hash=sha256:d728b2c2410d698d95e6200237feb50a695584d20289ad3379a439aa3d90baba     --hash=sha256:e003fd81aad2377a5a758bf7e1086cf3b70b63e9a5cc2f46bce8d0a2b4727c5f",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
@@ -7665,6 +7803,30 @@
             "ruleClassName": "whl_library",
             "attributes": {
               "requirement": "dill==0.3.5.1     --hash=sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302     --hash=sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86",
+              "repo": "pip_310",
+              "repo_prefix": "pip_310_",
+              "whl_patches": {},
+              "experimental_target_platforms": [],
+              "python_interpreter": "",
+              "python_interpreter_target": "@@rules_python~~python~python_3_10_host//:python",
+              "quiet": true,
+              "timeout": 600,
+              "isolated": true,
+              "extra_pip_args": [],
+              "download_only": false,
+              "pip_data_exclude": [],
+              "enable_implicit_namespace_pkgs": false,
+              "environment": {},
+              "envsubst": [],
+              "group_name": "",
+              "group_deps": []
+            }
+          },
+          "pip_310_msgspec": {
+            "bzlFile": "@@rules_python~//python/pip_install:pip_repository.bzl",
+            "ruleClassName": "whl_library",
+            "attributes": {
+              "requirement": "msgspec==0.18.6     --hash=sha256:06acbd6edf175bee0e36295d6b0302c6de3aaf61246b46f9549ca0041a9d7177     --hash=sha256:0e24539b25c85c8f0597274f11061c102ad6b0c56af053373ba4629772b407be     --hash=sha256:1003c20bfe9c6114cc16ea5db9c5466e49fae3d7f5e2e59cb70693190ad34da0     --hash=sha256:1a76b60e501b3932782a9da039bd1cd552b7d8dec54ce38332b87136c64852dd     --hash=sha256:37f67c1d81272131895bb20d388dd8d341390acd0e192a55ab02d4d6468b434c     --hash=sha256:3ac4dd63fd5309dd42a8c8c36c1563531069152be7819518be0a9d03be9788e4     --hash=sha256:40a4df891676d9c28a67c2cc39947c33de516335680d1316a89e8f7218660410     --hash=sha256:41cf758d3f40428c235c0f27bc6f322d43063bc32da7b9643e3f805c21ed57b4     --hash=sha256:46eb2f6b22b0e61c137e65795b97dc515860bf6ec761d8fb65fdb62aa094ba61     --hash=sha256:6aa85198f8f154cf35d6f979998f6dadd3dc46a8a8c714632f53f5d65b315c07     --hash=sha256:7481355a1adcf1f08dedd9311193c674ffb8bf7b79314b4314752b89a2cf7f1c     --hash=sha256:77f30b0234eceeff0f651119b9821ce80949b4d667ad38f3bfed0d0ebf9d6d8f     --hash=sha256:9080eb12b8f59e177bd1eb5c21e24dd2ba2fa88a1dbc9a98e05ad7779b54c681     --hash=sha256:974d3520fcc6b824a6dedbdf2b411df31a73e6e7414301abac62e6b8d03791b4     --hash=sha256:9da21f804c1a1471f26d32b5d9bc0480450ea77fbb8d9db431463ab64aaac2cf     --hash=sha256:a59fc3b4fcdb972d09138cb516dbde600c99d07c38fd9372a6ef500d2d031b4e     --hash=sha256:a6896f4cd5b4b7d688018805520769a8446df911eb93b421c6c68155cdf9dd5a     --hash=sha256:ad237100393f637b297926cae1868b0d500f764ccd2f0623a380e2bcfb2809ca     --hash=sha256:b5c390b0b0b7da879520d4ae26044d74aeee5144f83087eb7842ba59c02bc090     --hash=sha256:c3232fabacef86fe8323cecbe99abbc5c02f7698e3f5f2e248e3480b66a3596b     --hash=sha256:c61ee4d3be03ea9cd089f7c8e36158786cd06e51fbb62529276452bbf2d52ece     --hash=sha256:c8355b55c80ac3e04885d72db515817d9fbb0def3bab936bba104e99ad22cf46     --hash=sha256:cc001cf39becf8d2dcd3f413a4797c55009b3a3cdbf78a8bf5a7ca8fdb76032c     --hash=sha256:ce13981bfa06f5eb126a3a5a38b1976bddb49a36e4f46d8e6edecf33ccf11df1     --hash=sha256:d0feb7a03d971c1c0353de1a8fe30bb6579c2dc5ccf29b5f7c7ab01172010492     --hash=sha256:d5351afb216b743df4b6b147691523697ff3a2fc5f3d54f771e91219f5c23aaa     --hash=sha256:d70cb3d00d9f4de14d0b31d38dfe60c88ae16f3182988246a9861259c6722af6     --hash=sha256:d86f5071fe33e19500920333c11e2267a31942d18fed4d9de5bc2fbab267d28c     --hash=sha256:db1d8626748fa5d29bbd15da58b2d73af25b10aa98abf85aab8028119188ed57     --hash=sha256:e3b524df6ea9998bbc99ea6ee4d0276a101bcc1aa8d14887bb823914d9f60d07     --hash=sha256:e77e56ffe2701e83a96e35770c6adb655ffc074d530018d1b584a8e635b4f36f     --hash=sha256:e97dec6932ad5e3ee1e3c14718638ba333befc45e0661caa57033cd4cc489466     --hash=sha256:f7d9faed6dfff654a9ca7d9b0068456517f63dbc3aa704a527f493b9200b210a     --hash=sha256:fac5834e14ac4da1fca373753e0c4ec9c8069d1fe5f534fa5208453b6065d5be     --hash=sha256:fd62e5818731a66aaa8e9b0a1e5543dc979a46278da01e85c3c9a1a4f047ef7e     --hash=sha256:fda4c357145cf0b760000c4ad597e19b53adf01382b711f281720a10a0fe72b7",
               "repo": "pip_310",
               "repo_prefix": "pip_310_",
               "whl_patches": {},
