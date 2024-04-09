@@ -111,11 +111,10 @@ template <typename To, typename From>
     return n < ToLimits::min() || n > ToLimits::max();
   }
   if constexpr (ToLimits::is_signed && !FromLimits::is_signed) {
-    return n > static_cast<std::make_unsigned_t<To>>(ToLimits::max());
+    return n > std::make_unsigned_t<To>{ToLimits::max()};
   }
   if constexpr (!ToLimits::is_signed && FromLimits::is_signed) {
-    return n < 0 ||
-           static_cast<std::make_unsigned_t<From>>(n) > ToLimits::max();
+    return n < 0 || std::make_unsigned_t<From>{n} > ToLimits::max();
   }
 }
 
