@@ -65,7 +65,6 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
-#include "absl/base/optimization.h"
 #include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/container/flat_hash_map.h"
 #include "absl/hash/hash.h"  // IWYU pragma: keep
@@ -509,20 +508,6 @@ static absl::StatusOr<Environment> CopyEnv() {
 using bazel::tools::cpp::runfiles::Runfiles;
 using RunfilesPtr = absl::Nonnull<std::unique_ptr<Runfiles>>;
 
-static absl::Nullable<Runfiles*> CreateRunfiles(
-    const ExecutableKind kind, const std::string& argv0,
-    const std::string& source_repository, std::string& error) {
-  switch (kind) {
-    case ExecutableKind::kBinary:
-      return Runfiles::Create(argv0, source_repository, &error);
-    case ExecutableKind::kTest:
-      return Runfiles::CreateForTest(source_repository, &error);
-  }
-  LOG(FATAL) << "invalid runfiles mode "
-             << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
-  ABSL_UNREACHABLE();
-}
-
 static absl::StatusOr<RunfilesPtr> CreateRunfiles(
     const ExecutableKind kind, const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv) {
@@ -533,8 +518,21 @@ static absl::StatusOr<RunfilesPtr> CreateRunfiles(
       original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
   if (!argv0.ok()) return argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Runfiles>> runfiles(
-      CreateRunfiles(kind, *argv0, std::string(source_repository), error));
+  absl::Nullable<std::unique_ptr<Runfiles>> runfiles;
+  switch (kind) {
+    case ExecutableKind::kBinary:
+      runfiles.reset(
+          Runfiles::Create(*argv0, std::string(source_repository), &error));
+      break;
+    case ExecutableKind::kTest:
+      runfiles.reset(
+          Runfiles::CreateForTest(std::string(source_repository), &error));
+      break;
+    default:
+      LOG(FATAL) << "invalid runfiles mode "
+                 << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
+      break;
+  }
   if (runfiles == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
