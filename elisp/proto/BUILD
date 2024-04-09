@@ -13,7 +13,9 @@
 # limitations under the License.
 
 load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
-load("@rules_proto//proto:defs.bzl", "proto_library")
+load("@rules_proto//proto:defs.bzl", "proto_lang_toolchain", "proto_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
 
@@ -120,6 +122,42 @@ elisp_proto_library(
     name = "wrappers_elisp_proto",
     visibility = ["//visibility:public"],
     deps = ["@com_google_protobuf//:wrappers_proto"],
+)
+
+py_binary(
+    name = "plugin",
+    srcs = ["plugin.py"],
+    data = [":generate"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        ":descriptor_py_proto",
+        ":plugin_py_proto",
+    ],
+)
+
+proto_lang_toolchain(
+    name = "toolchain",
+    command_line = "--elisp_out=$(OUT)",
+    mnemonic = "GenElispProto",
+    output_files = "multiple",
+    plugin = ":plugin",
+    plugin_format_flag = "--plugin=protoc-gen-elisp=%s",
+    progress_message = "Generating Emacs Lisp protocol buffer library %{label}",
+    runtime = ":proto",
+    visibility = ["//visibility:public"],
+)
+
+py_proto_library(
+    name = "descriptor_py_proto",
+    tags = ["no-python-check"],
+    deps = ["@com_google_protobuf//:descriptor_proto"],
+)
+
+py_proto_library(
+    name = "plugin_py_proto",
+    tags = ["no-python-check"],
+    deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
 
 elisp_cc_module(
