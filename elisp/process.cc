@@ -39,8 +39,8 @@
 
 #include <algorithm>  // IWYU pragma: keep
 #include <cerrno>     // IWYU pragma: keep
-#include <cstddef>
 #include <cstdlib>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <optional>
@@ -73,7 +73,6 @@
 #include "absl/log/log.h"  // IWYU pragma: keep
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"
@@ -91,6 +90,7 @@
 
 #include "elisp/platform.h"
 
+// IWYU pragma: no_include <__fwd/string.h>
 // IWYU pragma: no_include <__system_error/error_category.h>
 // IWYU pragma: no_include <__system_error/error_code.h>
 // IWYU pragma: no_include <__system_error/error_condition.h>
