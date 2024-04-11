@@ -254,6 +254,8 @@
   X(kMapEntryP, "elisp/proto/map-entry-p")                       \
   X(kSerializedFileDescriptorSetP,                               \
     "elisp/proto/serialized-file-descriptor-set-p")              \
+  X(kSerializedFileDescriptorProtoP,                             \
+    "elisp/proto/serialized-file-descriptor-proto-p")            \
   X(kObjectArena, "elisp/proto/object--arena")                   \
   X(kObjectPtr, "elisp/proto/object--ptr")                       \
   X(kArrayNew, "elisp/proto/array--new")                         \
@@ -2255,7 +2257,7 @@ static bool UpdateMapEntries(struct Context ctx, upb_Arena* arena,
 
 // Returns a message definition given its full protocol buffer name including
 // the package name.  The containing file must have been registered using
-// RegisterFileDescriptorSet before.
+// RegisterFileDescriptor before.
 static const upb_MessageDef* FindMessageByFullName(struct Context ctx,
                                                    upb_StringView full_name) {
   const upb_MessageDef* def = upb_DefPool_FindMessageByNameWithSize(
@@ -2267,7 +2269,7 @@ static const upb_MessageDef* FindMessageByFullName(struct Context ctx,
 }
 
 // Returns a message definition given its Lisp structure name as a symbol.  The
-// containing file must have been registered using RegisterFileDescriptorSet
+// containing file must have been registered using RegisterFileDescriptor
 // before, and the Lisp structure must have been defined in a generated file.
 static const upb_MessageDef* FindMessageByStructName(struct Context ctx,
                                                      emacs_value struct_name) {
@@ -2307,8 +2309,8 @@ static upb_StringView MessageNameFromTypeUrl(struct Context ctx,
 }
 
 // Returns a message definition given its type URL.  The containing file must
-// have been registered using RegisterFileDescriptorSet before.  This is useful
-// for dealing with the Any message type; see
+// have been registered using RegisterFileDescriptor before.  This is useful for
+// dealing with the Any message type; see
 // https://developers.google.com/protocol-buffers/docs/proto3#any and the
 // comments in any.proto.
 static const upb_MessageDef* FindMessageByTypeUrl(struct Context ctx,
@@ -2489,6 +2491,23 @@ static const google_protobuf_FileDescriptorSet* ReadFileDescriptorSet(
     WrongTypeArgument(ctx, kSerializedFileDescriptorSetP, serialized);
   }
   return set;
+}
+
+// Parses a file descriptor from its serialized representation.
+static const google_protobuf_FileDescriptorProto* ReadFileDescriptorProto(
+    struct Context ctx, upb_Arena* arena, emacs_value serialized) {
+  struct MutableString string =
+      ExtractUnibyteString(ctx, ArenaAllocator(arena), serialized);
+  if (string.data == NULL) return NULL;
+  const google_protobuf_FileDescriptorProto* file =
+      google_protobuf_FileDescriptorProto_parse_ex(
+          string.data, string.size, NULL,
+          kUpb_DecodeOption_AliasString | kUpb_DecodeOption_CheckRequired,
+          arena);
+  if (file == NULL) {
+    WrongTypeArgument(ctx, kSerializedFileDescriptorProtoP, serialized);
+  }
+  return file;
 }
 
 // Helper function for ConvertFileDescriptorSet.
@@ -2705,16 +2724,6 @@ static bool RegisterFileDescriptorProto(
     return false;
   }
   return true;
-}
-
-static void RegisterFileDescriptors(
-    struct Context ctx, const google_protobuf_FileDescriptorSet* set) {
-  size_t count;
-  const google_protobuf_FileDescriptorProto* const* files =
-      google_protobuf_FileDescriptorSet_file(set, &count);
-  for (size_t i = 0; i < count; ++i) {
-    if (!RegisterFileDescriptorProto(ctx, files[i])) return;
-  }
 }
 
 /// Function definitions
@@ -3878,7 +3887,7 @@ static emacs_value ParseFileDescriptorSet(emacs_env* env,
   return ret;
 }
 
-static emacs_value RegisterFileDescriptorSet(
+static emacs_value RegisterFileDescriptor(
     emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED, emacs_value* args,
     void* data) {
   struct Context ctx = {env, data};
@@ -3886,13 +3895,13 @@ static emacs_value RegisterFileDescriptorSet(
   emacs_value serialized = args[0];
   upb_Arena* arena = NewArena(ctx);
   if (arena == NULL) return NULL;
-  const google_protobuf_FileDescriptorSet* set =
-      ReadFileDescriptorSet(ctx, arena, serialized);
-  if (set == NULL) {
+  const google_protobuf_FileDescriptorProto* file =
+      ReadFileDescriptorProto(ctx, arena, serialized);
+  if (file == NULL) {
     upb_Arena_Free(arena);
     return NULL;
   }
-  RegisterFileDescriptors(ctx, set);
+  RegisterFileDescriptorProto(ctx, file);
   upb_Arena_Free(arena);
   return Nil(ctx);
 }
@@ -4346,14 +4355,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "users should not call it directly.\n\n"
         "(fn serialized)",
         kNoSideEffects, ParseFileDescriptorSet);
-  Defun(ctx, "elisp/proto/register-file-descriptor-set", 1, 1,
+  Defun(ctx, "elisp/proto/register-file-descriptor", 1, 1,
         "Register a protocol buffer file descriptor set.\n"
         "SERIALIZED must be the serialized form of a\n"
-        "google.protobuf.FileDescriptorSet message.\n"
+        "google.protobuf.FileDescriptorProto message.\n"
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",
-        0, RegisterFileDescriptorSet);
+        0, RegisterFileDescriptor);
   DefineError(ctx, kUnknownField, "Unknown protocol buffer message field");
   DefineError(ctx, kAtomicField,
               "Field is not a message, repeated, or map field");

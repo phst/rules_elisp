@@ -150,9 +150,11 @@ VALUES is a list of (NAME NUMBER) pairs."
            (cl-check-type dep elisp/proto/simple-string)
            (prin1 `(require ',(intern dep))) (terpri))
          (when dependencies (terpri))
-         (prin1 `(elisp/proto/register-file-descriptor-set
-                  ,serialized-file-descriptor-set))
-         (terpri) (terpri)
+         (dolist (file parsed)
+           (cl-destructuring-bind (_name descriptor _deps _messages _enum) file
+             (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
+             (terpri)))
+         (terpri)
          (dolist (file parsed)
            (cl-destructuring-bind (_name _descriptor _deps messages enums) file
              (dolist (message messages)
