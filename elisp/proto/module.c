@@ -445,10 +445,10 @@ static emacs_value List2(struct Context ctx, emacs_value arg1,
   return List(ctx, 2, args);
 }
 
-static emacs_value List3(struct Context ctx, emacs_value arg1, emacs_value arg2,
-                         emacs_value arg3) {
-  emacs_value args[] = {arg1, arg2, arg3};
-  return List(ctx, 3, args);
+static emacs_value List5(struct Context ctx, emacs_value arg1, emacs_value arg2,
+                         emacs_value arg3, emacs_value arg4, emacs_value arg5) {
+  emacs_value args[] = {arg1, arg2, arg3, arg4, arg5};
+  return List(ctx, 5, args);
 }
 
 static void Signal(struct Context ctx, enum GlobalSymbol symbol,
@@ -2491,6 +2491,40 @@ static const google_protobuf_FileDescriptorSet* ReadFileDescriptorSet(
   return set;
 }
 
+// Helper function for ConvertFileDescriptorSet.
+static emacs_value SerializeFileDescriptor(
+    struct Context ctx, upb_Arena* arena,
+    const google_protobuf_FileDescriptorProto* file) {
+  size_t size;
+  const char* data = google_protobuf_FileDescriptorProto_serialize_ex(
+      file, kUpb_EncodeOption_Deterministic | kUpb_EncodeOption_CheckRequired,
+      arena, &size);
+  if (data == NULL) {
+    Signal0(ctx, kSerializeError);
+    return NULL;
+  }
+  return MakeUnibyteString(ctx, upb_StringView_FromDataAndSize(data, size));
+}
+
+// Helper function for ConvertFileDescriptorSet.
+static emacs_value ConvertDependencies(
+    struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
+  size_t size;
+  const upb_StringView* deps =
+      google_protobuf_FileDescriptorProto_dependency(file, &size);
+  if (size == 0) return Nil(ctx);
+  if (size > PTRDIFF_MAX) {
+    OverflowError0(ctx);
+    return NULL;
+  }
+  emacs_value* array = AllocateLispArray(ctx, size);
+  if (array == NULL) return NULL;
+  for (size_t i = 0; i < size; ++i) array[i] = MakeString(ctx, deps[i]);
+  emacs_value ret = List(ctx, (ptrdiff_t)size, array);
+  free(array);
+  return ret;
+}
+
 // Helper function for ConvertFileDescriptorSet.  Returns a list of field names
 // as symbols.
 static emacs_value ConvertFieldDescriptors(
@@ -2599,13 +2633,17 @@ static void ConvertMessageDescriptors(
 }
 
 // Helper function for ConvertFileDescriptorSet.  Returns a list of the form
-// (proto-file-name
+// (proto-file-name serialized-file-descriptor-proto
+//  (dependency-file-name…)
 //  ((message-name field-name…)…)
 //  ((enumeration-name (enumerator-name value)…)…)).
 static emacs_value ConvertFileDescriptor(
-    struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
+    struct Context ctx, upb_Arena* arena,
+    const google_protobuf_FileDescriptorProto* file) {
   emacs_value name =
       MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
+  emacs_value serialized = SerializeFileDescriptor(ctx, arena, file);
+  emacs_value dependencies = ConvertDependencies(ctx, file);
   emacs_value messages_list = Nil(ctx);
   emacs_value enums_list = Nil(ctx);
   upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
@@ -2621,15 +2659,17 @@ static emacs_value ConvertFileDescriptor(
   // The helper functions have constructed the lists in reversed order.
   messages_list = Nreverse(ctx, messages_list);
   enums_list = Nreverse(ctx, enums_list);
-  return List3(ctx, name, messages_list, enums_list);
+  return List5(ctx, name, serialized, dependencies, messages_list, enums_list);
 }
 
 // Returns a list of the form
-// ((proto-file-name
+// ((proto-file-name serialized-file-descriptor-proto
+//   (dependency-file-name…)
 //   ((message-name field-name…)…)
 //   ((enumeration-name (enumerator-name value)…)…))…).
 static emacs_value ConvertFileDescriptorSet(
-    struct Context ctx, const google_protobuf_FileDescriptorSet* set) {
+    struct Context ctx, upb_Arena* arena,
+    const google_protobuf_FileDescriptorSet* set) {
   size_t files_count;
   const google_protobuf_FileDescriptorProto* const* files =
       google_protobuf_FileDescriptorSet_file(set, &files_count);
@@ -2640,7 +2680,7 @@ static emacs_value ConvertFileDescriptorSet(
   emacs_value* array = AllocateLispArray(ctx, files_count);
   if (array == NULL && files_count > 0) return NULL;
   for (size_t i = 0; i < files_count; ++i) {
-    array[i] = ConvertFileDescriptor(ctx, files[i]);
+    array[i] = ConvertFileDescriptor(ctx, arena, files[i]);
   }
   emacs_value ret = List(ctx, (ptrdiff_t)files_count, array);
   free(array);
@@ -3833,7 +3873,7 @@ static emacs_value ParseFileDescriptorSet(emacs_env* env,
     upb_Arena_Free(arena);
     return NULL;
   }
-  emacs_value ret = ConvertFileDescriptorSet(ctx, set);
+  emacs_value ret = ConvertFileDescriptorSet(ctx, arena, set);
   upb_Arena_Free(arena);
   return ret;
 }
@@ -4298,7 +4338,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "SERIALIZED must be the serialized form of a\n"
         "google.protobuf.FileDescriptorSet message.\n"
         "Return a nested list\n"
-        "((PROTO-FILE-NAME\n"
+        "((PROTO-FILE-NAME SERIALIZED-FILE-DESCRIPTOR-PROTO\n"
+        "  (DEPENDENCY-FILE-NAME...)\n"
         "  ((MESSAGE-FULL-NAME FIELD-NAME...)...)\n"
         "  ((ENUM-FULL-NAME (NAME VALUE)...)...))...).\n"
         "This function is used by the protocol buffer compiler;\n"

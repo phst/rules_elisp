@@ -931,7 +931,8 @@
          (set (google/protobuf/FileDescriptorSet-new :file (list file)))
          (serialized (elisp/proto/serialize set)))
     (should (equal (elisp/proto/parse-file-descriptor-set serialized)
-                   '(("test.proto"
+                   `(("test.proto" ,(elisp/proto/serialize file)
+                      ()
                       (("test.Message" field))
                       (("test.Enum" (VALUE 77))))))))
   (should-error (elisp/proto/parse-file-descriptor-set "garbage")))
