@@ -168,6 +168,20 @@ elisp_binary(
     deps = [":proto"],
 )
 
+elisp_binary(
+    name = "generate_bundle",
+    src = "generate-bundle.el",
+    input_args = [1],
+    output_args = [2],
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
+    deps = [":proto"],
+)
+
 upb_proto_library(
     name = "any_upb_proto",
     deps = ["@com_google_protobuf//:any_proto"],
