@@ -2638,28 +2638,33 @@ static emacs_value ConvertFileDescriptorSet(
   return List3(ctx, files_list, messages_list, enums_list);
 }
 
+static bool RegisterFileDescriptorProto(
+    struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
+  upb_DefPool* pool = MutableDefPool(ctx);
+  upb_StringView name = google_protobuf_FileDescriptorProto_name(file);
+  if (upb_DefPool_FindFileByNameWithSize(pool, name.data, name.size)) {
+    // Duplicate registrations result in an error.  We allow them because a
+    // generated file might be legitimately reloaded, or we might have
+    // preregistered the file descriptor.
+    return true;
+  }
+  upb_Status status;
+  upb_Status_Clear(&status);
+  if (upb_DefPool_AddFile(pool, file, &status) == NULL ||
+      !upb_Status_IsOk(&status)) {
+    ProtoError(ctx, kRegistrationFailed, &status);
+    return false;
+  }
+  return true;
+}
+
 static void RegisterFileDescriptors(
     struct Context ctx, const google_protobuf_FileDescriptorSet* set) {
-  upb_DefPool* pool = MutableDefPool(ctx);
   size_t count;
   const google_protobuf_FileDescriptorProto* const* files =
       google_protobuf_FileDescriptorSet_file(set, &count);
   for (size_t i = 0; i < count; ++i) {
-    const google_protobuf_FileDescriptorProto* file = files[i];
-    upb_StringView name = google_protobuf_FileDescriptorProto_name(file);
-    if (upb_DefPool_FindFileByNameWithSize(pool, name.data, name.size)) {
-      // Duplicate registrations result in an error.  We allow them because a
-      // generated file might be legitimately reloaded, or we might have
-      // preregistered the file descriptor.
-      continue;
-    }
-    upb_Status status;
-    upb_Status_Clear(&status);
-    if (upb_DefPool_AddFile(pool, file, &status) == NULL ||
-        !upb_Status_IsOk(&status)) {
-      ProtoError(ctx, kRegistrationFailed, &status);
-      return;
-    }
+    if (!RegisterFileDescriptorProto(ctx, files[i])) return;
   }
 }
 
