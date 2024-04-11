@@ -1,6 +1,6 @@
 ;;; generate.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022, 2023 Google LLC
+;; Copyright 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -20,8 +20,7 @@
 ;;
 ;; Usage:
 ;;
-;;   elisp/proto/generate DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE \
-;;     DEPENDENCIES...
+;;   elisp/proto/generate DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE
 
 ;;; Code:
 
@@ -106,7 +105,7 @@ VALUES is a list of (NAME NUMBER) pairs."
   (terpri))
 
 (pcase command-line-args-left
-  (`(,descriptor-file ,output-file ,target ,feature . ,dependencies)
+  (`(,descriptor-file ,output-file ,target ,feature)
    (setq command-line-args-left nil)
    (cl-check-type target elisp/proto/simple-string)
    (cl-check-type feature elisp/proto/simple-string)
@@ -119,7 +118,11 @@ VALUES is a list of (NAME NUMBER) pairs."
              (insert-file-contents-literally descriptor-file)
              (buffer-substring-no-properties (point-min) (point-max))))
           (parsed (elisp/proto/parse-file-descriptor-set
-                   serialized-file-descriptor-set)))
+                   serialized-file-descriptor-set))
+          (infos (cl-remove feature parsed :key #'car :test-not #'string-equal))
+          (info (car infos)))
+     (unless (length= infos 1)
+       (user-error "Got %d infos for feature %s" (length infos) feature))
      (cl-check-type output-name elisp/proto/simple-string)
      (with-temp-file (concat "/:" output-file)
        (let ((standard-output (current-buffer))
@@ -131,49 +134,42 @@ VALUES is a list of (NAME NUMBER) pairs."
              (print-escape-newlines t)
              (print-escape-nonascii t)
              (pp-escape-newlines t))
-         (insert ";;; " output-name " --- protocol buffer library " target
-                 " -*- lexical-binding: t; -*-\n\n"
-                 ";;; Commentary:\n\n"
-                 ";; A generated protocol buffer library.\n"
-                 ";; This library corresponds to the the following "
-                 "Bazel target:\n"
-                 ";;   " target "\n"
-                 ";; This file was generated from the following files:\n")
-         (dolist (file parsed)
-           (cl-destructuring-bind (name _descriptor _deps _messages _enums) file
-             (cl-check-type name elisp/proto/simple-string)
-             (insert ";;   " name "\n")))
-         (insert "\n;;; Code:\n\n")
-         (prin1 '(require 'cl-lib)) (terpri) (terpri)
-         (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
-         (dolist (dep dependencies)
-           (cl-check-type dep elisp/proto/simple-string)
-           (prin1 `(require ',(intern dep))) (terpri))
-         (when dependencies (terpri))
-         (dolist (file parsed)
-           (cl-destructuring-bind (_name descriptor _deps _messages _enum) file
-             (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
-             (terpri)))
-         (terpri)
-         (dolist (file parsed)
-           (cl-destructuring-bind (_name _descriptor _deps messages enums) file
-             (dolist (message messages)
-               (cl-destructuring-bind (full-name . fields) message
-                 (elisp/proto/generate-message full-name fields)))
-             (dolist (enum enums)
-               (cl-destructuring-bind (full-name . values) enum
-                 (elisp/proto/generate-enum full-name values)))))
-         (prin1 `(provide ',(intern feature))) (terpri) (terpri)
-         (insert ";; Local Variables:\n"
-                 ;; Generated docstrings can be overly long if they contain
-                 ;; lengthy message names.  Don’t issue byte-compiler warnings
-                 ;; for them.
-                 ";; byte-compile-docstring-max-column: 500\n"
-                 ";; End:\n\n"
-                 ";;; " output-name " ends here\n")))))
+         (cl-destructuring-bind (proto-file descriptor deps messages enums) info
+           (cl-assert (string-equal proto-file feature) :show-args)
+           (insert ";;; " output-name " --- protocol buffer library " target
+                   " -*- lexical-binding: t; -*-\n\n"
+                   ";;; Commentary:\n\n"
+                   ";; A generated protocol buffer library.\n"
+                   ";; This library corresponds to the the following "
+                   "Bazel target:\n"
+                   ";;   " target "\n"
+                   ";; This file was generated from the following file:\n")
+           (insert ";;   " proto-file "\n")
+           (insert "\n;;; Code:\n\n")
+           (prin1 '(require 'cl-lib)) (terpri) (terpri)
+           (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
+           (dolist (dep deps)
+             (cl-check-type dep elisp/proto/simple-string)
+             (prin1 `(require ',(intern dep))) (terpri))
+           (when deps (terpri))
+           (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
+           (terpri) (terpri)
+           (dolist (message messages)
+             (cl-destructuring-bind (full-name . fields) message
+               (elisp/proto/generate-message full-name fields)))
+           (dolist (enum enums)
+             (cl-destructuring-bind (full-name . values) enum
+               (elisp/proto/generate-enum full-name values)))
+           (prin1 `(provide ',(intern feature))) (terpri) (terpri)
+           (insert ";; Local Variables:\n"
+                   ;; Generated docstrings can be overly long if they
+                   ;; contain lengthy message names.  Don’t issue
+                   ;; byte-compiler warnings for them.
+                   ";; byte-compile-docstring-max-column: 500\n"
+                   ";; End:\n\n"
+                   ";;; " output-name " ends here\n"))))))
   (_ (user-error (concat "Usage: elisp/proto/generate "
-                         "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE "
-                         "DEPENDENCIES..."))))
+                         "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE"))))
 
 ;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
 ;; Info node ‘(emacs) Specifying File Variables’.

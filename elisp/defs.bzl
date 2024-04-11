@@ -102,33 +102,55 @@ def _elisp_library_impl(ctx):
 def _elisp_proto_aspect_impl(target, ctx):
     """Aspect implementation for the “elisp_proto_aspect” aspect."""
     info = target[ProtoInfo]
-    deps = depset(transitive = [
-        depset(dep[EmacsLispInfo].source_files)
-        for dep in ctx.rule.attr.deps
-    ])
-    src = ctx.actions.declare_file(ctx.label.name + ".el")
+    srcs = []
+    for proto in info.direct_sources:
+        src = ctx.actions.declare_file(proto.basename + ".el", sibling = proto)
+        srcs.append(src)
+        args = ctx.actions.args()
+        args.add(info.direct_descriptor_set)
+        args.add(src)
+        args.add(str(ctx.label))
+        args.add(paths.relativize(proto.path, info.proto_source_root))
+        ctx.actions.run(
+            outputs = [src],
+            inputs = [info.direct_descriptor_set],
+            executable = ctx.executable._generate,
+            arguments = [args],
+            mnemonic = "GenElispProto",
+            progress_message = "Generating Emacs Lisp protocol buffer library %{output}",
+            toolchain = None,
+        )
+
+    # TODO: We probably shouldn’t generate this bundle, but right now it’s
+    # needed for compatibility.
+    bundle = ctx.actions.declare_file(ctx.label.name + ".el")
     args = ctx.actions.args()
     args.add(info.direct_descriptor_set)
-    args.add(src)
+    args.add(bundle)
     args.add(str(ctx.label))
-    args.add(_elisp_proto_feature(src))
-    args.add_all(deps, map_each = _elisp_proto_feature)
+    args.add(_elisp_proto_feature(bundle))
     ctx.actions.run(
-        outputs = [src],
+        outputs = [bundle],
         inputs = [info.direct_descriptor_set],
-        executable = ctx.executable._generate,
+        executable = ctx.executable._generate_bundle,
         arguments = [args],
-        mnemonic = "GenElispProto",
-        progress_message = "Generating Emacs Lisp protocol buffer library %{output}",
+        mnemonic = "GenElispProtoBundle",
+        progress_message = "Generating Emacs Lisp protocol buffer bundle %{output}",
         toolchain = None,
     )
-    load_path = []
+
+    load_dir = info.proto_source_root.removeprefix(ctx.bin_dir.path + "/")
+    if load_dir.startswith("external/"):
+        _, _, load_dir = load_dir.partition("/")
+        _, _, load_dir = load_dir.partition("/")
+    load_dir = "/" + check_relative_filename(load_dir)
+    load_path = [load_dir]
     if ctx.label.package == "src/google/protobuf":
         # See the comment in _elisp_proto_feature why we’re doing this.
         load_path.append(".")
     result = _compile(
         ctx = ctx,
-        srcs = [src],
+        srcs = srcs + [bundle],
         deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
         load_path = load_path,
         data = None,
@@ -143,7 +165,7 @@ def _elisp_proto_aspect_impl(target, ctx):
             extensions = ["el"],
         ),
         EmacsLispInfo(
-            source_files = [src],
+            source_files = srcs + [bundle],
             compiled_files = result.outs,
             load_path = result.load_path,
             data_files = ctx.rule.files.data,
@@ -362,6 +384,11 @@ _elisp_proto_aspect = aspect(
         ),
         "_generate": attr.label(
             default = Label("//elisp/proto:generate"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "_generate_bundle": attr.label(
+            default = Label("//elisp/proto:generate_bundle"),
             executable = True,
             cfg = "exec",
         ),
