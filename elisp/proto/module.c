@@ -2598,30 +2598,38 @@ static void ConvertMessageDescriptors(
   }
 }
 
-static void ConvertFileDescriptor(
-    struct Context ctx, const google_protobuf_FileDescriptorProto* file,
-    emacs_value* name, emacs_value* messages_list, emacs_value* enums_list) {
-  *name = MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
+// Helper function for ConvertFileDescriptorSet.  Returns a list of the form
+// (proto-file-name
+//  ((message-name field-name…)…)
+//  ((enumeration-name (enumerator-name value)…)…)).
+static emacs_value ConvertFileDescriptor(
+    struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
+  emacs_value name =
+      MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
+  emacs_value messages_list = Nil(ctx);
+  emacs_value enums_list = Nil(ctx);
   upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
   size_t messages_count;
   const google_protobuf_DescriptorProto* const* messages =
       google_protobuf_FileDescriptorProto_message_type(file, &messages_count);
   ConvertMessageDescriptors(ctx, package, messages_count, messages,
-                            messages_list, enums_list);
+                            &messages_list, &enums_list);
   size_t enums_count;
   const google_protobuf_EnumDescriptorProto* const* enums =
       google_protobuf_FileDescriptorProto_enum_type(file, &enums_count);
-  ConvertEnumDescriptors(ctx, package, enums_count, enums, enums_list);
+  ConvertEnumDescriptors(ctx, package, enums_count, enums, &enums_list);
+  // The helper functions have constructed the lists in reversed order.
+  messages_list = Nreverse(ctx, messages_list);
+  enums_list = Nreverse(ctx, enums_list);
+  return List3(ctx, name, messages_list, enums_list);
 }
 
 // Returns a list of the form
-// ((proto-file-name…)
-//  ((message-name field-name…)…)
-//  ((enumeration-name (enumerator-name value)…)…)).
+// ((proto-file-name
+//   ((message-name field-name…)…)
+//   ((enumeration-name (enumerator-name value)…)…))…).
 static emacs_value ConvertFileDescriptorSet(
     struct Context ctx, const google_protobuf_FileDescriptorSet* set) {
-  emacs_value messages_list = Nil(ctx);
-  emacs_value enums_list = Nil(ctx);
   size_t files_count;
   const google_protobuf_FileDescriptorProto* const* files =
       google_protobuf_FileDescriptorSet_file(set, &files_count);
@@ -2629,18 +2637,14 @@ static emacs_value ConvertFileDescriptorSet(
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* filenames = AllocateLispArray(ctx, files_count);
-  if (filenames == NULL && files_count > 0) return NULL;
+  emacs_value* array = AllocateLispArray(ctx, files_count);
+  if (array == NULL && files_count > 0) return NULL;
   for (size_t i = 0; i < files_count; ++i) {
-    ConvertFileDescriptor(ctx, files[i], &filenames[i], &messages_list,
-                          &enums_list);
+    array[i] = ConvertFileDescriptor(ctx, files[i]);
   }
-  emacs_value files_list = List(ctx, (ptrdiff_t)files_count, filenames);
-  free(filenames);
-  // The helper functions have constructed the lists in reversed order.
-  messages_list = Nreverse(ctx, messages_list);
-  enums_list = Nreverse(ctx, enums_list);
-  return List3(ctx, files_list, messages_list, enums_list);
+  emacs_value ret = List(ctx, (ptrdiff_t)files_count, array);
+  free(array);
+  return ret;
 }
 
 static bool RegisterFileDescriptorProto(
@@ -4294,9 +4298,9 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "SERIALIZED must be the serialized form of a\n"
         "google.protobuf.FileDescriptorSet message.\n"
         "Return a nested list\n"
-        "((PROTO-FILE-NAME...)\n"
-        " ((MESSAGE-FULL-NAME FIELD-NAME...)...)\n"
-        " ((ENUM-FULL-NAME (NAME VALUE)...)...)).\n"
+        "((PROTO-FILE-NAME\n"
+        "  ((MESSAGE-FULL-NAME FIELD-NAME...)...)\n"
+        "  ((ENUM-FULL-NAME (NAME VALUE)...)...))...).\n"
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",
