@@ -140,7 +140,7 @@ VALUES is a list of (NAME NUMBER) pairs."
                  ";;   " target "\n"
                  ";; This file was generated from the following files:\n")
          (dolist (file parsed)
-           (cl-destructuring-bind (name _messages _enums) file
+           (cl-destructuring-bind (name _descriptor _deps _messages _enums) file
              (cl-check-type name elisp/proto/simple-string)
              (insert ";;   " name "\n")))
          (insert "\n;;; Code:\n\n")
@@ -154,7 +154,7 @@ VALUES is a list of (NAME NUMBER) pairs."
                   ,serialized-file-descriptor-set))
          (terpri) (terpri)
          (dolist (file parsed)
-           (cl-destructuring-bind (_name messages enums) file
+           (cl-destructuring-bind (_name _descriptor _deps messages enums) file
              (dolist (message messages)
                (cl-destructuring-bind (full-name . fields) message
                  (elisp/proto/generate-message full-name fields)))
