@@ -2598,6 +2598,22 @@ static void ConvertMessageDescriptors(
   }
 }
 
+static void ConvertFileDescriptor(
+    struct Context ctx, const google_protobuf_FileDescriptorProto* file,
+    emacs_value* name, emacs_value* messages_list, emacs_value* enums_list) {
+  *name = MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
+  upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
+  size_t messages_count;
+  const google_protobuf_DescriptorProto* const* messages =
+      google_protobuf_FileDescriptorProto_message_type(file, &messages_count);
+  ConvertMessageDescriptors(ctx, package, messages_count, messages,
+                            messages_list, enums_list);
+  size_t enums_count;
+  const google_protobuf_EnumDescriptorProto* const* enums =
+      google_protobuf_FileDescriptorProto_enum_type(file, &enums_count);
+  ConvertEnumDescriptors(ctx, package, enums_count, enums, enums_list);
+}
+
 // Returns a list of the form
 // ((proto-file-name…)
 //  ((message-name field-name…)…)
@@ -2616,19 +2632,8 @@ static emacs_value ConvertFileDescriptorSet(
   emacs_value* filenames = AllocateLispArray(ctx, files_count);
   if (filenames == NULL && files_count > 0) return NULL;
   for (size_t i = 0; i < files_count; ++i) {
-    const google_protobuf_FileDescriptorProto* file = files[i];
-    filenames[i] =
-        MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
-    upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
-    size_t messages_count;
-    const google_protobuf_DescriptorProto* const* messages =
-        google_protobuf_FileDescriptorProto_message_type(file, &messages_count);
-    ConvertMessageDescriptors(ctx, package, messages_count, messages,
-                              &messages_list, &enums_list);
-    size_t enums_count;
-    const google_protobuf_EnumDescriptorProto* const* enums =
-        google_protobuf_FileDescriptorProto_enum_type(file, &enums_count);
-    ConvertEnumDescriptors(ctx, package, enums_count, enums, &enums_list);
+    ConvertFileDescriptor(ctx, files[i], &filenames[i], &messages_list,
+                          &enums_list);
   }
   emacs_value files_list = List(ctx, (ptrdiff_t)files_count, filenames);
   free(filenames);
