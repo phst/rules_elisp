@@ -1059,7 +1059,7 @@ def _binary(ctx, *, srcs, tags, args):
         fatal_warnings = ctx.attr.fatal_warnings,
     )
     toolchain = ctx.toolchains[Label("//elisp:toolchain_type")]
-    emacs = toolchain.emacs
+    emacs = toolchain.emacs[DefaultInfo]
 
     # Only pass in data files when needed.
     data_files_for_manifest = (
@@ -1118,7 +1118,7 @@ def _binary(ctx, *, srcs, tags, args):
         ctx,
         header = "elisp/binary.h",
         args = [
-            "--wrapper=" + runfile_location(ctx, emacs[DefaultInfo].files_to_run.executable),
+            "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
             "--mode=" + ("wrap" if toolchain.wrap else "direct"),
         ] + [
             "--rule-tag=" + tag
@@ -1135,13 +1135,13 @@ def _binary(ctx, *, srcs, tags, args):
         ] + args,
     )
     bin_runfiles = ctx.runfiles(
-        files = [emacs[DefaultInfo].files_to_run.executable] + result.outs,
+        files = [emacs.files_to_run.executable] + result.outs,
         transitive_files = depset(
             transitive = [transitive_files, result.runfiles.files],
         ),
         root_symlinks = links,
     )
-    emacs_runfiles = emacs[DefaultInfo].default_runfiles
+    emacs_runfiles = emacs.default_runfiles
     runfiles = bin_runfiles.merge(emacs_runfiles).merge(launcher_runfiles)
     return executable, runfiles
 
