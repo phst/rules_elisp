@@ -1,6 +1,6 @@
 ;;; proto-test.el --- unit tests for protocol buffer support  -*- lexical-binding: t; -*-
 
-;; Copyright 2022, 2023 Google LLC
+;; Copyright 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -931,9 +931,9 @@
          (set (google/protobuf/FileDescriptorSet-new :file (list file)))
          (serialized (elisp/proto/serialize set)))
     (should (equal (elisp/proto/parse-file-descriptor-set serialized)
-                   '(("test.proto")
-                     (("test.Message" field))
-                     (("test.Enum" (VALUE 77)))))))
+                   '(("test.proto"
+                      (("test.Message" field))
+                      (("test.Enum" (VALUE 77))))))))
   (should-error (elisp/proto/parse-file-descriptor-set "garbage")))
 
 (ert-deftest elisp/proto/reload ()

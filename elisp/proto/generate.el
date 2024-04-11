@@ -121,52 +121,54 @@ VALUES is a list of (NAME NUMBER) pairs."
           (parsed (elisp/proto/parse-file-descriptor-set
                    serialized-file-descriptor-set)))
      (cl-check-type output-name elisp/proto/simple-string)
-     (cl-destructuring-bind (files messages enums) parsed
-       (with-temp-file (concat "/:" output-file)
-         (let ((standard-output (current-buffer))
-               (print-level nil)
-               (print-length nil)
-               (print-circle t)
-               (print-gensym t)
-               (print-escape-control-characters t)
-               (print-escape-newlines t)
-               (print-escape-nonascii t)
-               (pp-escape-newlines t))
-           (insert ";;; " output-name " --- protocol buffer library " target
-                   " -*- lexical-binding: t; -*-\n\n"
-                   ";;; Commentary:\n\n"
-                   ";; A generated protocol buffer library.\n"
-                   ";; This library corresponds to the the following "
-                   "Bazel target:\n"
-                   ";;   " target "\n"
-                   ";; This file was generated from the following files:\n")
-           (dolist (file files)
-             (cl-check-type file elisp/proto/simple-string)
-             (insert ";;   " file "\n"))
-           (insert "\n;;; Code:\n\n")
-           (prin1 '(require 'cl-lib)) (terpri) (terpri)
-           (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
-           (dolist (dep dependencies)
-             (cl-check-type dep elisp/proto/simple-string)
-             (prin1 `(require ',(intern dep))) (terpri))
-           (when dependencies (terpri))
-           (prin1 `(elisp/proto/register-file-descriptor-set
-                    ,serialized-file-descriptor-set))
-           (terpri) (terpri)
-           (dolist (message messages)
-             (cl-destructuring-bind (full-name . fields) message
-               (elisp/proto/generate-message full-name fields)))
-           (dolist (enum enums)
-             (cl-destructuring-bind (full-name . values) enum
-               (elisp/proto/generate-enum full-name values)))
-           (prin1 `(provide ',(intern feature))) (terpri) (terpri)
-           (insert ";; Local Variables:\n"
-                   ;; Generated docstrings can be overly long if they contain
-                   ;; lengthy message names.  Don’t issue byte-compiler warnings
-                   ;; for them.
-                   ";; byte-compile-docstring-max-column: 500\n"
-                   ";; End:\n\n"
-                   ";;; " output-name " ends here\n"))))))
+     (with-temp-file (concat "/:" output-file)
+       (let ((standard-output (current-buffer))
+             (print-level nil)
+             (print-length nil)
+             (print-circle t)
+             (print-gensym t)
+             (print-escape-control-characters t)
+             (print-escape-newlines t)
+             (print-escape-nonascii t)
+             (pp-escape-newlines t))
+         (insert ";;; " output-name " --- protocol buffer library " target
+                 " -*- lexical-binding: t; -*-\n\n"
+                 ";;; Commentary:\n\n"
+                 ";; A generated protocol buffer library.\n"
+                 ";; This library corresponds to the the following "
+                 "Bazel target:\n"
+                 ";;   " target "\n"
+                 ";; This file was generated from the following files:\n")
+         (dolist (file parsed)
+           (cl-destructuring-bind (name _messages _enums) file
+             (cl-check-type name elisp/proto/simple-string)
+             (insert ";;   " name "\n")))
+         (insert "\n;;; Code:\n\n")
+         (prin1 '(require 'cl-lib)) (terpri) (terpri)
+         (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
+         (dolist (dep dependencies)
+           (cl-check-type dep elisp/proto/simple-string)
+           (prin1 `(require ',(intern dep))) (terpri))
+         (when dependencies (terpri))
+         (prin1 `(elisp/proto/register-file-descriptor-set
+                  ,serialized-file-descriptor-set))
+         (terpri) (terpri)
+         (dolist (file parsed)
+           (cl-destructuring-bind (_name messages enums) file
+             (dolist (message messages)
+               (cl-destructuring-bind (full-name . fields) message
+                 (elisp/proto/generate-message full-name fields)))
+             (dolist (enum enums)
+               (cl-destructuring-bind (full-name . values) enum
+                 (elisp/proto/generate-enum full-name values)))))
+         (prin1 `(provide ',(intern feature))) (terpri) (terpri)
+         (insert ";; Local Variables:\n"
+                 ;; Generated docstrings can be overly long if they contain
+                 ;; lengthy message names.  Don’t issue byte-compiler warnings
+                 ;; for them.
+                 ";; byte-compile-docstring-max-column: 500\n"
+                 ";; End:\n\n"
+                 ";;; " output-name " ends here\n")))))
   (_ (user-error (concat "Usage: elisp/proto/generate "
                          "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE "
                          "DEPENDENCIES..."))))
