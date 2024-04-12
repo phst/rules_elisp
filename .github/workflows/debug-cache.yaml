@@ -32,7 +32,6 @@ jobs:
       - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
-          bazel-version: latest
           github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Build Emacs
         shell: pwsh

@@ -19,11 +19,12 @@
 Mimics a trivial version of Make."""
 
 import argparse
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 import functools
 import io
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import subprocess
@@ -46,11 +47,16 @@ def target(func: _Target) -> _Target:
 
 
 def _run(args: Sequence[str | pathlib.Path], *,
-         cwd: Optional[pathlib.Path] = None) -> None:
+         cwd: Optional[pathlib.Path] = None,
+         env: Optional[Mapping[str, str]] = None) -> None:
     if cwd:
         print('cd', shlex.quote(str(cwd)), '&&', end=' ')
+    env = env or None
+    if env is not None:
+        print(*(f'{k}={shlex.quote(v)}' for k, v in env.items()), end=' ')
+        env = dict(os.environ, **env)
     print(_quote(args))
-    subprocess.run(args, check=True, cwd=cwd)
+    subprocess.run(args, check=True, cwd=cwd, env=env)
 
 
 class Builder:
@@ -58,9 +64,9 @@ class Builder:
 
     def __init__(self, *,
                  profiles: Optional[pathlib.Path]) -> None:
-        bazel = shutil.which('bazelisk') or shutil.which('bazel')
+        bazel = shutil.which('bazelisk')
         if not bazel:
-            raise FileNotFoundError('neither Bazelisk nor Bazel found')
+            raise FileNotFoundError('Bazelisk not found')
         self._bazel = pathlib.Path(bazel)
         self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
@@ -91,6 +97,7 @@ class Builder:
         # Test both default toolchain and versioned toolchains.
         self.test()
         self.versions()
+        self.bazels()
         self.ext()
 
     @target
@@ -140,8 +147,35 @@ class Builder:
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain',
                        profile=version)
 
+    @target
+    def bazels(self) -> None:
+        """Runs the Bazel tests for all supported Bazel versions."""
+        for version in sorted(_BAZEL_VERSIONS):
+            self._test(profile=f'bazel-{version}', bazel_version=version)
+
     def _test(self, *args: str, profile: str,
-              cwd: Optional[pathlib.Path] = None) -> None:
+              cwd: Optional[pathlib.Path] = None,
+              bazel_version: str = 'latest') -> None:
+        # The lockfile format differs between the Bazel versions, so only for
+        # one version --lockfile_mode=error can work.  --lockfile_mode=update
+        # would be useless on GitHub since we never use the updated lockfiles,
+        # so switch lockfiles off entirely in other Bazel versions.
+        if bazel_version == 'latest':
+            # Assume Bazel that’s new enough.
+            bzlmod = True
+            bwtb = True
+            lockfile_mode = 'error'
+        else:
+            match = re.match(r'(\d+)\.(\d+)', bazel_version, re.ASCII)
+            if not match:
+                raise ValueError(f'invalid version string {bazel_version}')
+            version = (int(match[1]), int(match[2]))
+            # Don’t enable Build without the Bytes in Bazel versions affected by
+            # https://github.com/bazelbuild/bazel/issues/19143 and
+            # https://github.com/bazelbuild/bazel/issues/20408.  We can enable
+            # it unconditionally once we drop support for these versions.
+            bwtb = version >= (6, 5)
+            lockfile_mode = 'off'
         for bzlmod in (True, False):
             prefix = '' if bzlmod else 'no'
             options = [f'--{prefix}enable_bzlmod']
@@ -153,8 +187,13 @@ class Builder:
                     '--experimental_announce_profile_path',
                     '--profile=' + str(profile_file),
                 ]
+            if bwtb and self._github:
+                options.append('--remote_download_minimal')
+            if self._github:
+                options.append(f'--lockfile_mode={lockfile_mode}')
             options.extend(args)
-            _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd)
+            _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd,
+                 env={'USE_BAZEL_VERSION': bazel_version})
 
     @target
     def ext(self) -> None:
@@ -175,6 +214,9 @@ class Builder:
 
 # All potentially supported Emacs versions.
 _VERSIONS = frozenset({'28.1', '28.2', '29.1', '29.2', '29.3'})
+
+# Selection of supported Bazel versions.
+_BAZEL_VERSIONS = frozenset({'6.3.2', '6.5.0', '7.1.1', 'latest'})
 
 
 def main() -> None:
