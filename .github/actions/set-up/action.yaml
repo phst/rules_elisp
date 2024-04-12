@@ -16,9 +16,6 @@ name: Set up Bazel workspace
 description: Install necessary dependencies and load remote caches
 
 inputs:
-  bazel:
-    description: Bazel version to use
-    required: false
   cc:
     description: C/C++ compiler to use
     required: false
@@ -37,14 +34,6 @@ runs:
       with:
         bazelrc: |
           common --config=ci
-          # The lockfile format differs between the Bazel versions, so only for
-          # one version --lockfile_mode=error can work.  --lockfile_mode=update
-          # would be useless since we never use the updated lockfiles, so switch
-          # lockfiles off entirely in other Bazel versions.
-          common --lockfile_mode=${{case(inputs.bazel == '', 'error', 'off')}}
-          # --omit_run_args was added in Bazel 9.
-          # FIXME: Add it unconditionally once we drop support for Bazel 8.
-          ${{case(inputs.bazel == '', '', '# ')}}run --noomit_run_args
           # See https://bazel.build/configure/windows#clang for how to configure
           # Bazel to use Clang on Windows.
           ${{
@@ -52,7 +41,7 @@ runs:
                  'build --config=clang-cl', '')
           }}
         # Use disk cache to speed up runs.
-        disk-cache: ${{inputs.bazel || 'default'}}-${{inputs.cc}}
+        disk-cache: ${{inputs.cc}}
         repository-cache: true
     - id: msys2
       name: Install MSYS2
@@ -107,14 +96,6 @@ runs:
           'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe',
           'EMACS=${{steps.msys2.outputs.msys2-location}}\mingw64\bin\emacs.exe'
         )
-    - name: Override Bazel version
-      if: inputs.bazel
-      shell: pwsh
-      run: >-
-        Add-Content
-        -Verbose
-        -LiteralPath $Env:GITHUB_ENV
-        -Value 'USE_BAZEL_VERSION=${{inputs.bazel}}'
     - name: Override C/C++ compiler
       if: runner.os != 'Windows'
       shell: bash

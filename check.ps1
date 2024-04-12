@@ -25,11 +25,11 @@ $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
 $candidates = @(
-    Get-Command -Name bazelisk, bazel -Type Application, ExternalScript
+    Get-Command -Name bazelisk -Type Application, ExternalScript
 )
 
 if (! $candidates) {
-    throw 'neither Bazelisk nor Bazel found'
+    throw 'Bazelisk not found'
 }
 
 $bazel = $candidates[0].Path
@@ -49,9 +49,17 @@ function Run-Tests {
 # All supported Emacs major versions.
 $versions = '30', '31'
 
+# Selection of supported non-default Bazel versions.
+$bazelVersions = '8.1.0', '8.x'
+
 $VerbosePreference = 'Continue'
 
 Set-Location -Path $PSScriptRoot
+
+if (Test-Path Env:USE_BAZEL_VERSION) {
+    Write-Warning -Message 'Removing environment variable USE_BAZEL_VERSION'
+    Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+}
 
 # Test both default toolchain and versioned toolchains.
 Run-Tests
@@ -68,6 +76,27 @@ Run-Tests '--extra_toolchains=//elisp:local_toolchain'
 
 Run-Bazel 'mod' 'graph' > $null
 
+# Run the Bazel tests for all supported Bazel versions.
+foreach ($version in $bazelVersions) {
+    New-Item -Verbose -Path Env: -Name USE_BAZEL_VERSION -Value $version
+    # The lockfile format differs between the Bazel versions, so only for one
+    # version --lockfile_mode=error can work.  --lockfile_mode=update would be
+    # useless in GitHub since we never use the updated lockfiles, so switch
+    # lockfiles off entirely in other Bazel versions.
+    Run-Tests '--lockfile_mode=off'
+    Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+}
+
 Join-Path -Path examples -ChildPath ext | Set-Location
 Run-Tests
 Run-Bazel 'mod' 'graph' > $null
+
+foreach ($version in $bazelVersions) {
+    New-Item -Verbose -Path Env: -Name USE_BAZEL_VERSION -Value $version
+    # The lockfile format differs between the Bazel versions, so only for one
+    # version --lockfile_mode=error can work.  --lockfile_mode=update would be
+    # useless in GitHub since we never use the updated lockfiles, so switch
+    # lockfiles off entirely in other Bazel versions.
+    Run-Tests '--lockfile_mode=off'
+    Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+}

@@ -27,12 +27,9 @@ jobs:
     name: Test
     strategy:
       matrix:
-        # We don’t use the GitHub matrix support for the Emacs toolchain to
-        # allow Bazel to cache intermediate results between the test runs.
-        bazel:
-          - '8.1.0'
-          - '8.x'
-          - ''  # use .bazelversion
+        # We don’t use the GitHub matrix support for the Emacs toolchain and the
+        # Bazel version to allow Bazel to cache intermediate results between the
+        # test runs.
         os:
           - ubuntu-latest
           - macos-latest
@@ -60,7 +57,6 @@ jobs:
       - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
-          bazel: ${{matrix.bazel}}
           cc: ${{matrix.cc}}
       - name: Run Bazel tests
         shell: pwsh
