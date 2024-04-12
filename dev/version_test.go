@@ -166,8 +166,9 @@ type dependency struct {
 
 func addLegacyDependencies(t *testing.T, r map[string]dependency, file *build.File, dev bool) {
 	modulesByRepoName := map[string]string{
-		"bazel-gazelle": "gazelle",
-		"bazel-skylib":  "bazel_skylib",
+		"bazel-gazelle":       "gazelle",
+		"bazel-skylib":        "bazel_skylib",
+		"buildifier-prebuilt": "buildifier_prebuilt",
 	}
 	f := func(x build.Expr, stk []build.Expr) error {
 		call, ok := x.(*build.CallExpr)
