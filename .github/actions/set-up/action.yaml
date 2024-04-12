@@ -104,6 +104,7 @@ runs:
         build --experimental_convenience_symlinks=ignore
         build --show_result=0
         build --nostamp
+        build --experimental_repository_cache_hardlinks
         test --test_output=errors
         EOF
         # BAZELISK_GITHUB_TOKEN: See
