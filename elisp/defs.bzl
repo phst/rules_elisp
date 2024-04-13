@@ -908,13 +908,10 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             ))
 
         # At least some of the sources must be reachable from the directory.
-        # FIXME: Ugly special-casing necessary for built-in protocol buffer
-        # libraries since they unexpectedly generate source files in external
-        # repositories.
         prefix = "./" if dir == "." else "./" + dir + "/"
-        if dir != "src/google/protobuf" and not any([("./" + src.short_path).startswith(prefix) for src in srcs]):
+        if not any([("./" + repository_relative_filename(src)).startswith(prefix) for src in srcs]):
             fail("None of the files [{}] are reachable from load path directory {}"
-                .format(", ".join([src.short_path for src in srcs]), dir))
+                .format(", ".join([repository_relative_filename(src) for src in srcs]), dir))
 
         # If we’re compiling source files from another package, we need to
         # insert the output base directory for this rule.  In that case, we
@@ -973,7 +970,7 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             ctx.actions.declare_file(
                 paths.join(
                     _OUTPUT_DIR,
-                    paths.replace_extension(src.short_path, ".elc"),
+                    paths.replace_extension(repository_relative_filename(src), ".elc"),
                 ),
             ) if relocate_output else ctx.actions.declare_file(
                 paths.replace_extension(src.basename, ".elc"),
