@@ -34,6 +34,7 @@ func TestDependencyVersions(t *testing.T) {
 		t.Fatal(err)
 	}
 	commitHashVersionRegexp := regexp.MustCompile(`^[.\d]+-\d+-([[:xdigit:]]+)$`)
+	versionSuffixRegexp := regexp.MustCompile(`\.bcr\.\d+$`)
 	moduleDeps := make(map[string]dependency)
 	moduleOnlyDeps := []string{
 		// Only used as an example.
@@ -47,7 +48,7 @@ func TestDependencyVersions(t *testing.T) {
 	}
 	for _, rule := range moduleFile.Rules("bazel_dep") {
 		name := rule.Name()
-		version := rule.AttrString("version")
+		version := versionSuffixRegexp.ReplaceAllLiteralString(rule.AttrString("version"), "")
 		dev := rule.AttrLiteral("dev_dependency") == "True"
 		if name == "" {
 			t.Fatalf("invalid bazel_dep rule %q", name)

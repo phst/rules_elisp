@@ -146,10 +146,6 @@ load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
 
-load("@upb//bazel:workspace_deps.bzl", "upb_deps")
-
-upb_deps()
-
 http_archive(
     name = "io_abseil_py",
     sha256 = "480faf554f57e1f1e82700d811fd9ec3658cfd5bd43ed644cf7243a82343734e",

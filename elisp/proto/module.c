@@ -135,10 +135,11 @@
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wconversion"
 #  pragma GCC diagnostic ignored "-Wsign-conversion"
+#  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 #ifdef _MSC_VER
 #  pragma warning(push, 3)
-#  pragma warning(disable : 4090 4244 4267 4334)
+#  pragma warning(disable : 4090 4098 4244 4267 4334)
 #endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
@@ -152,13 +153,13 @@
 #include "upb/base/descriptor_constants.h"
 #include "upb/base/status.h"
 #include "upb/base/string_view.h"
-#include "upb/collections/array.h"
-#include "upb/collections/map.h"
+#include "upb/base/upcast.h"
 #include "upb/json/decode.h"
 #include "upb/json/encode.h"
 #include "upb/mem/arena.h"
+#include "upb/message/array.h"
+#include "upb/message/map.h"
 #include "upb/message/message.h"
-#include "upb/message/types.h"
 #include "upb/reflection/def.h"
 #include "upb/reflection/message.h"
 #include "upb/text/encode.h"
@@ -3725,7 +3726,7 @@ static emacs_value MakeTimestamp(emacs_env* env,
   }
   if (!SetTimestampProto(ctx, msg, args[0])) return NULL;
   return MakeMessageStruct(ctx, arena, GlobalSymbol(ctx, kTimestampNew), def,
-                           msg, true);
+                           UPB_UPCAST(msg), true);
 }
 
 static emacs_value MakeDuration(emacs_env* env,
@@ -3744,7 +3745,7 @@ static emacs_value MakeDuration(emacs_env* env,
   }
   if (!SetDurationProto(ctx, msg, args[0])) return NULL;
   return MakeMessageStruct(ctx, arena, GlobalSymbol(ctx, kDurationNew), def,
-                           msg, true);
+                           UPB_UPCAST(msg), true);
 }
 
 static emacs_value PackAny(emacs_env* env,
@@ -3771,7 +3772,7 @@ static emacs_value PackAny(emacs_env* env,
   if (type_url.data == NULL || serialized.data == NULL) return NULL;
   google_protobuf_Any_set_type_url(any, View(type_url));
   google_protobuf_Any_set_value(any, View(serialized));
-  return MakeMutableMessage(ctx, arena, any_def, any);
+  return MakeMutableMessage(ctx, arena, any_def, UPB_UPCAST(any));
 }
 
 static emacs_value UnpackAny(emacs_env* env,

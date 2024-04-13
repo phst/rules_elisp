@@ -87,20 +87,10 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_protobuf",
-        patches = [Label("//:protobuf.patch")],
-        sha256 = "9776a431a6fd0730c85c7c083cf1cde7d6774d3f4afdb18cc6f34cbe5687e236",
-        strip_prefix = "protobuf-23.1/",
+        sha256 = "288d3b95e17d7890921d7bf3ea02361faf638bb1370afaf5cfbc4da01d19496c",
+        strip_prefix = "protobuf-26.0/",
         urls = [
-            "https://github.com/protocolbuffers/protobuf/releases/download/v23.1/protobuf-23.1.zip",  # 2023-05-16
-        ],
-    )
-    maybe(
-        http_archive,
-        name = "upb",
-        sha256 = "f2f22ecea7c60f4ef989a91744f2a3ab5bad532b0b14b9f320fe4b37d0aa6b09",
-        strip_prefix = "upb-e7430e66d6e51def2a88f0b66fdab62b0d9492c1/",
-        urls = [
-            "https://github.com/protocolbuffers/upb/archive/e7430e66d6e51def2a88f0b66fdab62b0d9492c1.zip",  # 2023-09-07
+            "https://github.com/protocolbuffers/protobuf/releases/download/v26.0/protobuf-26.0.zip",  # 2024-03-12
         ],
     )
     non_module_deps(name = "phst_rules_elisp_deps")
