@@ -12,8 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("@rules_proto//proto:defs.bzl", "proto_library")
-load("@upb//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
 
@@ -141,18 +141,16 @@ elisp_cc_module(
         "//emacs:module_header",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/base:core_headers",
-        "@upb",
-        "@upb//:collections",
-        "@upb//:descriptor_upb_proto",
-        "@upb//:json",
-        "@upb//:message",
-        "@upb//:reflection",
-        "@upb//:wire",
-        "@upb//upb/base",
-        "@upb//upb/mem",
-        "@upb//upb/message:types",
-        "@upb//upb/text",
-        "@upb//upb/util:required_fields",
+        "@com_google_protobuf//upb:descriptor_upb_proto",
+        "@com_google_protobuf//upb:json",
+        "@com_google_protobuf//upb:message",
+        "@com_google_protobuf//upb:reflection",
+        "@com_google_protobuf//upb:wire",
+        "@com_google_protobuf//upb/base",
+        "@com_google_protobuf//upb/mem",
+        "@com_google_protobuf//upb/message:types",
+        "@com_google_protobuf//upb/text",
+        "@com_google_protobuf//upb/util:required_fields",
     ],
 )
 
