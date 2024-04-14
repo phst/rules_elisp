@@ -29,14 +29,10 @@ jobs:
       matrix:
         # We don’t use the GitHub matrix support for the Emacs toolchain to
         # allow Bazel to cache intermediate results between the test runs.
-        bazel: [6.0.0, 6.3.2, 6.5.0, 7.1.1, latest]
+        bazel: [6.3.2, 6.5.0, 7.1.1, latest]
         os: [ubuntu-latest, macos-latest, windows-latest]
         cc: [gcc, clang, msvc]
         exclude:
-          # We can’t support older Bazel versions on Windows due to
-          # https://github.com/bazelbuild/bazel/issues/15073.
-          - bazel: 6.0.0
-            os: windows-latest
           # Visual C++ works only on Windows.  Windows doesn’t use the CC
           # environment variable and always uses Visual C++ by default.
           - os: ubuntu-latest
@@ -71,10 +67,6 @@ jobs:
           echo common
           --lockfile_mode=${{matrix.bazel == 'latest' && 'error' || 'off'}}>>
           github.bazelrc
-        # The --lockfile_mode flag was introduced in Bazel 6.2.
-        if: >-
-          !startsWith(matrix.bazel, '6.0.') &&
-          !startsWith(matrix.bazel, '6.1.')
       - name: Run Bazel tests
         shell: pwsh
         run: python build.py --profiles='${{runner.temp}}/profiles' -- check
