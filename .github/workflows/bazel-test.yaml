@@ -27,9 +27,9 @@ jobs:
     name: Test
     strategy:
       matrix:
-        # We don’t use the GitHub matrix support for the Emacs toolchain to
-        # allow Bazel to cache intermediate results between the test runs.
-        bazel: [6.3.2, 6.5.0, 7.1.1, latest]
+        # We don’t use the GitHub matrix support for the Emacs toolchain and the
+        # Bazel version to allow Bazel to cache intermediate results between the
+        # test runs.
         os: [ubuntu-latest, macos-latest, windows-latest]
         cc: [gcc, clang, msvc]
         exclude:
@@ -54,19 +54,8 @@ jobs:
       - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
-          bazel-version: ${{matrix.bazel}}
           cc: ${{matrix.cc}}
           github-token: ${{secrets.GITHUB_TOKEN}}
-      - name: Set lockfile mode
-        # The lockfile format differs between the Bazel versions, so only for
-        # one version --lockfile_mode=error can work.  --lockfile_mode=update
-        # would be useless since we never use the updated lockfiles, so switch
-        # lockfiles off entirely in other Bazel versions.
-        shell: bash
-        run: >-
-          echo common
-          --lockfile_mode=${{matrix.bazel == 'latest' && 'error' || 'off'}}>>
-          github.bazelrc
       - name: Run Bazel tests
         shell: pwsh
         run: python build.py --profiles='${{runner.temp}}/profiles' -- check
@@ -74,7 +63,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: >-
-            profiles for Bazel version ${{matrix.bazel}} on ${{runner.os}}
-            compiled with ${{matrix.cc}}
+            profiles on ${{runner.os}} compiled with ${{matrix.cc}}
           path: ${{runner.temp}}/profiles/*.json.gz
           if-no-files-found: ignore
