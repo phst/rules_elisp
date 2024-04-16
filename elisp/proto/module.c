@@ -4379,7 +4379,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
               "Required protocol buffer field not present");
   DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error");
   DefineError(ctx, kParseError,
-              "Error parse serialized protocol buffer message");
+              "Error parsing serialized protocol buffer message");
   DefineError(ctx, kSerializeError,
               "Error serializing protocol buffer message");
   DefineError(ctx, kJsonParseError,
