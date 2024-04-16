@@ -109,7 +109,6 @@ def _elisp_proto_aspect_impl(target, ctx):
         args = ctx.actions.args()
         args.add(info.direct_descriptor_set)
         args.add(src)
-        args.add(str(ctx.label))
         args.add(paths.relativize(proto.path, info.proto_source_root))
         ctx.actions.run(
             outputs = [src],

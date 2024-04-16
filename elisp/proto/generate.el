@@ -20,7 +20,7 @@
 ;;
 ;; Usage:
 ;;
-;;   elisp/proto/generate DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE
+;;   elisp/proto/generate DESCRIPTOR-FILE OUTPUT-FILE FEATURE
 
 ;;; Code:
 
@@ -105,9 +105,8 @@ VALUES is a list of (NAME NUMBER) pairs."
   (terpri))
 
 (pcase command-line-args-left
-  (`(,descriptor-file ,output-file ,target ,feature)
+  (`(,descriptor-file ,output-file ,feature)
    (setq command-line-args-left nil)
-   (cl-check-type target elisp/proto/simple-string)
    (cl-check-type feature elisp/proto/simple-string)
    (let* ((coding-system-for-read 'utf-8-unix)
           (coding-system-for-write 'utf-8-unix)
@@ -136,13 +135,10 @@ VALUES is a list of (NAME NUMBER) pairs."
              (pp-escape-newlines t))
          (cl-destructuring-bind (proto-file descriptor deps messages enums) info
            (cl-assert (string-equal proto-file feature) :show-args)
-           (insert ";;; " output-name " --- protocol buffer library " target
+           (insert ";;; " output-name " --- protocol buffer library " proto-file
                    " -*- lexical-binding: t; -*-\n\n"
                    ";;; Commentary:\n\n"
                    ";; A generated protocol buffer library.\n"
-                   ";; This library corresponds to the the following "
-                   "Bazel target:\n"
-                   ";;   " target "\n"
                    ";; This file was generated from the following file:\n")
            (insert ";;   " proto-file "\n")
            (insert "\n;;; Code:\n\n")
@@ -169,7 +165,7 @@ VALUES is a list of (NAME NUMBER) pairs."
                    ";; End:\n\n"
                    ";;; " output-name " ends here\n"))))))
   (_ (user-error (concat "Usage: elisp/proto/generate "
-                         "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE"))))
+                         "DESCRIPTOR-FILE OUTPUT-FILE FEATURE"))))
 
 ;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
 ;; Info node ‘(emacs) Specifying File Variables’.
