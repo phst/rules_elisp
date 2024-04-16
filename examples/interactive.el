@@ -1,6 +1,6 @@
 ;;; interactive.el --- example for an interactive Emacs session  -*- lexical-binding: t; -*-
 
-;; Copyright 2022 Google LLC
+;; Copyright 2022, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -23,6 +23,6 @@
 
 (require 'elisp/proto/proto)
 (require 'elisp/runfiles/runfiles)
-(require 'examples/example_proto)
+(require 'examples/example.proto)
 
 ;;; interactive.el ends here
