@@ -31,8 +31,10 @@ emacs_binary(
     name = "emacs",
     srcs = ["[src]"],
     builtin_features = "builtin_features.json",
+    mode = "[mode]",
     module_header = "emacs-module.h",
     strip_prefix = "[strip_prefix]",
+    target_compatible_with = [[compatible_with]],
     visibility = ["[emacs_pkg]"],
 )
 

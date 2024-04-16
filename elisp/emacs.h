@@ -44,7 +44,12 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(std::string_view install,
+struct Params {
+  std::string_view mode;
+  std::string_view install;
+};
+
+absl::StatusOr<int> Main(Params params,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

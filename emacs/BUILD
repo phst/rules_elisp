@@ -53,43 +53,64 @@ py_test(
 
 alias(
     name = "module_header",
-    actual = "@gnu_emacs_29.3//:module_header",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:module_header",
+        "//conditions:default": "@gnu_emacs_29.3//:module_header",
+    }),
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "builtin_features",
-    actual = "@gnu_emacs_29.3//:builtin_features",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:builtin_features",
+        "//conditions:default": "@gnu_emacs_29.3//:builtin_features",
+    }),
     visibility = ["//gazelle:__pkg__"],
 )
 
 alias(
     name = "emacs_28.1",
-    actual = "@gnu_emacs_28.1//:emacs",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_28.1//:emacs",
+        "//conditions:default": "@gnu_emacs_28.1//:emacs",
+    }),
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "emacs_28.2",
-    actual = "@gnu_emacs_28.2//:emacs",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_28.2//:emacs",
+        "//conditions:default": "@gnu_emacs_28.2//:emacs",
+    }),
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "emacs_29.1",
-    actual = "@gnu_emacs_29.1//:emacs",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.1//:emacs",
+        "//conditions:default": "@gnu_emacs_29.1//:emacs",
+    }),
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "emacs_29.2",
-    actual = "@gnu_emacs_29.2//:emacs",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.2//:emacs",
+        "//conditions:default": "@gnu_emacs_29.2//:emacs",
+    }),
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "emacs_29.3",
-    actual = "@gnu_emacs_29.3//:emacs",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:emacs",
+        "//conditions:default": "@gnu_emacs_29.3//:emacs",
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -136,6 +157,11 @@ alias(
         "@gnu_emacs_29.1//:__pkg__",
         "@gnu_emacs_29.2//:__pkg__",
         "@gnu_emacs_29.3//:__pkg__",
+        "@gnu_emacs_windows_28.1//:__pkg__",
+        "@gnu_emacs_windows_28.2//:__pkg__",
+        "@gnu_emacs_windows_29.1//:__pkg__",
+        "@gnu_emacs_windows_29.2//:__pkg__",
+        "@gnu_emacs_windows_29.3//:__pkg__",
     ],
 )
 
@@ -180,5 +206,10 @@ cc_defaults(
         "@gnu_emacs_29.1//:__pkg__",
         "@gnu_emacs_29.2//:__pkg__",
         "@gnu_emacs_29.3//:__pkg__",
+        "@gnu_emacs_windows_28.1//:__pkg__",
+        "@gnu_emacs_windows_28.2//:__pkg__",
+        "@gnu_emacs_windows_29.1//:__pkg__",
+        "@gnu_emacs_windows_29.2//:__pkg__",
+        "@gnu_emacs_windows_29.3//:__pkg__",
     ],
 )

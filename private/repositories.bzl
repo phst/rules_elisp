@@ -24,22 +24,27 @@ def non_module_deps():
     _emacs(
         version = "28.1",
         integrity = "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
+        windows_integrity = "sha384-TB/aHtif+AWx5PE7gx+4kasLmnX9vUJwcph/HmUPmHfq9m7amsgcJ0zv107hla0o",
     )
     _emacs(
         version = "28.2",
         integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+        windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
     )
     _emacs(
         version = "29.1",
         integrity = "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
+        windows_integrity = "sha384-A0UjZuyAE97UyQHUqNGKmYUqhNZi5K46tG5PIB4hiWiKPQ9UPQA92k3zZwe3+ab9",
     )
     _emacs(
         version = "29.2",
         integrity = "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
+        windows_integrity = "sha384-vLpxklmtKw9Xb6DADhx7Xq+ojBiOKHtlMraMqi9bCHz8V3JlGBPBJmdcqgKjT3hs",
     )
     _emacs(
         version = "29.3",
         integrity = "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
+        windows_integrity = "sha384-Zdo9uJEsrI53M7/5g7OqIPcSPX1sBLNMbhnOSN88W+x5fwcshZSBgRy4l1IdO1P6",
     )
 
 def _non_module_dev_deps_impl(ctx):
@@ -104,13 +109,27 @@ the library.""",
     ),
 }
 
-def _emacs(*, version, integrity):
+def _emacs(*, version, integrity, windows_integrity):
+    major, _, _ = version.partition(".")
     _emacs_repository(
         name = "gnu_emacs_" + version,
         path = "/emacs/emacs-{}.tar.xz".format(version),
         integrity = integrity,
         output = "emacs.tar.xz",
         strip_prefix = "emacs-{}".format(version),
+        mode = "source",
+    )
+    _emacs_repository(
+        name = "gnu_emacs_windows_" + version,
+        path = "/emacs/windows/emacs-{}/emacs-{}.zip".format(major, version),
+        integrity = windows_integrity,
+        output = "emacs.zip",
+        strip_prefix = "emacs-{}".format(version) if major == "28" else "",
+        mode = "release",
+        target_compatible_with = [
+            Label("@platforms//os:windows"),
+            Label("@platforms//cpu:x86_64"),
+        ],
     )
 
 def _emacs_repository_impl(ctx):
@@ -132,6 +151,8 @@ def _emacs_repository_impl(ctx):
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
             '"[src]"': repr(output),
             '"[strip_prefix]"': repr(ctx.attr.strip_prefix),
+            '"[mode]"': repr(ctx.attr.mode),
+            "[[compatible_with]]": repr([str(label) for label in ctx.attr.target_compatible_with]),
         },
         executable = False,
     )
@@ -142,6 +163,8 @@ _emacs_repository = repository_rule(
         "integrity": attr.string(mandatory = True),
         "output": attr.string(mandatory = True),
         "strip_prefix": attr.string(),
+        "mode": attr.string(mandatory = True, values = ["source", "release"]),
+        "target_compatible_with": attr.label_list(),
     },
     implementation = _emacs_repository_impl,
 )

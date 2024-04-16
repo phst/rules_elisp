@@ -56,7 +56,7 @@ absl::StatusOr<int> RunLauncher(
     absl::Span<const NativeStringView> original_args, ExecutableKind kind);
 
 absl::StatusOr<int> RunEmacs(std::string_view source_repository,
-                             std::string_view install,
+                             std::string_view mode, std::string_view install,
                              absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

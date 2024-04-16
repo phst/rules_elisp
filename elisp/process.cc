@@ -593,6 +593,87 @@ static absl::StatusOr<Environment> RunfilesEnvironment(
   return map;
 }
 
+class DosDevice final {
+ public:
+  static absl::StatusOr<DosDevice> Create(
+      [[maybe_unused]] const NativeStringView target) {
+    CHECK(!target.empty());
+#ifdef _WIN32
+    const DWORD drives = ::GetLogicalDrives();
+    if (drives == 0) return WindowsStatus("GetLogicalDrives");
+    for (wchar_t letter = L'Z'; letter >= L'D'; --letter) {
+      const DWORD bit = 1U << (letter - L'A');
+      if ((drives & bit) == 0) {
+        constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
+        const wchar_t name[] = {letter, L':', L'\0'};
+        std::wstring string(target);
+        if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
+          return WindowsStatus("DefineDosDeviceW", flags, Escape(name),
+                               Escape(target));
+        }
+        return DosDevice(name, target);
+      }
+    }
+    return absl::ResourceExhaustedError("no drive letters available");
+#else
+    return absl::UnimplementedError("this system doesn’t support DOS devices");
+#endif
+  }
+
+  ~DosDevice() noexcept {
+#ifdef _WIN32
+    if (name_.empty()) return;
+    constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
+                            DDD_NO_BROADCAST_SYSTEM;
+    if (!::DefineDosDeviceW(flags, Pointer(name_), Pointer(target_))) {
+      LOG(ERROR) << WindowsStatus("DefineDosDeviceW", flags, Escape(name_),
+                                  Escape(target_));
+    }
+#endif
+  }
+
+  DosDevice(const DosDevice&) = delete;
+  DosDevice& operator=(const DosDevice&) = delete;
+
+#ifdef _WIN32
+  DosDevice(DosDevice&& other)
+      : name_(std::exchange(other.name_, std::wstring())),
+        target_(std::exchange(other.target_, std::wstring())) {}
+
+  DosDevice& operator=(DosDevice&& other) {
+    name_ = std::exchange(other.name_, std::wstring());
+    target_ = std::exchange(other.target_, std::wstring());
+    return *this;
+  }
+#else
+  DosDevice(DosDevice&&) = default;
+  DosDevice& operator=(DosDevice&&) = default;
+#endif
+
+  NativeString name() const {
+#ifdef _WIN32
+    return name_;
+#else
+    return {};
+#endif
+  }
+
+ private:
+#ifdef _WIN32
+  explicit DosDevice(const std::wstring_view name,
+                     const std::wstring_view target)
+      : name_(name), target_(target) {
+    CHECK(!name.empty());
+    CHECK(!target.empty());
+  }
+
+  std::wstring name_;
+  std::wstring target_;
+#else
+  explicit DosDevice() = default;
+#endif
+};
+
 static absl::StatusOr<int> Run(std::vector<NativeString>& args,
                                const Environment& env) {
   CHECK(!args.empty());
@@ -684,40 +765,68 @@ absl::StatusOr<int> RunLauncher(
 }
 
 absl::StatusOr<int> RunEmacs(
-    const std::string_view source_repository, const std::string_view install,
+    const std::string_view source_repository, const std::string_view mode,
+    const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
   const absl::StatusOr<RunfilesPtr> runfiles =
       CreateRunfiles(ExecutableKind::kBinary, source_repository, original_args);
   if (!runfiles.ok()) return runfiles.status();
-  const absl::StatusOr<NativeString> emacs =
-      ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.exe"));
-  if (!emacs.ok()) return emacs.status();
-  const absl::StatusOr<NativeString> dump =
-      ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
-  if (!dump.ok()) return dump.status();
-  const absl::StatusOr<NativeString> etc =
-      ResolveRunfile(**runfiles, absl::StrCat(install, "/etc"));
-  if (!etc.ok()) return etc.status();
-  const absl::StatusOr<NativeString> lisp =
-      ResolveRunfile(**runfiles, absl::StrCat(install, "/lisp"));
-  if (!lisp.ok()) return lisp.status();
-  const absl::StatusOr<NativeString> libexec =
-      ResolveRunfile(**runfiles, absl::StrCat(install, "/libexec"));
-  if (!libexec.ok()) return libexec.status();
-  std::vector<NativeString> args = {
-      *emacs,
-      RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump,
-  };
+  bool release;
+  // We currently support pre-built Emacsen only on Windows because there are no
+  // official binary release archives for Unix systems.
+  if (Windows && mode == "release") {
+    release = true;
+  } else {
+    CHECK_EQ(mode, "source") << "invalid mode";
+    release = false;
+  }
+  std::vector<NativeString> args;
+  std::optional<DosDevice> dos_device;
+  if (Windows && release) {
+    const absl::StatusOr<NativeString> root =
+        ResolveRunfile(**runfiles, install);
+    if (!root.ok()) return root.status();
+    // The filenames in the released Emacs archive are too long.  Create a drive
+    // letter to shorten them.
+    absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
+    if (!device.ok()) return device.status();
+    args.push_back(device->name() +
+                   RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
+    dos_device = std::move(*device);
+  } else {
+    const absl::StatusOr<NativeString> emacs = ResolveRunfile(
+        **runfiles,
+        absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
+    if (!emacs.ok()) return emacs.status();
+    args.push_back(*emacs);
+  }
+  if (!release) {
+    const absl::StatusOr<NativeString> dump =
+        ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
+    if (!dump.ok()) return dump.status();
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump);
+  }
   if (!original_args.empty()) {
     args.insert(args.end(), std::next(original_args.begin()),
                 original_args.end());
   }
   absl::StatusOr<Environment> env = RunfilesEnvironment(**runfiles);
   if (!env.ok()) return env.status();
-  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
-  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
-  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
-  env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
+  if (!release) {
+    const absl::StatusOr<NativeString> etc =
+        ResolveRunfile(**runfiles, absl::StrCat(install, "/etc"));
+    if (!etc.ok()) return etc.status();
+    const absl::StatusOr<NativeString> lisp =
+        ResolveRunfile(**runfiles, absl::StrCat(install, "/lisp"));
+    if (!lisp.ok()) return lisp.status();
+    const absl::StatusOr<NativeString> libexec =
+        ResolveRunfile(**runfiles, absl::StrCat(install, "/libexec"));
+    if (!libexec.ok()) return libexec.status();
+    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
+    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
+    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
+    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
+  }
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   env->insert(orig_env->begin(), orig_env->end());
