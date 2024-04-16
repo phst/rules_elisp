@@ -196,13 +196,11 @@
   X(kIntern, "intern")                                           \
   X(kSymbolName, "symbol-name")                                  \
   X(kSymbolValue, "symbol-value")                                \
-  X(kSet, "set")                                                 \
   X(kFunctionPut, "function-put")                                \
   X(kNumberp, "numberp")                                         \
   X(kStringp, "stringp")                                         \
   X(kMultibyteStringP, "multibyte-string-p")                     \
   X(kUnibyteStringP, "elisp/proto/unibyte-string-p")             \
-  X(kHexStringP, "elisp/proto/hex-string-p")                     \
   X(kPlistp, "elisp/proto/plistp")                               \
   X(kCons, "cons")                                               \
   X(kList, "list")                                               \
@@ -214,9 +212,6 @@
   X(kPrin1, "prin1")                                             \
   X(kPrinc, "princ")                                             \
   X(kPrintLength, "print-length")                                \
-  X(kMostPositiveFixnum, "most-positive-fixnum")                 \
-  X(kEmacsMajorVersion, "emacs-major-version")                   \
-  X(kGcConsThreshold, "gc-cons-threshold")                       \
   X(kDefalias, "defalias")                                       \
   X(kDefineError, "define-error")                                \
   X(kOverflowError, "overflow-error")                            \
@@ -227,7 +222,6 @@
   X(kImmutable, "elisp/proto/immutable")                         \
   X(kDuplicateKey, "elisp/proto/duplicate-key")                  \
   X(kWrongChoice, "elisp/proto/wrong-choice")                    \
-  X(kFormatError, "elisp/proto/format-error")                    \
   X(kMalformed, "elisp/proto/malformed")                         \
   X(kMalformedUtf8, "elisp/proto/malformed-utf-8")               \
   X(kMissingRequiredField, "elisp/proto/missing-required-field") \
@@ -247,11 +241,8 @@
   X(kArenaP, "elisp/proto/arena-p")                              \
   X(kMessageP, "elisp/proto/message-p")                          \
   X(kArrayP, "elisp/proto/array-p")                              \
-  X(kArrayListP, "elisp/proto/array-list-p")                     \
   X(kMapP, "elisp/proto/map-p")                                  \
   X(kScalarFieldP, "elisp/proto/scalar-field-p")                 \
-  X(kSingularFieldP, "elisp/proto/singular-field-p")             \
-  X(kRepeatedFieldP, "elisp/proto/repeated-field-p")             \
   X(kMapFieldP, "elisp/proto/map-field-p")                       \
   X(kMapEntryP, "elisp/proto/map-entry-p")                       \
   X(kSerializedFileDescriptorSetP,                               \
@@ -4374,7 +4365,6 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   DefineError(ctx, kImmutable, "Immutable protocol buffer object");
   DefineError(ctx, kDuplicateKey, "Duplicate keyword argument");
   DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument");
-  DefineError(ctx, kFormatError, "String formatting failed");
   DefineError(ctx, kMalformed,
               "Serialized protocol buffer message is malformed");
   DefineError(ctx, kMalformedUtf8,
