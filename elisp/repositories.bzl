@@ -93,7 +93,7 @@ def rules_elisp_dependencies():
             "https://github.com/protocolbuffers/protobuf/releases/download/v26.0/protobuf-26.0.zip",  # 2024-03-12
         ],
     )
-    non_module_deps(name = "phst_rules_elisp_deps")
+    non_module_deps()
 
 # buildifier: disable=unnamed-macro
 def rules_elisp_toolchains():
