@@ -295,4 +295,4 @@ def _unpack(ctx, archive, *, strip_prefix = ""):
 
 def _munge_msvc_flag(s):
     # Crude way to work around specifying Visual C++ options in .bazelrc.
-    return s.replace("/std:c", "-std=gnu")
+    return None if s.startswith("/external:") else s.replace("/std:c", "-std=gnu")
