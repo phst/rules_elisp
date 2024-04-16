@@ -891,6 +891,10 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
     )
     resolved_load_path = []
     source_load_path = []
+    source_roots = sorted(collections.uniq([
+        check_relative_filename(paths.normalize(paths.join(src.root.path, src.owner.workspace_root)))
+        for src in srcs
+    ]))
     for dir in ["/"] + load_path:
         if not dir:
             fail("empty directory in load path")
@@ -903,9 +907,10 @@ def _compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             # If we have more than one source file, we need to add the
             # respective source directory to the load path for this rule’s
             # actions only, so that the source files can load each other.
-            source_load_path.append(check_relative_filename(
-                paths.join(ctx.label.workspace_root, dir),
-            ))
+            source_load_path += [
+                check_relative_filename(paths.join(root, dir))
+                for root in source_roots
+            ]
 
         # At least some of the sources must be reachable from the directory.
         prefix = "./" if dir == "." else "./" + dir + "/"
