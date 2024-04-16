@@ -173,10 +173,10 @@ elisp_proto_library(
 You can then use the ~elisp_proto_library~ rule in the same way as a normal
 ~elisp_library~ rule, i.e., depend on it in other ~elisp_library~,
 ~elisp_binary~, or ~elisp_test~ rules.  The name of the Emacs Lisp feature for
-the library consists of the package containing the ~proto_library~ rule and its
-name within the package, joined with a slash character (=/=).  For example, if
-the above BUILD file is in a package named =mypackage=, you would load the
-protocol buffer library using ~(require 'mypackage/my_proto)~.
+the library is the same as the name of the original =.proto= file, relative to
+its repository root.  For example, if the above BUILD file is in a package named
+=mypackage=, you would load the protocol buffer library using ~(require
+'mypackage/my.proto)~.
 
 Emacs Lisp protocol buffer bindings contain Emacs Lisp equivalents for all
 message and enumeration types defined in the underlying protocol buffer
