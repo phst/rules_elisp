@@ -448,6 +448,13 @@ COPTS = select({
         "-pedantic",
     ],
 }) + select({
+    # Disable warnings from external repositories, if possible.
+    Label("@rules_cc//cc/compiler:msvc-cl"): [
+        "/external:Iexternal",
+        "/external:W3",
+        "/external:templates-",
+    ],
+    Label("//private:gcc"): [],
     Label("@rules_cc//cc/compiler:clang"): [
         # Work around https://github.com/llvm/llvm-project/issues/121984.
         "--system-header-prefix=absl/",
@@ -455,7 +462,6 @@ COPTS = select({
         "--system-header-prefix=tools/",
         "--system-header-prefix=upb/",
     ],
-    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
