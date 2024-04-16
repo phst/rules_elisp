@@ -142,7 +142,10 @@ alias(
 
 cc_toolchain_suite(
     name = "windows_cc_toolchain",
-    target_compatible_with = ["@platforms//os:windows"],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
     toolchains = {
         "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
         "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
