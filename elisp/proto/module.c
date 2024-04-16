@@ -2838,9 +2838,10 @@ static void ClearBit(struct Context ctx, emacs_value value, int bit,
 }
 
 static void DefineError(struct Context ctx, enum GlobalSymbol symbol,
-                        const char* message) {
-  FuncallSymbol2(ctx, kDefineError, GlobalSymbol(ctx, symbol),
-                 MakeString(ctx, upb_StringView_FromString(message)));
+                        const char* message, enum GlobalSymbol parent) {
+  FuncallSymbol3(ctx, kDefineError, GlobalSymbol(ctx, symbol),
+                 MakeString(ctx, upb_StringView_FromString(message)),
+                 GlobalSymbol(ctx, parent));
 }
 
 static void Provide(struct Context ctx, const char* feature) {
@@ -4359,34 +4360,38 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "users should not call it directly.\n\n"
         "(fn serialized)",
         0, RegisterFileDescriptor);
-  DefineError(ctx, kUnknownField, "Unknown protocol buffer message field");
+  DefineError(ctx, kUnknownField, "Unknown protocol buffer message field",
+              kNil);
   DefineError(ctx, kAtomicField,
-              "Field is not a message, repeated, or map field");
-  DefineError(ctx, kImmutable, "Immutable protocol buffer object");
-  DefineError(ctx, kDuplicateKey, "Duplicate keyword argument");
-  DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument");
+              "Field is not a message, repeated, or map field", kNil);
+  DefineError(ctx, kImmutable, "Immutable protocol buffer object", kNil);
+  DefineError(ctx, kDuplicateKey, "Duplicate keyword argument", kNil);
+  DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument", kNil);
   DefineError(ctx, kParseError,
-              "Error parsing serialized protocol buffer message");
-  DefineError(ctx, kSerializeError,
-              "Error serializing protocol buffer message");
+              "Error parsing serialized protocol buffer message", kNil);
+  DefineError(ctx, kSerializeError, "Error serializing protocol buffer message",
+              kNil);
   DefineError(ctx, kJsonParseError,
-              "Error parsing protocol buffer message from JSON");
+              "Error parsing protocol buffer message from JSON", kNil);
   DefineError(ctx, kJsonSerializeError,
-              "Error serializing protocol buffer message to JSON");
+              "Error serializing protocol buffer message to JSON", kNil);
   DefineError(ctx, kMalformed,
-              "Serialized protocol buffer message is malformed");
+              "Serialized protocol buffer message is malformed", kParseError);
   DefineError(ctx, kMalformedUtf8,
-              "Serialized protocol buffer message contains malformed UTF-8");
-  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error");
+              "Serialized protocol buffer message contains malformed UTF-8",
+              kParseError);
+  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error",
+              kParseError);
   DefineError(ctx, kMissingRequiredField,
-              "Required protocol buffer field not present");
-  DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error");
+              "Required protocol buffer field not present", kNil);
+  DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error", kNil);
   DefineError(ctx, kNoPresence,
-              "Protocol buffer field has no notion of presence");
+              "Protocol buffer field has no notion of presence", kNil);
   DefineError(ctx, kUninitializedAny,
-              "Message of type google.protobuf.Any not properly initialized");
+              "Message of type google.protobuf.Any not properly initialized",
+              kNil);
   DefineError(ctx, kRegistrationFailed,
-              "Could not register file descriptor set");
+              "Could not register file descriptor set", kNil);
   Provide(ctx, "elisp/proto/module");
   return kSuccess;
 }
