@@ -222,15 +222,15 @@
   X(kImmutable, "elisp/proto/immutable")                         \
   X(kDuplicateKey, "elisp/proto/duplicate-key")                  \
   X(kWrongChoice, "elisp/proto/wrong-choice")                    \
-  X(kMalformed, "elisp/proto/malformed")                         \
-  X(kMalformedUtf8, "elisp/proto/malformed-utf-8")               \
-  X(kMissingRequiredField, "elisp/proto/missing-required-field") \
-  X(kUnlinkedSubMessage, "elisp/proto/unlinked-sub-message")     \
-  X(kArenaFusionFailed, "elisp/proto/arena-fusion-failed")       \
   X(kParseError, "elisp/proto/parse-error")                      \
   X(kSerializeError, "elisp/proto/serialize-error")              \
   X(kJsonParseError, "elisp/proto/json-parse-error")             \
   X(kJsonSerializeError, "elisp/proto/json-serialize-error")     \
+  X(kMalformed, "elisp/proto/malformed")                         \
+  X(kMalformedUtf8, "elisp/proto/malformed-utf-8")               \
+  X(kUnlinkedSubMessage, "elisp/proto/unlinked-sub-message")     \
+  X(kMissingRequiredField, "elisp/proto/missing-required-field") \
+  X(kArenaFusionFailed, "elisp/proto/arena-fusion-failed")       \
   X(kNoPresence, "elisp/proto/no-presence")                      \
   X(kUninitializedAny, "elisp/proto/uninitialized-any")          \
   X(kRegistrationFailed, "elisp/proto/registration-failed")      \
@@ -4365,14 +4365,6 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   DefineError(ctx, kImmutable, "Immutable protocol buffer object");
   DefineError(ctx, kDuplicateKey, "Duplicate keyword argument");
   DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument");
-  DefineError(ctx, kMalformed,
-              "Serialized protocol buffer message is malformed");
-  DefineError(ctx, kMalformedUtf8,
-              "Serialized protocol buffer message contains malformed UTF-8");
-  DefineError(ctx, kMissingRequiredField,
-              "Required protocol buffer field not present");
-  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error");
-  DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error");
   DefineError(ctx, kParseError,
               "Error parsing serialized protocol buffer message");
   DefineError(ctx, kSerializeError,
@@ -4381,6 +4373,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
               "Error parsing protocol buffer message from JSON");
   DefineError(ctx, kJsonSerializeError,
               "Error serializing protocol buffer message to JSON");
+  DefineError(ctx, kMalformed,
+              "Serialized protocol buffer message is malformed");
+  DefineError(ctx, kMalformedUtf8,
+              "Serialized protocol buffer message contains malformed UTF-8");
+  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error");
+  DefineError(ctx, kMissingRequiredField,
+              "Required protocol buffer field not present");
+  DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error");
   DefineError(ctx, kNoPresence,
               "Protocol buffer field has no notion of presence");
   DefineError(ctx, kUninitializedAny,
