@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,6 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+common --enable_platform_specific_config
+
+# Suppress warnings from external repositories if possible.
+build --features=external_include_paths
+build --host_features=external_include_paths
+
+# FIXME: This shouldn’t be necessary.  File bug against Bazel.
+build:windows --copt='/external:W3' --host_copt='/external:W3'
 
 # Run Pylint by default.
 build --aspects='//private:defs.bzl%check_python'
