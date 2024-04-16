@@ -69,38 +69,38 @@ filegroup(
 
 emacs_binary(
     name = "emacs_28.1",
-    srcs = ["@phst_rules_elisp_deps//emacs-28.1:srcs"],
-    readme = "@phst_rules_elisp_deps//emacs-28.1:readme",
+    srcs = ["@gnu_emacs_28.1//:srcs"],
+    readme = "@gnu_emacs_28.1//:readme",
     visibility = ["//visibility:public"],
 )
 
 emacs_binary(
     name = "emacs_28.2",
-    srcs = ["@phst_rules_elisp_deps//emacs-28.2:srcs"],
-    readme = "@phst_rules_elisp_deps//emacs-28.2:readme",
+    srcs = ["@gnu_emacs_28.2//:srcs"],
+    readme = "@gnu_emacs_28.2//:readme",
     visibility = ["//visibility:public"],
 )
 
 emacs_binary(
     name = "emacs_29.1",
-    srcs = ["@phst_rules_elisp_deps//emacs-29.1:srcs"],
-    readme = "@phst_rules_elisp_deps//emacs-29.1:readme",
+    srcs = ["@gnu_emacs_29.1//:srcs"],
+    readme = "@gnu_emacs_29.1//:readme",
     visibility = ["//visibility:public"],
 )
 
 emacs_binary(
     name = "emacs_29.2",
-    srcs = ["@phst_rules_elisp_deps//emacs-29.2:srcs"],
-    readme = "@phst_rules_elisp_deps//emacs-29.2:readme",
+    srcs = ["@gnu_emacs_29.2//:srcs"],
+    readme = "@gnu_emacs_29.2//:readme",
     visibility = ["//visibility:public"],
 )
 
 emacs_binary(
     name = "emacs_29.3",
-    srcs = ["@phst_rules_elisp_deps//emacs-29.3:srcs"],
+    srcs = ["@gnu_emacs_29.3//:srcs"],
     builtin_features = "builtin_features.json",
     module_header = "emacs-module.h",
-    readme = "@phst_rules_elisp_deps//emacs-29.3:readme",
+    readme = "@gnu_emacs_29.3//:readme",
     visibility = ["//visibility:public"],
 )
 

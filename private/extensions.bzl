@@ -19,7 +19,7 @@ load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev
 visibility("private")
 
 def _non_module_deps_impl(_ctx):
-    _deps(name = "phst_rules_elisp_deps")
+    _deps()
 
 def _non_module_dev_deps_impl(_ctx):
     _dev_deps(name = "phst_rules_elisp_dev_deps")

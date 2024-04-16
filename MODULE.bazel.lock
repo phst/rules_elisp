@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "e0aff38155cb522fa0a9a4eadaf46d0fed239e8de437c57b6302b74737f29f94",
+  "moduleFileHash": "0c3b3c81525beb250f2cd36ce6a34b6c7d7d19b35b4c70a92344fca689165823",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -54,7 +54,11 @@
             "column": 32
           },
           "imports": {
-            "phst_rules_elisp_deps": "phst_rules_elisp_deps"
+            "gnu_emacs_28.1": "gnu_emacs_28.1",
+            "gnu_emacs_28.2": "gnu_emacs_28.2",
+            "gnu_emacs_29.1": "gnu_emacs_29.1",
+            "gnu_emacs_29.2": "gnu_emacs_29.2",
+            "gnu_emacs_29.3": "gnu_emacs_29.3"
           },
           "devImports": [],
           "tags": [],
@@ -67,7 +71,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 44,
+            "line": 48,
             "column": 36
           },
           "imports": {
@@ -86,7 +90,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 51,
+            "line": 55,
             "column": 23
           },
           "imports": {
@@ -106,7 +110,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 52,
+                "line": 56,
                 "column": 17
               }
             }
@@ -120,7 +124,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 62,
+            "line": 66,
             "column": 20
           },
           "imports": {
@@ -142,7 +146,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 63,
+                "line": 67,
                 "column": 10
               }
             }
@@ -156,7 +160,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 73,
+            "line": 77,
             "column": 23
           },
           "imports": {},
@@ -170,7 +174,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 74,
+                "line": 78,
                 "column": 12
               }
             }
@@ -184,7 +188,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 76,
+            "line": 80,
             "column": 24
           },
           "imports": {
@@ -208,7 +212,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 77,
+                "line": 81,
                 "column": 15
               }
             },
@@ -222,7 +226,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 82,
+                "line": 86,
                 "column": 15
               }
             },
@@ -236,7 +240,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 87,
+                "line": 91,
                 "column": 15
               }
             }
@@ -1882,7 +1886,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "LRWBHkF87zIr3tnneF+6/MPC8dCQsDTV+flC2BB2cQM=",
+        "bzlTransitiveDigest": "LF+Y4UWxVtZ496wIm5pMK+7mMpSjJOuGk0BvmUt+hCk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1914,15 +1918,50 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "Tc4HURv/SijUI/nhGSH6nvyE17Cn9cSM8NOkIaWP71E=",
+        "bzlTransitiveDigest": "UbLLfbAGWNMS6aYxiyH5YxsvUO6uAYt4renz4iW1Djw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
-          "phst_rules_elisp_deps": {
+          "gnu_emacs_29.3": {
             "bzlFile": "@@//private:repositories.bzl",
-            "ruleClassName": "non_module_deps",
-            "attributes": {}
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "version": "29.3",
+              "sha256": "c34c05d3ace666ed9c7f7a0faf070fea3217ff1910d004499bd5453233d742a0"
+            }
+          },
+          "gnu_emacs_29.2": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "version": "29.2",
+              "sha256": "7d3d2448988720bf4bf57ad77a5a08bf22df26160f90507a841ba986be2670dc"
+            }
+          },
+          "gnu_emacs_28.2": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "version": "28.2",
+              "sha256": "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488"
+            }
+          },
+          "gnu_emacs_29.1": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "version": "29.1",
+              "sha256": "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01"
+            }
+          },
+          "gnu_emacs_28.1": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "version": "28.1",
+              "sha256": "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1"
+            }
           }
         },
         "recordedRepoMappingEntries": []
@@ -1930,7 +1969,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "Tc4HURv/SijUI/nhGSH6nvyE17Cn9cSM8NOkIaWP71E=",
+        "bzlTransitiveDigest": "UbLLfbAGWNMS6aYxiyH5YxsvUO6uAYt4renz4iW1Djw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
