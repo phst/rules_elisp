@@ -231,6 +231,7 @@
   X(kMalformed, "elisp/proto/malformed")                         \
   X(kMalformedUtf8, "elisp/proto/malformed-utf-8")               \
   X(kMissingRequiredField, "elisp/proto/missing-required-field") \
+  X(kUnlinkedSubMessage, "elisp/proto/unlinked-sub-message")     \
   X(kArenaFusionFailed, "elisp/proto/arena-fusion-failed")       \
   X(kParseError, "elisp/proto/parse-error")                      \
   X(kSerializeError, "elisp/proto/serialize-error")              \
@@ -1393,6 +1394,9 @@ static void ParseError(struct Context ctx, upb_DecodeStatus status,
       break;
     case kUpb_DecodeStatus_MissingRequired:
       Signal1(ctx, kMissingRequiredField, value);
+      break;
+    case kUpb_DecodeStatus_UnlinkedSubMessage:
+      Signal1(ctx, kUnlinkedSubMessage, value);
       break;
     default:
       Signal2(ctx, kParseError, MakeInteger(ctx, status), value);
@@ -4377,6 +4381,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
               "Serialized protocol buffer message contains malformed UTF-8");
   DefineError(ctx, kMissingRequiredField,
               "Required protocol buffer field not present");
+  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error");
   DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error");
   DefineError(ctx, kParseError,
               "Error parsing serialized protocol buffer message");
