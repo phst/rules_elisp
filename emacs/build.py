@@ -36,14 +36,15 @@ from typing import Optional, Union
 def main() -> None:
     """Configures and builds Emacs."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--release', action='store_true')
     group = parser.add_mutually_exclusive_group(required=True)
     group.add_argument('--archive', type=pathlib.Path)
     group.add_argument('--readme', type=pathlib.Path)
     parser.add_argument('--strip-prefix', type=pathlib.PurePosixPath)
     parser.add_argument('--install', type=pathlib.Path, required=True)
-    parser.add_argument('--cc', type=pathlib.Path, required=True)
-    parser.add_argument('--cflags', required=True)
-    parser.add_argument('--ldflags', required=True)
+    parser.add_argument('--cc', type=pathlib.Path)
+    parser.add_argument('--cflags')
+    parser.add_argument('--ldflags')
     parser.add_argument('--module-header', type=pathlib.Path)
     parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
@@ -52,9 +53,13 @@ def main() -> None:
               else (args.archive, args.strip_prefix))
     install = args.install.resolve()
 
-    features = _build(source=source, install=install,
-                      cc=args.cc, cflags=args.cflags, ldflags=args.ldflags,
-                      builtin_features=bool(args.builtin_features))
+    if args.release:
+        features = _unpack(source=source, install=install,
+                           builtin_features=bool(args.builtin_features))
+    else:
+        features = _build(source=source, install=install,
+                          cc=args.cc, cflags=args.cflags, ldflags=args.ldflags,
+                          builtin_features=bool(args.builtin_features))
 
     if args.builtin_features:
         data = {'builtinFeatures': sorted(features)}
@@ -147,6 +152,25 @@ def _build(*, source: Union[pathlib.Path,
     for compiled in lisp.glob('**/*.elc'):
         compiled.with_suffix('.el').unlink()
 
+    return features
+
+
+def _unpack(*, source: tuple[pathlib.Path, pathlib.PurePosixPath],
+            install: pathlib.Path,
+            builtin_features: bool) -> Optional[Set[str]]:
+    if not isinstance(source, tuple):
+        raise NotImplementedError(
+            'in release mode only archive sources are supported')
+    archive, prefix = source
+    try:
+        # Bazel sometimes creates the output directory; remove it so that
+        # _unpack_archive works correctly.
+        install.rmdir()
+    except FileNotFoundError:
+        pass
+    _unpack_archive(archive, install, prefix=prefix)
+    lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
+    features = _builtin_features(lisp) if builtin_features else None
     return features
 
 

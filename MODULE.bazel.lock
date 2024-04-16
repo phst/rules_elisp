@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "26fffb02c59e8f44efcdea22025fd62acb3ca3fc95c5655c8b957b008cb3d656",
+  "moduleFileHash": "22b2582221c41ac31ed2921c9c54c6bde7961aa14683868602195d41c80155db",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -59,7 +59,12 @@
             "gnu_emacs_28.2": "gnu_emacs_28.2",
             "gnu_emacs_29.1": "gnu_emacs_29.1",
             "gnu_emacs_29.2": "gnu_emacs_29.2",
-            "gnu_emacs_29.3": "gnu_emacs_29.3"
+            "gnu_emacs_29.3": "gnu_emacs_29.3",
+            "gnu_emacs_windows_28.1": "gnu_emacs_windows_28.1",
+            "gnu_emacs_windows_28.2": "gnu_emacs_windows_28.2",
+            "gnu_emacs_windows_29.1": "gnu_emacs_windows_29.1",
+            "gnu_emacs_windows_29.2": "gnu_emacs_windows_29.2",
+            "gnu_emacs_windows_29.3": "gnu_emacs_windows_29.3"
           },
           "devImports": [],
           "tags": [],
@@ -72,7 +77,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 49,
+            "line": 54,
             "column": 36
           },
           "imports": {
@@ -91,7 +96,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 56,
+            "line": 61,
             "column": 23
           },
           "imports": {
@@ -111,7 +116,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 57,
+                "line": 62,
                 "column": 17
               }
             }
@@ -125,7 +130,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 67,
+            "line": 72,
             "column": 20
           },
           "imports": {
@@ -147,7 +152,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 68,
+                "line": 73,
                 "column": 10
               }
             }
@@ -161,7 +166,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 78,
+            "line": 83,
             "column": 23
           },
           "imports": {},
@@ -175,7 +180,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 79,
+                "line": 84,
                 "column": 12
               }
             }
@@ -189,7 +194,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 81,
+            "line": 86,
             "column": 24
           },
           "imports": {
@@ -213,7 +218,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 82,
+                "line": 87,
                 "column": 15
               }
             },
@@ -227,7 +232,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 87,
+                "line": 92,
                 "column": 15
               }
             },
@@ -241,7 +246,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 92,
+                "line": 97,
                 "column": 15
               }
             }
@@ -1887,7 +1892,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "DRUfuSRxm1EALS6A7laxabg5Gtm9ce6qd9f/tVFzBdk=",
+        "bzlTransitiveDigest": "921wkO3PYpURNGLAIBg/ESf1c3rAMZPcU4Z5iVApAHs=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1919,11 +1924,86 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "rNWhgxHuuaDXfsuG1MqSptfDPCj+Fw07cIbgTeKexIE=",
+        "bzlTransitiveDigest": "baK9p5xrZqCyS+fy85Dpva2aQV6Ubzu69fvZHb1D9n8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "gnu_emacs_windows_28.2": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-28/emacs-28.2.zip",
+              "integrity": "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
+              "output": "emacs.zip",
+              "strip_prefix": "emacs-28.2",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "gnu_emacs_windows_29.1": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-29/emacs-29.1.zip",
+              "integrity": "sha384-A0UjZuyAE97UyQHUqNGKmYUqhNZi5K46tG5PIB4hiWiKPQ9UPQA92k3zZwe3+ab9",
+              "output": "emacs.zip",
+              "strip_prefix": "",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "gnu_emacs_windows_28.1": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-28/emacs-28.1.zip",
+              "integrity": "sha384-TB/aHtif+AWx5PE7gx+4kasLmnX9vUJwcph/HmUPmHfq9m7amsgcJ0zv107hla0o",
+              "output": "emacs.zip",
+              "strip_prefix": "emacs-28.1",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "gnu_emacs_windows_29.3": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-29/emacs-29.3.zip",
+              "integrity": "sha384-Zdo9uJEsrI53M7/5g7OqIPcSPX1sBLNMbhnOSN88W+x5fwcshZSBgRy4l1IdO1P6",
+              "output": "emacs.zip",
+              "strip_prefix": "",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "gnu_emacs_windows_29.2": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-29/emacs-29.2.zip",
+              "integrity": "sha384-vLpxklmtKw9Xb6DADhx7Xq+ojBiOKHtlMraMqi9bCHz8V3JlGBPBJmdcqgKjT3hs",
+              "output": "emacs.zip",
+              "strip_prefix": "",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
           "local_emacs": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_local_emacs",
@@ -1936,7 +2016,8 @@
               "path": "/emacs/emacs-29.3.tar.xz",
               "integrity": "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
               "output": "emacs.tar.xz",
-              "strip_prefix": "emacs-29.3"
+              "strip_prefix": "emacs-29.3",
+              "mode": "source"
             }
           },
           "gnu_emacs_29.2": {
@@ -1946,7 +2027,8 @@
               "path": "/emacs/emacs-29.2.tar.xz",
               "integrity": "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
               "output": "emacs.tar.xz",
-              "strip_prefix": "emacs-29.2"
+              "strip_prefix": "emacs-29.2",
+              "mode": "source"
             }
           },
           "gnu_emacs_28.2": {
@@ -1956,7 +2038,8 @@
               "path": "/emacs/emacs-28.2.tar.xz",
               "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
               "output": "emacs.tar.xz",
-              "strip_prefix": "emacs-28.2"
+              "strip_prefix": "emacs-28.2",
+              "mode": "source"
             }
           },
           "gnu_emacs_29.1": {
@@ -1966,7 +2049,8 @@
               "path": "/emacs/emacs-29.1.tar.xz",
               "integrity": "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
               "output": "emacs.tar.xz",
-              "strip_prefix": "emacs-29.1"
+              "strip_prefix": "emacs-29.1",
+              "mode": "source"
             }
           },
           "gnu_emacs_28.1": {
@@ -1976,16 +2060,23 @@
               "path": "/emacs/emacs-28.1.tar.xz",
               "integrity": "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
               "output": "emacs.tar.xz",
-              "strip_prefix": "emacs-28.1"
+              "strip_prefix": "emacs-28.1",
+              "mode": "source"
             }
           }
         },
-        "recordedRepoMappingEntries": []
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "platforms",
+            "platforms"
+          ]
+        ]
       }
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "rNWhgxHuuaDXfsuG1MqSptfDPCj+Fw07cIbgTeKexIE=",
+        "bzlTransitiveDigest": "baK9p5xrZqCyS+fy85Dpva2aQV6Ubzu69fvZHb1D9n8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

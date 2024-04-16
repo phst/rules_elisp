@@ -42,12 +42,23 @@ def _emacs_binary_impl(ctx):
         # known file (README in the source root) instead.
         archive = None
         readme = ctx.file.readme
-    emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
-    install = _install(ctx, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
+
+    mode = ctx.attr.mode
+    if mode == "source":
+        emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
+        install = _install(ctx, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
+    elif mode == "release":
+        if not archive:
+            fail("release mode requires a source archive")
+        install = _unpack(ctx, archive, strip_prefix = ctx.attr.strip_prefix)
+    else:
+        fail("invalid build mode {}".format(mode))
+
     executable, runfiles = cc_launcher(
         ctx,
         header = "elisp/emacs.h",
         args = [
+            mode,
             runfile_location(ctx, install),
         ],
         native = False,
@@ -62,6 +73,17 @@ def _emacs_binary_impl(ctx):
 
 emacs_binary = rule(
     attrs = LAUNCHER_ATTRS | {
+        "mode": attr.string(
+            doc = """How to build and install Emacs.  Possible values are:
+- `source`: Build Emacs from sources using `configure` and `make install`.
+  `srcs` must refer to an unpacked Emacs source archive.
+- `release`: Run Emacs directly without building or installing.
+  `srcs` must refer to an unpacked Emacs release archive containing pre-built
+  binaries for the correct target operating system and architecture.
+  Currently this only works on Windows.""",
+            values = ["source", "release"],
+            default = "source",
+        ),
         "srcs": attr.label_list(
             allow_files = True,
             allow_empty = False,
@@ -219,6 +241,41 @@ def _install(ctx, cc_toolchain, *, archive, strip_prefix, readme):
         mnemonic = "EmacsInstall",
         progress_message = "Installing Emacs into %{output}",
         env = env,
+        toolchain = None,
+    )
+    return install
+
+def _unpack(ctx, archive, *, strip_prefix = ""):
+    """Unpacks Emacs from a release archive.
+
+    Args:
+      ctx (ctx): rule context
+      archive (File): location of the Emacs release archive to unpack
+      strip_prefix (str): prefix to strip from the files in the archive
+
+    Returns:
+      a File representing the Emacs installation directory
+    """
+    install = ctx.actions.declare_directory("_" + ctx.label.name)
+    args = ctx.actions.args()
+    args.add("--release")
+    args.add(archive, format = "--archive=%s")
+    args.add(strip_prefix, format = "--strip-prefix=%s")
+    args.add(install.path, format = "--install=%s")
+    secondary_outs = []
+    if ctx.outputs.module_header:
+        args.add(ctx.outputs.module_header, format = "--module-header=%s")
+        secondary_outs.append(ctx.outputs.module_header)
+    if ctx.outputs.builtin_features:
+        args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
+        secondary_outs.append(ctx.outputs.builtin_features)
+    ctx.actions.run(
+        outputs = [install] + secondary_outs,
+        inputs = ctx.files.srcs,
+        executable = ctx.executable._build,
+        arguments = [args],
+        mnemonic = "EmacsInstall",
+        progress_message = "Unpacking Emacs into %{output}",
         toolchain = None,
     )
     return install
