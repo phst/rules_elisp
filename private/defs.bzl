@@ -403,6 +403,12 @@ def run_emacs(
         toolchain = Label("//elisp:toolchain_type"),
     )
 
+# We can’t use treat_warnings_as_errors on macOS unconditionally yet because
+# it tries to pass a flag -fatal-warnings to the linker, but the macOS
+# linker accepts -fatal_warnings instead.  See
+# https://github.com/bazelbuild/bazel/issues/20919.
+_WARNINGS_AS_ERRORS = [("" if bazel_features.cc.treat_warnings_as_errors_works_on_macos else "-") + "treat_warnings_as_errors"]
+
 # Features for all packages.  These may not contain select expressions.
 # FIXME: Once all supported Bazel versions parse REPO.bazel, move these features
 # there, and remove them from BUILD files.
@@ -414,20 +420,10 @@ PACKAGE_FEATURES = [
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
     "-macos_default_link_flags",
-] + (
-    # We can’t use treat_warnings_as_errors on macOS unconditionally yet because
-    # it tries to pass a flag -fatal-warnings to the linker, but the macOS
-    # linker accepts -fatal_warnings instead.  See
-    # https://github.com/bazelbuild/bazel/issues/20919.
-    ["treat_warnings_as_errors"] if bazel_features.cc.treat_warnings_as_errors_works_on_macos else []
-)
+] + _WARNINGS_AS_ERRORS
 
 FEATURES = select({
-    # We can’t use treat_warnings_as_errors on macOS unconditionally yet because
-    # it tries to pass a flag -fatal-warnings to the linker, but the macOS
-    # linker accepts -fatal_warnings instead.  See
-    # https://github.com/bazelbuild/bazel/issues/20919.
-    Label("@platforms//os:macos"): [],
+    Label("@platforms//os:macos"): _WARNINGS_AS_ERRORS,
     Label("//conditions:default"): ["treat_warnings_as_errors"],
 })
 
