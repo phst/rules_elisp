@@ -1,6 +1,6 @@
 ;;; proto-test.el --- unit tests for protocol buffer library  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022 Google LLC
+;; Copyright 2020, 2021, 2022, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 ;;; Code:
 
-(require 'examples/example_proto)
+(require 'examples/example.proto)
 
 (require 'elisp/proto/proto)
 

@@ -34,12 +34,12 @@
 (require 'seq)
 (require 'subr-x)
 
-(require 'any_proto)
-(require 'descriptor_proto)
-(require 'duration_proto)
-(require 'elisp/proto/test_proto)
-(require 'timestamp_proto)
-(require 'wrappers_proto)
+(require 'elisp/proto/test.proto)
+(require 'google/protobuf/any.proto)
+(require 'google/protobuf/descriptor.proto)
+(require 'google/protobuf/duration.proto)
+(require 'google/protobuf/timestamp.proto)
+(require 'google/protobuf/wrappers.proto)
 
 (ert-deftest elisp/proto/make ()
   (let ((message (elisp/proto/make 'google/protobuf/Duration :seconds 333)))
@@ -940,9 +940,9 @@
 (ert-deftest elisp/proto/reload ()
   "Check that unloading and reloading a protocol buffer library works."
   ;; Use a feature that’s not used in any other test.
-  (require 'type_proto)
-  (unload-feature 'type_proto)
-  (require 'type_proto))
+  (require 'google/protobuf/type.proto)
+  (unload-feature 'google/protobuf/type.proto)
+  (require 'google/protobuf/type.proto))
 
 (ert-deftest elisp/proto/check-required/success ()
   (elisp/proto/check-required
