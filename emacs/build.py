@@ -19,6 +19,7 @@ use it outside the rules or depend on its behavior.
 """
 
 import argparse
+from collections.abc import Set
 import glob
 import json
 import os
@@ -30,6 +31,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+from typing import Optional
 
 def main() -> None:
     """Configures and builds Emacs."""
@@ -42,13 +44,31 @@ def main() -> None:
     parser.add_argument('--module-header', type=pathlib.Path)
     parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
+    source = args.readme.resolve().parent
+    install = args.install.resolve()
+
+    features = _build(source=source, install=install,
+                      cc=args.cc, cflags=args.cflags, ldflags=args.ldflags,
+                      builtin_features=bool(args.builtin_features))
+
+    if args.builtin_features:
+        data = {'builtinFeatures': sorted(features)}
+        with args.builtin_features.open('wt', encoding='utf-8') as file:
+            json.dump(data, file)
+
+    if args.module_header:
+        # Copy emacs-module.h to the desired location.
+        shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
+
+
+def _build(*, source: pathlib.Path, install: pathlib.Path,
+           cc: pathlib.Path, cflags: str, ldflags: str,
+           builtin_features: bool) -> Optional[Set[str]]:
     windows = platform.system() == 'Windows'
     if windows:
-        bash = _find_bash(args.cc)
-    source = args.readme.resolve().parent
+        bash = _find_bash(cc)
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
-    install = args.install.resolve()
     shutil.copytree(source, build)
 
     def run(*command: str) -> None:
@@ -89,23 +109,12 @@ def main() -> None:
         # https://debbugs.gnu.org/37042.
         '--with-modules', '--with-toolkit-scroll-bars',
         '--disable-build-details',
-        'CC=' + args.cc.resolve().as_posix(),
-        'CFLAGS=' + args.cflags,
-        'LDFLAGS=' + args.ldflags)
+        'CC=' + cc.resolve().as_posix(),
+        'CFLAGS=' + cflags,
+        'LDFLAGS=' + ldflags)
     run('make', 'install')
 
-    if args.builtin_features:
-        lisp = build / 'lisp'
-        features = set()
-        for source in lisp.glob('**/*.el'):
-            with source.open('rt', encoding='ascii', errors='replace') as file:
-                for line in file:
-                    match = re.match(r"\(provide '([-/\w]+)\)", line, re.ASCII)
-                    if match:
-                        features.add(match.group(1))
-        data = {'builtinFeatures': sorted(features)}
-        with args.builtin_features.open('wt', encoding='utf-8') as file:
-            json.dump(data, file)
+    features = _builtin_features(build / 'lisp') if builtin_features else None
 
     # Build directory no longer needed, delete it.
     shutil.rmtree(temp, ignore_errors=True)
@@ -124,9 +133,8 @@ def main() -> None:
     # e.g. https://debbugs.gnu.org/40766).
     for compiled in lisp.glob('**/*.elc'):
         compiled.with_suffix('.el').unlink()
-    if args.module_header:
-        # Copy emacs-module.h to the desired location.
-        shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
+
+    return features
 
 
 def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
@@ -137,6 +145,17 @@ def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
     if not bash.is_file():
         raise FileNotFoundError(f'no Bash program found in {msys}')
     return bash
+
+
+def _builtin_features(lisp: pathlib.Path) -> Set[str]:
+    features = set()
+    for source in lisp.glob('**/*.el'):
+        with source.open('rt', encoding='ascii', errors='replace') as file:
+            for line in file:
+                match = re.match(r"\(provide '([-/\w]+)\)", line, re.ASCII)
+                if match:
+                    features.add(match.group(1))
+    return frozenset(features)
 
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
