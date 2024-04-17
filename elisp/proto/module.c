@@ -2677,14 +2677,9 @@ static emacs_value ConvertFileDescriptor(
   return List5(ctx, name, serialized, dependencies, messages_list, enums_list);
 }
 
-// Returns a list of the form
-// ((proto-file-name serialized-file-descriptor-proto
-//   (dependency-file-name…)
-//   ((message-name field-name…)…)
-//   ((enumeration-name (enumerator-name value)…)…))…).
+// Returns a list of the .proto file names in the set.
 static emacs_value ConvertFileDescriptorSet(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_FileDescriptorSet* set) {
+    struct Context ctx, const google_protobuf_FileDescriptorSet* set) {
   size_t files_count;
   const google_protobuf_FileDescriptorProto* const* files =
       google_protobuf_FileDescriptorSet_file(set, &files_count);
@@ -2695,7 +2690,8 @@ static emacs_value ConvertFileDescriptorSet(
   emacs_value* array = AllocateLispArray(ctx, files_count);
   if (array == NULL && files_count > 0) return NULL;
   for (size_t i = 0; i < files_count; ++i) {
-    array[i] = ConvertFileDescriptor(ctx, arena, files[i]);
+    upb_StringView name = google_protobuf_FileDescriptorProto_name(files[i]);
+    array[i] = MakeString(ctx, name);
   }
   emacs_value ret = List(ctx, (ptrdiff_t)files_count, array);
   free(array);
@@ -3898,7 +3894,7 @@ static emacs_value ParseFileDescriptorSet(emacs_env* env,
     upb_Arena_Free(arena);
     return NULL;
   }
-  emacs_value ret = ConvertFileDescriptorSet(ctx, arena, set);
+  emacs_value ret = ConvertFileDescriptorSet(ctx, set);
   upb_Arena_Free(arena);
   return ret;
 }
@@ -4375,11 +4371,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "Parse a protocol buffer file descriptor set.\n"
         "SERIALIZED must be the serialized form of a\n"
         "google.protobuf.FileDescriptorSet message.\n"
-        "Return a nested list\n"
-        "((PROTO-FILE-NAME SERIALIZED-FILE-DESCRIPTOR-PROTO\n"
-        "  (DEPENDENCY-FILE-NAME...)\n"
-        "  ((MESSAGE-FULL-NAME FIELD-NAME...)...)\n"
-        "  ((ENUM-FULL-NAME (NAME VALUE)...)...))...).\n"
+        "Return a list of the names of all .proto files in the set.\n"
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",

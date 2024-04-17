@@ -70,9 +70,8 @@
                  ";;   " target "\n\n"
                  ";;; Code:\n\n")
          (dolist (file parsed)
-           (cl-destructuring-bind (proto-file _desc _deps _msgs _enums) file
-             (cl-check-type proto-file elisp/proto/simple-string)
-             (prin1 `(require ',(intern proto-file))) (terpri)))
+           (cl-check-type file elisp/proto/simple-string)
+           (prin1 `(require ',(intern file))) (terpri))
          (when parsed (terpri))
          (prin1 `(provide ',(intern feature))) (terpri) (terpri)
          (insert ";;; " output-name " ends here\n")))))
