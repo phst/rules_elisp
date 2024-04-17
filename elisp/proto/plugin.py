@@ -22,24 +22,26 @@ import subprocess
 import sys
 import tempfile
 
-from google.protobuf import descriptor_pb2  # pylint: disable=import-error
-from google.protobuf.compiler import plugin_pb2  # pylint: disable=import-error
+from google.protobuf import descriptor_database
+from google.protobuf.compiler import plugin_pb2
 
 def main() -> None:
     """Entry point."""
-    request = plugin_pb2.CodeGeneratorRequest.FromString(
+    request = plugin_pb2.CodeGeneratorRequest.FromString(  # pytype: disable=module-attr pylint: disable=no-member
         sys.stdin.buffer.read())
-    response = plugin_pb2.CodeGeneratorResponse()
+    response = plugin_pb2.CodeGeneratorResponse()  # pytype: disable=module-attr pylint: disable=no-member
     generate = pathlib.Path(request.parameter)
+    database = descriptor_database.DescriptorDatabase()
+    for file in request.proto_file:
+        database.Add(file)
     tempdir = pathlib.Path(tempfile.mkdtemp())
     infile = tempdir / 'in.binpb'
     outfile = tempdir / 'out.el'
-    descriptors = descriptor_pb2.FileDescriptorSet()
-    for file in request.proto_file:
-        file.ClearField('source_code_info')  # strip unnecessary documentation
-        descriptors.file.add().CopyFrom(file)
-    infile.write_bytes(descriptors.SerializeToString(deterministic=True))
     for name in request.file_to_generate:
+        descriptor = database.FindFileByName(name)
+        # Strip unnecessary documentation.
+        descriptor.ClearField('source_code_info')
+        infile.write_bytes(descriptor.SerializeToString(deterministic=True))
         subprocess.run([generate, infile, outfile, name], check=True)
         response.file.add(name=name + '.el',
                           content=outfile.read_text(encoding='utf-8'))

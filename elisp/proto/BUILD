@@ -131,8 +131,8 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
-        ":descriptor_py_proto",
         ":plugin_py_proto",
+        "@com_google_protobuf//:protobuf_python",
     ],
 )
 
