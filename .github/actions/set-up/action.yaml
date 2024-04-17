@@ -45,7 +45,7 @@ runs:
     - name: Install Homebrew packages
       # The Protocol Buffer rules need ‘realpath’ from the GNU coreutils.
       shell: bash
-      run: brew update && brew install coreutils
+      run: brew update && brew install coreutils emacs
       if: runner.os == 'macOS'
     - name: Install MSYS2
       uses: msys2/setup-msys2@v2
@@ -57,6 +57,7 @@ runs:
           base-devel
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-xpm-nox
+          mingw-w64-x86_64-emacs
       if: runner.os == 'Windows'
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
@@ -68,6 +69,7 @@ runs:
       shell: cmd
       run: >-
         ECHO BAZEL_SH=C:\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
+        && ECHO EMACS=C:\MSYS64\mingw64\bin\emacs.exe>> %GITHUB_ENV%
         && MKDIR %RUNNER_TEMP%\output-base
         && SUBST O: %RUNNER_TEMP%\output-base
         && ECHO startup --output_base='O:\\'>> github.bazelrc

@@ -24,6 +24,7 @@ import functools
 import io
 import os
 import pathlib
+import platform
 import shlex
 import shutil
 import subprocess
@@ -91,6 +92,7 @@ class Builder:
         # Test both default toolchain and versioned toolchains.
         self.test()
         self.versions()
+        self.local()
         self.ext()
 
     @target
@@ -139,6 +141,20 @@ class Builder:
         for version in sorted(_VERSIONS):
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain',
                        profile=version)
+
+    @target
+    def local(self) -> None:
+        """Runs the Bazel tests under the locally-installed Emacs."""
+        if platform.system() == 'Linux':
+            distribution, release = subprocess.run(
+                ['lsb_release', '--short', '--id', '--release'], check=True,
+                stdout=subprocess.PIPE, encoding='utf-8').stdout.splitlines()
+            if distribution == 'Ubuntu' and release.startswith('22.'):
+                # Once GitHub switches to Ubuntu 24.04, drop this branch.
+                print('Local Emacs is too old')
+                return
+        self._test('--extra_toolchains=//elisp:local_toolchain',
+                   profile='local')
 
     def _test(self, *args: str, profile: str,
               cwd: Optional[pathlib.Path] = None) -> None:
