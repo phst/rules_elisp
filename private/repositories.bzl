@@ -63,34 +63,6 @@ non_module_dev_deps = repository_rule(
     implementation = _non_module_dev_deps_impl,
 )
 
-def _config_impl(repository_ctx):
-    repository_ctx.template(
-        "BUILD.bazel",
-        Label("//private:config.template.BUILD"),
-        {
-            '"[bzl_library]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
-            '"[private_pkg]"': repr(str(Label("//private:__pkg__"))),
-        },
-        executable = False,
-    )
-    repository_ctx.template(
-        "defs.bzl",
-        Label("//private:config.template.bzl"),
-        {
-            # Workaround for https://github.com/bazelbuild/bazel/issues/8305.
-            '"[bazel_version]"': repr(native.bazel_version),
-        },
-        executable = False,
-    )
-
-config = repository_rule(
-    doc = """Generates a repository with configuration data.
-
-This repository is a workaround for various Bazel limitations.""",
-    implementation = _config_impl,
-    local = True,  # always reevaluate in case the Bazel version changes
-)
-
 HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
 available as an `elisp_library`.  This {kind} is very similar to
 [`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive),
