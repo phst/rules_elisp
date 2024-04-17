@@ -204,4 +204,4 @@ def _install(ctx, cc_toolchain, readme):
 
 def _munge_msvc_flag(s):
     # Crude way to work around specifying Visual C++ options in .bazelrc.
-    return s.replace("/std:c", "-std=gnu")
+    return None if s.startswith("/external:") else s.replace("/std:c", "-std=gnu")
