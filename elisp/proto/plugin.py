@@ -22,7 +22,6 @@ import subprocess
 import sys
 import tempfile
 
-from google.protobuf import descriptor_pb2  # pylint: disable=import-error
 from google.protobuf.compiler import plugin_pb2  # pylint: disable=import-error
 
 def main() -> None:
@@ -34,12 +33,15 @@ def main() -> None:
     tempdir = pathlib.Path(tempfile.mkdtemp())
     infile = tempdir / 'in.binpb'
     outfile = tempdir / 'out.el'
-    descriptors = descriptor_pb2.FileDescriptorSet()
-    for file in request.proto_file:
-        file.ClearField('source_code_info')  # strip unnecessary documentation
-        descriptors.file.add().CopyFrom(file)
-    infile.write_bytes(descriptors.SerializeToString(deterministic=True))
     for name in request.file_to_generate:
+        descriptors = [file for file in request.proto_file if file.name == name]
+        if len(descriptors) != 1:
+            raise ValueError(f'got {len(descriptors)} file descriptors for '
+                             f'protocol buffer definition file {name}')
+        descriptor, = descriptors
+        # Strip unnecessary documentation.
+        descriptor.ClearField('source_code_info')
+        infile.write_bytes(descriptor.SerializeToString(deterministic=True))
         subprocess.run([generate, infile, outfile, name], check=True)
         response.file.add(name=name + '.el',
                           content=outfile.read_text(encoding='utf-8'))

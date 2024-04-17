@@ -111,17 +111,12 @@ VALUES is a list of (NAME NUMBER) pairs."
    (let* ((coding-system-for-read 'utf-8-unix)
           (coding-system-for-write 'utf-8-unix)
           (output-name (file-name-nondirectory output-file))
-          (serialized-file-descriptor-set
+          (serialized-file-descriptor
            (with-temp-buffer
              (set-buffer-multibyte nil)
              (insert-file-contents-literally descriptor-file)
              (buffer-substring-no-properties (point-min) (point-max))))
-          (parsed (elisp/proto/parse-file-descriptor-set
-                   serialized-file-descriptor-set))
-          (infos (cl-remove feature parsed :key #'car :test-not #'string-equal))
-          (info (car infos)))
-     (unless (length= infos 1)
-       (user-error "Got %d infos for feature %s" (length infos) feature))
+          (info (elisp/proto/parse-file-descriptor serialized-file-descriptor)))
      (cl-check-type output-name elisp/proto/simple-string)
      (with-temp-file (concat "/:" output-file)
        (let ((standard-output (current-buffer))
