@@ -82,6 +82,7 @@ runs:
         release: false
         install: >
           texinfo
+          mingw-w64-x86_64-emacs
     - name: Set up Ubuntu worker
       if: runner.os == 'Linux'
       shell: bash
@@ -106,7 +107,7 @@ runs:
       if: runner.os == 'macOS'
       shell: bash
       run: |
-        brew update && brew install texinfo
+        brew update && brew install texinfo emacs
         # Detect Xcode command-line tools on macOS to work around
         # https://github.com/bazelbuild/bazel/issues/14970.
         cov="$(xcrun --find llvm-cov)"
@@ -126,7 +127,10 @@ runs:
         Add-Content
         -Verbose
         -LiteralPath $Env:GITHUB_ENV
-        -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
+        -Value (
+          'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe',
+          'EMACS=${{steps.msys2.outputs.msys2-location}}\mingw64\bin\emacs.exe'
+        )
     - name: Override Bazel version
       if: inputs.bazel-version != 'default'
       shell: pwsh
