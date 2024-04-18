@@ -3871,25 +3871,6 @@ static emacs_value CheckFieldKeyword(emacs_env* env,
   return Nil(ctx);
 }
 
-static emacs_value ParseFileDescriptor(emacs_env* env,
-                                       ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
-                                       emacs_value* args, void* data) {
-  struct Context ctx = {env, data};
-  assert(nargs == 1);
-  emacs_value serialized = args[0];
-  upb_Arena* arena = NewArena(ctx);
-  if (arena == NULL) return NULL;
-  const google_protobuf_FileDescriptorProto* file =
-      ReadFileDescriptorProto(ctx, arena, serialized);
-  if (file == NULL) {
-    upb_Arena_Free(arena);
-    return NULL;
-  }
-  emacs_value ret = ConvertFileDescriptor(ctx, arena, file);
-  upb_Arena_Free(arena);
-  return ret;
-}
-
 static emacs_value ParseFileDescriptorSet(emacs_env* env,
                                           ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
                                           emacs_value* args, void* data) {
@@ -4364,19 +4345,6 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "Signal an error of type ‘elisp/proto/unknown-field’ if not.\n\n"
         "(fn type keyword)",
         0, CheckFieldKeyword);
-  Defun(ctx, "elisp/proto/parse-file-descriptor", 1, 1,
-        "Parse a protocol buffer file descriptor.\n"
-        "SERIALIZED must be the serialized form of a\n"
-        "google.protobuf.FileDescriptorProto message.\n"
-        "Return a nested list\n"
-        "(PROTO-FILE-NAME SERIALIZED\n"
-        " (DEPENDENCY-FILE-NAME...)\n"
-        " ((MESSAGE-FULL-NAME FIELD-NAME...)...)\n"
-        " ((ENUM-FULL-NAME (NAME VALUE)...)...)).\n"
-        "This function is used by the protocol buffer compiler;\n"
-        "users should not call it directly.\n\n"
-        "(fn serialized)",
-        kNoSideEffects, ParseFileDescriptor);
   Defun(ctx, "elisp/proto/parse-file-descriptor-set", 1, 1,
         "Parse a protocol buffer file descriptor set.\n"
         "SERIALIZED must be the serialized form of a\n"

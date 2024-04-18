@@ -130,7 +130,10 @@ py_binary(
     data = [":generate"],
     python_version = "PY3",
     srcs_version = "PY3",
-    deps = [":plugin_py_proto"],
+    deps = [
+        ":descriptor_py_proto",
+        ":plugin_py_proto",
+    ],
 )
 
 proto_lang_toolchain(
@@ -143,6 +146,12 @@ proto_lang_toolchain(
     progress_message = "Generating Emacs Lisp protocol buffer library %{label}",
     runtime = ":proto",
     visibility = ["//visibility:public"],
+)
+
+py_proto_library(
+    name = "descriptor_py_proto",
+    tags = ["no-python-check"],
+    deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 
 py_proto_library(
