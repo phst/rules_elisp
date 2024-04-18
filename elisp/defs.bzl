@@ -109,8 +109,6 @@ def _elisp_proto_aspect_impl(target, ctx):
         proto_info = info,
         proto_lang_toolchain_info = ctx.attr._proto_toolchain[proto_common.ProtoLangToolchainInfo],
         generated_files = srcs,
-        additional_args = ctx.actions.args().add(ctx.executable._generate, format = "--elisp_opt=%s"),
-        additional_tools = [ctx.executable._generate],
     )
 
     # TODO: We probably shouldn’t generate this bundle, but right now it’s
@@ -377,11 +375,6 @@ _elisp_proto_aspect = aspect(
         "_compile": attr.label(
             default = Label("//elisp:compile.elc"),
             allow_single_file = [".elc"],
-        ),
-        "_generate": attr.label(
-            default = Label("//elisp/proto:generate"),
-            executable = True,
-            cfg = "exec",
         ),
         "_generate_bundle": attr.label(
             default = Label("//elisp/proto:generate_bundle"),

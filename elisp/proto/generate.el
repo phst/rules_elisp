@@ -104,68 +104,64 @@ VALUES is a list of (NAME NUMBER) pairs."
         (terpri))))
   (terpri))
 
-(pcase command-line-args-left
-  (`(,descriptor-file ,output-file ,feature)
-   (setq command-line-args-left nil)
-   (cl-check-type feature elisp/proto/simple-string)
-   (let* ((coding-system-for-read 'utf-8-unix)
-          (coding-system-for-write 'utf-8-unix)
-          (output-name (file-name-nondirectory output-file))
-          (serialized-file-descriptor-set
-           (with-temp-buffer
-             (set-buffer-multibyte nil)
-             (insert-file-contents-literally descriptor-file)
-             (buffer-substring-no-properties (point-min) (point-max))))
-          (parsed (elisp/proto/parse-file-descriptor-set
-                   serialized-file-descriptor-set))
-          (infos (cl-remove feature parsed :key #'car :test-not #'string-equal))
-          (info (car infos)))
-     (unless (length= infos 1)
-       (user-error "Got %d infos for feature %s" (length infos) feature))
-     (cl-check-type output-name elisp/proto/simple-string)
-     (with-temp-file (concat "/:" output-file)
-       (let ((standard-output (current-buffer))
-             (print-level nil)
-             (print-length nil)
-             (print-circle t)
-             (print-gensym t)
-             (print-escape-control-characters t)
-             (print-escape-newlines t)
-             (print-escape-nonascii t)
-             (pp-escape-newlines t))
-         (cl-destructuring-bind (proto-file descriptor deps messages enums) info
-           (cl-assert (string-equal proto-file feature) :show-args)
-           (insert ";;; " output-name " --- protocol buffer library " proto-file
-                   " -*- lexical-binding: t; -*-\n\n"
-                   ";;; Commentary:\n\n"
-                   ";; A generated protocol buffer library.\n"
-                   ";; This file was generated from the following file:\n")
-           (insert ";;   " proto-file "\n")
-           (insert "\n;;; Code:\n\n")
-           (prin1 '(require 'cl-lib)) (terpri) (terpri)
-           (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
-           (dolist (dep deps)
-             (cl-check-type dep elisp/proto/simple-string)
-             (prin1 `(require ',(intern dep))) (terpri))
-           (when deps (terpri))
-           (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
-           (terpri) (terpri)
-           (dolist (message messages)
-             (cl-destructuring-bind (full-name . fields) message
-               (elisp/proto/generate-message full-name fields)))
-           (dolist (enum enums)
-             (cl-destructuring-bind (full-name . values) enum
-               (elisp/proto/generate-enum full-name values)))
-           (prin1 `(provide ',(intern feature))) (terpri) (terpri)
-           (insert ";; Local Variables:\n"
-                   ;; Generated docstrings can be overly long if they
-                   ;; contain lengthy message names.  Don’t issue
-                   ;; byte-compiler warnings for them.
-                   ";; byte-compile-docstring-max-column: 500\n"
-                   ";; End:\n\n"
-                   ";;; " output-name " ends here\n"))))))
-  (_ (user-error (concat "Usage: elisp/proto/generate "
-                         "DESCRIPTOR-FILE OUTPUT-FILE FEATURE"))))
+(cl-defun elisp/proto/generate-file ((proto-file descriptor deps messages enums))
+  (with-temp-buffer
+    (let* ((feature proto-file)
+           (output-file (concat proto-file ".el"))
+           (output-name (file-name-nondirectory output-file))
+           (standard-output (current-buffer))
+           (print-level nil)
+           (print-length nil)
+           (print-circle t)
+           (print-gensym t)
+           (print-escape-control-characters t)
+           (print-escape-newlines t)
+           (print-escape-nonascii t)
+           (pp-escape-newlines t))
+      (cl-check-type output-name elisp/proto/simple-string)
+      (insert ";;; " output-name " --- protocol buffer library " proto-file
+              " -*- lexical-binding: t; -*-\n\n"
+              ";;; Commentary:\n\n"
+              ";; A generated protocol buffer library.\n"
+              ";; This file was generated from the following file:\n")
+      (insert ";;   " proto-file "\n")
+      (insert "\n;;; Code:\n\n")
+      (prin1 '(require 'cl-lib)) (terpri) (terpri)
+      (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
+      (dolist (dep deps)
+        (cl-check-type dep elisp/proto/simple-string)
+        (prin1 `(require ',(intern dep))) (terpri))
+      (when deps (terpri))
+      (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
+      (terpri) (terpri)
+      (dolist (message messages)
+        (cl-destructuring-bind (full-name . fields) message
+          (elisp/proto/generate-message full-name fields)))
+      (dolist (enum enums)
+        (cl-destructuring-bind (full-name . values) enum
+          (elisp/proto/generate-enum full-name values)))
+      (prin1 `(provide ',(intern feature))) (terpri) (terpri)
+      (insert ";; Local Variables:\n"
+              ;; Generated docstrings can be overly long if they contain lengthy
+              ;; message names.  Don’t issue byte-compiler warnings for them.
+              ";; byte-compile-docstring-max-column: 500\n"
+              ";; End:\n\n"
+              ";;; " output-name " ends here\n")
+      (cons output-file
+            (buffer-substring-no-properties (point-min) (point-max))))))
+
+(set-binary-mode 'stdin :binary)
+(set-binary-mode 'stdout :binary)
+(let* ((standard-output #'external-debugging-output)
+       (inhibit-modification-hooks t)
+       (stdin (with-temp-buffer
+                (set-buffer-multibyte nil)
+                (elisp/proto/insert-stdin)
+                (buffer-substring-no-properties (point-min) (point-max))))
+       (request (elisp/proto/parse-code-generator-request stdin))
+       (response (mapcar #'elisp/proto/generate-file request))
+       (stdout (elisp/proto/serialize-code-generator-response response)))
+  (elisp/proto/write-stdout stdout))
 
 ;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
 ;; Info node ‘(emacs) Specifying File Variables’.
