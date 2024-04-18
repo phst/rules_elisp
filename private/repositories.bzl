@@ -41,15 +41,15 @@ def non_module_deps():
         integrity = "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
     )
 
-def _non_module_dev_deps_impl(repository_ctx):
-    repository_ctx.download_and_extract(
+def _non_module_dev_deps_impl(ctx):
+    ctx.download_and_extract(
         sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
         url = [
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
         stripPrefix = "JUnit-Schema-1.0.0/",
     )
-    repository_ctx.template(
+    ctx.template(
         "BUILD.bazel",
         Label("//:junit_xsd.BUILD"),
         {
@@ -111,17 +111,17 @@ def _emacs(*, version, integrity):
         strip_prefix = "emacs-{}".format(version),
     )
 
-def _emacs_repository_impl(repository_ctx):
-    path = repository_ctx.attr.path
-    repository_ctx.download_and_extract(
-        integrity = repository_ctx.attr.integrity,
+def _emacs_repository_impl(ctx):
+    path = ctx.attr.path
+    ctx.download_and_extract(
+        integrity = ctx.attr.integrity,
         url = [
             "https://ftpmirror.gnu.org" + path,
             "https://ftp.gnu.org/gnu" + path,
         ],
-        stripPrefix = repository_ctx.attr.strip_prefix,
+        stripPrefix = ctx.attr.strip_prefix,
     )
-    repository_ctx.template(
+    ctx.template(
         "BUILD.bazel",
         Label("//:emacs.BUILD"),
         {

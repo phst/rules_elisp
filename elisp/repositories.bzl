@@ -100,20 +100,20 @@ def rules_elisp_toolchains():
     """Registers the default toolchains for Emacs Lisp."""
     native.register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
 
-def _elisp_http_archive_impl(repository_ctx):
+def _elisp_http_archive_impl(ctx):
     """Implementation of the `elisp_http_archive` repository rule."""
-    repository_ctx.download_and_extract(
-        url = repository_ctx.attr.urls,
-        integrity = repository_ctx.attr.integrity or fail("missing archive checksum"),
-        stripPrefix = repository_ctx.attr.strip_prefix,
+    ctx.download_and_extract(
+        url = ctx.attr.urls,
+        integrity = ctx.attr.integrity or fail("missing archive checksum"),
+        stripPrefix = ctx.attr.strip_prefix,
     )
-    repository_ctx.template(
+    ctx.template(
         "BUILD.bazel",
         Label("//elisp:BUILD.template"),
         {
-            '"[defs_bzl]"': repr(str(repository_ctx.attr._defs_bzl)),
-            '"[target_name]"': repr(repository_ctx.attr.target_name),
-            "[[exclude]]": repr(repository_ctx.attr.exclude),
+            '"[defs_bzl]"': repr(str(ctx.attr._defs_bzl)),
+            '"[target_name]"': repr(ctx.attr.target_name),
+            "[[exclude]]": repr(ctx.attr.exclude),
         },
         executable = False,
     )

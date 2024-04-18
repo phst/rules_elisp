@@ -29,9 +29,9 @@ _http_archive = tag_class(
     },
 )
 
-def _elisp_impl(module_ctx):
+def _elisp_impl(ctx):
     """Implementation of the `elisp` module extension."""
-    for module in module_ctx.modules:
+    for module in ctx.modules:
         for arch in module.tags.http_archive:
             elisp_http_archive(
                 name = arch.name,
