@@ -22,23 +22,23 @@ def non_module_deps():
     """Installs dependencies that are not available as modules."""
     _emacs(
         version = "28.1",
-        sha256 = "28b1b3d099037a088f0a4ca251d7e7262eab5ea1677aabffa6c4426961ad75e1",
+        integrity = "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
     )
     _emacs(
         version = "28.2",
-        sha256 = "ee21182233ef3232dc97b486af2d86e14042dbb65bbc535df562c3a858232488",
+        integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
     )
     _emacs(
         version = "29.1",
-        sha256 = "d2f881a5cc231e2f5a03e86f4584b0438f83edd7598a09d24a21bd8d003e2e01",
+        integrity = "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
     )
     _emacs(
         version = "29.2",
-        sha256 = "7d3d2448988720bf4bf57ad77a5a08bf22df26160f90507a841ba986be2670dc",
+        integrity = "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
     )
     _emacs(
         version = "29.3",
-        sha256 = "c34c05d3ace666ed9c7f7a0faf070fea3217ff1910d004499bd5453233d742a0",
+        integrity = "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
     )
 
 def _non_module_dev_deps_impl(repository_ctx):
@@ -103,17 +103,17 @@ the library.""",
     ),
 }
 
-def _emacs(*, version, sha256):
+def _emacs(*, version, integrity):
     _emacs_repository(
         name = "gnu_emacs_" + version,
         version = version,
-        sha256 = sha256,
+        integrity = integrity,
     )
 
 def _emacs_repository_impl(repository_ctx):
     version = repository_ctx.attr.version
     repository_ctx.download_and_extract(
-        sha256 = repository_ctx.attr.sha256,
+        integrity = repository_ctx.attr.integrity,
         url = [
             "https://ftpmirror.gnu.org/emacs/emacs-{}.tar.xz".format(version),
             "https://ftp.gnu.org/gnu/emacs/emacs-{}.tar.xz".format(version),
@@ -132,7 +132,7 @@ def _emacs_repository_impl(repository_ctx):
 _emacs_repository = repository_rule(
     attrs = {
         "version": attr.string(mandatory = True),
-        "sha256": attr.string(mandatory = True),
+        "integrity": attr.string(mandatory = True),
     },
     implementation = _emacs_repository_impl,
 )
