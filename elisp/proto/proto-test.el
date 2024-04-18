@@ -36,6 +36,7 @@
 
 (require 'elisp/proto/test.proto)
 (require 'google/protobuf/any.proto)
+(require 'google/protobuf/compiler/plugin.proto)
 (require 'google/protobuf/descriptor.proto)
 (require 'google/protobuf/duration.proto)
 (require 'google/protobuf/timestamp.proto)
@@ -922,7 +923,7 @@
                                               :value "garbage"))
                     :type 'wrong-type-argument))))
 
-(ert-deftest elisp/proto/parse-file-descriptor-set ()
+(ert-deftest elisp/proto/parse-code-generator-request ()
   (let* ((field (google/protobuf/FieldDescriptorProto-new
                  :type google/protobuf/FieldDescriptorProto/TYPE_INT64
                  :name "field"
@@ -940,14 +941,16 @@
                 :package "test"
                 :message_type (list message)
                 :enum_type (list enum)))
-         (set (google/protobuf/FileDescriptorSet-new :file (list file)))
-         (serialized (elisp/proto/serialize set)))
-    (should (equal (elisp/proto/parse-file-descriptor-set serialized)
+         (request (google/protobuf/compiler/CodeGeneratorRequest-new
+                   :file_to_generate '("test.proto")
+                   :proto_file (list file)))
+         (serialized (elisp/proto/serialize request)))
+    (should (equal (elisp/proto/parse-code-generator-request serialized)
                    `(("test.proto" ,(elisp/proto/serialize file)
                       ()
                       (("test.Message" field))
                       (("test.Enum" (VALUE 77))))))))
-  (should-error (elisp/proto/parse-file-descriptor-set "garbage")))
+  (should-error (elisp/proto/parse-code-generator-request "garbage")))
 
 (ert-deftest elisp/proto/reload ()
   "Check that unloading and reloading a protocol buffer library works."

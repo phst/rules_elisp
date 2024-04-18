@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
 load("@rules_proto//proto:defs.bzl", "proto_lang_toolchain", "proto_library")
-load("@rules_python//python:defs.bzl", "py_binary")
-load("@rules_python//python:proto.bzl", "py_proto_library")
+load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
 
@@ -41,6 +41,7 @@ elisp_test(
     flaky = True,  # https://debbugs.gnu.org/46722
     deps = [
         ":any_elisp_proto",
+        ":compiler_plugin_elisp_proto",
         ":descriptor_elisp_proto",
         ":duration_elisp_proto",
         ":proto",
@@ -124,40 +125,16 @@ elisp_proto_library(
     deps = ["@com_google_protobuf//:wrappers_proto"],
 )
 
-py_binary(
-    name = "plugin",
-    srcs = ["plugin.py"],
-    data = [":generate"],
-    python_version = "PY3",
-    srcs_version = "PY3",
-    deps = [
-        ":compiler_plugin_py_proto",
-        ":descriptor_py_proto",
-    ],
-)
-
 proto_lang_toolchain(
     name = "toolchain",
     command_line = "--elisp_out=$(OUT)",
     mnemonic = "GenElispProto",
     output_files = "multiple",
-    plugin = ":plugin",
+    plugin = ":generate",
     plugin_format_flag = "--plugin=protoc-gen-elisp=%s",
     progress_message = "Generating Emacs Lisp protocol buffer library %{label}",
     runtime = ":proto",
     visibility = ["//visibility:public"],
-)
-
-py_proto_library(
-    name = "descriptor_py_proto",
-    tags = ["no-python-check"],
-    deps = ["@com_google_protobuf//:descriptor_proto"],
-)
-
-py_proto_library(
-    name = "compiler_plugin_py_proto",
-    tags = ["no-python-check"],
-    deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
 
 elisp_cc_module(
@@ -172,6 +149,7 @@ elisp_cc_module(
     deps = [
         ":any_upb_proto",
         ":any_upbdefs_proto",
+        ":compiler_plugin_upb_proto",
         ":duration_upb_proto",
         ":duration_upbdefs_proto",
         ":timestamp_upb_proto",
@@ -192,11 +170,36 @@ elisp_cc_module(
     ],
 )
 
+py_test(
+    name = "module_test",
+    srcs = ["module_test.py"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
+        # add additional quoting.
+        shell.quote("--cat=$(rlocationpath :cat)"),
+    ],
+    data = [":cat"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        "//elisp:runfiles",
+        "@io_abseil_py//absl/flags",
+        "@io_abseil_py//absl/testing:absltest",
+    ],
+)
+
+elisp_binary(
+    name = "cat",
+    testonly = True,
+    src = "cat.el",
+    input_args = [2],
+    output_args = [2],
+    deps = [":module"],
+)
+
 elisp_binary(
     name = "generate",
     src = "generate.el",
-    input_args = [1],
-    output_args = [2],
     visibility = [
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
@@ -246,6 +249,11 @@ upb_proto_library(
 upb_proto_reflection_library(
     name = "timestamp_upbdefs_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
+)
+
+upb_proto_library(
+    name = "compiler_plugin_upb_proto",
+    deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
 
 proto_library(

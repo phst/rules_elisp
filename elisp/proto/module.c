@@ -81,13 +81,51 @@
 #endif
 
 #include <assert.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <wchar.h>
+
+#ifdef _WIN32
+#  ifndef UNICODE
+#    define UNICODE
+#  endif
+#  ifndef _UNICODE
+#    define _UNICODE
+#  endif
+#  ifndef STRICT
+#    define STRICT
+#  endif
+#  ifndef NOMINMAX
+#    define NOMINMAX
+#  endif
+#  ifndef WIN32_LEAN_AND_MEAN
+#    define WIN32_LEAN_AND_MEAN
+#  endif
+#  ifdef _MSC_VER
+#    pragma warning(push, 3)
+#    pragma warning(disable : 5105)
+#  endif
+#  include <windows.h>
+#  ifdef _MSC_VER
+#    pragma warning(pop)
+#  endif
+#  if MAXDWORD > SIZE_MAX
+#    error unsupported architecture
+#  endif
+#else
+#  include <sys/types.h>
+#  include <unistd.h>
+#  if SSIZE_MAX > SIZE_MAX
+#    error unsupported architecture
+#  endif
+#endif
 
 #ifndef INT32_MAX
 #  error this file requires the int32_t type
@@ -152,6 +190,7 @@
 #include "google/protobuf/descriptor.upb.h"
 #include "google/protobuf/duration.upb.h"
 #include "google/protobuf/duration.upbdefs.h"
+#include "google/protobuf/compiler/plugin.upb.h"
 #include "google/protobuf/timestamp.upb.h"
 #include "google/protobuf/timestamp.upbdefs.h"
 #include "upb/base/descriptor_constants.h"
@@ -213,6 +252,7 @@
   X(kMakeVector, "make-vector")                                  \
   X(kLength, "length")                                           \
   X(kAref, "aref")                                               \
+  X(kInsert, "insert")                                           \
   X(kPrin1, "prin1")                                             \
   X(kPrinc, "princ")                                             \
   X(kPrintLength, "print-length")                                \
@@ -237,7 +277,9 @@
   X(kArenaFusionFailed, "elisp/proto/arena-fusion-failed")       \
   X(kNoPresence, "elisp/proto/no-presence")                      \
   X(kUninitializedAny, "elisp/proto/uninitialized-any")          \
+  X(kFileError, "elisp/proto/file-error")                        \
   X(kRegistrationFailed, "elisp/proto/registration-failed")      \
+  X(kUnknownProtoFile, "elisp/proto/unknown-proto-file")         \
   X(kMessageTypeP, "elisp/proto/message-type-p")                 \
   X(kFieldNameP, "elisp/proto/field-name-p")                     \
   X(kFieldKeywordP, "elisp/proto/field-keyword-p")               \
@@ -249,8 +291,8 @@
   X(kScalarFieldP, "elisp/proto/scalar-field-p")                 \
   X(kMapFieldP, "elisp/proto/map-field-p")                       \
   X(kMapEntryP, "elisp/proto/map-entry-p")                       \
-  X(kSerializedFileDescriptorSetP,                               \
-    "elisp/proto/serialized-file-descriptor-set-p")              \
+  X(kSerializedCodeGeneratorRequestP,                            \
+    "elisp/proto/serialized-code-generator-request-p")           \
   X(kSerializedFileDescriptorProtoP,                             \
     "elisp/proto/serialized-file-descriptor-proto-p")            \
   X(kObjectArena, "elisp/proto/object--arena")                   \
@@ -816,8 +858,22 @@ static emacs_value Cons(struct Context ctx, emacs_value car, emacs_value cdr) {
   return FuncallSymbol2(ctx, kCons, car, cdr);
 }
 
+static emacs_value Car(struct Context ctx, emacs_value list) {
+  return FuncallSymbol1(ctx, kCar, list);
+}
+
+static emacs_value Cdr(struct Context ctx, emacs_value list) {
+  return FuncallSymbol1(ctx, kCdr, list);
+}
+
 static void Push(struct Context ctx, emacs_value newelt, emacs_value* list) {
   *list = Cons(ctx, newelt, *list);
+}
+
+static emacs_value Pop(struct Context ctx, emacs_value* list) {
+  emacs_value car = Car(ctx, *list);
+  *list = Cdr(ctx, *list);
+  return car;
 }
 
 // The time conversion functions assume that time_t is integral and fits into
@@ -2489,23 +2545,6 @@ static bool SetDurationProto(struct Context ctx, google_protobuf_Duration* msg,
 // have generate.el operate on generated Lisp reflections of those because that
 // would create a dependency cycle.
 
-// Parses a file descriptor set from its serialized representation.
-static const google_protobuf_FileDescriptorSet* ReadFileDescriptorSet(
-    struct Context ctx, upb_Arena* arena, emacs_value serialized) {
-  struct MutableString string =
-      ExtractUnibyteString(ctx, ArenaAllocator(arena), serialized);
-  if (string.data == NULL) return NULL;
-  const google_protobuf_FileDescriptorSet* set =
-      google_protobuf_FileDescriptorSet_parse_ex(
-          string.data, string.size, NULL,
-          kUpb_DecodeOption_AliasString | kUpb_DecodeOption_CheckRequired,
-          arena);
-  if (set == NULL) {
-    WrongTypeArgument(ctx, kSerializedFileDescriptorSetP, serialized);
-  }
-  return set;
-}
-
 // Parses a file descriptor from its serialized representation.
 static const google_protobuf_FileDescriptorProto* ReadFileDescriptorProto(
     struct Context ctx, upb_Arena* arena, emacs_value serialized) {
@@ -2523,7 +2562,7 @@ static const google_protobuf_FileDescriptorProto* ReadFileDescriptorProto(
   return file;
 }
 
-// Helper function for ConvertFileDescriptorSet.
+// Helper function for ParseCodeGeneratorRequest.
 static emacs_value SerializeFileDescriptor(
     struct Context ctx, upb_Arena* arena,
     const google_protobuf_FileDescriptorProto* file) {
@@ -2538,7 +2577,7 @@ static emacs_value SerializeFileDescriptor(
   return MakeUnibyteString(ctx, upb_StringView_FromDataAndSize(data, size));
 }
 
-// Helper function for ConvertFileDescriptorSet.
+// Helper function for ParseCodeGeneratorRequest.
 static emacs_value ConvertDependencies(struct Context ctx, upb_Arena* arena,
                                        const upb_FileDef* file) {
   struct Allocator alloc = ArenaAllocator(arena);
@@ -2555,7 +2594,7 @@ static emacs_value ConvertDependencies(struct Context ctx, upb_Arena* arena,
   return List(ctx, size, array);
 }
 
-// Helper function for ConvertFileDescriptorSet.  Returns a list of field names
+// Helper function for ParseCodeGeneratorRequest.  Returns a list of field names
 // as symbols.
 static emacs_value ConvertFieldDescriptors(struct Context ctx, upb_Arena* arena,
                                            const upb_MessageDef* message) {
@@ -2573,8 +2612,8 @@ static emacs_value ConvertFieldDescriptors(struct Context ctx, upb_Arena* arena,
   return List(ctx, count, args);
 }
 
-// Helper function for ConvertFileDescriptorSet.  Returns a list of (name value)
-// pairs.
+// Helper function for ParseCodeGeneratorRequest.  Returns a list of
+// (name value) pairs.
 static emacs_value ConvertEnumValueDescriptors(struct Context ctx,
                                                upb_Arena* arena,
                                                const upb_EnumDef* enumeration) {
@@ -2594,7 +2633,7 @@ static emacs_value ConvertEnumValueDescriptors(struct Context ctx,
   return List(ctx, count, args);
 }
 
-// Helper function for ConvertFileDescriptorSet.  Adds new enumeration
+// Helper function for ParseCodeGeneratorRequest.  Adds new enumeration
 // descriptors to the beginning of the given list.  The list elements are of the
 // form (full-name (enumerator-name value)…), where ‘full-name’ is the full name
 // of the enumeration type as a string, including the package name.
@@ -2621,7 +2660,7 @@ static const upb_EnumDef* NestedEnumDef(const void* parent, int i) {
   return upb_MessageDef_NestedEnum(parent, i);
 }
 
-// Helper function for ConvertFileDescriptorSet.  Adds new message and
+// Helper function for ParseCodeGeneratorRequest.  Adds new message and
 // enumeration type descriptors to the beginnings of the given lists.  The
 // message type list elements are of the form (full-name field-name…), and the
 // enumeration list elements are of the form
@@ -2669,16 +2708,14 @@ static const upb_EnumDef* TopLevelEnumDef(const void* file, int i) {
   return upb_FileDef_TopLevelEnum(file, i);
 }
 
-// Helper function for ConvertFileDescriptorSet.  Returns a list of the form
+// Helper function for ParseCodeGeneratorRequest.  Returns a list of the form
 // (proto-file-name serialized-file-descriptor-proto
 //  (dependency-file-name…)
 //  ((message-name field-name…)…)
 //  ((enumeration-name (enumerator-name value)…)…)).
 static emacs_value ConvertFileDescriptor(
-    struct Context ctx, upb_Arena* arena, upb_DefPool* pool,
+    struct Context ctx, upb_Arena* arena, const upb_FileDef* file,
     const google_protobuf_FileDescriptorProto* proto) {
-  const upb_FileDef* file = AddFileToPool(ctx, proto, pool);
-  if (file == NULL) return NULL;
   emacs_value name =
       MakeString(ctx, upb_StringView_FromString(upb_FileDef_Name(file)));
   emacs_value serialized = SerializeFileDescriptor(ctx, arena, proto);
@@ -2697,34 +2734,176 @@ static emacs_value ConvertFileDescriptor(
   return List5(ctx, name, serialized, dependencies, messages_list, enums_list);
 }
 
+#ifdef _WIN32
+static void FileError(struct Context ctx, DWORD code) {
+  emacs_value message = Nil(ctx);
+  enum { kWideSize = 0x4000 };
+  wchar_t wide_buf[kWideSize];
+  DWORD wide_len =
+      FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                     NULL, code, 0, wide_buf, kWideSize, NULL);
+  if (wide_len > 0) {
+    enum { kUtf8Size = kWideSize * 3 };
+    char utf8_buf[kUtf8Size];
+    assert(wide_len <= INT_MAX);
+    int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wide_buf, (int)wide_len,
+                                       utf8_buf, kUtf8Size, NULL, NULL);
+    if (utf8_len > 0) {
+      message = MakeString(
+          ctx, upb_StringView_FromDataAndSize(utf8_buf, (size_t)utf8_len));
+    }
+  }
+  Signal2(ctx, kFileError, MakeUInteger(ctx, code), message);
+}
+#else
+static void FileError(struct Context ctx, int code) {
+  emacs_value message = Nil(ctx);
+  char buffer[0x4000];
+  if (strerror_r(code, buffer, sizeof buffer) == 0) {
+    message = MakeString(ctx, upb_StringView_FromString(buffer));
+  }
+  Signal2(ctx, kFileError, MakeInteger(ctx, code), message);
+}
+#endif
+
+struct FileDefProtoPair {
+  const upb_FileDef* def;
+  const google_protobuf_FileDescriptorProto* proto;
+};
+
+// Helper function for ConvertGeneratorRequest.  The arguments must point to
+// FileDefProtoPair structures.
+int CompareFileDefProtoPairs(const void* a, const void* b) {
+  const struct FileDefProtoPair* p = a;
+  const struct FileDefProtoPair* q = b;
+  uintptr_t u = (uintptr_t)p->def;
+  uintptr_t v = (uintptr_t)q->def;
+  if (u < v) return -1;
+  if (u > v) return +1;
+  return 0;
+}
+
 // Returns a list of the form
 // ((proto-file-name serialized-file-descriptor-proto
 //   (dependency-file-name…)
 //   ((message-name field-name…)…)
 //   ((enumeration-name (enumerator-name value)…)…))…).
-static emacs_value ConvertFileDescriptorSet(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_FileDescriptorSet* set) {
+static emacs_value ConvertGeneratorRequest(
+    struct Context ctx, upb_Arena* arena, upb_DefPool* pool,
+    const google_protobuf_compiler_CodeGeneratorRequest* request) {
   struct Allocator alloc = ArenaAllocator(arena);
-  size_t files_count;
-  const google_protobuf_FileDescriptorProto* const* files =
-      google_protobuf_FileDescriptorSet_file(set, &files_count);
-  if (files_count > PTRDIFF_MAX) {
+  size_t protos_count;
+  const google_protobuf_FileDescriptorProto* const* protos =
+      google_protobuf_compiler_CodeGeneratorRequest_proto_file(request,
+                                                               &protos_count);
+  struct FileDefProtoPair* pairs =
+      AllocateArray(ctx, alloc, protos_count, sizeof *pairs);
+  if (pairs == NULL && protos_count > 0) return NULL;
+  for (size_t i = 0; i < protos_count; ++i) {
+    const google_protobuf_FileDescriptorProto* proto = protos[i];
+    const upb_FileDef* def = AddFileToPool(ctx, proto, pool);
+    if (def == NULL) return false;
+    struct FileDefProtoPair* pair = &pairs[i];
+    pair->def = def;
+    pair->proto = proto;
+  }
+  qsort(pairs, protos_count, sizeof *pairs, CompareFileDefProtoPairs);
+  size_t names_count;
+  const upb_StringView* names =
+      google_protobuf_compiler_CodeGeneratorRequest_file_to_generate(
+          request, &names_count);
+  if (names_count > PTRDIFF_MAX) {
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* array = AllocateLispArray(ctx, alloc, files_count);
-  if (array == NULL && files_count > 0) return NULL;
+  emacs_value* array = AllocateLispArray(ctx, alloc, names_count);
+  if (array == NULL && names_count > 0) return NULL;
+  for (size_t i = 0; i < names_count; ++i) {
+    upb_StringView name = names[i];
+    const upb_FileDef* def =
+        upb_DefPool_FindFileByNameWithSize(pool, name.data, name.size);
+    if (def == NULL) {
+      Signal1(ctx, kUnknownProtoFile, MakeString(ctx, name));
+      return NULL;
+    }
+    struct FileDefProtoPair key = {def, NULL};
+    const struct FileDefProtoPair* pair = bsearch(
+        &key, pairs, protos_count, sizeof *pairs, CompareFileDefProtoPairs);
+    if (pair == NULL) {
+      Signal1(ctx, kUnknownProtoFile, MakeString(ctx, name));
+      return NULL;
+    };
+    array[i] = ConvertFileDescriptor(ctx, arena, def, pair->proto);
+  }
+  return List(ctx, (ptrdiff_t)names_count, array);
+}
+
+static emacs_value ParseGeneratorRequest(struct Context ctx, upb_Arena* arena,
+                                         upb_StringView serialized) {
+  google_protobuf_compiler_CodeGeneratorRequest* request =
+      google_protobuf_compiler_CodeGeneratorRequest_parse_ex(
+          serialized.data, serialized.size, NULL,
+          kUpb_DecodeOption_AliasString | kUpb_DecodeOption_CheckRequired,
+          arena);
+  if (request == NULL) {
+    WrongTypeArgument(ctx, kSerializedCodeGeneratorRequestP,
+                      MakeString(ctx, serialized));
+    return NULL;
+  }
+  size_t count;
+  google_protobuf_FileDescriptorProto* const* files =
+      google_protobuf_compiler_CodeGeneratorRequest_mutable_proto_file(request,
+                                                                       &count);
+  for (size_t i = 0; i < count; ++i) {
+    // Strip unnecessary documentation.
+    google_protobuf_FileDescriptorProto_clear_source_code_info(files[i]);
+  }
   upb_DefPool* pool = upb_DefPool_New();
   if (pool == NULL) {
     MemoryFull(ctx);
     return NULL;
   }
-  for (size_t i = 0; i < files_count; ++i) {
-    array[i] = ConvertFileDescriptor(ctx, arena, pool, files[i]);
-  }
+  emacs_value ret = ConvertGeneratorRequest(ctx, arena, pool, request);
   upb_DefPool_Free(pool);
-  return List(ctx, (ptrdiff_t)files_count, array);
+  return ret;
+}
+
+static upb_StringView SerializeGeneratorResponse(struct Context ctx,
+                                                 upb_Arena* arena,
+                                                 emacs_value list) {
+  upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
+  struct Allocator alloc = ArenaAllocator(arena);
+  google_protobuf_compiler_CodeGeneratorResponse* resp =
+      google_protobuf_compiler_CodeGeneratorResponse_new(arena);
+  if (resp == NULL || !Success(ctx)) {
+    MemoryFull(ctx);
+    return null;
+  }
+  while (IsNotNil(ctx, list)) {
+    emacs_value elt = Pop(ctx, &list);
+    upb_StringView name = View(ExtractString(ctx, alloc, Car(ctx, elt)));
+    upb_StringView content = View(ExtractString(ctx, alloc, Cdr(ctx, elt)));
+    google_protobuf_compiler_CodeGeneratorResponse_File* file =
+        google_protobuf_compiler_CodeGeneratorResponse_add_file(resp, arena);
+    if (file == NULL) {
+      MemoryFull(ctx);
+      return null;
+    }
+    google_protobuf_compiler_CodeGeneratorResponse_File_set_name(file, name);
+    google_protobuf_compiler_CodeGeneratorResponse_File_set_content(file,
+                                                                    content);
+  }
+  size_t size;
+  const char* data =
+      google_protobuf_compiler_CodeGeneratorResponse_serialize_ex(
+          resp,
+          kUpb_EncodeOption_Deterministic | kUpb_EncodeOption_CheckRequired,
+          arena, &size);
+  if (data == NULL) {
+    Signal0(ctx, kSerializeError);
+    return null;
+  }
+  return upb_StringView_FromDataAndSize(data, size);
 }
 
 static bool RegisterFileDescriptorProto(
@@ -3885,21 +4064,115 @@ static emacs_value CheckFieldKeyword(emacs_env* env,
   return Nil(ctx);
 }
 
-static emacs_value ParseFileDescriptorSet(emacs_env* env,
-                                          ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
-                                          emacs_value* args, void* data) {
+// We use OS-specific functions for InsertStdin and WriteStdout because Emacs
+// closes the standard I/O streams on Windows.
+
+static emacs_value InsertStdin(emacs_env* env,
+                               ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                               emacs_value* args ABSL_ATTRIBUTE_UNUSED,
+                               void* data) {
   struct Context ctx = {env, data};
-  assert(nargs == 1);
-  emacs_value serialized = args[0];
-  upb_Arena* arena = NewArena(ctx);
-  if (arena == NULL) return NULL;
-  const google_protobuf_FileDescriptorSet* set =
-      ReadFileDescriptorSet(ctx, arena, serialized);
-  if (set == NULL) {
-    upb_Arena_Free(arena);
+  assert(nargs == 0);
+#ifdef _WIN32
+  HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
+  if (handle == INVALID_HANDLE_VALUE) {
+    FileError(ctx, GetLastError());
     return NULL;
   }
-  emacs_value ret = ConvertFileDescriptorSet(ctx, arena, set);
+#endif
+  while (Success(ctx)) {
+    char buffer[0x4000];
+#ifdef _WIN32
+    DWORD n;
+    if (!ReadFile(handle, buffer, sizeof buffer, &n, NULL)) {
+      DWORD code = GetLastError();
+      if (code == ERROR_BROKEN_PIPE) break;
+      FileError(ctx, code);
+      return NULL;
+    }
+#else
+    ssize_t v = read(STDIN_FILENO, buffer, sizeof buffer);
+    if (v < 0) {
+      FileError(ctx, errno);
+      return NULL;
+    }
+    size_t n = (size_t)v;
+#endif
+    if (n == 0) break;
+    assert(n <= sizeof buffer);
+    emacs_value string =
+        MakeUnibyteString(ctx, upb_StringView_FromDataAndSize(buffer, n));
+    FuncallSymbol1(ctx, kInsert, string);
+  }
+  return Nil(ctx);
+}
+
+static emacs_value WriteStdout(emacs_env* env,
+                               ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
+                               emacs_value* args, void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 1);
+  struct Allocator alloc = HeapAllocator();
+#ifdef _WIN32
+  HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+  if (handle == INVALID_HANDLE_VALUE) {
+    FileError(ctx, GetLastError());
+    return NULL;
+  }
+#endif
+  struct MutableString content = ExtractUnibyteString(ctx, alloc, args[0]);
+  if (content.data == NULL) return NULL;
+  size_t left = content.size;
+  const char* ptr = content.data;
+  while (left > 0 && Success(ctx)) {
+#ifdef _WIN32
+    DWORD n;
+    if (!WriteFile(handle, ptr, left <= MAXDWORD ? (DWORD)left : MAXDWORD, &n,
+                   NULL)) {
+      FileError(ctx, GetLastError());
+      break;
+    }
+#else
+    ssize_t v = write(STDOUT_FILENO, ptr, left <= SSIZE_MAX ? left : SSIZE_MAX);
+    if (v < 0) {
+      FileError(ctx, errno);
+      break;
+    }
+    size_t n = (size_t)v;
+#endif
+    assert(n <= left);
+    ptr += n;
+    left -= n;
+  }
+  Free(alloc, content.data);
+  return Nil(ctx);
+}
+
+static emacs_value ParseCodeGeneratorRequest(
+    emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED, emacs_value* args,
+    void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 1);
+  upb_Arena* arena = NewArena(ctx);
+  if (arena == NULL) return NULL;
+  struct Allocator alloc = ArenaAllocator(arena);
+  struct MutableString serialized = ExtractUnibyteString(ctx, alloc, args[0]);
+  emacs_value ret = serialized.data == NULL
+                        ? NULL
+                        : ParseGeneratorRequest(ctx, arena, View(serialized));
+  upb_Arena_Free(arena);
+  return ret;
+}
+
+static emacs_value SerializeCodeGeneratorResponse(
+    emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED, emacs_value* args,
+    void* data) {
+  struct Context ctx = {env, data};
+  assert(nargs == 1);
+  upb_Arena* arena = NewArena(ctx);
+  if (arena == NULL) return NULL;
+  upb_StringView serialized = SerializeGeneratorResponse(ctx, arena, args[0]);
+  emacs_value ret = MakeUnibyteString(ctx, serialized);
   upb_Arena_Free(arena);
   return ret;
 }
@@ -4359,10 +4632,22 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "Signal an error of type ‘elisp/proto/unknown-field’ if not.\n\n"
         "(fn type keyword)",
         0, CheckFieldKeyword);
-  Defun(ctx, "elisp/proto/parse-file-descriptor-set", 1, 1,
-        "Parse a protocol buffer file descriptor set.\n"
+  Defun(ctx, "elisp/proto/insert-stdin", 0, 0,
+        "Insert standard input into current buffer.\n"
+        "This function is used by the protocol buffer compiler;\n"
+        "users should not call it directly.",
+        0, InsertStdin);
+  Defun(ctx, "elisp/proto/write-stdout", 1, 1,
+        "Write STRING to standard output.\n"
+        "STRING must be a unibyte string.\n"
+        "This function is used by the protocol buffer compiler;\n"
+        "users should not call it directly.\n\n"
+        "(fn string)",
+        0, WriteStdout);
+  Defun(ctx, "elisp/proto/parse-code-generator-request", 1, 1,
+        "Parse a protocol buffer code generator request.\n"
         "SERIALIZED must be the serialized form of a\n"
-        "google.protobuf.FileDescriptorSet message.\n"
+        "google.protobuf.compiler.CodeGeneratorRequest message.\n"
         "Return a nested list\n"
         "((PROTO-FILE-NAME SERIALIZED-FILE-DESCRIPTOR-PROTO\n"
         "  (DEPENDENCY-FILE-NAME...)\n"
@@ -4371,7 +4656,19 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",
-        kNoSideEffects, ParseFileDescriptorSet);
+        kNoSideEffects, ParseCodeGeneratorRequest);
+  Defun(ctx, "elisp/proto/serialize-code-generator-response", 1, 1,
+        "Generate and serialize a protocol buffer generator response.\n"
+        "FILES must be a list of (NAME . CONTENT) pairs,\n"
+        "where NAME is a string specifying the name of the file to generate,\n"
+        "and CONTENT are the corresponding file contents.\n"
+        "Convert FILES to a message of type\n"
+        "google.protobuf.compiler.CodeGeneratorResponse\n"
+        "and return its serialized form as a unibyte string.\n"
+        "This function is used by the protocol buffer compiler;\n"
+        "users should not call it directly.\n\n"
+        "(fn files)",
+        kNoSideEffects, SerializeCodeGeneratorResponse);
   Defun(ctx, "elisp/proto/register-file-descriptor", 1, 1,
         "Register a protocol buffer file descriptor set.\n"
         "SERIALIZED must be the serialized form of a\n"
@@ -4410,8 +4707,11 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   DefineError(ctx, kUninitializedAny,
               "Message of type google.protobuf.Any not properly initialized",
               kNil);
+  DefineError(ctx, kFileError, "File error", kNil);
   DefineError(ctx, kRegistrationFailed,
               "Could not register file descriptor set", kNil);
+  DefineError(ctx, kUnknownProtoFile, "Unknown protocol buffer definition file",
+              kNil);
   Provide(ctx, "elisp/proto/module");
   return kSuccess;
 }

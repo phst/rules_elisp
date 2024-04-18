@@ -426,6 +426,7 @@ py_library(
     srcs = ["runfiles.py"],
     srcs_version = "PY3",
     visibility = [
+        "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
         "//examples:__pkg__",
         "//tests:__pkg__",
