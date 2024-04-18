@@ -106,19 +106,20 @@ the library.""",
 def _emacs(*, version, integrity):
     _emacs_repository(
         name = "gnu_emacs_" + version,
-        version = version,
+        path = "/emacs/emacs-{}.tar.xz".format(version),
         integrity = integrity,
+        strip_prefix = "emacs-{}".format(version),
     )
 
 def _emacs_repository_impl(repository_ctx):
-    version = repository_ctx.attr.version
+    path = repository_ctx.attr.path
     repository_ctx.download_and_extract(
         integrity = repository_ctx.attr.integrity,
         url = [
-            "https://ftpmirror.gnu.org/emacs/emacs-{}.tar.xz".format(version),
-            "https://ftp.gnu.org/gnu/emacs/emacs-{}.tar.xz".format(version),
+            "https://ftpmirror.gnu.org" + path,
+            "https://ftp.gnu.org/gnu" + path,
         ],
-        stripPrefix = "emacs-{}".format(version),
+        stripPrefix = repository_ctx.attr.strip_prefix,
     )
     repository_ctx.template(
         "BUILD.bazel",
@@ -131,8 +132,9 @@ def _emacs_repository_impl(repository_ctx):
 
 _emacs_repository = repository_rule(
     attrs = {
-        "version": attr.string(mandatory = True),
+        "path": attr.string(mandatory = True),
         "integrity": attr.string(mandatory = True),
+        "strip_prefix": attr.string(),
     },
     implementation = _emacs_repository_impl,
 )

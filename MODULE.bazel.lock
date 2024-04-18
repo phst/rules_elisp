@@ -1886,7 +1886,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "h4zejOhf3f+Y13xRI198NSTCd7JvWyIaO4qKcb16TnY=",
+        "bzlTransitiveDigest": "WJmK7fhEB5IIh//o4J6850NqvVANEMTqPABUTTVHzp0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1918,7 +1918,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "HsNsMqD55vSfA2EMdZUXHP2c9+wqP458QfvQicqfAiQ=",
+        "bzlTransitiveDigest": "TtOQSeqiZaDd8M+viYOfNrzrxrIHp1WQtg1sB2FJiR4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1927,40 +1927,45 @@
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
             "attributes": {
-              "version": "29.3",
-              "integrity": "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA="
+              "path": "/emacs/emacs-29.3.tar.xz",
+              "integrity": "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
+              "strip_prefix": "emacs-29.3"
             }
           },
           "gnu_emacs_29.2": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
             "attributes": {
-              "version": "29.2",
-              "integrity": "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw="
+              "path": "/emacs/emacs-29.2.tar.xz",
+              "integrity": "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
+              "strip_prefix": "emacs-29.2"
             }
           },
           "gnu_emacs_28.2": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
             "attributes": {
-              "version": "28.2",
-              "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg="
+              "path": "/emacs/emacs-28.2.tar.xz",
+              "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+              "strip_prefix": "emacs-28.2"
             }
           },
           "gnu_emacs_29.1": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
             "attributes": {
-              "version": "29.1",
-              "integrity": "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE="
+              "path": "/emacs/emacs-29.1.tar.xz",
+              "integrity": "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
+              "strip_prefix": "emacs-29.1"
             }
           },
           "gnu_emacs_28.1": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
             "attributes": {
-              "version": "28.1",
-              "integrity": "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE="
+              "path": "/emacs/emacs-28.1.tar.xz",
+              "integrity": "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
+              "strip_prefix": "emacs-28.1"
             }
           }
         },
@@ -1969,7 +1974,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "HsNsMqD55vSfA2EMdZUXHP2c9+wqP458QfvQicqfAiQ=",
+        "bzlTransitiveDigest": "TtOQSeqiZaDd8M+viYOfNrzrxrIHp1WQtg1sB2FJiR4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
