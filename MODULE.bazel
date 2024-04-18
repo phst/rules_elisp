@@ -39,6 +39,7 @@ use_repo(cc_configure, "local_config_cc")
 
 # Non-module dependencies
 non_module_deps = use_extension("//private:extensions.bzl", "non_module_deps")
+use_repo(non_module_deps, "local_emacs")
 use_repo(non_module_deps, "gnu_emacs_28.1")
 use_repo(non_module_deps, "gnu_emacs_28.2")
 use_repo(non_module_deps, "gnu_emacs_29.1")

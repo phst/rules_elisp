@@ -99,7 +99,7 @@ elisp_toolchain(
 
 elisp_toolchain(
     name = "local",
-    emacs = ":local_emacs",
+    emacs = "@local_emacs//:emacs",
     use_default_shell_env = True,
 )
 
@@ -136,11 +136,6 @@ exports_files(
         # is implemented in all supported Bazel versions.
         "//visibility:public",
     ],
-)
-
-sh_binary(
-    name = "local_emacs",
-    srcs = ["local_emacs.sh"],
 )
 
 bzl_library(
