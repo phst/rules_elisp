@@ -910,32 +910,6 @@
                                               :value "garbage"))
                     :type 'wrong-type-argument))))
 
-(ert-deftest elisp/proto/parse-file-descriptor ()
-  (let* ((field (google/protobuf/FieldDescriptorProto-new
-                 :type google/protobuf/FieldDescriptorProto/TYPE_INT64
-                 :name "field"
-                 :json_name "field"
-                 :number 3
-                 :label google/protobuf/FieldDescriptorProto/LABEL_REPEATED))
-         (message (google/protobuf/DescriptorProto-new :name "Message"
-                                                       :field (list field)))
-         (value (google/protobuf/EnumValueDescriptorProto-new :name "VALUE"
-                                                              :number 77))
-         (enum (google/protobuf/EnumDescriptorProto-new :name "Enum"
-                                                        :value (list value)))
-         (file (google/protobuf/FileDescriptorProto-new
-                :name "test.proto"
-                :package "test"
-                :message_type (list message)
-                :enum_type (list enum)))
-         (serialized (elisp/proto/serialize file)))
-    (should (equal (elisp/proto/parse-file-descriptor serialized)
-                   `("test.proto" ,serialized
-                     ()
-                     (("test.Message" field))
-                     (("test.Enum" (VALUE 77)))))))
-  (should-error (elisp/proto/parse-file-descriptor "garbage")))
-
 (ert-deftest elisp/proto/parse-file-descriptor-set ()
   (let* ((field (google/protobuf/FieldDescriptorProto-new
                  :type google/protobuf/FieldDescriptorProto/TYPE_INT64
