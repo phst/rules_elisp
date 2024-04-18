@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "1ae69322ac3823527337acf02016e8ee95813d8d356f47060255b8956fa642f0",
-    "phst_rules_elisp": "0c3b3c81525beb250f2cd36ce6a34b6c7d7d19b35b4c70a92344fca689165823"
+    "phst_rules_elisp": "bdf3193a90f9cf2675ba91714308ba24e1328b487c21aa210665f339f4970299"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -108,6 +108,7 @@
             "column": 32
           },
           "imports": {
+            "local_emacs": "local_emacs",
             "gnu_emacs_28.1": "gnu_emacs_28.1",
             "gnu_emacs_28.2": "gnu_emacs_28.2",
             "gnu_emacs_29.1": "gnu_emacs_29.1",
@@ -1428,7 +1429,7 @@
     },
     "@@phst_rules_elisp~//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "LITOn4qDvw7gdZ5+CeGergziAN78+kGBbbZTuxPIb/A=",
+        "bzlTransitiveDigest": "XDyW4MzAvnYpMWovxDxl96p+uoSjNS1fz29uXPMdyMY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1460,11 +1461,16 @@
     },
     "@@phst_rules_elisp~//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "WC1MniWiHKY089FBjKQ1HbpwXFms6oMzresLOBeLSkE=",
+        "bzlTransitiveDigest": "iSgn3SRCd4cxcNj/gn7bhgdHwOWADXo87xcgqqA2KDo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "local_emacs": {
+            "bzlFile": "@@phst_rules_elisp~//private:repositories.bzl",
+            "ruleClassName": "_local_emacs",
+            "attributes": {}
+          },
           "gnu_emacs_29.3": {
             "bzlFile": "@@phst_rules_elisp~//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",

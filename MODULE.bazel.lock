@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "0c3b3c81525beb250f2cd36ce6a34b6c7d7d19b35b4c70a92344fca689165823",
+  "moduleFileHash": "bdf3193a90f9cf2675ba91714308ba24e1328b487c21aa210665f339f4970299",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -54,6 +54,7 @@
             "column": 32
           },
           "imports": {
+            "local_emacs": "local_emacs",
             "gnu_emacs_28.1": "gnu_emacs_28.1",
             "gnu_emacs_28.2": "gnu_emacs_28.2",
             "gnu_emacs_29.1": "gnu_emacs_29.1",
@@ -71,7 +72,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 48,
+            "line": 49,
             "column": 36
           },
           "imports": {
@@ -90,7 +91,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 55,
+            "line": 56,
             "column": 23
           },
           "imports": {
@@ -110,7 +111,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 56,
+                "line": 57,
                 "column": 17
               }
             }
@@ -124,7 +125,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 66,
+            "line": 67,
             "column": 20
           },
           "imports": {
@@ -146,7 +147,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 67,
+                "line": 68,
                 "column": 10
               }
             }
@@ -160,7 +161,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 77,
+            "line": 78,
             "column": 23
           },
           "imports": {},
@@ -174,7 +175,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 78,
+                "line": 79,
                 "column": 12
               }
             }
@@ -188,7 +189,7 @@
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
-            "line": 80,
+            "line": 81,
             "column": 24
           },
           "imports": {
@@ -212,7 +213,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 81,
+                "line": 82,
                 "column": 15
               }
             },
@@ -226,7 +227,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 86,
+                "line": 87,
                 "column": 15
               }
             },
@@ -240,7 +241,7 @@
               "devDependency": true,
               "location": {
                 "file": "@@//:MODULE.bazel",
-                "line": 91,
+                "line": 92,
                 "column": 15
               }
             }
@@ -1886,7 +1887,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "LITOn4qDvw7gdZ5+CeGergziAN78+kGBbbZTuxPIb/A=",
+        "bzlTransitiveDigest": "XDyW4MzAvnYpMWovxDxl96p+uoSjNS1fz29uXPMdyMY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1918,11 +1919,16 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "WC1MniWiHKY089FBjKQ1HbpwXFms6oMzresLOBeLSkE=",
+        "bzlTransitiveDigest": "iSgn3SRCd4cxcNj/gn7bhgdHwOWADXo87xcgqqA2KDo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
+          "local_emacs": {
+            "bzlFile": "@@//private:repositories.bzl",
+            "ruleClassName": "_local_emacs",
+            "attributes": {}
+          },
           "gnu_emacs_29.3": {
             "bzlFile": "@@//private:repositories.bzl",
             "ruleClassName": "_emacs_repository",
@@ -1974,7 +1980,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "WC1MniWiHKY089FBjKQ1HbpwXFms6oMzresLOBeLSkE=",
+        "bzlTransitiveDigest": "iSgn3SRCd4cxcNj/gn7bhgdHwOWADXo87xcgqqA2KDo=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

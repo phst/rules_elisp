@@ -20,6 +20,7 @@ visibility(["//", "//elisp"])
 
 def non_module_deps():
     """Installs dependencies that are not available as modules."""
+    _local_emacs(name = "local_emacs")
     _emacs(
         version = "28.1",
         integrity = "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
@@ -137,4 +138,26 @@ _emacs_repository = repository_rule(
         "strip_prefix": attr.string(),
     },
     implementation = _emacs_repository_impl,
+)
+
+def _local_emacs_impl(ctx):
+    emacs = ctx.which("emacs")
+
+    # Don’t fail during the loading phase if Emacs isn’t locally installed, only
+    # when Emacs is actually needed.
+    if emacs:
+        ctx.symlink(emacs, "source.exe")
+    ctx.template(
+        "BUILD.bazel",
+        Label("//:local.BUILD.template"),
+        {
+            '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
+            '"[elisp_pkg]"': repr(str(Label("//elisp:__pkg__"))),
+        },
+        executable = False,
+    )
+
+_local_emacs = repository_rule(
+    implementation = _local_emacs_impl,
+    local = True,
 )
