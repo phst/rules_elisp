@@ -27,7 +27,7 @@ package(
 licenses(["notice"])
 
 bzl_library(
-    name = "defs_bzl",
+    name = "defs",
     srcs = ["defs.bzl"],
     visibility = [
         "//docs:__pkg__",
@@ -35,15 +35,15 @@ bzl_library(
         "//emacs:__pkg__",
     ],
     deps = [
-        ":generated_bzl",
-        "//elisp:builtin_bzl",
+        ":generated",
+        "//elisp:builtin",
         "@bazel_features//:features",
         "@bazel_skylib//lib:paths",
     ],
 )
 
 bzl_library(
-    name = "repositories_bzl",
+    name = "repositories",
     srcs = ["repositories.bzl"],
     visibility = [
         "//docs:__pkg__",
@@ -52,13 +52,13 @@ bzl_library(
 )
 
 bzl_library(
-    name = "extensions_bzl",
+    name = "extensions",
     srcs = ["extensions.bzl"],
-    deps = [":repositories_bzl"],
+    deps = [":repositories"],
 )
 
 bzl_library(
-    name = "generated_bzl",
+    name = "generated",
     srcs = ["generated.bzl"],
 )
 

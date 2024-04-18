@@ -71,7 +71,7 @@ stardoc(
     format = "proto",
     input = "//elisp:defs.bzl",
     deps = [
-        "//private:defs_bzl",
+        "//private:defs",
         "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
@@ -85,8 +85,8 @@ stardoc(
     format = "proto",
     input = "//emacs:defs.bzl",
     deps = [
-        "//elisp:builtin_bzl",
-        "//private:defs_bzl",
+        "//elisp:builtin",
+        "//private:defs",
         "@bazel_skylib//lib:paths",
     ],
 )
@@ -97,8 +97,8 @@ stardoc(
     format = "proto",
     input = "//elisp:repositories.bzl",
     deps = [
-        "//elisp:builtin_bzl",
-        "//private:repositories_bzl",
+        "//elisp:builtin",
+        "//private:repositories",
     ],
 )
 
@@ -114,9 +114,9 @@ stardoc(
         "manual",
     ],
     deps = [
-        "//elisp:builtin_bzl",
-        "//elisp:repositories_bzl",
-        "//private:repositories_bzl",
+        "//elisp:builtin",
+        "//elisp:repositories",
+        "//private:repositories",
     ],
 )
 

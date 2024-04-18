@@ -144,10 +144,10 @@ sh_binary(
 )
 
 bzl_library(
-    name = "defs_bzl",
+    name = "defs",
     srcs = ["defs.bzl"],
     deps = [
-        "//private:defs_bzl",
+        "//private:defs",
         "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
@@ -156,23 +156,23 @@ bzl_library(
 )
 
 bzl_library(
-    name = "repositories_bzl",
+    name = "repositories",
     srcs = ["repositories.bzl"],
     visibility = ["//docs:__pkg__"],
-    deps = ["//private:repositories_bzl"],
+    deps = ["//private:repositories"],
 )
 
 bzl_library(
-    name = "extensions_bzl",
+    name = "extensions",
     srcs = ["extensions.bzl"],
     deps = [
-        ":repositories_bzl",
-        "//private:repositories_bzl",
+        ":repositories",
+        "//private:repositories",
     ],
 )
 
 bzl_library(
-    name = "builtin_bzl",
+    name = "builtin",
     srcs = ["@bazel_tools//tools:bzl_srcs"],
     visibility = [
         "//docs:__pkg__",

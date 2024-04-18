@@ -118,11 +118,11 @@ py_binary(
 )
 
 bzl_library(
-    name = "defs_bzl",
+    name = "defs",
     srcs = ["defs.bzl"],
     deps = [
-        "//elisp:builtin_bzl",
-        "//private:defs_bzl",
+        "//elisp:builtin",
+        "//private:defs",
         "@bazel_skylib//lib:paths",
     ],
 )
