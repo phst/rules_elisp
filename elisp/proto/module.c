@@ -125,6 +125,10 @@
 #  error unsupported architecture
 #endif
 
+#if INT_MAX > PTRDIFF_MAX
+#  error unsupported architecture
+#endif
+
 #include "emacs-module.h"
 
 #if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 28
