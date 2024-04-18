@@ -15,8 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load("//private:defs.bzl", "FEATURES", "PACKAGE_FEATURES", "UNDEFINED_ERROR", "cc_defaults")
-load(":defs.bzl", "emacs_binary")
+load("//private:defs.bzl", "PACKAGE_FEATURES", "UNDEFINED_ERROR", "cc_defaults")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -52,55 +51,45 @@ py_test(
     ],
 )
 
-cc_library(
+alias(
     name = "module_header",
-    hdrs = ["emacs-module.h"],
-    features = FEATURES + ["-default_link_libs"],
-    includes = ["."],
-    linkstatic = True,
+    actual = "@gnu_emacs_29.3//:module_header",
     visibility = ["//visibility:public"],
 )
 
-filegroup(
+alias(
     name = "builtin_features",
-    srcs = ["builtin_features.json"],
+    actual = "@gnu_emacs_29.3//:builtin_features",
     visibility = ["//gazelle:__pkg__"],
 )
 
-emacs_binary(
+alias(
     name = "emacs_28.1",
-    srcs = ["@gnu_emacs_28.1//:srcs"],
-    readme = "@gnu_emacs_28.1//:readme",
+    actual = "@gnu_emacs_28.1//:emacs",
     visibility = ["//visibility:public"],
 )
 
-emacs_binary(
+alias(
     name = "emacs_28.2",
-    srcs = ["@gnu_emacs_28.2//:srcs"],
-    readme = "@gnu_emacs_28.2//:readme",
+    actual = "@gnu_emacs_28.2//:emacs",
     visibility = ["//visibility:public"],
 )
 
-emacs_binary(
+alias(
     name = "emacs_29.1",
-    srcs = ["@gnu_emacs_29.1//:srcs"],
-    readme = "@gnu_emacs_29.1//:readme",
+    actual = "@gnu_emacs_29.1//:emacs",
     visibility = ["//visibility:public"],
 )
 
-emacs_binary(
+alias(
     name = "emacs_29.2",
-    srcs = ["@gnu_emacs_29.2//:srcs"],
-    readme = "@gnu_emacs_29.2//:readme",
+    actual = "@gnu_emacs_29.2//:emacs",
     visibility = ["//visibility:public"],
 )
 
-emacs_binary(
+alias(
     name = "emacs_29.3",
-    srcs = ["@gnu_emacs_29.3//:srcs"],
-    builtin_features = "builtin_features.json",
-    module_header = "emacs-module.h",
-    readme = "@gnu_emacs_29.3//:readme",
+    actual = "@gnu_emacs_29.3//:emacs",
     visibility = ["//visibility:public"],
 )
 
@@ -138,6 +127,16 @@ alias(
         "@platforms//os:windows": ":windows_cc_toolchain",
         "//conditions:default": "@bazel_tools//tools/cpp:current_cc_toolchain",
     }),
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "@gnu_emacs_28.1//:__pkg__",
+        "@gnu_emacs_28.2//:__pkg__",
+        "@gnu_emacs_29.1//:__pkg__",
+        "@gnu_emacs_29.2//:__pkg__",
+        "@gnu_emacs_29.3//:__pkg__",
+    ],
 )
 
 cc_toolchain_suite(
@@ -172,4 +171,14 @@ cc_defaults(
     # that the configure script doesn’t incorrectly detect absent functions as
     # present.
     linkopts = UNDEFINED_ERROR,
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "@gnu_emacs_28.1//:__pkg__",
+        "@gnu_emacs_28.2//:__pkg__",
+        "@gnu_emacs_29.1//:__pkg__",
+        "@gnu_emacs_29.2//:__pkg__",
+        "@gnu_emacs_29.3//:__pkg__",
+    ],
 )
