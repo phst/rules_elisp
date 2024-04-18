@@ -117,13 +117,12 @@ def _elisp_proto_aspect_impl(target, ctx):
     # needed for compatibility.
     bundle = ctx.actions.declare_file(ctx.label.name + ".el")
     args = ctx.actions.args()
-    args.add(info.direct_descriptor_set)
     args.add(bundle)
     args.add(str(ctx.label))
     args.add(_elisp_proto_feature(bundle))
+    args.add_all(srcs, map_each = _elisp_proto_feature, uniquify = True, expand_directories = False)
     ctx.actions.run(
         outputs = [bundle],
-        inputs = [info.direct_descriptor_set],
         executable = ctx.executable._generate_bundle,
         arguments = [args],
         mnemonic = "GenElispProtoBundle",
@@ -172,6 +171,11 @@ def _elisp_proto_feature(file):
     stem, ext = paths.split_extension(repository_relative_filename(file))
     if ext != ".el":
         fail("invalid extension {}".format(ext))
+
+    # Strip “virtual import” prefix.
+    _, _, after = stem.partition("/_virtual_imports/")
+    if after:
+        _, _, stem = after.partition("/")
 
     # Work around https://github.com/bazelbuild/bazel/issues/11044 for built-in
     # types.
