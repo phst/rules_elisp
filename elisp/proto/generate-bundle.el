@@ -20,13 +20,11 @@
 ;;
 ;; Usage:
 ;;
-;;   elisp/proto/generate-bundle DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE
+;;   elisp/proto/generate-bundle OUTPUT-FILE TARGET FEATURE DEPENDENCIES...
 
 ;;; Code:
 
 (require 'cl-lib)
-
-(require 'elisp/proto/proto)
 
 (cl-deftype elisp/proto/simple-string ()
   '(and string
@@ -36,19 +34,12 @@
                       string)))))
 
 (pcase command-line-args-left
-  (`(,descriptor-file ,output-file ,target ,feature)
+  (`(,output-file ,target ,feature . ,dependencies)
    (setq command-line-args-left nil)
    (cl-check-type target elisp/proto/simple-string)
    (cl-check-type feature elisp/proto/simple-string)
    (let* ((coding-system-for-read 'utf-8-unix)
           (coding-system-for-write 'utf-8-unix)
-          (serialized-file-descriptor-set
-           (with-temp-buffer
-             (set-buffer-multibyte nil)
-             (insert-file-contents-literally descriptor-file)
-             (buffer-substring-no-properties (point-min) (point-max))))
-          (parsed (elisp/proto/parse-file-descriptor-set
-                   serialized-file-descriptor-set))
           (output-file (concat "/:" output-file))
           (output-name (file-name-nondirectory output-file)))
      (cl-check-type output-name elisp/proto/simple-string)
@@ -69,14 +60,13 @@
                  "Bazel target:\n"
                  ";;   " target "\n\n"
                  ";;; Code:\n\n")
-         (dolist (file parsed)
-           (cl-destructuring-bind (proto-file _desc _deps _msgs _enums) file
-             (cl-check-type proto-file elisp/proto/simple-string)
-             (prin1 `(require ',(intern proto-file))) (terpri)))
-         (when parsed (terpri))
+         (dolist (dep dependencies)
+           (cl-check-type dep elisp/proto/simple-string)
+           (prin1 `(require ',(intern dep))) (terpri))
+         (when dependencies (terpri))
          (prin1 `(provide ',(intern feature))) (terpri) (terpri)
          (insert ";;; " output-name " ends here\n")))))
   (_ (user-error (concat "Usage: elisp/proto/generate-bundle "
-                         "DESCRIPTOR-FILE OUTPUT-FILE TARGET FEATURE"))))
+                         "OUTPUT-FILE TARGET FEATURE DEPENDENCIES..."))))
 
 ;;; generate-bundle.el ends here
