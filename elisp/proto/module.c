@@ -2647,6 +2647,19 @@ static void ConvertMessageDescriptors(
   }
 }
 
+static const upb_FileDef* AddFileToPool(
+    struct Context ctx, const google_protobuf_FileDescriptorProto* file,
+    upb_DefPool* pool) {
+  upb_Status status;
+  upb_Status_Clear(&status);
+  const upb_FileDef* ret = upb_DefPool_AddFile(pool, file, &status);
+  if (ret == NULL || !upb_Status_IsOk(&status)) {
+    ProtoError(ctx, kRegistrationFailed, &status);
+    return NULL;
+  }
+  return ret;
+}
+
 // Helper function for ConvertFileDescriptorSet.  Returns a list of the form
 // (proto-file-name serialized-file-descriptor-proto
 //  (dependency-file-name…)
@@ -2708,14 +2721,7 @@ static bool RegisterFileDescriptorProto(
     // preregistered the file descriptor.
     return true;
   }
-  upb_Status status;
-  upb_Status_Clear(&status);
-  if (upb_DefPool_AddFile(pool, file, &status) == NULL ||
-      !upb_Status_IsOk(&status)) {
-    ProtoError(ctx, kRegistrationFailed, &status);
-    return false;
-  }
-  return true;
+  return AddFileToPool(ctx, file, pool) != NULL;
 }
 
 /// Function definitions
