@@ -960,13 +960,6 @@ static struct MutableString Concat2(struct Context ctx, struct Allocator alloc,
   return Concat(ctx, alloc, 2, args);
 }
 
-static struct MutableString Concat3(struct Context ctx, struct Allocator alloc,
-                                    upb_StringView a, upb_StringView b,
-                                    upb_StringView c) {
-  upb_StringView args[] = {a, b, c};
-  return Concat(ctx, alloc, 3, args);
-}
-
 static void ReplaceChar(struct MutableString string, char from, char to) {
   for (size_t i = 0; i < string.size; ++i) {
     if (string.data[i] == from) string.data[i] = to;
@@ -2546,94 +2539,86 @@ static emacs_value SerializeFileDescriptor(
 }
 
 // Helper function for ConvertFileDescriptorSet.
-static emacs_value ConvertDependencies(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_FileDescriptorProto* file) {
+static emacs_value ConvertDependencies(struct Context ctx, upb_Arena* arena,
+                                       const upb_FileDef* file) {
   struct Allocator alloc = ArenaAllocator(arena);
-  size_t size;
-  const upb_StringView* deps =
-      google_protobuf_FileDescriptorProto_dependency(file, &size);
+  int size = upb_FileDef_DependencyCount(file);
+  assert(size >= 0);
   if (size == 0) return Nil(ctx);
-  if (size > PTRDIFF_MAX) {
-    OverflowError0(ctx);
-    return NULL;
-  }
-  emacs_value* array = AllocateLispArray(ctx, alloc, size);
+  emacs_value* array = AllocateLispArray(ctx, alloc, (size_t)size);
   if (array == NULL) return NULL;
-  for (size_t i = 0; i < size; ++i) array[i] = MakeString(ctx, deps[i]);
-  return List(ctx, (ptrdiff_t)size, array);
+  for (int i = 0; i < size; ++i) {
+    const upb_FileDef* dep = upb_FileDef_Dependency(file, i);
+    upb_StringView name = upb_StringView_FromString(upb_FileDef_Name(dep));
+    array[i] = MakeString(ctx, name);
+  }
+  return List(ctx, size, array);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Returns a list of field names
 // as symbols.
-static emacs_value ConvertFieldDescriptors(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_DescriptorProto* message) {
+static emacs_value ConvertFieldDescriptors(struct Context ctx, upb_Arena* arena,
+                                           const upb_MessageDef* message) {
   struct Allocator alloc = ArenaAllocator(arena);
-  size_t count;
-  const google_protobuf_FieldDescriptorProto* const* fields =
-      google_protobuf_DescriptorProto_field(message, &count);
+  int count = upb_MessageDef_FieldCount(message);
+  assert(count >= 0);
   if (count == 0) return Nil(ctx);
-  if (count > PTRDIFF_MAX) {
-    OverflowError0(ctx);
-    return NULL;
-  }
-  emacs_value* args = AllocateLispArray(ctx, alloc, count);
+  emacs_value* args = AllocateLispArray(ctx, alloc, (size_t)count);
   if (args == NULL) return NULL;
-  for (size_t i = 0; i < count; ++i) {
-    const google_protobuf_FieldDescriptorProto* field = fields[i];
-    upb_StringView name = google_protobuf_FieldDescriptorProto_name(field);
+  for (int i = 0; i < count; ++i) {
+    const upb_FieldDef* field = upb_MessageDef_Field(message, i);
+    upb_StringView name = upb_StringView_FromString(upb_FieldDef_Name(field));
     args[i] = Intern(ctx, name);
   }
-  return List(ctx, (ptrdiff_t)count, args);
+  return List(ctx, count, args);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Returns a list of (name value)
 // pairs.
-static emacs_value ConvertEnumValueDescriptors(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_EnumDescriptorProto* enumeration) {
+static emacs_value ConvertEnumValueDescriptors(struct Context ctx,
+                                               upb_Arena* arena,
+                                               const upb_EnumDef* enumeration) {
   struct Allocator alloc = ArenaAllocator(arena);
-  size_t count;
-  const google_protobuf_EnumValueDescriptorProto* const* values =
-      google_protobuf_EnumDescriptorProto_value(enumeration, &count);
+  int count = upb_EnumDef_ValueCount(enumeration);
+  assert(count >= 0);
   if (count == 0) return Nil(ctx);
-  if (count > PTRDIFF_MAX) {
-    OverflowError0(ctx);
-    return NULL;
-  }
-  emacs_value* args = AllocateLispArray(ctx, alloc, count);
+  emacs_value* args = AllocateLispArray(ctx, alloc, (size_t)count);
   if (args == NULL) return NULL;
-  for (size_t i = 0; i < count; ++i) {
-    const google_protobuf_EnumValueDescriptorProto* value = values[i];
-    upb_StringView name = google_protobuf_EnumValueDescriptorProto_name(value);
-    int32_t number = google_protobuf_EnumValueDescriptorProto_number(value);
+  for (int i = 0; i < count; ++i) {
+    const upb_EnumValueDef* value = upb_EnumDef_Value(enumeration, i);
+    upb_StringView name =
+        upb_StringView_FromString(upb_EnumValueDef_Name(value));
+    int32_t number = upb_EnumValueDef_Number(value);
     args[i] = List2(ctx, Intern(ctx, name), MakeInteger(ctx, number));
   }
-  return List(ctx, (ptrdiff_t)count, args);
+  return List(ctx, count, args);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Adds new enumeration
 // descriptors to the beginning of the given list.  The list elements are of the
 // form (full-name (enumerator-name value)…), where ‘full-name’ is the full name
 // of the enumeration type as a string, including the package name.
-static void ConvertEnumDescriptors(
-    struct Context ctx, upb_Arena* arena, upb_StringView parent, size_t count,
-    const google_protobuf_EnumDescriptorProto* const* enums,
-    emacs_value* list) {
-  struct Allocator alloc = HeapAllocator();
-  upb_StringView dot = upb_StringView_FromString(".");
-  for (size_t i = 0; i < count; ++i) {
-    const google_protobuf_EnumDescriptorProto* enumeration = enums[i];
-    struct MutableString full_name =
-        Concat3(ctx, alloc, parent, dot,
-                google_protobuf_EnumDescriptorProto_name(enumeration));
-    if (full_name.data == NULL) return;
+static void ConvertEnumDescriptors(struct Context ctx, upb_Arena* arena,
+                                   int count,
+                                   const upb_EnumDef* (*get)(const void*, int),
+                                   const void* parent, emacs_value* list) {
+  assert(count >= 0);
+  for (int i = 0; i < count; ++i) {
+    const upb_EnumDef* enumeration = get(parent, i);
+    upb_StringView full_name =
+        upb_StringView_FromString(upb_EnumDef_FullName(enumeration));
     emacs_value values = ConvertEnumValueDescriptors(ctx, arena, enumeration);
-    emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), values);
-    Free(alloc, full_name.data);
+    emacs_value elt = Cons(ctx, MakeString(ctx, full_name), values);
     Push(ctx, elt, list);
   }
+}
+
+static const upb_MessageDef* NestedMessageDef(const void* parent, int i) {
+  return upb_MessageDef_NestedMessage(parent, i);
+}
+
+static const upb_EnumDef* NestedEnumDef(const void* parent, int i) {
+  return upb_MessageDef_NestedEnum(parent, i);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Adds new message and
@@ -2643,28 +2628,22 @@ static void ConvertEnumDescriptors(
 // (full-name (enumerator-name value)…).  In both cases, ‘full-name’ is the full
 // name of the type as a string, including the package name.
 static void ConvertMessageDescriptors(
-    struct Context ctx, upb_Arena* arena, upb_StringView parent, size_t count,
-    const google_protobuf_DescriptorProto* const* messages,
+    struct Context ctx, upb_Arena* arena, int count,
+    const upb_MessageDef* (*get)(const void*, int), const void* parent,
     emacs_value* messages_list, emacs_value* enums_list) {
-  struct Allocator alloc = ArenaAllocator(arena);
-  upb_StringView dot = upb_StringView_FromString(".");
-  for (size_t i = 0; i < count; ++i) {
-    const google_protobuf_DescriptorProto* message = messages[i];
-    struct MutableString full_name = Concat3(
-        ctx, alloc, parent, dot, google_protobuf_DescriptorProto_name(message));
-    if (full_name.data == NULL) return;
+  assert(count >= 0);
+  for (int i = 0; i < count; ++i) {
+    const upb_MessageDef* message = get(parent, i);
+    upb_StringView full_name =
+        upb_StringView_FromString(upb_MessageDef_FullName(message));
     emacs_value fields = ConvertFieldDescriptors(ctx, arena, message);
-    emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), fields);
+    emacs_value elt = Cons(ctx, MakeString(ctx, full_name), fields);
     Push(ctx, elt, messages_list);
-    size_t messages_count;
-    const google_protobuf_DescriptorProto* const* nested_messages =
-        google_protobuf_DescriptorProto_nested_type(message, &messages_count);
-    ConvertMessageDescriptors(ctx, arena, View(full_name), messages_count,
-                              nested_messages, messages_list, enums_list);
-    size_t enums_count;
-    const google_protobuf_EnumDescriptorProto* const* enums =
-        google_protobuf_DescriptorProto_enum_type(message, &enums_count);
-    ConvertEnumDescriptors(ctx, arena, View(full_name), enums_count, enums,
+    int messages_count = upb_MessageDef_NestedMessageCount(message);
+    ConvertMessageDescriptors(ctx, arena, messages_count, NestedMessageDef,
+                              message, messages_list, enums_list);
+    int enums_count = upb_MessageDef_NestedEnumCount(message);
+    ConvertEnumDescriptors(ctx, arena, enums_count, NestedEnumDef, message,
                            enums_list);
   }
 }
@@ -2682,30 +2661,36 @@ static const upb_FileDef* AddFileToPool(
   return ret;
 }
 
+static const upb_MessageDef* TopLevelMessageDef(const void* file, int i) {
+  return upb_FileDef_TopLevelMessage(file, i);
+}
+
+static const upb_EnumDef* TopLevelEnumDef(const void* file, int i) {
+  return upb_FileDef_TopLevelEnum(file, i);
+}
+
 // Helper function for ConvertFileDescriptorSet.  Returns a list of the form
 // (proto-file-name serialized-file-descriptor-proto
 //  (dependency-file-name…)
 //  ((message-name field-name…)…)
 //  ((enumeration-name (enumerator-name value)…)…)).
 static emacs_value ConvertFileDescriptor(
-    struct Context ctx, upb_Arena* arena,
-    const google_protobuf_FileDescriptorProto* file) {
+    struct Context ctx, upb_Arena* arena, upb_DefPool* pool,
+    const google_protobuf_FileDescriptorProto* proto) {
+  const upb_FileDef* file = AddFileToPool(ctx, proto, pool);
+  if (file == NULL) return NULL;
   emacs_value name =
-      MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
-  emacs_value serialized = SerializeFileDescriptor(ctx, arena, file);
+      MakeString(ctx, upb_StringView_FromString(upb_FileDef_Name(file)));
+  emacs_value serialized = SerializeFileDescriptor(ctx, arena, proto);
   emacs_value dependencies = ConvertDependencies(ctx, arena, file);
   emacs_value messages_list = Nil(ctx);
   emacs_value enums_list = Nil(ctx);
-  upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
-  size_t messages_count;
-  const google_protobuf_DescriptorProto* const* messages =
-      google_protobuf_FileDescriptorProto_message_type(file, &messages_count);
-  ConvertMessageDescriptors(ctx, arena, package, messages_count, messages,
-                            &messages_list, &enums_list);
-  size_t enums_count;
-  const google_protobuf_EnumDescriptorProto* const* enums =
-      google_protobuf_FileDescriptorProto_enum_type(file, &enums_count);
-  ConvertEnumDescriptors(ctx, arena, package, enums_count, enums, &enums_list);
+  int messages_count = upb_FileDef_TopLevelMessageCount(file);
+  ConvertMessageDescriptors(ctx, arena, messages_count, TopLevelMessageDef,
+                            file, &messages_list, &enums_list);
+  int enums_count = upb_FileDef_TopLevelEnumCount(file);
+  ConvertEnumDescriptors(ctx, arena, enums_count, TopLevelEnumDef, file,
+                         &enums_list);
   // The helper functions have constructed the lists in reversed order.
   messages_list = Nreverse(ctx, messages_list);
   enums_list = Nreverse(ctx, enums_list);
@@ -2730,9 +2715,15 @@ static emacs_value ConvertFileDescriptorSet(
   }
   emacs_value* array = AllocateLispArray(ctx, alloc, files_count);
   if (array == NULL && files_count > 0) return NULL;
-  for (size_t i = 0; i < files_count; ++i) {
-    array[i] = ConvertFileDescriptor(ctx, arena, files[i]);
+  upb_DefPool* pool = upb_DefPool_New();
+  if (pool == NULL) {
+    MemoryFull(ctx);
+    return NULL;
   }
+  for (size_t i = 0; i < files_count; ++i) {
+    array[i] = ConvertFileDescriptor(ctx, arena, pool, files[i]);
+  }
+  upb_DefPool_Free(pool);
   return List(ctx, (ptrdiff_t)files_count, array);
 }
 
