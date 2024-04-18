@@ -12,18 +12,41 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-filegroup(
-    name = "srcs",
+load("[defs_bzl]", "emacs_binary")
+
+package(
+    default_visibility = ["//visibility:private"],
+    features = [
+        "layering_check",
+        "parse_headers",
+        "treat_warnings_as_errors",
+        "-macos_default_link_flags",
+    ],
+)
+
+emacs_binary(
+    name = "emacs",
     srcs = glob(
         ["**"],
         allow_empty = False,
     ),
+    builtin_features = "builtin_features.json",
+    module_header = "emacs-module.h",
+    readme = "README",
+    visibility = ["[emacs_pkg]"],
+)
+
+cc_library(
+    name = "module_header",
+    hdrs = ["emacs-module.h"],
+    features = ["-default_link_libs"],
+    linkstatic = True,
     visibility = ["[emacs_pkg]"],
 )
 
 filegroup(
-    name = "readme",
-    srcs = ["README"],
+    name = "builtin_features",
+    srcs = ["builtin_features.json"],
     visibility = ["[emacs_pkg]"],
 )
 

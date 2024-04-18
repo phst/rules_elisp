@@ -126,6 +126,7 @@ def _emacs_repository_impl(ctx):
         "BUILD.bazel",
         Label("//:emacs.BUILD"),
         {
+            '"[defs_bzl]"': repr(str(Label("//emacs:defs.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
         },
         executable = False,
