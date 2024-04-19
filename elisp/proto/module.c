@@ -879,7 +879,8 @@ static emacs_value Intern(struct Context ctx, upb_StringView name) {
   return FuncallSymbol1(ctx, kIntern, MakeString(ctx, name));
 }
 
-static emacs_value Nreverse(struct Context ctx, emacs_value value) {
+ABSL_MUST_USE_RESULT static emacs_value Nreverse(struct Context ctx,
+                                                 emacs_value value) {
   return FuncallSymbol1(ctx, kNreverse, value);
 }
 
