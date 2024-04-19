@@ -2547,8 +2547,9 @@ static emacs_value SerializeFileDescriptor(
 
 // Helper function for ConvertFileDescriptorSet.
 static emacs_value ConvertDependencies(
-    struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
-  struct Allocator alloc = HeapAllocator();
+    struct Context ctx, upb_Arena* arena,
+    const google_protobuf_FileDescriptorProto* file) {
+  struct Allocator alloc = ArenaAllocator(arena);
   size_t size;
   const upb_StringView* deps =
       google_protobuf_FileDescriptorProto_dependency(file, &size);
@@ -2568,8 +2569,9 @@ static emacs_value ConvertDependencies(
 // Helper function for ConvertFileDescriptorSet.  Returns a list of field names
 // as symbols.
 static emacs_value ConvertFieldDescriptors(
-    struct Context ctx, const google_protobuf_DescriptorProto* message) {
-  struct Allocator alloc = HeapAllocator();
+    struct Context ctx, upb_Arena* arena,
+    const google_protobuf_DescriptorProto* message) {
+  struct Allocator alloc = ArenaAllocator(arena);
   size_t count;
   const google_protobuf_FieldDescriptorProto* const* fields =
       google_protobuf_DescriptorProto_field(message, &count);
@@ -2593,9 +2595,9 @@ static emacs_value ConvertFieldDescriptors(
 // Helper function for ConvertFileDescriptorSet.  Returns a list of (name value)
 // pairs.
 static emacs_value ConvertEnumValueDescriptors(
-    struct Context ctx,
+    struct Context ctx, upb_Arena* arena,
     const google_protobuf_EnumDescriptorProto* enumeration) {
-  struct Allocator alloc = HeapAllocator();
+  struct Allocator alloc = ArenaAllocator(arena);
   size_t count;
   const google_protobuf_EnumValueDescriptorProto* const* values =
       google_protobuf_EnumDescriptorProto_value(enumeration, &count);
@@ -2622,7 +2624,7 @@ static emacs_value ConvertEnumValueDescriptors(
 // form (full-name (enumerator-name value)…), where ‘full-name’ is the full name
 // of the enumeration type as a string, including the package name.
 static void ConvertEnumDescriptors(
-    struct Context ctx, upb_StringView parent, size_t count,
+    struct Context ctx, upb_Arena* arena, upb_StringView parent, size_t count,
     const google_protobuf_EnumDescriptorProto* const* enums,
     emacs_value* list) {
   struct Allocator alloc = HeapAllocator();
@@ -2633,7 +2635,7 @@ static void ConvertEnumDescriptors(
         Concat3(ctx, alloc, parent, dot,
                 google_protobuf_EnumDescriptorProto_name(enumeration));
     if (full_name.data == NULL) return;
-    emacs_value values = ConvertEnumValueDescriptors(ctx, enumeration);
+    emacs_value values = ConvertEnumValueDescriptors(ctx, arena, enumeration);
     emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), values);
     Free(alloc, full_name.data);
     Push(ctx, elt, list);
@@ -2647,28 +2649,28 @@ static void ConvertEnumDescriptors(
 // (full-name (enumerator-name value)…).  In both cases, ‘full-name’ is the full
 // name of the type as a string, including the package name.
 static void ConvertMessageDescriptors(
-    struct Context ctx, upb_StringView parent, size_t count,
+    struct Context ctx, upb_Arena* arena, upb_StringView parent, size_t count,
     const google_protobuf_DescriptorProto* const* messages,
     emacs_value* messages_list, emacs_value* enums_list) {
-  struct Allocator alloc = HeapAllocator();
+  struct Allocator alloc = ArenaAllocator(arena);
   upb_StringView dot = upb_StringView_FromString(".");
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_DescriptorProto* message = messages[i];
     struct MutableString full_name = Concat3(
         ctx, alloc, parent, dot, google_protobuf_DescriptorProto_name(message));
     if (full_name.data == NULL) return;
-    emacs_value fields = ConvertFieldDescriptors(ctx, message);
+    emacs_value fields = ConvertFieldDescriptors(ctx, arena, message);
     emacs_value elt = Cons(ctx, MakeString(ctx, View(full_name)), fields);
     Push(ctx, elt, messages_list);
     size_t messages_count;
     const google_protobuf_DescriptorProto* const* nested_messages =
         google_protobuf_DescriptorProto_nested_type(message, &messages_count);
-    ConvertMessageDescriptors(ctx, View(full_name), messages_count,
+    ConvertMessageDescriptors(ctx, arena, View(full_name), messages_count,
                               nested_messages, messages_list, enums_list);
     size_t enums_count;
     const google_protobuf_EnumDescriptorProto* const* enums =
         google_protobuf_DescriptorProto_enum_type(message, &enums_count);
-    ConvertEnumDescriptors(ctx, View(full_name), enums_count, enums,
+    ConvertEnumDescriptors(ctx, arena, View(full_name), enums_count, enums,
                            enums_list);
     Free(alloc, full_name.data);
   }
@@ -2698,19 +2700,19 @@ static emacs_value ConvertFileDescriptor(
   emacs_value name =
       MakeString(ctx, google_protobuf_FileDescriptorProto_name(file));
   emacs_value serialized = SerializeFileDescriptor(ctx, arena, file);
-  emacs_value dependencies = ConvertDependencies(ctx, file);
+  emacs_value dependencies = ConvertDependencies(ctx, arena, file);
   emacs_value messages_list = Nil(ctx);
   emacs_value enums_list = Nil(ctx);
   upb_StringView package = google_protobuf_FileDescriptorProto_package(file);
   size_t messages_count;
   const google_protobuf_DescriptorProto* const* messages =
       google_protobuf_FileDescriptorProto_message_type(file, &messages_count);
-  ConvertMessageDescriptors(ctx, package, messages_count, messages,
+  ConvertMessageDescriptors(ctx, arena, package, messages_count, messages,
                             &messages_list, &enums_list);
   size_t enums_count;
   const google_protobuf_EnumDescriptorProto* const* enums =
       google_protobuf_FileDescriptorProto_enum_type(file, &enums_count);
-  ConvertEnumDescriptors(ctx, package, enums_count, enums, &enums_list);
+  ConvertEnumDescriptors(ctx, arena, package, enums_count, enums, &enums_list);
   // The helper functions have constructed the lists in reversed order.
   messages_list = Nreverse(ctx, messages_list);
   enums_list = Nreverse(ctx, enums_list);
