@@ -131,8 +131,8 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
+        ":compiler_plugin_py_proto",
         ":descriptor_py_proto",
-        ":plugin_py_proto",
     ],
 )
 
@@ -155,7 +155,7 @@ py_proto_library(
 )
 
 py_proto_library(
-    name = "plugin_py_proto",
+    name = "compiler_plugin_py_proto",
     tags = ["no-python-check"],
     deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
