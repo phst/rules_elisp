@@ -504,6 +504,23 @@ ABSL_MUST_USE_RESULT static bool AddOverflowSize(struct Context ctx, size_t a,
   return overflow;
 }
 
+// Returns whether a * b would overflow.  If not, set *r to a * b.  Otherwise,
+// the value of *r is unspecified.
+ABSL_MUST_USE_RESULT static bool MultiplyOverflowSize(struct Context ctx,
+                                                      size_t a, size_t b,
+                                                      size_t* r) {
+  bool overflow;
+#if ABSL_HAVE_BUILTIN(__builtin_mul_overflow)
+  overflow = __builtin_mul_overflow(a, b, r);
+#else
+  size_t c = a * b;
+  overflow = a != 0 && c / a != b;
+  if (!overflow) *r = c;
+#endif
+  if (overflow) OverflowError0(ctx);
+  return overflow;
+}
+
 static void WrongTypeArgument(struct Context ctx, enum GlobalSymbol predicate,
                               emacs_value value) {
   Signal2(ctx, kWrongTypeArgument, GlobalSymbol(ctx, predicate), value);
@@ -698,15 +715,16 @@ static void* Allocate(struct Context ctx, struct Allocator alloc, size_t size) {
   return ptr;
 }
 
-static void* AllocateArray(struct Context ctx, size_t count, size_t size) {
+static void* AllocateArray(struct Context ctx, struct Allocator alloc,
+                           size_t count, size_t size) {
   assert(size > 0);
-  void* ptr = calloc(count, size);
-  if (ptr == NULL && count > 0) MemoryFull(ctx);
-  return ptr;
+  if (MultiplyOverflowSize(ctx, count, size, &size)) return NULL;
+  return Allocate(ctx, alloc, size);
 }
 
-static emacs_value* AllocateLispArray(struct Context ctx, size_t count) {
-  return AllocateArray(ctx, count, sizeof(emacs_value));
+static emacs_value* AllocateLispArray(struct Context ctx,
+                                      struct Allocator alloc, size_t count) {
+  return AllocateArray(ctx, alloc, count, sizeof(emacs_value));
 }
 
 static void* AllocateFromArena(struct Context ctx, upb_Arena* arena,
@@ -1132,10 +1150,11 @@ static emacs_value MakeFieldName(struct Context ctx, const upb_FieldDef* def) {
 // type as symbols.  This is typically used for error messages.
 static emacs_value MakeMessageFields(struct Context ctx,
                                      const upb_MessageDef* def) {
+  struct Allocator alloc = HeapAllocator();
   int count = upb_MessageDef_FieldCount(def);
   assert(count >= 0);
   if (count == 0) return Nil(ctx);
-  emacs_value* names = AllocateLispArray(ctx, (size_t)count);
+  emacs_value* names = AllocateLispArray(ctx, alloc, (size_t)count);
   if (names == NULL) return NULL;
   for (int i = 0; i < count; ++i) {
     const upb_FieldDef* field = upb_MessageDef_Field(def, i);
@@ -1143,7 +1162,7 @@ static emacs_value MakeMessageFields(struct Context ctx,
     names[i] = Intern(ctx, name);
   }
   emacs_value ret = List(ctx, count, names);
-  free(names);
+  Free(alloc, names);
   return ret;
 }
 
@@ -2528,6 +2547,7 @@ static emacs_value SerializeFileDescriptor(
 // Helper function for ConvertFileDescriptorSet.
 static emacs_value ConvertDependencies(
     struct Context ctx, const google_protobuf_FileDescriptorProto* file) {
+  struct Allocator alloc = HeapAllocator();
   size_t size;
   const upb_StringView* deps =
       google_protobuf_FileDescriptorProto_dependency(file, &size);
@@ -2536,11 +2556,11 @@ static emacs_value ConvertDependencies(
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* array = AllocateLispArray(ctx, size);
+  emacs_value* array = AllocateLispArray(ctx, alloc, size);
   if (array == NULL) return NULL;
   for (size_t i = 0; i < size; ++i) array[i] = MakeString(ctx, deps[i]);
   emacs_value ret = List(ctx, (ptrdiff_t)size, array);
-  free(array);
+  Free(alloc, array);
   return ret;
 }
 
@@ -2548,6 +2568,7 @@ static emacs_value ConvertDependencies(
 // as symbols.
 static emacs_value ConvertFieldDescriptors(
     struct Context ctx, const google_protobuf_DescriptorProto* message) {
+  struct Allocator alloc = HeapAllocator();
   size_t count;
   const google_protobuf_FieldDescriptorProto* const* fields =
       google_protobuf_DescriptorProto_field(message, &count);
@@ -2556,7 +2577,7 @@ static emacs_value ConvertFieldDescriptors(
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* args = AllocateLispArray(ctx, count);
+  emacs_value* args = AllocateLispArray(ctx, alloc, count);
   if (args == NULL) return NULL;
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_FieldDescriptorProto* field = fields[i];
@@ -2564,7 +2585,7 @@ static emacs_value ConvertFieldDescriptors(
     args[i] = Intern(ctx, name);
   }
   emacs_value ret = List(ctx, (ptrdiff_t)count, args);
-  free(args);
+  Free(alloc, args);
   return ret;
 }
 
@@ -2573,6 +2594,7 @@ static emacs_value ConvertFieldDescriptors(
 static emacs_value ConvertEnumValueDescriptors(
     struct Context ctx,
     const google_protobuf_EnumDescriptorProto* enumeration) {
+  struct Allocator alloc = HeapAllocator();
   size_t count;
   const google_protobuf_EnumValueDescriptorProto* const* values =
       google_protobuf_EnumDescriptorProto_value(enumeration, &count);
@@ -2581,7 +2603,7 @@ static emacs_value ConvertEnumValueDescriptors(
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* args = AllocateLispArray(ctx, count);
+  emacs_value* args = AllocateLispArray(ctx, alloc, count);
   if (args == NULL) return NULL;
   for (size_t i = 0; i < count; ++i) {
     const google_protobuf_EnumValueDescriptorProto* value = values[i];
@@ -2590,7 +2612,7 @@ static emacs_value ConvertEnumValueDescriptors(
     args[i] = List2(ctx, Intern(ctx, name), MakeInteger(ctx, number));
   }
   emacs_value ret = List(ctx, (ptrdiff_t)count, args);
-  free(args);
+  Free(alloc, args);
   return ret;
 }
 
@@ -2702,6 +2724,7 @@ static emacs_value ConvertFileDescriptor(
 static emacs_value ConvertFileDescriptorSet(
     struct Context ctx, upb_Arena* arena,
     const google_protobuf_FileDescriptorSet* set) {
+  struct Allocator alloc = ArenaAllocator(arena);
   size_t files_count;
   const google_protobuf_FileDescriptorProto* const* files =
       google_protobuf_FileDescriptorSet_file(set, &files_count);
@@ -2709,13 +2732,13 @@ static emacs_value ConvertFileDescriptorSet(
     OverflowError0(ctx);
     return NULL;
   }
-  emacs_value* array = AllocateLispArray(ctx, files_count);
+  emacs_value* array = AllocateLispArray(ctx, alloc, files_count);
   if (array == NULL && files_count > 0) return NULL;
   for (size_t i = 0; i < files_count; ++i) {
     array[i] = ConvertFileDescriptor(ctx, arena, files[i]);
   }
   emacs_value ret = List(ctx, (ptrdiff_t)files_count, array);
-  free(array);
+  Free(alloc, array);
   return ret;
 }
 
@@ -2779,14 +2802,15 @@ struct KeySpec {
 // Signals an error that a keyword argument is unknown.
 static void UnknownKey(struct Context ctx, ptrdiff_t nspecs,
                        const struct KeySpec* specs, emacs_value arg) {
+  struct Allocator alloc = HeapAllocator();
   assert(nspecs > 0);
-  emacs_value* choices = AllocateLispArray(ctx, (size_t)nspecs);
+  emacs_value* choices = AllocateLispArray(ctx, alloc, (size_t)nspecs);
   if (choices == NULL) return;
   for (ptrdiff_t i = 0; i < nspecs; ++i) {
     choices[i] = GlobalSymbol(ctx, specs[i].key);
   }
   WrongChoice(ctx, arg, nspecs, choices);
-  free(choices);
+  Free(alloc, choices);
 }
 
 // Matches the given keyword against an array of key specifications.  Returns
@@ -3376,6 +3400,7 @@ static emacs_value ExtendArray(emacs_env* env,
 static emacs_value SortArray(emacs_env* env,
                              ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
                              emacs_value* args, void* data) {
+  struct Allocator alloc = HeapAllocator();
   struct Context ctx = {env, data};
   assert(nargs == 2);
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
@@ -3387,14 +3412,14 @@ static emacs_value SortArray(emacs_env* env,
   // portable.  Besides, both functions require the array to be contiguous,
   // which isn’t necessarily the case for upb_Array.  So we copy the necessary
   // context and element data into a new contiguous array.
-  struct ArrayElement* elts = AllocateArray(ctx, size, sizeof *elts);
+  struct ArrayElement* elts = AllocateArray(ctx, alloc, size, sizeof *elts);
   if (elts == NULL) return NULL;
   struct SortContext sort_ctx = {ctx, pred, array.type, array.value};
   for (size_t i = 0; i < size; ++i) {
     upb_MessageValue val = upb_Array_Get(array.value, i);
     emacs_value lisp = MakeSingular(ctx, array.arena, array.type, val);
     if (!Success(ctx)) {
-      free(elts);
+      Free(alloc, elts);
       return NULL;
     }
     struct ArrayElement elt = {&sort_ctx, val, lisp};
@@ -3405,7 +3430,7 @@ static emacs_value SortArray(emacs_env* env,
   for (size_t i = 0; i < size; ++i) {
     upb_Array_Set(array.value, i, elts[i].val);
   }
-  free(elts);
+  Free(alloc, elts);
   return Nil(ctx);
 }
 
