@@ -1887,7 +1887,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "VQu9AgcdXf2Oz9di7/rIVvQGLV+j/OZdHEdMFhPJzhM=",
+        "bzlTransitiveDigest": "tJJl/Dpj9keL2LlVqp/e0MB/HkJvQCWbX1o/GJgNgGY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1919,7 +1919,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "hukaZgZODQxvCCS3gK94+AjzNjpUAy01F2UYcT8N8nY=",
+        "bzlTransitiveDigest": "0SGPSN+BWhAukspdiTtNGMj3OstKjHoZQz2zg0hs9Wg=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1980,7 +1980,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "hukaZgZODQxvCCS3gK94+AjzNjpUAy01F2UYcT8N8nY=",
+        "bzlTransitiveDigest": "0SGPSN+BWhAukspdiTtNGMj3OstKjHoZQz2zg0hs9Wg=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
