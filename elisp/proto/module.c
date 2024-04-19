@@ -2561,9 +2561,7 @@ static emacs_value ConvertDependencies(
   emacs_value* array = AllocateLispArray(ctx, alloc, size);
   if (array == NULL) return NULL;
   for (size_t i = 0; i < size; ++i) array[i] = MakeString(ctx, deps[i]);
-  emacs_value ret = List(ctx, (ptrdiff_t)size, array);
-  Free(alloc, array);
-  return ret;
+  return List(ctx, (ptrdiff_t)size, array);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Returns a list of field names
@@ -2587,9 +2585,7 @@ static emacs_value ConvertFieldDescriptors(
     upb_StringView name = google_protobuf_FieldDescriptorProto_name(field);
     args[i] = Intern(ctx, name);
   }
-  emacs_value ret = List(ctx, (ptrdiff_t)count, args);
-  Free(alloc, args);
-  return ret;
+  return List(ctx, (ptrdiff_t)count, args);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Returns a list of (name value)
@@ -2614,9 +2610,7 @@ static emacs_value ConvertEnumValueDescriptors(
     int32_t number = google_protobuf_EnumValueDescriptorProto_number(value);
     args[i] = List2(ctx, Intern(ctx, name), MakeInteger(ctx, number));
   }
-  emacs_value ret = List(ctx, (ptrdiff_t)count, args);
-  Free(alloc, args);
-  return ret;
+  return List(ctx, (ptrdiff_t)count, args);
 }
 
 // Helper function for ConvertFileDescriptorSet.  Adds new enumeration
@@ -2672,7 +2666,6 @@ static void ConvertMessageDescriptors(
         google_protobuf_DescriptorProto_enum_type(message, &enums_count);
     ConvertEnumDescriptors(ctx, arena, View(full_name), enums_count, enums,
                            enums_list);
-    Free(alloc, full_name.data);
   }
 }
 
@@ -2740,9 +2733,7 @@ static emacs_value ConvertFileDescriptorSet(
   for (size_t i = 0; i < files_count; ++i) {
     array[i] = ConvertFileDescriptor(ctx, arena, files[i]);
   }
-  emacs_value ret = List(ctx, (ptrdiff_t)files_count, array);
-  Free(alloc, array);
-  return ret;
+  return List(ctx, (ptrdiff_t)files_count, array);
 }
 
 static bool RegisterFileDescriptorProto(
