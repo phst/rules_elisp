@@ -1887,7 +1887,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "eaZvGOnFC4Tj9oIYn1jXZnx7qo72rb2jahGpYwCyuas=",
+        "bzlTransitiveDigest": "ZcHLTKibaxVyb2cq5VCyeNfycc+5kW8LolGTwq9q99M=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1919,7 +1919,7 @@
     },
     "//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "rga2s1NEi+UgAUztTjnalsU37xVLX5sBYCC3wAnREx4=",
+        "bzlTransitiveDigest": "CvXEGOETEZaOsCc5g38wFWYtZvKYBnyfNQV31qxRJ5Y=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1980,7 +1980,7 @@
     },
     "//private:extensions.bzl%non_module_dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "rga2s1NEi+UgAUztTjnalsU37xVLX5sBYCC3wAnREx4=",
+        "bzlTransitiveDigest": "CvXEGOETEZaOsCc5g38wFWYtZvKYBnyfNQV31qxRJ5Y=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
