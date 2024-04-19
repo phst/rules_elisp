@@ -694,16 +694,16 @@ absl::StatusOr<int> RunEmacs(
   if (!emacs.ok()) return emacs.status();
   const absl::StatusOr<NativeString> dump =
       ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
-  if (!dump.ok()) return dump.status();;
+  if (!dump.ok()) return dump.status();
   const absl::StatusOr<NativeString> etc =
       ResolveRunfile(**runfiles, absl::StrCat(install, "/etc"));
-  if (!etc.ok()) return etc.status();;
+  if (!etc.ok()) return etc.status();
   const absl::StatusOr<NativeString> lisp =
       ResolveRunfile(**runfiles, absl::StrCat(install, "/lisp"));
-  if (!lisp.ok()) return lisp.status();;
+  if (!lisp.ok()) return lisp.status();
   const absl::StatusOr<NativeString> libexec =
       ResolveRunfile(**runfiles, absl::StrCat(install, "/libexec"));
-  if (!libexec.ok()) return libexec.status();;
+  if (!libexec.ok()) return libexec.status();
   std::vector<NativeString> args = {
       *emacs,
       RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump,
