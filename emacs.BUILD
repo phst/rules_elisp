@@ -20,6 +20,9 @@ package(
         "layering_check",
         "parse_headers",
         "treat_warnings_as_errors",
+        # On Windows, Bazel generates incorrectly-escaped parameter files.  See
+        # https://github.com/bazelbuild/bazel/issues/21029.
+        "-compiler_param_file",
         "-macos_default_link_flags",
     ],
 )
