@@ -142,7 +142,7 @@ _emacs_repository = repository_rule(
 )
 
 def _local_emacs_impl(ctx):
-    windows = ctx.os.name.startswith("Windows")
+    windows = ctx.os.name.startswith("windows")
     emacs = _getenv(ctx, "EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
         emacs += ".exe"
