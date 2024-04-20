@@ -8299,7 +8299,7 @@
       "os:windows,arch:amd64": {
         "bzlTransitiveDigest": "XXpzWxkQv/IRleZiUZUJ3ppLi6j6puWdZr9tvvbP3kQ=",
         "recordedFileInputs": {
-          "@@//dev/windows-requirements.txt": "5672974a768820fd0ef98c8877d2909c5c7be6f7ebd33fc9bdf0c2fb3167a005"
+          "@@//dev/windows-requirements.txt": "e6907bc2380b3e948648676a5787910accab2c1bf27b55a9a6bce95fdc44b86b"
         },
         "recordedDirentsInputs": {},
         "envVariables": {},
