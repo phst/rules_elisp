@@ -29,13 +29,10 @@ package(
 
 emacs_binary(
     name = "emacs",
-    srcs = glob(
-        ["**"],
-        allow_empty = False,
-    ),
+    srcs = ["[src]"],
     builtin_features = "builtin_features.json",
     module_header = "emacs-module.h",
-    readme = "README",
+    strip_prefix = "[strip_prefix]",
     visibility = ["[emacs_pkg]"],
 )
 

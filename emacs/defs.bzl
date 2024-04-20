@@ -33,11 +33,17 @@ visibility("public")
 
 def _emacs_binary_impl(ctx):
     """Rule implementation of the “emacs_binary” rule."""
+    srcs = ctx.files.srcs
+    if len(srcs) == 1:
+        (archive,) = srcs
+        readme = None
+    else:
+        # It’s not possible to refer to a directory as a label, so we refer to a
+        # known file (README in the source root) instead.
+        archive = None
+        readme = ctx.file.readme
     emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
-
-    # It’s not possible to refer to a directory as a label, so we refer to a
-    # known file (README in the source root) instead.
-    install = _install(ctx, emacs_cc_toolchain, ctx.file.readme)
+    install = _install(ctx, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
     executable, runfiles = cc_launcher(
         ctx,
         header = "elisp/emacs.h",
@@ -60,13 +66,19 @@ emacs_binary = rule(
             allow_files = True,
             allow_empty = False,
             mandatory = True,
-            doc = "All Emacs source files.",
+            doc = """Either a single Emacs source archive, or all Emacs source
+files from an already-unpacked archive.""",
+        ),
+        "strip_prefix": attr.string(
+            doc = """Prefix to strip from the source archive.
+Ignored if `srcs` doesn’t refer to an archive.""",
         ),
         "readme": attr.label(
             allow_single_file = True,
-            mandatory = True,
             doc = """The README file in the root of the Emacs repository.
-This is necessary to determine the source root directory.""",
+This is necessary to determine the source root directory if `srcs` refers
+to unpacked Emacs sources.  If `srcs` refers to a source archive,
+`readme` is ignored.""",
         ),
         "module_header": attr.output(
             doc = """Label for a file target that will receive the
@@ -112,13 +124,18 @@ The resulting executable can be used to run the compiled Emacs.""",
     implementation = _emacs_binary_impl,
 )
 
-def _install(ctx, cc_toolchain, readme):
+def _install(ctx, cc_toolchain, *, archive, strip_prefix, readme):
     """Builds and install Emacs.
 
     Args:
       ctx (ctx): rule context
       cc_toolchain (Provider): the C toolchain to use to compile Emacs
-      readme (File): location of the README file in the Emacs source tree
+      archive (File): Emacs source archive to build from, or `None` if building
+          from an unpacked source tree
+      strip_prefix (str): prefix to strip from the files in `archive`; ignored
+          if building from an unpacked source tree
+      readme (File): location of the README file in the Emacs source tree; only
+          used if `archive` is `None`
 
     Returns:
       a File representing the Emacs installation directory
@@ -162,7 +179,11 @@ def _install(ctx, cc_toolchain, readme):
         )
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
-    args.add(readme, format = "--readme=%s")
+    if archive:
+        args.add(archive, format = "--archive=%s")
+        args.add(strip_prefix, format = "--strip-prefix=%s")
+    if readme:
+        args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
     args.add(cc, format = "--cc=%s")
     args.add_joined(

@@ -1429,7 +1429,7 @@
     },
     "@@phst_rules_elisp~//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "ZcHLTKibaxVyb2cq5VCyeNfycc+5kW8LolGTwq9q99M=",
+        "bzlTransitiveDigest": "DRUfuSRxm1EALS6A7laxabg5Gtm9ce6qd9f/tVFzBdk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1461,7 +1461,7 @@
     },
     "@@phst_rules_elisp~//private:extensions.bzl%non_module_deps": {
       "general": {
-        "bzlTransitiveDigest": "CvXEGOETEZaOsCc5g38wFWYtZvKYBnyfNQV31qxRJ5Y=",
+        "bzlTransitiveDigest": "rNWhgxHuuaDXfsuG1MqSptfDPCj+Fw07cIbgTeKexIE=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -1477,6 +1477,7 @@
             "attributes": {
               "path": "/emacs/emacs-29.3.tar.xz",
               "integrity": "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
+              "output": "emacs.tar.xz",
               "strip_prefix": "emacs-29.3"
             }
           },
@@ -1486,6 +1487,7 @@
             "attributes": {
               "path": "/emacs/emacs-29.2.tar.xz",
               "integrity": "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
+              "output": "emacs.tar.xz",
               "strip_prefix": "emacs-29.2"
             }
           },
@@ -1495,6 +1497,7 @@
             "attributes": {
               "path": "/emacs/emacs-28.2.tar.xz",
               "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+              "output": "emacs.tar.xz",
               "strip_prefix": "emacs-28.2"
             }
           },
@@ -1504,6 +1507,7 @@
             "attributes": {
               "path": "/emacs/emacs-29.1.tar.xz",
               "integrity": "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
+              "output": "emacs.tar.xz",
               "strip_prefix": "emacs-29.1"
             }
           },
@@ -1513,6 +1517,7 @@
             "attributes": {
               "path": "/emacs/emacs-28.1.tar.xz",
               "integrity": "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
+              "output": "emacs.tar.xz",
               "strip_prefix": "emacs-28.1"
             }
           }

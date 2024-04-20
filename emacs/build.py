@@ -31,12 +31,15 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-from typing import Optional
+from typing import Optional, Union
 
 def main() -> None:
     """Configures and builds Emacs."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--readme', type=pathlib.Path, required=True)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument('--archive', type=pathlib.Path)
+    group.add_argument('--readme', type=pathlib.Path)
+    parser.add_argument('--strip-prefix', type=pathlib.PurePosixPath)
     parser.add_argument('--install', type=pathlib.Path, required=True)
     parser.add_argument('--cc', type=pathlib.Path, required=True)
     parser.add_argument('--cflags', required=True)
@@ -44,7 +47,9 @@ def main() -> None:
     parser.add_argument('--module-header', type=pathlib.Path)
     parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
-    source = args.readme.resolve().parent
+    source = (args.readme.resolve().parent
+              if args.readme
+              else (args.archive, args.strip_prefix))
     install = args.install.resolve()
 
     features = _build(source=source, install=install,
@@ -61,7 +66,10 @@ def main() -> None:
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
 
 
-def _build(*, source: pathlib.Path, install: pathlib.Path,
+# Don’t use | due to https://bugs.python.org/issue42233.
+def _build(*, source: Union[pathlib.Path,
+                            tuple[pathlib.Path, pathlib.PurePosixPath]],
+           install: pathlib.Path,
            cc: pathlib.Path, cflags: str, ldflags: str,
            builtin_features: bool) -> Optional[Set[str]]:
     windows = platform.system() == 'Windows'
@@ -69,7 +77,12 @@ def _build(*, source: pathlib.Path, install: pathlib.Path,
         bash = _find_bash(cc)
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
-    shutil.copytree(source, build)
+
+    if isinstance(source, tuple):
+        archive, prefix = source
+        _unpack_archive(archive, build, prefix=prefix)
+    else:
+        shutil.copytree(source, build)
 
     def run(*command: str) -> None:
         env = None
@@ -176,6 +189,17 @@ def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
     ret = src.resolve(strict=True).rename(dest)
     src.unlink(missing_ok=True)
     return ret
+
+
+def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
+                    prefix: Optional[pathlib.PurePosixPath] = None) -> None:
+    prefix = prefix or pathlib.PurePosixPath()
+    if prefix.is_absolute():
+        raise ValueError(f'absolute prefix {prefix}')
+    temp = pathlib.Path(tempfile.mkdtemp('emacs-unpack-'))
+    shutil.unpack_archive(archive, temp)
+    _rename(temp / prefix, dest)
+    shutil.rmtree(temp)
 
 
 if __name__ == '__main__':
