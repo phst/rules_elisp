@@ -104,31 +104,35 @@ use_repo(
 # Tools for development
 bazel_dep(name = "buildifier_prebuilt", version = "6.4.0", dev_dependency = True)
 bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
-git_override(
+archive_override(
     module_name = "hedron_compile_commands",
-    commit = "eca42c63700fccdc49cf58177e0a96f0f6075a68",
-    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+    integrity = "sha384-esPTYvOAWfvydCLlfTFTItuRKaDDLV/qJ+3BRqlh6pGhvhOmJtqKZ8OeyJ7iuSUy",
+    strip_prefix = "bazel-compile-commands-extractor-eca42c63700fccdc49cf58177e0a96f0f6075a68",
+    urls = ["https://github.com/hedronvision/bazel-compile-commands-extractor/archive/eca42c63700fccdc49cf58177e0a96f0f6075a68.zip"],
 )
 
 bazel_dep(name = "phst_update_workspace_snippets", dev_dependency = True)
-git_override(
+archive_override(
     module_name = "phst_update_workspace_snippets",
-    commit = "fba2b14f5a8280f65a313b9037ccecb60e33f238",
-    remote = "https://github.com/phst/update-workspace-snippets.git",
+    integrity = "sha384-hARfrBeNuJMLiv/SMWGIZci4JM+9wZu/h1rCYmVqfGVeWh65vvLqdyvCIDvz82kB",
+    strip_prefix = "update-workspace-snippets-fba2b14f5a8280f65a313b9037ccecb60e33f238",
+    urls = ["https://github.com/phst/update-workspace-snippets/archive/fba2b14f5a8280f65a313b9037ccecb60e33f238.zip"],
 )
 
 bazel_dep(name = "phst_bazelcov", dev_dependency = True)
-git_override(
+archive_override(
     module_name = "phst_bazelcov",
-    commit = "012a9b2b7211b37e886403ba284b1b09e6665e89",
-    remote = "https://github.com/phst/bazelcov.git",
+    integrity = "sha384-9W8IIOl1LVX9JbpK6MY4Uu2mf62i+hrmghW4hmCtLO8ABYqPTcQf8Oo0t4VUnznK",
+    strip_prefix = "bazelcov-012a9b2b7211b37e886403ba284b1b09e6665e89",
+    urls = ["https://github.com/phst/bazelcov/archive/012a9b2b7211b37e886403ba284b1b09e6665e89.zip"],
 )
 
 bazel_dep(name = "phst_merge_bazel_lockfiles", dev_dependency = True)
-git_override(
+archive_override(
     module_name = "phst_merge_bazel_lockfiles",
-    commit = "95005999479dcac5d6a3399a9f58625e078db448",
-    remote = "https://github.com/phst/merge-bazel-lockfiles.git",
+    integrity = "sha384-gFuWEcT8E1bI6t3DVCcdr3wPUQ2IZOY9ND472JvDb55pZhLKJd9j6bvjDubP7svW",
+    strip_prefix = "merge-bazel-lockfiles-95005999479dcac5d6a3399a9f58625e078db448",
+    urls = ["https://github.com/phst/merge-bazel-lockfiles/archive/95005999479dcac5d6a3399a9f58625e078db448.zip"],
 )
 
 # We want to test the external example without adding its repository to the
