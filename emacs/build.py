@@ -196,10 +196,14 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
     prefix = prefix or pathlib.PurePosixPath()
     if prefix.is_absolute():
         raise ValueError(f'absolute prefix {prefix}')
-    temp = pathlib.Path(tempfile.mkdtemp('emacs-unpack-'))
-    shutil.unpack_archive(archive, temp)
-    _rename(temp / prefix, dest)
-    shutil.rmtree(temp)
+    parts = prefix.parts
+    if len(parts) > 1:
+        raise NotImplementedError(f'unsupported prefix {prefix}')
+    if parts and dest.name != parts[0]:
+        shutil.unpack_archive(archive, dest.parent)
+        _rename(dest.parent / prefix, dest)
+    else:
+        shutil.unpack_archive(archive, dest)
 
 
 if __name__ == '__main__':
