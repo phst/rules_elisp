@@ -206,7 +206,7 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
     # Bazel output directories.
     _remove_eln(temp / prefix)
     shutil.move(temp / prefix, dest)
-    shutil.rmtree(temp)
+    shutil.rmtree(temp, ignore_errors=True)
 
 
 def _remove_eln(root: pathlib.Path):
