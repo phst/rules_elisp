@@ -18,11 +18,11 @@ load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev
 
 visibility("private")
 
-def _non_module_deps_impl(_ctx):
+def _deps_impl(_ctx):
     _deps()
 
-def _non_module_dev_deps_impl(_ctx):
+def _dev_deps_impl(_ctx):
     _dev_deps(name = "phst_rules_elisp_dev_deps")
 
-non_module_deps = module_extension(implementation = _non_module_deps_impl)
-non_module_dev_deps = module_extension(implementation = _non_module_dev_deps_impl)
+deps = module_extension(implementation = _deps_impl)
+dev_deps = module_extension(implementation = _dev_deps_impl)
