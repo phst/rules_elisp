@@ -202,8 +202,31 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
         raise ValueError(f'absolute prefix {prefix}')
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-unpack-'))
     shutil.unpack_archive(archive, temp)
+    # Native-compiled files on Windows have filenames that are too long for
+    # Bazel output directories.
+    _remove_eln(temp / prefix)
     shutil.move(temp / prefix, dest)
     shutil.rmtree(temp)
+
+
+def _remove_eln(root: pathlib.Path):
+    try:
+        native = _glob_unique(
+            root / 'lib' / 'emacs' / '[.0-9]*' / 'native-lisp')
+    except FileNotFoundError:
+        return
+    for parent, dirs, files in os.walk(native, topdown=False):
+        parent = pathlib.Path(parent)
+        has_others = False
+        for name in files:
+            file = parent / name
+            if file.suffix == '.eln':
+                file.unlink()
+            else:
+                has_others = True
+        if not (has_others or dirs):
+            # Remove unnecessary empty directory.
+            parent.rmdir()
 
 
 if __name__ == '__main__':
