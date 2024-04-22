@@ -193,6 +193,10 @@ def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
 
 def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
                     prefix: Optional[pathlib.PurePosixPath] = None) -> None:
+    # Once we require Python 3.12, we can use
+    # dest.exists(resolve_symlink=False).
+    if os.path.lexists(dest):
+        raise FileExistsError(f'destination directory {dest} already exists')
     prefix = prefix or pathlib.PurePosixPath()
     if prefix.is_absolute():
         raise ValueError(f'absolute prefix {prefix}')
