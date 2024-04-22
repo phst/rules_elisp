@@ -200,7 +200,7 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
     prefix = prefix or pathlib.PurePosixPath()
     if prefix.is_absolute():
         raise ValueError(f'absolute prefix {prefix}')
-    temp = pathlib.Path(tempfile.mkdtemp('emacs-unpack-'))
+    temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-unpack-'))
     shutil.unpack_archive(archive, temp)
     shutil.move(temp / prefix, dest)
     shutil.rmtree(temp)
