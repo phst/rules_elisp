@@ -14,7 +14,7 @@
   },
   "localOverrideHashes": {
     "bazel_tools": "1ae69322ac3823527337acf02016e8ee95813d8d356f47060255b8956fa642f0",
-    "phst_rules_elisp": "22b2582221c41ac31ed2921c9c54c6bde7961aa14683868602195d41c80155db"
+    "phst_rules_elisp": "443909971c565e3ce141d63a0d9c23da3bf01b994587e1747090f64e118021e7"
   },
   "moduleDepGraph": {
     "<root>": {
@@ -100,12 +100,12 @@
         },
         {
           "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
-          "extensionName": "non_module_deps",
+          "extensionName": "deps",
           "usingModule": "phst_rules_elisp@_",
           "location": {
             "file": "@@phst_rules_elisp~//:MODULE.bazel",
             "line": 41,
-            "column": 32
+            "column": 21
           },
           "imports": {
             "local_emacs": "local_emacs",
@@ -1464,9 +1464,9 @@
         ]
       }
     },
-    "@@phst_rules_elisp~//private:extensions.bzl%non_module_deps": {
+    "@@phst_rules_elisp~//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "baK9p5xrZqCyS+fy85Dpva2aQV6Ubzu69fvZHb1D9n8=",
+        "bzlTransitiveDigest": "508DeHlIvy6YL+IG39A/NaS7z9lJTOTwz+IP3QJz8RI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

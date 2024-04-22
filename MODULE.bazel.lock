@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "22b2582221c41ac31ed2921c9c54c6bde7961aa14683868602195d41c80155db",
+  "moduleFileHash": "443909971c565e3ce141d63a0d9c23da3bf01b994587e1747090f64e118021e7",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -46,12 +46,12 @@
         },
         {
           "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
-          "extensionName": "non_module_deps",
+          "extensionName": "deps",
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
             "line": 41,
-            "column": 32
+            "column": 21
           },
           "imports": {
             "local_emacs": "local_emacs",
@@ -73,12 +73,12 @@
         },
         {
           "extensionBzlFile": "@phst_rules_elisp//private:extensions.bzl",
-          "extensionName": "non_module_dev_deps",
+          "extensionName": "dev_deps",
           "usingModule": "<root>",
           "location": {
             "file": "@@//:MODULE.bazel",
             "line": 54,
-            "column": 36
+            "column": 25
           },
           "imports": {
             "phst_rules_elisp_dev_deps": "phst_rules_elisp_dev_deps"
@@ -1922,9 +1922,9 @@
         ]
       }
     },
-    "//private:extensions.bzl%non_module_deps": {
+    "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "baK9p5xrZqCyS+fy85Dpva2aQV6Ubzu69fvZHb1D9n8=",
+        "bzlTransitiveDigest": "508DeHlIvy6YL+IG39A/NaS7z9lJTOTwz+IP3QJz8RI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -2074,9 +2074,9 @@
         ]
       }
     },
-    "//private:extensions.bzl%non_module_dev_deps": {
+    "//private:extensions.bzl%dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "baK9p5xrZqCyS+fy85Dpva2aQV6Ubzu69fvZHb1D9n8=",
+        "bzlTransitiveDigest": "508DeHlIvy6YL+IG39A/NaS7z9lJTOTwz+IP3QJz8RI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
