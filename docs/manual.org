@@ -42,9 +42,7 @@ Bazel]].  This repository supports all full Bazel releases starting with Bazel
 6.3.0.  You’ll also need a recent C/C++ compiler (GCC or Clang on GNU/Linux and
 macOS, Visual C++ 2019 on Windows) and at least Python 3.10.  For further
 instructions how to use Bazel on Windows, see
-[[https://bazel.build/install/windows][Installing Bazel on Windows]].  On
-Windows, you’ll also need MinGW-w64 and MSYS2 to build Emacs; see the file
-=nt/INSTALL.W64= in the Emacs source repository.
+[[https://bazel.build/install/windows][Installing Bazel on Windows]].
 
 This repository generally supports the two most recent major versions of Emacs.
 Currently, the supported versions are Emacs 28 and Emacs 29.  Once Emacs 30 is
