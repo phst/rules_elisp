@@ -688,12 +688,12 @@ static void* HeapAllocate(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
   return malloc(size);
 }
 
-static void HeapFree(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
+static void HeapFreePtr(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
   free(ptr);
 }
 
 static struct Allocator HeapAllocator(void) {
-  struct Allocator ret = {HeapAllocate, HeapFree, NULL};
+  struct Allocator ret = {HeapAllocate, HeapFreePtr, NULL};
   return ret;
 }
 
