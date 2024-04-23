@@ -17,3 +17,7 @@
 package tests_test
 
 const outputFile = `C:\Temp\output.dat`
+
+// Emacs exits with a code of −1 in case of a signal, which gets converted to an
+// exit status with all bits set: 8 bits on Unix systems, 32 bits on Windows.
+const signalCode = 0xFFFFFFFF
