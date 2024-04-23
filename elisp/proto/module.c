@@ -2734,38 +2734,6 @@ static emacs_value ConvertFileDescriptor(
   return List5(ctx, name, serialized, dependencies, messages_list, enums_list);
 }
 
-#ifdef _WIN32
-static void FileError(struct Context ctx, DWORD code) {
-  emacs_value message = Nil(ctx);
-  enum { kWideSize = 0x4000 };
-  wchar_t wide_buf[kWideSize];
-  DWORD wide_len =
-      FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-                     NULL, code, 0, wide_buf, kWideSize, NULL);
-  if (wide_len > 0) {
-    enum { kUtf8Size = kWideSize * 3 };
-    char utf8_buf[kUtf8Size];
-    assert(wide_len <= INT_MAX);
-    int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wide_buf, (int)wide_len,
-                                       utf8_buf, kUtf8Size, NULL, NULL);
-    if (utf8_len > 0) {
-      message = MakeString(
-          ctx, upb_StringView_FromDataAndSize(utf8_buf, (size_t)utf8_len));
-    }
-  }
-  Signal2(ctx, kFileError, MakeUInteger(ctx, code), message);
-}
-#else
-static void FileError(struct Context ctx, int code) {
-  emacs_value message = Nil(ctx);
-  char buffer[0x4000];
-  if (strerror_r(code, buffer, sizeof buffer) == 0) {
-    message = MakeString(ctx, upb_StringView_FromString(buffer));
-  }
-  Signal2(ctx, kFileError, MakeInteger(ctx, code), message);
-}
-#endif
-
 struct FileDefProtoPair {
   const upb_FileDef* def;
   const google_protobuf_FileDescriptorProto* proto;
@@ -2918,6 +2886,40 @@ static bool RegisterFileDescriptorProto(
   }
   return AddFileToPool(ctx, file, pool) != NULL;
 }
+
+/// Operating system interfaces
+
+#ifdef _WIN32
+static void FileError(struct Context ctx, DWORD code) {
+  emacs_value message = Nil(ctx);
+  enum { kWideSize = 0x4000 };
+  wchar_t wide_buf[kWideSize];
+  DWORD wide_len =
+      FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                     NULL, code, 0, wide_buf, kWideSize, NULL);
+  if (wide_len > 0) {
+    enum { kUtf8Size = kWideSize * 3 };
+    char utf8_buf[kUtf8Size];
+    assert(wide_len <= INT_MAX);
+    int utf8_len = WideCharToMultiByte(CP_UTF8, 0, wide_buf, (int)wide_len,
+                                       utf8_buf, kUtf8Size, NULL, NULL);
+    if (utf8_len > 0) {
+      message = MakeString(
+          ctx, upb_StringView_FromDataAndSize(utf8_buf, (size_t)utf8_len));
+    }
+  }
+  Signal2(ctx, kFileError, MakeUInteger(ctx, code), message);
+}
+#else
+static void FileError(struct Context ctx, int code) {
+  emacs_value message = Nil(ctx);
+  char buffer[0x4000];
+  if (strerror_r(code, buffer, sizeof buffer) == 0) {
+    message = MakeString(ctx, upb_StringView_FromString(buffer));
+  }
+  Signal2(ctx, kFileError, MakeInteger(ctx, code), message);
+}
+#endif
 
 /// Function definitions
 
