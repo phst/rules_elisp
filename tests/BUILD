@@ -64,6 +64,7 @@ TEST_DATA = [
     "//elisp/runfiles:runfiles.elc",
     "//emacs",
     "//tests:empty",
+    "//tests:signal",
     "//tests:test",
     "//tests:test.el",
     "//tests/wrap:launcher",
@@ -147,6 +148,11 @@ run_binary(
 elisp_binary(
     name = "print_version",
     src = "print-version.el",
+)
+
+elisp_binary(
+    name = "signal",
+    src = "signal.el",
 )
 
 elisp_library(

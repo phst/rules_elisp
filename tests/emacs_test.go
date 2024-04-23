@@ -36,6 +36,7 @@ import (
 var (
 	emacs       = runfileFlag("//emacs")
 	empty       = runfileFlag("//tests:empty")
+	signal      = runfileFlag("//tests:signal")
 	launcher    = runfileFlag("//tests/wrap:launcher")
 	binaryH     = runfileFlag("//elisp/private/tools:binary.h")
 	binaryCc    = runfileFlag("//elisp/private/tools:binary.cc")
@@ -57,6 +58,11 @@ func TestRun(t *testing.T) {
 	}{
 		{"emacs --version", *emacs, []string{"--version"}, 0, `^GNU Emacs \d+`, `^$`},
 		{"empty binary", *empty, nil, 0, `^$`, `^$`},
+		{"signal", *signal, nil, signalCode, `(?s)^\r?
+Error: error \("Foo"\).*
+  error\("Foo"\).*
+  normal-top-level\(\)\r?
+$`, `^Foo\r?\n$`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cmd := exec.Command(tc.program, tc.args...)
