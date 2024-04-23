@@ -99,8 +99,8 @@ class Builder:
         _run([self._bazel, 'run', '--',
               '@buildifier_prebuilt//:buildifier',
               '--mode=check', '--lint=warn',
-              '--warnings=+native-py,+out-of-order-load', '-r', '--',
-              self._workspace])
+              '--warnings=+native-proto,+native-py,+out-of-order-load',
+              '-r', '--', self._workspace])
 
     @target
     def nogo(self) -> None:
