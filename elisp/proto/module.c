@@ -684,28 +684,28 @@ struct Allocator {
   void* data;
 };
 
-static void* HeapAllocate(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
+static void* HeapAllocatorAlloc(size_t size, void* data ABSL_ATTRIBUTE_UNUSED) {
   return malloc(size);
 }
 
-static void HeapFreePtr(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
+static void HeapAllocatorFree(void* ptr, void* data ABSL_ATTRIBUTE_UNUSED) {
   free(ptr);
 }
 
 static struct Allocator HeapAllocator(void) {
-  struct Allocator ret = {HeapAllocate, HeapFreePtr, NULL};
+  struct Allocator ret = {HeapAllocatorAlloc, HeapAllocatorFree, NULL};
   return ret;
 }
 
-static void* ArenaAllocate(size_t size, void* data) {
+static void* ArenaAllocatorAlloc(size_t size, void* data) {
   return upb_Arena_Malloc(data, size);
 }
 
-static void ArenaFree(void* ptr ABSL_ATTRIBUTE_UNUSED,
-                      void* data ABSL_ATTRIBUTE_UNUSED) {}
+static void ArenaAllocatorFree(void* ptr ABSL_ATTRIBUTE_UNUSED,
+                               void* data ABSL_ATTRIBUTE_UNUSED) {}
 
 static struct Allocator ArenaAllocator(upb_Arena* arena) {
-  struct Allocator ret = {ArenaAllocate, ArenaFree, arena};
+  struct Allocator ret = {ArenaAllocatorAlloc, ArenaAllocatorFree, arena};
   return ret;
 }
 
