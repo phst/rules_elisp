@@ -47,11 +47,8 @@ runs:
       with:
         update: false
         release: false
-        # See nt/INSTALL.W64 for the list of required MSYS2 packages
         install: >
-          base-devel
-          mingw-w64-x86_64-toolchain
-          mingw-w64-x86_64-xpm-nox
+          texinfo
       if: runner.os == 'Windows'
     - name: Install Texinfo
       shell: bash
