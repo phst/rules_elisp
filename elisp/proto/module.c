@@ -125,6 +125,11 @@
 #  if SSIZE_MAX > SIZE_MAX
 #    error unsupported architecture
 #  endif
+// See Linux and macOS man pages for read(2) and write(2).
+enum { kMaxIO = 0x7FFFF000 };
+#  if kMaxIO > INT_MAX
+#    error unsupported architecture
+#  endif
 #endif
 
 #ifndef INT32_MAX
@@ -2910,6 +2915,60 @@ static void FileError(struct Context ctx, DWORD code) {
   }
   Signal2(ctx, kFileError, MakeUInteger(ctx, code), message);
 }
+
+typedef HANDLE FileHandle;
+
+static bool ValidHandle(HANDLE handle) {
+  return handle != INVALID_HANDLE_VALUE && handle != NULL;
+}
+
+static HANDLE StandardHandle(struct Context ctx, DWORD id) {
+  HANDLE handle = GetStdHandle(id);
+  if (handle == INVALID_HANDLE_VALUE) FileError(ctx, GetLastError());
+  if (handle == NULL) FileError(ctx, ERROR_INVALID_HANDLE);
+  return handle;
+}
+
+static HANDLE StdinHandle(struct Context ctx) {
+  return StandardHandle(ctx, STD_INPUT_HANDLE);
+}
+
+static HANDLE StdoutHandle(struct Context ctx) {
+  return StandardHandle(ctx, STD_OUTPUT_HANDLE);
+}
+
+static upb_StringView ReadHandle(struct Context ctx, HANDLE handle,
+                                 char* buffer, size_t size) {
+  upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
+  if (!Success(ctx)) return null;
+  DWORD n;
+  if (!ReadFile(handle, buffer, size <= MAXDWORD ? (DWORD)size : MAXDWORD, &n,
+                NULL)) {
+    assert(n == 0);
+    DWORD code = GetLastError();
+    if (code != ERROR_BROKEN_PIPE) FileError(ctx, code);
+    return null;
+  }
+  assert(n <= size);
+  if (n == 0) return null;
+  return upb_StringView_FromDataAndSize(buffer, n);
+}
+
+static bool WriteHandle(struct Context ctx, HANDLE handle,
+                        upb_StringView* data) {
+  if (!Success(ctx)) return false;
+  DWORD n;
+  if (!WriteFile(handle, data->data,
+                 data->size <= MAXDWORD ? (DWORD)data->size : MAXDWORD, &n,
+                 NULL)) {
+    assert(n == 0);
+    FileError(ctx, GetLastError());
+    return false;
+  }
+  data->data += n;
+  data->size -= n;
+  return true;
+}
 #else
 static void FileError(struct Context ctx, int code) {
   emacs_value message = Nil(ctx);
@@ -2918,6 +2977,46 @@ static void FileError(struct Context ctx, int code) {
     message = MakeString(ctx, upb_StringView_FromString(buffer));
   }
   Signal2(ctx, kFileError, MakeInteger(ctx, code), message);
+}
+
+typedef int FileHandle;
+
+static bool ValidHandle(int fd) {
+  return fd >= 0;
+}
+
+static int StdinHandle(struct Context ctx ABSL_ATTRIBUTE_UNUSED) {
+  return STDIN_FILENO;
+}
+
+static int StdoutHandle(struct Context ctx ABSL_ATTRIBUTE_UNUSED) {
+  return STDOUT_FILENO;
+}
+
+static upb_StringView ReadHandle(struct Context ctx, int fd, char* buffer,
+                                 size_t size) {
+  upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
+  if (!Success(ctx)) return null;
+  ssize_t n = read(fd, buffer, size <= SSIZE_MAX ? size : SSIZE_MAX);
+  if (n < 0) {
+    FileError(ctx, errno);
+    return null;
+  }
+  if (n == 0) return null;
+  assert((size_t)n <= size);
+  return upb_StringView_FromDataAndSize(buffer, (size_t)n);
+}
+
+static bool WriteHandle(struct Context ctx, int fd, upb_StringView* data) {
+  if (!Success(ctx)) return false;
+  ssize_t n = write(fd, data->data, data->size <= kMaxIO ? data->size : kMaxIO);
+  if (n < 0) {
+    FileError(ctx, errno);
+    return false;
+  }
+  data->data += n;
+  data->size -= (size_t)n;
+  return true;
 }
 #endif
 
@@ -4075,36 +4174,13 @@ static emacs_value InsertStdin(emacs_env* env,
                                void* data) {
   struct Context ctx = {env, data};
   assert(nargs == 0);
-#ifdef _WIN32
-  HANDLE handle = GetStdHandle(STD_INPUT_HANDLE);
-  if (handle == INVALID_HANDLE_VALUE) {
-    FileError(ctx, GetLastError());
-    return NULL;
-  }
-#endif
-  while (Success(ctx)) {
-    char buffer[0x4000];
-#ifdef _WIN32
-    DWORD n;
-    if (!ReadFile(handle, buffer, sizeof buffer, &n, NULL)) {
-      DWORD code = GetLastError();
-      if (code == ERROR_BROKEN_PIPE) break;
-      FileError(ctx, code);
-      return NULL;
-    }
-#else
-    ssize_t v = read(STDIN_FILENO, buffer, sizeof buffer);
-    if (v < 0) {
-      FileError(ctx, errno);
-      return NULL;
-    }
-    size_t n = (size_t)v;
-#endif
-    if (n == 0) break;
-    assert(n <= sizeof buffer);
-    emacs_value string =
-        MakeUnibyteString(ctx, upb_StringView_FromDataAndSize(buffer, n));
-    FuncallSymbol1(ctx, kInsert, string);
+  FileHandle handle = StdinHandle(ctx);
+  if (!ValidHandle(handle)) return NULL;
+  char buffer[0x4000];
+  upb_StringView result;
+  while ((result = ReadHandle(ctx, handle, buffer, sizeof buffer)).data !=
+         NULL) {
+    FuncallSymbol1(ctx, kInsert, MakeUnibyteString(ctx, result));
   }
   return Nil(ctx);
 }
@@ -4115,37 +4191,12 @@ static emacs_value WriteStdout(emacs_env* env,
   struct Context ctx = {env, data};
   assert(nargs == 1);
   struct Allocator alloc = HeapAllocator();
-#ifdef _WIN32
-  HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (handle == INVALID_HANDLE_VALUE) {
-    FileError(ctx, GetLastError());
-    return NULL;
-  }
-#endif
+  FileHandle handle = StdoutHandle(ctx);
+  if (!ValidHandle(handle)) return NULL;
   struct MutableString content = ExtractUnibyteString(ctx, alloc, args[0]);
   if (content.data == NULL) return NULL;
-  size_t left = content.size;
-  const char* ptr = content.data;
-  while (left > 0 && Success(ctx)) {
-#ifdef _WIN32
-    DWORD n;
-    if (!WriteFile(handle, ptr, left <= MAXDWORD ? (DWORD)left : MAXDWORD, &n,
-                   NULL)) {
-      FileError(ctx, GetLastError());
-      break;
-    }
-#else
-    ssize_t v = write(STDOUT_FILENO, ptr, left <= SSIZE_MAX ? left : SSIZE_MAX);
-    if (v < 0) {
-      FileError(ctx, errno);
-      break;
-    }
-    size_t n = (size_t)v;
-#endif
-    assert(n <= left);
-    ptr += n;
-    left -= n;
-  }
+  upb_StringView left = View(content);
+  while (left.size > 0 && WriteHandle(ctx, handle, &left));
   Free(alloc, content.data);
   return Nil(ctx);
 }
