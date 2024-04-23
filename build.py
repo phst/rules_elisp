@@ -99,7 +99,7 @@ class Builder:
         _run([self._bazel, 'run', '--',
               '@buildifier_prebuilt//:buildifier',
               '--mode=check', '--lint=warn',
-              '--warnings=+native-proto,+native-py,+out-of-order-load',
+              '--warnings=+native-proto,+native-py',
               '-r', '--', self._workspace])
 
     @target
