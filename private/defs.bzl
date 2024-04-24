@@ -468,7 +468,11 @@ CONLYOPTS = select({
 
 LAUNCHER_COPTS = COPTS + CXXOPTS
 
-DEFINES = ["_GNU_SOURCE"] + select({
+DEFINES = [
+    # https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01
+    "_POSIX_C_SOURCE=200809L",
+    "_XOPEN_SOURCE=700",
+] + select({
     Label("@platforms//os:linux"): [],
     Label("@platforms//os:macos"): [],
     Label("@platforms//os:windows"): [
