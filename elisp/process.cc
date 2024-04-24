@@ -713,7 +713,25 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
   DWORD code;
   success = ::GetExitCodeProcess(process_info.hProcess, &code);
   if (!success) return WindowsStatus("GetExitCodeProcess");
-  return CastNumber<int>(code);
+  // Emacs returns −1 on error, which the Windows C runtime will translate to
+  // 0xFFFFFFFF.  Undo this cast, assuming that both DWORD and int use two’s
+  // complement representation without padding bits.
+  static_assert(sizeof(int) == sizeof(DWORD));
+  static_assert(std::has_unique_object_representations_v<int>);
+  static_assert(std::has_unique_object_representations_v<DWORD>);
+  using IntLimits = std::numeric_limits<int>;
+  static_assert(IntLimits::radix == 2);
+  static_assert(IntLimits::digits == 31);
+  static_assert(-1 == ~0);  // https://stackoverflow.com/a/16501113
+  using DWORDLimits = std::numeric_limits<DWORD>;
+  static_assert(DWORDLimits::radix == 2);
+  static_assert(DWORDLimits::digits == 32);
+  // This cast is guaranteed to do the right thing in C++20, and in practice
+  // also works on older C++ versions.
+  const int code_int = static_cast<int>(code);
+  // Ensure we don’t accidentally return success on failure.
+  CHECK((code == 0) == (code_int == 0));
+  return code_int;
 #else
   const std::vector<absl::Nonnull<char*>> argv = Pointers(args);
   const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
