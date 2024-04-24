@@ -43,12 +43,9 @@ class ModuleTest(absltest.TestCase):
 
     def test_insert_stdin(self):
         """Unit test for elisp/proto/insert-stdin."""
-        infile = self._tempdir / 'in'
-        infile.write_bytes(b'stdin \xFF')
         outfile = self._tempdir / 'out'
-        with infile.open('rb') as stdin:
-            result = subprocess.run([self._cat, '>', outfile], check=True,
-                                    stdin=stdin, capture_output=True)
+        result = subprocess.run([self._cat, '>', outfile], check=True,
+                                input=b'stdin \xFF', capture_output=True)
         self.assertEmpty(result.stdout)
         self.assertEmpty(result.stderr)
         self.assertEqual(outfile.read_bytes(), b'stdin \xFF')
