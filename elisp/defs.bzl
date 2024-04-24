@@ -442,7 +442,7 @@ def _elisp_cc_module_impl(ctx):
         cc_toolchain = cc_toolchain,
         srcs = ctx.files.srcs,
         compilation_contexts = [info.compilation_context for info in infos],
-        local_defines = defaults.defines,
+        local_defines = defaults.defines + ctx.attr.local_defines,
         user_compile_flags = defaults.copts + ctx.attr.copts,
     )
     out = cc_common.link(
