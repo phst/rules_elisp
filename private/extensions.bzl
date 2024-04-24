@@ -14,15 +14,14 @@
 
 """Non-module dependencies."""
 
+load("@bazel_skylib//lib:modules.bzl", "modules")
 load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
 
 visibility("private")
 
-def _deps_impl(_ctx):
-    _deps()
-
-def _dev_deps_impl(_ctx):
+def _dev_deps_impl():
     _dev_deps(name = "phst_rules_elisp_dev_deps")
 
-deps = module_extension(implementation = _deps_impl)
-dev_deps = module_extension(implementation = _dev_deps_impl)
+# Bazel 6 doesn’t accept doc = None, so pass an empty string instead.
+deps = modules.as_extension(_deps, doc = "")
+dev_deps = modules.as_extension(_dev_deps_impl, doc = "")
