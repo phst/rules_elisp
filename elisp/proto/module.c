@@ -2973,7 +2973,10 @@ static bool WriteHandle(struct Context ctx, HANDLE handle,
 static void FileError(struct Context ctx, int code) {
   emacs_value message = Nil(ctx);
   char buffer[0x4000];
-  if (strerror_r(code, buffer, sizeof buffer) == 0) {
+  // Make sure we get the POSIX version of strerror_r by explicitly assigning
+  // its return value to an int variable.  See the strerror_r(3) man page.
+  int result = strerror_r(code, buffer, sizeof buffer);
+  if (result == 0) {
     message = MakeString(ctx, upb_StringView_FromString(buffer));
   }
   Signal2(ctx, kFileError, MakeInteger(ctx, code), message);
