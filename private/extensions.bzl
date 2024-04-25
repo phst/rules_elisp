@@ -22,6 +22,5 @@ visibility("private")
 def _dev_deps_impl():
     _dev_deps(name = "phst_rules_elisp_dev_deps")
 
-# Bazel 6 doesn’t accept doc = None, so pass an empty string instead.
-deps = modules.as_extension(_deps, doc = "")
-dev_deps = modules.as_extension(_dev_deps_impl, doc = "")
+deps = modules.as_extension(_deps)
+dev_deps = modules.as_extension(_dev_deps_impl)
