@@ -19,12 +19,12 @@ import platform
 import subprocess
 
 from absl import flags
-from absl.flags import FLAGS
 from absl.testing import absltest
 
 from elisp import runfiles
 
 
+FLAGS = flags.FLAGS
 flags.DEFINE_string(
     'launcher', None, 'location of the //elisp:launcher target', required=True)
 flags.DEFINE_string(
