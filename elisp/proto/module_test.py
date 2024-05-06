@@ -22,11 +22,12 @@ import pathlib
 import subprocess
 
 from absl import flags
-from absl.flags import FLAGS
 from absl.testing import absltest
 
 from elisp import runfiles
 
+
+FLAGS = flags.FLAGS
 
 flags.DEFINE_string('cat', None, 'location of the //elisp/proto:cat target',
                     required=True)

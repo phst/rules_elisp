@@ -25,6 +25,7 @@ from elisp import runfiles
 
 
 FLAGS = flags.FLAGS
+
 flags.DEFINE_string(
     'launcher', None, 'location of the //elisp:launcher target', required=True)
 flags.DEFINE_string(
