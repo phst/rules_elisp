@@ -55,7 +55,7 @@ gh run download "${id:?}"
 for dir in . examples/ext; do
   out="${dir:?}/MODULE.bazel.lock"
   linux="lockfiles-Linux-X64/${out:?}"
-  macos="lockfiles-macOS-X64/${out:?}"
+  macos="lockfiles-macOS-ARM64/${out:?}"
   windows="lockfiles-Windows-X64/${out:?}"
   bazel run \
     --lockfile_mode=off \
@@ -63,7 +63,7 @@ for dir in . examples/ext; do
     -- \
     @phst_merge_bazel_lockfiles//:merge \
     --linux-amd64="${linux:?}" \
-    --darwin-amd64="${macos:?}" \
+    --darwin-arm64="${macos:?}" \
     --windows-amd64="${windows:?}" \
     --local="${out:?}" \
     --output="${out:?}"
