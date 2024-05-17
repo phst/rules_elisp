@@ -37,9 +37,9 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "bazel_features",
-        sha256 = "22056b03b3f64491244882453022b801438c01d672829d1ac6338876b0fa206a",
-        strip_prefix = "bazel_features-1.7.1",
-        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.7.1/bazel_features-v1.7.1.tar.gz",
+        sha256 = "2cd9e57d4c38675d321731d65c15258f3a66438ad531ae09cb8bb14217dc8572",
+        strip_prefix = "bazel_features-1.11.0",
+        url = "https://github.com/bazel-contrib/bazel_features/releases/download/v1.11.0/bazel_features-v1.11.0.tar.gz",
     )
     maybe(
         http_archive,
