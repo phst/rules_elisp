@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "675b3185b3672fbd055f2f474616c2ef4e2ac72b12bee254fe44c3d759128c10",
+  "moduleFileHash": "5bae0e81093d88d15bf235fbf9a128925bdc311d806fffd4d726e5ff780a8c6c",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -212,8 +212,8 @@
               "tagName": "module",
               "attributeValues": {
                 "path": "github.com/bazelbuild/buildtools",
-                "sum": "h1:2Gc2Q6hVR1SJ8bBI9Ybzoggp8u/ED2WkM4MfvEIn9+c=",
-                "version": "v0.0.0-20231115204819-d4c9dccdfbb1"
+                "sum": "h1:hqhMmuZiSNwCWVHqnpr4DZfIeZ2/aJF7fs207eg7HZo=",
+                "version": "v0.0.0-20240422193413-1429e15ae755"
               },
               "devDependency": true,
               "location": {
