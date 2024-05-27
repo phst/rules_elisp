@@ -877,6 +877,7 @@ file that has been instrumented with Edebug."
        (unless (eq (marker-buffer begin) buffer)
          (error "Function %s got redefined in some other file" name))
        (cl-incf functions-hit (min calls 1))
+       (elisp/ert/hash--get-or-put (line-number-at-pos begin) lines 0)
        (cl-assert (eql (length coverage) (length offsets)) :show-args)
        (cl-loop
         for offset across offsets
