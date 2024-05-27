@@ -873,11 +873,12 @@ file that has been instrumented with Edebug."
                             thereis (and (not (eql hits 0)) hits)
                             finally return 0)
        for (begin _ offsets) = (get name 'edebug)
+       for begin-line = (line-number-at-pos begin)
        do
        (unless (eq (marker-buffer begin) buffer)
          (error "Function %s got redefined in some other file" name))
        (cl-incf functions-hit (min calls 1))
-       (elisp/ert/hash--get-or-put (line-number-at-pos begin) lines 0)
+       (elisp/ert/hash--get-or-put begin-line lines 0)
        (cl-assert (eql (length coverage) (length offsets)) :show-args)
        (cl-loop
         for offset across offsets
@@ -922,7 +923,7 @@ file that has been instrumented with Edebug."
                     (cl-loop for f across frequencies
                              and n across-ref v
                              do (cl-callf max n f)))))))))
-       (push (list (line-number-at-pos begin)
+       (push (list begin-line
                    (elisp/ert/sanitize--string (symbol-name name))
                    calls)
              functions)))
