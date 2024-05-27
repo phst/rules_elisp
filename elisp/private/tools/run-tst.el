@@ -709,6 +709,7 @@ Lisp source file that has been instrumented with Edebug using
        ;; Yuck!  More messing around with Edebug internals.
        for name = (edebug--form-data-name data)
        for begin = (edebug--form-data-begin data)
+       for end = (edebug--form-data-end data)
        for ours = (eq (get name 'edebug-behavior) '@coverage)
        for coverage = (get name (if ours '@coverage 'edebug-freq-count))
        for frequency = (if ours
@@ -724,7 +725,8 @@ Lisp source file that has been instrumented with Edebug using
        for (_ _ offsets) = (get name 'edebug)
        for begin-line = (line-number-at-pos begin)
        do
-       (unless (eq (marker-buffer begin) buffer)
+       (unless (and (eq (marker-buffer begin) buffer)
+                    (eq (marker-buffer end) buffer))
          (error "Function %s got redefined in some other file" name))
        (cl-incf functions-hit (min calls 1))
        (@hash-get-or-put begin-line lines calls)
@@ -771,7 +773,7 @@ Lisp source file that has been instrumented with Edebug using
                     (cl-loop for f across frequencies
                              and n across-ref v
                              do (cl-callf max n f)))))))))
-       (push (list begin-line
+       (push (list begin-line (line-number-at-pos end)
                    (@sanitize-string (symbol-name name))
                    calls)
              functions)))
@@ -779,9 +781,9 @@ Lisp source file that has been instrumented with Edebug using
     ;; The expected format is described to some extend in the
     ;; geninfo(1) man page.
     (insert (format "SF:%s\n" file-name))
-    (pcase-dolist (`(,line ,name ,_calls) functions)
-      (insert (format "FN:%d,%s\n" line name)))
-    (pcase-dolist (`(,_line ,name ,calls) functions)
+    (pcase-dolist (`(,begin-line ,end-line ,name ,_calls) functions)
+      (insert (format "FN:%d,%d,%s\n" begin-line end-line name)))
+    (pcase-dolist (`(,_begin-line ,_end-line ,name ,calls) functions)
       (insert (format "FNDA:%d,%s\n" calls name)))
     (insert (format "FNF:%d\n" (length functions)))
     (insert (format "FNH:%d\n" functions-hit))
