@@ -15,12 +15,12 @@
 """Non-module dependencies."""
 
 load("@bazel_skylib//lib:modules.bzl", "modules")
-load(":repositories.bzl", _deps = "non_module_deps", _dev_deps = "non_module_dev_deps")
+load(":repositories.bzl", "non_module_deps", _dev_deps = "non_module_dev_deps")
 
 visibility("private")
 
 def _dev_deps_impl():
     _dev_deps(name = "phst_rules_elisp_dev_deps")
 
-deps = modules.as_extension(_deps)
+deps = modules.as_extension(non_module_deps)
 dev_deps = modules.as_extension(_dev_deps_impl)
