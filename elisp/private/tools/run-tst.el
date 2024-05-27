@@ -1,6 +1,6 @@
 ;;; run-tst.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2025 Google LLC
+;; Copyright 2020-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -708,6 +708,7 @@ Lisp source file that has been instrumented with Edebug using
        for data in edebug-form-data
        ;; Yuck!  More messing around with Edebug internals.
        for name = (edebug--form-data-name data)
+       for begin = (edebug--form-data-begin data)
        for ours = (eq (get name 'edebug-behavior) '@coverage)
        for coverage = (get name (if ours '@coverage 'edebug-freq-count))
        for frequency = (if ours
@@ -720,7 +721,7 @@ Lisp source file that has been instrumented with Edebug using
                             for hits = (funcall frequency cov)
                             thereis (and (not (eql hits 0)) hits)
                             finally return 0)
-       for (begin _ offsets) = (get name 'edebug)
+       for (_ _ offsets) = (get name 'edebug)
        for begin-line = (line-number-at-pos begin)
        do
        (unless (eq (marker-buffer begin) buffer)
