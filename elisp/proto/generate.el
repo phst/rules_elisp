@@ -134,12 +134,10 @@ VALUES is a list of (NAME NUMBER) pairs."
       (when deps (terpri))
       (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
       (terpri) (terpri)
-      (dolist (message messages)
-        (cl-destructuring-bind (full-name . fields) message
-          (elisp/proto/generate-message full-name fields)))
-      (dolist (enum enums)
-        (cl-destructuring-bind (full-name . values) enum
-          (elisp/proto/generate-enum full-name values)))
+      (pcase-dolist (`(,full-name . ,fields) messages)
+        (elisp/proto/generate-message full-name fields))
+      (pcase-dolist (`(,full-name . ,values) enums)
+        (elisp/proto/generate-enum full-name values))
       (prin1 `(provide ',(intern feature))) (terpri) (terpri)
       (insert ";; Local Variables:\n"
               ;; Generated docstrings can be overly long if they contain lengthy

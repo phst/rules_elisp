@@ -415,8 +415,8 @@ NAME is the name of the test."
       (insert (format-message "\n  Test %s backtrace:\n\n" name))
       (goto-char (point-max))
       (when infos (insert ?\n))
-      (dolist (info infos)
-        (insert "  " (car info) (cdr info) ?\n))
+      (pcase-dolist (`(,prefix . ,message) infos)
+        (insert "  " prefix message ?\n))
       (insert (format-message "\n  Test %s condition:\n\n" name))
       (let ((point (point)))
         (pp (ert-test-result-with-condition-condition result)
@@ -931,10 +931,10 @@ file that has been instrumented with Edebug."
     ;; The expected format is described to some extend in the
     ;; geninfo(1) man page.
     (insert (format "SF:%s\n" file-name))
-    (dolist (func functions)
-      (insert (format "FN:%d,%s\n" (car func) (cadr func))))
-    (dolist (func functions)
-      (insert (format "FNDA:%d,%s\n" (caddr func) (cadr func))))
+    (pcase-dolist (`(,line ,name ,_calls) functions)
+      (insert (format "FN:%d,%s\n" line name)))
+    (pcase-dolist (`(,_line ,name ,calls) functions)
+      (insert (format "FNDA:%d,%s\n" calls name)))
     (insert (format "FNF:%d\n" (length functions)))
     (insert (format "FNH:%d\n" functions-hit))
     ;; Convert branch table into a vector used for BRDA lines.
