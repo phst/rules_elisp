@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "5bae0e81093d88d15bf235fbf9a128925bdc311d806fffd4d726e5ff780a8c6c",
+  "moduleFileHash": "ee380c51d444517f9307d3856f8ef338b53447e10246cc810f1de1fadb534878",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -267,7 +267,7 @@
         "io_bazel_stardoc": "stardoc@0.6.2",
         "io_bazel_rules_go": "rules_go@0.48.0",
         "io_abseil_py": "abseil-py@1.4.0",
-        "bazel_gazelle": "gazelle@0.36.0",
+        "bazel_gazelle": "gazelle@0.37.0",
         "buildifier_prebuilt": "buildifier_prebuilt@6.4.0",
         "hedron_compile_commands": "hedron_compile_commands@_",
         "phst_update_workspace_snippets": "phst_update_workspace_snippets@_",
@@ -838,7 +838,7 @@
         "platforms": "platforms@0.0.10",
         "rules_proto": "rules_proto@6.0.0",
         "com_google_protobuf": "protobuf@26.0.bcr.1",
-        "gazelle": "gazelle@0.36.0",
+        "gazelle": "gazelle@0.37.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -884,10 +884,10 @@
         }
       }
     },
-    "gazelle@0.36.0": {
+    "gazelle@0.37.0": {
       "name": "gazelle",
-      "version": "0.36.0",
-      "key": "gazelle@0.36.0",
+      "version": "0.37.0",
+      "key": "gazelle@0.37.0",
       "repoName": "bazel_gazelle",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
@@ -895,9 +895,9 @@
         {
           "extensionBzlFile": "@io_bazel_rules_go//go:extensions.bzl",
           "extensionName": "go_sdk",
-          "usingModule": "gazelle@0.36.0",
+          "usingModule": "gazelle@0.37.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "file": "https://bcr.bazel.build/modules/gazelle/0.37.0/MODULE.bazel",
             "line": 13,
             "column": 23
           },
@@ -912,9 +912,9 @@
         {
           "extensionBzlFile": "@bazel_gazelle//internal/bzlmod:non_module_deps.bzl",
           "extensionName": "non_module_deps",
-          "usingModule": "gazelle@0.36.0",
+          "usingModule": "gazelle@0.37.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "file": "https://bcr.bazel.build/modules/gazelle/0.37.0/MODULE.bazel",
             "line": 21,
             "column": 32
           },
@@ -931,9 +931,9 @@
         {
           "extensionBzlFile": "@bazel_gazelle//:extensions.bzl",
           "extensionName": "go_deps",
-          "usingModule": "gazelle@0.36.0",
+          "usingModule": "gazelle@0.37.0",
           "location": {
-            "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+            "file": "https://bcr.bazel.build/modules/gazelle/0.37.0/MODULE.bazel",
             "line": 29,
             "column": 24
           },
@@ -960,7 +960,7 @@
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+                "file": "https://bcr.bazel.build/modules/gazelle/0.37.0/MODULE.bazel",
                 "line": 30,
                 "column": 18
               }
@@ -974,7 +974,7 @@
               },
               "devDependency": false,
               "location": {
-                "file": "https://bcr.bazel.build/modules/gazelle/0.36.0/MODULE.bazel",
+                "file": "https://bcr.bazel.build/modules/gazelle/0.37.0/MODULE.bazel",
                 "line": 34,
                 "column": 15
               }
@@ -998,9 +998,9 @@
         "ruleClassName": "http_archive",
         "attributes": {
           "urls": [
-            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.36.0/bazel-gazelle-v0.36.0.tar.gz"
+            "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.37.0/bazel-gazelle-v0.37.0.tar.gz"
           ],
-          "integrity": "sha256-dd8ojEsxyB61D1Hi4U9HY8t1SNquEmgXJHBkY3/Z6mI=",
+          "integrity": "sha256-12v3pg/YsFBEQJDfooN6Tq+YKeEWVhjuNdzspcvfWNU=",
           "strip_prefix": "",
           "remote_patches": {},
           "remote_patch_strip": 0
@@ -1129,7 +1129,7 @@
       ],
       "deps": {
         "rules_go": "rules_go@0.48.0",
-        "gazelle": "gazelle@0.36.0",
+        "gazelle": "gazelle@0.37.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       }
