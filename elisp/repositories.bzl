@@ -76,10 +76,10 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "com_google_absl",
-        sha256 = "d0f9a580463375978f5ae4e04da39c3664bdaa23724b2f0bf00896a02bf801b9",
-        strip_prefix = "abseil-cpp-20240116.0/",
+        sha256 = "733726b8c3a6d39a4120d7e45ea8b41a434cdacde401cba500f14236c49b39dc",
+        strip_prefix = "abseil-cpp-20240116.2/",
         urls = [
-            "https://github.com/abseil/abseil-cpp/archive/refs/tags/20240116.0.zip",  # 2024-01-22
+            "https://github.com/abseil/abseil-cpp/releases/download/20240116.2/abseil-cpp-20240116.2.tar.gz",  # 2024-04-08
         ],
     )
     maybe(
