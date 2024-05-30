@@ -1,6 +1,6 @@
 {
   "lockFileVersion": 6,
-  "moduleFileHash": "85be1d6a7e486ccc5ef4aae0deb0d96bd13ad3be8d65ad987c612c8c9e6d0bd3",
+  "moduleFileHash": "eb49837193fbd8684a816b56e6ed78358a775ada62380b0a5a031e74a1ce2e46",
   "flags": {
     "cmdRegistries": [
       "https://bcr.bazel.build/"
@@ -263,7 +263,7 @@
         "rules_proto": "rules_proto@6.0.0",
         "rules_python": "rules_python@0.32.2",
         "com_google_absl": "abseil-cpp@20240116.2",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "io_bazel_stardoc": "stardoc@0.6.2",
         "io_bazel_rules_go": "rules_go@0.48.0",
         "io_abseil_py": "abseil-py@1.4.0",
@@ -586,7 +586,7 @@
         "rules_cc": "rules_cc@0.0.9",
         "platforms": "platforms@0.0.10",
         "rules_proto": "rules_proto@6.0.0",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -635,10 +635,10 @@
         }
       }
     },
-    "protobuf@26.0.bcr.1": {
+    "protobuf@27.0": {
       "name": "protobuf",
-      "version": "26.0.bcr.1",
-      "key": "protobuf@26.0.bcr.1",
+      "version": "27.0",
+      "key": "protobuf@27.0",
       "repoName": "com_google_protobuf",
       "executionPlatformsToRegister": [],
       "toolchainsToRegister": [],
@@ -663,15 +663,12 @@
         "ruleClassName": "http_archive",
         "attributes": {
           "urls": [
-            "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v26.0.zip"
+            "https://github.com/protocolbuffers/protobuf/releases/download/v27.0/protobuf-27.0.zip"
           ],
-          "integrity": "sha256-wscevJCvl5bog09lCT8vq4iwqCsqPoBbNIQmRaKvxLA=",
-          "strip_prefix": "protobuf-26.0",
-          "remote_patches": {
-            "https://bcr.bazel.build/modules/protobuf/26.0.bcr.1/patches/0001-Add-MODULE.bazel.patch": "sha256-rv+t+/L4C2BgRFhLYncji4yGODTLvcMjZIrSM1RcA54=",
-            "https://bcr.bazel.build/modules/protobuf/26.0.bcr.1/patches/0002-relative-labels.patch": "sha256-NvicAuuDJLFNLEi9pvGj7PPj/GbpYYYoVdihRosZgSA="
-          },
-          "remote_patch_strip": 1
+          "integrity": "sha256-PhFI2wkP8hImwYiO85+nvHeQBCviH/Qon9Ic4XNfNFU=",
+          "strip_prefix": "protobuf-27.0",
+          "remote_patches": {},
+          "remote_patch_strip": 0
         }
       }
     },
@@ -732,7 +729,7 @@
         "rules_java": "rules_java@7.4.0",
         "rules_jvm_external": "rules_jvm_external@5.2",
         "rules_license": "rules_license@0.0.8",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
       },
@@ -837,7 +834,7 @@
         "bazel_skylib": "bazel_skylib@1.6.1",
         "platforms": "platforms@0.0.10",
         "rules_proto": "rules_proto@6.0.0",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "gazelle": "gazelle@0.37.0",
         "bazel_tools": "bazel_tools@_",
         "local_config_platform": "local_config_platform@_"
@@ -987,7 +984,7 @@
       "deps": {
         "bazel_features": "bazel_features@1.11.0",
         "bazel_skylib": "bazel_skylib@1.6.1",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "io_bazel_rules_go": "rules_go@0.48.0",
         "rules_proto": "rules_proto@6.0.0",
         "bazel_tools": "bazel_tools@_",
@@ -1361,7 +1358,7 @@
         "rules_python": "rules_python@0.32.2",
         "buildozer": "buildozer@6.4.0.2",
         "platforms": "platforms@0.0.10",
-        "com_google_protobuf": "protobuf@26.0.bcr.1",
+        "com_google_protobuf": "protobuf@27.0",
         "zlib": "zlib@1.3",
         "build_bazel_apple_support": "apple_support@1.5.0",
         "local_config_platform": "local_config_platform@_"
@@ -1952,7 +1949,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "J3RsjYTk1nZZIBJtXh+GJtgMcEw+7E/jMF5LLLS139s=",
+        "bzlTransitiveDigest": "KtUTQ1LHXkp4/dv+qOHcnve5UN16lPDEdaFccz8RJLg=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
