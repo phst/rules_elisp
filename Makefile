@@ -49,3 +49,9 @@ install:
 	  bazel-bin/docs/rules_elisp.info \
 	  '$(INFODIR)/rules_elisp.info'
 	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+
+godeps:
+	$(BAZEL) run $(BAZELFLAGS) -- //dev:gazelle update-repos -- \
+	  github.com/bazelbuild/buildtools \
+	  github.com/google/addlicense \
+	  github.com/google/go-cmp
