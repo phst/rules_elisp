@@ -138,3 +138,28 @@ py_test(
         "@io_abseil_py//absl/testing:absltest",
     ],
 )
+
+elisp_binary(
+    name = "signal",
+    src = "signal.el",
+)
+
+py_test(
+    name = "signal_test",
+    size = "medium",
+    timeout = "short",
+    srcs = ["signal_test.py"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
+        # add additional quoting.
+        shell.quote("--binary=$(rlocationpath :signal)"),
+    ],
+    data = [":signal"],
+    python_version = "PY3",
+    srcs_version = "PY3",
+    deps = [
+        "//elisp:runfiles",
+        "@io_abseil_py//absl/flags",
+        "@io_abseil_py//absl/testing:absltest",
+    ],
+)
