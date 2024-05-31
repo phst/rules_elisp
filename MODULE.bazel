@@ -18,7 +18,7 @@ module(name = "phst_rules_elisp")
 
 # Non-development module dependencies
 bazel_dep(name = "platforms", version = "0.0.10")
-bazel_dep(name = "bazel_skylib", version = "1.6.1")
+bazel_dep(name = "bazel_skylib", version = "1.7.0")
 bazel_dep(name = "bazel_features", version = "1.11.0")
 bazel_dep(name = "rules_license", version = "0.0.8")
 bazel_dep(name = "rules_proto", version = "6.0.0")
