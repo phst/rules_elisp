@@ -547,9 +547,7 @@ module_config(
     linkopts = select({
         # Export only symbols that make up the module interface.
         "@platforms//os:linux": [
-            # See https://github.com/bazelbuild/bazel/issues/12313 why we need
-            # to add additional quoting.
-            shell.quote("-Wl,--version-script=$(execpath :module.lds)"),
+            "-Wl,--version-script=$(execpath :module.lds)",
             "-Wl,--no-undefined",
         ],
         "@platforms//os:windows": [
