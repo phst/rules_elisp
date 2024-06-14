@@ -65,6 +65,12 @@ additions for this library and all its transitive dependencies.
 The `depset` uses preorder traversal: entries for libraries closer to the root
 of the dependency graph come first.  The `depset` elements are structures as
 described in the provider documentation.""",
+        "package_file": """A `File` object for the -pkg.el file.
+None if `enable_package` is False.""",
+        "metadata_file": """A `File` object for the metadata file.
+None if `enable_package` is False.""",
+        "autoloads_file": """A `File` object for the autoloads file.
+None if `enable_package` is False.""",
     },
 )
 
@@ -79,9 +85,19 @@ def _elisp_library_impl(ctx):
         tags = ctx.attr.tags,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
+    extra_out = []
+    package_file = None
+    metadata_file = None
+    autoloads_file = None
+    if ctx.attr.enable_package and not ctx.attr.testonly:
+        pkg = _build_package(ctx, ctx.files.srcs, ctx.files.data)
+        extra_out += [pkg.package_file, pkg.metadata_file, pkg.autoloads_file]
+        package_file = pkg.package_file
+        metadata_file = pkg.metadata_file
+        autoloads_file = pkg.autoloads_file
     return [
         DefaultInfo(
-            files = depset(direct = result.outs),
+            files = depset(direct = result.outs + extra_out),
             runfiles = result.runfiles,
         ),
         coverage_common.instrumented_files_info(
@@ -97,6 +113,9 @@ def _elisp_library_impl(ctx):
             transitive_source_files = result.transitive_srcs,
             transitive_compiled_files = result.transitive_outs,
             transitive_load_path = result.transitive_load_path,
+            package_file = package_file,
+            metadata_file = metadata_file,
+            autoloads_file = autoloads_file,
         ),
     ]
 
@@ -343,6 +362,34 @@ To add a load path entry for the current package, specify `.` here.""",
         "deps": attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
+        ),
+        "enable_package": attr.bool(
+            doc = """Enable generation of package.el package for this library.
+This value is forced to False if testonly is True.""",
+            default = True,
+        ),
+        "emacs_package_name": attr.string(
+            doc = """The name used for the package.el package.
+This attribute is ignored if enable_package is False.
+Otherwise, srcs should contain a package description file `<name>-pkg.el`.
+If there is no such package description file, then srcs must contain a file
+`<name>.el` containing the appropriate package headers.
+
+If there is only one file in srcs, then the default value is the file basename
+with the .el suffix removed.  Otherwise, the default is the target label name,
+with underscores replaced with dashes.""",
+        ),
+        "_gen_pkg_el": attr.label(
+            default = "//elisp:gen-pkg-el.elc",
+            allow_single_file = [".elc"],
+        ),
+        "_gen_metadata": attr.label(
+            default = "//elisp:gen-metadata.elc",
+            allow_single_file = [".elc"],
+        ),
+        "_gen_autoloads": attr.label(
+            default = "//elisp:gen-autoloads.elc",
+            allow_single_file = [".elc"],
         ),
     },
     doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
@@ -1215,6 +1262,170 @@ def _resolve_load_path(ctx, dir):
             paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
         ),
     )
+
+def _get_emacs_package_name(ctx):
+    """Returns the package name to use for `elisp_library' rules."""
+    if ctx.attr.emacs_package_name:
+        return ctx.attr.emacs_package_name
+    if len(ctx.files.srcs) != 1:
+        return ctx.label.name.replace("_", "-")
+    basename = ctx.files.srcs[0].basename
+    if not basename.endswith(".el"):
+        fail("Suspicious single file when guessing package_name for target", ctx.label)
+    if basename.endswith("-pkg.el"):
+        fail("Suspicious package_name derived from single source file for target", ctx.label)
+    return basename[:-len(".el")]
+
+def _build_package(ctx, srcs, data):
+    """Build package files.
+
+    Args:
+      ctx (ctx): rule context
+      srcs (list of Files): Emacs Lisp sources files
+      data (list of Files): data files
+
+    Returns:
+      A structure with the following fields:
+        package_file: the File object for the -pkg.el file
+        metadata_file: the File object containing the package metadata
+        autoloads_file: the File object for the autoloads file
+    """
+    package_name = _get_emacs_package_name(ctx)
+
+    pkg_file = None
+
+    # Try to find an existing -pkg.el file
+    expected = package_name + "-pkg.el"
+    for file in srcs + data:
+        if file.basename == expected:
+            pkg_file = file
+            break
+
+    # Generate a -pkg.el file
+    if pkg_file == None:
+        expected = package_name + ".el"
+        for file in srcs + data:
+            if file.basename == expected:
+                pkg_file = _generate_pkg_el(ctx, file)
+                break
+    if pkg_file == None:
+        fail("No package metadata found for target", ctx.label)
+
+    # Try to find an existing autoloads file
+    autoloads_file = None
+    expected = package_name + "-autoloads.el"
+    for file in srcs + data:
+        if file.basename == expected:
+            autoloads_file = file
+            break
+    if autoloads_file == None:
+        autoloads_file = _generate_autoloads(ctx, package_name, srcs)
+    metadata_file = _generate_metadata(ctx, pkg_file)
+    return struct(
+        package_file = pkg_file,
+        metadata_file = metadata_file,
+        autoloads_file = autoloads_file,
+    )
+
+def _generate_pkg_el(ctx, src):
+    """Generate -pkg.el file.
+
+    Args:
+      ctx (ctx): rule context
+      src (File): Emacs Lisp source file to parse for package metadata
+
+    Returns:
+      the File object for the -pkg.el file
+    """
+    package_name = src.basename.rsplit(".")[0]
+    out = ctx.actions.declare_file(paths.join(
+        _OUTPUT_DIR,
+        ctx.attr.name,
+        "{}-pkg.el".format(package_name),
+    ))
+    inputs = depset(direct = [src, ctx.file._gen_pkg_el])
+    run_emacs(
+        ctx = ctx,
+        arguments = [
+            "--load=" + ctx.file._gen_pkg_el.path,
+            "--funcall=elisp/gen-pkg-el-and-exit",
+            src.path,
+            out.path,
+        ],
+        inputs = inputs,
+        outputs = [out],
+        tags = ctx.attr.tags,
+        mnemonic = "GenPkgEl",
+        progress_message = "Generating -pkg.el {}".format(out.short_path),
+        manifest_basename = out.basename,
+        manifest_sibling = out,
+    )
+    return out
+
+def _generate_metadata(ctx, package_file):
+    """Generate metadata file.
+
+    Args:
+      ctx (ctx): rule context
+      package_file (File): the File object for the -pkg.el file
+
+    Returns:
+      The File object for the metadata file
+    """
+    if not package_file.basename.endswith("-pkg.el"):
+        fail("Unexpected package_file", package_file)
+    package_name = package_file.basename[:-len("-pkg.el")]
+    out = ctx.actions.declare_file(paths.join(_OUTPUT_DIR, ctx.attr.name, "{}.json".format(package_name)))
+    inputs = depset(direct = [package_file, ctx.file._gen_metadata])
+    run_emacs(
+        ctx = ctx,
+        arguments = [
+            "--load=" + ctx.file._gen_metadata.path,
+            "--funcall=elisp/gen-metadata-and-exit",
+            package_file.path,
+            out.path,
+        ],
+        inputs = inputs,
+        outputs = [out],
+        tags = ctx.attr.tags,
+        mnemonic = "GenMetadata",
+        progress_message = "Generating metadata {}".format(out.short_path),
+        manifest_basename = out.basename,
+        manifest_sibling = out,
+    )
+    return out
+
+def _generate_autoloads(ctx, package_name, srcs):
+    """Generate autoloads file.
+
+    Args:
+      ctx (ctx): rule context
+      package_name (string): name of package
+      srcs (list of Files): Emacs Lisp source files for which to generate autoloads
+
+    Returns:
+      The generated File.
+    """
+    out = ctx.actions.declare_file(paths.join(_OUTPUT_DIR, ctx.attr.name, "{}-autoloads.el".format(package_name)))
+    inputs = depset(direct = srcs + [ctx.file._gen_autoloads])
+    run_emacs(
+        ctx = ctx,
+        arguments = [
+            "--load=" + ctx.file._gen_autoloads.path,
+            "--funcall=elisp/gen-autoloads-and-exit",
+            out.path,
+            package_name,
+            ctx.actions.args().add_all(srcs),
+        ],
+        inputs = inputs,
+        outputs = [out],
+        tags = ctx.attr.tags,
+        mnemonic = "GenAutoloads",
+        progress_message = "Generating autoloads {}".format(out.short_path),
+        manifest_basename = out.basename,
+        manifest_sibling = out,
+    )
+    return out
 
 # Directory relative to the current package where to store compiled files.  This
 # is equivalent to _objs for C++ rules.  See

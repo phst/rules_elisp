@@ -14,6 +14,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
+;; Version: 0.1.0
+
 ;;; Commentary:
 
 ;; Example functions to test coverage reporting.  This has to be in a separate
