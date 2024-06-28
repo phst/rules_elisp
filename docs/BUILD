@@ -53,7 +53,6 @@ DOCS = [
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
-    exclude_tag = "",
     includes = DOCS,
     main = "manual.org",
     tags = STARDOC_TAGS,
@@ -63,10 +62,10 @@ elisp_binary(
     name = "merge",
     src = "merge.el",
     input_args = list(range(
-        3,
-        len(DOCS) + 4,
+        2,
+        len(DOCS) + 3,
     )),
-    output_args = [2],
+    output_args = [1],
 )
 
 stardoc(
