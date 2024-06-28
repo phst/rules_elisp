@@ -17,7 +17,7 @@ load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "PACKAGE_FEATURES", "STARDOC_TAGS", "merged_manual")
+load("//private:defs.bzl", "PACKAGE_FEATURES", "STARDOC_TAGS", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -47,12 +47,13 @@ DOCS = [
     "elisp",
     "emacs",
     "repositories",
-] + (["extensions"] if DOCUMENT_EXTENSIONS else [])
+    "extensions",
+]
 
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
-    exclude_tag = "" if DOCUMENT_EXTENSIONS else "extensions",
+    exclude_tag = "",
     includes = DOCS,
     main = "manual.org",
     tags = STARDOC_TAGS,
