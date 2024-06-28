@@ -22,24 +22,9 @@ def non_module_deps():
     """Installs dependencies that are not available as modules."""
     _local_emacs(name = "local_emacs")
     _emacs(
-        version = "28.1",
-        integrity = "sha256-KLGz0JkDegiPCkyiUdfnJi6rXqFneqv/psRCaWGtdeE=",
-        windows_integrity = "sha384-TB/aHtif+AWx5PE7gx+4kasLmnX9vUJwcph/HmUPmHfq9m7amsgcJ0zv107hla0o",
-    )
-    _emacs(
         version = "28.2",
         integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
         windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
-    )
-    _emacs(
-        version = "29.1",
-        integrity = "sha256-0viBpcwjHi9aA+hvRYSwQ4+D7ddZignSSiG9jQA+LgE=",
-        windows_integrity = "sha384-A0UjZuyAE97UyQHUqNGKmYUqhNZi5K46tG5PIB4hiWiKPQ9UPQA92k3zZwe3+ab9",
-    )
-    _emacs(
-        version = "29.2",
-        integrity = "sha256-fT0kSJiHIL9L9XrXeloIvyLfJhYPkFB6hBuphr4mcNw=",
-        windows_integrity = "sha384-vLpxklmtKw9Xb6DADhx7Xq+ojBiOKHtlMraMqi9bCHz8V3JlGBPBJmdcqgKjT3hs",
     )
     _emacs(
         version = "29.3",
