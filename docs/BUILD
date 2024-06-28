@@ -17,7 +17,7 @@ load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "PACKAGE_FEATURES", "merged_manual")
+load("//private:defs.bzl", "DOCUMENT_EXTENSIONS", "PACKAGE_FEATURES", "STARDOC_TAGS", "merged_manual")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -31,6 +31,7 @@ elisp_manual(
     name = "manual",
     src = "merged.org",
     out = "manual.texi",
+    tags = STARDOC_TAGS,
 )
 
 # This rule assumes that Texinfo is installed locally.
@@ -39,6 +40,7 @@ genrule(
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
     cmd = "makeinfo --no-split --output=$@ -- $<",
+    tags = STARDOC_TAGS,
 )
 
 DOCS = [
@@ -53,6 +55,7 @@ merged_manual(
     exclude_tag = "" if DOCUMENT_EXTENSIONS else "extensions",
     includes = DOCS,
     main = "manual.org",
+    tags = STARDOC_TAGS,
 )
 
 elisp_binary(
@@ -70,6 +73,7 @@ stardoc(
     out = "elisp.binpb",
     format = "proto",
     input = "//elisp:defs.bzl",
+    tags = STARDOC_TAGS,
     deps = [
         "//private:defs",
         "@bazel_features//:features",
@@ -84,6 +88,7 @@ stardoc(
     out = "emacs.binpb",
     format = "proto",
     input = "//emacs:defs.bzl",
+    tags = STARDOC_TAGS,
     deps = [
         "//elisp:builtin",
         "//private:defs",
@@ -96,6 +101,7 @@ stardoc(
     out = "repositories.binpb",
     format = "proto",
     input = "//elisp:repositories.bzl",
+    tags = STARDOC_TAGS,
     deps = [
         "//elisp:builtin",
         "//private:repositories",
@@ -107,12 +113,7 @@ stardoc(
     out = "extensions.binpb",
     format = "proto",
     input = "//elisp:extensions.bzl",
-    tags = [
-        # Due to https://github.com/bazelbuild/stardoc/issues/192, building this
-        # target fails on Bazel 6 and below, so don’t include it in target
-        # patterns.
-        "manual",
-    ],
+    tags = STARDOC_TAGS,
     deps = [
         "//elisp:builtin",
         "//elisp:repositories",
