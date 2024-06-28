@@ -70,37 +70,10 @@ alias(
 )
 
 alias(
-    name = "emacs_28.1",
-    actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_28.1//:emacs",
-        "//conditions:default": "@gnu_emacs_28.1//:emacs",
-    }),
-    visibility = ["//visibility:public"],
-)
-
-alias(
     name = "emacs_28.2",
     actual = select({
         "@platforms//os:windows": "@gnu_emacs_windows_28.2//:emacs",
         "//conditions:default": "@gnu_emacs_28.2//:emacs",
-    }),
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "emacs_29.1",
-    actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.1//:emacs",
-        "//conditions:default": "@gnu_emacs_29.1//:emacs",
-    }),
-    visibility = ["//visibility:public"],
-)
-
-alias(
-    name = "emacs_29.2",
-    actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.2//:emacs",
-        "//conditions:default": "@gnu_emacs_29.2//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
@@ -152,15 +125,9 @@ alias(
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
         # is implemented in all supported Bazel versions.
-        "@gnu_emacs_28.1//:__pkg__",
         "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.1//:__pkg__",
-        "@gnu_emacs_29.2//:__pkg__",
         "@gnu_emacs_29.3//:__pkg__",
-        "@gnu_emacs_windows_28.1//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.1//:__pkg__",
-        "@gnu_emacs_windows_29.2//:__pkg__",
         "@gnu_emacs_windows_29.3//:__pkg__",
     ],
 )
@@ -201,15 +168,9 @@ cc_defaults(
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
         # is implemented in all supported Bazel versions.
-        "@gnu_emacs_28.1//:__pkg__",
         "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.1//:__pkg__",
-        "@gnu_emacs_29.2//:__pkg__",
         "@gnu_emacs_29.3//:__pkg__",
-        "@gnu_emacs_windows_28.1//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.1//:__pkg__",
-        "@gnu_emacs_windows_29.2//:__pkg__",
         "@gnu_emacs_windows_29.3//:__pkg__",
     ],
 )
