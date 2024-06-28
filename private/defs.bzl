@@ -37,8 +37,6 @@ visibility([
     "//tests/pkg",
 ])
 
-DOCUMENT_EXTENSIONS = hasattr(native, "starlark_doc_extract")
-
 # Stardoc requires Bazel 7, so don’t attempt to build any Stardoc targets on
 # older versions unless explicitly requested.
 # TODO: Remove this once we require Bazel 7.
