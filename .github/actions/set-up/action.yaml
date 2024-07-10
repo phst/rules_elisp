@@ -132,7 +132,4 @@ runs:
       # unconditionally once we drop support for these versions.
       if: >-
         !startsWith(inputs.bazel-version, '6.') ||
-        !(
-        startsWith(inputs.bazel-version, '6.3.') ||
-        startsWith(inputs.bazel-version, '6.4.')
-        )
+        !startsWith(inputs.bazel-version, '6.4.')
