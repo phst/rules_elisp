@@ -63,8 +63,8 @@ toolchain(
 )
 
 toolchain(
-    name = "emacs_29.3_toolchain",
-    toolchain = "emacs_29.3",
+    name = "emacs_29.4_toolchain",
+    toolchain = "emacs_29.4",
     toolchain_type = ":toolchain_type",
 )
 
@@ -91,8 +91,8 @@ elisp_toolchain(
 )
 
 elisp_toolchain(
-    name = "emacs_29.3",
-    emacs = "//emacs:emacs_29.3",
+    name = "emacs_29.4",
+    emacs = "//emacs:emacs_29.4",
 )
 
 exports_files(

@@ -123,7 +123,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "knzfYYn990nhCvePlf+Ft31KZw7QV8qMnQRz5J+nzd0=",
+        "bzlTransitiveDigest": "yGRiZ0fRWOB8YiWkjLrIrq1LK828rvqQWkjccHcRWwI=",
         "usagesDigest": "yy8Vn1h4qidAnXMm6KnS08xXJ3L/eyOnptg6dYB8p1g=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

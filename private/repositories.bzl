@@ -27,9 +27,9 @@ def non_module_deps():
         windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
     )
     _emacs(
-        version = "29.3",
-        integrity = "sha256-w0wF06zmZu2cf3oPrwcP6jIX/xkQ0ARJm9VFMjPXQqA=",
-        windows_integrity = "sha384-Zdo9uJEsrI53M7/5g7OqIPcSPX1sBLNMbhnOSN88W+x5fwcshZSBgRy4l1IdO1P6",
+        version = "29.4",
+        integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
+        windows_integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
     )
 
 def _non_module_dev_deps_impl(ctx):
