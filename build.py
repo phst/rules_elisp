@@ -174,7 +174,7 @@ class Builder:
 
 
 # All potentially supported Emacs versions.
-_VERSIONS = frozenset({'28.2', '29.3'})
+_VERSIONS = frozenset({'28.2', '29.4'})
 
 
 def main() -> None:

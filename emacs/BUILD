@@ -27,7 +27,7 @@ licenses(["notice"])
 
 alias(
     name = "emacs",
-    actual = ":emacs_29.3",
+    actual = ":emacs_29.4",
     visibility = ["//visibility:public"],
 )
 
@@ -54,8 +54,8 @@ py_test(
 alias(
     name = "module_header",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:module_header",
-        "//conditions:default": "@gnu_emacs_29.3//:module_header",
+        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:module_header",
+        "//conditions:default": "@gnu_emacs_29.4//:module_header",
     }),
     visibility = ["//visibility:public"],
 )
@@ -63,8 +63,8 @@ alias(
 alias(
     name = "builtin_features",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:builtin_features",
-        "//conditions:default": "@gnu_emacs_29.3//:builtin_features",
+        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:builtin_features",
+        "//conditions:default": "@gnu_emacs_29.4//:builtin_features",
     }),
     visibility = ["//gazelle:__pkg__"],
 )
@@ -79,10 +79,10 @@ alias(
 )
 
 alias(
-    name = "emacs_29.3",
+    name = "emacs_29.4",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.3//:emacs",
-        "//conditions:default": "@gnu_emacs_29.3//:emacs",
+        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:emacs",
+        "//conditions:default": "@gnu_emacs_29.4//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
@@ -126,9 +126,9 @@ alias(
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
         # is implemented in all supported Bazel versions.
         "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.3//:__pkg__",
+        "@gnu_emacs_29.4//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.3//:__pkg__",
+        "@gnu_emacs_windows_29.4//:__pkg__",
     ],
 )
 
@@ -169,8 +169,8 @@ cc_defaults(
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
         # is implemented in all supported Bazel versions.
         "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.3//:__pkg__",
+        "@gnu_emacs_29.4//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.3//:__pkg__",
+        "@gnu_emacs_windows_29.4//:__pkg__",
     ],
 )
