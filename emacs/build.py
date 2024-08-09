@@ -20,6 +20,7 @@ use it outside the rules or depend on its behavior.
 
 import argparse
 from collections.abc import Set
+import datetime
 import glob
 import json
 import os
@@ -228,6 +229,15 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
     shutil.unpack_archive(archive, temp)
     shutil.move(temp / prefix, dest, copy_function=shutil.copy)
     shutil.rmtree(temp, ignore_errors=True)
+    _touch(dest, datetime.datetime(2020, 1, 1, tzinfo=datetime.timezone.utc))
+
+
+def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
+    stamp = time.timestamp()
+    for parent, _dirs, files in os.walk(root):
+        parent = pathlib.Path(parent)
+        for file in files:
+            os.utime(parent / file, (stamp, stamp))
 
 
 if __name__ == '__main__':
