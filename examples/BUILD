@@ -104,6 +104,7 @@ elisp_manual(
     name = "doc",
     src = "doc.org",
     out = "doc.texi",
+    additional_inputs = ["config.org"],
 )
 
 genrule(
