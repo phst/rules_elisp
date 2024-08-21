@@ -720,6 +720,10 @@ UNDEFINED_ERROR = select({
     Label("//conditions:default"): [],
 })
 
+# FIXME: This restriction is arbitrary; elisp_binary rules should accept any
+# number of input files if necessary.
+MAX_MANUAL_ADDITIONAL_INPUTS = 10
+
 def _repository_name(file):
     # Skip empty string for main repository.
     return file.owner.workspace_name or None

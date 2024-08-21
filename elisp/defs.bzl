@@ -24,6 +24,7 @@ load(
     "CcDefaultInfo",
     "LAUNCHER_ATTRS",
     "LAUNCHER_DEPS",
+    "MAX_MANUAL_ADDITIONAL_INPUTS",
     "ModuleConfigInfo",
     "cc_launcher",
     "check_relative_filename",
@@ -738,11 +739,14 @@ def _elisp_manual_impl(ctx):
     out = ctx.outputs.out
     if out.extension != "texi":
         fail("Output filename {} doesn’t end in “.texi”".format(out.short_path))
+    additional_inputs = ctx.files.additional_inputs
+    if len(additional_inputs) > MAX_MANUAL_ADDITIONAL_INPUTS:
+        fail("Got {} additional input files; at most {} are allowed".format(len(additional_inputs), MAX_MANUAL_ADDITIONAL_INPUTS))
     ctx.actions.run(
         outputs = [out],
-        inputs = [src],
+        inputs = [src] + additional_inputs,
         executable = ctx.executable._export,
-        arguments = [ctx.actions.args().add(src).add(out)],
+        arguments = [ctx.actions.args().add(out).add(src).add_all(additional_inputs, expand_directories = False)],
         mnemonic = "Export",
         progress_message = "Exporting %{input} into Texinfo file",
         toolchain = None,
@@ -758,6 +762,11 @@ elisp_manual = rule(
         "out": attr.output(
             doc = "Texinfo manual file to write; must end in `.texi`.",
             mandatory = True,
+        ),
+        "additional_inputs": attr.label_list(
+            doc = "List of additional files made available during export.",
+            allow_files = True,
+            cfg = "exec",
         ),
         "_export": attr.label(
             allow_single_file = True,

@@ -28,6 +28,7 @@ load(
     "LAUNCHER_FEATURES",
     "LAUNCHER_LINKOPTS",
     "LINKOPTS",
+    "MAX_MANUAL_ADDITIONAL_INPUTS",
     "PACKAGE_FEATURES",
     "UNDEFINED_ERROR",
     "bootstrap",
@@ -480,8 +481,11 @@ build_test(
 elisp_binary(
     name = "export_org",
     src = "export-org.el",
-    input_args = [1],
-    output_args = [2],
+    input_args = range(
+        2,
+        3 + MAX_MANUAL_ADDITIONAL_INPUTS,
+    ),
+    output_args = [1],
     visibility = [
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md

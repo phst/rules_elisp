@@ -18,7 +18,7 @@
 
 ;; Internal implementation of the ‘elisp_manual’ Bazel rule.
 ;; Usage:
-;;    emacs export-org.el INPUT.org OUTPUT.texi
+;;    emacs export-org.el OUTPUT.texi INPUT.org 〈ADDITIONAL-INPUTS〉
 
 ;;; Code:
 
@@ -30,7 +30,7 @@
 (unless noninteractive (user-error "This file works only in batch mode"))
 
 (pcase command-line-args-left
-  (`(,input ,output)
+  (`(,output ,input . ,_)
    (setq command-line-args-left nil)
    (cl-callf expand-file-name input)
    (cl-callf expand-file-name output)
@@ -48,6 +48,6 @@
        (insert-file-contents input :visit)
        (setq default-directory (file-name-directory input))
        (write-region (org-export-as 'texinfo) nil output))))
-  (_ (user-error "Usage: elisp/export-org INPUT OUTPUT")))
+  (_ (user-error "Usage: elisp/export-org OUTPUT INPUT ADDITIONAL-INPUTS")))
 
 ;;; export-org.el ends here
