@@ -45,7 +45,8 @@
          (org-export-time-stamp-file nil)
          (org-export-use-babel nil))
      (with-temp-buffer
-       (insert-file-contents input)
+       (insert-file-contents input :visit)
+       (setq default-directory (file-name-directory input))
        (write-region (org-export-as 'texinfo) nil output))))
   (_ (user-error "Usage: elisp/export-org INPUT OUTPUT")))
 
