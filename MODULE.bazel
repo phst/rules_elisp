@@ -24,7 +24,7 @@ bazel_dep(name = "rules_license", version = "1.0.0")
 bazel_dep(name = "rules_proto", version = "6.0.0")
 bazel_dep(name = "rules_python", version = "0.34.0")
 bazel_dep(name = "abseil-cpp", version = "20240116.2", repo_name = "com_google_absl")
-bazel_dep(name = "protobuf", version = "27.2", repo_name = "com_google_protobuf")
+bazel_dep(name = "protobuf", version = "28.1", repo_name = "com_google_protobuf")
 
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.6.2", dev_dependency = True, repo_name = "io_bazel_stardoc")
