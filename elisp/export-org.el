@@ -32,6 +32,8 @@
 (pcase command-line-args-left
   (`(,input ,output)
    (setq command-line-args-left nil)
+   (cl-callf expand-file-name input)
+   (cl-callf expand-file-name output)
    (let ((warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
          (coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
