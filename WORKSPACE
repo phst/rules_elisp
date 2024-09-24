@@ -176,9 +176,9 @@ buildifier_prebuilt_register_toolchains()
 
 http_archive(
     name = "bazel_gazelle",
-    sha256 = "d76bf7a60fd8b050444090dfa2837a4eaf9829e1165618ee35dceca5cbdf58d5",
+    sha256 = "2c7545cc914a411e5c15c3d55a0a5ed34fbff62def0e1f0ab6ed14bda222c3cc",
     urls = [
-        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.37.0/bazel-gazelle-v0.37.0.tar.gz",  # 2024-05-24
+        "https://github.com/bazelbuild/bazel-gazelle/releases/download/v0.39.0/bazel-gazelle-v0.39.0.tar.gz",  # 2024-09-23
     ],
 )
 
