@@ -189,8 +189,8 @@ gazelle_dependencies()
 go_repository(
     name = "com_github_bazelbuild_buildtools",
     importpath = "github.com/bazelbuild/buildtools",
-    sum = "h1:hqhMmuZiSNwCWVHqnpr4DZfIeZ2/aJF7fs207eg7HZo=",
-    version = "v0.0.0-20240422193413-1429e15ae755",
+    sum = "h1:FGzENZi+SX9I7h9xvMtRA3rel8hCEfyzSixteBgn7MU=",
+    version = "v0.0.0-20240918101019-be1c24cc9a44",
 )
 
 go_repository(
