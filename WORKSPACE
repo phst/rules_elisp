@@ -68,14 +68,6 @@ load("@pip_deps//:requirements.bzl", "install_deps")
 
 install_deps()
 
-load("@rules_proto//proto:repositories.bzl", "rules_proto_dependencies")
-
-rules_proto_dependencies()
-
-load("@rules_proto//proto:toolchains.bzl", "rules_proto_toolchains")
-
-rules_proto_toolchains()
-
 load("@rules_license//:deps.bzl", "rules_license_dependencies")
 
 # This must come after the rules_python repository because rules_license

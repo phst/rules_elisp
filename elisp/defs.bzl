@@ -18,7 +18,8 @@ load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
-load("@rules_proto//proto:defs.bzl", "ProtoInfo", "proto_common")
+load("@com_google_protobuf//bazel/common:proto_common.bzl", "proto_common")
+load("@com_google_protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",

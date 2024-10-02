@@ -114,7 +114,8 @@ bzl_library(
         "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
-        "@rules_proto//proto:defs",
+        "@com_google_protobuf//bazel/common:proto_common_bzl",
+        "@com_google_protobuf//bazel/common:proto_info_bzl",
     ],
 )
 

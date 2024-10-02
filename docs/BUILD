@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
-load("@rules_python//python:proto.bzl", "py_proto_library")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "STARDOC_TAGS", "merged_manual")
 
@@ -79,7 +79,8 @@ stardoc(
         "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
-        "@rules_proto//proto:defs",
+        "@com_google_protobuf//bazel/common:proto_common_bzl",
+        "@com_google_protobuf//bazel/common:proto_info_bzl",
     ],
 )
 

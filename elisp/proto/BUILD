@@ -13,8 +13,9 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
 load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
-load("@rules_proto//proto:defs.bzl", "proto_lang_toolchain", "proto_library")
+load("@com_google_protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
