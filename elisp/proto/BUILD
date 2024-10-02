@@ -14,7 +14,8 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
-load("@com_google_protobuf//bazel:upb_proto_library.bzl", "upb_proto_library", "upb_proto_reflection_library")
+load("@com_google_protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
+load("@com_google_protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_library")
 load("@com_google_protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
@@ -222,7 +223,7 @@ elisp_binary(
     ],
 )
 
-upb_proto_library(
+upb_c_proto_library(
     name = "any_upb_proto",
     deps = ["@com_google_protobuf//:any_proto"],
 )
@@ -232,7 +233,7 @@ upb_proto_reflection_library(
     deps = ["@com_google_protobuf//:any_proto"],
 )
 
-upb_proto_library(
+upb_c_proto_library(
     name = "duration_upb_proto",
     deps = ["@com_google_protobuf//:duration_proto"],
 )
@@ -242,7 +243,7 @@ upb_proto_reflection_library(
     deps = ["@com_google_protobuf//:duration_proto"],
 )
 
-upb_proto_library(
+upb_c_proto_library(
     name = "timestamp_upb_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
@@ -252,7 +253,7 @@ upb_proto_reflection_library(
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
-upb_proto_library(
+upb_c_proto_library(
     name = "compiler_plugin_upb_proto",
     deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
