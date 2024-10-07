@@ -1,6 +1,6 @@
 ;;; runfiles.el --- access to Bazel runfiles  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -64,11 +64,11 @@ an error of type ‘elisp/runfiles/not-found’."
     (when-let ((value (getenv "RUNFILES_DIR")))
       (unless (string-empty-p value)
         (setq directory (concat "/:" value)))))
-  (let* ((impl (or (and manifest (not (string-equal manifest ""))
+  (let* ((impl (or (and manifest (not (string-empty-p manifest))
                         (file-regular-p manifest)
                         (file-readable-p manifest)
                         (elisp/runfiles/make--manifest manifest))
-                   (and directory (not (string-equal directory ""))
+                   (and directory (not (string-empty-p directory))
                         (file-accessible-directory-p directory)
                         (elisp/runfiles/make--directory directory))
                    (signal 'elisp/runfiles/not-found
