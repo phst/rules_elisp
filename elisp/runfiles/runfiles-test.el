@@ -37,16 +37,18 @@
     (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
 
 (ert-deftest elisp/runfiles/special-chars/directory ()
-  (let* ((directory (make-temp-file "runfiles-test-" :directory))
-         (filename (expand-file-name "testäα𝐴🐈'.txt" directory))
+  (let* ((windows (memq system-type '(ms-dos windows-nt)))
+         (directory (make-temp-file "runfiles-test-" :directory))
+         (filename (concat "testäα𝐴🐈' " (unless windows "\t\n\\") ".txt"))
+         (target (expand-file-name filename directory))
          (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
                                         :directory directory))
          (coding-system-for-write 'utf-8-unix)
          (write-region-annotate-functions nil)
          (write-region-post-annotation-function nil))
-    (write-region "contents\n" nil filename nil nil nil 'excl)
-    (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
-                   filename))
+    (ert-info (filename :prefix "File name: ")
+      (write-region "contents\n" nil target nil nil nil 'excl)
+      (should (equal (elisp/runfiles/rlocation filename runfiles) target)))
     (delete-directory directory :recursive)))
 
 (ert-deftest elisp/runfiles/special-chars/manifest ()
