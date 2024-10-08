@@ -37,18 +37,17 @@
     (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
 
 (ert-deftest elisp/runfiles/special-chars/directory ()
-  (let ((directory (make-temp-file "runfiles-test-" :directory)))
-    (unwind-protect
-        (let ((filename (expand-file-name "testäα𝐴🐈'.txt" directory))
-              (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
-                                             :directory directory))
-              (coding-system-for-write 'utf-8-unix)
-              (write-region-annotate-functions nil)
-              (write-region-post-annotation-function nil))
-          (write-region "contents\n" nil filename nil nil nil 'excl)
-          (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
-                         filename)))
-      (delete-directory directory :recursive))))
+  (let* ((directory (make-temp-file "runfiles-test-" :directory))
+         (filename (expand-file-name "testäα𝐴🐈'.txt" directory))
+         (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
+                                        :directory directory))
+         (coding-system-for-write 'utf-8-unix)
+         (write-region-annotate-functions nil)
+         (write-region-post-annotation-function nil))
+    (write-region "contents\n" nil filename nil nil nil 'excl)
+    (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
+                   filename))
+    (delete-directory directory :recursive)))
 
 (ert-deftest elisp/runfiles/special-chars/manifest ()
   (let* ((manifest (elisp/runfiles/rlocation
