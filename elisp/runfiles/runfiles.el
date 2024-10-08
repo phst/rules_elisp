@@ -501,14 +501,12 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
       ;; Perform the same parsing as
       ;; https://github.com/bazelbuild/bazel/blob/6.4.0/tools/cpp/runfiles/runfiles_src.cc#L241.
       (while (not (eobp))
-        (pcase (buffer-substring-no-properties
-                (line-beginning-position) (line-end-position))
-          ((rx bol (let key (+ (not (any ?\n ?\s))))
-               ?\s (let value (+ nonl)) eol)
+        (pcase (buffer-substring-no-properties (point) (line-end-position))
+          ((rx bos (let key (+ (not (any ?\n ?\s))))
+               ?\s (let value (* nonl)) eos)
            ;; Runfiles are always local, so quote them unconditionally.
-           (puthash key (concat "/:" value) manifest))
-          ((rx bol (let key (+ (not (any ?\n ?\s)))) ?\s eol)
-           (puthash key :empty manifest))
+           (puthash key (if (string-empty-p value) :empty (concat "/:" value))
+                    manifest))
           (other (signal 'elisp/runfiles/syntax-error (list filename other))))
         (forward-line)))
     (elisp/runfiles/manifest--make filename manifest)))
