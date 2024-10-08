@@ -56,8 +56,17 @@
                     "phst_rules_elisp/elisp/runfiles/test-manifest"))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
-    (should (equal (elisp/runfiles/rlocation "testäα𝐴🐈'.txt" runfiles)
-                   "/:/runfiles/testäα𝐴🐈'.txt"))))
+    (pcase-dolist (`(,source ,target)
+                   '(("testäα𝐴🐈'.txt"
+                      "/:/runfiles/testäα𝐴🐈'.txt")
+                     ("target-with-space"
+                      "/:/runfiles/with space\\and backslash")
+                     ("target-with-newline"
+                      "/:/runfiles/with\nnewline\\and backslash")
+                     ("source with space,\nnewline,\\and backslash"
+                      "/:/runfiles/with space,\nnewline,\\and backslash")))
+      (ert-info (source :prefix "Source: ")
+        (should (equal (elisp/runfiles/rlocation source runfiles) target))))))
 
 (ert-deftest elisp/runfiles/make/empty-file ()
   (let* ((manifest (elisp/runfiles/rlocation
