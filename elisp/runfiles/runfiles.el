@@ -501,13 +501,31 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
       ;; Perform the same parsing as
       ;; https://github.com/bazelbuild/bazel/blob/6.4.0/tools/cpp/runfiles/runfiles_src.cc#L241.
       (while (not (eobp))
-        (pcase (buffer-substring-no-properties (point) (line-end-position))
-          ((rx bos (let key (+ (not (any ?\n ?\s))))
-               ?\s (let value (* nonl)) eos)
-           ;; Runfiles are always local, so quote them unconditionally.
-           (puthash key (if (string-empty-p value) :empty (concat "/:" value))
-                    manifest))
-          (other (signal 'elisp/runfiles/syntax-error (list filename other))))
+        (let ((line (buffer-substring-no-properties
+                     (point) (line-end-position)))
+              (escaped (eql (following-char) ?\s)))
+          (cl-flet* ((syntax-error ()
+                       (signal 'elisp/runfiles/syntax-error
+                               (list filename line)))
+                     (unescape (string &rest other)
+                       (let ((pairs `(,@other ("\\n" . "\n") ("\\b" . "\\"))))
+                         (replace-regexp-in-string
+                          (rx ?\\ (? anychar))
+                          (lambda (seq)
+                            (or (cdr (assoc seq pairs)) (syntax-error)))
+                          string :fixedcase :literal))))
+            (pcase (if escaped (substring-no-properties line 1) line)
+              ((rx bos (let key (+ (not (any ?\n ?\s))))
+                   ?\s (let value (* nonl)) eos)
+               (when escaped
+                 (cl-callf unescape key '("\\s" . " "))
+                 (cl-callf unescape value))
+               (puthash key
+                        ;; Runfiles are always local, so quote them
+                        ;; unconditionally.
+                        (if (string-empty-p value) :empty (concat "/:" value))
+                        manifest))
+              (_ (syntax-error)))))
         (forward-line)))
     (elisp/runfiles/manifest--make filename manifest)))
 
