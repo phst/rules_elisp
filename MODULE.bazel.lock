@@ -74,8 +74,8 @@
     "https://bcr.bazel.build/modules/protobuf/21.7/MODULE.bazel": "a5a29bb89544f9b97edce05642fac225a808b5b7be74038ea3640fae2f8e66a7",
     "https://bcr.bazel.build/modules/protobuf/23.1/MODULE.bazel": "88b393b3eb4101d18129e5db51847cd40a5517a53e81216144a8c32dfeeca52a",
     "https://bcr.bazel.build/modules/protobuf/24.4/MODULE.bazel": "7bc7ce5f2abf36b3b7b7c8218d3acdebb9426aeb35c2257c96445756f970eb12",
-    "https://bcr.bazel.build/modules/protobuf/28.2/MODULE.bazel": "c0c8e51757df486d0314fa290e174d707bad4a6c2aa5ccb08a4b4abd76a23e90",
-    "https://bcr.bazel.build/modules/protobuf/28.2/source.json": "31a22dd0dd25b579257b0c5821b527a9bc987b7c16cf111fbf31704c2786651b",
+    "https://bcr.bazel.build/modules/protobuf/28.3/MODULE.bazel": "2b3764bbab2e46703412bd3b859efcf0322638ed015e88432df3bb740507a1e9",
+    "https://bcr.bazel.build/modules/protobuf/28.3/source.json": "61337685ae98657f879c16418789099910254009ac8f4af1b8f8fe2b53120f0d",
     "https://bcr.bazel.build/modules/protobuf/3.19.0/MODULE.bazel": "6b5fbb433f760a99a22b18b6850ed5784ef0e9928a72668b66e4d7ccd47db9b0",
     "https://bcr.bazel.build/modules/protobuf/3.19.2/MODULE.bazel": "532ffe5f2186b69fdde039efe6df13ba726ff338c6bc82275ad433013fa10573",
     "https://bcr.bazel.build/modules/protobuf/3.19.6/MODULE.bazel": "9233edc5e1f2ee276a60de3eaa47ac4132302ef9643238f23128fea53ea12858",
@@ -154,7 +154,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "aVnbSibJ7WOrO3Pt84BtKe6VFmxnGyDWNywoM0JpboQ=",
+        "bzlTransitiveDigest": "ziWEPIsHZaX2pEkSiDBVLGa2CyjgLPxRehZQfG+hZzc=",
         "usagesDigest": "3DNBnWLAoUV76qpAhBURaI5OO+RkYjldACmVSNU3CmA=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -4980,7 +4980,7 @@
     "@@rules_rust~//rust:extensions.bzl%rust": {
       "general": {
         "bzlTransitiveDigest": "+MZj6U74JPiE3JkDPGj8XtKUnyzjVqezYLKaSVmeNcc=",
-        "usagesDigest": "ElzJR5U/JYBUVkh3JnMDYgDbl5hTB0/+pB2cMOfl8IQ=",
+        "usagesDigest": "Slhvc0mGOP/16GsbVgk/MEjVoR2Tp4iQpo8vyWkgLqk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
