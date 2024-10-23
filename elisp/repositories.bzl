@@ -62,9 +62,9 @@ def rules_elisp_dependencies():
     maybe(
         http_archive,
         name = "rules_python",
-        sha256 = "ca77768989a7f311186a29747e3e95c936a41dffac779aff6b443db22290d913",
-        strip_prefix = "rules_python-0.36.0",
-        url = "https://github.com/bazelbuild/rules_python/releases/download/0.36.0/rules_python-0.36.0.tar.gz",
+        sha256 = "bd4797821b72b80b69e3c5ab4ad037e7fd1e6a0a27aebf42424c7ab0ce32e254",
+        strip_prefix = "rules_python-0.37.1",
+        url = "https://github.com/bazelbuild/rules_python/releases/download/0.37.1/rules_python-0.37.1.tar.gz",
     )
     maybe(
         http_archive,
