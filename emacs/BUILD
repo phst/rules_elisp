@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@rules_cc//cc:defs.bzl", "cc_toolchain_suite")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "UNDEFINED_ERROR", "cc_defaults")
 
