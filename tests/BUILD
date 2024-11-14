@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Tests for Emacs Lisp Bazel rules.  These tests are outside the //elisp package
+# Tests for Emacs Lisp Bazel rules.  These tests are outside the ‘elisp’ package
 # so that they can use external repositories loaded in our WORKSPACE file only,
 # e.g. the Go rules.
 
