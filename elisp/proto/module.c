@@ -229,7 +229,7 @@ enum { kMaxIO = 0x7FFFF000 };
 // forms into the generated Emacs Lisp files which register the descriptors in
 // the pool.  We also keep preallocated interned versions of the symbols that
 // this module uses frequently; without that, some of the module functions were
-// found to spent up to 30% of their CPU time in calls to ‘intern’.
+// found to spend up to 30% of their CPU time in calls to ‘intern’.
 
 // All preallocated symbols.  See https://en.wikipedia.org/wiki/X_Macro for the
 // pattern.  The first parameter is an enumerator name, the second one the
