@@ -116,7 +116,6 @@ stardoc(
     input = "//elisp:extensions.bzl",
     tags = STARDOC_TAGS,
     deps = [
-        "//elisp:builtin",
         "//elisp:repositories",
         "//private:repositories",
     ],
