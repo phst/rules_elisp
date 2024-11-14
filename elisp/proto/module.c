@@ -321,7 +321,7 @@ enum { kMaxIO = 0x7FFFF000 };
   X(kCProtoNames, ":proto-names")
 
 // clang-format off
-// Clang-Format get confused by this coding structure.
+// Clang-Format gets confused by this coding structure.
 enum GlobalSymbol {
 #define X(enumerator, string) enumerator,
   GLOBAL_SYMBOLS
