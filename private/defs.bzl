@@ -434,7 +434,7 @@ LAUNCHER_FEATURES = FEATURES
 
 # Shared C++ compilation options.
 COPTS = select({
-    Label("//private:msvc-cl"): [
+    Label("@rules_cc//cc/compiler:msvc-cl"): [
         "/WX",
         "/W4",
         "/utf-8",
@@ -455,17 +455,17 @@ COPTS = select({
 })
 
 CXXOPTS = select({
-    Label("//private:msvc-cl"): [],
+    Label("@rules_cc//cc/compiler:msvc-cl"): [],
     Label("//private:gcc"): [
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",
     ],
-    Label("//private:clang"): [],
+    Label("@rules_cc//cc/compiler:clang"): [],
 })
 
 CONLYOPTS = select({
-    Label("//private:msvc-cl"): [],
+    Label("@rules_cc//cc/compiler:msvc-cl"): [],
     Label("//private:gcc_or_clang"): ["-Wvla"],
 })
 
@@ -492,7 +492,7 @@ LAUNCHER_DEFINES = DEFINES
 LINKOPTS = []
 
 LAUNCHER_LINKOPTS = LINKOPTS + select({
-    Label("//private:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
+    Label("@rules_cc//cc/compiler:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
     Label("//private:gcc_or_clang"): [],
 })
 

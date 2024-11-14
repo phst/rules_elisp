@@ -88,7 +88,7 @@ selects.config_setting_group(
     name = "gcc_or_clang",
     match_any = [
         ":gcc",
-        ":clang",
+        "@rules_cc//cc/compiler:clang",
     ],
     visibility = ["//visibility:private"],
 )
@@ -96,20 +96,10 @@ selects.config_setting_group(
 selects.config_setting_group(
     name = "gcc",
     match_any = [
-        ":gcc_new",
+        "@rules_cc//cc/compiler:gcc",
         ":gcc_old",
     ],
     visibility = ["//visibility:private"],
-)
-
-config_setting(
-    name = "gcc_new",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "gcc"},
-    visibility = [
-        "//elisp:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-    ],
 )
 
 # Obsolete value for the C++ compiler flag, to be removed once
@@ -119,26 +109,6 @@ config_setting(
 config_setting(
     name = "gcc_old",
     flag_values = {"@bazel_tools//tools/cpp:compiler": "compiler"},
-    visibility = [
-        "//elisp:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-    ],
-)
-
-config_setting(
-    name = "clang",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "clang"},
-    visibility = [
-        "//elisp:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-    ],
-)
-
-config_setting(
-    name = "msvc-cl",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "msvc-cl"},
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
