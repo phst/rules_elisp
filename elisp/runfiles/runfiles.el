@@ -116,7 +116,7 @@ should be used in its place."
              (canonical caller-repo))
     (pcase-exhaustive filename
       ((rx bos
-           (let apparent (+ (not (any ?/ ?\n))))
+           (let apparent (+ (not (any "/\n"))))
            (let rest (? ?/ (+ nonl)))
            eos)
        (when-let ((mapping (gethash (cons canonical apparent) table)))
@@ -515,7 +515,7 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
                             (or (cdr (assoc seq pairs)) (syntax-error)))
                           string :fixedcase :literal))))
             (pcase (if escaped (substring-no-properties line 1) line)
-              ((rx bos (let key (+ (not (any ?\n ?\s))))
+              ((rx bos (let key (+ (not (any "\n "))))
                    ?\s (let value (* nonl)) eos)
                (when escaped
                  (cl-callf unescape key '("\\s" . " "))
@@ -624,9 +624,9 @@ If there’s no repository mapping file, the return value is nil."
         (let ((table (make-hash-table :test #'equal :size 5)))
           (while (not (eobp))
             (unless (looking-at (rx bol
-                                    (group (* (not (any ?, ?\n)))) ?,
-                                    (group (+ (not (any ?, ?\n)))) ?,
-                                    (group (+ (not (any ?, ?\n))))
+                                    (group (* (not (any ",\n")))) ?,
+                                    (group (+ (not (any ",\n")))) ?,
+                                    (group (+ (not (any ",\n"))))
                                     eol))
               (signal 'elisp/runfiles/syntax-error
                       (list file (line-number-at-pos))))
