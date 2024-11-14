@@ -17,9 +17,11 @@
 load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain", "use_cpp_toolchain")
 load("@com_google_protobuf//bazel/common:proto_common.bzl", "proto_common")
 load("@com_google_protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain", "use_cc_toolchain")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -426,7 +428,7 @@ corresponding `proto_library` rule.""",
 
 def _elisp_cc_module_impl(ctx):
     """Implementation of the `elisp_cc_module` rule."""
-    cc_toolchain = find_cpp_toolchain(ctx)
+    cc_toolchain = find_cc_toolchain(ctx)
     deps = ctx.attr.deps + [ctx.attr._module_header]
     infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._module_config[CcDefaultInfo]
@@ -593,7 +595,7 @@ C/C++ compiler.  See the [corresponding attribute for
     },
     provides = [EmacsLispInfo],
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchain(),
+    toolchains = use_cc_toolchain(),
     implementation = _elisp_cc_module_impl,
 )
 
@@ -649,7 +651,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchain() + [Label("//elisp:toolchain_type")],
+    toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_binary_impl,
 )
 
@@ -730,7 +732,7 @@ the `:nocover` tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.""",
     fragments = ["cpp"],
     test = True,
-    toolchains = use_cpp_toolchain() + [Label("//elisp:toolchain_type")],
+    toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_test_impl,
 )
 

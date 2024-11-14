@@ -81,6 +81,8 @@ stardoc(
         "@bazel_skylib//lib:paths",
         "@com_google_protobuf//bazel/common:proto_common_bzl",
         "@com_google_protobuf//bazel/common:proto_info_bzl",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
     ],
 )
 
@@ -91,9 +93,11 @@ stardoc(
     input = "//emacs:defs.bzl",
     tags = STARDOC_TAGS,
     deps = [
-        "//elisp:builtin",
         "//private:defs",
         "@bazel_skylib//lib:paths",
+        "@rules_cc//cc:action_names_bzl",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
     ],
 )
 

@@ -105,9 +105,11 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     deps = [
-        "//elisp:builtin",
         "//private:defs",
         "@bazel_skylib//lib:paths",
+        "@rules_cc//cc:action_names_bzl",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
     ],
 )
 

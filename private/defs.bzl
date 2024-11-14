@@ -18,7 +18,9 @@ These definitions are internal and subject to change without notice."""
 
 load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility([
@@ -216,7 +218,7 @@ def cc_launcher(ctx, *, header, args, native = True):
       representing the executable that starts Emacs and `runfiles` is a
       `runfiles` object for the runfiles that the executable will need
     """
-    cc_toolchain = find_cpp_toolchain(ctx)
+    cc_toolchain = find_cc_toolchain(ctx)
     deps = ctx.attr._launcher_deps
     infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._launcher_defaults[CcDefaultInfo]
