@@ -149,14 +149,14 @@ elisp_cc_module(
     features = FEATURES + ["-default_link_libs"],
     local_defines = DEFINES,
     deps = [
-        ":any_upb_proto",
-        ":any_upbdefs_proto",
-        ":compiler_plugin_upb_proto",
-        ":descriptor_upb_proto",
-        ":duration_upb_proto",
-        ":duration_upbdefs_proto",
-        ":timestamp_upb_proto",
-        ":timestamp_upbdefs_proto",
+        ":any_upb_c_proto",
+        ":any_upb_proto_reflection",
+        ":compiler_plugin_upb_c_proto",
+        ":descriptor_upb_c_proto",
+        ":duration_upb_c_proto",
+        ":duration_upb_proto_reflection",
+        ":timestamp_upb_c_proto",
+        ":timestamp_upb_proto_reflection",
         "//emacs:module_header",
         "@com_google_absl//absl/base:config",
         "@com_google_absl//absl/base:core_headers",
@@ -224,42 +224,42 @@ elisp_binary(
 )
 
 upb_c_proto_library(
-    name = "descriptor_upb_proto",
+    name = "descriptor_upb_c_proto",
     deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 
 upb_c_proto_library(
-    name = "any_upb_proto",
+    name = "any_upb_c_proto",
     deps = ["@com_google_protobuf//:any_proto"],
 )
 
 upb_proto_reflection_library(
-    name = "any_upbdefs_proto",
+    name = "any_upb_proto_reflection",
     deps = ["@com_google_protobuf//:any_proto"],
 )
 
 upb_c_proto_library(
-    name = "duration_upb_proto",
+    name = "duration_upb_c_proto",
     deps = ["@com_google_protobuf//:duration_proto"],
 )
 
 upb_proto_reflection_library(
-    name = "duration_upbdefs_proto",
+    name = "duration_upb_proto_reflection",
     deps = ["@com_google_protobuf//:duration_proto"],
 )
 
 upb_c_proto_library(
-    name = "timestamp_upb_proto",
+    name = "timestamp_upb_c_proto",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
 upb_proto_reflection_library(
-    name = "timestamp_upbdefs_proto",
+    name = "timestamp_upb_proto_reflection",
     deps = ["@com_google_protobuf//:timestamp_proto"],
 )
 
 upb_c_proto_library(
-    name = "compiler_plugin_upb_proto",
+    name = "compiler_plugin_upb_c_proto",
     deps = ["@com_google_protobuf//:compiler_plugin_proto"],
 )
 
