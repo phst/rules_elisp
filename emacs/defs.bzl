@@ -122,7 +122,7 @@ This is used by Gazelle.""",
             cfg = "exec",
         ),
         "_cc_toolchain": attr.label(
-            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+            default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_cc_toolchain": attr.label(

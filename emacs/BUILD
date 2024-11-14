@@ -120,7 +120,7 @@ alias(
     name = "cc_toolchain",
     actual = select({
         "@platforms//os:windows": ":windows_cc_toolchain",
-        "//conditions:default": "@bazel_tools//tools/cpp:current_cc_toolchain",
+        "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
     }),
     visibility = [
         # FIXME: Make private once

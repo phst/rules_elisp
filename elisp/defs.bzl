@@ -579,7 +579,7 @@ C/C++ compiler.  See the [corresponding attribute for
 `cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.local_defines).""",
         ),
         "_cc_toolchain": attr.label(
-            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+            default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_module_header": attr.label(
@@ -605,7 +605,7 @@ elisp_binary = rule(
             mandatory = True,
         ),
         "_cc_toolchain": attr.label(
-            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+            default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
@@ -666,7 +666,7 @@ elisp_test = rule(
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         "_cc_toolchain": attr.label(
-            default = Label("@bazel_tools//tools/cpp:current_cc_toolchain"),
+            default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
