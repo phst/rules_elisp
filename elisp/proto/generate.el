@@ -36,7 +36,7 @@
   '(and string
         (satisfies (lambda (string)
                      (string-match-p
-                      (rx bos (+ (any blank alnum ?_ ?- ?. ?/ ?: ?@ ?~)) eos)
+                      (rx bos (+ (any blank alnum ?_ ?+ ?- ?. ?/ ?: ?@ ?~)) eos)
                       string)))))
 
 (defun elisp/proto/generate-message (full-name fields)

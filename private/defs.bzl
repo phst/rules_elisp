@@ -141,8 +141,8 @@ def check_relative_filename(filename):
     if paths.is_absolute(filename):
         fail("filename {} is absolute".format(filename))
     filename = paths.normalize(filename)
-    if not (filename == "." or filename[0].isalpha() or filename.startswith("_")):
-        fail("filename {} has to start with a letter or underscore".format(filename))
+    if not (filename == "." or filename[0].isalpha() or filename[0] in "_+"):
+        fail("filename {} has to start with a letter, underscore, or plus sign".format(filename))
     for char in filename.elems():
         if not (char.isalnum() or char in "-_./+$@%=,~"):
             fail("invalid character {} in filename {}".format(char, filename))
