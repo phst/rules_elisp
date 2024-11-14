@@ -108,7 +108,7 @@ stardoc(
     input = "//elisp:repositories.bzl",
     tags = STARDOC_TAGS,
     deps = [
-        "//elisp:bazel_tools_bzl",
+        "//private:bazel_tools_bzl",
         "//private:repositories",
     ],
 )
@@ -120,8 +120,8 @@ stardoc(
     input = "//elisp:extensions.bzl",
     tags = STARDOC_TAGS,
     deps = [
-        "//elisp:bazel_tools_bzl",
         "//elisp:repositories",
+        "//private:bazel_tools_bzl",
         "//private:repositories",
     ],
 )
