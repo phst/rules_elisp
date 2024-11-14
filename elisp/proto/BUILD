@@ -152,6 +152,7 @@ elisp_cc_module(
         ":any_upb_proto",
         ":any_upbdefs_proto",
         ":compiler_plugin_upb_proto",
+        ":descriptor_upb_proto",
         ":duration_upb_proto",
         ":duration_upbdefs_proto",
         ":timestamp_upb_proto",
@@ -165,7 +166,6 @@ elisp_cc_module(
         "@com_google_protobuf//upb/message",
         "@com_google_protobuf//upb/message:types",
         "@com_google_protobuf//upb/reflection",
-        "@com_google_protobuf//upb/reflection:descriptor_upb_proto",
         "@com_google_protobuf//upb/text",
         "@com_google_protobuf//upb/util:required_fields",
         "@com_google_protobuf//upb/wire",
@@ -221,6 +221,11 @@ elisp_binary(
         # is implemented in all supported Bazel versions.
         "//visibility:public",
     ],
+)
+
+upb_c_proto_library(
+    name = "descriptor_upb_proto",
+    deps = ["@com_google_protobuf//:descriptor_proto"],
 )
 
 upb_c_proto_library(
