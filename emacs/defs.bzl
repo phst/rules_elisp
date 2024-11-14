@@ -15,11 +15,13 @@
 """Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel."""
 
 load(
-    "@bazel_tools//tools/build_defs/cc:action_names.bzl",
+    "@rules_cc//cc:action_names.bzl",
     "CPP_LINK_EXECUTABLE_ACTION_NAME",
     "C_COMPILE_ACTION_NAME",
 )
-load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "use_cpp_toolchain")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
+load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
@@ -142,7 +144,7 @@ This is used by Gazelle.""",
 The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cpp_toolchain(),
+    toolchains = use_cc_toolchain(),
     implementation = _emacs_binary_impl,
 )
 

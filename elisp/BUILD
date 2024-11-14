@@ -117,6 +117,8 @@ bzl_library(
         "@bazel_skylib//lib:paths",
         "@com_google_protobuf//bazel/common:proto_common_bzl",
         "@com_google_protobuf//bazel/common:proto_info_bzl",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
     ],
 )
 
