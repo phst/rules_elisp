@@ -14,7 +14,10 @@
 
 """Bzlmod module definition for rules_elisp."""
 
-module(name = "phst_rules_elisp")
+module(
+    name = "phst_rules_elisp",
+    bazel_compatibility = [">=6.4.0"],
+)
 
 # Non-development module dependencies
 bazel_dep(name = "platforms", version = "0.0.10")
