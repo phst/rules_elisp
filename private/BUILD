@@ -40,6 +40,7 @@ bzl_library(
         "@bazel_skylib//lib:paths",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
+        "@rules_python//python:py_info_bzl",
     ],
 )
 
