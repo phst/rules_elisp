@@ -455,6 +455,18 @@ COPTS = select({
         "-pedantic",
         "-pedantic-errors",
     ],
+}) + select({
+    # Disable warnings from external repositories, if possible.
+    Label("//private:msvc-cl"): [
+        "/external:Iexternal",
+        "/external:W3",
+        "/external:templates-",
+    ],
+    Label("//private:gcc"): [],
+    Label("//private:clang"): [
+        "--system-header-prefix=absl/",
+        "--system-header-prefix=upb/",
+    ],
 })
 
 CXXOPTS = select({
