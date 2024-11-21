@@ -49,8 +49,10 @@ exports_files(
 
 exports_files(
     [
+        # keep sorted
         "MODULE.bazel",
         "WORKSPACE",
+        "go.mod",
     ],
     visibility = ["//dev:__pkg__"],
 )
