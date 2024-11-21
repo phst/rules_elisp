@@ -470,6 +470,42 @@ bootstrap(
     ],
 )
 
+bootstrap(
+    name = "gen-pkg-el",
+    src = "gen-pkg-el.el",
+    out = "gen-pkg-el.elc",
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
+)
+
+bootstrap(
+    name = "gen-metadata",
+    src = "gen-metadata.el",
+    out = "gen-metadata.elc",
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
+)
+
+bootstrap(
+    name = "gen-autoloads",
+    src = "gen-autoloads.el",
+    out = "gen-autoloads.elc",
+    visibility = [
+        # FIXME: Make private once
+        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
+        # is implemented in all supported Bazel versions.
+        "//visibility:public",
+    ],
+)
+
 build_test(
     name = "compile_test",
     targets = [":compile"],
