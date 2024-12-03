@@ -24,6 +24,7 @@ import functools
 import io
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import subprocess
@@ -68,6 +69,17 @@ class Builder:
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
             or pathlib.Path(__file__).parent
         ).absolute()
+        version_str = subprocess.run([str(bazel), '--version'], check=True,
+                                     stdout=subprocess.PIPE,
+                                     encoding='utf-8').stdout
+        # https://www.gnu.org/prep/standards/html_node/_002d_002dversion.html
+        match = re.match(r'.+ (\d+)\.(\d+)[^ ]*$', version_str,
+                         re.ASCII | re.MULTILINE)
+        if not match:
+            raise ValueError(f'invalid version string {version_str}')
+        version = (int(match[1]), int(match[2]))
+        # Older Bazel versions don’t support the --enable_workspace option.
+        self._enable_workspace = version >= (7, 1)
 
     def build(self, goals: Sequence[str]) -> None:
         """Builds the specified goals."""
@@ -145,6 +157,8 @@ class Builder:
         for bzlmod in (True, False):
             prefix = '' if bzlmod else 'no'
             options = [f'--{prefix}enable_bzlmod']
+            if not bzlmod and self._enable_workspace:
+                options.append('--enable_workspace')
             if bzlmod and self._profiles:
                 self._profiles.mkdir(exist_ok=True)
                 profile_file = self._profiles / (profile + '.json.gz')
