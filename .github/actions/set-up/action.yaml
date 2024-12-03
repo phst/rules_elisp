@@ -126,10 +126,3 @@ runs:
       shell: bash
       run: >-
         echo 'common --remote_download_minimal' >> github.bazelrc
-      # Don’t enable Build without the Bytes in Bazel versions affected by
-      # https://github.com/bazelbuild/bazel/issues/19143 and
-      # https://github.com/bazelbuild/bazel/issues/20408.  We can enable it
-      # unconditionally once we drop support for these versions.
-      if: >-
-        !startsWith(inputs.bazel-version, '6.') ||
-        !startsWith(inputs.bazel-version, '6.4.')
