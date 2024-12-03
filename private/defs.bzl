@@ -40,11 +40,6 @@ visibility([
     "//tests/pkg",
 ])
 
-# Stardoc requires Bazel 7, so don’t attempt to build any Stardoc targets on
-# older versions unless explicitly requested.
-# TODO: Remove this once we require Bazel 7.
-STARDOC_TAGS = [] if hasattr(native, "starlark_doc_extract") else ["manual"]
-
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
     if "no-python-check" in tags:
