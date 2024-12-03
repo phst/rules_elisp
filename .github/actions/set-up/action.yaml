@@ -96,6 +96,7 @@ runs:
         common --show_progress_rate_limit=10
         common --repository_cache='${{runner.temp}}/bazel-repository-cache'
         common --disk_cache='${{runner.temp}}/bazel-action-cache'
+        common --remote_download_minimal
         build --verbose_failures
         build --experimental_convenience_symlinks=ignore
         build --show_result=0
@@ -122,7 +123,3 @@ runs:
         # using git_override.
         git config --global core.autocrlf false
         git config --global core.eol lf
-    - name: Enable Build without the Bytes
-      shell: bash
-      run: >-
-        echo 'common --remote_download_minimal' >> github.bazelrc
