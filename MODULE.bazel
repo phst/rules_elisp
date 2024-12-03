@@ -16,7 +16,7 @@
 
 module(
     name = "phst_rules_elisp",
-    bazel_compatibility = [">=6.4.0"],
+    bazel_compatibility = [">=7.0.0"],
 )
 
 # Non-development module dependencies
