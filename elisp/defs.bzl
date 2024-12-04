@@ -14,7 +14,6 @@
 
 """Defines rules to work with Emacs Lisp files in Bazel."""
 
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@com_google_protobuf//bazel/common:proto_common.bzl", "proto_common")
@@ -476,18 +475,15 @@ def _elisp_cc_module_impl(ctx):
         )
 
     # Replicate some implementation details of cc_binary to make coverage work,
-    # at least with llvm-cov.  Do this only in Bazel 7, because Bazel 6 doesn’t
-    # support the metdata_files parameter for
-    # coverage_common.instrumented_files_info.  See
+    # at least with llvm-cov.  See
     # https://github.com/bazelbuild/bazel/issues/15974.
-    instrumented_files_info_kwargs = {}
-    if (bazel_features.rules.instrumented_files_info_has_metadata_files and
-        ctx.configuration.coverage_enabled and ctx.coverage_instrumented()):
+    metadata_files = []
+    if ctx.configuration.coverage_enabled and ctx.coverage_instrumented():
         # @bazel_tools//tools/test:collect_cc_coverage.sh requires a file whose
         # name ends in “runtime_objects_list.txt”.
         objects_list = ctx.actions.declare_file(ctx.label.name + ".runtime_objects_list.txt")
         ctx.actions.write(objects_list, lib.path + "\n")
-        instrumented_files_info_kwargs["metadata_files"] = [lib, objects_list]
+        metadata_files += [lib, objects_list]
 
     load_path = [_resolve_load_path(ctx, "")]
     return [
@@ -511,7 +507,7 @@ def _elisp_cc_module_impl(ctx):
             ctx,
             source_attributes = ["srcs"],
             dependency_attributes = ["deps"],
-            **instrumented_files_info_kwargs
+            metadata_files = metadata_files,
         ),
     ]
 
