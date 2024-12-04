@@ -52,12 +52,11 @@ python_register_toolchains(
     register_coverage_tool = True,
 )
 
-load("@hermetic_python//:defs.bzl", "interpreter")
 load("@rules_python//python:pip.bzl", "pip_parse")
 
 pip_parse(
     name = "pip_deps",
-    python_interpreter_target = interpreter,
+    python_interpreter_target = "@hermetic_python_host//:python",
     requirements_darwin = "//dev:macos-requirements.txt",
     requirements_linux = "//dev:linux-requirements.txt",
     requirements_lock = None,
