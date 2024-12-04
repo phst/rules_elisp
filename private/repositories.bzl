@@ -156,7 +156,7 @@ _emacs_repository = repository_rule(
 
 def _local_emacs_impl(ctx):
     windows = ctx.os.name.startswith("windows")
-    emacs = _getenv(ctx, "EMACS", "emacs")
+    emacs = ctx.getenv("EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
         emacs += ".exe"
     sep = "\\" if windows else "/"
@@ -181,10 +181,3 @@ _local_emacs = repository_rule(
     implementation = _local_emacs_impl,
     local = True,
 )
-
-def _getenv(ctx, variable, default = None):
-    if hasattr(ctx, "getenv"):
-        return ctx.getenv(variable, default)
-    else:
-        # TODO: Remove this branch after dropping support for Bazel 6.
-        return ctx.os.environ.get(variable, default)
