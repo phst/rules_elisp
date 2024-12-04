@@ -674,7 +674,7 @@ elisp_test = rule(
         # Magic coverage attributes.  This is only partially documented
         # (https://bazel.build/rules/lib/coverage#output_generator), but we can
         # take over the values from
-        # https://github.com/bazelbuild/bazel/blob/7.0.0-pre.20231018.3/src/main/starlark/builtins_bzl/common/python/py_test_bazel.bzl.
+        # https://github.com/bazelbuild/rules_python/blob/0.39.0/python/private/py_test_rule.bzl.
         "_lcov_merger": attr.label(
             default = configuration_field("coverage", "output_generator"),
             executable = True,
