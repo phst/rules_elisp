@@ -492,7 +492,7 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
   (let ((manifest (make-hash-table :test #'equal))
         (filename (expand-file-name filename)))
     (with-temp-buffer
-      ;; At least Java hard-codes UTF-8 for runfiles manifest, see
+      ;; At least Java hard-codes UTF-8 for the runfiles manifest, see
       ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/java/runfiles/Runfiles.java#L492.
       (let ((coding-system-for-read 'utf-8)
             (format-alist nil)
