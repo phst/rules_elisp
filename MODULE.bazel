@@ -37,7 +37,7 @@ bazel_dep(name = "gazelle", version = "0.39.1", dev_dependency = True, repo_name
 
 # Bring in the local_config_cc repository.  It’s needed for
 # //emacs:windows_cc_toolchain.
-cc_configure = use_extension("@bazel_tools//tools/cpp:cc_configure.bzl", "cc_configure_extension")
+cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc")
 
 # Non-module dependencies
