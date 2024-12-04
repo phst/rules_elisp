@@ -67,7 +67,7 @@
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"
-#include "tools/cpp/runfiles/runfiles.h"
+#include "cc/runfiles/runfiles.h"
 
 #ifdef __APPLE__
 #  include <crt_externs.h>  // for _NSGetEnviron
@@ -490,7 +490,7 @@ static absl::StatusOr<Environment> CopyEnv() {
   return map;
 }
 
-using bazel::tools::cpp::runfiles::Runfiles;
+using rules_cc::cc::runfiles::Runfiles;
 using RunfilesPtr = absl::Nonnull<std::unique_ptr<Runfiles>>;
 
 static absl::StatusOr<RunfilesPtr> CreateRunfiles(

@@ -89,7 +89,10 @@ cc_library(
         ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",
+        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -117,7 +120,10 @@ cc_library(
         ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",
+        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -205,7 +211,10 @@ cc_library(
         ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",
+        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -307,7 +316,10 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",
+        "@rules_cc//cc/runfiles",
     ],
 )
 
