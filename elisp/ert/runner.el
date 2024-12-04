@@ -142,7 +142,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
       (let ((format-alist nil)
             (after-insert-file-functions nil)
             ;; The coverage manifest uses ISO-8859-1, see
-            ;; https://github.com/bazelbuild/bazel/blob/6.4.0/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L68.
+            ;; https://github.com/bazelbuild/bazel/blob/7.4.1/src/main/java/com/google/devtools/build/lib/analysis/test/InstrumentedFileManifestAction.java#L60.
             (coding-system-for-read 'iso-8859-1-unix)
             (instrumented-files ()))
         (with-temp-buffer

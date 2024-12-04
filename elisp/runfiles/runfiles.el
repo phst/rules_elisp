@@ -180,7 +180,7 @@ local names on that host, otherwise signal an error of type
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
   (let ((case-fold-search nil))
     ;; This uses similar criteria as
-    ;; https://github.com/bazelbuild/bazel/blob/6.4.0/tools/cpp/runfiles/runfiles_src.cc#L188-L190.
+    ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/cpp/runfiles/runfiles_src.cc#L221-L223.
     ;; We also ban absolute filenames as well as some forms that only exist in
     ;; Emacs.
     (and (stringp string)
@@ -493,13 +493,13 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
         (filename (expand-file-name filename)))
     (with-temp-buffer
       ;; At least Java hard-codes UTF-8 for runfiles manifest, see
-      ;; https://github.com/bazelbuild/bazel/blob/6.4.0/tools/java/runfiles/Runfiles.java#L489.
+      ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/java/runfiles/Runfiles.java#L492.
       (let ((coding-system-for-read 'utf-8)
             (format-alist nil)
             (after-insert-file-functions nil))
         (insert-file-contents filename))
       ;; Perform the same parsing as
-      ;; https://github.com/bazelbuild/bazel/blob/6.4.0/tools/cpp/runfiles/runfiles_src.cc#L241.
+      ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/cpp/runfiles/runfiles_src.cc#L274.
       (while (not (eobp))
         (let ((line (buffer-substring-no-properties
                      (point) (line-end-position)))
