@@ -186,5 +186,5 @@ def _getenv(ctx, variable, default = None):
     if hasattr(ctx, "getenv"):
         return ctx.getenv(variable, default)
     else:
-        # TODO: Remove this branch after dropping support for Bazel 6.
+        # TODO: Remove this branch after dropping support for Bazel 7.0.
         return ctx.os.environ.get(variable, default)
