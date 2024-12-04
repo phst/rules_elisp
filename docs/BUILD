@@ -72,7 +72,6 @@ stardoc(
     input = "//elisp:defs.bzl",
     deps = [
         "//private:defs",
-        "@bazel_features//:features",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
         "@com_google_protobuf//bazel/common:proto_common_bzl",
