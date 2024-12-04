@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ _emacs_repository = repository_rule(
 
 def _local_emacs_impl(ctx):
     windows = ctx.os.name.startswith("windows")
-    emacs = _getenv(ctx, "EMACS", "emacs")
+    emacs = ctx.getenv("EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
         emacs += ".exe"
     sep = "\\" if windows else "/"
@@ -141,10 +141,3 @@ _local_emacs = repository_rule(
     implementation = _local_emacs_impl,
     local = True,
 )
-
-def _getenv(ctx, variable, default = None):
-    if hasattr(ctx, "getenv"):
-        return ctx.getenv(variable, default)
-    else:
-        # TODO: Remove this branch after dropping support for Bazel 7.0.
-        return ctx.os.environ.get(variable, default)
