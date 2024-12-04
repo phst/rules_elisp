@@ -68,12 +68,6 @@ load("@pip_deps//:requirements.bzl", "install_deps")
 
 install_deps()
 
-load("@rules_license//:deps.bzl", "rules_license_dependencies")
-
-# This must come after the rules_python repository because rules_license
-# otherwise adds an ancient version of rules_python.
-rules_license_dependencies()
-
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
