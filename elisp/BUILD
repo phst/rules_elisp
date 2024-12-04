@@ -100,9 +100,7 @@ elisp_toolchain(
 exports_files(
     ["launcher.cc"],
     visibility = [
-        # FIXME: Make internal once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make internal once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -182,9 +180,7 @@ cc_library(
     linkstatic = True,
     local_defines = DEFINES,
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
     deps = [
@@ -215,9 +211,7 @@ cc_library(
         shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
     deps = [
@@ -314,9 +308,7 @@ cc_library(
         ])),
     ],
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
     deps = [
@@ -436,9 +428,7 @@ cc_library(
     linkstatic = True,
     local_defines = DEFINES,
     visibility = [
-        # FIXME: Make internal once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make internal once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -462,9 +452,7 @@ bootstrap(
     src = "compile.el",
     out = "compile.elc",
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -483,9 +471,7 @@ elisp_binary(
     ),
     output_args = [1],
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -497,9 +483,7 @@ cc_defaults(
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -531,9 +515,7 @@ module_config(
         "@platforms//os:macos": ".dylib",
     }),
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )

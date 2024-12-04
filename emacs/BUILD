@@ -94,9 +94,7 @@ py_binary(
     python_version = "PY3",
     srcs_version = "PY3",
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
@@ -125,9 +123,7 @@ alias(
         "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
     }),
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "@gnu_emacs_28.2//:__pkg__",
         "@gnu_emacs_29.4//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",
@@ -168,9 +164,7 @@ cc_defaults(
     # present.
     linkopts = UNDEFINED_ERROR,
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "@gnu_emacs_28.2//:__pkg__",
         "@gnu_emacs_29.4//:__pkg__",
         "@gnu_emacs_windows_28.2//:__pkg__",

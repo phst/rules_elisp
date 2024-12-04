@@ -30,9 +30,7 @@ elisp_library(
     srcs = ["runner.el"],
     outs = ["runner.elc"],
     visibility = [
-        # FIXME: Make private once
-        # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
-        # is implemented in all supported Bazel versions.
+        # FIXME: Make private once we drop support for Bazel 7.0.
         "//visibility:public",
     ],
 )
