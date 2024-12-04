@@ -17,7 +17,7 @@
 // implementation uses the µpb library; see
 // https://github.com/protocolbuffers/upb.  In particular, it uses the
 // reflection-based approach described in
-// https://github.com/protocolbuffers/upb/blob/main/doc/wrapping-upb.md.
+// https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/wrapping-upb.md.
 // There’s a companion library, proto.el, which contains some higher-level
 // applications as well as definitions that are easier to write in Lisp than C.
 // The existence of this module is an implementation detail, and users should
@@ -27,7 +27,8 @@
 // pointers wrapped in structures of type ‘elisp/proto/object’, defined in
 // proto.el.  ‘elisp/proto/object’ also contains a pointer to an arena from
 // which the C object was allocated; see the section “Integrating GC with µpb”
-// in https://github.com/protocolbuffers/upb/blob/main/doc/wrapping-upb.md.
+// in
+// https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/wrapping-upb.md.
 //
 // Functions whose name starts with “Extract” convert a Lisp value into a
 // corresponding C object, and functions whose name starts with “Make” perform
@@ -1029,17 +1030,19 @@ static void ReplaceChar(struct MutableString string, char from, char to) {
 
 /// Arenas
 
-// See https://github.com/protocolbuffers/upb/blob/main/doc/wrapping-upb.md and
-// https://github.com/protocolbuffers/upb/blob/main/doc/vs-cpp-protos.md for
-// some discussion around arenas and how they should be treated in
+// See
+// https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/wrapping-upb.md
+// and
+// https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/vs-cpp-protos.md
+// for some discussion around arenas and how they should be treated in
 // language-specific wrappers.
 
 // An arena with the associated user pointer.  The ‘lisp’ member must refer to a
 // user pointer that points to the same arena as ‘ptr’.  When garbage-collecting
 // the Lisp object, the arena will be freed.  This implements the unique
 // ownership semantics described in the section “Integrating GC with µpb” in
-// https://github.com/protocolbuffers/upb/blob/main/doc/wrapping-upb.md.  All
-// objects allocated from the arena must be wrapped in a Lisp structure that
+// https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/wrapping-upb.md.
+// All objects allocated from the arena must be wrapped in a Lisp structure that
 // point to the Lisp representation of the arena; this implements the required
 // shared ownership semantics.  The MakeArena and ExtractArena functions return
 // a LispArena structure with the right constraints.
