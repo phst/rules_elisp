@@ -31,7 +31,6 @@ load(
     "LINKOPTS",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
     "PACKAGE_FEATURES",
-    "UNDEFINED_ERROR",
     "bootstrap",
     "cc_defaults",
     "executable_only",
@@ -525,7 +524,7 @@ module_config(
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
         ],
-    }) + UNDEFINED_ERROR,
+    }),
     suffix = select({
         "@platforms//os:linux": ".so",
         "@platforms//os:windows": ".dll",

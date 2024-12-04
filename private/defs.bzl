@@ -710,14 +710,6 @@ LAUNCHER_DEPS = [
     Label("@com_google_absl//absl/types:span"),
 ]
 
-# Pass “-undefined error” to the linker to find undefined symbols at link time.
-# Do that only if the toolchain passes “-undefined dynamic_lookup” to avoid a
-# warning on newer macOS versions.
-UNDEFINED_ERROR = select({
-    Label("@platforms//os:macos"): ["-undefined", "error"] if bazel_features.cc.undefined_dynamic_lookup else [],
-    Label("//conditions:default"): [],
-})
-
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10

@@ -16,7 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_cc//cc:defs.bzl", "cc_toolchain_suite")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
-load("//private:defs.bzl", "PACKAGE_FEATURES", "UNDEFINED_ERROR", "cc_defaults")
+load("//private:defs.bzl", "PACKAGE_FEATURES", "cc_defaults")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -163,10 +163,7 @@ cc_defaults(
         # Don’t link against the C++ standard library, as Emacs is pure C code.
         "-default_link_libs",
     ],
-    # On macOS, override the toolchain’s “-undefined dynamic_lookup” option so
-    # that the configure script doesn’t incorrectly detect absent functions as
-    # present.
-    linkopts = UNDEFINED_ERROR,
+    linkopts = [],
     visibility = [
         # FIXME: Make private once
         # https://github.com/bazelbuild/proposals/blob/main/designs/2019-10-15-tool-visibility.md
