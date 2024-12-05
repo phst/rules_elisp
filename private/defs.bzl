@@ -411,8 +411,8 @@ def run_emacs(
 _WARNINGS_AS_ERRORS = [("" if bazel_features.cc.treat_warnings_as_errors_works_on_macos else "-") + "treat_warnings_as_errors"]
 
 # Features for all packages.  These may not contain select expressions.
-# FIXME: Once all supported Bazel versions parse REPO.bazel, move these features
-# there, and remove them from BUILD files.
+# FIXME: Once we drop support for Bazel 7.0, move these features to the
+# REPO.bazel files, and remove them from BUILD files.
 PACKAGE_FEATURES = [
     "no_copts_tokenization",
     "layering_check",
