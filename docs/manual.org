@@ -95,6 +95,10 @@ load("@bazel_features//:deps.bzl", "bazel_features_deps")
 
 bazel_features_deps()
 
+load("@rules_python//python:repositories.bzl", "py_repositories")
+
+py_repositories()
+
 load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
 
 protobuf_deps()
@@ -102,11 +106,7 @@ protobuf_deps()
 
 #+TEXINFO: @noindent
 See [[https://bazel.build/external/overview#workspace-system][the Bazel
-documentation on WORKSPACE dependencies]] for background information.  Since
-~rules_elisp~ depends on ~rules_python~, you’ll also need to add a dependency on
-the latter.  See
-[[https://rules-python.readthedocs.io/en/latest/getting-started.html#using-a-workspace-file][the
-~rules_python~ documentation]].
+documentation on WORKSPACE dependencies]] for background information.
 
 Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
 See [[*Symbols defined in =//emacs:defs.bzl=]] and the examples in the
