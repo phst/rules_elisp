@@ -16,6 +16,7 @@ repo(
     default_applicable_licenses = ["@phst_rules_elisp//:license"],
     default_visibility = ["//visibility:private"],
     features = [
+        "treat_warnings_as_errors",
         "no_copts_tokenization",
         "layering_check",
         "parse_headers",

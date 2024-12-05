@@ -16,7 +16,6 @@
 
 These definitions are internal and subject to change without notice."""
 
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
@@ -404,16 +403,11 @@ def run_emacs(
         toolchain = Label("//elisp:toolchain_type"),
     )
 
-# We can’t use treat_warnings_as_errors on macOS unconditionally yet because
-# it tries to pass a flag -fatal-warnings to the linker, but the macOS
-# linker accepts -fatal_warnings instead.  See
-# https://github.com/bazelbuild/bazel/issues/20919.
-_WARNINGS_AS_ERRORS = [("" if bazel_features.cc.treat_warnings_as_errors_works_on_macos else "-") + "treat_warnings_as_errors"]
-
 # Features for all packages.  These may not contain select expressions.
 # FIXME: Once we drop support for Bazel 7.0, move these features to the
 # REPO.bazel files, and remove them from BUILD files.
 PACKAGE_FEATURES = [
+    "treat_warnings_as_errors",
     "no_copts_tokenization",
     "layering_check",
     "parse_headers",
@@ -421,13 +415,9 @@ PACKAGE_FEATURES = [
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
     "-macos_default_link_flags",
-] + _WARNINGS_AS_ERRORS
+]
 
-FEATURES = select({
-    Label("@platforms//os:macos"): _WARNINGS_AS_ERRORS,
-    Label("//conditions:default"): ["treat_warnings_as_errors"],
-})
-
+FEATURES = []
 LAUNCHER_FEATURES = FEATURES
 
 # Shared C++ compilation options.

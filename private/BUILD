@@ -36,7 +36,6 @@ bzl_library(
     ],
     deps = [
         ":generated",
-        "@bazel_features//:features",
         "@bazel_skylib//lib:paths",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
