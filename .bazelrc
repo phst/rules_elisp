@@ -12,7 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+build --enable_platform_specific_config
+
 build --process_headers_in_dependencies
+
+# The external_include_paths feature has to be specified in .bazelrc because it
+# needs to apply to all compile actions in all repositories.
+# TODO: File bug against Bazel to make this work as repository-level feature.
+build --features=external_include_paths
+build --host_features=external_include_paths
+
+# The next line shouldn’t be necessary.
+# TODO: File bug against rules_cc.
+build:windows --copt='/external:W3' --host_copt='/external:W3'
 
 # Run Pylint by default.
 build --aspects='//private:defs.bzl%check_python'
