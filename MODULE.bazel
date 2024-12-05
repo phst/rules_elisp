@@ -38,7 +38,7 @@ bazel_dep(name = "gazelle", version = "0.39.1", dev_dependency = True, repo_name
 # Bring in the local_config_cc repository.  It’s needed for
 # //emacs:windows_cc_toolchain.
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
-use_repo(cc_configure, "local_config_cc")
+use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
 deps = use_extension("//private:extensions.bzl", "deps")
@@ -53,6 +53,9 @@ use_repo(dev_deps, "phst_rules_elisp_dev_deps")
 
 # Local toolchains
 register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
+
+# C++-specific dependencies
+register_toolchains("@local_config_cc_toolchains//:all")
 
 # Python-specific dependencies
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
