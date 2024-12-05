@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -52,16 +52,6 @@
 #include <utility>
 #include <vector>
 
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wpedantic"
-#  pragma GCC diagnostic ignored "-Wconversion"
-#  pragma GCC diagnostic ignored "-Wsign-conversion"
-#  pragma GCC diagnostic ignored "-Woverflow"
-#endif
-#ifdef _MSC_VER
-#  pragma warning(push, 2)
-#endif
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
@@ -78,12 +68,6 @@
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"
 #include "tools/cpp/runfiles/runfiles.h"
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
 
 #ifdef __APPLE__
 #  include <crt_externs.h>  // for _NSGetEnviron
