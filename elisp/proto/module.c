@@ -179,16 +179,6 @@ enum { kMaxIO = 0x7FFFF000 };
 #  error Emacs module header too old
 #endif
 
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wconversion"
-#  pragma GCC diagnostic ignored "-Wsign-conversion"
-#  pragma GCC diagnostic ignored "-Wpedantic"
-#endif
-#ifdef _MSC_VER
-#  pragma warning(push, 3)
-#  pragma warning(disable : 4090 4098 4244 4267 4334)
-#endif
 #include "absl/base/attributes.h"
 #include "absl/base/config.h"
 #include "google/protobuf/any.upb.h"
@@ -215,12 +205,6 @@ enum { kMaxIO = 0x7FFFF000 };
 #include "upb/util/required_fields.h"
 #include "upb/wire/decode.h"
 #include "upb/wire/encode.h"
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
 
 /// Global variables
 
