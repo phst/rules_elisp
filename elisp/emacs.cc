@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,24 +16,8 @@
 
 #include <string_view>
 
-#ifdef __GNUC__
-#  pragma GCC diagnostic push
-#  pragma GCC diagnostic ignored "-Wpedantic"
-#  pragma GCC diagnostic ignored "-Wconversion"
-#  pragma GCC diagnostic ignored "-Wsign-conversion"
-#  pragma GCC diagnostic ignored "-Woverflow"
-#endif
-#ifdef _MSC_VER
-#  pragma warning(push, 2)
-#endif
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
-#ifdef __GNUC__
-#  pragma GCC diagnostic pop
-#endif
-#ifdef _MSC_VER
-#  pragma warning(pop)
-#endif
 
 #include "elisp/platform.h"
 #include "elisp/process.h"
