@@ -34,10 +34,6 @@ load("@bazel_skylib//lib:versions.bzl", "versions")
 # https://github.com/bazelbuild/bazel/issues/8305.
 versions.check("7.0.0")
 
-load("@bazel_features//:deps.bzl", "bazel_features_deps")
-
-bazel_features_deps()
-
 load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies", "rules_cc_toolchains")
 
 rules_cc_dependencies()
