@@ -411,6 +411,7 @@ PACKAGE_FEATURES = [
     "no_copts_tokenization",
     "layering_check",
     "parse_headers",
+    "external_include_paths",
     # On Windows, Bazel generates incorrectly-escaped parameter files.  See
     # https://github.com/bazelbuild/bazel/issues/21029.
     "-compiler_param_file",
