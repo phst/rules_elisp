@@ -110,7 +110,7 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  ifdef _MSC_VER
-#    pragma warning(push, 3)
+#    pragma warning(push, 2)
 #    pragma warning(disable : 5105)
 #  endif
 #  include <windows.h>
@@ -186,7 +186,7 @@ enum { kMaxIO = 0x7FFFF000 };
 #  pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 #ifdef _MSC_VER
-#  pragma warning(push, 3)
+#  pragma warning(push, 2)
 #  pragma warning(disable : 4090 4098 4244 4267 4334)
 #endif
 #include "absl/base/attributes.h"

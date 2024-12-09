@@ -60,7 +60,7 @@
 #  pragma GCC diagnostic ignored "-Woverflow"
 #endif
 #ifdef _MSC_VER
-#  pragma warning(push, 3)
+#  pragma warning(push, 2)
 #endif
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
