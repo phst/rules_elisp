@@ -429,7 +429,7 @@ COPTS = select({
         "/utf-8",
         "/permissive-",
         "/Zc:__cplusplus",
-        "/external:W3",  # TODO: shouldn’t be needed; file bug against rules_cc
+        "/external:W2",  # TODO: shouldn’t be needed; file bug against rules_cc
     ],
     Label("//private:gcc_or_clang"): [
         "-finput-charset=utf-8",
