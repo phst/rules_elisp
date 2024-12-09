@@ -12,6 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Treat warnings as errors by default.  This is in .bazelrc so it only applies
+# if this is the main repository.
+build --features=treat_warnings_as_errors
+build --host_features=treat_warnings_as_errors
+
 build --process_headers_in_dependencies
 
 # Run Pylint by default.
