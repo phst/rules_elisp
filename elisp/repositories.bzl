@@ -61,6 +61,14 @@ def rules_elisp_dependencies():
     )
     maybe(
         http_archive,
+        name = "rules_java",
+        urls = [
+            "https://github.com/bazelbuild/rules_java/releases/download/8.6.2/rules_java-8.6.2.tar.gz",
+        ],
+        sha256 = "a64ab04616e76a448c2c2d8165d836f0d2fb0906200d0b7c7376f46dd62e59cc",
+    )
+    maybe(
+        http_archive,
         name = "rules_python",
         sha256 = "4f7e2aa1eb9aa722d96498f5ef514f426c1f55161c3c9ae628c857a7128ceb07",
         strip_prefix = "rules_python-1.0.0",
