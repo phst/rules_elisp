@@ -24,7 +24,7 @@
 #  pragma GCC diagnostic ignored "-Woverflow"
 #endif
 #ifdef _MSC_VER
-#  pragma warning(push, 3)
+#  pragma warning(push, 2)
 #endif
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"

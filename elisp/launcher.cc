@@ -22,7 +22,7 @@
 #  pragma GCC diagnostic ignored "-Woverflow"
 #endif
 #ifdef _MSC_VER
-#  pragma warning(push, 3)
+#  pragma warning(push, 2)
 #endif
 #include "absl/container/fixed_array.h"
 #include "absl/log/log.h"
