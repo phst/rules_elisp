@@ -41,7 +41,9 @@ visibility([
 
 def _check_python_impl(target, ctx):
     tags = ctx.rule.attr.tags
-    if "no-python-check" in tags:
+
+    # TODO: Require PyInfo provider using required_providers, see below.
+    if "no-python-check" in tags or PyInfo not in target:
         return []
     info = target[PyInfo]
     stem = "_{}.python-check".format(target.label.name)
@@ -109,7 +111,10 @@ check_python = aspect(
             allow_single_file = True,
         ),
     },
-    required_providers = [PyInfo],
+    # The Python rules don’t advertise the PyInfo provider, so we can’t use
+    # required_providers here.
+    # TODO: File bug against rules_python.
+    # required_providers = [PyInfo],
 )
 
 def check_relative_filename(filename):
