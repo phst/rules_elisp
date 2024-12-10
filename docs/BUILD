@@ -44,7 +44,6 @@ genrule(
 DOCS = [
     "elisp",
     "emacs",
-    "repositories",
     "extensions",
 ]
 
@@ -92,17 +91,6 @@ stardoc(
         "@rules_cc//cc:action_names_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
-    ],
-)
-
-stardoc(
-    name = "repositories",
-    out = "repositories.binpb",
-    format = "proto",
-    input = "//elisp:repositories.bzl",
-    deps = [
-        "//private:bazel_tools_bzl",
-        "//private:repositories",
     ],
 )
 
