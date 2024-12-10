@@ -71,12 +71,7 @@ go_test(
     name = "go_default_test",
     size = "small",
     srcs = ["version_test.go"],
-    embedsrcs = [
-        # keep sorted
-        "MODULE.bazel",
-        "WORKSPACE",
-        "repositories.bzl",
-    ],
+    embedsrcs = ["MODULE.bazel"],
     deps = [
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
@@ -87,18 +82,6 @@ copy_file(
     name = "copy_module_bazel",
     src = "//:MODULE.bazel",
     out = "MODULE.bazel",
-)
-
-copy_file(
-    name = "copy_workspace",
-    src = "//:WORKSPACE",
-    out = "WORKSPACE",
-)
-
-copy_file(
-    name = "copy_repositories_bzl",
-    src = "//elisp:repositories.bzl",
-    out = "repositories.bzl",
 )
 
 nogo(

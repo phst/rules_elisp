@@ -48,9 +48,6 @@ exports_files(
 )
 
 exports_files(
-    [
-        "MODULE.bazel",
-        "WORKSPACE",
-    ],
+    ["MODULE.bazel"],
     visibility = ["//dev:__pkg__"],
 )
