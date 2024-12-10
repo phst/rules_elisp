@@ -14,7 +14,6 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@rules_cc//cc:defs.bzl", "cc_toolchain_suite")
 load("@rules_python//python:defs.bzl", "py_binary", "py_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "cc_defaults")
 
@@ -131,16 +130,13 @@ alias(
     ],
 )
 
-cc_toolchain_suite(
+alias(
     name = "windows_cc_toolchain",
+    actual = "@local_config_cc//:cc-compiler-x64_windows_mingw",
     target_compatible_with = [
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
     ],
-    toolchains = {
-        "x64_windows": "@local_config_cc//:cc-compiler-x64_windows_mingw",
-        "x64_windows|mingw-gcc": "@local_config_cc//:cc-compiler-x64_windows_mingw",
-    },
 )
 
 cc_defaults(
