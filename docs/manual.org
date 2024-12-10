@@ -50,8 +50,7 @@ released, support for Emacs 28 will be dropped.
 
 * Usage
 
-If you’re using Bzlmod, add a snippet like the following to your ~MODULE.bazel~
-file:
+Add a snippet like the following to your ~MODULE.bazel~ file:
 
 #+BEGIN_SRC bazel-module
 bazel_dep(name = "phst_rules_elisp")
@@ -64,60 +63,11 @@ git_override(
 
 #+TEXINFO: @noindent
 See [[https://bazel.build/external/overview#bzlmod][the Bzlmod documentation]]
-for background information.
-
-Alternatively, if you’re not using Bzlmod, add a snippet like the following to
-your Bazel ~WORKSPACE~ file:
-
-#+BEGIN_SRC bazel-workspace
-load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "phst_rules_elisp",
-    integrity = "sha384-QVJcZ4h8j8t9fjaddWCGssqBjUexRReKR53Th9XG1xPYXN/2eiWP1Is5pIfElsA5",
-    strip_prefix = "rules_elisp-30e571b6e69be2dcc782325834792d79c245d30d",
-    urls = [
-        "https://github.com/phst/rules_elisp/archive/30e571b6e69be2dcc782325834792d79c245d30d.zip",  # 2024-02-04
-    ],
-)
-
-load(
-    "@phst_rules_elisp//elisp:repositories.bzl",
-    "rules_elisp_dependencies",
-    "rules_elisp_toolchains",
-)
-
-rules_elisp_dependencies()
-
-rules_elisp_toolchains()
-
-load("@rules_cc//cc:repositories.bzl", "rules_cc_dependencies", "rules_cc_toolchains")
-
-rules_cc_dependencies()
-
-rules_cc_toolchains()
-
-load("@rules_java//java:rules_java_deps.bzl", "rules_java_dependencies")
-
-rules_java_dependencies()
-
-load("@rules_python//python:repositories.bzl", "py_repositories")
-
-py_repositories()
-
-load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
-
-protobuf_deps()
-#+END_SRC
-
-#+TEXINFO: @noindent
-See [[https://bazel.build/external/overview#workspace-system][the Bazel
-documentation on WORKSPACE dependencies]] for background information.
-
-Then you can use the ~elisp_library~, ~elisp_binary~, and ~elisp_test~ rules.
-See [[*Symbols defined in =//emacs:defs.bzl=]] and the examples in the
-~examples~ directory for details.  Note that the C++ code used by ~rules_elisp~
-requires at least C++17, but Bazel still compiles with C++11 by default.  See
+for background information.  Then you can use the ~elisp_library~,
+~elisp_binary~, and ~elisp_test~ rules.  See [[*Symbols defined in
+=//emacs:defs.bzl=]] and the examples in the ~examples~ directory for details.
+Note that the C++ code used by ~rules_elisp~ requires at least C++17, but Bazel
+still compiles with C++11 by default.  See
 [[https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil][the
 Abseil FAQ]] how to correctly change the C++ standard for your project.
 
