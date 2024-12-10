@@ -145,7 +145,7 @@
   "moduleExtensions": {
     "@@phst_rules_elisp+//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "LrIGrK8xk3aD8CZ4aCj3kGlByygbZxaDEsgh79FXpuo=",
+        "bzlTransitiveDigest": "geEKXXl/V7E4804MzmdLWP9Q1T9yUpJjzLCler18Vsc=",
         "usagesDigest": "6mFjFWWQGjuMfZ4GX13pmOeiqlTo8nyRVAXYA9HOCGI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -166,13 +166,7 @@
             }
           }
         },
-        "recordedRepoMappingEntries": [
-          [
-            "phst_rules_elisp+",
-            "bazel_tools",
-            "bazel_tools"
-          ]
-        ]
+        "recordedRepoMappingEntries": []
       }
     },
     "@@platforms//host:extension.bzl%host_platform": {

@@ -122,10 +122,7 @@ bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
     visibility = ["//docs:__pkg__"],
-    deps = [
-        "//private:bazel_tools_bzl",
-        "//private:repositories",
-    ],
+    deps = ["//private:repositories"],
 )
 
 bzl_library(

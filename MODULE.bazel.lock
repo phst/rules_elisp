@@ -167,7 +167,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "LrIGrK8xk3aD8CZ4aCj3kGlByygbZxaDEsgh79FXpuo=",
+        "bzlTransitiveDigest": "geEKXXl/V7E4804MzmdLWP9Q1T9yUpJjzLCler18Vsc=",
         "usagesDigest": "liZMS9ce4oz8dRujaSwrLfy/k+xo9hJ7wigNq+eJYmM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -188,13 +188,7 @@
             }
           }
         },
-        "recordedRepoMappingEntries": [
-          [
-            "",
-            "bazel_tools",
-            "bazel_tools"
-          ]
-        ]
+        "recordedRepoMappingEntries": []
       }
     },
     "@@buildifier_prebuilt+//:defs.bzl%buildifier_prebuilt_deps_extension": {
