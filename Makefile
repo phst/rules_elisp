@@ -27,7 +27,7 @@ generate: compdb coverage
 check:
 	./build.py -- check
 
-GENERATE_BAZELFLAGS = $(BAZELFLAGS) --enable_bzlmod --lockfile_mode=off
+GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 

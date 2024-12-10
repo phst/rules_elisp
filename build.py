@@ -143,7 +143,7 @@ class Builder:
 
     def _test(self, *args: str, profile: str,
               cwd: Optional[pathlib.Path] = None) -> None:
-        options = ['--enable_bzlmod']
+        options = []
         if self._profiles:
             self._profiles.mkdir(exist_ok=True)
             profile_file = self._profiles / (profile + '.json.gz')
