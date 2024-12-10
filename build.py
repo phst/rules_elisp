@@ -24,7 +24,6 @@ import functools
 import io
 import os
 import pathlib
-import re
 import shlex
 import shutil
 import subprocess
