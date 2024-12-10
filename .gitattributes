@@ -17,8 +17,6 @@
 BUILD                           text eol=lf
 MODULE.bazel                    text eol=lf
 REPO.bazel                      text eol=lf
-WORKSPACE                       text eol=lf
-WORKSPACE.bzlmod                text eol=lf
 *.bzl                           text eol=lf
 /tests/runfiles/test-manifest   text eol=lf
 /tests/runfiles/test-mapping    text eol=lf
