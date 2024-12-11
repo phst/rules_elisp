@@ -72,10 +72,7 @@ go_test(
     size = "small",
     srcs = ["version_test.go"],
     embedsrcs = ["MODULE.bazel"],
-    deps = [
-        "@com_github_bazelbuild_buildtools//build",
-        "@com_github_google_go_cmp//cmp",
-    ],
+    deps = ["@com_github_bazelbuild_buildtools//build"],
 )
 
 copy_file(
