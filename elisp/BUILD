@@ -121,7 +121,6 @@ bzl_library(
 bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
-    deps = ["//private:repositories"],
 )
 
 cc_binary(

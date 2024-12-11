@@ -99,7 +99,6 @@ stardoc(
     out = "extensions.binpb",
     format = "proto",
     input = "//elisp:extensions.bzl",
-    deps = ["//private:repositories"],
 )
 
 py_binary(

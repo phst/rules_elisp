@@ -54,46 +54,6 @@ non_module_dev_deps = repository_rule(
     implementation = _non_module_dev_deps_impl,
 )
 
-HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
-available as an `elisp_library`.  This {kind} is very similar to
-[`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive),
-except that it always generates a BUILD file containing a single `elisp_library`
-rule in the root package for all Emacs Lisp files in the archive.
-Test files (`…-test.el`, `…-tests.el`) and package metadata files (`…-pkg.el`)
-are excluded.
-The `elisp_library` rule is named `library` by default, unless overridden
-by the `target_name` attribute."""
-
-HTTP_ARCHIVE_ATTRS = {
-    "urls": attr.string_list(
-        doc = """List of archive URLs to try.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-urls).""",
-        mandatory = True,
-        allow_empty = False,
-    ),
-    "integrity": attr.string(
-        doc = """Expected checksum of the archive file in [Subresource
-Integrity](https://www.w3.org/TR/SRI/) format.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-integrity).""",
-        mandatory = True,
-    ),
-    "strip_prefix": attr.string(
-        doc = """Directory prefix to strip from the archive contents.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
-    ),
-    "target_name": attr.string(
-        doc = """Name of the `elisp_library` target to generate.""",
-        default = "library",
-    ),
-    "exclude": attr.string_list(
-        doc = """Glob patterns of additional files to exclude from
-the library.""",
-    ),
-}
-
 def _emacs(*, version, integrity, windows_integrity):
     major, _, _ = version.partition(".")
     _emacs_repository(
