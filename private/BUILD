@@ -116,13 +116,3 @@ config_setting(
         "//emacs:__pkg__",
     ],
 )
-
-bzl_library(
-    name = "bazel_tools_bzl",
-    srcs = ["@bazel_tools//tools:bzl_srcs"],
-    visibility = [
-        "//docs:__pkg__",
-        "//elisp:__pkg__",
-        "//emacs:__pkg__",
-    ],
-)
