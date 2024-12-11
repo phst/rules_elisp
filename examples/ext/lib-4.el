@@ -20,7 +20,7 @@
 
 ;;; Code:
 
-(require 'dash)  ; from elisp_http_archive rule
+(require 'dash)  ; from elisp.http_archive extension
 
 (defun lib-4-func ()
   (message "hi from lib-4"))
