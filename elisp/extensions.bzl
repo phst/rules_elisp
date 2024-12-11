@@ -15,7 +15,6 @@
 """Module extensions for Emacs Lisp."""
 
 load("//private:repositories.bzl", "HTTP_ARCHIVE_ATTRS", "HTTP_ARCHIVE_DOC")
-load(":repositories.bzl", "elisp_http_archive")
 
 visibility("public")
 
@@ -29,11 +28,37 @@ _http_archive = tag_class(
     },
 )
 
+def _elisp_http_archive_impl(ctx):
+    """Implementation of the `elisp_http_archive` repository rule."""
+    ctx.download_and_extract(
+        url = ctx.attr.urls,
+        integrity = ctx.attr.integrity or fail("missing archive checksum"),
+        stripPrefix = ctx.attr.strip_prefix,
+    )
+    ctx.template(
+        "BUILD.bazel",
+        Label("//elisp:BUILD.template"),
+        {
+            '"[defs_bzl]"': repr(str(ctx.attr._defs_bzl)),
+            '"[target_name]"': repr(ctx.attr.target_name),
+            "[[exclude]]": repr(ctx.attr.exclude),
+        },
+        executable = False,
+    )
+
+_elisp_http_archive = repository_rule(
+    doc = HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
+    attrs = HTTP_ARCHIVE_ATTRS | {
+        "_defs_bzl": attr.label(default = Label("//elisp:defs.bzl")),
+    },
+    implementation = _elisp_http_archive_impl,
+)
+
 def _elisp_impl(ctx):
     """Implementation of the `elisp` module extension."""
     for module in ctx.modules:
         for arch in module.tags.http_archive:
-            elisp_http_archive(
+            _elisp_http_archive(
                 name = arch.name,
                 urls = arch.urls,
                 integrity = arch.integrity,

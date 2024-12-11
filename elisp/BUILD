@@ -119,19 +119,9 @@ bzl_library(
 )
 
 bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-    visibility = ["//docs:__pkg__"],
-    deps = ["//private:repositories"],
-)
-
-bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
-    deps = [
-        ":repositories",
-        "//private:repositories",
-    ],
+    deps = ["//private:repositories"],
 )
 
 cc_binary(
