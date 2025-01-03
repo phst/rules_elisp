@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +29,7 @@ elisp_library(
     testonly = True,
     srcs = ["runner.el"],
     outs = ["runner.elc"],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//elisp:__pkg__"],
 )
 
 build_test(

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -202,10 +202,6 @@ elisp_binary(
 elisp_binary(
     name = "generate",
     src = "generate.el",
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
     deps = [":proto"],
 )
 
@@ -213,10 +209,7 @@ elisp_binary(
     name = "generate_bundle",
     src = "generate-bundle.el",
     output_args = [1],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//elisp:__pkg__"],
 )
 
 upb_c_proto_library(

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,10 +92,6 @@ py_binary(
     srcs = ["build.py"],
     python_version = "PY3",
     srcs_version = "PY3",
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
 )
 
 bzl_library(
@@ -121,13 +117,6 @@ alias(
         "@platforms//os:windows": ":windows_cc_toolchain",
         "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
     }),
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.4//:__pkg__",
-        "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.4//:__pkg__",
-    ],
 )
 
 alias(
@@ -156,11 +145,4 @@ cc_defaults(
         "-default_link_libs",
     ],
     linkopts = [],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "@gnu_emacs_28.2//:__pkg__",
-        "@gnu_emacs_29.4//:__pkg__",
-        "@gnu_emacs_windows_28.2//:__pkg__",
-        "@gnu_emacs_windows_29.4//:__pkg__",
-    ],
 )
