@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ This is not an officially supported Google product.
 To use ~rules_elisp~, you need [[https://bazel.build/][Bazel]].  For
 installation instructions, see [[https://bazel.build/install][Installing
 Bazel]].  This repository supports all full Bazel releases starting with Bazel
-7.0.0.  You’ll also need a recent C/C++ compiler (GCC or Clang on GNU/Linux and
+7.2.1.  You’ll also need a recent C/C++ compiler (GCC or Clang on GNU/Linux and
 macOS, Visual C++ 2019 on Windows) and at least Python 3.10.  For further
 instructions how to use Bazel on Windows, see
 [[https://bazel.build/install/windows][Installing Bazel on Windows]].
