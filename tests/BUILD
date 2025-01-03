@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@io_bazel_rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
@@ -58,7 +58,7 @@ go_test(
     deps = [
         "@com_github_google_go_cmp//cmp:go_default_library",
         "@com_github_google_go_cmp//cmp/cmpopts:go_default_library",
-        "@io_bazel_rules_go//go/runfiles",
+        "@rules_go//go/runfiles",
     ],
 )
 
@@ -134,7 +134,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         "//elisp:runfiles",
-        "@io_abseil_py//absl/flags",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/flags",
+        "@abseil-py//absl/testing:absltest",
     ],
 )

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ class Builder:
                 for file in filenames:
                     file = pathlib.Path(dirpath) / file
                     text = file.read_text(encoding='utf-8')
-                    if '@io_bazel_rules_go' in text:
+                    if '@rules_go' in text:
                         raise ValueError(f'unwanted Go targets in {file} found')
 
     @target

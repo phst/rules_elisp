@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_python//python:defs.bzl", "py_test")
 load(
     "//elisp:defs.bzl",
@@ -42,7 +42,7 @@ elisp_library(
     deps = [
         ":lib_2",
         "//elisp/runfiles",
-        "@example//:lib_4",
+        "@phst_rules_elisp_example//:lib_4",
     ],
 )
 
@@ -129,8 +129,8 @@ py_test(
     srcs_version = "PY3",
     deps = [
         "//elisp:runfiles",
-        "@io_abseil_py//absl/flags",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/flags",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 

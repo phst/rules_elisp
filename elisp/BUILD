@@ -108,8 +108,8 @@ bzl_library(
         "//private:defs",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
-        "@com_google_protobuf//bazel/common:proto_common_bzl",
-        "@com_google_protobuf//bazel/common:proto_info_bzl",
+        "@protobuf//bazel/common:proto_common_bzl",
+        "@protobuf//bazel/common:proto_info_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
@@ -165,9 +165,9 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -192,9 +192,9 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -217,8 +217,8 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":runfiles",
-        "@io_abseil_py//absl/flags",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/flags",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 
@@ -285,9 +285,9 @@ cc_library(
     deps = [
         ":platform",
         ":process",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/types:span",
     ],
 )
 
@@ -324,7 +324,7 @@ py_test(
     srcs_version = "PY3",
     deps = [
         ":manifest",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 
@@ -344,7 +344,7 @@ py_test(
     deps = [
         ":load",
         ":runfiles",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 
@@ -373,20 +373,20 @@ cc_library(
     local_defines = DEFINES,
     deps = [
         ":platform",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/cleanup",
+        "@abseil-cpp//absl/container:flat_hash_map",
+        "@abseil-cpp//absl/hash",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/log:die_if_null",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:span",
         "@bazel_tools//tools/cpp/runfiles",
-        "@com_google_absl//absl/algorithm:container",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_absl//absl/base:nullability",
-        "@com_google_absl//absl/cleanup",
-        "@com_google_absl//absl/container:flat_hash_map",
-        "@com_google_absl//absl/hash",
-        "@com_google_absl//absl/log",
-        "@com_google_absl//absl/log:check",
-        "@com_google_absl//absl/log:die_if_null",
-        "@com_google_absl//absl/status",
-        "@com_google_absl//absl/status:statusor",
-        "@com_google_absl//absl/strings",
-        "@com_google_absl//absl/types:span",
     ],
 )
 
