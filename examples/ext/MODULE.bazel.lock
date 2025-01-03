@@ -225,6 +225,36 @@
         "recordedRepoMappingEntries": []
       }
     },
+    "@@pybind11_bazel+//:internal_configure.bzl%internal_configure_extension": {
+      "general": {
+        "bzlTransitiveDigest": "yA4GkX1zdUTOXU4qKsh/YkjZKHAWkG8Fd7adNeGwiRc=",
+        "usagesDigest": "D1r3lfzMuUBFxgG8V6o0bQTLMk3GkaGOaPzw53wrwyw=",
+        "recordedFileInputs": {
+          "@@pybind11_bazel+//MODULE.bazel": "e6f4c20442eaa7c90d7190d8dc539d0ab422f95c65a57cc59562170c58ae3d34"
+        },
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "pybind11": {
+            "repoRuleId": "@@bazel_tools//tools/build_defs/repo:http.bzl%http_archive",
+            "attributes": {
+              "build_file": "@@pybind11_bazel+//:pybind11-BUILD.bazel",
+              "strip_prefix": "pybind11-2.12.0",
+              "urls": [
+                "https://github.com/pybind/pybind11/archive/v2.12.0.zip"
+              ]
+            }
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "pybind11_bazel+",
+            "bazel_tools",
+            "bazel_tools"
+          ]
+        ]
+      }
+    },
     "@@rules_fuzzing+//fuzzing/private:extensions.bzl%non_module_dependencies": {
       "general": {
         "bzlTransitiveDigest": "mGiTB79hRNjmeDTQdzkpCHyzXhErMbufeAmySBt7s5s=",
@@ -397,7 +427,7 @@
     "@@rules_python+//python/extensions:pip.bzl%pip": {
       "general": {
         "bzlTransitiveDigest": "3NU4P1ZMJpwxeEqYgdIqThspiJugQB2YFURwe5Cq0cI=",
-        "usagesDigest": "79GGVDKQWgbFJ2VAos9xkp+fzlom0QaHO3ovInDxzJg=",
+        "usagesDigest": "GFVMbyZRFzJGEZstpJcC8A1/6IUunW+DcQMj0pyEhOc=",
         "recordedFileInputs": {
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
