@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -98,10 +98,7 @@ elisp_toolchain(
 
 exports_files(
     ["launcher.cc"],
-    visibility = [
-        # FIXME: Make internal once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//emacs:__pkg__"],
 )
 
 bzl_library(
@@ -164,10 +161,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//emacs:__pkg__"],
     deps = [
         ":platform",
         ":process",
@@ -194,10 +188,6 @@ cc_library(
         # add additional quoting.
         shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
         shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
-    ],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
     ],
     deps = [
         ":platform",
@@ -291,10 +281,6 @@ cc_library(
             'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
             'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/ert:runner.elc))*")',
         ])),
-    ],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
     ],
     deps = [
         ":platform",
@@ -412,10 +398,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
-    visibility = [
-        # FIXME: Make internal once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//emacs:__pkg__"],
 )
 
 exports_files(
@@ -432,10 +415,6 @@ bootstrap(
     name = "compile",
     src = "compile.el",
     out = "compile.elc",
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
 )
 
 build_test(
@@ -451,10 +430,6 @@ elisp_binary(
         3 + MAX_MANUAL_ADDITIONAL_INPUTS,
     ),
     output_args = [1],
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
 )
 
 cc_defaults(
@@ -463,10 +438,7 @@ cc_defaults(
     defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
+    visibility = ["//emacs:__pkg__"],
 )
 
 module_config(
@@ -495,8 +467,4 @@ module_config(
         "@platforms//os:windows": ".dll",
         "@platforms//os:macos": ".dylib",
     }),
-    visibility = [
-        # FIXME: Make private once we drop support for Bazel 7.0.
-        "//visibility:public",
-    ],
 )
