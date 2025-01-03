@@ -601,9 +601,9 @@
         "bzlTransitiveDigest": "+VhRqUFw/YfdSXXW+Wq4tVGysYQgRpIiapiGJvre/dM=",
         "usagesDigest": "l+PqOUhDHZG/afgGIt8fsuw/gMiTmkDCkopKoQ0xx/8=",
         "recordedFileInputs": {
-          "@@//dev/linux-requirements.txt": "6755f3a99d353d5c224bd5964f5d08e7ecdde83f1e9ccb149bb8c9cac385e656",
-          "@@//dev/macos-requirements.txt": "6755f3a99d353d5c224bd5964f5d08e7ecdde83f1e9ccb149bb8c9cac385e656",
-          "@@//dev/windows-requirements.txt": "94e1f34a4a57955448010185ce2b94a639b0541d82a978b5947b15b5e27c6826",
+          "@@//dev/linux-requirements.txt": "e2db79fbb470f637e66d7d9522530269d351f7b02db963218be449222301cfce",
+          "@@//dev/macos-requirements.txt": "e2db79fbb470f637e66d7d9522530269d351f7b02db963218be449222301cfce",
+          "@@//dev/windows-requirements.txt": "85c0151f7bd6866b47294334ee519eef2c6c6dddba724cb0c302d9ce5a4d62de",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
           "@@rules_python++internal_deps+pypi__packaging//packaging-24.0.dist-info/RECORD": "be1aea790359b4c2c9ea83d153c1a57c407742a35b95ee36d00723509f5ed5dd",
@@ -625,7 +625,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "pip_310",
-              "requirement": "astroid==3.3.4     --hash=sha256:5eba185467253501b62a9f113c263524b4f5d55e1b30456370eed4cdbd6438fd     --hash=sha256:e73d0b62dd680a7c07cb2cd0ce3c22570b044dd01bd994bc3a2dd16c6cbba162"
+              "requirement": "astroid==3.3.8     --hash=sha256:187ccc0c248bfbba564826c26f070494f7bc964fd286b6d9fff4420e55de828c     --hash=sha256:a88c7994f914a4ea8572fac479459f4955eeccc877be3f2d959a33273b0cf40b"
             }
           },
           "pip_310_attrs": {
@@ -796,7 +796,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "pip_310",
-              "requirement": "pylint==3.3.1     --hash=sha256:2f846a466dd023513240bc140ad2dd73bfc080a5d85a710afdb728c420a5a2b9     --hash=sha256:9f3dcc87b1203e612b78d91a896407787e708b3f189b5fa0b307712d49ff0c6e"
+              "requirement": "pylint==3.3.3     --hash=sha256:07c607523b17e6d16e2ae0d7ef59602e332caa762af64203c24b41c27139f36a     --hash=sha256:26e271a2bc8bce0fc23833805a9076dd9b4d5194e2a02164942cb3cdc37b4183"
             }
           },
           "pip_310_pyparsing": {
