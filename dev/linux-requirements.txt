@@ -4,9 +4,9 @@
 #
 #    bazel run //dev:requirements.update
 #
-astroid==3.3.4 \
-    --hash=sha256:5eba185467253501b62a9f113c263524b4f5d55e1b30456370eed4cdbd6438fd \
-    --hash=sha256:e73d0b62dd680a7c07cb2cd0ce3c22570b044dd01bd994bc3a2dd16c6cbba162
+astroid==3.3.8 \
+    --hash=sha256:187ccc0c248bfbba564826c26f070494f7bc964fd286b6d9fff4420e55de828c \
+    --hash=sha256:a88c7994f914a4ea8572fac479459f4955eeccc877be3f2d959a33273b0cf40b
     # via pylint
 attrs==21.4.0 \
     --hash=sha256:2d27e3784d7a565d36ab851fe94887c5eccd6a463168875832a1be79c82828b4 \
