@@ -1,4 +1,4 @@
-;; Copyright 2021, 2022, 2023 Google LLC
+;; Copyright 2021, 2022, 2023, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -22,8 +22,8 @@
  (c-mode . ((page-delimiter . "^///")
             (mode . subword)))
  (js-json-mode . ((js-indent-level . 2)))
- ("elisp/proto/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../" "../../bazel-bin/" "../../bazel-bin/external/com_google_protobuf/")))))
+ ("elisp/proto/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../" "../../bazel-bin/" "../../bazel-bin/external/protobuf/")))))
  ("elisp/runfiles/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../")))))
- ("examples/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../" "./" "ext/" "../bazel-bin/" "../bazel-bin/external/com_google_protobuf/")))))
+ ("examples/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../" "./" "ext/" "../bazel-bin/" "../bazel-bin/external/protobuf/")))))
  ("tests/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../")))))
  ("tests/pkg/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../"))))))

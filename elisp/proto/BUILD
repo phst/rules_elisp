@@ -13,10 +13,10 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@com_google_protobuf//bazel:proto_library.bzl", "proto_library")
-load("@com_google_protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
-load("@com_google_protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_library")
-load("@com_google_protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+load("@protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
+load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_library")
+load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("@rules_python//python:defs.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
 load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "PACKAGE_FEATURES")
@@ -54,77 +54,77 @@ elisp_test(
     ],
 )
 
-# Well-known protocol buffers.  See @com_google_protobuf//:BUILD.
+# Well-known protocol buffers.  See @protobuf//:BUILD.
 elisp_proto_library(
     name = "any_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:any_proto"],
+    deps = ["@protobuf//:any_proto"],
 )
 
 elisp_proto_library(
     name = "api_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:api_proto"],
+    deps = ["@protobuf//:api_proto"],
 )
 
 elisp_proto_library(
     name = "compiler_plugin_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:compiler_plugin_proto"],
+    deps = ["@protobuf//:compiler_plugin_proto"],
 )
 
 elisp_proto_library(
     name = "descriptor_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:descriptor_proto"],
+    deps = ["@protobuf//:descriptor_proto"],
 )
 
 elisp_proto_library(
     name = "duration_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:duration_proto"],
+    deps = ["@protobuf//:duration_proto"],
 )
 
 elisp_proto_library(
     name = "empty_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:empty_proto"],
+    deps = ["@protobuf//:empty_proto"],
 )
 
 elisp_proto_library(
     name = "field_mask_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:field_mask_proto"],
+    deps = ["@protobuf//:field_mask_proto"],
 )
 
 elisp_proto_library(
     name = "source_context_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:source_context_proto"],
+    deps = ["@protobuf//:source_context_proto"],
 )
 
 elisp_proto_library(
     name = "struct_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:struct_proto"],
+    deps = ["@protobuf//:struct_proto"],
 )
 
 elisp_proto_library(
     name = "timestamp_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:timestamp_proto"],
+    deps = ["@protobuf//:timestamp_proto"],
 )
 
 elisp_proto_library(
     name = "type_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:type_proto"],
+    deps = ["@protobuf//:type_proto"],
 )
 
 elisp_proto_library(
     name = "wrappers_elisp_proto",
     visibility = ["//visibility:public"],
-    deps = ["@com_google_protobuf//:wrappers_proto"],
+    deps = ["@protobuf//:wrappers_proto"],
 )
 
 proto_lang_toolchain(
@@ -158,17 +158,17 @@ elisp_cc_module(
         ":timestamp_upb_c_proto",
         ":timestamp_upb_proto_reflection",
         "//emacs:module_header",
-        "@com_google_absl//absl/base:config",
-        "@com_google_absl//absl/base:core_headers",
-        "@com_google_protobuf//upb/base",
-        "@com_google_protobuf//upb/json",
-        "@com_google_protobuf//upb/mem",
-        "@com_google_protobuf//upb/message",
-        "@com_google_protobuf//upb/message:types",
-        "@com_google_protobuf//upb/reflection",
-        "@com_google_protobuf//upb/text",
-        "@com_google_protobuf//upb/util:required_fields",
-        "@com_google_protobuf//upb/wire",
+        "@abseil-cpp//absl/base:config",
+        "@abseil-cpp//absl/base:core_headers",
+        "@protobuf//upb/base",
+        "@protobuf//upb/json",
+        "@protobuf//upb/mem",
+        "@protobuf//upb/message",
+        "@protobuf//upb/message:types",
+        "@protobuf//upb/reflection",
+        "@protobuf//upb/text",
+        "@protobuf//upb/util:required_fields",
+        "@protobuf//upb/wire",
     ],
 )
 
@@ -185,8 +185,8 @@ py_test(
     srcs_version = "PY3",
     deps = [
         "//elisp:runfiles",
-        "@io_abseil_py//absl/flags",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/flags",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 
@@ -214,42 +214,42 @@ elisp_binary(
 
 upb_c_proto_library(
     name = "descriptor_upb_c_proto",
-    deps = ["@com_google_protobuf//:descriptor_proto"],
+    deps = ["@protobuf//:descriptor_proto"],
 )
 
 upb_c_proto_library(
     name = "any_upb_c_proto",
-    deps = ["@com_google_protobuf//:any_proto"],
+    deps = ["@protobuf//:any_proto"],
 )
 
 upb_proto_reflection_library(
     name = "any_upb_proto_reflection",
-    deps = ["@com_google_protobuf//:any_proto"],
+    deps = ["@protobuf//:any_proto"],
 )
 
 upb_c_proto_library(
     name = "duration_upb_c_proto",
-    deps = ["@com_google_protobuf//:duration_proto"],
+    deps = ["@protobuf//:duration_proto"],
 )
 
 upb_proto_reflection_library(
     name = "duration_upb_proto_reflection",
-    deps = ["@com_google_protobuf//:duration_proto"],
+    deps = ["@protobuf//:duration_proto"],
 )
 
 upb_c_proto_library(
     name = "timestamp_upb_c_proto",
-    deps = ["@com_google_protobuf//:timestamp_proto"],
+    deps = ["@protobuf//:timestamp_proto"],
 )
 
 upb_proto_reflection_library(
     name = "timestamp_upb_proto_reflection",
-    deps = ["@com_google_protobuf//:timestamp_proto"],
+    deps = ["@protobuf//:timestamp_proto"],
 )
 
 upb_c_proto_library(
     name = "compiler_plugin_upb_c_proto",
-    deps = ["@com_google_protobuf//:compiler_plugin_proto"],
+    deps = ["@protobuf//:compiler_plugin_proto"],
 )
 
 proto_library(

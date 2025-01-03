@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -699,12 +699,12 @@ LAUNCHER_ATTRS = {
 
 LAUNCHER_DEPS = [
     Label("//elisp:platform"),
-    Label("@com_google_absl//absl/container:fixed_array"),
-    Label("@com_google_absl//absl/log"),
-    Label("@com_google_absl//absl/meta:type_traits"),
-    Label("@com_google_absl//absl/status"),
-    Label("@com_google_absl//absl/status:statusor"),
-    Label("@com_google_absl//absl/types:span"),
+    Label("@abseil-cpp//absl/container:fixed_array"),
+    Label("@abseil-cpp//absl/log"),
+    Label("@abseil-cpp//absl/meta:type_traits"),
+    Label("@abseil-cpp//absl/status"),
+    Label("@abseil-cpp//absl/status:statusor"),
+    Label("@abseil-cpp//absl/types:span"),
 ]
 
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any

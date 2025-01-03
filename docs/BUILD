@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@com_google_protobuf//bazel:py_proto_library.bzl", "py_proto_library")
-load("@io_bazel_stardoc//stardoc:stardoc.bzl", "stardoc")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:defs.bzl", "py_binary")
+load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "merged_manual")
 
@@ -73,8 +73,8 @@ stardoc(
         "//private:defs",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
-        "@com_google_protobuf//bazel/common:proto_common_bzl",
-        "@com_google_protobuf//bazel/common:proto_info_bzl",
+        "@protobuf//bazel/common:proto_common_bzl",
+        "@protobuf//bazel/common:proto_info_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
@@ -116,5 +116,5 @@ py_binary(
 py_proto_library(
     name = "stardoc_output_py_proto",
     tags = ["no-python-check"],
-    deps = ["@io_bazel_stardoc//stardoc/proto:stardoc_output_proto"],
+    deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )

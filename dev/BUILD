@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_gazelle//:def.bzl", "gazelle")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@gazelle//:def.bzl", "gazelle")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
-load("@io_bazel_rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("@pip_deps//:requirements.bzl", "requirement")
+load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(

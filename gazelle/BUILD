@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_gazelle//:def.bzl", "gazelle_binary")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("@gazelle//:def.bzl", "gazelle_binary")
+load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -46,13 +46,13 @@ go_library(
     importpath = "github.com/phst/rules_elisp/gazelle",
     visibility = ["//visibility:private"],
     deps = [
-        "@bazel_gazelle//config:go_default_library",
-        "@bazel_gazelle//label:go_default_library",
-        "@bazel_gazelle//language:go_default_library",
-        "@bazel_gazelle//pathtools:go_default_library",
-        "@bazel_gazelle//repo:go_default_library",
-        "@bazel_gazelle//resolve:go_default_library",
-        "@bazel_gazelle//rule:go_default_library",
+        "@gazelle//config:go_default_library",
+        "@gazelle//label:go_default_library",
+        "@gazelle//language:go_default_library",
+        "@gazelle//pathtools:go_default_library",
+        "@gazelle//repo:go_default_library",
+        "@gazelle//resolve:go_default_library",
+        "@gazelle//rule:go_default_library",
     ],
 )
 
@@ -69,15 +69,15 @@ go_test(
     rundir = ".",
     deps = [
         ":go_default_library",
-        "@bazel_gazelle//label:go_default_library",
-        "@bazel_gazelle//language:go_default_library",
-        "@bazel_gazelle//repo:go_default_library",
-        "@bazel_gazelle//resolve:go_default_library",
-        "@bazel_gazelle//rule:go_default_library",
-        "@bazel_gazelle//testtools:go_default_library",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
         "@com_github_google_go_cmp//cmp:go_default_library",
-        "@io_bazel_rules_go//go/runfiles",
+        "@gazelle//label:go_default_library",
+        "@gazelle//language:go_default_library",
+        "@gazelle//repo:go_default_library",
+        "@gazelle//resolve:go_default_library",
+        "@gazelle//rule:go_default_library",
+        "@gazelle//testtools:go_default_library",
+        "@rules_go//go/runfiles",
     ],
 )
 

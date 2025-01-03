@@ -46,8 +46,8 @@ py_test(
     srcs_version = "PY3",
     deps = [
         "//elisp:runfiles",
-        "@io_abseil_py//absl/flags",
-        "@io_abseil_py//absl/testing:absltest",
+        "@abseil-py//absl/flags",
+        "@abseil-py//absl/testing:absltest",
     ],
 )
 
