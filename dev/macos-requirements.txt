@@ -20,9 +20,9 @@ dill==0.3.5.1 \
     --hash=sha256:33501d03270bbe410c72639b350e941882a8b0fd55357580fbc873fba0c59302 \
     --hash=sha256:d75e41f3eff1eee599d738e76ba8f4ad98ea229db8b085318aa2b3333a208c86
     # via pylint
-immutabledict==4.2.0 \
-    --hash=sha256:d728b2c2410d698d95e6200237feb50a695584d20289ad3379a439aa3d90baba \
-    --hash=sha256:e003fd81aad2377a5a758bf7e1086cf3b70b63e9a5cc2f46bce8d0a2b4727c5f
+immutabledict==4.2.1 \
+    --hash=sha256:c56a26ced38c236f79e74af3ccce53772827cef5c3bce7cab33ff2060f756373 \
+    --hash=sha256:d91017248981c72eb66c8ff9834e99c2f53562346f23e7f51e7a5ebcf66a3bcc
     # via pytype
 importlab==0.8 \
     --hash=sha256:a009ccde7b549b16f3e6b034fea748febc8d45ded9e8a09370a8f994acfda25b \
