@@ -31,8 +31,8 @@ compile_pip_requirements(
     name = "requirements",
     timeout = "moderate",
     env = {"USERPROFILE": r"C:\Temp"},
-    requirements_in = "requirements.in",
-    requirements_txt = ":requirements_txt",
+    requirements_in = "requirements.txt",
+    requirements_txt = ":requirements_lock",
     tags = [
         # Don’t try to run Pylint or Pytype.  This target doesn’t contain any of
         # our source files.
@@ -41,11 +41,11 @@ compile_pip_requirements(
 )
 
 alias(
-    name = "requirements_txt",
+    name = "requirements_lock",
     actual = select({
-        "@platforms//os:linux": "linux-requirements.txt",
-        "@platforms//os:macos": "macos-requirements.txt",
-        "@platforms//os:windows": "windows-requirements.txt",
+        "@platforms//os:linux": "linux-requirements.lock",
+        "@platforms//os:macos": "macos-requirements.lock",
+        "@platforms//os:windows": "windows-requirements.lock",
     }),
 )
 
