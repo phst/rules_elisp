@@ -71,10 +71,15 @@ runs:
       shell: bash
       run: |
         set -euxC
+        # The lockfile format differs between the Bazel versions, so only for
+        # one version --lockfile_mode=error can work.  --lockfile_mode=update
+        # would be useless since we never use the updated lockfiles, so switch
+        # lockfiles off entirely in other Bazel versions.
         cat >> github.bazelrc <<'EOF'
         common --announce_rc
         common --show_progress_rate_limit=10
         common --remote_download_minimal
+        common --lockfile_mode=${{inputs.bazel-version == 'latest' && 'error' || 'off'}}
         build --verbose_failures
         build --experimental_convenience_symlinks=ignore
         build --show_result=0
