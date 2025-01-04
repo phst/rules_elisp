@@ -56,6 +56,10 @@ runs:
       if: runner.os == 'macOS'
     - name: Set up Bazel
       uses: bazel-contrib/setup-bazel@0.10.0
+      with:
+        # Use disk cache to speed up runs.
+        disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
+        repository-cache: true
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
@@ -70,23 +74,6 @@ runs:
         && SUBST O: %RUNNER_TEMP%\output-base
         && ECHO startup --output_base='O:\\'>> github.bazelrc
       if: runner.os == 'Windows'
-    - name: Cache Bazel repositories
-      uses: actions/cache@v4
-      with:
-        path: ${{runner.temp}}/bazel-repository-cache
-        key: bazel-repositories-${{hashFiles('**.bazel', '**.bzl')}}
-        restore-keys: |
-          bazel-repositories-
-    - name: Cache Bazel results
-      # Use disk cache to speed up runs.
-      uses: actions/cache@v4
-      with:
-        path: ${{runner.temp}}/bazel-action-cache
-        key: bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{inputs.cc}}-${{hashFiles('**')}}
-        restore-keys: |
-          bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-${{inputs.cc}}-
-          bazel-actions-${{runner.os}}-${{inputs.bazel-version}}-
-          bazel-actions-${{runner.os}}-
     - name: Configure system (all platforms)
       shell: bash
       run: |
@@ -96,8 +83,6 @@ runs:
         tr '\\' '/' >> github.bazelrc <<'EOF'
         common --announce_rc
         common --show_progress_rate_limit=10
-        common --repository_cache='${{runner.temp}}/bazel-repository-cache'
-        common --disk_cache='${{runner.temp}}/bazel-action-cache'
         common --remote_download_minimal
         build --verbose_failures
         build --experimental_convenience_symlinks=ignore
