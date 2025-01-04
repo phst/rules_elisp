@@ -601,8 +601,8 @@
         "bzlTransitiveDigest": "+VhRqUFw/YfdSXXW+Wq4tVGysYQgRpIiapiGJvre/dM=",
         "usagesDigest": "/j72xdLc6WwIG7ncJZHNPsTcMRx2qEDfS3wB5JeJ+Gs=",
         "recordedFileInputs": {
-          "@@//dev/linux-requirements.lock": "5c3b57ba8767d1932fa4f8ff1fb9ada8927e5eb7e4519bf507cd6b7984aa6739",
-          "@@//dev/macos-requirements.lock": "5c3b57ba8767d1932fa4f8ff1fb9ada8927e5eb7e4519bf507cd6b7984aa6739",
+          "@@//dev/linux-requirements.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
+          "@@//dev/macos-requirements.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
           "@@//dev/windows-requirements.lock": "399070e77db7f34463a78b1ecc020d2391f3b043288d842fcfa2a793e3ac5db9",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
@@ -751,7 +751,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "pip_310",
-              "requirement": "networkx==2.6.3     --hash=sha256:80b6b89c77d1dfb64a4c7854981b60aeea6360ac02c6d4e4913319e0a313abef     --hash=sha256:c0946ed31d71f1b732b5aaa6da5a0388a345019af232ce2f49c766e2d6795c51"
+              "requirement": "networkx==3.4.2     --hash=sha256:307c3669428c5362aab27c8a1260aa8f47c4e91d3891f48be0141738d8d053e1     --hash=sha256:df5d4365b724cf81b8c6a7312509d0c22386097011ad1abe274afd5e9d3bbc5f"
             }
           },
           "pip_310_ninja": {
@@ -778,7 +778,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "pip_310",
-              "requirement": "pycnite==2023.10.11     --hash=sha256:7d02eb0ec4b405d8812ce053434dacfc2335dcd458ab58a1a8bf64f72d40bd76     --hash=sha256:ad8616982beecc39f2090999aa8fe0b044b1f6733ec39484cb5e0900b3c88aa1"
+              "requirement": "pycnite==2024.7.31     --hash=sha256:5125f1c95aef4a23b9bec3b32fae76873dcd46324fa68e39c10fa852ecdea340     --hash=sha256:9ff9c09d35056435b867e14ebf79626ca94b6017923a0bf9935377fa90d4cbb3"
             }
           },
           "pip_310_pydot": {
@@ -814,7 +814,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
               "repo": "pip_310",
-              "requirement": "pytype==2024.3.19 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:0245a209d521b59b919c09f7509a77f680f223108af8cccd3404533ba7aef7ba     --hash=sha256:07e66d9f907efd7e343364b7026ee6a06f477dc8d67aa7aaecca1e9cc3d45d20     --hash=sha256:0fdb883c88c55a7aa990266c920715f84c17405c9c3e090dc5505bdf67253482     --hash=sha256:2e1d69460cc5762954215a76f4dcc997d66875ea59e8db2b5edf26dbafa42b5e     --hash=sha256:80c694440aa6e4bc0e31fbec83d3b2bc6f7f0118fe59fda099641a466b4aed2a     --hash=sha256:9aa97b2dcd9945dea98f0a7a454626033f67f078156754d9ff657fcae2c42f60     --hash=sha256:ac3240ead0f7e5ce6fb74e4c7516c5db5ddacf5ef69851ac488321d53fefa1c6     --hash=sha256:acddb21ca98ff922cf6894c5da398a14e12d62f81b7749ed5abd7d014f8d6f38     --hash=sha256:ad12c110a4ec0a4132a6b26a2f28d513400f08f4751e32df18f880a68d055740     --hash=sha256:e2f9e8663bb1ded66d5854bb46f4947eb9bb25af42511a5ef5784f61b3bca3e5     --hash=sha256:e535b7caa8788a572177368721cc15492a988e6d9a2b401ed3bb3c43a4e88b4e     --hash=sha256:ef3e0de4f076a2adefde21e703cc25495e7b705e4cb2caa819375a33e238002f     --hash=sha256:ff874303b49cfcc4c08c7ea9b24495f134e4d9904f2cc1286c213c5932fd1fd9"
+              "requirement": "pytype==2024.10.11 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:13327d0d17b981fe2660dd3a69f97bf09a526f93debc40bb44b240628e0b55c1     --hash=sha256:15e2f39590cc08ef8e6704cfa5c1db6fbbee2799891f9d8adbf821f883a54745     --hash=sha256:1c5a43b132b19928a38ba1dbcf8f4e3f67a41ea26087ccf26ae371c4076c3809     --hash=sha256:2e31a964aa82e1ac317adbe17b77010e4f362882df1ce7ad15ef0cf0bb97039f     --hash=sha256:37d8dfdf23679abfdfe047efef7239a438a038e580d7e0767c0403a6be07cea0     --hash=sha256:5dd9ecb48aa46ecef14b39f1bbe8ff7e586e499639a056c05bd4436ca0b35d82     --hash=sha256:ae5ff82f0b07d5ad68d4ec32a3e8de44fad6ed565a821a76aca50a14df382274     --hash=sha256:cdc881cce9541a475ec48989a5ab889e6274a85afbf6da0e30266d0823f66d42     --hash=sha256:ead3408fc9622ba8a357c9a6b9b49059a9b8add0a3b8390a9ab490f62a984005     --hash=sha256:fb98711679e631b01b09b09185504fbf38d60f119280918e244a602cf843b0fe"
             }
           },
           "pip_310_pyyaml": {
