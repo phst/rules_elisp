@@ -29,7 +29,7 @@ WORKSPACE.bzlmod                text eol=lf
 
 # The hashes of the requirements files are recorded in MODULE.bazel.lock.  Make
 # sure that they stay intact across operating systems.
-/dev/*-requirements.txt         text eol=lf
+/dev/*-requirements.lock        text eol=lf
 
 # Local Variables:
 # tab-stop-list: (32)
