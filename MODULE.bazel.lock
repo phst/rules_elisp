@@ -601,8 +601,8 @@
         "bzlTransitiveDigest": "+VhRqUFw/YfdSXXW+Wq4tVGysYQgRpIiapiGJvre/dM=",
         "usagesDigest": "l+PqOUhDHZG/afgGIt8fsuw/gMiTmkDCkopKoQ0xx/8=",
         "recordedFileInputs": {
-          "@@//dev/linux-requirements.txt": "e2db79fbb470f637e66d7d9522530269d351f7b02db963218be449222301cfce",
-          "@@//dev/macos-requirements.txt": "e2db79fbb470f637e66d7d9522530269d351f7b02db963218be449222301cfce",
+          "@@//dev/linux-requirements.txt": "b67f2ca8c93b9b12022a0585951c81f61729fd7b06909d035f9315e1532ee338",
+          "@@//dev/macos-requirements.txt": "b67f2ca8c93b9b12022a0585951c81f61729fd7b06909d035f9315e1532ee338",
           "@@//dev/windows-requirements.txt": "85c0151f7bd6866b47294334ee519eef2c6c6dddba724cb0c302d9ce5a4d62de",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
@@ -862,7 +862,16 @@
               "requirement": "tomlkit==0.11.0     --hash=sha256:0f4050db66fd445b885778900ce4dd9aea8c90c4721141fde0d6ade893820ef1     --hash=sha256:71ceb10c0eefd8b8f11fe34e8a51ad07812cb1dc3de23247425fbc9ddc47b9dd"
             }
           },
-          "pip_310_typing_extensions": {
+          "pip_310_typing_extensions_linux_aarch64_linux_arm_linux_ppc_linux_s390x_linux_x86_64_osx_aarch64_osx_x86_64": {
+            "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
+            "attributes": {
+              "dep_template": "@pip//{name}:{target}",
+              "python_interpreter_target": "@@rules_python++python+python_3_10_host//:python",
+              "repo": "pip_310",
+              "requirement": "typing-extensions==4.12.2 ; sys_platform == \"linux\" or sys_platform == \"darwin\"     --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d     --hash=sha256:1a7ead55c7e559dd4dee8856e3a88b41225abfe1ce8df57b7c13915fe121ffb8"
+            }
+          },
+          "pip_310_typing_extensions_windows_x86_64": {
             "repoRuleId": "@@rules_python+//python/private/pypi:whl_library.bzl%whl_library",
             "attributes": {
               "dep_template": "@pip//{name}:{target}",
@@ -3401,7 +3410,7 @@
                 "toml": "{\"pip_310_toml\":[{\"version\":\"3.10\"}]}",
                 "tomli": "{\"pip_310_tomli\":[{\"version\":\"3.10\"}]}",
                 "tomlkit": "{\"pip_310_tomlkit\":[{\"version\":\"3.10\"}]}",
-                "typing_extensions": "{\"pip_310_typing_extensions\":[{\"version\":\"3.10\"}]}",
+                "typing_extensions": "{\"pip_310_typing_extensions_linux_aarch64_linux_arm_linux_ppc_linux_s390x_linux_x86_64_osx_aarch64_osx_x86_64\":[{\"target_platforms\":[\"cp310_linux_aarch64\",\"cp310_linux_arm\",\"cp310_linux_ppc\",\"cp310_linux_s390x\",\"cp310_linux_x86_64\",\"cp310_osx_aarch64\",\"cp310_osx_x86_64\"],\"version\":\"3.10\"}],\"pip_310_typing_extensions_windows_x86_64\":[{\"target_platforms\":[\"cp310_windows_x86_64\"],\"version\":\"3.10\"}]}",
                 "typing_inspect": "{\"pip_310_typing_inspect\":[{\"version\":\"3.10\"}]}"
               },
               "packages": [

@@ -19,3 +19,7 @@ pylint == 3.3.3
 # Pytype isn’t supported on Windows,
 # cf. https://github.com/google/pytype/tree/2024.03.19#requirements
 pytype == 2024.3.19 ; sys_platform == 'linux' or sys_platform == 'darwin'
+
+# Work around the issue described in https://github.com/google/pytype/pull/1793.
+# FIXME: Remove once https://github.com/google/pytype/pull/1793 is merged.
+typing-extensions >= 4.4.0 ; sys_platform == 'linux' or sys_platform == 'darwin'
