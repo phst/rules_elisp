@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+commonmark == 0.9.1
+
 pylint == 3.3.3
 
 # Pytype isn’t supported on Windows,
 # cf. https://github.com/google/pytype/tree/2024.03.19#requirements
 pytype == 2024.3.19 ; sys_platform == 'linux' or sys_platform == 'darwin'
-
-commonmark == 0.9.1
