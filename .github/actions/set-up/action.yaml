@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ runs:
       shell: bash
       run: brew update && brew install texinfo
       if: runner.os == 'macOS'
+    - name: Set up Bazel
+      uses: bazel-contrib/setup-bazel@0.10.0
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
