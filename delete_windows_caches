@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2024 Philipp Stephani
+# Copyright 2024, 2025 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,5 +21,5 @@
 set -eux
 
 gh cache list --limit=100 --json=key \
-  --jq='.[].key | select(contains("Windows"))' \
+  --jq='.[].key | select(contains("win32"))' \
   | xargs --verbose --no-run-if-empty --max-args=1 -- gh cache delete --
