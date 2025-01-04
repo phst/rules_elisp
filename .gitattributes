@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,23 +14,23 @@
 
 # Bazel/Starlark files always use Unix-style line endings,
 # cf. https://github.com/bazelbuild/buildtools/issues/914.
-BUILD                   text eol=lf
-MODULE.bazel            text eol=lf
-WORKSPACE               text eol=lf
-WORKSPACE.bzlmod        text eol=lf
-*.bzl                   text eol=lf
+BUILD                           text eol=lf
+MODULE.bazel                    text eol=lf
+WORKSPACE                       text eol=lf
+WORKSPACE.bzlmod                text eol=lf
+*.bzl                           text eol=lf
 
 # We enforce Unix-style line endings for the Stardoc files to address
 # https://github.com/bazelbuild/stardoc/issues/110.
-/docs/*.org             text eol=lf
+/docs/*.org                     text eol=lf
 
 # Don’t mess with coverage test data.
-/tests/coverage.dat     text eol=lf
+/tests/coverage.dat             text eol=lf
 
 # The hashes of the requirements files are recorded in MODULE.bazel.lock.  Make
 # sure that they stay intact across operating systems.
-/dev/*-requirements.txt text eol=lf
+/dev/*-requirements.txt         text eol=lf
 
 # Local Variables:
-# tab-stop-list: (24)
+# tab-stop-list: (32)
 # End:
