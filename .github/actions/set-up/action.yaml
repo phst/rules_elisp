@@ -78,9 +78,7 @@ runs:
       shell: bash
       run: |
         set -euxC
-        # The .bazelrc parser treats backslashes as escape characters, so
-        # replace them with forward slashes, which also works on Windows.
-        tr '\\' '/' >> github.bazelrc <<'EOF'
+        cat >> github.bazelrc <<'EOF'
         common --announce_rc
         common --show_progress_rate_limit=10
         common --remote_download_minimal
