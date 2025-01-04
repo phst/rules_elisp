@@ -63,16 +63,9 @@ runs:
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
-      # Work around https://github.com/protocolbuffers/protobuf/issues/12947.
-      # See https://bazel.build/configure/windows#long-path-issues.  Note that
-      # the .bazelrc parser treats backslashes as escape characters, so we have
-      # to escape them.
       shell: cmd
       run: >-
         ECHO BAZEL_SH=C:\MSYS64\usr\bin\bash.exe>> %GITHUB_ENV%
-        && MKDIR %RUNNER_TEMP%\output-base
-        && SUBST O: %RUNNER_TEMP%\output-base
-        && ECHO startup --output_base='O:\\'>> github.bazelrc
       if: runner.os == 'Windows'
     - name: Configure system (all platforms)
       shell: bash
