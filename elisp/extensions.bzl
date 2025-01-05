@@ -16,18 +16,16 @@
 
 visibility("public")
 
-_HTTP_ARCHIVE_DOC = """Downloads an archive file over HTTP and makes its contents
-available as an `elisp_library`.  This {kind} is very similar to
+_http_archive = tag_class(
+    doc = """Downloads an archive file over HTTP and makes its contents
+available as an `elisp_library`.  This tag class is very similar to
 [`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive),
 except that it always generates a BUILD file containing a single `elisp_library`
 rule in the root package for all Emacs Lisp files in the archive.
 Test files (`…-test.el`, `…-tests.el`) and package metadata files (`…-pkg.el`)
 are excluded.
 The `elisp_library` rule is named `library` by default, unless overridden
-by the `target_name` attribute."""
-
-_http_archive = tag_class(
-    doc = _HTTP_ARCHIVE_DOC.format(kind = "tag class"),
+by the `target_name` attribute.""",
     attrs = {
         "name": attr.string(
             doc = """Name of the repository to generate.""",
