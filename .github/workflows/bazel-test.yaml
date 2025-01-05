@@ -56,7 +56,6 @@ jobs:
         with:
           bazel-version: ${{matrix.bazel}}
           cc: ${{matrix.cc}}
-          github-token: ${{secrets.GITHUB_TOKEN}}
       - name: Run Bazel tests
         shell: pwsh
         run: python build.py --profiles='${{runner.temp}}/profiles' -- check
