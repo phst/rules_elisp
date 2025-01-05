@@ -19,9 +19,6 @@ inputs:
   bazel-version:
     description: Bazel version to use
     required: true
-  github-token:
-    description: GitHub authentication token from secrets.GITHUB_TOKEN
-    required: true
   cc:
     description: C/C++ compiler to use
     required: false
@@ -86,9 +83,6 @@ runs:
       shell: bash
       run: |
         set -euxC
-        # BAZELISK_GITHUB_TOKEN: See
-        # https://github.com/bazelbuild/bazelisk/issues/88#issuecomment-625178467.
-        #
         # BAZEL_USE_CPP_ONLY_TOOLCHAIN: We don’t need XCode, and using the Unix
         # toolchain tends to be less flaky.  See
         # https://github.com/bazelbuild/bazel/issues/14113#issuecomment-999794586.
@@ -96,7 +90,6 @@ runs:
         # locally; see https://github.com/bazelbuild/bazel/issues/14970.
         cat >> "${GITHUB_ENV:?}" <<'EOF'
         USE_BAZEL_VERSION=${{inputs.bazel-version}}
-        BAZELISK_GITHUB_TOKEN=${{inputs.github-token}}
         BAZEL_USE_CPP_ONLY_TOOLCHAIN=1
         CC=${{inputs.cc}}
         EOF
