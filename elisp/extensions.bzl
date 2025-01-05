@@ -70,7 +70,7 @@ def _elisp_http_archive_impl(ctx):
     """Implementation of the `elisp_http_archive` repository rule."""
     ctx.download_and_extract(
         url = ctx.attr.urls,
-        integrity = ctx.attr.integrity or fail("missing archive checksum"),
+        integrity = ctx.attr.integrity,
         stripPrefix = ctx.attr.strip_prefix,
     )
     ctx.template(
@@ -102,7 +102,7 @@ def _elisp_impl(ctx):
             _elisp_http_archive(
                 name = arch.name,
                 urls = arch.urls,
-                integrity = arch.integrity,
+                integrity = arch.integrity or fail("missing archive checksum"),
                 strip_prefix = arch.strip_prefix,
                 target_name = arch.target_name,
                 exclude = arch.exclude,
