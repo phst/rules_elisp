@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -123,6 +123,8 @@ This is used by Gazelle.""",
             executable = True,
             cfg = "exec",
         ),
+        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
+        # fixed.
         "_cc_toolchain": attr.label(
             default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],

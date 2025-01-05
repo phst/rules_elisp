@@ -576,6 +576,8 @@ See the [corresponding attribute for
 C/C++ compiler.  See the [corresponding attribute for
 `cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.local_defines).""",
         ),
+        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
+        # fixed.
         "_cc_toolchain": attr.label(
             default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
@@ -602,6 +604,8 @@ elisp_binary = rule(
             allow_single_file = [".el"],
             mandatory = True,
         ),
+        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
+        # fixed.
         "_cc_toolchain": attr.label(
             default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
@@ -663,6 +667,8 @@ elisp_test = rule(
             # https://github.com/bazelbuild/bazel/blob/7.4.1/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L74.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
+        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
+        # fixed.
         "_cc_toolchain": attr.label(
             default = Label("@rules_cc//cc:current_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
