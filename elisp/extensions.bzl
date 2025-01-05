@@ -26,42 +26,39 @@ are excluded.
 The `elisp_library` rule is named `library` by default, unless overridden
 by the `target_name` attribute."""
 
-_HTTP_ARCHIVE_ATTRS = {
-    "urls": attr.string_list(
-        doc = """List of archive URLs to try.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-urls).""",
-        mandatory = True,
-        allow_empty = False,
-    ),
-    "integrity": attr.string(
-        doc = """Expected checksum of the archive file in [Subresource
-Integrity](https://www.w3.org/TR/SRI/) format.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-integrity).""",
-        mandatory = True,
-    ),
-    "strip_prefix": attr.string(
-        doc = """Directory prefix to strip from the archive contents.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
-    ),
-    "target_name": attr.string(
-        doc = """Name of the `elisp_library` target to generate.""",
-        default = "library",
-    ),
-    "exclude": attr.string_list(
-        doc = """Glob patterns of additional files to exclude from
-the library.""",
-    ),
-}
-
 _http_archive = tag_class(
     doc = _HTTP_ARCHIVE_DOC.format(kind = "tag class"),
-    attrs = _HTTP_ARCHIVE_ATTRS | {
+    attrs = {
         "name": attr.string(
             doc = """Name of the repository to generate.""",
             mandatory = True,
+        ),
+        "urls": attr.string_list(
+            doc = """List of archive URLs to try.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-urls).""",
+            mandatory = True,
+            allow_empty = False,
+        ),
+        "integrity": attr.string(
+            doc = """Expected checksum of the archive file in [Subresource
+Integrity](https://www.w3.org/TR/SRI/) format.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-integrity).""",
+            mandatory = True,
+        ),
+        "strip_prefix": attr.string(
+            doc = """Directory prefix to strip from the archive contents.
+See the [corresponding attribute for
+`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
+        ),
+        "target_name": attr.string(
+            doc = """Name of the `elisp_library` target to generate.""",
+            default = "library",
+        ),
+        "exclude": attr.string_list(
+            doc = """Glob patterns of additional files to exclude from
+the library.""",
         ),
     },
 )
@@ -86,7 +83,12 @@ def _elisp_http_archive_impl(ctx):
 
 _elisp_http_archive = repository_rule(
     doc = _HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
-    attrs = _HTTP_ARCHIVE_ATTRS | {
+    attrs = {
+        "urls": attr.string_list(mandatory = True, allow_empty = False),
+        "integrity": attr.string(mandatory = True),
+        "strip_prefix": attr.string(mandatory = True),
+        "target_name": attr.string(mandatory = True),
+        "exclude": attr.string_list(mandatory = True),
         "_defs_bzl": attr.label(default = Label("//elisp:defs.bzl")),
     },
     implementation = _elisp_http_archive_impl,
