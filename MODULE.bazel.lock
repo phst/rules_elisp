@@ -176,7 +176,7 @@
   "moduleExtensions": {
     "//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "Ohei8xR6MAPWcBFGjHeBJJtJS2JGdv/Bn/anHa525TY=",
+        "bzlTransitiveDigest": "DN4xG/gZONIKSH/Uu9AgIhSLEw6ITSNdxFKKH9+Ep1M=",
         "usagesDigest": "liZMS9ce4oz8dRujaSwrLfy/k+xo9hJ7wigNq+eJYmM=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

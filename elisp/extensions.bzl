@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Google LLC
+# Copyright 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,7 +67,7 @@ _http_archive = tag_class(
 )
 
 def _elisp_http_archive_impl(ctx):
-    """Implementation of the `elisp_http_archive` repository rule."""
+    """Implementation of the `_elisp_http_archive` repository rule."""
     ctx.download_and_extract(
         url = ctx.attr.urls,
         integrity = ctx.attr.integrity or fail("missing archive checksum"),
