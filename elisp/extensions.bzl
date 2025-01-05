@@ -82,7 +82,6 @@ def _elisp_http_archive_impl(ctx):
     )
 
 _elisp_http_archive = repository_rule(
-    doc = _HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
         "integrity": attr.string(mandatory = True),
