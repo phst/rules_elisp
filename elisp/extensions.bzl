@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Google LLC
+# Copyright 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -84,6 +84,9 @@ def _elisp_http_archive_impl(ctx):
         executable = False,
     )
 
+# FIXME: Remove this rule and inline its implementation once
+# https://github.com/bazelbuild/bazel/issues/24829 is fixed in all supported
+# versions of Bazel.
 _elisp_http_archive = repository_rule(
     doc = _HTTP_ARCHIVE_DOC.format(kind = "repository rule"),
     attrs = _HTTP_ARCHIVE_ATTRS | {
