@@ -599,11 +599,11 @@
     "@@rules_python+//python/extensions:pip.bzl%pip": {
       "general": {
         "bzlTransitiveDigest": "+VhRqUFw/YfdSXXW+Wq4tVGysYQgRpIiapiGJvre/dM=",
-        "usagesDigest": "/j72xdLc6WwIG7ncJZHNPsTcMRx2qEDfS3wB5JeJ+Gs=",
+        "usagesDigest": "IT+eJXCxZJH/Z9dLyel4CUEVeq+QKW8NoTo+Ss8VmBw=",
         "recordedFileInputs": {
-          "@@//dev/linux-requirements.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
-          "@@//dev/macos-requirements.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
-          "@@//dev/windows-requirements.lock": "399070e77db7f34463a78b1ecc020d2391f3b043288d842fcfa2a793e3ac5db9",
+          "@@//dev/requirements-linux.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
+          "@@//dev/requirements-macos.lock": "8591540184757e15d112986ae97249b01ef84b3f23defcda21bdae18282e9023",
+          "@@//dev/requirements-windows.lock": "399070e77db7f34463a78b1ecc020d2391f3b043288d842fcfa2a793e3ac5db9",
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
           "@@rules_fuzzing+//fuzzing/requirements.txt": "ab04664be026b632a0d2a2446c4f65982b7654f5b6851d2f9d399a19b7242a5b",
           "@@rules_python++internal_deps+pypi__packaging//packaging-24.0.dist-info/RECORD": "be1aea790359b4c2c9ea83d153c1a57c407742a35b95ee36d00723509f5ed5dd",
