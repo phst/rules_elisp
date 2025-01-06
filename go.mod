@@ -17,7 +17,7 @@ module github.com/phst/rules_elisp
 go 1.22.0
 
 require (
-        github.com/bazelbuild/buildtools v0.0.0-20240918101019-be1c24cc9a44
-        github.com/google/addlicense v1.1.1
+	github.com/bazelbuild/buildtools v0.0.0-20240918101019-be1c24cc9a44
+	github.com/google/addlicense v1.1.1
 	github.com/google/go-cmp v0.6.0
 )
