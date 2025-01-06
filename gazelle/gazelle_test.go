@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2023 Google LLC
+// Copyright 2021, 2022, 2023, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -66,7 +66,7 @@ func TestGazelleBinary(t *testing.T) {
 	if err := os.WriteFile(bin, gazelleBinary, 0500); err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command(bin, "update")
+	cmd := exec.Command(bin, "update", "-repo_root="+dir)
 	cmd.Dir = dir
 	t.Log("running Gazelle binary")
 	output, err := cmd.CombinedOutput()
