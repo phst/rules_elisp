@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Tests for Emacs Lisp Bazel rules.  These tests are outside the //elisp package
+# Tests for Emacs Lisp Bazel rules.  These tests are outside the ‘elisp’ package
 # so that they can use external repositories loaded in our WORKSPACE file only,
 # e.g. the Go rules.
 
