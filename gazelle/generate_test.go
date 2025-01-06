@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ import (
 func TestGenerateRules(t *testing.T) {
 	dir, cleanup := testtools.CreateFiles(t, []testtools.FileSpec{
 		{
-			Path:    "WORKSPACE",
-			Content: `workspace(name = "test")`,
+			Path:    "MODULE.bazel",
+			Content: `module(name = "test")`,
 		},
 		{
 			Path:    "empty.el",
@@ -74,7 +74,7 @@ func TestGenerateRules(t *testing.T) {
 	}{
 		{
 			pkg:   "",
-			files: []string{"WORKSPACE", "lib-1.el", "lib-1-test.el", "empty.el", "nonexisting.el"},
+			files: []string{"MODULE.bazel", "lib-1.el", "lib-1-test.el", "empty.el", "nonexisting.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "empty", []string{"empty.el"}, nil),
