@@ -98,28 +98,32 @@ use_repo(
 
 # Tools for development
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
-bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+
+# Bogus versions added because of
+# https://github.com/renovatebot/renovate/discussions/33421.
+# FIXME: Remove them once Renovate issue is fixed.
+bazel_dep(name = "hedron_compile_commands", version = "0", dev_dependency = True)
 git_override(
     module_name = "hedron_compile_commands",
     commit = "eca42c63700fccdc49cf58177e0a96f0f6075a68",
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
 )
 
-bazel_dep(name = "phst_update_workspace_snippets", dev_dependency = True)
+bazel_dep(name = "phst_update_workspace_snippets", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_update_workspace_snippets",
     commit = "fba2b14f5a8280f65a313b9037ccecb60e33f238",
     remote = "https://github.com/phst/update-workspace-snippets.git",
 )
 
-bazel_dep(name = "phst_bazelcov", dev_dependency = True)
+bazel_dep(name = "phst_bazelcov", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_bazelcov",
     commit = "012a9b2b7211b37e886403ba284b1b09e6665e89",
     remote = "https://github.com/phst/bazelcov.git",
 )
 
-bazel_dep(name = "phst_merge_bazel_lockfiles", dev_dependency = True)
+bazel_dep(name = "phst_merge_bazel_lockfiles", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_merge_bazel_lockfiles",
     commit = "95005999479dcac5d6a3399a9f58625e078db448",
@@ -128,7 +132,7 @@ git_override(
 
 # We want to test the external example without adding its repository to the
 # registry.  So we override the dependency immediately locally.
-bazel_dep(name = "phst_rules_elisp_example", dev_dependency = True)
+bazel_dep(name = "phst_rules_elisp_example", version = "0", dev_dependency = True)
 local_path_override(
     module_name = "phst_rules_elisp_example",
     path = "examples/ext",
