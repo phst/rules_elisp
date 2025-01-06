@@ -28,8 +28,8 @@ import (
 func TestGazelleBinary(t *testing.T) {
 	dir, clean := testtools.CreateFiles(t, []testtools.FileSpec{
 		{
-			Path:    "WORKSPACE",
-			Content: `workspace(name = "test")`,
+			Path:    "MODULE.bazel",
+			Content: `module(name = "test")`,
 		},
 		{
 			Path:    "empty.el",
