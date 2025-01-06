@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@gazelle//:def.bzl", "gazelle_binary")
+load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
@@ -25,8 +25,13 @@ package(
 
 licenses(["notice"])
 
-gazelle_binary(
+gazelle(
     name = "gazelle",
+    gazelle = ":binary",
+)
+
+gazelle_binary(
+    name = "binary",
     languages = [":go_default_library"],
 )
 
@@ -65,7 +70,7 @@ go_test(
         "imports_test.go",
         "resolve_test.go",
     ],
-    embedsrcs = ["gazelle.exe"],
+    embedsrcs = ["binary.exe"],
     rundir = ".",
     deps = [
         ":go_default_library",
@@ -88,8 +93,8 @@ copy_file(
 )
 
 copy_file(
-    name = "copy_gazelle",
+    name = "copy_binary",
     testonly = True,
-    src = ":gazelle",
-    out = "gazelle.exe",
+    src = ":binary",
+    out = "binary.exe",
 )

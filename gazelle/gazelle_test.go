@@ -122,5 +122,5 @@ elisp_library(
 	})
 }
 
-//go:embed gazelle.exe
+//go:embed binary.exe
 var gazelleBinary []byte
