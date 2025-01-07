@@ -200,6 +200,81 @@
         "recordedRepoMappingEntries": []
       }
     },
+    "//private:extensions.bzl%deps": {
+      "general": {
+        "bzlTransitiveDigest": "R502064VT568vnXPNNZIZNbUO6f3K24gGO1cA6uI180=",
+        "usagesDigest": "ARAKUMjn2lih+tNys5k8lsfdKUhUhcOsMxt0x+Bab/U=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "gnu_emacs_28.2": {
+            "repoRuleId": "@@//private:extensions.bzl%_emacs_repository",
+            "attributes": {
+              "path": "/emacs/emacs-28.2.tar.xz",
+              "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+              "output": "emacs.tar.xz",
+              "strip_prefix": "emacs-28.2",
+              "mode": "source"
+            }
+          },
+          "gnu_emacs_windows_28.2": {
+            "repoRuleId": "@@//private:extensions.bzl%_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-28/emacs-28.2.zip",
+              "integrity": "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
+              "output": "emacs.zip",
+              "strip_prefix": "emacs-28.2",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "gnu_emacs_29.4": {
+            "repoRuleId": "@@//private:extensions.bzl%_emacs_repository",
+            "attributes": {
+              "path": "/emacs/emacs-29.4.tar.xz",
+              "integrity": "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
+              "output": "emacs.tar.xz",
+              "strip_prefix": "emacs-29.4",
+              "mode": "source"
+            }
+          },
+          "gnu_emacs_windows_29.4": {
+            "repoRuleId": "@@//private:extensions.bzl%_emacs_repository",
+            "attributes": {
+              "path": "/emacs/windows/emacs-29/emacs-29.4.zip",
+              "integrity": "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
+              "output": "emacs.zip",
+              "strip_prefix": "",
+              "mode": "release",
+              "target_compatible_with": [
+                "@@platforms//os:windows",
+                "@@platforms//cpu:x86_64"
+              ]
+            }
+          },
+          "local_emacs": {
+            "repoRuleId": "@@//private:extensions.bzl%_local_emacs_repo",
+            "attributes": {}
+          }
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_skylib",
+            "bazel_skylib+"
+          ],
+          [
+            "",
+            "platforms",
+            "platforms"
+          ]
+        ]
+      }
+    },
     "@@apple_support+//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "almzkGBvNuhmLzSaNoQuUQbmcR36mRx3Qu2K7TL2LWs=",

@@ -18,20 +18,6 @@ load("@bazel_skylib//lib:modules.bzl", "modules")
 
 visibility("private")
 
-def _non_module_deps():
-    """Installs dependencies that are not available as modules."""
-    _local_emacs(name = "local_emacs")
-    _emacs(
-        version = "28.2",
-        integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
-        windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
-    )
-    _emacs(
-        version = "29.4",
-        integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
-        windows_integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
-    )
-
 def _non_module_dev_deps_impl(ctx):
     ctx.download_and_extract(
         sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
@@ -54,7 +40,7 @@ _non_module_dev_deps = repository_rule(
     implementation = _non_module_dev_deps_impl,
 )
 
-def _emacs(*, version, integrity, windows_integrity):
+def _emacs_repos(*, version, integrity, windows_integrity):
     major, _, _ = version.partition(".")
     _emacs_repository(
         name = "gnu_emacs_" + version,
@@ -114,7 +100,7 @@ _emacs_repository = repository_rule(
     implementation = _emacs_repository_impl,
 )
 
-def _local_emacs_impl(ctx):
+def _local_emacs_repo_impl(ctx):
     windows = ctx.os.name.startswith("windows")
     emacs = ctx.getenv("EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
@@ -137,13 +123,44 @@ def _local_emacs_impl(ctx):
         executable = False,
     )
 
-_local_emacs = repository_rule(
-    implementation = _local_emacs_impl,
+_local_emacs_repo = repository_rule(
+    implementation = _local_emacs_repo_impl,
     local = True,
 )
+
+_local_emacs = tag_class(
+    attrs = {
+        "name": attr.string(mandatory = True),
+    },
+)
+
+_emacs = tag_class(
+    attrs = {
+        "version": attr.string(mandatory = True),
+        "integrity": attr.string(mandatory = True),
+        "windows_integrity": attr.string(mandatory = True),
+    },
+)
+
+def _deps_impl(ctx):
+    for module in ctx.modules:
+        for emacs in module.tags.emacs:
+            _emacs_repos(
+                version = emacs.version,
+                integrity = emacs.integrity,
+                windows_integrity = emacs.windows_integrity,
+            )
+        for local_emacs in module.tags.local_emacs:
+            _local_emacs_repo(name = local_emacs.name)
 
 def _dev_deps_impl():
     _non_module_dev_deps(name = "phst_rules_elisp_dev_deps")
 
-deps = modules.as_extension(_non_module_deps)
+deps = module_extension(
+    tag_classes = {
+        "emacs": _emacs,
+        "local_emacs": _local_emacs,
+    },
+    implementation = _deps_impl,
+)
 dev_deps = modules.as_extension(_dev_deps_impl)
