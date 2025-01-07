@@ -202,8 +202,8 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "EItT3PgzHZiMDtRrUHOQ7LJQQApE/5r7FX2KN8ChkSU=",
-        "usagesDigest": "ARAKUMjn2lih+tNys5k8lsfdKUhUhcOsMxt0x+Bab/U=",
+        "bzlTransitiveDigest": "2T9X25bvKOR272kBK/UkQyw1hKQSUZ8tYI393Gj/xk4=",
+        "usagesDigest": "8Xi2p2FiSBOktLQxSGs2qDuwuwNYOAjVjClaeFzhjs4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},

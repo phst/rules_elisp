@@ -88,7 +88,7 @@ def _deps_impl(ctx):
             _emacs_repository(
                 name = "gnu_emacs_" + emacs.version,
                 path = "/emacs/emacs-{}.tar.xz".format(emacs.version),
-                integrity = emacs.integrity,
+                integrity = emacs.source_integrity,
                 output = "emacs.tar.xz",
                 strip_prefix = "emacs-{}".format(emacs.version),
                 mode = "source",
@@ -113,7 +113,7 @@ deps = module_extension(
         "emacs": tag_class(
             attrs = {
                 "version": attr.string(mandatory = True),
-                "integrity": attr.string(mandatory = True),
+                "source_integrity": attr.string(mandatory = True),
                 "windows_integrity": attr.string(mandatory = True),
             },
         ),

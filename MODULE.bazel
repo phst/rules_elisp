@@ -48,12 +48,12 @@ use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 deps = use_extension("//private:extensions.bzl", "deps")
 deps.local_emacs(name = "local_emacs")
 deps.emacs(
-    integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+    source_integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
     version = "28.2",
     windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
 )
 deps.emacs(
-    integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
+    source_integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
     version = "29.4",
     windows_integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
 )
