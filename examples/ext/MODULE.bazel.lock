@@ -211,7 +211,7 @@
     },
     "@@phst_rules_elisp+//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "v6Vx/2tzeL19juCFeE6ZNuFqBLfgmcRAT9iTjN1HdoY=",
+        "bzlTransitiveDigest": "s8onf69OA0b1EpSNUGyKpP69q+6WCIwyW6xaLT83jzw=",
         "usagesDigest": "pqVdmfUwoAmog+tBeODqQxV5QWTYPgTDSt5nLTCeR6Q=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -271,11 +271,6 @@
           }
         },
         "recordedRepoMappingEntries": [
-          [
-            "phst_rules_elisp+",
-            "bazel_skylib",
-            "bazel_skylib+"
-          ],
           [
             "phst_rules_elisp+",
             "platforms",

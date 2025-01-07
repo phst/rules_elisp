@@ -202,7 +202,7 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "v6Vx/2tzeL19juCFeE6ZNuFqBLfgmcRAT9iTjN1HdoY=",
+        "bzlTransitiveDigest": "s8onf69OA0b1EpSNUGyKpP69q+6WCIwyW6xaLT83jzw=",
         "usagesDigest": "ARAKUMjn2lih+tNys5k8lsfdKUhUhcOsMxt0x+Bab/U=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -262,11 +262,6 @@
           }
         },
         "recordedRepoMappingEntries": [
-          [
-            "",
-            "bazel_skylib",
-            "bazel_skylib+"
-          ],
           [
             "",
             "platforms",

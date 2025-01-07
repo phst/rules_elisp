@@ -44,9 +44,13 @@ bzl_library(
 )
 
 bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+)
+
+bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
-    deps = ["@bazel_skylib//lib:modules"],
 )
 
 bzl_library(
