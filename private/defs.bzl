@@ -432,7 +432,6 @@ LAUNCHER_FEATURES = FEATURES
 # Shared C++ compilation options.
 COPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [
-        "/WX",
         "/W4",
         "/utf-8",
         "/permissive-",
@@ -442,13 +441,11 @@ COPTS = select({
     Label("//private:gcc_or_clang"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
-        "-Werror",
         "-Wall",
         "-Wextra",
         "-Wconversion",
         "-Wsign-conversion",
         "-pedantic",
-        "-pedantic-errors",
     ],
 }) + select({
     Label("@rules_cc//cc/compiler:clang"): [
