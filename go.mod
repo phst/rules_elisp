@@ -14,10 +14,12 @@
 
 module github.com/phst/rules_elisp
 
-go 1.22.0
+go 1.22.9
+
+toolchain go1.23.4
 
 require (
-	github.com/bazelbuild/bazel-gazelle v0.40.0
+	github.com/bazelbuild/bazel-gazelle v0.41.0
 	github.com/bazelbuild/buildtools v0.0.0-20241212155839-a9c248f4b684
 	github.com/bazelbuild/rules_go v0.51.0
 	github.com/google/addlicense v1.1.1
