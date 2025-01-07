@@ -14,31 +14,7 @@
 
 """Non-module dependencies."""
 
-load("@bazel_skylib//lib:modules.bzl", "modules")
-
 visibility("private")
-
-def _non_module_dev_deps_impl(ctx):
-    ctx.download_and_extract(
-        sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
-        url = [
-            "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
-        ],
-        stripPrefix = "JUnit-Schema-1.0.0/",
-    )
-    ctx.template(
-        "BUILD.bazel",
-        Label("//:junit_xsd.BUILD"),
-        {
-            '"[tests_pkg]"': repr(str(Label("//tests:__pkg__"))),
-        },
-        executable = False,
-    )
-
-_non_module_dev_deps = repository_rule(
-    doc = """Installs development dependencies that are not available as modules.""",
-    implementation = _non_module_dev_deps_impl,
-)
 
 def _emacs_repository_impl(ctx):
     path = ctx.attr.path
@@ -146,9 +122,6 @@ def _deps_impl(ctx):
         for local_emacs in module.tags.local_emacs:
             _local_emacs_repo(name = local_emacs.name)
 
-def _dev_deps_impl():
-    _non_module_dev_deps(name = "phst_rules_elisp_dev_deps")
-
 deps = module_extension(
     tag_classes = {
         "emacs": _emacs,
@@ -156,4 +129,3 @@ deps = module_extension(
     },
     implementation = _deps_impl,
 )
-dev_deps = modules.as_extension(_dev_deps_impl)
