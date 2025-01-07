@@ -40,29 +40,6 @@ _non_module_dev_deps = repository_rule(
     implementation = _non_module_dev_deps_impl,
 )
 
-def _emacs_repos(*, version, integrity, windows_integrity):
-    major, _, _ = version.partition(".")
-    _emacs_repository(
-        name = "gnu_emacs_" + version,
-        path = "/emacs/emacs-{}.tar.xz".format(version),
-        integrity = integrity,
-        output = "emacs.tar.xz",
-        strip_prefix = "emacs-{}".format(version),
-        mode = "source",
-    )
-    _emacs_repository(
-        name = "gnu_emacs_windows_" + version,
-        path = "/emacs/windows/emacs-{}/emacs-{}.zip".format(major, version),
-        integrity = windows_integrity,
-        output = "emacs.zip",
-        strip_prefix = "emacs-{}".format(version) if major == "28" else "",
-        mode = "release",
-        target_compatible_with = [
-            Label("@platforms//os:windows"),
-            Label("@platforms//cpu:x86_64"),
-        ],
-    )
-
 def _emacs_repository_impl(ctx):
     path = ctx.attr.path
     output = ctx.attr.output
@@ -145,10 +122,26 @@ _emacs = tag_class(
 def _deps_impl(ctx):
     for module in ctx.modules:
         for emacs in module.tags.emacs:
-            _emacs_repos(
-                version = emacs.version,
+            major, _, _ = emacs.version.partition(".")
+            _emacs_repository(
+                name = "gnu_emacs_" + emacs.version,
+                path = "/emacs/emacs-{}.tar.xz".format(emacs.version),
                 integrity = emacs.integrity,
-                windows_integrity = emacs.windows_integrity,
+                output = "emacs.tar.xz",
+                strip_prefix = "emacs-{}".format(emacs.version),
+                mode = "source",
+            )
+            _emacs_repository(
+                name = "gnu_emacs_windows_" + emacs.version,
+                path = "/emacs/windows/emacs-{}/emacs-{}.zip".format(major, emacs.version),
+                integrity = emacs.windows_integrity,
+                output = "emacs.zip",
+                strip_prefix = "emacs-{}".format(emacs.version) if major == "28" else "",
+                mode = "release",
+                target_compatible_with = [
+                    Label("@platforms//os:windows"),
+                    Label("@platforms//cpu:x86_64"),
+                ],
             )
         for local_emacs in module.tags.local_emacs:
             _local_emacs_repo(name = local_emacs.name)
