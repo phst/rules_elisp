@@ -29,7 +29,7 @@ def _emacs_repository_impl(ctx):
     )
     ctx.template(
         "BUILD.bazel",
-        Label("//:emacs.BUILD.template"),
+        Label("//private:emacs.BUILD.template"),
         {
             '"[defs_bzl]"': repr(str(Label("//emacs:defs.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
@@ -68,7 +68,7 @@ def _local_emacs_repo_impl(ctx):
         ctx.symlink(emacs, "source.exe")
     ctx.template(
         "BUILD.bazel",
-        Label("//:local.BUILD.template"),
+        Label("//private:local.BUILD.template"),
         {
             '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
             '"[elisp_pkg]"': repr(str(Label("//elisp:__pkg__"))),

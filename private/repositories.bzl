@@ -28,7 +28,7 @@ def _junit_xsd_impl(ctx):
     )
     ctx.template(
         "BUILD.bazel",
-        Label("//:junit_xsd.BUILD.template"),
+        Label("//private:junit_xsd.BUILD.template"),
         {
             '"[tests_pkg]"': repr(str(Label("//tests:__pkg__"))),
         },
