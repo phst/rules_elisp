@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,21 +44,9 @@ bzl_library(
 )
 
 bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//elisp:__pkg__",
-    ],
-)
-
-bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
-    deps = [
-        ":repositories",
-        "@bazel_skylib//lib:modules",
-    ],
+    deps = ["@bazel_skylib//lib:modules"],
 )
 
 bzl_library(
