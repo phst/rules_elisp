@@ -211,7 +211,7 @@
     },
     "@@phst_rules_elisp+//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "s8onf69OA0b1EpSNUGyKpP69q+6WCIwyW6xaLT83jzw=",
+        "bzlTransitiveDigest": "s7C+I+ggdVRTiRUdD8PHlgPijP4s4wHG2n6iNdKA5iw=",
         "usagesDigest": "pqVdmfUwoAmog+tBeODqQxV5QWTYPgTDSt5nLTCeR6Q=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

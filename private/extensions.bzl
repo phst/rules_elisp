@@ -29,7 +29,7 @@ def _emacs_repository_impl(ctx):
     )
     ctx.template(
         "BUILD.bazel",
-        Label("//:emacs.BUILD"),
+        Label("//:emacs.BUILD.template"),
         {
             '"[defs_bzl]"': repr(str(Label("//emacs:defs.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
