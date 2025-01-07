@@ -67,7 +67,7 @@ def _emacs_repository_impl(ctx):
     path = ctx.attr.path
     output = ctx.attr.output
     ctx.download(
-        integrity = ctx.attr.integrity,
+        integrity = ctx.attr.integrity or fail("archive integrity missing"),
         url = [
             "https://ftpmirror.gnu.org" + path,
             "https://ftp.gnu.org/gnu" + path,
