@@ -18,7 +18,7 @@ These definitions are internal and subject to change without notice."""
 
 visibility("private")
 
-def _non_module_dev_deps_impl(ctx):
+def _junit_xsd_impl(ctx):
     ctx.download_and_extract(
         sha256 = "ba809d0fedfb392cc604ad38aff7db7d750b77eaf5fed977a51360fa4a6dffdf",
         url = [
@@ -35,7 +35,7 @@ def _non_module_dev_deps_impl(ctx):
         executable = False,
     )
 
-non_module_dev_deps = repository_rule(
+junit_xsd = repository_rule(
     doc = """Installs development dependencies that are not available as modules.""",
-    implementation = _non_module_dev_deps_impl,
+    implementation = _junit_xsd_impl,
 )

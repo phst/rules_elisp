@@ -110,7 +110,7 @@ config_setting(
 copy_file(
     name = "copy_junit_xsd",
     testonly = True,
-    src = "@phst_rules_elisp_dev_deps//:JUnit.xsd",
+    src = "@junit_xsd//:JUnit.xsd",
     out = "JUnit.xsd",
 )
 

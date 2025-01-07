@@ -63,10 +63,10 @@ use_repo(deps, "gnu_emacs_29.4")
 use_repo(deps, "gnu_emacs_windows_28.2")
 use_repo(deps, "gnu_emacs_windows_29.4")
 
-dev_deps = use_repo_rule("//private:repositories.bzl", "non_module_dev_deps")
+junit_xsd = use_repo_rule("//private:repositories.bzl", "junit_xsd")
 
-dev_deps(
-    name = "phst_rules_elisp_dev_deps",
+junit_xsd(
+    name = "junit_xsd",
     dev_dependency = True,
 )
 
