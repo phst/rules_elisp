@@ -185,7 +185,7 @@
     },
     "@@phst_rules_elisp+//elisp:extensions.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "l2UQhABvsI1GWeeGr9xRgP5hk7UO5XVOvJLmKcVpPGg=",
+        "bzlTransitiveDigest": "cBvDLFFnQbEadDiZxWUPlOP/eB4j9ZbjwKKG4v31EV8=",
         "usagesDigest": "6mFjFWWQGjuMfZ4GX13pmOeiqlTo8nyRVAXYA9HOCGI=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -206,12 +206,22 @@
             }
           }
         },
-        "recordedRepoMappingEntries": []
+        "moduleExtensionMetadata": {
+          "useAllRepos": "REGULAR",
+          "reproducible": false
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "phst_rules_elisp+",
+            "bazel_skylib",
+            "bazel_skylib+"
+          ]
+        ]
       }
     },
     "@@phst_rules_elisp+//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "2T9X25bvKOR272kBK/UkQyw1hKQSUZ8tYI393Gj/xk4=",
+        "bzlTransitiveDigest": "HXdnqUddjHnPqOIc5bCvIqw8KAKkXitkc/EjiVBC00A=",
         "usagesDigest": "cDR0RtqIctLo0K/hZsKwxjvAMTgse8kkZKVh3uQiwEk=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -270,7 +280,16 @@
             "attributes": {}
           }
         },
+        "moduleExtensionMetadata": {
+          "useAllRepos": "DEV",
+          "reproducible": false
+        },
         "recordedRepoMappingEntries": [
+          [
+            "phst_rules_elisp+",
+            "bazel_skylib",
+            "bazel_skylib+"
+          ],
           [
             "phst_rules_elisp+",
             "platforms",

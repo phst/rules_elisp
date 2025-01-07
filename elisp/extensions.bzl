@@ -14,6 +14,8 @@
 
 """Module extensions for Emacs Lisp."""
 
+load("@bazel_skylib//lib:modules.bzl", "modules")
+
 visibility("public")
 
 _http_archive = tag_class(
@@ -103,6 +105,7 @@ def _elisp_impl(ctx):
                 target_name = arch.target_name,
                 exclude = arch.exclude,
             )
+    return modules.use_all_repos(ctx)
 
 elisp = module_extension(
     doc = """Module extension for Emacs Lisp.""",
