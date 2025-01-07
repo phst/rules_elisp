@@ -53,7 +53,7 @@ _emacs_repository = repository_rule(
     implementation = _emacs_repository_impl,
 )
 
-def _local_emacs_repo_impl(ctx):
+def _local_emacs_repository_impl(ctx):
     windows = ctx.os.name.startswith("windows")
     emacs = ctx.getenv("EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
@@ -76,8 +76,8 @@ def _local_emacs_repo_impl(ctx):
         executable = False,
     )
 
-_local_emacs_repo = repository_rule(
-    implementation = _local_emacs_repo_impl,
+_local_emacs_repository = repository_rule(
+    implementation = _local_emacs_repository_impl,
     local = True,
 )
 
@@ -120,7 +120,7 @@ def _deps_impl(ctx):
                 ],
             )
         for local_emacs in module.tags.local_emacs:
-            _local_emacs_repo(name = local_emacs.name)
+            _local_emacs_repository(name = local_emacs.name)
 
 deps = module_extension(
     tag_classes = {

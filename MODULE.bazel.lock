@@ -202,7 +202,7 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "l5nbPGcBGwGJTjdyfsSSLfItCqfIzEyu32iwjoSw0PA=",
+        "bzlTransitiveDigest": "XXawWmubjO8OPwSh68Rojp9CZ9KRpKQYukxFglUV8Wg=",
         "usagesDigest": "ARAKUMjn2lih+tNys5k8lsfdKUhUhcOsMxt0x+Bab/U=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -257,7 +257,7 @@
             }
           },
           "local_emacs": {
-            "repoRuleId": "@@//private:extensions.bzl%_local_emacs_repo",
+            "repoRuleId": "@@//private:extensions.bzl%_local_emacs_repository",
             "attributes": {}
           }
         },
