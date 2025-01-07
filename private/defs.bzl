@@ -447,6 +447,15 @@ COPTS = select({
         "-pedantic",
         "-pedantic-errors",
     ],
+}) + select({
+    Label("@rules_cc//cc/compiler:clang"): [
+        # Work around https://github.com/llvm/llvm-project/issues/121984.
+        "--system-header-prefix=absl/",
+        "--system-header-prefix=google/",
+        "--system-header-prefix=tools/",
+        "--system-header-prefix=upb/",
+    ],
+    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
