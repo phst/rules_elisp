@@ -14,6 +14,8 @@
 
 """Non-module dependencies."""
 
+load("@bazel_skylib//lib:modules.bzl", "modules")
+
 visibility("private")
 
 def _emacs_repository_impl(ctx):
@@ -107,6 +109,7 @@ def _deps_impl(ctx):
             )
         for local_emacs in module.tags.local_emacs:
             _local_emacs_repository(name = local_emacs.name)
+    return modules.use_all_repos(ctx)
 
 deps = module_extension(
     tag_classes = {

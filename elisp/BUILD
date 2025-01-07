@@ -118,6 +118,7 @@ bzl_library(
 bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
+    deps = ["@bazel_skylib//lib:modules"],
 )
 
 cc_binary(
