@@ -81,20 +81,6 @@ _local_emacs_repository = repository_rule(
     local = True,
 )
 
-_emacs = tag_class(
-    attrs = {
-        "version": attr.string(mandatory = True),
-        "integrity": attr.string(mandatory = True),
-        "windows_integrity": attr.string(mandatory = True),
-    },
-)
-
-_local_emacs = tag_class(
-    attrs = {
-        "name": attr.string(mandatory = True),
-    },
-)
-
 def _deps_impl(ctx):
     for module in ctx.modules:
         for emacs in module.tags.emacs:
@@ -124,8 +110,18 @@ def _deps_impl(ctx):
 
 deps = module_extension(
     tag_classes = {
-        "emacs": _emacs,
-        "local_emacs": _local_emacs,
+        "emacs": tag_class(
+            attrs = {
+                "version": attr.string(mandatory = True),
+                "integrity": attr.string(mandatory = True),
+                "windows_integrity": attr.string(mandatory = True),
+            },
+        ),
+        "local_emacs": tag_class(
+            attrs = {
+                "name": attr.string(mandatory = True),
+            },
+        ),
     },
     implementation = _deps_impl,
 )

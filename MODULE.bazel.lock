@@ -202,7 +202,7 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "XXawWmubjO8OPwSh68Rojp9CZ9KRpKQYukxFglUV8Wg=",
+        "bzlTransitiveDigest": "EItT3PgzHZiMDtRrUHOQ7LJQQApE/5r7FX2KN8ChkSU=",
         "usagesDigest": "ARAKUMjn2lih+tNys5k8lsfdKUhUhcOsMxt0x+Bab/U=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
