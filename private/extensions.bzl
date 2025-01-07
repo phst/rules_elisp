@@ -81,17 +81,17 @@ _local_emacs_repo = repository_rule(
     local = True,
 )
 
-_local_emacs = tag_class(
-    attrs = {
-        "name": attr.string(mandatory = True),
-    },
-)
-
 _emacs = tag_class(
     attrs = {
         "version": attr.string(mandatory = True),
         "integrity": attr.string(mandatory = True),
         "windows_integrity": attr.string(mandatory = True),
+    },
+)
+
+_local_emacs = tag_class(
+    attrs = {
+        "name": attr.string(mandatory = True),
     },
 )
 
