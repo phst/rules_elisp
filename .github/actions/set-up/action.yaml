@@ -52,7 +52,7 @@ runs:
       run: brew update && brew install texinfo
       if: runner.os == 'macOS'
     - name: Set up Bazel
-      uses: bazel-contrib/setup-bazel@0.12.0
+      uses: bazel-contrib/setup-bazel@0.12.1
       with:
         # The lockfile format differs between the Bazel versions, so only for
         # one version --lockfile_mode=error can work.  --lockfile_mode=update
