@@ -40,7 +40,8 @@ coverage:
 	  -- @phst_bazelcov//:bazelcov \
 	  --bazel='$(BAZEL)' --output=coverage-report
 
-INFODIR = /usr/local/share/info
+PREFIX = /usr/local
+INFODIR = $(PREFIX)/share/info
 
 install:
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
