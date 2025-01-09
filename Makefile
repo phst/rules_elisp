@@ -1,4 +1,4 @@
-# Copyright 2021, 2023, 2024 Google LLC
+# Copyright 2021, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ all: generate check
 generate: compdb coverage
 
 check:
-	./build.py -- check
+	./build.py -- check buildifier nogo license
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python
