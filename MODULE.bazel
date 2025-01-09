@@ -115,7 +115,7 @@ use_repo(
 bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
 
 # Bogus versions added because of
-# https://github.com/renovatebot/renovate/discussions/33421.
+# https://github.com/renovatebot/renovate/issues/33476.
 # FIXME: Remove them once Renovate issue is fixed.
 bazel_dep(name = "hedron_compile_commands", version = "0", dev_dependency = True)
 git_override(
