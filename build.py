@@ -91,41 +91,6 @@ class Builder:
         self.ext()
 
     @target
-    def buildifier(self) -> None:
-        """Checks that all BUILD files are formatted correctly."""
-        _run([self._bazel, 'run', '--',
-              '@buildifier',
-              '--mode=check', '--lint=warn',
-              '--warnings=+native-cc,+native-proto,+native-py',
-              '-r', '--', self._workspace])
-
-    @target
-    def nogo(self) -> None:
-        """Checks that there are no unwanted Go targets in public packages.
-
-        We don’t want any Go rules in the public packages, as our users would
-        have to depend on the Go rules then as well.
-        """
-        print('looking for unwanted Go targets in public packages')
-        for directory in ('elisp', 'emacs'):
-            for dirpath, _, filenames in os.walk(self._workspace / directory):
-                for file in filenames:
-                    file = pathlib.Path(dirpath) / file
-                    text = file.read_text(encoding='utf-8')
-                    if '@rules_go' in text:
-                        raise ValueError(f'unwanted Go targets in {file} found')
-
-    @target
-    def license(self) -> None:
-        """Checks that all source files have a license header."""
-        _run([self._bazel, 'run', '--',
-              '@addlicense',
-              '--check',
-              '--ignore=**/coverage-report/**',
-              '--',
-              self._workspace])
-
-    @target
     def test(self) -> None:
         """Runs the Bazel tests."""
         self._test(profile='test')

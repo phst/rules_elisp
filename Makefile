@@ -19,13 +19,15 @@ SHELL = /bin/sh
 
 BAZEL = bazel
 BAZELFLAGS =
+FIND = find
+GREP = grep
 
 all: generate check
 
 generate: compdb coverage
 
-check:
-	./build.py -- check buildifier nogo license
+check: buildifier nogo addlicense
+	./build.py -- check
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python
@@ -38,6 +40,25 @@ compdb:
 coverage:
 	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
 	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
+
+buildifier:
+	$(BAZEL) run $(BAZELFLAGS) -- \
+	  @buildifier \
+	  --mode=check --lint=warn \
+	  --warnings='+native-cc,+native-proto,+native-py' \
+	  -r -- "$${PWD}"
+
+# We don’t want any Go rules in the public packages, as our users would have to
+# depend on the Go rules then as well.
+nogo:
+	echo 'Looking for unwanted Go targets in public packages'
+	! $(FIND) elisp emacs -type f \
+	  -exec $(GREP) -F -e '@rules_go' -n -- '{}' '+' \
+	  || { echo 'Unwanted Go targets found'; exit 1; }
+
+addlicense:
+	$(BAZEL) run $(BAZELFLAGS) -- \
+	  @addlicense --check --ignore='**/coverage-report/**' -- "$${PWD}"
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
