@@ -37,8 +37,7 @@ compdb:
 
 coverage:
 	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
-	  -- @phst_bazelcov//:bazelcov \
-	  --bazel='$(BAZEL)' --output=coverage-report
+	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
