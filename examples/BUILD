@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
-load("@rules_python//python:defs.bzl", "py_test")
+load("@rules_python//python:py_test.bzl", "py_test")
 load(
     "//elisp:defs.bzl",
     "elisp_binary",

@@ -14,7 +14,8 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@rules_python//python:defs.bzl", "py_binary", "py_test")
+load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "cc_defaults")
 
 package(
