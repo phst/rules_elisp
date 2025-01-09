@@ -97,7 +97,7 @@ class Builder:
     def buildifier(self) -> None:
         """Checks that all BUILD files are formatted correctly."""
         _run([self._bazel, 'run', '--',
-              '@buildifier_prebuilt//:buildifier',
+              '@buildifier',
               '--mode=check', '--lint=warn',
               '--warnings=+native-cc,+native-proto,+native-py',
               '-r', '--', self._workspace])
@@ -122,7 +122,7 @@ class Builder:
     def license(self) -> None:
         """Checks that all source files have a license header."""
         _run([self._bazel, 'run', '--',
-              '@com_github_google_addlicense//:addlicense',
+              '@addlicense',
               '--check',
               '--ignore=**/coverage-report/**',
               '--',

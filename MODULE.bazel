@@ -107,12 +107,12 @@ go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
     "com_github_bazelbuild_buildtools",
-    "com_github_google_addlicense",
     "com_github_google_go_cmp",
+    addlicense = "com_github_google_addlicense",
 )
 
 # Tools for development
-bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True)
+bazel_dep(name = "buildifier_prebuilt", version = "7.3.1", dev_dependency = True, repo_name = "buildifier")
 
 # Bogus versions added because of
 # https://github.com/renovatebot/renovate/issues/33476.
