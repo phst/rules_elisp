@@ -59,6 +59,11 @@ jobs:
       - name: Run Bazel tests
         shell: pwsh
         run: python build.py --profiles='${{runner.temp}}/profiles' -- check
+      - name: Run OS-independent checks
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          python build.py -- buildifier nogo license
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:

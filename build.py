@@ -85,9 +85,6 @@ class Builder:
     @target
     def check(self) -> None:
         """Builds and tests the project."""
-        self.buildifier()
-        self.nogo()
-        self.license()
         # Test both default toolchain and versioned toolchains.
         self.test()
         self.versions()
