@@ -35,4 +35,7 @@ build --output_groups='+check_python'
 build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'
 build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
 
+# Treat warnings as errors, but only for this repository.
+build --//private:treat_warnings_as_errors
+
 import %workspace%/c-std.bazelrc

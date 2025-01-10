@@ -412,7 +412,6 @@ def run_emacs(
 # FIXME: Once we drop support for Bazel 7.0, move these features to the
 # REPO.bazel files, and remove them from BUILD files.
 PACKAGE_FEATURES = [
-    "treat_warnings_as_errors",
     "no_copts_tokenization",
     "layering_check",
     "parse_headers",
@@ -423,7 +422,11 @@ PACKAGE_FEATURES = [
     "-macos_default_link_flags",
 ]
 
-FEATURES = []
+FEATURES = select({
+    Label(":treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
+    Label("//conditions:default"): [],
+})
+
 LAUNCHER_FEATURES = FEATURES
 
 # Shared C++ compilation options.
