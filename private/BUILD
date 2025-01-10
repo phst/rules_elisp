@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load(":defs.bzl", "PACKAGE_FEATURES")
@@ -111,4 +112,14 @@ config_setting(
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
     ],
+)
+
+bool_flag(
+    name = "treat_warnings_as_errors",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "treat_warnings_as_errors_enabled",
+    flag_values = {":treat_warnings_as_errors": "true"},
 )
