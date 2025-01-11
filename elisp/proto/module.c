@@ -109,14 +109,7 @@
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  ifdef _MSC_VER
-#    pragma warning(push, 2)
-#    pragma warning(disable : 5105)
-#  endif
 #  include <windows.h>
-#  ifdef _MSC_VER
-#    pragma warning(pop)
-#  endif
 #  if MAXDWORD > SIZE_MAX
 #    error unsupported architecture
 #  endif
