@@ -164,7 +164,8 @@ def runfile_location(ctx, file):
     # unconditionally.  However, for files in external repositories,
     # “short_path” will start with “../〈repository〉/…”, so the logic here is
     # correct.  “check_relative_filename” not only ensures that the filename is
-    # relative, but also canonicalizes it.
+    # relative, but also canonicalizes it.  Also see
+    # https://bazel.build/extending/rules#runfiles_location.
     return check_relative_filename(
         paths.join(ctx.workspace_name, file.short_path),
     )
