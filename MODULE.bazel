@@ -124,7 +124,7 @@ git_override(
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
 )
 
-bazel_dep(name = "phst_update_workspace_snippets", version = "0", dev_dependency = True)
+bazel_dep(name = "phst_update_workspace_snippets", version = "0", dev_dependency = True, repo_name = "update-workspace-snippets")
 git_override(
     module_name = "phst_update_workspace_snippets",
     commit = "fcf065b3a9807ff0af4190208ece773cb17e6522",
