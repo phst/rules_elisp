@@ -194,7 +194,7 @@ def repository_relative_filename(file):
         name = name[3:]
         ws, sep, name = name.partition("/")
         if not ws or not sep:
-            fail("invalid name {}", file.short_path)
+            fail("invalid name {}".format(file.short_path))
     return name
 
 def cc_launcher(ctx, *, header, args, native = True):
