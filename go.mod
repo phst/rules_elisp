@@ -21,7 +21,7 @@ toolchain go1.23.4
 require (
 	github.com/bazelbuild/bazel-gazelle v0.41.0
 	github.com/bazelbuild/buildtools v0.0.0-20250110114635-13fa61383b99
-	github.com/bazelbuild/rules_go v0.51.0
+	github.com/bazelbuild/rules_go v0.52.0
 	github.com/google/addlicense v1.1.1
 	github.com/google/go-cmp v0.6.0
 )
