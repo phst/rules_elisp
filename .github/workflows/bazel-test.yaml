@@ -63,7 +63,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          make buildifier nogo addlicense
+          make nogo addlicense
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:

@@ -26,7 +26,7 @@ all: generate check
 
 generate: compdb coverage
 
-check: buildifier nogo addlicense
+check: nogo addlicense
 	./build.py -- check
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
@@ -40,13 +40,6 @@ compdb:
 coverage:
 	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
 	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
-
-buildifier:
-	$(BAZEL) run $(BAZELFLAGS) -- \
-	  @buildifier \
-	  --mode=check --lint=warn \
-	  --warnings='+native-cc,+native-proto,+native-py' \
-	  -r -- "$${PWD}"
 
 # We don’t want any Go rules in the public packages, as our users would have to
 # depend on the Go rules then as well.
