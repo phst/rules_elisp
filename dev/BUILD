@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
+load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "gazelle")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@pip_deps//:requirements.bzl", "requirement")
@@ -26,6 +27,18 @@ package(
 )
 
 licenses(["notice"])
+
+buildifier_test(
+    name = "buildifier_test",
+    lint_mode = "warn",
+    lint_warnings = [
+        "+native-cc",
+        "+native-proto",
+        "+native-py",
+    ],
+    no_sandbox = True,
+    workspace = "//:MODULE.bazel",
+)
 
 compile_pip_requirements(
     name = "requirements",
