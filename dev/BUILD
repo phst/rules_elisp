@@ -16,6 +16,7 @@ load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "gazelle")
 load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
+load("@phst_license_test//:def.bzl", "license_test")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
@@ -39,6 +40,13 @@ buildifier_test(
     ],
     no_sandbox = True,
     workspace = "//:MODULE.bazel",
+)
+
+license_test(
+    name = "license_test",
+    timeout = "short",
+    ignore = ["coverage-report/**"],
+    marker = "//:MODULE.bazel",
 )
 
 compile_pip_requirements(

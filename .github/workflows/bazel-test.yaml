@@ -63,7 +63,7 @@ jobs:
         if: runner.os == 'Linux'
         shell: bash
         run: |
-          make nogo addlicense
+          make nogo
       - name: Upload profiles
         uses: actions/upload-artifact@v4
         with:

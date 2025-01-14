@@ -26,7 +26,7 @@ all: generate check
 
 generate: compdb coverage
 
-check: nogo addlicense
+check: nogo
 	./build.py -- check
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
@@ -48,10 +48,6 @@ nogo:
 	! $(FIND) elisp emacs -type f \
 	  -exec $(GREP) -F -e '@rules_go' -n -- '{}' '+' \
 	  || { echo 'Unwanted Go targets found'; exit 1; }
-
-addlicense:
-	$(BAZEL) run $(BAZELFLAGS) -- \
-	  @addlicense --check --ignore='**/coverage-report/**' -- "$${PWD}"
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
