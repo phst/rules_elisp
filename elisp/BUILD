@@ -106,6 +106,7 @@ exports_files(
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
+    visibility = ["//docs:__pkg__"],
     deps = [
         "//private:defs",
         "@bazel_skylib//lib:collections",
@@ -120,6 +121,7 @@ bzl_library(
 bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
+    visibility = ["//docs:__pkg__"],
     deps = ["@bazel_skylib//lib:modules"],
 )
 
