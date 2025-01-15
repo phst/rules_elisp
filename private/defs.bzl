@@ -677,7 +677,7 @@ merged_manual = rule(
             mandatory = True,
         ),
         "includes": attr.label_list(
-            allow_files = [".binpb"],
+            allow_files = [".binaryproto"],
             mandatory = True,
             allow_empty = False,
         ),
