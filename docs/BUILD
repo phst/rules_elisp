@@ -15,7 +15,6 @@
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("@stardoc//stardoc:stardoc.bzl", "stardoc")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "merged_manual")
 
@@ -50,7 +49,7 @@ DOCS = [
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
-    includes = DOCS,
+    includes = [d + ".binaryproto" for d in DOCS],
     main = "manual.org",
 )
 
@@ -64,27 +63,24 @@ elisp_binary(
     output_args = [1],
 )
 
-stardoc(
+starlark_doc_extract(
     name = "elisp",
-    out = "elisp.binpb",
-    format = "proto",
-    input = "//elisp:defs.bzl",
+    src = "//elisp:defs.bzl",
+    render_main_repo_name = True,
     deps = ["//elisp:defs"],
 )
 
-stardoc(
+starlark_doc_extract(
     name = "emacs",
-    out = "emacs.binpb",
-    format = "proto",
-    input = "//emacs:defs.bzl",
+    src = "//emacs:defs.bzl",
+    render_main_repo_name = True,
     deps = ["//emacs:defs"],
 )
 
-stardoc(
+starlark_doc_extract(
     name = "extensions",
-    out = "extensions.binpb",
-    format = "proto",
-    input = "//elisp:extensions.bzl",
+    src = "//elisp:extensions.bzl",
+    render_main_repo_name = True,
     deps = ["//elisp:extensions"],
 )
 
