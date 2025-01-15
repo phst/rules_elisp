@@ -52,7 +52,7 @@ nogo:
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
 
-install:
+install: check
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
 	install -d -- '$(INFODIR)'
 	install -m 0644 -- \
