@@ -98,6 +98,7 @@ py_binary(
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
+    visibility = ["//docs:__pkg__"],
     deps = [
         "//private:defs",
         "@bazel_skylib//lib:paths",

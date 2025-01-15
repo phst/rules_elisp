@@ -69,15 +69,7 @@ stardoc(
     out = "elisp.binpb",
     format = "proto",
     input = "//elisp:defs.bzl",
-    deps = [
-        "//private:defs",
-        "@bazel_skylib//lib:collections",
-        "@bazel_skylib//lib:paths",
-        "@protobuf//bazel/common:proto_common_bzl",
-        "@protobuf//bazel/common:proto_info_bzl",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
-    ],
+    deps = ["//elisp:defs"],
 )
 
 stardoc(
@@ -85,13 +77,7 @@ stardoc(
     out = "emacs.binpb",
     format = "proto",
     input = "//emacs:defs.bzl",
-    deps = [
-        "//private:defs",
-        "@bazel_skylib//lib:paths",
-        "@rules_cc//cc:action_names_bzl",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
-    ],
+    deps = ["//emacs:defs"],
 )
 
 stardoc(
@@ -99,7 +85,7 @@ stardoc(
     out = "extensions.binpb",
     format = "proto",
     input = "//elisp:extensions.bzl",
-    deps = ["@bazel_skylib//lib:modules"],
+    deps = ["//elisp:extensions"],
 )
 
 py_binary(
