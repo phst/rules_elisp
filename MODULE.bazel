@@ -95,7 +95,7 @@ pip.parse(
     requirements_linux = "//dev:requirements-linux.lock",
     requirements_windows = "//dev:requirements-windows.lock",
 )
-use_repo(pip, pip_deps = "pip")
+use_repo(pip, "pip")
 
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@pip_deps//:requirements.bzl", "requirement")
+load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
