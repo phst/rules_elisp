@@ -125,7 +125,6 @@ py_test(
         shell.quote("--bin=$(rlocationpath :bin)"),
     ],
     data = ["bin"],
-    python_version = "PY3",
     deps = [
         "//elisp:runfiles",
         "@abseil-py//absl/flags",

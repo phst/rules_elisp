@@ -181,7 +181,6 @@ py_test(
         shell.quote("--cat=$(rlocationpath :cat)"),
     ],
     data = [":cat"],
-    python_version = "PY3",
     deps = [
         "//elisp:runfiles",
         "@abseil-py//absl/flags",

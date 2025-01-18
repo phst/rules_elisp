@@ -35,7 +35,6 @@ py_binary(
     name = "build",
     srcs = ["build.py"],
     main = "build.py",
-    python_version = "PY3",
 )
 
 exports_files(

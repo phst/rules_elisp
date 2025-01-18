@@ -43,7 +43,6 @@ py_test(
         shell.quote("--emacs=$(rlocationpath :emacs)"),
     ],
     data = [":emacs"],
-    python_version = "PY3",
     deps = [
         "//elisp:runfiles",
         "@abseil-py//absl/flags",
@@ -90,7 +89,6 @@ alias(
 py_binary(
     name = "build",
     srcs = ["build.py"],
-    python_version = "PY3",
 )
 
 bzl_library(
