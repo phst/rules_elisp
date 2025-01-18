@@ -87,7 +87,6 @@ starlark_doc_extract(
 py_binary(
     name = "generate",
     srcs = ["generate.py"],
-    python_version = "PY3",
     tags = ["no-pytype"],  # FIXME
     deps = [
         ":stardoc_output_py_proto",

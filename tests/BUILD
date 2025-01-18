@@ -130,7 +130,6 @@ py_test(
         shell.quote("--binary=$(rlocationpath :empty)"),
     ],
     data = [":empty"],
-    python_version = "PY3",
     deps = [
         "//elisp:runfiles",
         "@abseil-py//absl/flags",

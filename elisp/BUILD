@@ -218,7 +218,6 @@ py_test(
         "binary.cc",
         ":launcher",
     ],
-    python_version = "PY3",
     deps = [
         ":runfiles",
         "@abseil-py//absl/flags",
@@ -241,14 +240,12 @@ py_binary(
         ":binary.h",
         "//elisp/runfiles:runfiles.elc",
     ],
-    python_version = "PY3",
     deps = ["//elisp:runfiles"],
 )
 
 py_binary(
     name = "run_binary",
     srcs = ["run_binary.py"],
-    python_version = "PY3",
     deps = [
         ":load",
         ":manifest",
@@ -297,7 +294,6 @@ py_binary(
     name = "run_test",
     testonly = True,
     srcs = ["run_test.py"],
-    python_version = "PY3",
     deps = [
         ":load",
         ":manifest",
@@ -320,7 +316,6 @@ py_test(
     name = "manifest_test",
     size = "small",
     srcs = ["manifest_test.py"],
-    python_version = "PY3",
     deps = [
         ":manifest",
         "@abseil-py//absl/testing:absltest",
@@ -337,7 +332,6 @@ py_test(
     name = "load_test",
     size = "small",
     srcs = ["load_test.py"],
-    python_version = "PY3",
     deps = [
         ":load",
         ":runfiles",
