@@ -219,7 +219,6 @@ py_test(
         ":launcher",
     ],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":runfiles",
         "@abseil-py//absl/flags",
@@ -243,7 +242,6 @@ py_binary(
         "//elisp/runfiles:runfiles.elc",
     ],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = ["//elisp:runfiles"],
 )
 
@@ -251,7 +249,6 @@ py_binary(
     name = "run_binary",
     srcs = ["run_binary.py"],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":load",
         ":manifest",
@@ -301,7 +298,6 @@ py_binary(
     testonly = True,
     srcs = ["run_test.py"],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":load",
         ":manifest",
@@ -318,7 +314,6 @@ executable_only(
 py_library(
     name = "manifest",
     srcs = ["manifest.py"],
-    srcs_version = "PY3",
 )
 
 py_test(
@@ -326,7 +321,6 @@ py_test(
     size = "small",
     srcs = ["manifest_test.py"],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":manifest",
         "@abseil-py//absl/testing:absltest",
@@ -336,7 +330,6 @@ py_test(
 py_library(
     name = "load",
     srcs = ["load.py"],
-    srcs_version = "PY3",
     deps = [":runfiles"],
 )
 
@@ -345,7 +338,6 @@ py_test(
     size = "small",
     srcs = ["load_test.py"],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         ":load",
         ":runfiles",
@@ -356,7 +348,6 @@ py_test(
 py_library(
     name = "runfiles",
     srcs = ["runfiles.py"],
-    srcs_version = "PY3",
     visibility = [
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
