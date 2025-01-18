@@ -78,7 +78,6 @@ py_binary(
     srcs = ["check_python.py"],
     main = "check_python.py",
     python_version = "3.12.8",
-    srcs_version = "PY3",
     visibility = ["//private:__pkg__"],
     deps = [requirement("pylint")] + select({
         # Pytype doesn’t work on Windows, so don’t build it when running

@@ -126,7 +126,6 @@ py_test(
     ],
     data = ["bin"],
     python_version = "PY3",
-    srcs_version = "PY3",
     deps = [
         "//elisp:runfiles",
         "@abseil-py//absl/flags",
