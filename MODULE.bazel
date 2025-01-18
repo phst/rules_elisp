@@ -86,7 +86,6 @@ python.toolchain(
     ignore_root_user_error = True,
     python_version = "3.12",
 )
-use_repo(python, hermetic_python = "python_3_12")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip", dev_dependency = True)
 pip.parse(

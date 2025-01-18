@@ -15,10 +15,11 @@
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "gazelle")
-load("@hermetic_python//:defs.bzl", "compile_pip_requirements", "py_binary")
 load("@phst_license_test//:def.bzl", "license_test")
 load("@pip_deps//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
+load("@rules_python//python:defs.bzl", "py_binary")
+load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -53,6 +54,7 @@ compile_pip_requirements(
     name = "requirements",
     timeout = "moderate",
     env = {"USERPROFILE": r"C:\Temp"},
+    python_version = "3.12.8",
     requirements_in = "requirements.txt",
     requirements_txt = ":requirements_lock",
     tags = [
@@ -75,6 +77,7 @@ py_binary(
     name = "check_python",
     srcs = ["check_python.py"],
     main = "check_python.py",
+    python_version = "3.12.8",
     srcs_version = "PY3",
     visibility = ["//private:__pkg__"],
     deps = [requirement("pylint")] + select({
