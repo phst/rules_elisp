@@ -54,7 +54,7 @@ compile_pip_requirements(
     name = "requirements",
     timeout = "moderate",
     env = {"USERPROFILE": r"C:\Temp"},
-    python_version = "3.12.8",
+    python_version = "3.12",
     requirements_in = "requirements.txt",
     requirements_txt = ":requirements_lock",
     tags = [
@@ -77,7 +77,7 @@ py_binary(
     name = "check_python",
     srcs = ["check_python.py"],
     main = "check_python.py",
-    python_version = "3.12.8",
+    python_version = "3.12",
     visibility = ["//private:__pkg__"],
     deps = [requirement("pylint")] + select({
         # Pytype doesn’t work on Windows, so don’t build it when running
