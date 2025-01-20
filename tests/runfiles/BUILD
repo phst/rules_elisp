@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -29,7 +30,7 @@ TEST_DATA = [
     "test-lib.elc",
     "test-manifest",
     "test-mapping",
-]
+] + (["testäα𝐴🐈'.txt"] if bazel_features.docs.utf8_enabled else [])
 
 elisp_test(
     name = "runfiles_test",

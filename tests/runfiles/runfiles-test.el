@@ -33,11 +33,15 @@
         (other (error "Unknown command-line argument %S" other))))
     table))
 
+(defvar tests/runfiles/test-rlocation
+  (or (gethash "testäα𝐴🐈'.txt" tests/runfiles/rlocations)
+      (gethash "test.txt" tests/runfiles/rlocations)
+      (error "Missing test.txt file")))
+
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
-         (filename (elisp/runfiles/rlocation
-                    (gethash "test.txt" tests/runfiles/rlocations)
-                    runfiles))
+         (filename (elisp/runfiles/rlocation tests/runfiles/test-rlocation
+                                             runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
@@ -99,7 +103,7 @@ context."
 
 (ert-deftest elisp/runfiles/file-handler ()
   (let* ((file-name-handler-alist file-name-handler-alist)
-         (rlocation (gethash "test.txt" tests/runfiles/rlocations))
+         (rlocation tests/runfiles/test-rlocation)
          (repository (string-trim-right rlocation (rx ?/ (* anychar))))
          (virtual-repo-root (concat "/bazel-runfile:" repository))
          (virtual-file (concat "/bazel-runfile:" rlocation))
