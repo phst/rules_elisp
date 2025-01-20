@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
          (filename (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test.txt" runfiles))
+                    "phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"
+                    runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
@@ -100,36 +101,44 @@ context."
                            :key #'cdr :test #'eq)
                  1))
     (should
-     (file-exists-p "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+     (file-exists-p
+      "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
     (should (file-readable-p
-             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
     (should
      (natnump
-      (file-modes "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")))
-    (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
+      (file-modes
+       "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt")))
+    (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"
                  "elisp/runfiles/file-handler")
-    (should (equal (expand-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (expand-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
-                    "/foobar")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (expand-file-name "runfiles/test.txt"
-                                     "/bazel-runfile:phst_rules_elisp/elisp/")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (expand-file-name "runfiles/test.txt"
-                                     "/bazel-runfile:phst_rules_elisp/elisp")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (file-relative-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
-                    "/bazel-runfile:phst_rules_elisp/elisp/")
-                   "runfiles/test.txt"))
+    (should
+     (equal (expand-file-name
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt")
+            "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
+    (should
+     (equal (expand-file-name
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"
+             "/foobar")
+            "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
+    (should
+     (equal (expand-file-name "runfiles/testäα𝐴🐈'.txt"
+                              "/bazel-runfile:phst_rules_elisp/elisp/")
+            "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
+    (should
+     (equal (expand-file-name "runfiles/testäα𝐴🐈'.txt"
+                              "/bazel-runfile:phst_rules_elisp/elisp")
+            "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
+    (should
+     (equal (file-relative-name
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"
+             "/bazel-runfile:phst_rules_elisp/elisp/")
+            "runfiles/testäα𝐴🐈'.txt"))
     (should (equal (file-truename "/bazel-runfile:phst_rules_elisp/elisp/")
                    "/bazel-runfile:phst_rules_elisp/elisp/"))
-    (should (equal (abbreviate-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should
+     (equal (abbreviate-file-name
+             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt")
+            "/bazel-runfile:phst_rules_elisp/elisp/runfiles/testäα𝐴🐈'.txt"))
     (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
       (require 'elisp/runfiles/test-lib))))
 
