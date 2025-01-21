@@ -47,8 +47,9 @@ def _emacs_binary_impl(ctx):
 
     mode = ctx.attr.mode
     if mode == "source":
+        shell_toolchain = ctx.toolchains[Label("@rules_shell//shell:toolchain_type")]
         emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
-        install = _install(ctx, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
+        install = _install(ctx, shell_toolchain, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
     elif mode == "release":
         if not archive:
             fail("release mode requires a source archive")
@@ -146,15 +147,17 @@ This is used by Gazelle.""",
 The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
-    toolchains = use_cc_toolchain(),
+    toolchains = use_cc_toolchain() + [Label("@rules_shell//shell:toolchain_type")],
     implementation = _emacs_binary_impl,
 )
 
-def _install(ctx, cc_toolchain, *, archive, strip_prefix, readme):
+def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readme):
     """Builds and install Emacs.
 
     Args:
       ctx (ctx): rule context
+      shell_toolchain (Provider): the shell toolchain to use on Windows; must
+          be an MSYS2 toolchain
       cc_toolchain (Provider): the C toolchain to use to compile Emacs
       archive (File): Emacs source archive to build from, or `None` if building
           from an unpacked source tree
@@ -220,6 +223,7 @@ def _install(ctx, cc_toolchain, *, archive, strip_prefix, readme):
     if readme:
         args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
+    args.add(shell_toolchain.path, format = "--bash=%s")
     args.add(cc, format = "--cc=%s")
     args.add_joined(
         cflags,

@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ def main() -> None:
     group.add_argument('--readme', type=pathlib.Path)
     parser.add_argument('--strip-prefix', type=pathlib.PurePosixPath)
     parser.add_argument('--install', type=pathlib.Path, required=True)
+    parser.add_argument('--bash', type=pathlib.Path)
     parser.add_argument('--cc', type=pathlib.Path)
     parser.add_argument('--cflags')
     parser.add_argument('--ldflags')
@@ -58,7 +59,7 @@ def main() -> None:
         features = _unpack(source=source, install=install,
                            builtin_features=bool(args.builtin_features))
     else:
-        features = _build(source=source, install=install,
+        features = _build(source=source, install=install, bash=args.bash,
                           cc=args.cc, cflags=args.cflags, ldflags=args.ldflags,
                           builtin_features=bool(args.builtin_features))
 
@@ -75,12 +76,10 @@ def main() -> None:
 # Don’t use | due to https://bugs.python.org/issue42233.
 def _build(*, source: Union[pathlib.Path,
                             tuple[pathlib.Path, pathlib.PurePosixPath]],
-           install: pathlib.Path,
+           install: pathlib.Path, bash: pathlib.Path,
            cc: pathlib.Path, cflags: str, ldflags: str,
            builtin_features: bool) -> Optional[Set[str]]:
     windows = platform.system() == 'Windows'
-    if windows:
-        bash = _find_bash(cc)
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
 
@@ -173,16 +172,6 @@ def _unpack(*, source: tuple[pathlib.Path, pathlib.PurePosixPath],
     lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
     features = _builtin_features(lisp) if builtin_features else None
     return features
-
-
-def _find_bash(c_compiler: pathlib.Path) -> pathlib.Path:
-    if c_compiler.parts[-3:-1] != ('mingw64', 'bin'):
-        raise ValueError(f'unsupported C compiler location {c_compiler}')
-    msys = c_compiler.parents[2]
-    bash = msys / 'usr' / 'bin' / 'bash.exe'
-    if not bash.is_file():
-        raise FileNotFoundError(f'no Bash program found in {msys}')
-    return bash
 
 
 def _builtin_features(lisp: pathlib.Path) -> Set[str]:
