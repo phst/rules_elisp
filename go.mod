@@ -17,6 +17,6 @@ module github.com/phst/rules_elisp
 go 1.23.5
 
 require (
-	github.com/bazelbuild/buildtools v0.0.0-20250121125200-733b4a20350d
+	github.com/bazelbuild/buildtools v0.0.0-20250121133043-54b4ddb7cbbf
 	github.com/google/go-cmp v0.6.0
 )
