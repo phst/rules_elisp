@@ -37,7 +37,8 @@ genrule(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
-    cmd = "makeinfo --no-split --output=$@ -- $<",
+    cmd = "$(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
+    tools = ["@local_texinfo//:makeinfo"],
 )
 
 DOCS = [
