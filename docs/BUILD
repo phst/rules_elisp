@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
@@ -34,11 +35,34 @@ elisp_manual(
     out = "manual.texi",
 )
 
-# This rule assumes that Texinfo is installed locally.
+# These rules assume that Texinfo is installed locally.
 makeinfo(
     name = "info",
     src = "manual.texi",
     out = "rules_elisp.info",
+)
+
+makeinfo(
+    name = "html",
+    src = "manual.texi",
+    out = "manual.html",
+)
+
+diff_test(
+    name = "html_test",
+    timeout = "short",
+    failure_message = "\n".join([
+        "Run the following command to fix:",
+        "bazel build //docs:manual.html && cp bazel-bin/docs/manual.html index.html",
+    ]),
+    file1 = "manual.html",
+    file2 = "//:index.html",
+    # On the GitHub runners, the installed version of Texinfo depends on the
+    # operating system.  Therefore spurious diffs would be generated if the
+    # installed version and the version used for development (on macOS) don’t
+    # match.
+    # FIXME: Find a better solution.
+    target_compatible_with = ["@platforms//os:macos"],
 )
 
 DOCS = [

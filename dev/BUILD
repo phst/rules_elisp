@@ -46,7 +46,10 @@ buildifier_test(
 license_test(
     name = "license_test",
     timeout = "short",
-    ignore = ["coverage-report/**"],
+    ignore = [
+        "coverage-report/**",
+        "index.html",
+    ],
     marker = "//:MODULE.bazel",
 )
 

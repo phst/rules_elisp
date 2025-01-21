@@ -47,4 +47,9 @@ exports_files(
     visibility = ["//dev:__pkg__"],
 )
 
+exports_files(
+    ["index.html"],
+    visibility = ["//docs:__pkg__"],
+)
+
 # gazelle:lang go,proto,starlark
