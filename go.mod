@@ -18,7 +18,7 @@ go 1.23.5
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.41.0
-	github.com/bazelbuild/buildtools v0.0.0-20250117124929-3648bec1fd3c
+	github.com/bazelbuild/buildtools v0.0.0-20250121125200-733b4a20350d
 	github.com/bazelbuild/rules_go v0.52.0
 	github.com/google/go-cmp v0.6.0
 )
