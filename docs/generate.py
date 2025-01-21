@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -89,6 +89,8 @@ class _Generator:
             self._extension(extension)
         for rule in module.repository_rule_info:
             self._repo_rule(rule)
+        for macro in module.macro_info:
+            self._macro(macro)
 
     def _rule(self, rule: stardoc_output_pb2.RuleInfo) -> None:
         name = rule.rule_name
@@ -204,6 +206,19 @@ class _Generator:
             self._write(f'It depends on the following '
                         f'environment variables: {env}\n\n')
         self._write('#+END_deffn\n\n')
+
+    def _macro(self, macro: stardoc_output_pb2.MacroInfo) -> None:
+        name = macro.macro_name
+        attrs = ', '.join(a.name if a.mandatory else f'[{a.name}]'
+                          for a in macro.attribute)
+        self._write(f'#+ATTR_TEXINFO: :options {name} ({attrs})\n')
+        self._write('#+BEGIN_defmac\n')
+        self._write(_markdown(macro.doc_string).lstrip())
+        self._write(
+            f'The ~{name}~ macro supports the following attributes:\n\n')
+        for attr in macro.attribute:
+            self._attribute(attr)
+        self._write('#+END_defmac\n\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         if attr.doc_string.startswith('Deprecated;'):
