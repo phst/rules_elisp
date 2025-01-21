@@ -619,12 +619,8 @@ bootstrap = rule(
 
 def _executable_only_impl(ctx):
     info = ctx.attr.src[DefaultInfo]
-    files_to_run = info.files_to_run
-    if not files_to_run:
-        fail("missing files_to_run")
-    executable = info.files_to_run.executable
-    if not executable:
-        fail("missing executable")
+    files_to_run = info.files_to_run or fail("missing files_to_run")
+    executable = files_to_run.executable or fail("missing executable")
     return DefaultInfo(
         files = depset([executable]),
         runfiles = info.default_runfiles,
