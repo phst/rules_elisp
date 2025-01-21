@@ -18,9 +18,13 @@ visibility("private")
 
 def _makeinfo_impl(ctx):
     out = ctx.outputs.out
+    if out.extension not in ["info", "html"]:
+        fail("Unknown output file name", out.basename)
     src = ctx.file.src
     args = ctx.actions.args()
     args.add("--no-split")
+    if out.extension == "html":
+        args.add("--html")
     args.add(out, format = "--output=%s")
     args.add("--")
     args.add(src)

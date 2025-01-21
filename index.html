@@ -1,0 +1,1596 @@
+<!DOCTYPE html>
+<html>
+<!-- Created by GNU Texinfo 7.2, https://www.gnu.org/software/texinfo/ -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Bazel rules for Emacs Lisp</title>
+
+<meta name="description" content="Bazel rules for Emacs Lisp">
+<meta name="keywords" content="Bazel rules for Emacs Lisp">
+<meta name="resource-type" content="document">
+<meta name="distribution" content="global">
+<meta name="Generator" content="makeinfo">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link href="#Top" rel="start" title="Top">
+<link href="#Indices" rel="index" title="Indices">
+<link href="#SEC_Contents" rel="contents" title="Table of Contents">
+<link href="#Introduction" rel="next" title="Introduction">
+<style type="text/css">
+<!--
+a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
+a.summary-letter-printindex {text-decoration: none}
+div.example {margin-left: 3.2em}
+span:hover a.copiable-link {visibility: visible}
+strong.def-name {font-family: monospace; font-weight: bold; font-size: larger}
+td.printindex-index-entry {vertical-align: top}
+td.printindex-index-section {vertical-align: top; padding-left: 1em}
+th.entries-header-printindex {text-align:left}
+th.sections-header-printindex {text-align:left; padding-left: 1em}
+ul.mark-bullet {list-style-type: disc}
+ul.toc-numbered-mark {list-style: none}
+-->
+</style>
+
+
+</head>
+
+<body lang="en">
+
+
+
+
+<div class="top-level-extent" id="Top">
+<div class="nav-panel">
+<p>
+Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h1 class="top" id="Bazel-rules-for-Emacs-Lisp"><span>Bazel rules for Emacs Lisp<a class="copiable-link" href="#Bazel-rules-for-Emacs-Lisp"> &para;</a></span></h1>
+
+
+<div class="region-contents" id="SEC_Contents">
+<h2 class="contents-heading">Table of Contents</h2>
+
+<div class="contents">
+
+<ul class="toc-numbered-mark">
+  <li><a id="toc-Introduction" href="#Introduction">1 Introduction</a></li>
+  <li><a id="toc-Requirements" href="#Requirements">2 Requirements</a></li>
+  <li><a id="toc-Usage" href="#Usage">3 Usage</a></li>
+  <li><a id="toc-Load-path-management" href="#Load-path-management">4 Load path management</a></li>
+  <li><a id="toc-Runfiles" href="#Runfiles">5 Runfiles</a></li>
+  <li><a id="toc-Protocol-buffers" href="#Protocol-buffers">6 Protocol buffers</a>
+  <ul class="toc-numbered-mark">
+    <li><a id="toc-Accessing-protocol-buffer-message-fields" href="#Protocol-buffer-fields">6.1 Accessing protocol buffer message fields</a></li>
+    <li><a id="toc-Parsing-and-serializing-protocol-buffer-messages" href="#Protocol-buffer-serialization">6.2 Parsing and serializing protocol buffer messages</a></li>
+    <li><a id="toc-Well_002dknown-protocol-buffer-types" href="#Well_002dknown-protocol-buffer-types">6.3 Well-known protocol buffer types</a></li>
+    <li><a id="toc-Specialized-array-and-map-functions" href="#Protocol-buffer-array-and-map-functions">6.4 Specialized array and map functions</a></li>
+  </ul></li>
+  <li><a id="toc-Starlark-symbol-reference" href="#Starlark-symbol-reference">7 Starlark symbol reference</a>
+  <ul class="toc-numbered-mark">
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl" href="#Starlark-library-rule">7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl" href="#Starlark-protocol-buffer-library-rule">7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl" href="#Starlark-C_002fC_002b_002b-module-rule">7.3 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl" href="#Starlark-binary-rule">7.4 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl" href="#Starlark-test-rule">7.5 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl" href="#Starlark-manual-rule">7.6 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl" href="#Starlark-provider">7.7 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl" href="#Starlark-toolchain">7.8 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl" href="#Extension-Starlark-symbols">7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002femacs_003adefs_002ebzl" href="#Emacs-Starlark-symbols">7.10 Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a></li>
+  </ul></li>
+  <li><a id="toc-Indices" href="#Indices">8 Indices</a>
+  <ul class="toc-numbered-mark">
+    <li><a id="toc-Concept-index" href="#Concept-index" rel="index">8.1 Concept index</a></li>
+    <li><a id="toc-Symbol-index" href="#Symbol-index" rel="index">8.2 Symbol index</a></li>
+    <li><a id="toc-Type-index" href="#Type-index" rel="index">8.3 Type index</a></li>
+  </ul></li>
+</ul>
+</div>
+</div>
+<hr>
+<div class="chapter-level-extent" id="Introduction">
+<div class="nav-panel">
+<p>
+Next: <a href="#Requirements" accesskey="n" rel="next">Requirements</a>, Previous: <a href="#Top" accesskey="p" rel="prev">Bazel rules for Emacs Lisp</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Introduction-1"><span>1 Introduction<a class="copiable-link" href="#Introduction-1"> &para;</a></span></h2>
+
+<p>This repository provides a Bazel integration for Emacs Lisp; see
+<a class="uref" href="https://bazel.build/">the Bazel homepage</a> for more information about Bazel,
+and see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Top">the Emacs Lisp manual</a>.  It is modeled after the
+rules definitions for other languages, like the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp">C++ rules</a>.
+</p>
+<p>This is not an officially supported Google product.
+</p>
+<hr>
+</div>
+<div class="chapter-level-extent" id="Requirements">
+<div class="nav-panel">
+<p>
+Next: <a href="#Usage" accesskey="n" rel="next">Usage</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Requirements-1"><span>2 Requirements<a class="copiable-link" href="#Requirements-1"> &para;</a></span></h2>
+
+<p>To use <code class="code">rules_elisp</code>, you need <a class="uref" href="https://bazel.build/">Bazel</a>.  For
+installation instructions, see <a class="uref" href="https://bazel.build/install">Installing
+Bazel</a>.  This repository supports all full Bazel releases starting with Bazel
+7.2.1.  You’ll also need a recent C/C++ compiler (GCC or Clang on GNU/Linux and
+macOS, Visual C++ 2019 on Windows) and at least Python 3.12.  For further
+instructions how to use Bazel on Windows, see
+<a class="uref" href="https://bazel.build/install/windows">Installing Bazel on Windows</a>.
+</p>
+<p>This repository generally supports the two most recent major versions of Emacs.
+Currently, the supported versions are Emacs 28 and Emacs 29.  Once Emacs 30 is
+released, support for Emacs 28 will be dropped.
+</p>
+<hr>
+</div>
+<div class="chapter-level-extent" id="Usage">
+<div class="nav-panel">
+<p>
+Next: <a href="#Load-path-management" accesskey="n" rel="next">Load path management</a>, Previous: <a href="#Requirements" accesskey="p" rel="prev">Requirements</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Usage-1"><span>3 Usage<a class="copiable-link" href="#Usage-1"> &para;</a></span></h2>
+
+<p>Add a snippet like the following to your <code class="code">MODULE.bazel</code> file:
+</p>
+<div class="example">
+<pre class="example-preformatted">bazel_dep(name = &quot;phst_rules_elisp&quot;)
+git_override(
+    module_name = &quot;phst_rules_elisp&quot;,
+    remote = &quot;https://github.com/phst/rules_elisp.git&quot;,
+    commit = &quot;10054ee512b7087eb53d92f4f85857b778e53357&quot;,
+)
+</pre></div>
+
+<p>See <a class="uref" href="https://bazel.build/external/overview#bzlmod">the Bzlmod documentation</a>
+for background information.  Then you can use the <code class="code">elisp_library</code>,
+<code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.  See <a class="ref" href="#Starlark-library-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a>, <a class="ref" href="#Starlark-binary-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, <a class="ref" href="#Starlark-test-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>,
+and the examples in the <code class="code">examples</code> directory for details.  Note that the C++
+code used by <code class="code">rules_elisp</code> requires at least C++17, but Bazel still compiles
+with C++11 by default.  See
+<a class="uref" href="https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil">the
+Abseil FAQ</a> how to correctly change the C++ standard for your project.
+</p>
+<hr>
+</div>
+<div class="chapter-level-extent" id="Load-path-management">
+<div class="nav-panel">
+<p>
+Next: <a href="#Runfiles" accesskey="n" rel="next">Runfiles</a>, Previous: <a href="#Usage" accesskey="p" rel="prev">Usage</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Load-path-management-1"><span>4 Load path management<a class="copiable-link" href="#Load-path-management-1"> &para;</a></span></h2>
+
+<a class="index-entry-id" id="index-Load-path"></a>
+
+<p>The Emacs Lisp rules by default only add the repository root directories to the
+load path; see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Library-Search">(elisp)Library Search</a>.  However, many Emacs Lisp
+libraries assume that their immediate parent directory is present in the load
+path.  To support such libraries, the <code class="code">elisp_library</code> rule supports an optional
+<code class="code">load_path</code> attribute.  You can specify additional load path directories using
+this attribute.  Relative directories are relative to the Bazel package
+directory; absolute directories are relative to the repository root.  A typical
+use case is to specify <code class="code">load_path = [&quot;.&quot;]</code> to add the current package to the
+load path.
+</p>
+<hr>
+</div>
+<div class="chapter-level-extent" id="Runfiles">
+<div class="nav-panel">
+<p>
+Next: <a href="#Protocol-buffers" accesskey="n" rel="next">Protocol buffers</a>, Previous: <a href="#Load-path-management" accesskey="p" rel="prev">Load path management</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Runfiles-1"><span>5 Runfiles<a class="copiable-link" href="#Runfiles-1"> &para;</a></span></h2>
+
+<a class="index-entry-id" id="index-Runfiles"></a>
+
+<p>This repository also includes a library to access runfiles; see
+<a class="uref" href="https://bazel.build/extending/rules#runfiles">the Bazel documentation on
+runfiles</a>.  To use it, add a build dependency on
+<code class="code">@phst_rules_elisp//elisp/runfiles</code>.
+</p>
+<a class="index-entry-id" id="index-elisp_002frunfiles_002frlocation"></a>
+<a class="index-entry-id" id="index-elisp_002frunfiles_002frunfiles"></a>
+<p>Use the function <code class="code">elisp/runfiles/rlocation</code> to map a runfile name to a
+filename in the local filesystem.  For more advanced use cases, see the
+class <code class="code">elisp/runfiles/runfiles</code>.
+</p>
+<a class="index-entry-id" id="index-elisp_002frunfiles_002ffile_002dhandler"></a>
+<p>The library also provides a file name handler for runfiles,
+<code class="code">elisp/runfiles/file-handler</code>.  It uses the prefix &lsquo;<samp class="samp">/bazel-runfile:</samp>&rsquo;.
+</p>
+<hr>
+</div>
+<div class="chapter-level-extent" id="Protocol-buffers">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-symbol-reference" accesskey="n" rel="next">Starlark symbol reference</a>, Previous: <a href="#Runfiles" accesskey="p" rel="prev">Runfiles</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Protocol-buffers-1"><span>6 Protocol buffers<a class="copiable-link" href="#Protocol-buffers-1"> &para;</a></span></h2>
+
+<a class="index-entry-id" id="index-Protocol-buffers"></a>
+
+<p>By defining <code class="code">elisp_proto_library</code> rules, you can use protocol buffers in Emacs
+Lisp; see <a class="uref" href="https://developers.google.com/protocol-buffers">https://developers.google.com/protocol-buffers</a>.  To make a
+protocol buffer definition available to Emacs Lisp, you first need a
+<code class="code">proto_library</code> rule; see
+<a class="uref" href="https://bazel.build/reference/be/protocol-buffer#proto_library">https://bazel.build/reference/be/protocol-buffer#proto_library</a>.  You can
+either use an existing <code class="code">proto_library</code> rule or add your own.  Then, add an
+<code class="code">elisp_proto_library</code> rule that references the <code class="code">proto_library</code> rule.  Normally,
+the name of the <code class="code">proto_library</code> rule ends in &lsquo;<samp class="samp">_proto</samp>&rsquo;, and the name of the
+corresponding <code class="code">elisp_proto_library</code> rule has the same prefix and ends in
+&lsquo;<samp class="samp">_elisp_proto</samp>&rsquo;.  For example:
+</p>
+<div class="example">
+<pre class="example-preformatted">proto_library(
+    name = &quot;my_proto&quot;,
+    srcs = [&quot;my.proto&quot;],
+)
+elisp_proto_library(
+    name = &quot;my_elisp_proto&quot;,
+    deps = [&quot;:my_proto&quot;],
+)
+</pre></div>
+
+<p>You can then use the <code class="code">elisp_proto_library</code> rule in the same way as a normal
+<code class="code">elisp_library</code> rule, i.e., depend on it in other <code class="code">elisp_library</code>,
+<code class="code">elisp_binary</code>, or <code class="code">elisp_test</code> rules.  The name of the Emacs Lisp feature for
+the library is the same as the name of the original &lsquo;<samp class="samp">.proto</samp>&rsquo; file, relative to
+its repository root.  For example, if the above BUILD file is in a package named
+&lsquo;<samp class="samp">mypackage</samp>&rsquo;, you would load the protocol buffer library using <code class="code">(require
+'mypackage/my.proto)</code>.
+</p>
+<p>Emacs Lisp protocol buffer bindings contain Emacs Lisp equivalents for all
+message and enumeration types defined in the underlying protocol buffer
+definition files.  Because Emacs Lisp doesn’t have namespaces, the names of all
+defined entities are the full names of the corresponding protocol buffer
+descriptors, including the protocol buffer package name (which is often
+different from the Bazel package name), but with dots (&lsquo;<samp class="samp">.</samp>&rsquo;) replaced with
+slashes (&lsquo;<samp class="samp">/</samp>&rsquo;), because dots are special characters in Emacs Lisp; see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Symbol-Type">(elisp)Symbol Type</a>.  For example, the Lisp name of the protocol buffer
+message type <code class="code">google.protobuf.Duration</code> is <code class="code">google/protobuf/Duration</code>, and the
+Lisp name of the protocol buffer enumeration value
+<code class="code">google.protobuf.FieldDescriptorProto.TYPE_BOOL</code> is
+<code class="code">google/protobuf/FieldDescriptorProto/TYPE_BOOL</code>.
+</p>
+<p>When accessing protocol buffer message fields, Emacs translates field values to
+and from Lisp data types; see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Programming-Types">(elisp)Programming Types</a>.  For scalar
+types, the translation uses appropriate matching types, i.e., numbers and
+strings.  Boolean values are translated to either <code class="code">nil</code> or <code class="code">t</code>.  The <code class="code">bytes</code>
+type is represented using unibyte strings; see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Text-Representations">(elisp)Text Representations</a>.  Accessing string and byte fields always creates copies; this
+means that changing the return value using <code class="code">aset</code> will not modify the original
+protocol buffer message.
+</p>
+<p>The situation is a bit more complex for submessage fields, repeated fields, and
+map fields.  Emacs represents values of these fields using specialized types.
+For submessage fields, these types are again generated protocol buffer message
+types.  For repeated and map fields, Emacs uses the types <code class="code">elisp/proto/array</code>
+and <code class="code">elisp/proto/map</code>, respectively.  Message, array, and map objects can be
+mutable or immutable; attempting to modify an immutable object signals an error.
+The Lisp representations of these types are opaque structure-like types.  Their
+implementation is maintained internally, and you shouldn’t try to access or
+modify it directly.  Rather, the Emacs Lisp library <code class="code">elisp/proto/proto</code> contains
+the following facilities to use and manipulate these types.
+</p>
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-elisp_002fproto_002fmessage"><span class="category-def">Type: </span><span><strong class="def-name">elisp/proto/message</strong><a class="copiable-link" href="#index-elisp_002fproto_002fmessage"> &para;</a></span></dt>
+<dd><a class="index-entry-id" id="index-protocol-buffer-message"></a>
+<p>The base type for all message types.  This is an abstract type; you can’t
+instantiate it directly.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmessage_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/message-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002fmessage_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given object is a protocol buffer message
+object.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmessage_002dmutable_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/message-mutable-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002fmessage_002dmutable_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given protocol buffer message object is
+mutable.
+</p></dd></dl>
+
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-elisp_002fproto_002farray"><span class="category-def">Type: </span><span><strong class="def-name">elisp/proto/array</strong><a class="copiable-link" href="#index-elisp_002fproto_002farray"> &para;</a></span></dt>
+<dd><a class="index-entry-id" id="index-protocol-buffer-array"></a>
+<p>A type that represents repeated protocol buffer message fields.  You can’t
+instantiate this type directly; instead, you obtain instances of this type by
+accessing repeated message fields.
+</p>
+<p>Protocol buffer arrays are generalized sequences.  This means you can use the
+functions from the <code class="code">seq.el</code> library with them.  See <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Sequence-Functions">(elisp)Sequence Functions</a>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002farray_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/array-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002farray_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given object is a protocol buffer array
+object.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002farray_002dmutable_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/array-mutable-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002farray_002dmutable_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given protocol buffer array is mutable.
+</p></dd></dl>
+
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-elisp_002fproto_002fmap"><span class="category-def">Type: </span><span><strong class="def-name">elisp/proto/map</strong><a class="copiable-link" href="#index-elisp_002fproto_002fmap"> &para;</a></span></dt>
+<dd><a class="index-entry-id" id="index-protocol-buffer-map"></a>
+<p>A type that represents protocol buffer map fields.  You can’t instantiate this
+type directly; instead, you obtain instances of this type by accessing repeated
+message fields.  See
+<a class="uref" href="https://developers.google.com/protocol-buffers/docs/proto3#maps">https://developers.google.com/protocol-buffers/docs/proto3#maps</a>.
+</p>
+<p>Protocol buffer maps are generalized maps.  This means you can use the functions
+from the <code class="code">map.el</code> library with them.  See the comments in <code class="code">map.el</code> for details.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmap_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given object is a protocol buffer map object.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmap_002dmutable_002dp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-mutable-p</strong> <var class="def-var-arguments">object</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dmutable_002dp"> &para;</a></span></dt>
+<dd><p>This predicate returns whether the given protocol buffer map is mutable.
+</p></dd></dl>
+
+<p>It should be noted that protocol buffer arrays and maps are not “full” types.
+You can’t use them as replacement types for vectors or hash tables because
+there’s no way to create objects of these types from scratch.  You can only
+obtain new objects by accessing protocol buffer message fields.  This is also
+the reason why these types don’t provide implementations of <code class="code">seq-into</code>,
+<code class="code">seq-concatenate</code> or <code class="code">map-into</code> that would return new protocol buffer arrays and
+maps.
+</p>
+<p>Another important difference between these types and the standard Emacs Lisp
+types is that protocol buffer arrays and maps are strongly-typed: all their
+elements have the same type, which is determined when creating the object.  For
+example, you can’t add a string value to a protocol buffer array holding
+integers.
+</p>
+<p>The Lisp representation of protocol buffer enumerations are plain Lisp
+constants.  See <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Defining-Variables">(elisp)Defining Variables</a>.  Their values are just the
+integral values of the corresponding enumerators.
+</p>
+<p>Whenever Emacs needs to convert a Lisp value to a protocol buffer field value,
+an array element, or a map key or value, it accepts values that are compatible
+with the destination type.  For example, you can use an integer to set a
+floating-point protocol buffer message field.  Setting a Boolean field accepts
+any non-<code class="code">nil</code> value as <code class="code">true</code>.  Setting a repeated field accepts lists, vectors,
+and any other generalized sequence type.  Setting a map field accepts
+hash-tables, association lists, and any other generalized map type.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmake"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/make</strong> <var class="def-var-arguments">type [fields...]</var><a class="copiable-link" href="#index-elisp_002fproto_002fmake"> &para;</a></span></dt>
+<dd><p>This function creates and initializes a new protocol buffer message object.  The
+<var class="var">type</var> must be a symbol denoting an existing protocol buffer message
+type, using the conventions described above (i.e., periods replaced with
+slashes).  Before calling this function for a given type, you have to <code class="code">require</code>
+the generated library that defines the type, otherwise the function will fail.
+The <var class="var">fields</var> are keyword-value pairs of the form
+<code class="code">:<var class="var">field</var> <var class="var">value</var></code> that are used to initialize the
+fields.  If a field isn’t mentioned in <var class="var">fields</var>, it’s not set in the
+resulting message.  For example, the following code creates a new protocol
+buffer message object of type <code class="code">google.protobuf.Duration</code>:
+</p>
+<div class="example lisp">
+<pre class="lisp-preformatted">(require 'elisp/proto/proto)
+(require 'duration_proto)
+(elisp/proto/make 'google/protobuf/Duration :seconds 3600)
+</pre></div>
+
+<p>The <code class="code">nanos</code> field remains uninitialized.
+</p></dd></dl>
+
+<p>For every protocol buffer message type, the generated library will also contain
+a function <code class="code"><var class="var">type</var>-new</code> that you can use as a shorthand for
+<code class="code">elisp/proto/make</code>.  For example, you could also write the above example as
+</p>
+<div class="example lisp">
+<pre class="lisp-preformatted">(require 'duration_proto)
+(google/protobuf/Duration-new :seconds 3600)
+</pre></div>
+
+<p>To check whether an object is a protocol buffer message object of a given type,
+the generated libraries contain predicate functions like
+<code class="code"><var class="var">type</var>-p</code>.  For example, to test whether an object is a
+duration protocol buffer message, you can write
+</p>
+<div class="example lisp">
+<pre class="lisp-preformatted">(require 'duration_proto)
+(google/protobuf/Duration-p object)
+</pre></div>
+
+<p>You can also use the Common Lisp type predicates like <code class="code">cl-typep</code> or
+<code class="code">cl-check-type</code> with protocol buffer message objects.  See
+<a data-manual="cl" href="https://www.gnu.org/software/emacs/manual/html_mono/cl.html#Type-Predicates">(cl)Type Predicates</a>.
+</p>
+
+<ul class="mini-toc">
+<li><a href="#Protocol-buffer-fields" accesskey="1">Accessing protocol buffer message fields</a></li>
+<li><a href="#Protocol-buffer-serialization" accesskey="2">Parsing and serializing protocol buffer messages</a></li>
+<li><a href="#Well_002dknown-protocol-buffer-types" accesskey="3">Well-known protocol buffer types</a></li>
+<li><a href="#Protocol-buffer-array-and-map-functions" accesskey="4">Specialized array and map functions</a></li>
+</ul>
+<hr>
+<div class="section-level-extent" id="Protocol-buffer-fields">
+<div class="nav-panel">
+<p>
+Next: <a href="#Protocol-buffer-serialization" accesskey="n" rel="next">Parsing and serializing protocol buffer messages</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Accessing-protocol-buffer-message-fields"><span>6.1 Accessing protocol buffer message fields<a class="copiable-link" href="#Accessing-protocol-buffer-message-fields"> &para;</a></span></h3>
+
+<p>The functions described in this section retrieve and manipulate message fields.
+They all accept a message object as first argument and a field name as second
+argument.  The field name is a plain symbol denoting the unqualified field name.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fhas_002dfield"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/has-field</strong> <var class="def-var-arguments">message field</var><a class="copiable-link" href="#index-elisp_002fproto_002fhas_002dfield"> &para;</a></span></dt>
+<dd><p>This function returns whether the given field is present in the message object.
+If the field doesn’t have a notion of presence (e.g., it’s a repeated field), an
+error is signaled.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002ffield"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/field</strong> <var class="def-var-arguments">message field</var><a class="copiable-link" href="#index-elisp_002fproto_002ffield"> &para;</a></span></dt>
+<dd><p>This function returns the value of the given field within the message object.
+If the field isn’t set in the message, then the return value depends on the type
+of the field.  If the field is scalar, its default value is returned.  If the
+field is a submessage, repeated, or map field, <code class="code">nil</code> is returned.  For
+non-scalar fields, the return value is immutable, i.e., trying to change it will
+signal an error.
+</p>
+<p>If the field is a string or byte array field, the return value is a
+newly-allocated string.  This implies that it’s often a good idea to bind the
+return value to a local variable instead of retrieving the value many times.
+</p></dd></dl>
+
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_002fproto"><span class="category-def">pcase pattern: </span><span><strong class="def-name">elisp/proto</strong> <var class="def-var-arguments">type [fields...]</var><a class="copiable-link" href="#index-elisp_002fproto"> &para;</a></span></dt>
+<dd><p>As a more compact alternative to type predicates and field access using
+<code class="code">elisp/proto/field</code>, you can use <code class="code">elisp/proto</code> patterns in <code class="code">pcase</code> form.  See
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Pattern_002dMatching-Conditional">(elisp)Pattern-Matching Conditional</a>.  The <code class="code">elisp/proto</code> form takes an
+unquoted protocol buffer type and a list of fields.  For example, the following
+form extracts the fields of a duration message:
+</p>
+<div class="example lisp">
+<pre class="lisp-preformatted">(pcase message
+  ((elisp/proto google/protobuf/Duration seconds nanos)
+   (message &quot;Duration with %d seconds and %d nanoseconds&quot;
+            seconds nanos))
+  (_ (message &quot;Some other thing&quot;)))
+</pre></div>
+
+<p>Instead of specifying plain field names, you can also specify
+<code class="code">(<var class="var">field</var> <var class="var">pattern</var>)</code> pairs.  These match the field
+value against <var class="var">pattern</var>, which is again a <code class="code">pcase</code> pattern.  For
+example, the following code tests whether a duration is strictly positive:
+</p>
+<div class="example lisp">
+<pre class="lisp-preformatted">(pcase message
+  ((or (elisp/proto google/protobuf/Duration
+                    (seconds (and (pred cl-plusp) seconds))
+                    nanos)
+       (elisp/proto google/protobuf/Duration
+                    (seconds (and 0 seconds))
+                    (nanos (and (pred cl-plusp) nanos))))
+   (message &quot;Duration with %d seconds and %d nanoseconds is positive&quot;
+            seconds nanos)))
+</pre></div>
+
+<p>A <var class="var">field</var> construct that is a plain symbol is thus the same as
+<code class="code">(<var class="var">field</var> <var class="var">field</var>)</code>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fset_002dfield"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/set-field</strong> <var class="def-var-arguments">message field value</var><a class="copiable-link" href="#index-elisp_002fproto_002fset_002dfield"> &para;</a></span></dt>
+<dd><p>This function sets the field to a new value.  It signals an error if the message
+object is immutable, or if the new value isn’t compatible with the field type.
+</p></dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Protocol-buffer-serialization">
+<div class="nav-panel">
+<p>
+Next: <a href="#Well_002dknown-protocol-buffer-types" accesskey="n" rel="next">Well-known protocol buffer types</a>, Previous: <a href="#Protocol-buffer-fields" accesskey="p" rel="prev">Accessing protocol buffer message fields</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Parsing-and-serializing-protocol-buffer-messages"><span>6.2 Parsing and serializing protocol buffer messages<a class="copiable-link" href="#Parsing-and-serializing-protocol-buffer-messages"> &para;</a></span></h3>
+
+<p>The primary purpose of protocol buffers is data serialization.  The Emacs Lisp
+protocol buffer bindings support all three major forms of protocol buffer
+serialization: binary, JSON, and text.  However, currently the textual protocol
+buffer representation can only be generated, not parsed.  Since none of the
+serialized forms are self-describing, you have to explicitly pass the desired
+message type to the parsing functions.
+</p>
+<p>You can customize the behavior of the parsing and serialization functions to
+some extend with optional keyword arguments.  These are the most common keyword
+arguments:
+</p>
+<dl class="table">
+<dt><code class="code">:allow-partial</code></dt>
+<dd><p>This keyword argument affects how missing required fields
+are handled: by default, they cause an error to be signaled, but if the
+keyword argument is non-<code class="code">nil</code>, they are silently ignored, and the result might
+not be fully initialized.
+</p></dd>
+<dt><code class="code">:discard-unknown</code></dt>
+<dd><p>This keyword argument affects how unknown fields are
+handled: by default, they cause an error to be signaled, but if the keyword
+argument is non-<code class="code">nil</code>, they are silently ignored.
+</p></dd>
+<dt><code class="code">:deterministic</code></dt>
+<dd><p>If this keyword argument is non-<code class="code">nil</code>, serialization
+functions attempt to produce slightly more deterministic output; however, this
+attempt is best-effort, since protocol buffer serialization is not guaranteed
+to be deterministic.
+</p></dd>
+</dl>
+
+<p>Other keyword arguments are described in the main body of the function
+definitions below.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fparse"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/parse</strong> <var class="def-var-arguments">type serialized [:allow-partial]</var><a class="copiable-link" href="#index-elisp_002fproto_002fparse"> &para;</a></span></dt>
+<dd><p>This function parses a protocol buffer message from its binary serialization
+form.  The <var class="var">serialized</var> argument must be a unibyte string containing
+the binary serialization of a protocol buffer message of type <var class="var">type</var>.
+The <var class="var">type</var> is again a symbol denoting a protocol buffer message type.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fparse_002djson"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/parse-json</strong> <var class="def-var-arguments">type serialized [:discard-unknown]</var><a class="copiable-link" href="#index-elisp_002fproto_002fparse_002djson"> &para;</a></span></dt>
+<dd><p>This function is like <code class="code">elisp/proto/parse</code>, but it expects the JSON serialization
+instead of the binary serialization.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fserialize"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/serialize</strong> <var class="def-var-arguments">message [:allow-partial] [:discard-unknown] [:deterministic]</var><a class="copiable-link" href="#index-elisp_002fproto_002fserialize"> &para;</a></span></dt>
+<dd><p>This function is the inverse of <code class="code">elisp/proto/parse</code>, producing the binary
+serialization of the <var class="var">message</var> as a unibyte string.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fserialize_002dtext"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/serialize-text</strong> <var class="def-var-arguments">message [:compact] [:discard-unknown] [:deterministic]</var><a class="copiable-link" href="#index-elisp_002fproto_002fserialize_002dtext"> &para;</a></span></dt>
+<dd><p>This function is the inverse of <code class="code">elisp/proto/parse</code>, producing the binary
+serialization of the <var class="var">message</var> as a unibyte string.  If the
+<code class="code">:compact</code> keyword argument is non-<code class="code">nil</code>, the output is a bit more compact, with
+less vertical whitespace; however, you shouldn’t rely on any specific output
+format in any case.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fserialize_002djson"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/serialize-json</strong> <var class="def-var-arguments">message [:emit-defaults] [:proto-names]</var><a class="copiable-link" href="#index-elisp_002fproto_002fserialize_002djson"> &para;</a></span></dt>
+<dd><p>This function is the inverse of <code class="code">elisp/proto/parse-json</code>, producing the JSON
+serialization of the <var class="var">message</var> as a string.  If the <code class="code">:emit-defaults</code>
+keyword argument is non-<code class="code">nil</code>, the result will also include fields whose value
+equals their default value; normally such fields are left out.  The
+<code class="code">:proto-names</code> keyword argument determines the naming style for field names: by
+default, camel-case versions of the names are used, but if the keyword argument
+is non-<code class="code">nil</code>, the names from the protocol buffer definition are used verbatim.
+</p></dd></dl>
+
+<p>You can print a human-readable representation of protocol buffer messages,
+arrays, and maps using the functions <code class="code">cl-prin1</code>, <code class="code">cl-prin1-to-string</code>, or
+<code class="code">cl-print-to-string-with-limit</code>.  However, these objects don’t have a read
+syntax; see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Printed-Representation">(elisp)Printed Representation</a>.  Using plain Emacs functions
+like <code class="code">print</code> will result in a representation that’s not very human-readable; see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Read-and-Print">(elisp)Read and Print</a>.
+</p>
+<hr>
+</div>
+<div class="section-level-extent" id="Well_002dknown-protocol-buffer-types">
+<div class="nav-panel">
+<p>
+Next: <a href="#Protocol-buffer-array-and-map-functions" accesskey="n" rel="next">Specialized array and map functions</a>, Previous: <a href="#Protocol-buffer-serialization" accesskey="p" rel="prev">Parsing and serializing protocol buffer messages</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Well_002dknown-protocol-buffer-types-1"><span>6.3 Well-known protocol buffer types<a class="copiable-link" href="#Well_002dknown-protocol-buffer-types-1"> &para;</a></span></h3>
+
+<p>The Emacs Lisp protocol buffer bindings contain some dedicated support for a few
+well-known message types.  These are predefined types which are used frequently;
+see
+<a class="uref" href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf">https://developers.google.com/protocol-buffers/docs/reference/google.protobuf</a>.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002ftimestamp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/timestamp</strong> <var class="def-var-arguments">message</var><a class="copiable-link" href="#index-elisp_002fproto_002ftimestamp"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fduration"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/duration</strong> <var class="def-var-arguments">message</var><a class="copiable-link" href="#index-elisp_002fproto_002fduration"> &para;</a></span></dt>
+<dd><p>These functions convert protocol buffer messages of type
+<code class="code">google.protobuf.Timestamp</code> and <code class="code">google.protobuf.Duration</code> to Lisp timestamps.
+See <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Time-of-Day">(elisp)Time of Day</a>, for the definition of a Lisp timestamp.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmake_002dtimestamp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/make-timestamp</strong> <var class="def-var-arguments">time</var><a class="copiable-link" href="#index-elisp_002fproto_002fmake_002dtimestamp"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fmake_002dduration"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/make-duration</strong> <var class="def-var-arguments">time</var><a class="copiable-link" href="#index-elisp_002fproto_002fmake_002dduration"> &para;</a></span></dt>
+<dd><p>These functions perform the opposite conversion, creating
+<code class="code">google.protobuf.Timestamp</code> and <code class="code">google.protobuf.Duration</code> messages from Lisp
+time values.  See <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Time-of-Day">(elisp)Time of Day</a>, for the definition of a Lisp time
+value.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fset_002dtimestamp"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/set-timestamp</strong> <var class="def-var-arguments">message time</var><a class="copiable-link" href="#index-elisp_002fproto_002fset_002dtimestamp"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fset_002dduration"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/set-duration</strong> <var class="def-var-arguments">message time</var><a class="copiable-link" href="#index-elisp_002fproto_002fset_002dduration"> &para;</a></span></dt>
+<dd><p>These functions are similar, but they change message objects in place instead of
+creating new ones.  The <var class="var">message</var> arguments must be mutable.  As an
+alternative to calling these functions directly, you can also use
+<code class="code">elisp/proto/timestamp</code> and <code class="code">elisp/proto/duration</code> as generalized variables; see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Generalized-Variables">(elisp)Generalized Variables</a>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fpack_002dany"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/pack-any</strong> <var class="def-var-arguments">message</var><a class="copiable-link" href="#index-elisp_002fproto_002fpack_002dany"> &para;</a></span></dt>
+<dd><p>This function returns a new protocol buffer message of type
+<code class="code">google.protobuf.Any</code> that wraps the given <var class="var">message</var>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002funpack_002dany"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/unpack-any</strong> <var class="def-var-arguments">any</var><a class="copiable-link" href="#index-elisp_002fproto_002funpack_002dany"> &para;</a></span></dt>
+<dd><p>This function unpacks the given protocol buffer message of type
+<code class="code">google.protobuf.Any</code>.  The return type depends on the <code class="code">type_url</code> field.  Even
+though this allows you to handle message types dynamically, you still need to
+load the generated bindings for the dynamic type for unpacking to work.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fany_002dtype_002dname"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/any-type-name</strong> <var class="def-var-arguments">any</var><a class="copiable-link" href="#index-elisp_002fproto_002fany_002dtype_002dname"> &para;</a></span></dt>
+<dd><p>This function extracts the full type name from the <code class="code">type_url</code> field of the given
+protocol buffer message of type <code class="code">google.protobuf.Any</code>.  The return name is the
+full name of the type of the message packed in <var class="var">any</var> as a string.
+</p></dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Protocol-buffer-array-and-map-functions">
+<div class="nav-panel">
+<p>
+Previous: <a href="#Well_002dknown-protocol-buffer-types" accesskey="p" rel="prev">Well-known protocol buffer types</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Specialized-array-and-map-functions"><span>6.4 Specialized array and map functions<a class="copiable-link" href="#Specialized-array-and-map-functions"> &para;</a></span></h3>
+
+<p>This section describes a few additional functions that deal with arrays and
+maps.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002farray_002dlength"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/array-length</strong> <var class="def-var-arguments">array</var><a class="copiable-link" href="#index-elisp_002fproto_002farray_002dlength"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fmap_002dlength"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-length</strong> <var class="def-var-arguments">map</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dlength"> &para;</a></span></dt>
+<dd><p>These functions return the number of elements in the given array or map.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fdo_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/do-array</strong> <var class="def-var-arguments">function array</var><a class="copiable-link" href="#index-elisp_002fproto_002fdo_002darray"> &para;</a></span></dt>
+<dd><p>This function calls <var class="var">function</var> for each element in <var class="var">array</var> in
+ascending order.  <var class="var">function</var> has to accept a single argument.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fdo_002dmap"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/do-map</strong> <var class="def-var-arguments">function map</var><a class="copiable-link" href="#index-elisp_002fproto_002fdo_002dmap"> &para;</a></span></dt>
+<dd><p>This function calls <var class="var">function</var> for each entry in <var class="var">map</var>.
+<var class="var">function</var> has to accept two arguments, the key and the value.  The
+iteration order is arbitrary.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fappend_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/append-array</strong> <var class="def-var-arguments">array value</var><a class="copiable-link" href="#index-elisp_002fproto_002fappend_002darray"> &para;</a></span></dt>
+<dd><p>This function adds <var class="var">value</var> as a new element to the end of
+<var class="var">array</var>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fextend_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/extend-array</strong> <var class="def-var-arguments">dest source</var><a class="copiable-link" href="#index-elisp_002fproto_002fextend_002darray"> &para;</a></span></dt>
+<dd><p>This function appends all elements in the <var class="var">source</var> sequence to the end
+of <var class="var">dest</var>.  The <var class="var">source</var> must be a generalized sequence.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fupdate_002dmap"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/update-map</strong> <var class="def-var-arguments">dest source</var><a class="copiable-link" href="#index-elisp_002fproto_002fupdate_002dmap"> &para;</a></span></dt>
+<dd><p>This function inserts all entries in the <var class="var">source</var> map into
+<var class="var">map</var>.  The <var class="var">source</var> must be a generalized map.  If a given
+key already exists, the corresponding value is overwritten.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fcopy_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/copy-array</strong> <var class="def-var-arguments">array</var><a class="copiable-link" href="#index-elisp_002fproto_002fcopy_002darray"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fcopy_002dmap"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/copy-map</strong> <var class="def-var-arguments">map</var><a class="copiable-link" href="#index-elisp_002fproto_002fcopy_002dmap"> &para;</a></span></dt>
+<dd><p>These functions return a shallow copy of the given array or map.  The returned
+copy is mutable, but its elements might still be immutable.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fclear_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/clear-array</strong> <var class="def-var-arguments">array</var><a class="copiable-link" href="#index-elisp_002fproto_002fclear_002darray"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fclear_002dmap"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/clear-map</strong> <var class="def-var-arguments">map</var><a class="copiable-link" href="#index-elisp_002fproto_002fclear_002dmap"> &para;</a></span></dt>
+<dd><p>These functions remove all elements from the given array or map.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002freplace_002darray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/replace-array</strong> <var class="def-var-arguments">dest source</var><a class="copiable-link" href="#index-elisp_002fproto_002freplace_002darray"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002freplace_002dmap"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/replace-map</strong> <var class="def-var-arguments">dest source</var><a class="copiable-link" href="#index-elisp_002fproto_002freplace_002dmap"> &para;</a></span></dt>
+<dd><p>These functions first remove all elements from <var class="var">dest</var> and then add
+elements from <var class="var">source</var>.  After the operation finishes successfully,
+<var class="var">dest</var> will have the same number of elements as <var class="var">source</var>.
+Elements in <var class="var">source</var> are converted to the element type of
+<var class="var">dest</var> as necessary.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fmap_002dput"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-put</strong> <var class="def-var-arguments">map key value</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dput"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fmap_002dset"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-set</strong> <var class="def-var-arguments">map key value</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dset"> &para;</a></span></dt>
+<dd><p>These two functions perform an “upsert” operation: if <var class="var">key</var> is already
+present in <var class="var">map</var>, they update its value to <var class="var">value</var>, otherwise
+they insert a new entry into the map.  The only difference is the return value:
+<code class="code">elisp/proto/map-put</code> follows the convention of <code class="code">puthash</code> and always returns
+<var class="var">value</var>, while <code class="code">elisp/proto/map-set</code> returns whether a new entry was
+inserted.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002farray_002dpop"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/array-pop</strong> <var class="def-var-arguments">array index</var><a class="copiable-link" href="#index-elisp_002fproto_002farray_002dpop"> &para;</a></span></dt>
+<dt class="deffnx defunx-alias-deffnx def-cmd-deffn def-line" id="index-elisp_002fproto_002fmap_002dpop"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/map-pop</strong> <var class="def-var-arguments">map key</var><a class="copiable-link" href="#index-elisp_002fproto_002fmap_002dpop"> &para;</a></span></dt>
+<dd><p>These functions remove the element with the given index or key and return its
+value.  In the case of an array, elements are shifted left to fill the hole.
+</p></dd></dl>
+
+<p>The following functions work on ranges in an array.  A range is defined by a
+start index and an end index; the start index is included in the range, but the
+end index is not.  If either index is negative, it’s treated as counting from
+the end; this facilitates things like addressing the last five elements of an
+array.  If the end index is left out or <code class="code">nil</code>, the length of the array is used
+instead; this means that passing only a start index addresses the entire
+remaining subarray starting at that index.  These are exactly the same
+conventions that the functions <code class="code">substring</code> and <code class="code">seq-subseq</code> use.  See
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Creating-Strings">(elisp)Creating Strings</a>, and see <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Sequence-Functions">(elisp)Sequence Functions</a>.
+</p>
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002fsubarray"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/subarray</strong> <var class="def-var-arguments">array from [to]</var><a class="copiable-link" href="#index-elisp_002fproto_002fsubarray"> &para;</a></span></dt>
+<dd><p>This function returns a shallow copy of the subsequence of <var class="var">array</var>
+delineated by <var class="var">from</var> and <var class="var">to</var>.
+</p></dd></dl>
+
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-elisp_002fproto_002farray_002ddelete"><span class="category-def">Function: </span><span><strong class="def-name">elisp/proto/array-delete</strong> <var class="def-var-arguments">array from [to]</var><a class="copiable-link" href="#index-elisp_002fproto_002farray_002ddelete"> &para;</a></span></dt>
+<dd><p>This function removes the range delineated by <var class="var">from</var> and <var class="var">to</var>
+from <var class="var">array</var>.  Elements are shifted left to fill in the hole.
+</p></dd></dl>
+
+<hr>
+</div>
+</div>
+<div class="chapter-level-extent" id="Starlark-symbol-reference">
+<div class="nav-panel">
+<p>
+Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href="#Protocol-buffers" accesskey="p" rel="prev">Protocol buffers</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Starlark-symbol-reference-1"><span>7 Starlark symbol reference<a class="copiable-link" href="#Starlark-symbol-reference-1"> &para;</a></span></h2>
+
+
+<ul class="mini-toc">
+<li><a href="#Starlark-library-rule" accesskey="1">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-protocol-buffer-library-rule" accesskey="2">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="3">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-binary-rule" accesskey="4">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-test-rule" accesskey="5">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-manual-rule" accesskey="6">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-provider" accesskey="7">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-toolchain" accesskey="8">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
+<li><a href="#Extension-Starlark-symbols" accesskey="9">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
+<li><a href="#Emacs-Starlark-symbols">Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a></li>
+</ul>
+<hr>
+<div class="section-level-extent" id="Starlark-library-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-protocol-buffer-library-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl"><span>7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_library</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_library</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [outs], [data], [load_path], [deps])</var><a class="copiable-link" href="#index-elisp_005flibrary"> &para;</a></span></dt>
+<dd><p>Byte-compiles Emacs Lisp source files and makes the compiled output
+available to dependencies.  All sources are byte-compiled.
+<code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this binary
+can then use <code class="code">load</code> or <code class="code">require</code> to load them.
+</p>
+<p>By default, libraries need to be loaded using a filename relative to the
+repository root, i.e., <var class="var">package</var>/​<var class="var">file</var>.  If you want to add
+further elements to the load path, use the <code class="code">load_path</code> attribute.
+</p>
+<p>If there are multiple source files specified in <code class="code">srcs</code>, these source files can
+also load each other.  However, it’s often preferable to only have one
+<code class="code">elisp_library</code> target per source file to make dependencies more obvious and
+ensure that files get only loaded in their byte-compiled form.
+</p>
+<p>The source files in <code class="code">srcs</code> can also list shared objects.  The rule treats them
+as Emacs modules and doesn’t try to byte-compile them.  You can use
+e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
+</p>
+<p>The <code class="code">elisp_library</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>List of source files.  These must either be Emacs Lisp files ending
+in <code class="code">.el</code>, or module objects ending in <code class="code">.so</code>, <code class="code">.dylib</code>, or <code class="code">.dll</code>.  List of
+labels; mandatory.
+</p></dd>
+<dt><code class="code">outs</code></dt>
+<dd><p>List of byte-compiled Emacs Lisp files to be made available as
+targets.  List of output files; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">load_path</code></dt>
+<dd><p>List of additional load path elements.  The elements are
+directory names, which can be either relative or absolute.  Relative names are
+relative to the current package.  Absolute names are relative to the
+repository root.  To add a load path entry for the current package, specify
+<code class="code">.</code> here.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-protocol-buffer-library-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-library-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl"><span>7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_proto_library</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fproto_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_proto_library</strong> <var class="def-var-arguments">(name, deps)</var><a class="copiable-link" href="#index-elisp_005fproto_005flibrary"> &para;</a></span></dt>
+<dd><p>Generates Emacs bindings for a protocol buffer library.
+By convention, for a <code class="code">proto_library</code> rule named
+<code class="code"><var class="var">prefix</var>_​proto</code> there should be a corresponding
+<code class="code">elisp_proto_library</code> rule named <code class="code"><var class="var">prefix</var>_​elisp_​proto</code>.
+Other <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules can then depend
+on this rule.  This rule generates and byte-compiles Emacs Lisp representations
+of the protocol buffer definitions listed in the <code class="code">deps</code> attribute and all their
+direct and indirect dependencies.  The feature symbol for <code class="code">require</code> is
+<code class="code"><var class="var">package</var>/​<var class="var">name</var></code>, where
+<code class="code">/​/​<var class="var">package</var>:<var class="var">name</var></code> is the label of the
+corresponding <code class="code">proto_library</code> rule.
+</p>
+<p>The <code class="code">elisp_proto_library</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of exactly one <code class="code">proto_library</code> rule.  List of labels;
+mandatory; required providers: <code class="code">ProtoInfo</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-C_002fC_002b_002b-module-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-binary-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-protocol-buffer-library-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl"><span>7.3 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_cc_module</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fcc_005fmodule"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_cc_module</strong> <var class="def-var-arguments">(name, [srcs], [deps], [data], [copts], [linkopts], [local_defines])</var><a class="copiable-link" href="#index-elisp_005fcc_005fmodule"> &para;</a></span></dt>
+<dd><p>Builds an Emacs dynamic module from C and C+​+​ source files.
+For background on Emacs modules, see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Dynamic-Modules">Emacs Dynamic Modules</a>, and see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Writing-Dynamic-Modules">Writing Dynamically-Loaded Modules</a>.
+The <code class="code">emacs_module</code> rule is similar to
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library"><code class="code">cc_library</code></a>,
+but it always builds a dynamic library (shared object) that can be loaded
+into Emacs.  The module can also be used directly as dependency
+for <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.
+The dynamic library will only export the symbols necessary for Emacs modules,
+<code class="code">plugin_is_GPL_compatible</code> and <code class="code">emacs_module_init</code>; see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Module-Initialization">Module Initialization Code</a>.
+The file name of the dynamic library will be
+<code class="code"><var class="var">name</var>.<var class="var">extension</var></code>, where <var class="var">name</var>
+is the rule name as specified in the <code class="code">name</code> attribute, and <var class="var">extension</var>
+is the correct extension for dynamic libraries for the target operating system.
+The file name will not be prefixed with <code class="code">lib</code>.
+</p>
+<p>The library code in <code class="code">srcs</code> can include a recent version of <code class="code">emacs-module.h</code>
+using
+</p><div class="example">
+<pre class="example-preformatted">#include &quot;emacs-module.h&quot;
+</pre></div>
+
+<p>to implement module functions.
+</p>
+<p>The <code class="code">elisp_cc_module</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>C and C+​+​ source files for the module.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.srcs">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p><code class="code">cc_library</code> targets that the module depends on.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.deps">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>;
+required providers: <code class="code">CcInfo</code>.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>Data dependencies to make available at runtime.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.data">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">copts</code></dt>
+<dd><p>Additional options to pass to the C/​C+​+​ compiler.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.copts">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">linkopts</code></dt>
+<dd><p>Additional options to pass to the C/​C+​+​ linker.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.linkopts">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">local_defines</code></dt>
+<dd><p>Additional preprocessor definitions to pass to the C/​C+​+​
+compiler.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.local_defines">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-binary-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-test-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl"><span>7.4 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_binary</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_binary</strong> <var class="def-var-arguments">(name, [fatal_warnings], src, [data], [deps], [interactive], [input_args], [output_args])</var><a class="copiable-link" href="#index-elisp_005fbinary"> &para;</a></span></dt>
+<dd><p>Binary rule that loads a single Emacs Lisp file.
+The source file is byte-compiled.  At runtime, the compiled version is loaded
+in batch mode unless <code class="code">interactive</code> is <code class="code">True</code>.
+</p>
+<p>The <code class="code">elisp_binary</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">src</code></dt>
+<dd><p>Source file to load.  Label; mandatory.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+<dt><code class="code">interactive</code></dt>
+<dd><p>Run Emacs in interactive instead of batch mode.  Boolean;
+optional; default: <code class="code">False</code>.
+</p></dd>
+<dt><code class="code">input_args</code></dt>
+<dd><p>Indices of command-line arguments that represent input
+filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
+  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
+the corresponding arguments are treated as filenames for input files and added
+to the <code class="code">inputFiles</code> field of the manifest.  This only has an effect for
+toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
+<code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">output_args</code></dt>
+<dd><p>Indices of command-line arguments that represent output
+filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
+  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
+the corresponding arguments are treated as filenames for output files and
+added to the <code class="code">outputFiles</code> field of the manifest.  This only has an effect for
+toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
+<code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-test-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-manual-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-binary-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl"><span>7.5 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_test</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005ftest"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_test</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [data], [deps], [skip_tests], [skip_tags])</var><a class="copiable-link" href="#index-elisp_005ftest"> &para;</a></span></dt>
+<dd><p>Runs ERT tests that are defined in the source files.
+The given source files should contain ERT tests defined with <code class="code">ert-deftest</code>.
+For details, see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#How-to-Write-Tests">How to Write Tests</a>.
+The generated test binary loads all source files and executes all
+tests like <code class="code">ert-run-tests-batch-and-exit</code>.
+</p>
+<p>You can restrict the tests to be run using the <code class="code">--test_filter</code> option.  If set,
+the value of <code class="code">--test_filter</code> must be a Lisp expression usable as an
+ERT test selector; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Test-Selectors">Test Selectors</a>.
+You can also restrict the tests to be run using the <code class="code">skip_tests</code> and
+<code class="code">skip_tags</code> rule attributes.  These restrictions are additive, i.e., a test
+only runs if it’s not suppressed by either facility.
+</p>
+<p>In coverage mode (i.e., when run under <code class="code">bazel coverage</code>), all tests tagged with
+the <code class="code">:nocover</code> tag are also skipped.  You can use this tag to skip tests that
+normally pass, but don’t work under coverage for some reason.
+</p>
+<p>The <code class="code">elisp_test</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>List of source files to load.  List of labels; mandatory.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+<dt><code class="code">skip_tests</code></dt>
+<dd><p>List of tests to skip.  This attribute contains a list of ERT
+test symbols; when running the test rule, these tests are skipped.  Most of
+the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>. The <code class="code">skip_tests</code>
+attribute is mainly useful for third-party code that you don’t control.  List
+of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">skip_tags</code></dt>
+<dd><p>List of test tags to skip.  This attribute contains a list of
+tag names; if a test is tagged with one of the tags from this list, it is
+skipped.  This can be useful to e.g.  skip tests that are flaky or only work
+in interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
+tests.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-manual-rule">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-provider" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-test-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"><span>7.6 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp_manual</code> rule.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fmanual"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_manual</strong> <var class="def-var-arguments">(name, src, out, [additional_inputs])</var><a class="copiable-link" href="#index-elisp_005fmanual"> &para;</a></span></dt>
+<dd><p>Generates a GNU Texinfo manual from an Org Mode file.
+See <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html#Top">GNU Texinfo</a>, and see <a data-manual="org" href="https://www.gnu.org/software/emacs/manual/html_mono/org.html#Top">the Org Mode manual</a>.
+Uses Org’s exporting functionality; see <a data-manual="org" href="https://www.gnu.org/software/emacs/manual/html_mono/org.html#Exporting">Exporting</a>.
+You can then use <code class="code">texi2any</code> to generate other document formats from the output
+file; see <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html#Generic-Translator-texi2any"><code class="code">texi2any</code></a>.
+</p>
+<p>The <code class="code">elisp_manual</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">src</code></dt>
+<dd><p>Org-mode file to use as manual source; must end in <code class="code">.org</code>.  Label;
+mandatory.
+</p></dd>
+<dt><code class="code">out</code></dt>
+<dd><p>Texinfo manual file to write; must end in <code class="code">.texi</code>.  Output file;
+mandatory.
+</p></dd>
+<dt><code class="code">additional_inputs</code></dt>
+<dd><p>List of additional files made available during export.
+List of labels; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-provider">
+<div class="nav-panel">
+<p>
+Next: <a href="#Starlark-toolchain" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-manual-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"><span>7.7 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"> &para;</a></span></h3>
+
+<p>Defines rules to work with Emacs Lisp files in Bazel.
+</p>
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-EmacsLispInfo"><span class="category-def">Provider: </span><span><strong class="def-name">EmacsLispInfo</strong> <var class="def-var-arguments">source_files compiled_files load_path data_files transitive_source_files transitive_compiled_files transitive_load_path</var><a class="copiable-link" href="#index-EmacsLispInfo"> &para;</a></span></dt>
+<dd><p>Provider for Emacs Lisp libraries.
+The <code class="code">elisp_library</code>, <code class="code">elisp_proto_library</code>, and <code class="code">elisp_cc_module</code> rules
+produce this provider.
+</p>
+<p>Load path directory entries are structures with the following fields:
+</p><ul class="itemize mark-bullet">
+<li><code class="code">for_actions</code> is a string specifying the load directory to use for actions,
+relative to the execution root.
+</li><li><code class="code">for_runfiles</code> is a string specifying the load directory to use at runtime,
+relative to the runfiles root.
+</li></ul>
+
+<p>The <code class="code">EmacsLispInfo</code> provider has the following fields:
+</p>
+<dl class="table">
+<dt><code class="code">source_files</code></dt>
+<dd><p>A list of <code class="code">File</code> objects containing the Emacs Lisp source
+files of this library.
+</p></dd>
+<dt><code class="code">compiled_files</code></dt>
+<dd><p>A list of <code class="code">File</code> objects containing the byte-compiled
+Emacs Lisp files and module objects of this library.
+</p></dd>
+<dt><code class="code">load_path</code></dt>
+<dd><p>A list containing necessary load path additions for this
+library.  The list elements are structures as described in the provider
+documentation.
+</p></dd>
+<dt><code class="code">data_files</code></dt>
+<dd><p>A list of <code class="code">File</code> objects that this library requires at
+runtime.
+</p></dd>
+<dt><code class="code">transitive_source_files</code></dt>
+<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing the Emacs
+Lisp source files of this library and all its transitive dependencies.
+</p></dd>
+<dt><code class="code">transitive_compiled_files</code></dt>
+<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing the
+byte-compiled Emacs Lisp files and module objects of this library and all its
+transitive dependencies.
+</p></dd>
+<dt><code class="code">transitive_load_path</code></dt>
+<dd><p>A <code class="code">depset</code> containing necessary load path additions
+for this library and all its transitive dependencies.  The <code class="code">depset</code> uses
+preorder traversal: entries for libraries closer to the root of the dependency
+graph come first.  The <code class="code">depset</code> elements are structures as described in the
+provider documentation.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Starlark-toolchain">
+<div class="nav-panel">
+<p>
+Next: <a href="#Extension-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-provider" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"><span>7.8 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"> &para;</a></span></h3>
+
+<p>Defines rules to work with Emacs Lisp files in Bazel.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005ftoolchain"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_toolchain</strong> <var class="def-var-arguments">(name, emacs, [use_default_shell_env], [execution_requirements], [wrap])</var><a class="copiable-link" href="#index-elisp_005ftoolchain"> &para;</a></span></dt>
+<dd><p>Toolchain rule for Emacs Lisp.
+This toolchain configures how to run Emacs.
+The executable passed to the <code class="code">emacs</code> attribute must be a binary
+that behaves like Emacs.
+If <code class="code">wrap</code> is <code class="code">False</code>, Bazel calls it as is, passing arguments
+that a normal Emacs binary would accept.
+If <code class="code">wrap</code> is <code class="code">True</code>, Bazel calls the binary with a special <code class="code">--manifest</code> option.
+The value of the option is the filename of a JSON file containing a manifest.
+The manifest specifies which files should be readable and/​or writable by Emacs.
+Toolchains can use this to sandbox Emacs, if desired.
+</p>
+<p>If <code class="code">wrap</code> is <code class="code">True</code>, the format of the command line is as follows:
+</p><div class="example">
+<pre class="example-preformatted">emacs --manifest=MANIFEST -- ARGS…
+</pre></div>
+
+<p>That is, the original arguments for Emacs are separated by a double hyphen
+(<code class="code">--</code>) so that argument parsers can distinguish between the <code class="code">--manifest</code> option
+and Emacs arguments.
+</p>
+<p>The manifest is a JSON object with the following keys:
+</p><ul class="itemize mark-bullet">
+<li><code class="code">root</code> can be either <code class="code">EXECUTION_ROOT</code> or <code class="code">RUNFILES_ROOT</code> and specifies
+the root directory for relative file names.
+</li><li><code class="code">loadPath</code> is a list of directory names making up the load path.
+</li><li><code class="code">inputFiles</code> is a list of files that should be readable.
+</li><li><code class="code">outputFiles</code> is a list of files that should be writable.
+</li><li><code class="code">tags</code> is the list of tags for the current rule.
+</li></ul>
+
+<p>When executing an action, file names are relative to the execution root.
+Otherwise, file names are relative to the runfiles root.  File names in
+<code class="code">inputFiles</code> or <code class="code">outputFiles</code> can also be absolute; in this case they specify
+temporary files that are deleted after the action completes, or files passed on
+the command line interpreted according to the <code class="code">input_args</code> and <code class="code">output_args</code>
+attributes of the <code class="code">elisp_binary</code> rule.
+</p>
+<p>The <code class="code">elisp_toolchain</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">emacs</code></dt>
+<dd><p>An executable file that behaves like the Emacs binary.  Depending
+on whether <code class="code">wrap</code> is <code class="code">True</code>, Bazel invokes this executable with a command line
+like <code class="code">emacs --manifest=MANIFEST -- ARGS…</code> or <code class="code">emacs ARGS…</code>. The <code class="code">--manifest</code>
+flag is only present if <code class="code">wrap</code> is <code class="code">True</code>. See the rule documentation for
+details.  Label; mandatory.
+</p></dd>
+<dt><code class="code">use_default_shell_env</code></dt>
+<dd><p>Whether actions should inherit the external shell
+environment.  Boolean; optional; default: <code class="code">False</code>.
+</p></dd>
+<dt><code class="code">execution_requirements</code></dt>
+<dd><p>Execution requirements for compilation and test
+actions.  Dictionary string → string; optional; default: <code class="code">{}</code>.
+</p></dd>
+<dt><code class="code">wrap</code></dt>
+<dd><p>Whether the binary given in the <code class="code">emacs</code> attribute is a wrapper
+around Emacs proper.  If <code class="code">True</code>, Bazel passes a manifest file using the
+<code class="code">--manifest</code> option.  See the rule documentation for details.  Boolean;
+optional; default: <code class="code">False</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Extension-Starlark-symbols">
+<div class="nav-panel">
+<p>
+Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-toolchain" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"><span>7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the <code class="code">elisp</code> module extension.
+</p>
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
+<dd><p>Module extension for Emacs Lisp.
+</p>
+<p>The <code class="code">elisp</code> module extension provides the following tag classes:
+</p>
+<dl class="first-defop def-block">
+<dt class="defop def-line" id="index-http_005farchive-on-elisp"><span class="category-def">Tag class on <code class="code">elisp</code>: </span><span><strong class="def-name">http_archive</strong> <var class="def-var-arguments">(name, urls, integrity, [strip_prefix], [target_name], [exclude])</var><a class="copiable-link" href="#index-http_005farchive-on-elisp"> &para;</a></span></dt>
+<dd><p>Downloads an archive file over HTTP and makes its contents
+available as an <code class="code">elisp_library</code>.  This tag class is very similar to
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive"><code class="code">http_archive</code></a>,
+except that it always generates a BUILD file containing a single <code class="code">elisp_library</code>
+rule in the root package for all Emacs Lisp files in the archive.
+Test files (<code class="code">…-test.el</code>, <code class="code">…-tests.el</code>) and package metadata files (<code class="code">…-pkg.el</code>)
+are excluded.
+The <code class="code">elisp_library</code> rule is named <code class="code">library</code> by default, unless overridden
+by the <code class="code">target_name</code> attribute.
+</p>
+<p>The <code class="code">http_archive</code> tag class supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>Name of the repository to generate.  Name; mandatory.
+</p></dd>
+<dt><code class="code">urls</code></dt>
+<dd><p>List of archive URLs to try.  See the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-urls">corresponding
+attribute for <code class="code">http_archive</code></a>.  List of strings; mandatory.
+</p></dd>
+<dt><code class="code">integrity</code></dt>
+<dd><p>Expected checksum of the archive file in
+<a class="uref" href="https://www.w3.org/TR/SRI/">Subresource Integrity</a> format.  See the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-integrity">corresponding
+attribute for <code class="code">http_archive</code></a>.  String; mandatory.
+</p></dd>
+<dt><code class="code">strip_prefix</code></dt>
+<dd><p>Directory prefix to strip from the archive contents.  See
+the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix">corresponding
+attribute for <code class="code">http_archive</code></a>.  String; optional; default: <code class="code">&quot;&quot;</code>.
+</p></dd>
+<dt><code class="code">target_name</code></dt>
+<dd><p>Name of the <code class="code">elisp_library</code> target to generate.  String;
+optional; default: <code class="code">&quot;library&quot;</code>.
+</p></dd>
+<dt><code class="code">exclude</code></dt>
+<dd><p>Glob patterns of additional files to exclude from the library.
+List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Emacs-Starlark-symbols">
+<div class="nav-panel">
+<p>
+Previous: <a href="#Extension-Starlark-symbols" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbols-defined-in-_002f_002femacs_003adefs_002ebzl"><span>7.10 Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002femacs_003adefs_002ebzl"> &para;</a></span></h3>
+
+<p>Defines the rule <code class="code">emacs_binary</code>, which compiles Emacs for use in Bazel.
+</p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-emacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-emacs_005fbinary"> &para;</a></span></dt>
+<dd><p>Builds Emacs from a source repository.
+The resulting executable can be used to run the compiled Emacs.
+</p>
+<p>The <code class="code">emacs_binary</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">mode</code></dt>
+<dd><p>How to build and install Emacs.  Possible values are: - <code class="code">source</code>:
+Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>. <code class="code">srcs</code> must
+refer to an unpacked Emacs source archive.  - <code class="code">release</code>: Run Emacs directly
+without building or installing.  <code class="code">srcs</code> must refer to an unpacked Emacs
+release archive containing pre-built   binaries for the correct target
+operating system and architecture.   Currently this only works on Windows.
+String; optional; default: <code class="code">&quot;source&quot;</code>.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>Either a single Emacs source archive, or all Emacs source files from
+an already-unpacked archive.  List of labels; mandatory.
+</p></dd>
+<dt><code class="code">strip_prefix</code></dt>
+<dd><p>Prefix to strip from the source archive.  Ignored if <code class="code">srcs</code>
+doesn’t refer to an archive.  String; optional; default: <code class="code">&quot;&quot;</code>.
+</p></dd>
+<dt><code class="code">readme</code></dt>
+<dd><p>The README file in the root of the Emacs repository.  This is
+necessary to determine the source root directory if <code class="code">srcs</code> refers to unpacked
+Emacs sources.  If <code class="code">srcs</code> refers to a source archive, <code class="code">readme</code> is ignored.
+Label; optional; default: <code class="code">None</code>.
+</p></dd>
+<dt><code class="code">module_header</code></dt>
+<dd><p>Label for a file target that will receive the
+<code class="code">emacs-module.h</code> header.  If not provided, don’t install the header.  Output
+file; optional; default: <code class="code">None</code>.
+</p></dd>
+<dt><code class="code">builtin_features</code></dt>
+<dd><p>Label for a file into which to write the list of builtin
+features.  If not provided, don’t write such a file.  This is used by Gazelle.
+Output file; optional; default: <code class="code">None</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
+<hr>
+</div>
+</div>
+<div class="chapter-level-extent" id="Indices">
+<div class="nav-panel">
+<p>
+Previous: <a href="#Starlark-symbol-reference" accesskey="p" rel="prev">Starlark symbol reference</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Indices-1"><span>8 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
+
+
+<ul class="mini-toc">
+<li><a href="#Concept-index" accesskey="1">Concept index</a></li>
+<li><a href="#Symbol-index" accesskey="2">Symbol index</a></li>
+<li><a href="#Type-index" accesskey="3">Type index</a></li>
+</ul>
+<hr>
+<div class="section-level-extent" id="Concept-index">
+<div class="nav-panel">
+<p>
+Next: <a href="#Symbol-index" accesskey="n" rel="next">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Concept-index-1"><span>8.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
+
+<div class="printindex cp-printindex">
+<table class="cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="cp-entries-printindex">
+<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Concept-index_cp_letter-L">L</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-Load-path">Load path</a></td><td class="printindex-index-section"><a href="#Load-path-management">Load path management</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Concept-index_cp_letter-P">P</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-array">protocol buffer array</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-map">protocol buffer map</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-message">protocol buffer message</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-Protocol-buffers">Protocol buffers</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Concept-index_cp_letter-R">R</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-Runfiles">Runfiles</a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+</table>
+<table class="cp-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-R"><b>R</b></a>
+ &nbsp; 
+</td></tr></table>
+</div>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Symbol-index">
+<div class="nav-panel">
+<p>
+Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <a href="#Concept-index" accesskey="p" rel="prev">Concept index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Symbol-index-1"><span>8.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
+
+<div class="printindex fn-printindex">
+<table class="fn-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
+ &nbsp; 
+</td></tr></table>
+<table class="fn-entries-printindex">
+<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Symbol-index_fn_letter-E">E</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-binary-rule">Starlark binary rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Starlark-C_002fC_002b_002b-module-rule">Starlark C/C++ module rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-library-rule">Starlark library rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Starlark-manual-rule">Starlark manual rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-protocol-buffer-library-rule">Starlark protocol buffer library rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Starlark-test-rule">Starlark test rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-toolchain">Starlark toolchain</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto"><code>elisp/proto</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fany_002dtype_002dname"><code>elisp/proto/any-type-name</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fappend_002darray"><code>elisp/proto/append-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002ddelete"><code>elisp/proto/array-delete</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dlength"><code>elisp/proto/array-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dmutable_002dp"><code>elisp/proto/array-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dp"><code>elisp/proto/array-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dpop"><code>elisp/proto/array-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002darray"><code>elisp/proto/clear-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002dmap"><code>elisp/proto/clear-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002darray"><code>elisp/proto/copy-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002dmap"><code>elisp/proto/copy-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002darray"><code>elisp/proto/do-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002dmap"><code>elisp/proto/do-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fduration"><code>elisp/proto/duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fextend_002darray"><code>elisp/proto/extend-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ffield"><code>elisp/proto/field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fhas_002dfield"><code>elisp/proto/has-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake"><code>elisp/proto/make</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dduration"><code>elisp/proto/make-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dtimestamp"><code>elisp/proto/make-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dlength"><code>elisp/proto/map-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dmutable_002dp"><code>elisp/proto/map-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dp"><code>elisp/proto/map-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dpop"><code>elisp/proto/map-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dput"><code>elisp/proto/map-put</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dset"><code>elisp/proto/map-set</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dmutable_002dp"><code>elisp/proto/message-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dp"><code>elisp/proto/message-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fpack_002dany"><code>elisp/proto/pack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse"><code>elisp/proto/parse</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse_002djson"><code>elisp/proto/parse-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002darray"><code>elisp/proto/replace-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002dmap"><code>elisp/proto/replace-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize"><code>elisp/proto/serialize</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002djson"><code>elisp/proto/serialize-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002dtext"><code>elisp/proto/serialize-text</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dduration"><code>elisp/proto/set-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dfield"><code>elisp/proto/set-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dtimestamp"><code>elisp/proto/set-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fsubarray"><code>elisp/proto/subarray</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ftimestamp"><code>elisp/proto/timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002funpack_002dany"><code>elisp/proto/unpack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fupdate_002dmap"><code>elisp/proto/update-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002ffile_002dhandler"><code>elisp/runfiles/file-handler</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frlocation"><code>elisp/runfiles/rlocation</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-emacs_005fbinary"><code>emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Emacs-Starlark-symbols">Emacs Starlark symbols</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Symbol-index_fn_letter-H">H</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Extension-Starlark-symbols">Extension Starlark symbols</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+</table>
+<table class="fn-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
+ &nbsp; 
+</td></tr></table>
+</div>
+
+<hr>
+</div>
+<div class="section-level-extent" id="Type-index">
+<div class="nav-panel">
+<p>
+Previous: <a href="#Symbol-index" accesskey="p" rel="prev">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h3 class="section" id="Type-index-1"><span>8.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
+
+<div class="printindex tp-printindex">
+<table class="tp-entries-printindex">
+<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
+<tr><td colspan="3"><hr></td></tr>
+<tr><th id="Type-index_tp_letter-E">E</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp"><code>elisp</code></a></td><td class="printindex-index-section"><a href="#Extension-Starlark-symbols">Extension Starlark symbols</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray"><code>elisp/proto/array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap"><code>elisp/proto/map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage"><code>elisp/proto/message</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frunfiles"><code>elisp/runfiles/runfiles</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-EmacsLispInfo"><code>EmacsLispInfo</code></a></td><td class="printindex-index-section"><a href="#Starlark-provider">Starlark provider</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
+</table>
+</div>
+
+</div>
+</div>
+</div>
+
+
+
+</body>
+</html>
