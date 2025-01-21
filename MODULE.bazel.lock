@@ -224,7 +224,7 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "HXdnqUddjHnPqOIc5bCvIqw8KAKkXitkc/EjiVBC00A=",
+        "bzlTransitiveDigest": "46Zc9yYJTPme4Mn3PLFEXOvc0P2d8YAW5uNdtdRDRi4=",
         "usagesDigest": "8Xi2p2FiSBOktLQxSGs2qDuwuwNYOAjVjClaeFzhjs4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -297,6 +297,32 @@
             "",
             "platforms",
             "platforms"
+          ]
+        ]
+      }
+    },
+    "//private:extensions.bzl%dev_deps": {
+      "general": {
+        "bzlTransitiveDigest": "46Zc9yYJTPme4Mn3PLFEXOvc0P2d8YAW5uNdtdRDRi4=",
+        "usagesDigest": "I7uLfCIDw4EhUdOX1jGaNva/lcz1d50YMTTpU5XdnJY=",
+        "recordedFileInputs": {},
+        "recordedDirentsInputs": {},
+        "envVariables": {},
+        "generatedRepoSpecs": {
+          "local_texinfo": {
+            "repoRuleId": "@@//private:extensions.bzl%_local_texinfo_repository",
+            "attributes": {}
+          }
+        },
+        "moduleExtensionMetadata": {
+          "useAllRepos": "DEV",
+          "reproducible": false
+        },
+        "recordedRepoMappingEntries": [
+          [
+            "",
+            "bazel_skylib",
+            "bazel_skylib+"
           ]
         ]
       }

@@ -65,6 +65,10 @@ use_repo(deps, "gnu_emacs_29.4")
 use_repo(deps, "gnu_emacs_windows_28.2")
 use_repo(deps, "gnu_emacs_windows_29.4")
 
+dev_deps = use_extension("//private:extensions.bzl", "dev_deps", dev_dependency = True)
+dev_deps.local_texinfo(name = "local_texinfo")
+use_repo(dev_deps, "local_texinfo")
+
 junit_xsd = use_repo_rule("//private:repositories.bzl", "junit_xsd")
 
 junit_xsd(
