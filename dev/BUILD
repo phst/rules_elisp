@@ -109,5 +109,4 @@ nogo(
     deps = TOOLS_NOGO,
 )
 
-# gazelle:prefix github.com/phst/rules_elisp
 gazelle(name = "gazelle")

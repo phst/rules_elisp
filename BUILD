@@ -46,3 +46,5 @@ exports_files(
     ["MODULE.bazel"],
     visibility = ["//dev:__pkg__"],
 )
+
+# gazelle:prefix github.com/phst/rules_elisp
