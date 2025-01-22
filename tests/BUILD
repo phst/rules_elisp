@@ -22,7 +22,7 @@ load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_test")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
-load(":private/defs.bzl", "elisp_test_suite")
+load(":defs.bzl", "elisp_test_suite")
 
 package(
     default_applicable_licenses = ["//:license"],
