@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
-load("@gazelle//:def.bzl", "gazelle")
+load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
 load("@phst_license_test//:def.bzl", "license_test")
 load("@pip//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
@@ -109,4 +109,15 @@ nogo(
     deps = TOOLS_NOGO,
 )
 
-gazelle(name = "gazelle")
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle_binary",
+)
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = DEFAULT_LANGUAGES + [
+        "//gazelle:library",
+        "@bazel_skylib_gazelle_plugin//bzl",
+    ],
+)

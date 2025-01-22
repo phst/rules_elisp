@@ -49,7 +49,7 @@ go_library(
     ],
     embedsrcs = ["builtin_features.json"],
     importpath = "github.com/phst/rules_elisp/gazelle",
-    visibility = ["//visibility:private"],
+    visibility = ["//dev:__pkg__"],
     deps = [
         "@gazelle//config",
         "@gazelle//label",
