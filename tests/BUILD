@@ -16,6 +16,7 @@
 # so that they can use external repositories loaded as development-only
 # dependencies in our MODULE.bazel file, e.g. the Go rules.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_go//go:def.bzl", "go_test")
@@ -32,6 +33,15 @@ package(
 )
 
 licenses(["notice"])
+
+bzl_library(
+    name = "defs",
+    srcs = ["defs.bzl"],
+    deps = [
+        "//elisp:defs",
+        "@bazel_skylib//lib:unittest",
+    ],
+)
 
 elisp_test_suite(name = "elisp_test")
 
