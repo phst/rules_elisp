@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2023, 2024 Google LLC
+// Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,8 @@
 // limitations under the License.
 
 // Package gazelle implements Gazelle support for Emacs Lisp.  It generates and
-// maintains elisp_library and elisp_test rules from the phst_rules_elisp
-// repository.  See https://github.com/phst/rules_elisp and
+// maintains elisp_library, elisp_binary, and elisp_test rules from the
+// phst_rules_elisp repository.  See https://github.com/phst/rules_elisp and
 // https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
 package gazelle
 
