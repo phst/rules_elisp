@@ -21,6 +21,7 @@ import (
 	"regexp"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/language"
@@ -28,9 +29,9 @@ import (
 )
 
 // GenerateRules implements [language.Language.GenerateRules].  It generates
-// elisp_library or elisp_test rules, one per source file.  It adds the features
-// required by each file to the [language.GenerateResult.Imports] slice as
-// [Imports] structures.
+// elisp_library, elisp_proto_library, or elisp_test rules, one per source file.
+// It adds the features required by each file to the
+// [language.GenerateResult.Imports] slice as [Imports] structures.
 func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	fsys := os.DirFS(args.Dir)
 	pkg := bazelPackage(args.Rel)
@@ -50,16 +51,22 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	return res
 }
 
-// generateRule generates a rule for a single Emacs Lisp source file.  fsys is a
-// filesystem for the Bazel workspace root containing the source file, pkg is
-// the name of the Bazel package (the empty string for the root package), and
-// file names the source file within the package.  Return nil if file doesn’t
-// name an Emacs Lisp file or on any error.
+// generateRule generates a rule for a single Emacs Lisp or protocol buffer
+// definition source file.  fsys is a filesystem for the Bazel workspace root
+// containing the source file, pkg is the name of the Bazel package (the empty
+// string for the root package), and file names the source file within the
+// package.  Return nil if file doesn’t name an Emacs Lisp or protocol buffer
+// definition file or on any error.
 func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Imports) {
 	if file == ".dir-locals.el" {
 		// Never generate a rule for .dir-locals.el, as it can’t be
 		// compiled.
 		return nil, Imports{}
+	}
+	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" {
+		r := rule.NewRule(protoLibraryKind, stem+"_elisp_proto")
+		r.SetAttr("deps", []string{":" + stem + "_proto"})
+		return r, Imports{}
 	}
 	src := srcFile(label.New("", string(pkg), file))
 	if !src.valid() {
@@ -115,7 +122,7 @@ type Imports struct {
 
 var (
 	testFilePattern = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)
-	requirePattern  = regexp.MustCompile(`(?m)^\(require '([-/\w]+)\)`)
+	requirePattern  = regexp.MustCompile(`(?m)^\(require '([-./\w]+)\)`)
 )
 
 type byName language.GenerateResult

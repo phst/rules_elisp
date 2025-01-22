@@ -34,6 +34,7 @@ func TestGazelleBinary(t *testing.T) {
 		{
 			Path: "BUILD.bazel",
 			Content: `
+proto_library(name = "my_proto", srcs = ["my.proto"])
 some_rule(name = "module")
 # gazelle:resolve elisp module :module
 `,
@@ -47,6 +48,7 @@ some_rule(name = "module")
 			Content: `
 (require 'lib-2)
 (require 'module)
+(require 'my.proto)
 (provide 'lib-1)
 (provide 'foo)
 `,
@@ -62,6 +64,10 @@ some_rule(name = "module")
 		{
 			Path:    ".dir-locals.el",
 			Content: `("foo")`,
+		},
+		{
+			Path:    "my.proto",
+			Content: "",
 		},
 		{
 			Path:    "pkg/lib-2.el",
@@ -90,7 +96,12 @@ some_rule(name = "module")
 	testtools.CheckFiles(t, dir, []testtools.FileSpec{
 		{
 			Path: "BUILD.bazel",
-			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
+			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_proto_library", "elisp_test")
+
+proto_library(
+    name = "my_proto",
+    srcs = ["my.proto"],
+)
 
 some_rule(name = "module")
 # gazelle:resolve elisp module :module
@@ -105,6 +116,7 @@ elisp_library(
     srcs = ["lib-1.el"],
     deps = [
         ":module",
+        ":my_elisp_proto",
         "//pkg:lib_2",
     ],
 )
@@ -113,6 +125,11 @@ elisp_test(
     name = "lib_1_test",
     srcs = ["lib-1-test.el"],
     deps = [":lib_1"],
+)
+
+elisp_proto_library(
+    name = "my_elisp_proto",
+    deps = [":my_proto"],
 )
 `,
 		}, {

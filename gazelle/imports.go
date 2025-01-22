@@ -16,6 +16,8 @@ package gazelle
 
 import (
 	"log"
+	"path"
+	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -28,6 +30,14 @@ import (
 // returns the features that the source files likely provide.  It doesn’t
 // actually parse the source files.
 func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
+	if r.Kind() == protoLibraryKind {
+		stem, ok := strings.CutSuffix(r.Name(), "_elisp_proto")
+		if !ok || stem == "" {
+			return nil
+		}
+		feat := Feature(path.Join(f.Pkg, stem+".proto"))
+		return []resolve.ImportSpec{feat.importSpec()}
+	}
 	if r.Kind() != libraryKind {
 		return nil
 	}
