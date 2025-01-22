@@ -13,8 +13,9 @@
 // limitations under the License.
 
 // Package gazelle implements Gazelle support for Emacs Lisp.  It generates and
-// maintains elisp_library, elisp_binary, and elisp_test rules from the
-// phst_rules_elisp repository.  See https://github.com/phst/rules_elisp and
+// maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
+// rules from the phst_rules_elisp repository.  See
+// https://github.com/phst/rules_elisp and
 // https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
 package gazelle
 
@@ -64,6 +65,9 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 			MergeableAttrs: map[string]bool{"srcs": true},
 			ResolveAttrs:   map[string]bool{"deps": true},
 		},
+		protoLibraryKind: {
+			NonEmptyAttrs: map[string]bool{"deps": true},
+		},
 		binaryKind: {
 			NonEmptyAttrs: map[string]bool{
 				"src":  true,
@@ -85,14 +89,15 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 func (elisp) Loads() []rule.LoadInfo {
 	return []rule.LoadInfo{{
 		Name:    "@phst_rules_elisp//elisp:defs.bzl",
-		Symbols: []string{libraryKind, binaryKind, testKind},
+		Symbols: []string{libraryKind, protoLibraryKind, binaryKind, testKind},
 	}}
 }
 
 func (elisp) Fix(c *config.Config, f *rule.File) {}
 
 const (
-	libraryKind = "elisp_library"
-	binaryKind  = "elisp_binary"
-	testKind    = "elisp_test"
+	libraryKind      = "elisp_library"
+	protoLibraryKind = "elisp_proto_library"
+	binaryKind       = "elisp_binary"
+	testKind         = "elisp_test"
 )

@@ -35,6 +35,9 @@ func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
 	r *rule.Rule, imports interface{}, from label.Label,
 ) {
+	if r.Kind() == protoLibraryKind {
+		return
+	}
 	imp, ok := imports.(Imports)
 	if !ok {
 		return

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2021, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,6 +99,14 @@ func TestImports(t *testing.T) {
 			pkg:   "lib",
 			build: `elisp_library(name = "lib", srcs = [])`,
 			want:  []resolve.ImportSpec{},
+		},
+		{
+			desc:  "protocol buffer library",
+			pkg:   "lib",
+			build: `elisp_proto_library(name = "my_elisp_proto")`,
+			want: []resolve.ImportSpec{
+				{Lang: "elisp", Imp: "lib/my.proto"},
+			},
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
