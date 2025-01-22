@@ -60,7 +60,6 @@ func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 		for _, dir := range f.Directives {
 			fun, ok := directives[dir.Key]
 			if !ok {
-				log.Printf("%s: unknown directive %s %s", f.Path, dir.Key, dir.Value)
 				continue
 			}
 			fun(f, dir, ext)
