@@ -65,7 +65,7 @@ git_override(
 See [[https://bazel.build/external/overview#bzlmod][the Bzlmod documentation]]
 for background information.  Then you can use the ~elisp_library~,
 ~elisp_binary~, and ~elisp_test~ rules.  See [[*Symbols defined in
-=//emacs:defs.bzl=]] and the examples in the ~examples~ directory for details.
+=//elisp:defs.bzl=]] and the examples in the ~examples~ directory for details.
 Note that the C++ code used by ~rules_elisp~ requires at least C++17, but Bazel
 still compiles with C++11 by default.  See
 [[https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil][the
