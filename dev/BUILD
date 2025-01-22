@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
-load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
 load("@phst_license_test//:def.bzl", "license_test")
 load("@pip//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
@@ -112,6 +112,18 @@ nogo(
 gazelle(
     name = "gazelle",
     gazelle = ":gazelle_binary",
+)
+
+gazelle_test(
+    name = "gazelle_test",
+    timeout = "short",
+    gazelle = ":gazelle_binary",
+    target_compatible_with = select({
+        # FIXME: Make this work on Windows.
+        "@platforms//os:windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    workspace = "//:MODULE.bazel",
 )
 
 gazelle_binary(
