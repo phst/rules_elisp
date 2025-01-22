@@ -17,6 +17,7 @@
 These definitions are internal and subject to change without notice."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
@@ -639,8 +640,9 @@ additional file to build.
 
 def _merged_manual_impl(ctx):
     orgs = []
+    roots = sets.make()
     for bin in ctx.files.includes:
-        org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"))
+        org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"), sibling = bin)
         ctx.actions.run(
             outputs = [org],
             inputs = [bin],
@@ -651,11 +653,18 @@ def _merged_manual_impl(ctx):
             toolchain = None,
         )
         orgs.append(org)
+        sets.insert(roots, org.root)
+
+    if sets.length(roots) != 1:
+        fail("multiple roots: %s", sets.str(roots))
+    (root,) = sets.to_list(roots)
 
     args = ctx.actions.args()
     args.add(ctx.outputs.out)
     args.add(ctx.file.main)
-    args.add_all(orgs, expand_directories = False)
+    args.add(ctx.file.main.owner.package)
+    args.add(root.path)
+    args.add_all(orgs, expand_directories = False, map_each = repository_relative_filename)
     ctx.actions.run(
         outputs = [ctx.outputs.out],
         inputs = [ctx.file.main] + orgs,

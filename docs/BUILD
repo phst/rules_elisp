@@ -50,7 +50,7 @@ DOCS = [
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
-    includes = ["{}.{}.binaryproto".format(pkg, name) for pkg, name in DOCS],
+    includes = ["{}/{}.binaryproto".format(pkg, name) for pkg, name in DOCS],
     main = "manual.org",
 )
 
@@ -66,7 +66,7 @@ elisp_binary(
 
 [
     starlark_doc_extract(
-        name = "{}.{}".format(pkg, name),
+        name = "{}/{}".format(pkg, name),
         src = "//{}:{}.bzl".format(pkg, name),
         render_main_repo_name = True,
         deps = ["//{}:{}".format(pkg, name)],
