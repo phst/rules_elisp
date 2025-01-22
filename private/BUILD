@@ -123,3 +123,5 @@ config_setting(
     name = "treat_warnings_as_errors_enabled",
     flag_values = {":treat_warnings_as_errors": "true"},
 )
+
+# gazelle:ignore generated.*.bzl
