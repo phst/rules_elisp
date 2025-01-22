@@ -2,6 +2,8 @@ github.com/bazelbuild/bazel-gazelle v0.40.0 h1:SAYys3KRG5i3KTgQAvO423bLT1rQMSgqE
 github.com/bazelbuild/bazel-gazelle v0.40.0/go.mod h1:xI42W5YdKQg0g3rj1jZfdW8j1UihNmvb5KwWDdHg2ec=
 github.com/bazelbuild/buildtools v0.0.0-20250121133043-54b4ddb7cbbf h1:Ihrs0tW7tHkqwPtmL75r1+rZmZgUuwqeaHG+AZE/vGw=
 github.com/bazelbuild/buildtools v0.0.0-20250121133043-54b4ddb7cbbf/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
+github.com/bazelbuild/buildtools v0.0.0-20250122150430-a84ab464140c h1:2xZh3m/693P4uNhTz5WGfTnL6e8wqUZVhzW8yEIpnxc=
+github.com/bazelbuild/buildtools v0.0.0-20250122150430-a84ab464140c/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
 github.com/bazelbuild/rules_go v0.52.0 h1:+ozpngVAW67pCAwfhepaXSSrG3yHcj8K9hNAxSYBno4=
 github.com/bazelbuild/rules_go v0.52.0/go.mod h1:M+YrupNArA7OiTlv++rFUgQ6Sm+ZXbQ5HPUj0cGa0us=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
