@@ -28,10 +28,10 @@ type extension struct {
 
 func initExtension(c *config.Config) *extension {
 	ext := getExtension(c)
-	if ext != nil {
-		return ext
+	if ext == nil {
+		ext = new(extension)
 	}
-	ext = new(extension)
+	ext = ext.clone()
 	c.Exts[languageName] = ext
 	return ext
 }
