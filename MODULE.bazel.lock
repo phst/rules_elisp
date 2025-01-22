@@ -186,16 +186,16 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "//elisp:extensions.bzl%elisp": {
+    "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "cBvDLFFnQbEadDiZxWUPlOP/eB4j9ZbjwKKG4v31EV8=",
-        "usagesDigest": "liZMS9ce4oz8dRujaSwrLfy/k+xo9hJ7wigNq+eJYmM=",
+        "bzlTransitiveDigest": "keXnJq03rxZE+i99Dizlz6cTSsttnIgR3nNdSSwFrZg=",
+        "usagesDigest": "dzh9Ut9m42pH4+Q0DEkPKJBrv71oNjdwfGFgXMV9dG0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
           "dash": {
-            "repoRuleId": "@@//elisp:extensions.bzl%_elisp_http_archive",
+            "repoRuleId": "@@//elisp/extensions:elisp.bzl%_elisp_http_archive",
             "attributes": {
               "urls": [
                 "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip"

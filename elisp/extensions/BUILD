@@ -1,10 +1,10 @@
-# Copyright 2023, 2024, 2025 Google LLC
+# Copyright 2025 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     https://www.apache.org/licenses/LICENSE-2.0
+#     http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,10 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Module extensions for Emacs Lisp."""
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
-load("//elisp/extensions:elisp.bzl", _elisp = "elisp")
+bzl_library(
+    name = "elisp",
+    srcs = ["elisp.bzl"],
+    visibility = [
+        "//docs:__pkg__",
+        "//elisp:__pkg__",
+    ],
+    deps = ["@bazel_skylib//lib:modules"],
+)
 
-visibility("public")
-
-elisp = _elisp
+exports_files(
+    ["elisp.bzl"],
+    visibility = ["//docs:__pkg__"],
+)
