@@ -92,7 +92,7 @@ def _local_texinfo_repository_impl(ctx):
         "BUILD.bazel",
         Label("//private:texinfo.BUILD.template"),
         {
-            '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
+            '"[sh_binary.bzl]"': repr(str(Label("@rules_shell//shell:sh_binary.bzl"))),
             '"[docs:__pkg__]"': repr(str(Label("//docs:__pkg__"))),
         },
         executable = False,

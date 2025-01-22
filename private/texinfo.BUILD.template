@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("[native_binary.bzl]", "native_binary")
+load("[sh_binary.bzl]", "sh_binary")
 
 package(default_visibility = ["[docs:__pkg__]"])
 
-native_binary(
+sh_binary(
     name = "makeinfo",
-    src = "makeinfo.exe",
+    srcs = ["makeinfo.exe"],
 )
 
 # Local Variables:

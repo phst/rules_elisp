@@ -224,7 +224,7 @@
     },
     "//private:extensions.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "46Zc9yYJTPme4Mn3PLFEXOvc0P2d8YAW5uNdtdRDRi4=",
+        "bzlTransitiveDigest": "ndH/ZQcbGW/ZHpFwgcljHd6hKyhsQNJKlLdX1+YHqRg=",
         "usagesDigest": "8Xi2p2FiSBOktLQxSGs2qDuwuwNYOAjVjClaeFzhjs4=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -303,7 +303,7 @@
     },
     "//private:extensions.bzl%dev_deps": {
       "general": {
-        "bzlTransitiveDigest": "46Zc9yYJTPme4Mn3PLFEXOvc0P2d8YAW5uNdtdRDRi4=",
+        "bzlTransitiveDigest": "ndH/ZQcbGW/ZHpFwgcljHd6hKyhsQNJKlLdX1+YHqRg=",
         "usagesDigest": "I7uLfCIDw4EhUdOX1jGaNva/lcz1d50YMTTpU5XdnJY=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
