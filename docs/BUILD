@@ -42,15 +42,15 @@ genrule(
 )
 
 DOCS = [
-    "elisp",
-    "emacs",
-    "extensions",
+    ("elisp", "defs"),
+    ("emacs", "defs"),
+    ("elisp", "extensions"),
 ]
 
 merged_manual(
     name = "merged_manual",
     out = "merged.org",
-    includes = [d + ".binaryproto" for d in DOCS],
+    includes = ["{}.{}.binaryproto".format(pkg, name) for pkg, name in DOCS],
     main = "manual.org",
 )
 
@@ -64,26 +64,15 @@ elisp_binary(
     output_args = [1],
 )
 
-starlark_doc_extract(
-    name = "elisp",
-    src = "//elisp:defs.bzl",
-    render_main_repo_name = True,
-    deps = ["//elisp:defs"],
-)
-
-starlark_doc_extract(
-    name = "emacs",
-    src = "//emacs:defs.bzl",
-    render_main_repo_name = True,
-    deps = ["//emacs:defs"],
-)
-
-starlark_doc_extract(
-    name = "extensions",
-    src = "//elisp:extensions.bzl",
-    render_main_repo_name = True,
-    deps = ["//elisp:extensions"],
-)
+[
+    starlark_doc_extract(
+        name = "{}.{}".format(pkg, name),
+        src = "//{}:{}.bzl".format(pkg, name),
+        render_main_repo_name = True,
+        deps = ["//{}:{}".format(pkg, name)],
+    )
+    for pkg, name in DOCS
+]
 
 py_binary(
     name = "generate",

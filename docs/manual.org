@@ -629,21 +629,21 @@ from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 :ALT_TITLE: Emacs Lisp Starlark symbols
 :END:
 
-#+INCLUDE: elisp.org
+#+INCLUDE: elisp.defs.org
 
 ** Symbols defined in =//elisp:extensions.bzl=
 :PROPERTIES:
 :ALT_TITLE: Extension Starlark symbols
 :END:
 
-#+INCLUDE: extensions.org
+#+INCLUDE: elisp.extensions.org
 
 ** Symbols defined in =//emacs:defs.bzl=
 :PROPERTIES:
 :ALT_TITLE: Emacs Starlark symbols
 :END:
 
-#+INCLUDE: emacs.org
+#+INCLUDE: emacs.defs.org
 
 * Indices
 
