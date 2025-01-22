@@ -14,10 +14,10 @@
 
 module github.com/phst/rules_elisp
 
-go 1.23.5
+go 1.22.7
 
 require (
-	github.com/bazelbuild/bazel-gazelle v0.41.0
+	github.com/bazelbuild/bazel-gazelle v0.40.0
 	github.com/bazelbuild/buildtools v0.0.0-20250121133043-54b4ddb7cbbf
 	github.com/bazelbuild/rules_go v0.52.0
 	github.com/google/go-cmp v0.6.0
