@@ -38,18 +38,13 @@ func (elisp) Resolve(
 	}
 	var deps []string
 	for _, feat := range imp.Requires {
-		spec := feat.importSpec()
-		res := ix.FindRulesByImportWithConfig(c, spec, languageName)
-		if len(res) == 0 {
+		lbl := resolveFeature(c, ix, from, feat)
+		if lbl == nil {
 			log.Printf("%s: no rule for required feature %s found", from, feat)
 			continue
 		}
-		if len(res) > 1 {
-			log.Printf("%s: %d rules for required feature %s found", from, len(res), feat)
-		}
 		// Make the label relative to the current package if possible.
-		lbl := res[0].Label.Rel(from.Repo, from.Pkg)
-		deps = append(deps, lbl.String())
+		deps = append(deps, lbl.Rel(from.Repo, from.Pkg).String())
 	}
 	if len(deps) > 0 {
 		sort.Strings(deps)
@@ -57,4 +52,16 @@ func (elisp) Resolve(
 	} else {
 		r.DelAttr("deps")
 	}
+}
+
+func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) *label.Label {
+	spec := feat.importSpec()
+	res := ix.FindRulesByImportWithConfig(c, spec, languageName)
+	if len(res) == 0 {
+		return nil
+	}
+	if len(res) > 1 {
+		log.Printf("%s: %d rules for required feature %s found", from, len(res), feat)
+	}
+	return &res[0].Label
 }
