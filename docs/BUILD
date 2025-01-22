@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
@@ -33,12 +34,17 @@ elisp_manual(
     out = "manual.texi",
 )
 
-genrule(
+run_binary(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
-    cmd = "$(execpath :makeinfo) --no-split --output=$@ -- $<",
-    tools = [":makeinfo"],
+    args = [
+        "--no-split",
+        "--output=$(execpath rules_elisp.info)",
+        "--",
+        "$(execpath manual.texi)",
+    ],
+    tool = ":makeinfo",
 )
 
 # This rule assumes that Texinfo is installed locally.
