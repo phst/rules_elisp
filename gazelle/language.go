@@ -76,19 +76,19 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 	return map[string]rule.KindInfo{
 		libraryKind: {
 			NonEmptyAttrs: map[string]bool{
-				"src":       true,
+				"srcs":      true,
 				"deps":      true,
 				"load_path": true,
 			},
-			ResolveAttrs: map[string]bool{"deps": true},
+			MergeableAttrs: map[string]bool{"srcs": true},
+			ResolveAttrs:   map[string]bool{"deps": true},
 		},
 		binaryKind: {
 			NonEmptyAttrs: map[string]bool{
-				"srcs": true,
+				"src":  true,
 				"deps": true,
 			},
-			MergeableAttrs: map[string]bool{"srcs": true},
-			ResolveAttrs:   map[string]bool{"deps": true},
+			ResolveAttrs: map[string]bool{"deps": true},
 		},
 		testKind: {
 			NonEmptyAttrs: map[string]bool{
