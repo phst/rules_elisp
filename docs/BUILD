@@ -50,7 +50,7 @@ DOCS = [
     ("elisp", "elisp_manual"),
     ("elisp/common", "elisp_info"),
     ("elisp/toolchains", "elisp_toolchain"),
-    ("elisp", "extensions"),
+    ("elisp/extensions", "elisp"),
     ("emacs", "defs"),
 ]
 

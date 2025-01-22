@@ -1,4 +1,4 @@
-# Copyright 2023, 2024 Google LLC
+# Copyright 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ local_path_override(
     path = "../..",
 )
 
-elisp = use_extension("@phst_rules_elisp//elisp:extensions.bzl", "elisp")
+elisp = use_extension("@phst_rules_elisp//elisp/extensions:elisp.bzl", "elisp")
 elisp.http_archive(
     name = "dash",
     exclude = ["dash-functional.el"],

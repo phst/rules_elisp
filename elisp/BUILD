@@ -185,8 +185,7 @@ bzl_library(
 bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
-    visibility = ["//docs:__pkg__"],
-    deps = ["@bazel_skylib//lib:modules"],
+    deps = ["//elisp/extensions:elisp"],
 )
 
 cc_binary(
@@ -463,7 +462,6 @@ exports_files(
         "elisp_library.bzl",
         "elisp_manual.bzl",
         "elisp_test.bzl",
-        "extensions.bzl",
     ],
     visibility = ["//docs:__pkg__"],
 )
