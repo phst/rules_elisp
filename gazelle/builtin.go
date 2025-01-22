@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,9 +15,10 @@
 package gazelle
 
 import (
-	_ "embed"
 	"encoding/json"
 	"fmt"
+
+	_ "embed"
 )
 
 var builtinFeatures = decodeBuiltinFeatures(builtinFeaturesJSON)
