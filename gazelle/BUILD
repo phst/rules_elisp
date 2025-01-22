@@ -51,13 +51,13 @@ go_library(
     importpath = "github.com/phst/rules_elisp/gazelle",
     visibility = ["//visibility:private"],
     deps = [
-        "@gazelle//config:go_default_library",
-        "@gazelle//label:go_default_library",
-        "@gazelle//language:go_default_library",
-        "@gazelle//pathtools:go_default_library",
-        "@gazelle//repo:go_default_library",
-        "@gazelle//resolve:go_default_library",
-        "@gazelle//rule:go_default_library",
+        "@gazelle//config",
+        "@gazelle//label",
+        "@gazelle//language",
+        "@gazelle//pathtools",
+        "@gazelle//repo",
+        "@gazelle//resolve",
+        "@gazelle//rule",
     ],
 )
 
@@ -74,14 +74,14 @@ go_test(
     rundir = ".",
     deps = [
         ":library",
-        "@com_github_bazelbuild_buildtools//build:go_default_library",
-        "@com_github_google_go_cmp//cmp:go_default_library",
-        "@gazelle//label:go_default_library",
-        "@gazelle//language:go_default_library",
-        "@gazelle//repo:go_default_library",
-        "@gazelle//resolve:go_default_library",
-        "@gazelle//rule:go_default_library",
-        "@gazelle//testtools:go_default_library",
+        "@com_github_bazelbuild_buildtools//build",
+        "@com_github_google_go_cmp//cmp",
+        "@gazelle//label",
+        "@gazelle//language",
+        "@gazelle//repo",
+        "@gazelle//resolve",
+        "@gazelle//rule",
+        "@gazelle//testtools",
     ],
 )
 
