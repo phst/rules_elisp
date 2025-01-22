@@ -32,11 +32,11 @@ gazelle(
 
 gazelle_binary(
     name = "binary",
-    languages = [":go_default_library"],
+    languages = [":library"],
 )
 
 go_library(
-    name = "go_default_library",
+    name = "library",
     srcs = [
         "builtin.go",
         "feature.go",
@@ -73,7 +73,7 @@ go_test(
     embedsrcs = ["binary.exe"],
     rundir = ".",
     deps = [
-        ":go_default_library",
+        ":library",
         "@com_github_bazelbuild_buildtools//build:go_default_library",
         "@com_github_google_go_cmp//cmp:go_default_library",
         "@gazelle//label:go_default_library",
