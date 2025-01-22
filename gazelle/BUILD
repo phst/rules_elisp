@@ -39,6 +39,7 @@ go_library(
     name = "library",
     srcs = [
         "builtin.go",
+        "extension.go",
         "feature.go",
         "generate.go",
         "imports.go",
