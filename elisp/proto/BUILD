@@ -263,3 +263,4 @@ elisp_proto_library(
 )
 
 # gazelle:go_generate_proto false
+# gazelle:elisp_provide :module=elisp/proto/module

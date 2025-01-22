@@ -20,6 +20,8 @@ package gazelle
 
 import (
 	"flag"
+	"log"
+	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -40,13 +42,30 @@ func (elisp) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {}
 
 func (elisp) CheckFlags(fs *flag.FlagSet, c *config.Config) error { return nil }
 
-func (elisp) KnownDirectives() []string { return nil }
+func (elisp) KnownDirectives() []string {
+	var r []string
+	for k := range directives {
+		r = append(r, k)
+	}
+	return r
+}
 
 func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 	// We always rely on the imports index to write deps attributes.
 	c.IndexLibraries = true
 
-	initExtension(c)
+	ext := initExtension(c)
+
+	if f != nil {
+		for _, dir := range f.Directives {
+			fun, ok := directives[dir.Key]
+			if !ok {
+				log.Printf("%s: unknown directive %s %s", f.Path, dir.Key, dir.Value)
+				continue
+			}
+			fun(f, dir, ext)
+		}
+	}
 }
 
 func (elisp) Name() string { return languageName }
@@ -90,6 +109,24 @@ func (elisp) Loads() []rule.LoadInfo {
 }
 
 func (elisp) Fix(c *config.Config, f *rule.File) {}
+
+var directives = map[string]func(*rule.File, rule.Directive, *extension){
+	"elisp_provide": processProvide,
+}
+
+func processProvide(f *rule.File, dir rule.Directive, ext *extension) {
+	before, after, ok := strings.Cut(dir.Value, "=")
+	if !ok || before == "" || after == "" {
+		log.Printf("%s: invalid directive %s %s", f.Path, dir.Key, dir.Value)
+		return
+	}
+	lbl, err := label.Parse(before)
+	if err != nil {
+		log.Printf("%s: invalid label %q in directive: %s", f.Path, before, err)
+		return
+	}
+	ext.addProvider(lbl.Abs("", f.Pkg), Feature(after))
+}
 
 const (
 	libraryKind = "elisp_library"

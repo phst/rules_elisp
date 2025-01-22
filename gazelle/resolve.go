@@ -55,6 +55,10 @@ func (elisp) Resolve(
 }
 
 func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) *label.Label {
+	if lbl := getExtension(c).provider(feat); lbl != nil {
+		return lbl
+	}
+
 	spec := feat.importSpec()
 	res := ix.FindRulesByImportWithConfig(c, spec, languageName)
 	if len(res) == 0 {

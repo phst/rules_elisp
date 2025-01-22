@@ -32,6 +32,13 @@ func TestGazelleBinary(t *testing.T) {
 			Content: `module(name = "test")`,
 		},
 		{
+			Path: "BUILD.bazel",
+			Content: `
+some_rule(name = "module")
+# gazelle:elisp_provide :module=module
+`,
+		},
+		{
 			Path:    "empty.el",
 			Content: "",
 		},
@@ -39,6 +46,7 @@ func TestGazelleBinary(t *testing.T) {
 			Path: "lib-1.el",
 			Content: `
 (require 'lib-2)
+(require 'module)
 (provide 'lib-1)
 (provide 'foo)
 `,
@@ -84,6 +92,9 @@ func TestGazelleBinary(t *testing.T) {
 			Path: "BUILD.bazel",
 			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
 
+some_rule(name = "module")
+# gazelle:elisp_provide :module=module
+
 elisp_library(
     name = "empty",
     srcs = ["empty.el"],
@@ -92,7 +103,10 @@ elisp_library(
 elisp_library(
     name = "lib_1",
     srcs = ["lib-1.el"],
-    deps = ["//pkg:lib_2"],
+    deps = [
+        ":module",
+        "//pkg:lib_2",
+    ],
 )
 
 elisp_test(
