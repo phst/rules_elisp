@@ -36,7 +36,7 @@ licenses(["notice"])
 elisp_test_suite(name = "elisp_test")
 
 go_test(
-    name = "go_default_test",
+    name = "tests_test",
     size = "medium",
     timeout = "short",
     srcs = ["ert_test.go"],
