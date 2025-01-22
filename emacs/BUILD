@@ -89,24 +89,14 @@ alias(
 py_binary(
     name = "build",
     srcs = ["build.py"],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
-    deps = [
-        "//private:defs",
-        "@bazel_skylib//lib:paths",
-        "@rules_cc//cc:action_names_bzl",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
-    ],
-)
-
-exports_files(
-    ["defs.bzl"],
-    visibility = ["//docs:__pkg__"],
+    deps = ["//elisp/toolchains:elisp_emacs_binary"],
 )
 
 alias(
@@ -115,6 +105,7 @@ alias(
         "@platforms//os:windows": ":windows_cc_toolchain",
         "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
     }),
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 alias(
@@ -143,4 +134,5 @@ cc_defaults(
         "-default_link_libs",
     ],
     linkopts = [],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )

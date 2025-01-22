@@ -100,7 +100,7 @@ elisp_toolchain(
 
 exports_files(
     ["launcher.cc"],
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 bzl_library(
@@ -227,7 +227,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
         ":platform",
         ":process",
@@ -449,7 +449,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 exports_files(
@@ -493,7 +493,7 @@ cc_defaults(
     defines = LAUNCHER_DEFINES,
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
-    visibility = ["//emacs:__pkg__"],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 module_config(

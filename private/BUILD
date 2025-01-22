@@ -35,6 +35,7 @@ bzl_library(
         "//elisp:__pkg__",
         "//elisp/private:__pkg__",
         "//elisp/proto:__pkg__",
+        "//elisp/toolchains:__pkg__",
         "//emacs:__pkg__",
     ],
     deps = [

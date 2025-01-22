@@ -15,8 +15,24 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 exports_files(
-    ["elisp_toolchain.bzl"],
+    [
+        # keep sorted
+        "elisp_emacs_binary.bzl",
+        "elisp_toolchain.bzl",
+    ],
     visibility = ["//docs:__pkg__"],
+)
+
+bzl_library(
+    name = "elisp_emacs_binary",
+    srcs = ["elisp_emacs_binary.bzl"],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//private:defs",
+        "@rules_cc//cc:action_names_bzl",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
+    ],
 )
 
 bzl_library(
