@@ -82,7 +82,6 @@ go_test(
         "@gazelle//resolve:go_default_library",
         "@gazelle//rule:go_default_library",
         "@gazelle//testtools:go_default_library",
-        "@rules_go//go/runfiles",
     ],
 )
 
