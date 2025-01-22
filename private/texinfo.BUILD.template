@@ -17,8 +17,13 @@ load("[native_binary.bzl]", "native_binary")
 package(default_visibility = ["[docs:__pkg__]"])
 
 native_binary(
+    name = "perl",
+    src = "perl.exe",
+)
+
+filegroup(
     name = "makeinfo",
-    src = "makeinfo.exe",
+    srcs = ["makeinfo.pl"],
 )
 
 # Local Variables:

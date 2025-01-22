@@ -32,13 +32,16 @@ elisp_manual(
     out = "manual.texi",
 )
 
-# This rule assumes that Texinfo is installed locally.
+# This rule assumes that Perl and Texinfo are installed locally.
 genrule(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
-    cmd = "$(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
-    tools = ["@local_texinfo//:makeinfo"],
+    cmd = "$(execpath @local_texinfo//:perl) -w $(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
+    tools = [
+        "@local_texinfo//:makeinfo",
+        "@local_texinfo//:perl",
+    ],
 )
 
 DOCS = [

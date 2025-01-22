@@ -87,7 +87,11 @@ def _local_texinfo_repository_impl(ctx):
     makeinfo = ctx.getenv("MAKEINFO", "makeinfo") or fail("MAKEINFO is empty")
     if "/" not in makeinfo and "\\" not in makeinfo:
         makeinfo = ctx.which(makeinfo) or fail("Texinfo not installed")
-    ctx.symlink(makeinfo, "makeinfo.exe")
+    ctx.symlink(makeinfo, "makeinfo.pl")
+
+    perl = ctx.which("perl") or fail("Perl not installed")
+    ctx.symlink(perl, "perl.exe")
+
     ctx.template(
         "BUILD.bazel",
         Label("//private:texinfo.BUILD.template"),
