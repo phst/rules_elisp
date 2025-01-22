@@ -116,7 +116,7 @@ use_repo(
 )
 
 # Tools for development
-bazel_dep(name = "buildifier_prebuilt", version = "8.0.0", dev_dependency = True, repo_name = "buildifier")
+bazel_dep(name = "buildifier_prebuilt", version = "8.0.1", dev_dependency = True, repo_name = "buildifier")
 bazel_dep(name = "phst_license_test", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_license_test",
