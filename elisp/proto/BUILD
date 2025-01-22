@@ -261,3 +261,5 @@ elisp_proto_library(
     testonly = True,
     deps = [":test_proto"],
 )
+
+# gazelle:go_generate_proto false

@@ -163,3 +163,5 @@ elisp_test(
         "//elisp/proto",
     ],
 )
+
+# gazelle:go_generate_proto false
