@@ -31,6 +31,7 @@ visibility([
     "//docs",
     "//elisp",
     "//elisp/ert",
+    "//elisp/private",
     "//elisp/proto",
     "//elisp/runfiles",
     "//emacs",

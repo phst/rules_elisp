@@ -624,12 +624,61 @@ from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 
 * Starlark symbol reference
 
-** Symbols defined in =//elisp:defs.bzl=
+** Symbols defined in =//elisp:elisp_library.bzl=
 :PROPERTIES:
-:ALT_TITLE: Emacs Lisp Starlark symbols
+:ALT_TITLE: Starlark library rule
 :END:
 
-#+INCLUDE: elisp/defs.org
+#+INCLUDE: elisp/elisp_library.org
+
+** Symbols defined in =//elisp/proto:elisp_proto_library.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark protocol buffer library rule
+:END:
+
+#+INCLUDE: elisp/proto/elisp_proto_library.org
+
+** Symbols defined in =//elisp:elisp_cc_module.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark C/C++ module rule
+:END:
+
+#+INCLUDE: elisp/elisp_cc_module.org
+
+** Symbols defined in =//elisp:elisp_binary.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark binary rule
+:END:
+
+#+INCLUDE: elisp/elisp_binary.org
+
+** Symbols defined in =//elisp:elisp_test.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark test rule
+:END:
+
+#+INCLUDE: elisp/elisp_test.org
+
+** Symbols defined in =//elisp:elisp_manual.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark manual rule
+:END:
+
+#+INCLUDE: elisp/elisp_manual.org
+
+** Symbols defined in =//elisp/common:elisp_info.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark provider
+:END:
+
+#+INCLUDE: elisp/common/elisp_info.org
+
+** Symbols defined in =//elisp/toolchains:elisp_toolchain.bzl=
+:PROPERTIES:
+:ALT_TITLE: Starlark toolchain
+:END:
+
+#+INCLUDE: elisp/toolchains/elisp_toolchain.org
 
 ** Symbols defined in =//elisp:extensions.bzl=
 :PROPERTIES:
