@@ -144,7 +144,7 @@ git_override(
 bazel_dep(name = "phst_bazelcov", version = "0", dev_dependency = True, repo_name = "bazelcov")
 git_override(
     module_name = "phst_bazelcov",
-    commit = "eab314d95b7cc7ade373a14673f8d051491fcb8d",
+    commit = "b7045fda0138bd881f9bba2232387117bc033088",
     remote = "https://github.com/phst/bazelcov.git",
 )
 
