@@ -33,6 +33,7 @@ visibility([
     "//elisp/private",
     "//elisp/proto",
     "//elisp/runfiles",
+    "//elisp/toolchains",
     "//emacs",
     "//examples",
     "//gazelle",

@@ -75,7 +75,7 @@ DOCS = [
     ("elisp/common", "elisp_info"),
     ("elisp/toolchains", "elisp_toolchain"),
     ("elisp/extensions", "elisp"),
-    ("emacs", "defs"),
+    ("elisp/toolchains", "elisp_emacs_binary"),
 ]
 
 merged_manual(

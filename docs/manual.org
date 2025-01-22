@@ -689,12 +689,12 @@ from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 
 #+INCLUDE: elisp/extensions/elisp.org
 
-** Symbols defined in =//emacs:defs.bzl=
+** Symbols defined in =//elisp/toolchains:elisp_emacs_binary.bzl=
 :PROPERTIES:
 :ALT_TITLE: Emacs Starlark symbols
 :END:
 
-#+INCLUDE: emacs/defs.org
+#+INCLUDE: elisp/toolchains/elisp_emacs_binary.org
 
 * Indices
 
