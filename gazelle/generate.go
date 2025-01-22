@@ -55,6 +55,11 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 // file names the source file within the package.  Return nil if file doesn’t
 // name an Emacs Lisp file or on any error.
 func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Imports) {
+	if file == ".dir-locals.el" {
+		// Never generate a rule for .dir-locals.el, as it can’t be
+		// compiled.
+		return nil, Imports{}
+	}
 	src := srcFile(label.New("", string(pkg), file))
 	if !src.valid() {
 		// Probably not an Emacs Lisp file.  Don’t print an error.

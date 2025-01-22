@@ -52,6 +52,10 @@ func TestGazelleBinary(t *testing.T) {
 `,
 		},
 		{
+			Path:    ".dir-locals.el",
+			Content: `("foo")`,
+		},
+		{
 			Path:    "pkg/lib-2.el",
 			Content: `(provide 'lib-2)`,
 		},
