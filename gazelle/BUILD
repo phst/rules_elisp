@@ -62,7 +62,7 @@ go_library(
 )
 
 go_test(
-    name = "go_default_test",
+    name = "gazelle_test",
     timeout = "short",
     srcs = [
         "gazelle_test.go",

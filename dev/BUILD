@@ -89,7 +89,7 @@ py_binary(
 )
 
 go_test(
-    name = "go_default_test",
+    name = "dev_test",
     size = "small",
     srcs = ["version_test.go"],
     embedsrcs = ["MODULE.bazel"],
