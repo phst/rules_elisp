@@ -15,6 +15,7 @@
 load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "merged_manual")
 
@@ -32,13 +33,18 @@ elisp_manual(
     out = "manual.texi",
 )
 
-# This rule assumes that Texinfo is installed locally.
 genrule(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
-    cmd = "$(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
-    tools = ["@local_texinfo//:makeinfo"],
+    cmd = "$(execpath :makeinfo) --no-split --output=$@ -- $<",
+    tools = [":makeinfo"],
+)
+
+# This rule assumes that Texinfo is installed locally.
+sh_binary(
+    name = "makeinfo",
+    srcs = ["makeinfo.sh"],
 )
 
 DOCS = [
