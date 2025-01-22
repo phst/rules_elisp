@@ -48,3 +48,4 @@ exports_files(
 )
 
 # gazelle:prefix github.com/phst/rules_elisp
+# gazelle:lang go,proto,starlark
