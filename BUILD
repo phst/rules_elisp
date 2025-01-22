@@ -47,5 +47,4 @@ exports_files(
     visibility = ["//dev:__pkg__"],
 )
 
-# gazelle:prefix github.com/phst/rules_elisp
 # gazelle:lang go,proto,starlark
