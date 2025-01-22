@@ -42,9 +42,16 @@ genrule(
 )
 
 DOCS = [
-    ("elisp", "defs"),
-    ("emacs", "defs"),
+    ("elisp", "elisp_library"),
+    ("elisp/proto", "elisp_proto_library"),
+    ("elisp", "elisp_cc_module"),
+    ("elisp", "elisp_binary"),
+    ("elisp", "elisp_test"),
+    ("elisp", "elisp_manual"),
+    ("elisp/common", "elisp_info"),
+    ("elisp/toolchains", "elisp_toolchain"),
     ("elisp", "extensions"),
+    ("emacs", "defs"),
 ]
 
 merged_manual(

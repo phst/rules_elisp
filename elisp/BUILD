@@ -111,14 +111,75 @@ bzl_library(
         "//tests:__pkg__",
     ],
     deps = [
+        ":elisp_binary",
+        ":elisp_cc_module",
+        ":elisp_library",
+        ":elisp_manual",
+        ":elisp_test",
+        "//elisp/common:elisp_info",
+        "//elisp/proto:elisp_proto_library",
+        "//elisp/toolchains:elisp_toolchain",
+    ],
+)
+
+bzl_library(
+    name = "elisp_library",
+    srcs = ["elisp_library.bzl"],
+    visibility = ["//docs:__pkg__"],
+    deps = [
+        "//elisp/common:elisp_info",
+        "//elisp/private:compile",
+    ],
+)
+
+bzl_library(
+    name = "elisp_cc_module",
+    srcs = ["elisp_cc_module.bzl"],
+    visibility = ["//docs:__pkg__"],
+    deps = [
+        "//elisp/common:elisp_info",
+        "//elisp/private:load_path",
         "//private:defs",
-        "@bazel_skylib//lib:collections",
-        "@bazel_skylib//lib:paths",
-        "@protobuf//bazel/common:proto_common_bzl",
-        "@protobuf//bazel/common:proto_info_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
+)
+
+bzl_library(
+    name = "elisp_binary",
+    srcs = ["elisp_binary.bzl"],
+    visibility = ["//docs:__pkg__"],
+    deps = [
+        "//elisp/common:elisp_info",
+        "//elisp/private:binary",
+        "//elisp/private:compile",
+        "//private:defs",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
+    ],
+)
+
+bzl_library(
+    name = "elisp_test",
+    srcs = [
+        "elisp_test.bzl",  # keep
+    ],
+    visibility = ["//docs:__pkg__"],
+    deps = [
+        "//elisp/common:elisp_info",
+        "//elisp/private:binary",
+        "//elisp/private:compile",
+        "//private:defs",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
+    ],
+)
+
+bzl_library(
+    name = "elisp_manual",
+    srcs = ["elisp_manual.bzl"],
+    visibility = ["//docs:__pkg__"],
+    deps = ["//private:defs"],
 )
 
 bzl_library(
@@ -397,7 +458,11 @@ cc_library(
 exports_files(
     [
         # keep sorted
-        "defs.bzl",
+        "elisp_binary.bzl",
+        "elisp_cc_module.bzl",
+        "elisp_library.bzl",
+        "elisp_manual.bzl",
+        "elisp_test.bzl",
         "extensions.bzl",
     ],
     visibility = ["//docs:__pkg__"],
@@ -408,6 +473,7 @@ bootstrap(
     name = "compile",
     src = "compile.el",
     out = "compile.elc",
+    visibility = ["//elisp/proto:__pkg__"],
 )
 
 build_test(

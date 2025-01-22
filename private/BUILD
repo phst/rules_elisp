@@ -33,6 +33,8 @@ bzl_library(
     visibility = [
         "//docs:__pkg__",
         "//elisp:__pkg__",
+        "//elisp/private:__pkg__",
+        "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
     ],
     deps = [

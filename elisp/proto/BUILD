@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
@@ -139,6 +140,23 @@ proto_lang_toolchain(
     visibility = ["//visibility:public"],
 )
 
+bzl_library(
+    name = "elisp_proto_library",
+    srcs = ["elisp_proto_library.bzl"],
+    visibility = [
+        "//docs:__pkg__",
+        "//elisp:__pkg__",
+    ],
+    deps = [
+        "//elisp/common:elisp_info",
+        "//elisp/private:compile",
+        "//private:defs",
+        "@bazel_skylib//lib:paths",
+        "@protobuf//bazel/common:proto_common_bzl",
+        "@protobuf//bazel/common:proto_info_bzl",
+    ],
+)
+
 elisp_cc_module(
     name = "module",
     srcs = ["module.c"],
@@ -260,6 +278,11 @@ elisp_proto_library(
     name = "test_elisp_proto",
     testonly = True,
     deps = [":test_proto"],
+)
+
+exports_files(
+    ["elisp_proto_library.bzl"],
+    visibility = ["//docs:__pkg__"],
 )
 
 # gazelle:go_generate_proto false
