@@ -1,4 +1,4 @@
-// Copyright 2022, 2023 Google LLC
+// Copyright 2022, 2023, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,9 +26,10 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
-// GenerateRules implements Language.GenerateRules.  It generates elisp_library
-// or elisp_test rules, one per source file.  It adds the features required by
-// each file to the GenerateResult.Imports slice as Imports structures.
+// GenerateRules implements [language.Language.GenerateRules].  It generates
+// elisp_library or elisp_test rules, one per source file.  It adds the features
+// required by each file to the [language.GenerateResult.Imports] slice as
+// [Imports] structures.
 func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	fsys := os.DirFS(args.Dir)
 	pkg := bazelPackage(args.Rel)
@@ -101,7 +102,7 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 }
 
 // Imports documents which features an Emacs Lisp file requires.
-// Language.GenerateRules uses this type for GenerateResult.Imports.
+// [GenerateRules] uses this type for [language.GenerateResult.Imports].
 type Imports struct {
 	Requires []Feature
 }

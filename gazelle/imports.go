@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
-// Imports implements Resolver.Imports.  For an elisp_library rule, it returns
-// the features that the source files likely provide.  It doesn’t actually parse
-// the source files.
+// Imports implements [resolve.Resolver.Imports].  For an elisp_library rule, it
+// returns the features that the source files likely provide.  It doesn’t
+// actually parse the source files.
 func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
 	if r.Kind() != libraryKind {
 		return nil

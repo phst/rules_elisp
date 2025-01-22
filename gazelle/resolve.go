@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2024 Google LLC
+// Copyright 2021, 2022, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
-// Resolve implements Resolver.Resolve.  It adds a deps attribute to the given
-// rule.  imports should be an Imports object, and ix should contain mappings
-// for the features in imports.
+// Resolve implements [resolve.Resolver.Resolve].  It adds a deps attribute to
+// the given rule.  imports should be an [Imports] object, and ix should contain
+// mappings for the features in imports.
 func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
 	r *rule.Rule, imports interface{}, from label.Label,
