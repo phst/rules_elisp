@@ -19,11 +19,11 @@ load("@bazel_skylib//lib:paths.bzl", "paths")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load(
     "//private:defs.bzl",
-    "LAUNCHER_ATTRS",
     "check_relative_filename",
     "repository_relative_filename",
     "run_emacs",
 )
+load(":cc_launcher_config.bzl", "LAUNCHER_ATTRS")
 load(":load_path.bzl", "resolve_load_path")
 
 visibility(["//elisp", "//elisp/proto"])

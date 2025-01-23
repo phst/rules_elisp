@@ -19,11 +19,8 @@ load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
+load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
-load(
-    "//private:defs.bzl",
-    "LAUNCHER_DEPS",
-)
 
 visibility("public")
 

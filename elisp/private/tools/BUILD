@@ -20,6 +20,14 @@ load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
+load(
+    "//elisp/private:cc_launcher_config.bzl",
+    "LAUNCHER_COPTS",
+    "LAUNCHER_DEFINES",
+    "LAUNCHER_DEPS",
+    "LAUNCHER_FEATURES",
+    "LAUNCHER_LINKOPTS",
+)
 load("//elisp/private:executable_only.bzl", "executable_only")
 load(
     "//private:defs.bzl",
@@ -27,11 +35,6 @@ load(
     "CXXOPTS",
     "DEFINES",
     "FEATURES",
-    "LAUNCHER_COPTS",
-    "LAUNCHER_DEFINES",
-    "LAUNCHER_DEPS",
-    "LAUNCHER_FEATURES",
-    "LAUNCHER_LINKOPTS",
     "LINKOPTS",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
     "PACKAGE_FEATURES",

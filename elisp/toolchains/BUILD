@@ -38,6 +38,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//elisp/private:cc_launcher",
+        "//elisp/private:cc_launcher_config",
         "//private:defs",
         "@rules_cc//cc:action_names_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",

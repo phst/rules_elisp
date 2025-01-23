@@ -214,8 +214,6 @@ FEATURES = select({
     Label("//conditions:default"): [],
 })
 
-LAUNCHER_FEATURES = FEATURES
-
 # Shared C++ compilation options.
 COPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [
@@ -260,8 +258,6 @@ CONLYOPTS = select({
     Label("//elisp/private:gcc_or_clang"): ["-Wvla"],
 })
 
-LAUNCHER_COPTS = COPTS + CXXOPTS
-
 DEFINES = [
     # https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01
     "_POSIX_C_SOURCE=200809L",
@@ -278,14 +274,7 @@ DEFINES = [
     ],
 })
 
-LAUNCHER_DEFINES = DEFINES
-
 LINKOPTS = []
-
-LAUNCHER_LINKOPTS = LINKOPTS + select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
-    Label("//elisp/private:gcc_or_clang"): [],
-})
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
@@ -318,27 +307,6 @@ cc_defaults = rule(
     doc = "Internal rule for default C++ flags",
     provides = [CcDefaultInfo],
 )
-
-LAUNCHER_ATTRS = {
-    "_launcher_srcs": attr.label_list(
-        default = [Label("//elisp/private/tools:launcher.cc")],
-        allow_files = [".cc"],
-    ),
-    "_launcher_defaults": attr.label(
-        default = Label("//elisp:launcher_defaults"),
-        providers = [CcDefaultInfo],
-    ),
-}
-
-LAUNCHER_DEPS = [
-    Label("//elisp/private/tools:platform"),
-    Label("@abseil-cpp//absl/container:fixed_array"),
-    Label("@abseil-cpp//absl/log"),
-    Label("@abseil-cpp//absl/meta:type_traits"),
-    Label("@abseil-cpp//absl/status"),
-    Label("@abseil-cpp//absl/status:statusor"),
-    Label("@abseil-cpp//absl/types:span"),
-]
 
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.

@@ -13,13 +13,16 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//elisp/private:module_config.bzl", "module_config")
 load(
-    "//private:defs.bzl",
+    "//elisp/private:cc_launcher_config.bzl",
     "LAUNCHER_COPTS",
     "LAUNCHER_DEFINES",
     "LAUNCHER_FEATURES",
     "LAUNCHER_LINKOPTS",
+)
+load("//elisp/private:module_config.bzl", "module_config")
+load(
+    "//private:defs.bzl",
     "PACKAGE_FEATURES",
     "cc_defaults",
 )
@@ -130,6 +133,7 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
+        "//elisp/private:cc_launcher_config",
         "//elisp/private:compile",
         "//private:defs",
         "@rules_cc//cc:find_cc_toolchain_bzl",
@@ -146,6 +150,7 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
+        "//elisp/private:cc_launcher_config",
         "//elisp/private:compile",
         "//private:defs",
         "@rules_cc//cc:find_cc_toolchain_bzl",

@@ -40,6 +40,7 @@ bzl_library(
         "//elisp/proto:__pkg__",
     ],
     deps = [
+        ":cc_launcher_config",
         ":load_path",
         "//elisp/common:elisp_info",
         "//private:defs",
@@ -70,6 +71,16 @@ bzl_library(
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
+)
+
+bzl_library(
+    name = "cc_launcher_config",
+    srcs = ["cc_launcher_config.bzl"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
+    ],
+    deps = ["//private:defs"],
 )
 
 bzl_library(
