@@ -24,7 +24,6 @@ visibility([
     "//dev",
     "//docs",
     "//elisp",
-    "//elisp/ert",
     "//elisp/private",
     "//elisp/private/tools",
     "//elisp/proto",
