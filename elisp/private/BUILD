@@ -120,6 +120,12 @@ bzl_library(
     srcs = ["generated.bzl"],
 )
 
+bzl_library(
+    name = "deps",
+    srcs = ["deps.bzl"],
+    deps = ["@bazel_skylib//lib:modules"],
+)
+
 selects.config_setting_group(
     name = "gcc_or_clang",
     match_any = [

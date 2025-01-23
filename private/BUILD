@@ -38,12 +38,6 @@ bzl_library(
     deps = ["@bazel_skylib//lib:paths"],
 )
 
-bzl_library(
-    name = "extensions",
-    srcs = ["extensions.bzl"],
-    deps = ["@bazel_skylib//lib:modules"],
-)
-
 bool_flag(
     name = "treat_warnings_as_errors",
     build_setting_default = False,

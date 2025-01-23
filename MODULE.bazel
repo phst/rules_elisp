@@ -47,7 +47,7 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
-deps = use_extension("//private:extensions.bzl", "deps")
+deps = use_extension("//elisp/private:deps.bzl", "deps")
 deps.local_emacs(name = "local_emacs")
 deps.emacs(
     source_integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",

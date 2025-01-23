@@ -221,16 +221,16 @@
         ]
       }
     },
-    "@@phst_rules_elisp+//private:extensions.bzl%deps": {
+    "@@phst_rules_elisp+//elisp/private:deps.bzl%deps": {
       "general": {
         "bzlTransitiveDigest": "HXdnqUddjHnPqOIc5bCvIqw8KAKkXitkc/EjiVBC00A=",
-        "usagesDigest": "cDR0RtqIctLo0K/hZsKwxjvAMTgse8kkZKVh3uQiwEk=",
+        "usagesDigest": "gPsIyFJ+lcaUSBLBkR834M5K3bmMa0nStuDITfaIfU8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
         "generatedRepoSpecs": {
           "gnu_emacs_28.2": {
-            "repoRuleId": "@@phst_rules_elisp+//private:extensions.bzl%_emacs_repository",
+            "repoRuleId": "@@phst_rules_elisp+//elisp/private:deps.bzl%_emacs_repository",
             "attributes": {
               "path": "/emacs/emacs-28.2.tar.xz",
               "integrity": "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
@@ -240,7 +240,7 @@
             }
           },
           "gnu_emacs_windows_28.2": {
-            "repoRuleId": "@@phst_rules_elisp+//private:extensions.bzl%_emacs_repository",
+            "repoRuleId": "@@phst_rules_elisp+//elisp/private:deps.bzl%_emacs_repository",
             "attributes": {
               "path": "/emacs/windows/emacs-28/emacs-28.2.zip",
               "integrity": "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
@@ -254,7 +254,7 @@
             }
           },
           "gnu_emacs_29.4": {
-            "repoRuleId": "@@phst_rules_elisp+//private:extensions.bzl%_emacs_repository",
+            "repoRuleId": "@@phst_rules_elisp+//elisp/private:deps.bzl%_emacs_repository",
             "attributes": {
               "path": "/emacs/emacs-29.4.tar.xz",
               "integrity": "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
@@ -264,7 +264,7 @@
             }
           },
           "gnu_emacs_windows_29.4": {
-            "repoRuleId": "@@phst_rules_elisp+//private:extensions.bzl%_emacs_repository",
+            "repoRuleId": "@@phst_rules_elisp+//elisp/private:deps.bzl%_emacs_repository",
             "attributes": {
               "path": "/emacs/windows/emacs-29/emacs-29.4.zip",
               "integrity": "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
@@ -278,7 +278,7 @@
             }
           },
           "local_emacs": {
-            "repoRuleId": "@@phst_rules_elisp+//private:extensions.bzl%_local_emacs_repository",
+            "repoRuleId": "@@phst_rules_elisp+//elisp/private:deps.bzl%_local_emacs_repository",
             "attributes": {}
           }
         },
