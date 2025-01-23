@@ -136,7 +136,7 @@ _elisp_proto_aspect = aspect(
             allow_single_file = [".elc"],
         ),
         "_generate_bundle": attr.label(
-            default = Label("//elisp/proto:generate_bundle"),
+            default = Label("//elisp/private/tools:gen_proto_bundle"),
             executable = True,
             cfg = "exec",
         ),

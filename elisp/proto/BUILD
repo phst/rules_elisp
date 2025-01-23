@@ -133,7 +133,7 @@ proto_lang_toolchain(
     command_line = "--elisp_out=$(OUT)",
     mnemonic = "GenElispProto",
     output_files = "multiple",
-    plugin = ":generate",
+    plugin = "//elisp/private/tools:gen_proto",
     plugin_format_flag = "--plugin=protoc-gen-elisp=%s",
     progress_message = "Generating Emacs Lisp protocol buffer library %{label}",
     runtime = ":proto",
@@ -210,19 +210,6 @@ elisp_binary(
     input_args = [2],
     output_args = [2],
     deps = [":module"],
-)
-
-elisp_binary(
-    name = "generate",
-    src = "generate.el",
-    deps = [":proto"],
-)
-
-elisp_binary(
-    name = "generate_bundle",
-    src = "generate-bundle.el",
-    output_args = [1],
-    visibility = ["//elisp:__pkg__"],
 )
 
 upb_c_proto_library(

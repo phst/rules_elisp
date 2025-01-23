@@ -333,6 +333,20 @@ build_test(
 )
 
 elisp_binary(
+    name = "gen_proto",
+    src = "gen-proto.el",
+    visibility = ["//elisp/proto:__pkg__"],
+    deps = ["//elisp/proto"],
+)
+
+elisp_binary(
+    name = "gen_proto_bundle",
+    src = "gen-proto-bundle.el",
+    output_args = [1],
+    visibility = ["//elisp/proto:__pkg__"],
+)
+
+elisp_binary(
     name = "export_org",
     src = "export-org.el",
     input_args = range(
