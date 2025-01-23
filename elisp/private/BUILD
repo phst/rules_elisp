@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
@@ -117,6 +118,15 @@ bzl_library(
 bzl_library(
     name = "generated",
     srcs = ["generated.bzl"],
+)
+
+selects.config_setting_group(
+    name = "gcc_or_clang",
+    match_any = [
+        "@rules_cc//cc/compiler:gcc",
+        "@rules_cc//cc/compiler:clang",
+    ],
+    visibility = ["//visibility:private"],
 )
 
 # gazelle:ignore generated.*.bzl

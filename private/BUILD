@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load(":defs.bzl", "PACKAGE_FEATURES")
 
@@ -43,15 +42,6 @@ bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
     deps = ["@bazel_skylib//lib:modules"],
-)
-
-selects.config_setting_group(
-    name = "gcc_or_clang",
-    match_any = [
-        "@rules_cc//cc/compiler:gcc",
-        "@rules_cc//cc/compiler:clang",
-    ],
-    visibility = ["//visibility:private"],
 )
 
 bool_flag(

@@ -225,7 +225,7 @@ COPTS = select({
         "/Zc:__cplusplus",
         "/external:W2",  # TODO: shouldn’t be needed; file bug against rules_cc
     ],
-    Label("//private:gcc_or_clang"): [
+    Label("//elisp/private:gcc_or_clang"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
         "-Wall",
@@ -257,7 +257,7 @@ CXXOPTS = select({
 
 CONLYOPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    Label("//private:gcc_or_clang"): ["-Wvla"],
+    Label("//elisp/private:gcc_or_clang"): ["-Wvla"],
 })
 
 LAUNCHER_COPTS = COPTS + CXXOPTS
@@ -284,7 +284,7 @@ LINKOPTS = []
 
 LAUNCHER_LINKOPTS = LINKOPTS + select({
     Label("@rules_cc//cc/compiler:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
-    Label("//private:gcc_or_clang"): [],
+    Label("//elisp/private:gcc_or_clang"): [],
 })
 
 CcDefaultInfo = provider(
