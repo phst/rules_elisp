@@ -107,13 +107,6 @@ elisp_manual(
     additional_inputs = ["config.org"],
 )
 
-genrule(
-    name = "makeinfo",
-    srcs = ["doc.texi"],
-    outs = ["doc.info"],
-    cmd = "makeinfo --no-split --output=$@ -- $<",
-)
-
 py_test(
     name = "bin_test",
     size = "medium",
