@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//elisp/private:module_config.bzl", "module_config")
 load(
-    "//private:defs.bzl",
+    "//private:package_features.bzl",
     "PACKAGE_FEATURES",
 )
 load(":defs.bzl", "elisp_toolchain")

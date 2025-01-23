@@ -20,7 +20,7 @@ load("@pip//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
