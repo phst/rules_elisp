@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],

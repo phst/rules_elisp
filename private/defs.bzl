@@ -119,20 +119,6 @@ def repository_relative_filename(file):
             fail("invalid name {}".format(file.short_path))
     return name
 
-# Features for all packages.  These may not contain select expressions.
-# FIXME: Once we drop support for Bazel 7.0, move these features to the
-# REPO.bazel files, and remove them from BUILD files.
-PACKAGE_FEATURES = [
-    "no_copts_tokenization",
-    "layering_check",
-    "parse_headers",
-    "external_include_paths",
-    # On Windows, Bazel generates incorrectly-escaped parameter files.  See
-    # https://github.com/bazelbuild/bazel/issues/21029.
-    "-compiler_param_file",
-    "-macos_default_link_flags",
-]
-
 FEATURES = select({
     Label(":treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
     Label("//conditions:default"): [],

@@ -14,7 +14,7 @@
 
 load("@rules_license//rules:license.bzl", "license")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = [":license"],

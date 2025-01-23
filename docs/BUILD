@@ -18,7 +18,7 @@ load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":makeinfo.bzl", "makeinfo")
 load(":merged_manual.bzl", "merged_manual")
 

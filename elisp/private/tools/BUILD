@@ -37,8 +37,8 @@ load(
     "FEATURES",
     "LINKOPTS",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
-    "PACKAGE_FEATURES",
 )
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],

@@ -18,9 +18,9 @@ load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load(
     "//private:defs.bzl",
-    "PACKAGE_FEATURES",
     "cc_defaults",
 )
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(
     ":cc_launcher_config.bzl",
     "LAUNCHER_COPTS",

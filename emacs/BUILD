@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],

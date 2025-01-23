@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
-load(":defs.bzl", "PACKAGE_FEATURES")
+load(":package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -46,6 +46,11 @@ bool_flag(
 config_setting(
     name = "treat_warnings_as_errors_enabled",
     flag_values = {":treat_warnings_as_errors": "true"},
+)
+
+bzl_library(
+    name = "package_features",
+    srcs = ["package_features.bzl"],
 )
 
 bzl_library(

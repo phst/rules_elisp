@@ -17,7 +17,7 @@
 # dependencies in our MODULE.bazel file, e.g. the Go rules.
 
 load("//elisp:defs.bzl", "elisp_library", "elisp_test")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
