@@ -77,7 +77,7 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [
     <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl" href="#Starlark-provider">7.7 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
     <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl" href="#Starlark-toolchain">7.8 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
     <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl" href="#Extension-Starlark-symbols">7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002femacs_003adefs_002ebzl" href="#Emacs-Starlark-symbols">7.10 Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl" href="#Emacs-Starlark-symbols">7.10 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
   </ul></li>
   <li><a id="toc-Indices" href="#Indices">8 Indices</a>
   <ul class="toc-numbered-mark">
@@ -777,7 +777,7 @@ Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href
 <li><a href="#Starlark-provider" accesskey="7">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
 <li><a href="#Starlark-toolchain" accesskey="8">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
 <li><a href="#Extension-Starlark-symbols" accesskey="9">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-<li><a href="#Emacs-Starlark-symbols">Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a></li>
+<li><a href="#Emacs-Starlark-symbols">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
 </ul>
 <hr>
 <div class="section-level-extent" id="Starlark-library-rule">
@@ -1327,7 +1327,7 @@ optional; default: <code class="code">False</code>.
 <div class="section-level-extent" id="Extension-Starlark-symbols">
 <div class="nav-panel">
 <p>
-Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-toolchain" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-toolchain" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
 <h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"><span>7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"> &para;</a></span></h3>
 
@@ -1396,19 +1396,20 @@ List of strings; optional; default: <code class="code">[]</code>.
 <p>
 Previous: <a href="#Extension-Starlark-symbols" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002femacs_003adefs_002ebzl"><span>7.10 Symbols defined in &lsquo;<samp class="samp">//emacs:defs.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002femacs_003adefs_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"><span>7.10 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"> &para;</a></span></h3>
 
-<p>Defines the rule <code class="code">emacs_binary</code>, which compiles Emacs for use in Bazel.
+<p>Defines the rule <code class="code">elisp_emacs_binary</code>, which compiles Emacs for use in
+Bazel.
 </p>
 <dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-emacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-emacs_005fbinary"> &para;</a></span></dt>
+<dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//emacs:defs.bzl&quot;, &quot;emacs_binary&quot;)
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/toolchains:elisp_emacs_binary.bzl&quot;, &quot;elisp_emacs_binary&quot;)
 </pre></div>
 <p>Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.
 </p>
-<p>The <code class="code">emacs_binary</code> rule supports the following attributes:
+<p>The <code class="code">elisp_emacs_binary</code> rule supports the following attributes:
 </p>
 <dl class="table">
 <dt><code class="code">name</code></dt>
@@ -1528,6 +1529,7 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><th id="Symbol-index_fn_letter-E">E</th></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-binary-rule">Starlark binary rule</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Starlark-C_002fC_002b_002b-module-rule">Starlark C/C++ module rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Emacs-Starlark-symbols">Emacs Starlark symbols</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-library-rule">Starlark library rule</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Starlark-manual-rule">Starlark manual rule</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-protocol-buffer-library-rule">Starlark protocol buffer library rule</a></td></tr>
@@ -1579,7 +1581,6 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fupdate_002dmap"><code>elisp/proto/update-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002ffile_002dhandler"><code>elisp/runfiles/file-handler</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frlocation"><code>elisp/runfiles/rlocation</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-emacs_005fbinary"><code>emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Emacs-Starlark-symbols">Emacs Starlark symbols</a></td></tr>
 <tr><td colspan="3"><hr></td></tr>
 <tr><th id="Symbol-index_fn_letter-H">H</th></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Extension-Starlark-symbols">Extension Starlark symbols</a></td></tr>
