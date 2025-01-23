@@ -45,6 +45,11 @@ check-extra:
         # We don’t want any Go rules in the public packages, as our users would
         # have to depend on the Go rules then as well.
 	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
+        # Find BUILD files without default visibility.  See
+        # https://opensource.google/documentation/reference/thirdparty/new_license_rules#new_requirements.
+	! $(GIT) grep -I -r -F -L \
+	  -e 'default_visibility = ["//visibility:private"]' \
+	  -- '*/BUILD' '*/BUILD.bazel'
         # Find Starlark files without visibility declaration.
 	! $(GIT) grep -I -r -E -L -e '^visibility\(' -- '*.bzl'
         # Find BUILD files without correct license declaration.
