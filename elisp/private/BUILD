@@ -136,6 +136,8 @@ bzl_library(
     ],
 )
 
+# gazelle:ignore generated.*.bzl
+
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
@@ -206,8 +208,6 @@ alias(
         "@platforms//cpu:x86_64",
     ],
 )
-
-# gazelle:ignore generated.*.bzl
 
 bzl_library(
     name = "executable_only",
