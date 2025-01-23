@@ -131,7 +131,7 @@ This is used by Gazelle.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_emacs_cc_toolchain": attr.label(
-            default = Label("//emacs:cc_toolchain"),
+            default = Label("//elisp/private:emacs_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(

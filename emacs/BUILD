@@ -92,24 +92,6 @@ bzl_library(
     deps = ["//elisp/toolchains:elisp_emacs_binary"],
 )
 
-alias(
-    name = "cc_toolchain",
-    actual = select({
-        "@platforms//os:windows": ":windows_cc_toolchain",
-        "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
-    }),
-    visibility = ["//elisp/toolchains:__pkg__"],
-)
-
-alias(
-    name = "windows_cc_toolchain",
-    actual = "@local_config_cc//:cc-compiler-x64_windows_mingw",
-    target_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
 cc_defaults(
     name = "defaults",
     copts = [],

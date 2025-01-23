@@ -152,6 +152,24 @@ bzl_library(
     deps = ["@bazel_skylib//lib:modules"],
 )
 
+alias(
+    name = "emacs_cc_toolchain",
+    actual = select({
+        "@platforms//os:windows": ":windows_cc_toolchain",
+        "//conditions:default": "@rules_cc//cc:current_cc_toolchain",
+    }),
+    visibility = ["//elisp/toolchains:__pkg__"],
+)
+
+alias(
+    name = "windows_cc_toolchain",
+    actual = "@local_config_cc//:cc-compiler-x64_windows_mingw",
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
+
 selects.config_setting_group(
     name = "gcc_or_clang",
     match_any = [
