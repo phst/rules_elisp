@@ -168,6 +168,15 @@ cc_defaults(
     visibility = ["//elisp/toolchains:__pkg__"],
 )
 
+selects.config_setting_group(
+    name = "gcc_or_clang",
+    match_any = [
+        "@rules_cc//cc/compiler:gcc",
+        "@rules_cc//cc/compiler:clang",
+    ],
+    visibility = ["//visibility:private"],
+)
+
 bzl_library(
     name = "deps",
     srcs = ["deps.bzl"],
@@ -196,15 +205,6 @@ alias(
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
     ],
-)
-
-selects.config_setting_group(
-    name = "gcc_or_clang",
-    match_any = [
-        "@rules_cc//cc/compiler:gcc",
-        "@rules_cc//cc/compiler:clang",
-    ],
-    visibility = ["//visibility:private"],
 )
 
 # gazelle:ignore generated.*.bzl
