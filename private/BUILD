@@ -42,11 +42,6 @@ bzl_library(
 )
 
 bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
-)
-
-bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
     deps = ["@bazel_skylib//lib:modules"],
@@ -124,3 +119,8 @@ config_setting(
 )
 
 # gazelle:ignore generated.*.bzl
+
+bzl_library(
+    name = "repositories",
+    srcs = ["repositories.bzl"],
+)
