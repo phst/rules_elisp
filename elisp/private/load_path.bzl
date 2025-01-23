@@ -16,7 +16,7 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load(
-    "//private:defs.bzl",
+    ":filenames.bzl",
     "check_relative_filename",
 )
 

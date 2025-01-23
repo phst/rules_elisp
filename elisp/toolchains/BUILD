@@ -40,7 +40,7 @@ bzl_library(
         "//elisp/private:cc_default_info",
         "//elisp/private:cc_launcher",
         "//elisp/private:cc_launcher_config",
-        "//private:defs",
+        "//elisp/private:filenames",
         "@rules_cc//cc:action_names_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",

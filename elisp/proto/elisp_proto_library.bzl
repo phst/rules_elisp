@@ -20,7 +20,7 @@ load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:compile.bzl", "compile")
 load(
-    "//private:defs.bzl",
+    "//elisp/private:filenames.bzl",
     "check_relative_filename",
     "repository_relative_filename",
 )
