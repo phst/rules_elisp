@@ -76,7 +76,9 @@ class _Generator:
 
     def run(self, module: stardoc_output_pb2.ModuleInfo) -> None:
         """Writes the generated Org Mode output."""
-        self._write(_markdown(module.module_docstring))
+        doc = module.module_docstring
+        if len(doc) > 100 and '\n' not in doc:
+            self._write(_markdown(doc))
         for rule in module.rule_info:
             self._rule(rule)
         for provider in module.provider_info:
