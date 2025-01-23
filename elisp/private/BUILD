@@ -90,6 +90,7 @@ bzl_library(
         "//elisp/toolchains:__pkg__",
     ],
     deps = [
+        ":cc_config",
         ":cc_default_info",
         "//private:defs",
     ],
@@ -239,6 +240,11 @@ bzl_library(
         "//emacs:__pkg__",
     ],
     deps = ["@bazel_skylib//lib:paths"],
+)
+
+bzl_library(
+    name = "cc_config",
+    srcs = ["cc_config.bzl"],
 )
 
 bzl_library(

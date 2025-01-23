@@ -20,7 +20,8 @@ load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_
 load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
-load("//private:defs.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
+load("//elisp/private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES")
+load("//private:defs.bzl", "FEATURES")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(

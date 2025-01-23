@@ -16,12 +16,9 @@
 
 load(
     "//private:defs.bzl",
-    "COPTS",
-    "CXXOPTS",
-    "DEFINES",
     "FEATURES",
-    "LINKOPTS",
 )
+load(":cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "LINKOPTS")
 load(":cc_default_info.bzl", "CcDefaultInfo")
 
 visibility([
