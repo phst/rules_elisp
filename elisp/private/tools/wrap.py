@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ import sys
 from typing import Any
 import unittest
 
-from elisp import runfiles
+from elisp.private.tools import runfiles
 
 def main() -> None:
     """Main function."""
@@ -70,7 +70,7 @@ def main() -> None:
             want += [
                 '--option',
                 str(run_files.resolve(pathlib.PurePosixPath(
-                    'phst_rules_elisp/elisp/binary.cc'))),
+                    'phst_rules_elisp/elisp/private/tools/binary.cc'))),
                 ' \t\n\r\f äα𝐴🐈\'\\"',
                 '/:' + str(output_file),
             ]
@@ -83,8 +83,8 @@ def main() -> None:
                 'root': 'RUNFILES_ROOT',
                 'tags': ['local', 'mytag'],
                 'loadPath': ['phst_rules_elisp'],
-                'inputFiles': ['phst_rules_elisp/elisp/binary.cc',
-                               'phst_rules_elisp/elisp/binary.h'],
+                'inputFiles': ['phst_rules_elisp/elisp/private/tools/binary.cc',
+                               'phst_rules_elisp/elisp/private/tools/binary.h'],
                 'outputFiles': [str(output_file)],
             }
             for var in (got, want):

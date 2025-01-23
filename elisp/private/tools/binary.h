@@ -12,23 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/emacs.h"
+#ifndef ELISP_BINARY_H_
+#define ELISP_BINARY_H_
 
-#include <string_view>
+#if !defined __cplusplus || __cplusplus < 201703L
+#  error this file requires at least C++17
+#endif
+
+#include <initializer_list>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
-#include "elisp/platform.h"
-#include "elisp/process.h"
+#include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(
-    const Params params,
-    const absl::Span<const NativeStringView> original_args) {
-  return RunEmacs(BAZEL_CURRENT_REPOSITORY, params.mode, params.install,
-                  original_args);
-}
+absl::StatusOr<int> Main(std::initializer_list<NativeStringView> launcher_args,
+                         absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp
+
+#endif  // ELISP_BINARY_H_

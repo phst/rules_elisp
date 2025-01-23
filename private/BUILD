@@ -113,6 +113,7 @@ config_setting(
     flag_values = {"@bazel_tools//tools/cpp:compiler": "compiler"},
     visibility = [
         "//elisp:__pkg__",
+        "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
     ],

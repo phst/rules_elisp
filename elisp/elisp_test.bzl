@@ -116,7 +116,7 @@ elisp_test = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp:test")],
+            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:test")],
             providers = [CcInfo],
         ),
         # Magic coverage attributes.  This is only partially documented

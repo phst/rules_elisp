@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import pathlib
 
 from absl.testing import absltest
 
-from elisp import manifest
+from elisp.private.tools import manifest
 
 class ManifestTest(absltest.TestCase):
     """Unit tests for the manifest.add and manifest.write functions."""

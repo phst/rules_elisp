@@ -72,7 +72,7 @@ def _elisp_http_archive_impl(ctx):
     )
     ctx.template(
         "BUILD.bazel",
-        Label("//elisp:BUILD.template"),
+        Label("//elisp/private/tools:BUILD.template"),
         {
             '"[defs_bzl]"': repr(str(ctx.attr._defs_bzl)),
             '"[target_name]"': repr(ctx.attr.target_name),

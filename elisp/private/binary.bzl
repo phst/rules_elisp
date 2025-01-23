@@ -109,7 +109,7 @@ def binary(ctx, *, srcs, tags, args):
     # better be sure.
     executable, launcher_runfiles = cc_launcher(
         ctx,
-        header = "elisp/binary.h",
+        header = "elisp/private/tools/binary.h",
         args = [
             "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
             "--mode=" + ("wrap" if toolchain.wrap else "direct"),

@@ -187,7 +187,7 @@
     },
     "@@phst_rules_elisp+//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "keXnJq03rxZE+i99Dizlz6cTSsttnIgR3nNdSSwFrZg=",
+        "bzlTransitiveDigest": "yQz/G08CFUmWT+LSTWj5Cln5VJGdpdMChEhJUt7RIDo=",
         "usagesDigest": "VKYj6lzvfUzIuICEHfBh+99ZoqFiEr9KR+03L+rSdH8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

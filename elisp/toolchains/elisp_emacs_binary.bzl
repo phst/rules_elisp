@@ -60,7 +60,7 @@ def _elisp_emacs_binary_impl(ctx):
 
     executable, runfiles = cc_launcher(
         ctx,
-        header = "elisp/emacs.h",
+        header = "elisp/private/tools/emacs.h",
         args = [
             mode,
             runfile_location(ctx, install),
@@ -136,7 +136,7 @@ This is used by Gazelle.""",
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp:emacs")],
+            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:emacs")],
             providers = [CcInfo],
         ),
         "_emacs_defaults": attr.label(

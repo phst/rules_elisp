@@ -31,6 +31,7 @@ visibility([
     "//elisp",
     "//elisp/ert",
     "//elisp/private",
+    "//elisp/private/tools",
     "//elisp/proto",
     "//elisp/runfiles",
     "//elisp/toolchains",
@@ -534,7 +535,7 @@ bootstrap = rule(
         "out": attr.output(mandatory = True),
         "_compile": attr.label(
             allow_single_file = [".el"],
-            default = Label("//elisp:compile.el"),
+            default = Label("//elisp/private/tools:compile.el"),
         ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
@@ -626,7 +627,7 @@ merged_manual = rule(
 
 LAUNCHER_ATTRS = {
     "_launcher_srcs": attr.label_list(
-        default = [Label("//elisp:launcher.cc")],
+        default = [Label("//elisp/private/tools:launcher.cc")],
         allow_files = [".cc"],
     ),
     "_launcher_defaults": attr.label(
@@ -636,7 +637,7 @@ LAUNCHER_ATTRS = {
 }
 
 LAUNCHER_DEPS = [
-    Label("//elisp:platform"),
+    Label("//elisp/private/tools:platform"),
     Label("@abseil-cpp//absl/container:fixed_array"),
     Label("@abseil-cpp//absl/log"),
     Label("@abseil-cpp//absl/meta:type_traits"),

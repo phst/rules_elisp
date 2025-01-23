@@ -132,7 +132,7 @@ _elisp_proto_aspect = aspect(
     attr_aspects = ["deps"],
     attrs = {
         "_compile": attr.label(
-            default = Label("//elisp:compile.elc"),
+            default = Label("//elisp/private/tools:compile.elc"),
             allow_single_file = [".elc"],
         ),
         "_generate_bundle": attr.label(

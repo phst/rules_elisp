@@ -60,7 +60,7 @@ elisp_manual = rule(
             allow_single_file = True,
             executable = True,
             cfg = "exec",
-            default = Label("//elisp:export_org"),
+            default = Label("//elisp/private/tools:export_org"),
         ),
     },
     doc = """Generates a GNU Texinfo manual from an Org Mode file.

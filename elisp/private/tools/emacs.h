@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
-#include "elisp/platform.h"
+#include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
 

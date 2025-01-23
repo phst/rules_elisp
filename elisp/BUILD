@@ -13,32 +13,17 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
-load("@rules_python//python:py_binary.bzl", "py_binary")
-load("@rules_python//python:py_library.bzl", "py_library")
-load("@rules_python//python:py_test.bzl", "py_test")
 load(
     "//private:defs.bzl",
-    "COPTS",
-    "CXXOPTS",
-    "DEFINES",
-    "FEATURES",
     "LAUNCHER_COPTS",
     "LAUNCHER_DEFINES",
-    "LAUNCHER_DEPS",
     "LAUNCHER_FEATURES",
     "LAUNCHER_LINKOPTS",
-    "LINKOPTS",
-    "MAX_MANUAL_ADDITIONAL_INPUTS",
     "PACKAGE_FEATURES",
-    "bootstrap",
     "cc_defaults",
-    "executable_only",
     "module_config",
 )
-load(":defs.bzl", "elisp_binary", "elisp_toolchain")
+load(":defs.bzl", "elisp_toolchain")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -96,11 +81,6 @@ elisp_toolchain(
 elisp_toolchain(
     name = "emacs_29.4",
     emacs = "//emacs:emacs_29.4",
-)
-
-exports_files(
-    ["launcher.cc"],
-    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 bzl_library(
@@ -186,272 +166,6 @@ bzl_library(
     deps = ["//elisp/extensions:elisp"],
 )
 
-cc_binary(
-    name = "launcher",
-    testonly = True,
-    srcs = ["launcher.cc"],
-    copts = LAUNCHER_COPTS,
-    data = [":wrap_stripped"],
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_HEADER="elisp/binary.h"'),
-        shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
-            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
-            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/binary.h")',
-            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
-            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
-        ])),
-    ],
-    deps = LAUNCHER_DEPS + [":binary"],
-)
-
-build_test(
-    name = "launcher_test",
-    targets = [":launcher"],
-)
-
-cc_library(
-    name = "emacs",
-    srcs = ["emacs.cc"],
-    hdrs = ["emacs.h"],
-    copts = COPTS + CXXOPTS,
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES,
-    visibility = ["//elisp/toolchains:__pkg__"],
-    deps = [
-        ":platform",
-        ":process",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:span",
-        "@bazel_tools//tools/cpp/runfiles",
-    ],
-)
-
-cc_library(
-    name = "binary",
-    srcs = ["binary.cc"],
-    hdrs = ["binary.h"],
-    copts = COPTS + CXXOPTS,
-    data = [
-        ":run_binary_stripped",
-        "//elisp/runfiles:runfiles.elc",
-    ],
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
-        shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
-    ],
-    deps = [
-        ":platform",
-        ":process",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:span",
-        "@bazel_tools//tools/cpp/runfiles",
-    ],
-)
-
-py_test(
-    name = "binary_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["binary_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote("--launcher=$(rlocationpath :launcher)"),
-        shell.quote("--binary-cc=$(rlocationpath :binary.cc)"),
-    ],
-    data = [
-        "binary.cc",
-        ":launcher",
-    ],
-    deps = [
-        ":runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
-
-executable_only(
-    name = "wrap_stripped",
-    testonly = True,
-    src = ":wrap",
-)
-
-py_binary(
-    name = "wrap",
-    testonly = True,
-    srcs = ["wrap.py"],
-    data = [
-        ":binary.cc",
-        ":binary.h",
-        "//elisp/runfiles:runfiles.elc",
-    ],
-    deps = ["//elisp:runfiles"],
-)
-
-py_binary(
-    name = "run_binary",
-    srcs = ["run_binary.py"],
-    deps = [
-        ":load",
-        ":manifest",
-        ":runfiles",
-    ],
-)
-
-executable_only(
-    name = "run_binary_stripped",
-    src = ":run_binary",
-)
-
-cc_library(
-    name = "test",
-    testonly = True,
-    srcs = ["test.cc"],
-    hdrs = ["binary.h"],
-    copts = COPTS + CXXOPTS,
-    data = [
-        ":run_test_stripped",
-        "//elisp/ert:runner.elc",
-        "//elisp/runfiles:runfiles.elc",
-    ],
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
-        shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/ert:runner.elc))*")',
-        ])),
-    ],
-    deps = [
-        ":platform",
-        ":process",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:span",
-        "@bazel_tools//tools/cpp/runfiles",
-    ],
-)
-
-py_binary(
-    name = "run_test",
-    testonly = True,
-    srcs = ["run_test.py"],
-    deps = [
-        ":load",
-        ":manifest",
-        ":runfiles",
-    ],
-)
-
-executable_only(
-    name = "run_test_stripped",
-    testonly = True,
-    src = ":run_test",
-)
-
-py_library(
-    name = "manifest",
-    srcs = ["manifest.py"],
-)
-
-py_test(
-    name = "manifest_test",
-    size = "small",
-    srcs = ["manifest_test.py"],
-    deps = [
-        ":manifest",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
-
-py_library(
-    name = "load",
-    srcs = ["load.py"],
-    deps = [":runfiles"],
-)
-
-py_test(
-    name = "load_test",
-    size = "small",
-    srcs = ["load_test.py"],
-    deps = [
-        ":load",
-        ":runfiles",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
-
-py_library(
-    name = "runfiles",
-    srcs = ["runfiles.py"],
-    visibility = [
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-        "//examples:__pkg__",
-        "//tests:__pkg__",
-        "//tests/wrap:__pkg__",
-    ],
-    deps = ["@rules_python//python/runfiles"],
-)
-
-cc_library(
-    name = "process",
-    srcs = ["process.cc"],
-    hdrs = ["process.h"],
-    copts = COPTS + CXXOPTS,
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES,
-    deps = [
-        ":platform",
-        "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/cleanup",
-        "@abseil-cpp//absl/container:flat_hash_map",
-        "@abseil-cpp//absl/hash",
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/log:die_if_null",
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
-        "@abseil-cpp//absl/types:span",
-        "@bazel_tools//tools/cpp/runfiles",
-    ],
-)
-
-cc_library(
-    name = "platform",
-    hdrs = ["platform.h"],
-    copts = COPTS + CXXOPTS,
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES,
-    visibility = ["//elisp/toolchains:__pkg__"],
-)
-
 exports_files(
     [
         # keep sorted
@@ -462,29 +176,6 @@ exports_files(
         "elisp_test.bzl",
     ],
     visibility = ["//docs:__pkg__"],
-)
-
-# We can’t use “elisp_library” here for bootstrapping reasons.
-bootstrap(
-    name = "compile",
-    src = "compile.el",
-    out = "compile.elc",
-    visibility = ["//elisp/proto:__pkg__"],
-)
-
-build_test(
-    name = "compile_test",
-    targets = [":compile"],
-)
-
-elisp_binary(
-    name = "export_org",
-    src = "export-org.el",
-    input_args = range(
-        2,
-        3 + MAX_MANUAL_ADDITIONAL_INPUTS,
-    ),
-    output_args = [1],
 )
 
 cc_defaults(
@@ -499,18 +190,18 @@ cc_defaults(
 module_config(
     name = "module_config",
     srcs = select({
-        "@platforms//os:linux": [":module.lds"],
-        "@platforms//os:windows": [":module.def"],
+        "@platforms//os:linux": ["//elisp/private/tools:module.lds"],
+        "@platforms//os:windows": ["//elisp/private/tools:module.def"],
         "@platforms//os:macos": [],
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
         "@platforms//os:linux": [
-            "-Wl,--version-script=$(execpath :module.lds)",
+            "-Wl,--version-script=$(execpath //elisp/private/tools:module.lds)",
             "-Wl,--no-undefined",
         ],
         "@platforms//os:windows": [
-            "/DEF:$(execpath :module.def)",
+            "/DEF:$(execpath //elisp/private/tools:module.def)",
         ],
         "@platforms//os:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",

@@ -29,7 +29,7 @@ elisp_library(
     testonly = True,
     srcs = ["runner.el"],
     outs = ["runner.elc"],
-    visibility = ["//elisp:__pkg__"],
+    visibility = ["//elisp/private/tools:__pkg__"],
 )
 
 build_test(

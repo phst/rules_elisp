@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/process.h"
+#include "elisp/private/tools/process.h"
 
 #ifdef _WIN32
 #  ifndef UNICODE
@@ -73,7 +73,7 @@
 #  include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
-#include "elisp/platform.h"
+#include "elisp/private/tools/platform.h"
 
 // IWYU pragma: no_include <__fwd/string.h>
 // IWYU pragma: no_include <__system_error/error_category.h>

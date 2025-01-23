@@ -25,7 +25,7 @@
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
-#include "elisp/platform.h"
+#include "elisp/private/tools/platform.h"
 
 // IWYU pragma: no_include <__fwd/string_view.h>
 
