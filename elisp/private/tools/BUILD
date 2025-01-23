@@ -45,6 +45,12 @@ package(
 
 licenses(["notice"])
 
+py_binary(
+    name = "build_emacs",
+    srcs = ["build_emacs.py"],
+    visibility = ["//elisp/toolchains:__pkg__"],
+)
+
 cc_binary(
     name = "launcher",
     testonly = True,

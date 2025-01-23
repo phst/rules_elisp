@@ -121,7 +121,7 @@ This is used by Gazelle.""",
             doc = "Deprecated; must always be set to `portable`.",
         ),
         "_build": attr.label(
-            default = Label("//emacs:build"),
+            default = Label("//elisp/private/tools:build_emacs"),
             executable = True,
             cfg = "exec",
         ),
