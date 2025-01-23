@@ -24,6 +24,17 @@ package(
 
 licenses(["notice"])
 
+bool_flag(
+    name = "treat_warnings_as_errors",
+    build_setting_default = False,
+)
+
+config_setting(
+    name = "treat_warnings_as_errors_enabled",
+    flag_values = {":treat_warnings_as_errors": "true"},
+)
+
+# keep
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
@@ -35,17 +46,6 @@ bzl_library(
         "//elisp/toolchains:__pkg__",
         "//emacs:__pkg__",
     ],
-    deps = ["@bazel_skylib//lib:paths"],
-)
-
-bool_flag(
-    name = "treat_warnings_as_errors",
-    build_setting_default = False,
-)
-
-config_setting(
-    name = "treat_warnings_as_errors_enabled",
-    flag_values = {":treat_warnings_as_errors": "true"},
 )
 
 bzl_library(

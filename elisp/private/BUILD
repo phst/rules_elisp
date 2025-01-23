@@ -49,10 +49,10 @@ bzl_library(
     ],
     deps = [
         ":cc_launcher_config",
+        ":filenames",
         ":load_path",
         ":run_emacs",
         "//elisp/common:elisp_info",
-        "//private:defs",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
     ],
@@ -65,7 +65,7 @@ bzl_library(
     deps = [
         ":cc_launcher",
         ":compile",
-        "//private:defs",
+        ":filenames",
         "@bazel_skylib//lib:collections",
     ],
 )
@@ -109,7 +109,7 @@ bzl_library(
     srcs = ["load_path.bzl"],
     visibility = ["//elisp:__pkg__"],
     deps = [
-        "//private:defs",
+        ":filenames",
         "@bazel_skylib//lib:paths",
     ],
 )
@@ -228,6 +228,17 @@ bzl_library(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
     ],
+)
+
+bzl_library(
+    name = "filenames",
+    srcs = ["filenames.bzl"],
+    visibility = [
+        "//elisp/proto:__pkg__",
+        "//elisp/toolchains:__pkg__",
+        "//emacs:__pkg__",
+    ],
+    deps = ["@bazel_skylib//lib:paths"],
 )
 
 bzl_library(

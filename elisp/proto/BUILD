@@ -148,7 +148,7 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:compile",
-        "//private:defs",
+        "//elisp/private:filenames",
         "@bazel_skylib//lib:paths",
         "@protobuf//bazel/common:proto_common_bzl",
         "@protobuf//bazel/common:proto_info_bzl",

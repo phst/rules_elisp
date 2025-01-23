@@ -27,7 +27,7 @@ load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
 load(
-    "//private:defs.bzl",
+    "//elisp/private:filenames.bzl",
     "runfile_location",
 )
 
