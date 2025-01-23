@@ -98,6 +98,7 @@ class _Generator:
                           for a in rule.attribute)
         self._write(f'#+ATTR_TEXINFO: :options Rule {name} ({attrs})\n')
         self._write('#+BEGIN_deffn\n')
+        self._load(rule.origin_key)
         self._write(_markdown(rule.doc_string).lstrip())
         self._write(f'The ~{name}~ rule supports the following attributes:\n\n')
         for attr in rule.attribute:
@@ -110,6 +111,7 @@ class _Generator:
                            for p in func.parameter)
         self._write(f'#+ATTR_TEXINFO: :options {name} ({params})\n')
         self._write('#+BEGIN_defun\n')
+        self._load(func.origin_key)
         self._write(_markdown(func.doc_string).lstrip())
         for param in func.parameter:
             self._parameter(param)
@@ -136,6 +138,7 @@ class _Generator:
         fields = ' '.join(f.name for f in provider.field_info)
         self._write(f'#+ATTR_TEXINFO: :options Provider {name} {fields}\n')
         self._write('#+BEGIN_deftp\n')
+        self._load(provider.origin_key)
         self._write(_markdown(provider.doc_string).lstrip())
         self._write(f'The ~{name}~ provider has the following fields:\n\n')
         for field in provider.field_info:
@@ -152,6 +155,7 @@ class _Generator:
                          for a in aspect.attribute)
         self._write(f'#+ATTR_TEXINFO: :options Aspect {name} {attrs}\n')
         self._write('#+BEGIN_deffn\n')
+        self._load(aspect.origin_key)
         self._write(_markdown(aspect.doc_string).lstrip())
         if aspect.aspect_attribute:
             attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
@@ -167,6 +171,7 @@ class _Generator:
         self._write(
             f'#+ATTR_TEXINFO: :options {{Module extension}} {name} {tags}\n')
         self._write('#+BEGIN_deftp\n')
+        self._load(ext.origin_key)
         self._write(_markdown(ext.doc_string).lstrip())
         self._write(f'The ~{name}~ module extension '
                     f'provides the following tag classes:\n\n')
@@ -196,6 +201,7 @@ class _Generator:
         self._write(
             f'#+ATTR_TEXINFO: :options {{Repository rule}} {name} ({attrs})\n')
         self._write('#+BEGIN_deffn\n')
+        self._load(rule.origin_key)
         self._write(_markdown(rule.doc_string).lstrip())
         self._write(f'The ~{name}~ repository rule '
                     f'supports the following attributes:\n\n')
@@ -213,12 +219,18 @@ class _Generator:
                           for a in macro.attribute)
         self._write(f'#+ATTR_TEXINFO: :options {name} ({attrs})\n')
         self._write('#+BEGIN_defmac\n')
+        self._load(macro.origin_key)
         self._write(_markdown(macro.doc_string).lstrip())
         self._write(
             f'The ~{name}~ macro supports the following attributes:\n\n')
         for attr in macro.attribute:
             self._attribute(attr)
         self._write('#+END_defmac\n\n')
+
+    def _load(self, key: stardoc_output_pb2.OriginKey) -> None:
+        self._write('#+BEGIN_SRC bazel-starlark\n')
+        self._write(f'load("{key.file}", "{key.name}")\n')
+        self._write('#+END_SRC\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         if attr.doc_string.startswith('Deprecated;'):
