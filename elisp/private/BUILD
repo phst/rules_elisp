@@ -70,3 +70,10 @@ bzl_library(
         "@bazel_skylib//lib:paths",
     ],
 )
+
+bzl_library(
+    name = "module_config",
+    srcs = ["module_config.bzl"],
+    visibility = ["//visibility:private"],
+    deps = ["//private:defs"],
+)
