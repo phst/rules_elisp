@@ -48,8 +48,6 @@ config_setting(
     flag_values = {":treat_warnings_as_errors": "true"},
 )
 
-# gazelle:ignore generated.*.bzl
-
 bzl_library(
     name = "repositories",
     srcs = ["repositories.bzl"],
