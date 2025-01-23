@@ -366,43 +366,6 @@ module_config = rule(
     implementation = _module_config_impl,
 )
 
-def _bootstrap_impl(ctx):
-    src = ctx.file.src
-    out = ctx.outputs.out
-    compile = ctx.file._compile
-    args = ctx.actions.args()
-    args.add(compile, format = "--load=%s")
-    args.add("--fatal-warnings")
-    args.add("--funcall=elisp/compile-batch-and-exit")
-    args.add(src.owner.workspace_name)
-    args.add(src)
-    args.add(out)
-    run_emacs(
-        ctx,
-        arguments = [args],
-        inputs = depset([src, compile], order = "preorder"),
-        outputs = [out],
-        tags = ctx.attr.tags,
-        mnemonic = "ElispCompile",
-        progress_message = "Compiling %{input}",
-        manifest_basename = out.basename,
-        manifest_sibling = out,
-    )
-
-bootstrap = rule(
-    implementation = _bootstrap_impl,
-    attrs = {
-        "src": attr.label(mandatory = True, allow_single_file = [".el"]),
-        "out": attr.output(mandatory = True),
-        "_compile": attr.label(
-            allow_single_file = [".el"],
-            default = Label("//elisp/private/tools:compile.el"),
-        ),
-    },
-    doc = "Primitive version of `elisp_library` used for bootstrapping",
-    toolchains = [Label("//elisp:toolchain_type")],
-)
-
 def _executable_only_impl(ctx):
     info = ctx.attr.src[DefaultInfo]
     files_to_run = info.files_to_run or fail("missing files_to_run")

@@ -19,6 +19,7 @@ load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary")
+load("//elisp/private:bootstrap.bzl", "bootstrap")
 load(
     "//private:defs.bzl",
     "COPTS",
@@ -33,7 +34,6 @@ load(
     "LINKOPTS",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
     "PACKAGE_FEATURES",
-    "bootstrap",
     "executable_only",
 )
 
