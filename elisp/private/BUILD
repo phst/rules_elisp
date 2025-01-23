@@ -38,11 +38,6 @@ package(
 licenses(["notice"])
 
 bzl_library(
-    name = "run_emacs",
-    srcs = ["run_emacs.bzl"],
-)
-
-bzl_library(
     name = "bootstrap",
     srcs = ["bootstrap.bzl"],
     deps = [":run_emacs"],
@@ -223,3 +218,8 @@ selects.config_setting_group(
 )
 
 # gazelle:ignore generated.*.bzl
+
+bzl_library(
+    name = "run_emacs",
+    srcs = ["run_emacs.bzl"],
+)
