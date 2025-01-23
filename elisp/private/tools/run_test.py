@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,9 +29,9 @@ import sys
 import time
 import urllib.parse
 
-from elisp import load
-from elisp import manifest
-from elisp import runfiles
+from elisp.private.tools import load
+from elisp.private.tools import manifest
+from elisp.private.tools import runfiles
 
 def main() -> None:
     """Main function."""

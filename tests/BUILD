@@ -141,7 +141,7 @@ py_test(
     ],
     data = [":empty"],
     deps = [
-        "//elisp:runfiles",
+        "//elisp/private/tools:runfiles",
         "@abseil-py//absl/flags",
         "@abseil-py//absl/testing:absltest",
     ],

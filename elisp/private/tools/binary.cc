@@ -12,24 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/binary.h"
+#include "elisp/private/tools/binary.h"
 
 #include <initializer_list>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
-#include "elisp/platform.h"
-#include "elisp/process.h"
+#include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/process.h"
 
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
     const std::initializer_list<NativeStringView> launcher_args,
     const absl::Span<const NativeStringView> original_args) {
-  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
-                     {RULES_ELISP_TEST_ARGS}, launcher_args, original_args,
-                     ExecutableKind::kTest);
+  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY,
+                     {RULES_ELISP_BINARY_ARGS}, launcher_args, original_args,
+                     ExecutableKind::kBinary);
 }
 
 }  // namespace rules_elisp

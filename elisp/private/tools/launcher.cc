@@ -21,7 +21,7 @@
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
-#include "elisp/platform.h"
+#include "elisp/private/tools/platform.h"
 
 #include RULES_ELISP_HEADER
 

@@ -188,7 +188,7 @@
   "moduleExtensions": {
     "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "keXnJq03rxZE+i99Dizlz6cTSsttnIgR3nNdSSwFrZg=",
+        "bzlTransitiveDigest": "yQz/G08CFUmWT+LSTWj5Cln5VJGdpdMChEhJUt7RIDo=",
         "usagesDigest": "dzh9Ut9m42pH4+Q0DEkPKJBrv71oNjdwfGFgXMV9dG0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

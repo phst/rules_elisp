@@ -41,7 +41,7 @@ compile cleanly and that you don’t control.""",
         default = True,
     ),
     "_compile": attr.label(
-        default = Label("//elisp:compile.elc"),
+        default = Label("//elisp/private/tools:compile.elc"),
         allow_single_file = [".elc"],
     ),
 }

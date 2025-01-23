@@ -119,7 +119,7 @@ py_test(
     ],
     data = ["bin"],
     deps = [
-        "//elisp:runfiles",
+        "//elisp/private/tools:runfiles",
         "@abseil-py//absl/flags",
         "@abseil-py//absl/testing:absltest",
     ],

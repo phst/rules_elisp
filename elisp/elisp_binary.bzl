@@ -65,7 +65,7 @@ elisp_binary = rule(
             providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp:binary")],
+            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:binary")],
             providers = [CcInfo],
         ),
         "data": attr.label_list(

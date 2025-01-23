@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import subprocess
 from absl import flags
 from absl.testing import absltest
 
-from elisp import runfiles
+from elisp.private.tools import runfiles
 
 
 FLAGS = flags.FLAGS
