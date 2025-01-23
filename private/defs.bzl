@@ -247,7 +247,7 @@ COPTS = select({
 
 CXXOPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    Label("//private:gcc"): [
+    Label("@rules_cc//cc/compiler:gcc"): [
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",

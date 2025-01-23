@@ -48,34 +48,10 @@ bzl_library(
 selects.config_setting_group(
     name = "gcc_or_clang",
     match_any = [
-        ":gcc",
+        "@rules_cc//cc/compiler:gcc",
         "@rules_cc//cc/compiler:clang",
     ],
     visibility = ["//visibility:private"],
-)
-
-selects.config_setting_group(
-    name = "gcc",
-    match_any = [
-        "@rules_cc//cc/compiler:gcc",
-        ":gcc_old",
-    ],
-    visibility = ["//visibility:private"],
-)
-
-# Obsolete value for the C++ compiler flag, to be removed once
-# https://github.com/bazelbuild/bazel/pull/16297 and
-# https://github.com/bazelbuild/bazel/pull/20350 are in all supported Bazel
-# versions.
-config_setting(
-    name = "gcc_old",
-    flag_values = {"@bazel_tools//tools/cpp:compiler": "compiler"},
-    visibility = [
-        "//elisp:__pkg__",
-        "//elisp/private/tools:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-    ],
 )
 
 bool_flag(
