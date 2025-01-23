@@ -68,16 +68,11 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [
   </ul></li>
   <li><a id="toc-Starlark-symbol-reference" href="#Starlark-symbol-reference">7 Starlark symbol reference</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl" href="#Starlark-library-rule">7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl" href="#Starlark-protocol-buffer-library-rule">7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl" href="#Starlark-C_002fC_002b_002b-module-rule">7.3 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl" href="#Starlark-binary-rule">7.4 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl" href="#Starlark-test-rule">7.5 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl" href="#Starlark-manual-rule">7.6 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl" href="#Starlark-provider">7.7 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl" href="#Starlark-toolchain">7.8 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl" href="#Extension-Starlark-symbols">7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl" href="#Emacs-Starlark-symbols">7.10 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl" href="#Starlark-manual-rule">7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl" href="#Starlark-provider">7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl" href="#Starlark-toolchain">7.3 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl" href="#Extension-Starlark-symbols">7.4 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
+    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl" href="#Emacs-Starlark-symbols">7.5 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
   </ul></li>
   <li><a id="toc-Indices" href="#Indices">8 Indices</a>
   <ul class="toc-numbered-mark">
@@ -147,13 +142,276 @@ git_override(
 
 <p>See <a class="uref" href="https://bazel.build/external/overview#bzlmod">the Bzlmod documentation</a>
 for background information.  Then you can use the <code class="code">elisp_library</code>,
-<code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.  See <a class="ref" href="#Starlark-library-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a>, <a class="ref" href="#Starlark-binary-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, <a class="ref" href="#Starlark-test-rule">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>,
-and the examples in the <code class="code">examples</code> directory for details.  Note that the C++
-code used by <code class="code">rules_elisp</code> requires at least C++17, but Bazel still compiles
-with C++11 by default.  See
+<code class="code">elisp_cc_module</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.  See the rule
+documentation below and the examples in the <code class="code">examples</code> directory for details.
+Note that the C++ code used by <code class="code">rules_elisp</code> requires at least C++17, but Bazel
+still compiles with C++11 by default.  See
 <a class="uref" href="https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil">the
 Abseil FAQ</a> how to correctly change the C++ standard for your project.
 </p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_library</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [outs], [data], [load_path], [deps])</var><a class="copiable-link" href="#index-elisp_005flibrary"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_library.bzl&quot;, &quot;elisp_library&quot;)
+</pre></div>
+<p>Byte-compiles Emacs Lisp source files and makes the compiled output
+available to dependencies.  All sources are byte-compiled.
+<code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this binary
+can then use <code class="code">load</code> or <code class="code">require</code> to load them.
+</p>
+<p>By default, libraries need to be loaded using a filename relative to the
+repository root, i.e., <var class="var">package</var>/​<var class="var">file</var>.  If you want to add
+further elements to the load path, use the <code class="code">load_path</code> attribute.
+</p>
+<p>If there are multiple source files specified in <code class="code">srcs</code>, these source files can
+also load each other.  However, it’s often preferable to only have one
+<code class="code">elisp_library</code> target per source file to make dependencies more obvious and
+ensure that files get only loaded in their byte-compiled form.
+</p>
+<p>The source files in <code class="code">srcs</code> can also list shared objects.  The rule treats them
+as Emacs modules and doesn’t try to byte-compile them.  You can use
+e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
+</p>
+<p>The <code class="code">elisp_library</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>List of source files.  These must either be Emacs Lisp files ending
+in <code class="code">.el</code>, or module objects ending in <code class="code">.so</code>, <code class="code">.dylib</code>, or <code class="code">.dll</code>.  List of
+labels; mandatory.
+</p></dd>
+<dt><code class="code">outs</code></dt>
+<dd><p>List of byte-compiled Emacs Lisp files to be made available as
+targets.  List of output files; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">load_path</code></dt>
+<dd><p>List of additional load path elements.  The elements are
+directory names, which can be either relative or absolute.  Relative names are
+relative to the current package.  Absolute names are relative to the
+repository root.  To add a load path entry for the current package, specify
+<code class="code">.</code> here.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+</dl>
+</dd></dl>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fcc_005fmodule"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_cc_module</strong> <var class="def-var-arguments">(name, [srcs], [deps], [data], [copts], [linkopts], [local_defines])</var><a class="copiable-link" href="#index-elisp_005fcc_005fmodule"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_cc_module.bzl&quot;, &quot;elisp_cc_module&quot;)
+</pre></div>
+<p>Builds an Emacs dynamic module from C and C+​+​ source files.
+For background on Emacs modules, see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Dynamic-Modules">Emacs Dynamic Modules</a>, and see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Writing-Dynamic-Modules">Writing Dynamically-Loaded Modules</a>.
+The <code class="code">emacs_module</code> rule is similar to
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library"><code class="code">cc_library</code></a>,
+but it always builds a dynamic library (shared object) that can be loaded
+into Emacs.  The module can also be used directly as dependency
+for <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.
+The dynamic library will only export the symbols necessary for Emacs modules,
+<code class="code">plugin_is_GPL_compatible</code> and <code class="code">emacs_module_init</code>; see
+<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Module-Initialization">Module Initialization Code</a>.
+The file name of the dynamic library will be
+<code class="code"><var class="var">name</var>.<var class="var">extension</var></code>, where <var class="var">name</var>
+is the rule name as specified in the <code class="code">name</code> attribute, and <var class="var">extension</var>
+is the correct extension for dynamic libraries for the target operating system.
+The file name will not be prefixed with <code class="code">lib</code>.
+</p>
+<p>The library code in <code class="code">srcs</code> can include a recent version of <code class="code">emacs-module.h</code>
+using
+</p><div class="example">
+<pre class="example-preformatted">#include &quot;emacs-module.h&quot;
+</pre></div>
+
+<p>to implement module functions.
+</p>
+<p>The <code class="code">elisp_cc_module</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>C and C+​+​ source files for the module.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.srcs">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p><code class="code">cc_library</code> targets that the module depends on.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.deps">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>;
+required providers: <code class="code">CcInfo</code>.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>Data dependencies to make available at runtime.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.data">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">copts</code></dt>
+<dd><p>Additional options to pass to the C/​C+​+​ compiler.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.copts">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">linkopts</code></dt>
+<dd><p>Additional options to pass to the C/​C+​+​ linker.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.linkopts">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">local_defines</code></dt>
+<dd><p>Additional preprocessor definitions to pass to the C/​C+​+​
+compiler.  See the
+<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.local_defines">corresponding
+attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_binary</strong> <var class="def-var-arguments">(name, [fatal_warnings], src, [data], [deps], [interactive], [input_args], [output_args])</var><a class="copiable-link" href="#index-elisp_005fbinary"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_binary.bzl&quot;, &quot;elisp_binary&quot;)
+</pre></div>
+<p>Binary rule that loads a single Emacs Lisp file.
+The source file is byte-compiled.  At runtime, the compiled version is loaded
+in batch mode unless <code class="code">interactive</code> is <code class="code">True</code>.
+</p>
+<p>The <code class="code">elisp_binary</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">src</code></dt>
+<dd><p>Source file to load.  Label; mandatory.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+<dt><code class="code">interactive</code></dt>
+<dd><p>Run Emacs in interactive instead of batch mode.  Boolean;
+optional; default: <code class="code">False</code>.
+</p></dd>
+<dt><code class="code">input_args</code></dt>
+<dd><p>Indices of command-line arguments that represent input
+filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
+  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
+the corresponding arguments are treated as filenames for input files and added
+to the <code class="code">inputFiles</code> field of the manifest.  This only has an effect for
+toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
+<code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">output_args</code></dt>
+<dd><p>Indices of command-line arguments that represent output
+filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
+indices are interpreted as counting from the end of the array.  For example,
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
+  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
+the corresponding arguments are treated as filenames for output files and
+added to the <code class="code">outputFiles</code> field of the manifest.  This only has an effect for
+toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
+<code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005ftest"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_test</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [data], [deps], [skip_tests], [skip_tags])</var><a class="copiable-link" href="#index-elisp_005ftest"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_test.bzl&quot;, &quot;elisp_test&quot;)
+</pre></div>
+<p>Runs ERT tests that are defined in the source files.
+The given source files should contain ERT tests defined with <code class="code">ert-deftest</code>.
+For details, see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#How-to-Write-Tests">How to Write Tests</a>.
+The generated test binary loads all source files and executes all
+tests like <code class="code">ert-run-tests-batch-and-exit</code>.
+</p>
+<p>You can restrict the tests to be run using the <code class="code">--test_filter</code> option.  If set,
+the value of <code class="code">--test_filter</code> must be a Lisp expression usable as an
+ERT test selector; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Test-Selectors">Test Selectors</a>.
+You can also restrict the tests to be run using the <code class="code">skip_tests</code> and
+<code class="code">skip_tags</code> rule attributes.  These restrictions are additive, i.e., a test
+only runs if it’s not suppressed by either facility.
+</p>
+<p>In coverage mode (i.e., when run under <code class="code">bazel coverage</code>), all tests tagged with
+the <code class="code">:nocover</code> tag are also skipped.  You can use this tag to skip tests that
+normally pass, but don’t work under coverage for some reason.
+</p>
+<p>The <code class="code">elisp_test</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">fatal_warnings</code></dt>
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
+be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+cause the compilation to fail.  Most targets should leave this attribute as
+<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
+attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
+compile cleanly and that you don’t control.  Boolean; optional; default:
+<code class="code">True</code>.
+</p></dd>
+<dt><code class="code">srcs</code></dt>
+<dd><p>List of source files to load.  List of labels; mandatory.
+</p></dd>
+<dt><code class="code">data</code></dt>
+<dd><p>List of files to be made available at runtime.  List of labels;
+optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
+default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+</p></dd>
+<dt><code class="code">skip_tests</code></dt>
+<dd><p>List of tests to skip.  This attribute contains a list of ERT
+test symbols; when running the test rule, these tests are skipped.  Most of
+the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>. The <code class="code">skip_tests</code>
+attribute is mainly useful for third-party code that you don’t control.  List
+of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt><code class="code">skip_tags</code></dt>
+<dd><p>List of test tags to skip.  This attribute contains a list of
+tag names; if a test is tagged with one of the tags from this list, it is
+skipped.  This can be useful to e.g.  skip tests that are flaky or only work
+in interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
+tests.  List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
 <hr>
 </div>
 <div class="chapter-level-extent" id="Load-path-management">
@@ -246,6 +504,36 @@ its repository root.  For example, if the above BUILD file is in a package named
 &lsquo;<samp class="samp">mypackage</samp>&rsquo;, you would load the protocol buffer library using <code class="code">(require
 'mypackage/my.proto)</code>.
 </p>
+<dl class="first-deffn def-block">
+<dt class="deffn def-line" id="index-elisp_005fproto_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_proto_library</strong> <var class="def-var-arguments">(name, deps)</var><a class="copiable-link" href="#index-elisp_005fproto_005flibrary"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl&quot;, &quot;elisp_proto_library&quot;)
+</pre></div>
+<p>Generates Emacs bindings for a protocol buffer library.
+By convention, for a <code class="code">proto_library</code> rule named
+<code class="code"><var class="var">prefix</var>_​proto</code> there should be a corresponding
+<code class="code">elisp_proto_library</code> rule named <code class="code"><var class="var">prefix</var>_​elisp_​proto</code>.
+Other <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules can then depend
+on this rule.  This rule generates and byte-compiles Emacs Lisp representations
+of the protocol buffer definitions listed in the <code class="code">deps</code> attribute and all their
+direct and indirect dependencies.  The feature symbol for <code class="code">require</code> is
+<code class="code"><var class="var">package</var>/​<var class="var">name</var></code>, where
+<code class="code">/​/​<var class="var">package</var>:<var class="var">name</var></code> is the label of the
+corresponding <code class="code">proto_library</code> rule.
+</p>
+<p>The <code class="code">elisp_proto_library</code> rule supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>A unique name for this target.  Name; mandatory.
+</p></dd>
+<dt><code class="code">deps</code></dt>
+<dd><p>List of exactly one <code class="code">proto_library</code> rule.  List of labels;
+mandatory; required providers: <code class="code">ProtoInfo</code>.
+</p></dd>
+</dl>
+</dd></dl>
+
 <p>Emacs Lisp protocol buffer bindings contain Emacs Lisp equivalents for all
 message and enumeration types defined in the underlying protocol buffer
 definition files.  Because Emacs Lisp doesn’t have namespaces, the names of all
@@ -772,365 +1060,19 @@ Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href
 
 
 <ul class="mini-toc">
-<li><a href="#Starlark-library-rule" accesskey="1">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-protocol-buffer-library-rule" accesskey="2">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="3">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-binary-rule" accesskey="4">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-test-rule" accesskey="5">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-manual-rule" accesskey="6">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-provider" accesskey="7">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-toolchain" accesskey="8">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
-<li><a href="#Extension-Starlark-symbols" accesskey="9">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-<li><a href="#Emacs-Starlark-symbols">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-manual-rule" accesskey="1">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-provider" accesskey="2">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
+<li><a href="#Starlark-toolchain" accesskey="3">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
+<li><a href="#Extension-Starlark-symbols" accesskey="4">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
+<li><a href="#Emacs-Starlark-symbols" accesskey="5">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
 </ul>
 <hr>
-<div class="section-level-extent" id="Starlark-library-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-protocol-buffer-library-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl"><span>7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005flibrary_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_library</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [outs], [data], [load_path], [deps])</var><a class="copiable-link" href="#index-elisp_005flibrary"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_library.bzl&quot;, &quot;elisp_library&quot;)
-</pre></div>
-<p>Byte-compiles Emacs Lisp source files and makes the compiled output
-available to dependencies.  All sources are byte-compiled.
-<code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this binary
-can then use <code class="code">load</code> or <code class="code">require</code> to load them.
-</p>
-<p>By default, libraries need to be loaded using a filename relative to the
-repository root, i.e., <var class="var">package</var>/​<var class="var">file</var>.  If you want to add
-further elements to the load path, use the <code class="code">load_path</code> attribute.
-</p>
-<p>If there are multiple source files specified in <code class="code">srcs</code>, these source files can
-also load each other.  However, it’s often preferable to only have one
-<code class="code">elisp_library</code> target per source file to make dependencies more obvious and
-ensure that files get only loaded in their byte-compiled form.
-</p>
-<p>The source files in <code class="code">srcs</code> can also list shared objects.  The rule treats them
-as Emacs modules and doesn’t try to byte-compile them.  You can use
-e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
-</p>
-<p>The <code class="code">elisp_library</code> rule supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>A unique name for this target.  Name; mandatory.
-</p></dd>
-<dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
-cause the compilation to fail.  Most targets should leave this attribute as
-<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
-attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
-</p></dd>
-<dt><code class="code">srcs</code></dt>
-<dd><p>List of source files.  These must either be Emacs Lisp files ending
-in <code class="code">.el</code>, or module objects ending in <code class="code">.so</code>, <code class="code">.dylib</code>, or <code class="code">.dll</code>.  List of
-labels; mandatory.
-</p></dd>
-<dt><code class="code">outs</code></dt>
-<dd><p>List of byte-compiled Emacs Lisp files to be made available as
-targets.  List of output files; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">load_path</code></dt>
-<dd><p>List of additional load path elements.  The elements are
-directory names, which can be either relative or absolute.  Relative names are
-relative to the current package.  Absolute names are relative to the
-repository root.  To add a load path entry for the current package, specify
-<code class="code">.</code> here.  List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
-</p></dd>
-</dl>
-</dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Starlark-protocol-buffer-library-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-library-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl"><span>7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fproto_003aelisp_005fproto_005flibrary_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005fproto_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_proto_library</strong> <var class="def-var-arguments">(name, deps)</var><a class="copiable-link" href="#index-elisp_005fproto_005flibrary"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl&quot;, &quot;elisp_proto_library&quot;)
-</pre></div>
-<p>Generates Emacs bindings for a protocol buffer library.
-By convention, for a <code class="code">proto_library</code> rule named
-<code class="code"><var class="var">prefix</var>_​proto</code> there should be a corresponding
-<code class="code">elisp_proto_library</code> rule named <code class="code"><var class="var">prefix</var>_​elisp_​proto</code>.
-Other <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules can then depend
-on this rule.  This rule generates and byte-compiles Emacs Lisp representations
-of the protocol buffer definitions listed in the <code class="code">deps</code> attribute and all their
-direct and indirect dependencies.  The feature symbol for <code class="code">require</code> is
-<code class="code"><var class="var">package</var>/​<var class="var">name</var></code>, where
-<code class="code">/​/​<var class="var">package</var>:<var class="var">name</var></code> is the label of the
-corresponding <code class="code">proto_library</code> rule.
-</p>
-<p>The <code class="code">elisp_proto_library</code> rule supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>A unique name for this target.  Name; mandatory.
-</p></dd>
-<dt><code class="code">deps</code></dt>
-<dd><p>List of exactly one <code class="code">proto_library</code> rule.  List of labels;
-mandatory; required providers: <code class="code">ProtoInfo</code>.
-</p></dd>
-</dl>
-</dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Starlark-C_002fC_002b_002b-module-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-binary-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-protocol-buffer-library-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/proto:elisp_proto_library.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl"><span>7.3 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fcc_005fmodule_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005fcc_005fmodule"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_cc_module</strong> <var class="def-var-arguments">(name, [srcs], [deps], [data], [copts], [linkopts], [local_defines])</var><a class="copiable-link" href="#index-elisp_005fcc_005fmodule"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_cc_module.bzl&quot;, &quot;elisp_cc_module&quot;)
-</pre></div>
-<p>Builds an Emacs dynamic module from C and C+​+​ source files.
-For background on Emacs modules, see
-<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Dynamic-Modules">Emacs Dynamic Modules</a>, and see
-<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Writing-Dynamic-Modules">Writing Dynamically-Loaded Modules</a>.
-The <code class="code">emacs_module</code> rule is similar to
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library"><code class="code">cc_library</code></a>,
-but it always builds a dynamic library (shared object) that can be loaded
-into Emacs.  The module can also be used directly as dependency
-for <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.
-The dynamic library will only export the symbols necessary for Emacs modules,
-<code class="code">plugin_is_GPL_compatible</code> and <code class="code">emacs_module_init</code>; see
-<a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Module-Initialization">Module Initialization Code</a>.
-The file name of the dynamic library will be
-<code class="code"><var class="var">name</var>.<var class="var">extension</var></code>, where <var class="var">name</var>
-is the rule name as specified in the <code class="code">name</code> attribute, and <var class="var">extension</var>
-is the correct extension for dynamic libraries for the target operating system.
-The file name will not be prefixed with <code class="code">lib</code>.
-</p>
-<p>The library code in <code class="code">srcs</code> can include a recent version of <code class="code">emacs-module.h</code>
-using
-</p><div class="example">
-<pre class="example-preformatted">#include &quot;emacs-module.h&quot;
-</pre></div>
-
-<p>to implement module functions.
-</p>
-<p>The <code class="code">elisp_cc_module</code> rule supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>A unique name for this target.  Name; mandatory.
-</p></dd>
-<dt><code class="code">srcs</code></dt>
-<dd><p>C and C+​+​ source files for the module.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.srcs">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">deps</code></dt>
-<dd><p><code class="code">cc_library</code> targets that the module depends on.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.deps">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>;
-required providers: <code class="code">CcInfo</code>.
-</p></dd>
-<dt><code class="code">data</code></dt>
-<dd><p>Data dependencies to make available at runtime.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.data">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">copts</code></dt>
-<dd><p>Additional options to pass to the C/​C+​+​ compiler.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.copts">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">linkopts</code></dt>
-<dd><p>Additional options to pass to the C/​C+​+​ linker.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.linkopts">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">local_defines</code></dt>
-<dd><p>Additional preprocessor definitions to pass to the C/​C+​+​
-compiler.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.local_defines">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-</dl>
-</dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Starlark-binary-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-test-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-C_002fC_002b_002b-module-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_cc_module.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl"><span>7.4 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fbinary_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_binary</strong> <var class="def-var-arguments">(name, [fatal_warnings], src, [data], [deps], [interactive], [input_args], [output_args])</var><a class="copiable-link" href="#index-elisp_005fbinary"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_binary.bzl&quot;, &quot;elisp_binary&quot;)
-</pre></div>
-<p>Binary rule that loads a single Emacs Lisp file.
-The source file is byte-compiled.  At runtime, the compiled version is loaded
-in batch mode unless <code class="code">interactive</code> is <code class="code">True</code>.
-</p>
-<p>The <code class="code">elisp_binary</code> rule supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>A unique name for this target.  Name; mandatory.
-</p></dd>
-<dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
-cause the compilation to fail.  Most targets should leave this attribute as
-<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
-attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
-</p></dd>
-<dt><code class="code">src</code></dt>
-<dd><p>Source file to load.  Label; mandatory.
-</p></dd>
-<dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
-</p></dd>
-<dt><code class="code">interactive</code></dt>
-<dd><p>Run Emacs in interactive instead of batch mode.  Boolean;
-optional; default: <code class="code">False</code>.
-</p></dd>
-<dt><code class="code">input_args</code></dt>
-<dd><p>Indices of command-line arguments that represent input
-filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
-indices are interpreted as counting from the end of the array.  For example,
-the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
-  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
-the corresponding arguments are treated as filenames for input files and added
-to the <code class="code">inputFiles</code> field of the manifest.  This only has an effect for
-toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
-<code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">output_args</code></dt>
-<dd><p>Indices of command-line arguments that represent output
-filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
-indices are interpreted as counting from the end of the array.  For example,
-the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
-  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
-the corresponding arguments are treated as filenames for output files and
-added to the <code class="code">outputFiles</code> field of the manifest.  This only has an effect for
-toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
-<code class="code">[]</code>.
-</p></dd>
-</dl>
-</dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Starlark-test-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-manual-rule" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-binary-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_binary.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl"><span>7.5 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005ftest_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005ftest"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_test</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [data], [deps], [skip_tests], [skip_tags])</var><a class="copiable-link" href="#index-elisp_005ftest"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_test.bzl&quot;, &quot;elisp_test&quot;)
-</pre></div>
-<p>Runs ERT tests that are defined in the source files.
-The given source files should contain ERT tests defined with <code class="code">ert-deftest</code>.
-For details, see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#How-to-Write-Tests">How to Write Tests</a>.
-The generated test binary loads all source files and executes all
-tests like <code class="code">ert-run-tests-batch-and-exit</code>.
-</p>
-<p>You can restrict the tests to be run using the <code class="code">--test_filter</code> option.  If set,
-the value of <code class="code">--test_filter</code> must be a Lisp expression usable as an
-ERT test selector; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Test-Selectors">Test Selectors</a>.
-You can also restrict the tests to be run using the <code class="code">skip_tests</code> and
-<code class="code">skip_tags</code> rule attributes.  These restrictions are additive, i.e., a test
-only runs if it’s not suppressed by either facility.
-</p>
-<p>In coverage mode (i.e., when run under <code class="code">bazel coverage</code>), all tests tagged with
-the <code class="code">:nocover</code> tag are also skipped.  You can use this tag to skip tests that
-normally pass, but don’t work under coverage for some reason.
-</p>
-<p>The <code class="code">elisp_test</code> rule supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>A unique name for this target.  Name; mandatory.
-</p></dd>
-<dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
-cause the compilation to fail.  Most targets should leave this attribute as
-<code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
-attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
-</p></dd>
-<dt><code class="code">srcs</code></dt>
-<dd><p>List of source files to load.  List of labels; mandatory.
-</p></dd>
-<dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
-</p></dd>
-<dt><code class="code">skip_tests</code></dt>
-<dd><p>List of tests to skip.  This attribute contains a list of ERT
-test symbols; when running the test rule, these tests are skipped.  Most of
-the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>. The <code class="code">skip_tests</code>
-attribute is mainly useful for third-party code that you don’t control.  List
-of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-<dt><code class="code">skip_tags</code></dt>
-<dd><p>List of test tags to skip.  This attribute contains a list of
-tag names; if a test is tagged with one of the tags from this list, it is
-skipped.  This can be useful to e.g.  skip tests that are flaky or only work
-in interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
-tests.  List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-</dl>
-</dd></dl>
-
-<hr>
-</div>
 <div class="section-level-extent" id="Starlark-manual-rule">
 <div class="nav-panel">
 <p>
-Next: <a href="#Starlark-provider" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-test-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_test.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Starlark-provider" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"><span>7.6 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"><span>7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"> &para;</a></span></h3>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fmanual"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_manual</strong> <var class="def-var-arguments">(name, src, out, [additional_inputs])</var><a class="copiable-link" href="#index-elisp_005fmanual"> &para;</a></span></dt>
@@ -1171,7 +1113,7 @@ List of labels; optional; default: <code class="code">[]</code>.
 <p>
 Next: <a href="#Starlark-toolchain" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-manual-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"><span>7.7 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"><span>7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"> &para;</a></span></h3>
 
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-EmacsLispInfo"><span class="category-def">Provider: </span><span><strong class="def-name">EmacsLispInfo</strong> <var class="def-var-arguments">source_files compiled_files load_path data_files transitive_source_files transitive_compiled_files transitive_load_path</var><a class="copiable-link" href="#index-EmacsLispInfo"> &para;</a></span></dt>
@@ -1236,7 +1178,7 @@ provider documentation.
 <p>
 Next: <a href="#Extension-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-provider" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"><span>7.8 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"><span>7.3 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"> &para;</a></span></h3>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005ftoolchain"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_toolchain</strong> <var class="def-var-arguments">(name, emacs, [use_default_shell_env], [execution_requirements], [wrap])</var><a class="copiable-link" href="#index-elisp_005ftoolchain"> &para;</a></span></dt>
@@ -1317,7 +1259,7 @@ optional; default: <code class="code">False</code>.
 <p>
 Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-toolchain" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"><span>7.9 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"><span>7.4 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"> &para;</a></span></h3>
 
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
@@ -1382,7 +1324,7 @@ List of strings; optional; default: <code class="code">[]</code>.
 <p>
 Previous: <a href="#Extension-Starlark-symbols" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"><span>7.10 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"> &para;</a></span></h3>
+<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"><span>7.5 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"> &para;</a></span></h3>
 
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
@@ -1510,13 +1452,13 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
 <tr><td colspan="3"><hr></td></tr>
 <tr><th id="Symbol-index_fn_letter-E">E</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-binary-rule">Starlark binary rule</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Starlark-C_002fC_002b_002b-module-rule">Starlark C/C++ module rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Emacs-Starlark-symbols">Emacs Starlark symbols</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-library-rule">Starlark library rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Starlark-manual-rule">Starlark manual rule</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Starlark-protocol-buffer-library-rule">Starlark protocol buffer library rule</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Starlark-test-rule">Starlark test rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-toolchain">Starlark toolchain</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto"><code>elisp/proto</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fany_002dtype_002dname"><code>elisp/proto/any-type-name</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
