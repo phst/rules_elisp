@@ -107,7 +107,16 @@ and copy the generated file to //elisp/private:generated.bzl.""",
 bzl_library(
     name = "module_config",
     srcs = ["module_config.bzl"],
-    deps = ["//private:defs"],
+    deps = [
+        ":module_config_info",
+        "//private:defs",
+    ],
+)
+
+bzl_library(
+    name = "module_config_info",
+    srcs = ["module_config_info.bzl"],
+    visibility = ["//elisp:__pkg__"],
 )
 
 bzl_library(

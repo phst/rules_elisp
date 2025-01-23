@@ -116,6 +116,7 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:load_path",
+        "//elisp/private:module_config_info",
         "//private:defs",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",

@@ -319,14 +319,6 @@ cc_defaults = rule(
     provides = [CcDefaultInfo],
 )
 
-ModuleConfigInfo = provider(
-    doc = "Internal provider for system-specific Emacs module configuration",
-    fields = {
-        "suffix": "Filename suffix for Emacs modules",
-        "additional_linker_inputs": "Additional inputs for the linker to build Emacs modules",
-    },
-)
-
 LAUNCHER_ATTRS = {
     "_launcher_srcs": attr.label_list(
         default = [Label("//elisp/private/tools:launcher.cc")],

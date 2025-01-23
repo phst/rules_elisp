@@ -19,10 +19,10 @@ load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:load_path.bzl", "resolve_load_path")
+load("//elisp/private:module_config_info.bzl", "ModuleConfigInfo")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
-    "ModuleConfigInfo",
 )
 
 visibility("public")
