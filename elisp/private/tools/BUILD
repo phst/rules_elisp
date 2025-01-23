@@ -18,7 +18,7 @@ load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("//elisp:defs.bzl", "elisp_binary")
+load("//elisp:defs.bzl", "elisp_binary", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
 load(
     "//private:defs.bzl",
@@ -187,7 +187,7 @@ cc_library(
     copts = COPTS + CXXOPTS,
     data = [
         ":run_test_stripped",
-        "//elisp/ert:runner.elc",
+        "//elisp/private/tools:ert-runner.elc",
         "//elisp/runfiles:runfiles.elc",
     ],
     features = FEATURES,
@@ -199,7 +199,7 @@ cc_library(
         shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
         shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/ert:runner.elc))*")',
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/private/tools:ert-runner.elc))*")',
         ])),
     ],
     visibility = ["//elisp:__pkg__"],
@@ -227,6 +227,18 @@ executable_only(
     name = "run_test_stripped",
     testonly = True,
     src = ":run_test",
+)
+
+elisp_library(
+    name = "ert_runner",
+    testonly = True,
+    srcs = ["ert-runner.el"],
+    outs = ["ert-runner.elc"],
+)
+
+build_test(
+    name = "ert_runner_test",
+    targets = [":ert_runner"],
 )
 
 py_library(
