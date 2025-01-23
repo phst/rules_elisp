@@ -136,12 +136,6 @@ bzl_library(
     ],
 )
 
-bzl_library(
-    name = "module_config_info",
-    srcs = ["module_config_info.bzl"],
-    visibility = ["//elisp:__pkg__"],
-)
-
 cc_defaults(
     name = "launcher_defaults",
     copts = LAUNCHER_COPTS,
@@ -188,6 +182,12 @@ bzl_library(
     name = "deps",
     srcs = ["deps.bzl"],
     deps = ["@bazel_skylib//lib:modules"],
+)
+
+bzl_library(
+    name = "module_config_info",
+    srcs = ["module_config_info.bzl"],
+    visibility = ["//elisp:__pkg__"],
 )
 
 alias(
