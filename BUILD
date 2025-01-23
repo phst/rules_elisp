@@ -39,7 +39,7 @@ py_binary(
 
 exports_files(
     [".pylintrc"],
-    visibility = ["//private:__pkg__"],
+    visibility = ["//dev:__pkg__"],
 )
 
 exports_files(

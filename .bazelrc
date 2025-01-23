@@ -27,7 +27,7 @@ build --host_features=external_include_paths
 build:windows --copt='/external:W2' --host_copt='/external:W2'
 
 # Run Pylint by default.
-build --aspects='//private:defs.bzl%check_python'
+build --aspects='//dev:check_python.bzl%check_python'
 build --output_groups='+check_python'
 
 # Suppress unactionable warnings about duplicate libraries.
