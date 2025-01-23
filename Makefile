@@ -22,11 +22,12 @@ BAZELFLAGS =
 FIND = find
 GREP = grep
 
-all: generate check
+all:
+	$(BAZEL) build $(BAZELFLAGS) -- //...
 
 generate: compdb coverage
 
-check: check-extra
+check: all check-extra
 	./build.py -- check
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
