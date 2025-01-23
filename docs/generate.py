@@ -231,6 +231,10 @@ class _Generator:
         self._write('#+END_defmac\n\n')
 
     def _load(self, key: stardoc_output_pb2.OriginKey) -> None:
+        if not key.file:
+            raise ValueError('unknown file')
+        if not key.name:
+            raise ValueError(f'unknown symbol name in file {key.file}')
         self._write('#+BEGIN_SRC bazel-starlark\n')
         self._write(f'load("{key.file}", "{key.name}")\n')
         self._write('#+END_SRC\n')
