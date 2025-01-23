@@ -169,16 +169,6 @@ cc_defaults(
 )
 
 bzl_library(
-    name = "executable_only",
-    srcs = ["executable_only.bzl"],
-)
-
-bzl_library(
-    name = "generated",
-    srcs = ["generated.bzl"],
-)
-
-bzl_library(
     name = "deps",
     srcs = ["deps.bzl"],
     deps = ["@bazel_skylib//lib:modules"],
@@ -218,6 +208,16 @@ selects.config_setting_group(
 )
 
 # gazelle:ignore generated.*.bzl
+
+bzl_library(
+    name = "executable_only",
+    srcs = ["executable_only.bzl"],
+)
+
+bzl_library(
+    name = "generated",
+    srcs = ["generated.bzl"],
+)
 
 bzl_library(
     name = "run_emacs",
