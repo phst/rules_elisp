@@ -17,6 +17,7 @@ load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
+    default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
 
