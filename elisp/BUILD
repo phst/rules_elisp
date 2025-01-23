@@ -106,10 +106,7 @@ exports_files(
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//tests:__pkg__",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
         ":elisp_binary",
         ":elisp_cc_module",
@@ -125,7 +122,7 @@ bzl_library(
 bzl_library(
     name = "elisp_library",
     srcs = ["elisp_library.bzl"],
-    visibility = ["//docs:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:compile",
@@ -135,7 +132,7 @@ bzl_library(
 bzl_library(
     name = "elisp_cc_module",
     srcs = ["elisp_cc_module.bzl"],
-    visibility = ["//docs:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:load_path",
@@ -148,7 +145,7 @@ bzl_library(
 bzl_library(
     name = "elisp_binary",
     srcs = ["elisp_binary.bzl"],
-    visibility = ["//docs:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
@@ -164,7 +161,7 @@ bzl_library(
     srcs = [
         "elisp_test.bzl",  # keep
     ],
-    visibility = ["//docs:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
@@ -178,13 +175,14 @@ bzl_library(
 bzl_library(
     name = "elisp_manual",
     srcs = ["elisp_manual.bzl"],
-    visibility = ["//docs:__pkg__"],
+    visibility = ["//visibility:public"],
     deps = ["//private:defs"],
 )
 
 bzl_library(
     name = "extensions",
     srcs = ["extensions.bzl"],
+    visibility = ["//visibility:public"],
     deps = ["//elisp/extensions:elisp"],
 )
 

@@ -143,10 +143,7 @@ proto_lang_toolchain(
 bzl_library(
     name = "elisp_proto_library",
     srcs = ["elisp_proto_library.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//elisp:__pkg__",
-    ],
+    visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:compile",

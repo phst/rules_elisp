@@ -17,10 +17,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 bzl_library(
     name = "elisp",
     srcs = ["elisp.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//elisp:__pkg__",
-    ],
+    visibility = ["//visibility:public"],
     deps = ["@bazel_skylib//lib:modules"],
 )
 
