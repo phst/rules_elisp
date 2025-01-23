@@ -27,9 +27,14 @@ package(
 licenses(["notice"])
 
 bzl_library(
+    name = "run_emacs",
+    srcs = ["run_emacs.bzl"],
+)
+
+bzl_library(
     name = "bootstrap",
     srcs = ["bootstrap.bzl"],
-    deps = ["//private:defs"],
+    deps = [":run_emacs"],
 )
 
 bzl_library(
@@ -42,6 +47,7 @@ bzl_library(
     deps = [
         ":cc_launcher_config",
         ":load_path",
+        ":run_emacs",
         "//elisp/common:elisp_info",
         "//private:defs",
         "@bazel_skylib//lib:collections",
