@@ -41,68 +41,6 @@ FEATURES = select({
     Label("//conditions:default"): [],
 })
 
-# Shared C++ compilation options.
-COPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [
-        "/W4",
-        "/utf-8",
-        "/permissive-",
-        "/Zc:__cplusplus",
-        "/external:W2",  # TODO: shouldn’t be needed; file bug against rules_cc
-    ],
-    Label("//elisp/private:gcc_or_clang"): [
-        "-finput-charset=utf-8",
-        "-fexec-charset=utf-8",
-        "-Wall",
-        "-Wextra",
-        "-Wconversion",
-        "-Wsign-conversion",
-        "-pedantic",
-    ],
-}) + select({
-    Label("@rules_cc//cc/compiler:clang"): [
-        # Work around https://github.com/llvm/llvm-project/issues/121984.
-        "--system-header-prefix=absl/",
-        "--system-header-prefix=google/",
-        "--system-header-prefix=tools/",
-        "--system-header-prefix=upb/",
-    ],
-    Label("//conditions:default"): [],
-})
-
-CXXOPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    Label("@rules_cc//cc/compiler:gcc"): [
-        # GCC appears to treat some moves as redundant that are in fact
-        # necessary.
-        "-Wno-redundant-move",
-    ],
-    Label("@rules_cc//cc/compiler:clang"): [],
-})
-
-CONLYOPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [],
-    Label("//elisp/private:gcc_or_clang"): ["-Wvla"],
-})
-
-DEFINES = [
-    # https://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01
-    "_POSIX_C_SOURCE=200809L",
-    "_XOPEN_SOURCE=700",
-] + select({
-    Label("@platforms//os:linux"): [],
-    Label("@platforms//os:macos"): [],
-    Label("@platforms//os:windows"): [
-        "_UNICODE",
-        "UNICODE",
-        "STRICT",
-        "NOMINMAX",
-        "WIN32_LEAN_AND_MEAN",
-    ],
-})
-
-LINKOPTS = []
-
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10
