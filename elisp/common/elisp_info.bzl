@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines rules to work with Emacs Lisp files in Bazel."""
+"""Defines the `EmacsLispInfo` provider."""
 
 visibility("public")
 
