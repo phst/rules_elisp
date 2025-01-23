@@ -197,27 +197,6 @@ CcDefaultInfo = provider(
     },
 )
 
-def _cc_defaults_impl(ctx):
-    features, disabled_features = parse_features(ctx.attr.features)
-    return CcDefaultInfo(
-        features = features,
-        disabled_features = disabled_features,
-        defines = ctx.attr.defines,
-        copts = ctx.attr.copts,
-        linkopts = ctx.attr.linkopts,
-    )
-
-cc_defaults = rule(
-    implementation = _cc_defaults_impl,
-    attrs = {
-        "defines": attr.string_list(mandatory = True),
-        "copts": attr.string_list(mandatory = True),
-        "linkopts": attr.string_list(mandatory = True),
-    },
-    doc = "Internal rule for default C++ flags",
-    provides = [CcDefaultInfo],
-)
-
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10
