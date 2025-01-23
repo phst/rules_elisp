@@ -26,7 +26,6 @@ licenses(["notice"])
 bzl_library(
     name = "bootstrap",
     srcs = ["bootstrap.bzl"],
-    visibility = ["//visibility:private"],
     deps = ["//private:defs"],
 )
 
@@ -83,12 +82,10 @@ bzl_library(
 bzl_library(
     name = "module_config",
     srcs = ["module_config.bzl"],
-    visibility = ["//visibility:private"],
     deps = ["//private:defs"],
 )
 
 bzl_library(
     name = "executable_only",
     srcs = ["executable_only.bzl"],
-    visibility = ["//elisp:__subpackages__"],
 )
