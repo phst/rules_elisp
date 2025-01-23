@@ -51,11 +51,15 @@ nogo:
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
+INSTALL = install
+INSTALL_PROGRAM = $(INSTALL)
+INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_INFO = install-info
 
 install: check
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
-	install -d -- '$(INFODIR)'
-	install -m 0644 -- \
+	$(INSTALL) -d -- '$(INFODIR)'
+	$(INSTALL_DATA) -- \
 	  bazel-bin/docs/rules_elisp.info \
 	  '$(INFODIR)/rules_elisp.info'
-	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+	$(INSTALL_INFO) -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
