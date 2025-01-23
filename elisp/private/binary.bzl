@@ -18,10 +18,10 @@ rules."""
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load(
     "//private:defs.bzl",
-    "cc_launcher",
     "check_relative_filename",
     "runfile_location",
 )
+load(":cc_launcher.bzl", "cc_launcher")
 load(":compile.bzl", "compile")
 
 visibility("//elisp")

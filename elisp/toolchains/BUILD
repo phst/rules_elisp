@@ -28,6 +28,7 @@ bzl_library(
     srcs = ["elisp_emacs_binary.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//elisp/private:cc_launcher",
         "//private:defs",
         "@rules_cc//cc:action_names_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",

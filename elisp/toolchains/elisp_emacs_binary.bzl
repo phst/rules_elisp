@@ -23,12 +23,12 @@ load(
 load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("//elisp/private:cc_launcher.bzl", "cc_launcher")
 load(
     "//private:defs.bzl",
     "CcDefaultInfo",
     "LAUNCHER_ATTRS",
     "LAUNCHER_DEPS",
-    "cc_launcher",
     "runfile_location",
 )
 

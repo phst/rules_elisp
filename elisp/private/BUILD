@@ -35,9 +35,22 @@ bzl_library(
     srcs = ["binary.bzl"],
     visibility = ["//elisp:__pkg__"],
     deps = [
+        ":cc_launcher",
         ":compile",
         "//private:defs",
         "@bazel_skylib//lib:collections",
+    ],
+)
+
+bzl_library(
+    name = "cc_launcher",
+    srcs = ["cc_launcher.bzl"],
+    visibility = ["//elisp/toolchains:__pkg__"],
+    deps = [
+        "//private:defs",
+        "//private:generated",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
     ],
 )
 

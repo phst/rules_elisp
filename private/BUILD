@@ -39,12 +39,8 @@ bzl_library(
         "//emacs:__pkg__",
     ],
     deps = [
-        ":generated",
         "@bazel_skylib//lib:paths",
         "@bazel_skylib//lib:sets",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
-        "@rules_python//python:py_info_bzl",
     ],
 )
 
@@ -62,6 +58,7 @@ bzl_library(
 bzl_library(
     name = "generated",
     srcs = ["generated.bzl"],
+    visibility = ["//elisp/private:__pkg__"],
 )
 
 expand_template(
