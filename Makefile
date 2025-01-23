@@ -26,7 +26,7 @@ all: generate check
 
 generate: compdb coverage
 
-check: nogo
+check: check-extra
 	./build.py -- check
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
@@ -41,9 +41,9 @@ coverage:
 	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
 	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
 
-# We don’t want any Go rules in the public packages, as our users would have to
-# depend on the Go rules then as well.
-nogo:
+check-extra:
+        # We don’t want any Go rules in the public packages, as our users would
+        # have to depend on the Go rules then as well.
 	echo 'Looking for unwanted Go targets in public packages'
 	! $(FIND) elisp emacs -type f \
 	  -exec $(GREP) -F -e '@rules_go' -n -- '{}' '+' \
