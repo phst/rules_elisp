@@ -14,6 +14,8 @@
 
 """Defines the internal `executable_only` rule."""
 
+visibility(["//elisp/private/tools"])
+
 def _executable_only_impl(ctx):
     info = ctx.attr.src[DefaultInfo]
     files_to_run = info.files_to_run or fail("missing files_to_run")

@@ -1,4 +1,4 @@
-# Copyright 2024 Philipp Stephani
+# Copyright 2024, 2025 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@
 # and copy the output to //private:generated.bzl.
 
 """Internal generated definitions."""
+
+visibility(["//elisp/private"])
 
 # Starlark doesn’t have `chr` or `ord` functions, so we replicate them here.
 # CHR maps ordinals to single-character strings, and ORD does the reverse.  This
