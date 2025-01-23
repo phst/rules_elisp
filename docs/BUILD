@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_manual")
 load("//private:defs.bzl", "PACKAGE_FEATURES", "merged_manual")
+load(":makeinfo.bzl", "makeinfo")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -33,12 +35,10 @@ elisp_manual(
 )
 
 # This rule assumes that Texinfo is installed locally.
-genrule(
+makeinfo(
     name = "info",
-    srcs = ["manual.texi"],
-    outs = ["rules_elisp.info"],
-    cmd = "$(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
-    tools = ["@local_texinfo//:makeinfo"],
+    src = "manual.texi",
+    out = "rules_elisp.info",
 )
 
 DOCS = [
@@ -95,4 +95,9 @@ py_proto_library(
     name = "stardoc_output_py_proto",
     tags = ["no-python-check"],
     deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
+)
+
+bzl_library(
+    name = "makeinfo",
+    srcs = ["makeinfo.bzl"],
 )
