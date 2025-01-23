@@ -136,7 +136,7 @@ bzl_library(
     ],
 )
 
-# gazelle:ignore generated.*.bzl
+# gazelle:exclude generated.*.bzl
 
 cc_defaults(
     name = "launcher_defaults",
