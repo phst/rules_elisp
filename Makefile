@@ -44,7 +44,6 @@ coverage:
 check-extra:
         # We don’t want any Go rules in the public packages, as our users would
         # have to depend on the Go rules then as well.
-	echo 'Looking for unwanted Go targets in public packages'
 	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
 
 PREFIX = /usr/local
