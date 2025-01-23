@@ -21,10 +21,10 @@ load(
     "//private:defs.bzl",
     "check_relative_filename",
     "repository_relative_filename",
-    "run_emacs",
 )
 load(":cc_launcher_config.bzl", "LAUNCHER_ATTRS")
 load(":load_path.bzl", "resolve_load_path")
+load(":run_emacs.bzl", "run_emacs")
 
 visibility(["//elisp", "//elisp/proto"])
 

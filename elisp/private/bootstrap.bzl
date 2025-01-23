@@ -14,7 +14,7 @@
 
 """Defines the internal `bootstrap` rule."""
 
-load("//private:defs.bzl", "run_emacs")
+load(":run_emacs.bzl", "run_emacs")
 
 visibility(["//elisp/private/tools"])
 
