@@ -47,6 +47,14 @@ check-extra:
 	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
         # Find Starlark files without visibility declaration.
 	! $(GIT) grep -I -r -E -L -e '^visibility\(' -- '*.bzl'
+        # Find BUILD files without correct license declaration.
+	! $(GIT) grep -I -r -F -L -e 'default_applicable_licenses' \
+	  -- '*/BUILD' '*/BUILD.bazel'
+	! $(GIT) grep -I -r -E -L -e '^licenses\(\["notice"\]\)' \
+	  -- '*/BUILD' '*/BUILD.bazel'
+        # Find BUILD files without correct features.
+	! $(GIT) grep -I -r -F -L -e 'features = PACKAGE_FEATURES' \
+	  -- '*/BUILD' '*/BUILD.bazel' ':^/examples/ext/'
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
