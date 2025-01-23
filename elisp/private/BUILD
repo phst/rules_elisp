@@ -15,6 +15,13 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 
 bzl_library(
+    name = "bootstrap",
+    srcs = ["bootstrap.bzl"],
+    visibility = ["//visibility:private"],
+    deps = ["//private:defs"],
+)
+
+bzl_library(
     name = "compile",
     srcs = ["compile.bzl"],
     visibility = [
