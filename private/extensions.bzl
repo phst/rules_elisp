@@ -83,27 +83,6 @@ _local_emacs_repository = repository_rule(
     local = True,
 )
 
-def _local_texinfo_repository_impl(ctx):
-    makeinfo = ctx.getenv("MAKEINFO", "makeinfo") or fail("MAKEINFO is empty")
-    if "/" not in makeinfo and "\\" not in makeinfo:
-        makeinfo = ctx.which(makeinfo) or fail("Texinfo not installed")
-    ctx.symlink(makeinfo, "makeinfo.exe")
-    ctx.template(
-        "BUILD.bazel",
-        Label("//private:texinfo.BUILD.template"),
-        {
-            '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
-            '"[docs:__pkg__]"': repr(str(Label("//docs:__pkg__"))),
-        },
-        executable = False,
-    )
-
-_local_texinfo_repository = repository_rule(
-    implementation = _local_texinfo_repository_impl,
-    local = True,
-    configure = True,
-)
-
 def _deps_impl(ctx):
     for module in ctx.modules:
         for emacs in module.tags.emacs:
@@ -148,23 +127,4 @@ deps = module_extension(
         ),
     },
     implementation = _deps_impl,
-)
-
-def _dev_deps_impl(ctx):
-    for module in ctx.modules:
-        for texinfo in module.tags.local_texinfo:
-            _local_texinfo_repository(
-                name = texinfo.name or fail("missing repository name"),
-            )
-    return modules.use_all_repos(ctx)
-
-dev_deps = module_extension(
-    tag_classes = {
-        "local_texinfo": tag_class(
-            attrs = {
-                "name": attr.string(mandatory = True),
-            },
-        ),
-    },
-    implementation = _dev_deps_impl,
 )
