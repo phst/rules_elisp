@@ -119,10 +119,14 @@ corresponding ~elisp_proto_library~ rule has the same prefix and ends in
 =_elisp_proto=.  For example:
 
 #+BEGIN_SRC bazel-build
+load("@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
+
 proto_library(
     name = "my_proto",
     srcs = ["my.proto"],
 )
+
 elisp_proto_library(
     name = "my_elisp_proto",
     deps = [":my_proto"],

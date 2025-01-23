@@ -224,10 +224,14 @@ corresponding <code class="code">elisp_proto_library</code> rule has the same pr
 &lsquo;<samp class="samp">_elisp_proto</samp>&rsquo;.  For example:
 </p>
 <div class="example">
-<pre class="example-preformatted">proto_library(
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl&quot;, &quot;elisp_proto_library&quot;)
+load(&quot;@protobuf//bazel:proto_library.bzl&quot;, &quot;proto_library&quot;)
+
+proto_library(
     name = &quot;my_proto&quot;,
     srcs = [&quot;my.proto&quot;],
 )
+
 elisp_proto_library(
     name = &quot;my_elisp_proto&quot;,
     deps = [&quot;:my_proto&quot;],
