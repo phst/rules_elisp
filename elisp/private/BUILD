@@ -16,11 +16,8 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
-load(
-    "//private:defs.bzl",
-    "cc_defaults",
-)
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load(":cc_defaults.bzl", "cc_defaults")
 load(
     ":cc_launcher_config.bzl",
     "LAUNCHER_COPTS",
@@ -92,6 +89,12 @@ bzl_library(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
     ],
+    deps = ["//private:defs"],
+)
+
+bzl_library(
+    name = "cc_defaults",
+    srcs = ["cc_defaults.bzl"],
     deps = ["//private:defs"],
 )
 
