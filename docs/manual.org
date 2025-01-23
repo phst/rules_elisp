@@ -633,41 +633,36 @@ This function removes the range delineated by {{{var(from)}}} and {{{var(to)}}}
 from {{{var(array)}}}.  Elements are shifted left to fill in the hole.
 #+END_defun
 
-* Starlark symbol reference
+* Building manuals
 
-** Symbols defined in =//elisp:elisp_manual.bzl=
-:PROPERTIES:
-:ALT_TITLE: Starlark manual rule
-:END:
+You can use the ~elisp_manual~ rule to generate a Texinfo manual from an
+Org-mode file.  See [[info:texinfo#Top]], and see [[info:org#Top]].
 
 #+INCLUDE: elisp/elisp_manual.org
 
-** Symbols defined in =//elisp/common:elisp_info.bzl=
-:PROPERTIES:
-:ALT_TITLE: Starlark provider
-:END:
+* Depending on external libraries
 
-#+INCLUDE: elisp/common/elisp_info.org
-
-** Symbols defined in =//elisp/toolchains:elisp_toolchain.bzl=
-:PROPERTIES:
-:ALT_TITLE: Starlark toolchain
-:END:
-
-#+INCLUDE: elisp/toolchains/elisp_toolchain.org
-
-** Symbols defined in =//elisp/extensions:elisp.bzl=
-:PROPERTIES:
-:ALT_TITLE: Extension Starlark symbols
-:END:
+~rules_elisp~ provides a module extension to make it easier to depend on
+external Emacs Lisp libraries that don’t bring their own Bazel support.
 
 #+INCLUDE: elisp/extensions/elisp.org
 
-** Symbols defined in =//elisp/toolchains:elisp_emacs_binary.bzl=
-:PROPERTIES:
-:ALT_TITLE: Emacs Starlark symbols
-:END:
+* Starlark infrastructure
 
+The ~emacs_library~, ~emacs_cc_module~, and ~emacs_proto_library~ return the
+~EmacsLispInfo~ provider to transport information about Emacs Lisp libraries
+across target boundaries.  See
+[[https://bazel.build/extending/rules#providers][Providers]] for more
+information about providers.
+
+#+INCLUDE: elisp/common/elisp_info.org
+
+To compile Emacs Lisp source files and runs tests, ~rules_elisp~ registers the
+toolchains of type ~@phst_rules_elisp//elisp:toolchain_type~; see
+[[https://bazel.build/extending/toolchains][Toolchains]].  Emacs Lisp toolchains
+are created using the `elisp_toolchain` rule.
+
+#+INCLUDE: elisp/toolchains/elisp_toolchain.org
 #+INCLUDE: elisp/toolchains/elisp_emacs_binary.org
 
 * Indices

@@ -66,19 +66,14 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [
     <li><a id="toc-Well_002dknown-protocol-buffer-types" href="#Well_002dknown-protocol-buffer-types">6.3 Well-known protocol buffer types</a></li>
     <li><a id="toc-Specialized-array-and-map-functions" href="#Protocol-buffer-array-and-map-functions">6.4 Specialized array and map functions</a></li>
   </ul></li>
-  <li><a id="toc-Starlark-symbol-reference" href="#Starlark-symbol-reference">7 Starlark symbol reference</a>
+  <li><a id="toc-Building-manuals" href="#Building-manuals">7 Building manuals</a></li>
+  <li><a id="toc-Depending-on-external-libraries" href="#Depending-on-external-libraries">8 Depending on external libraries</a></li>
+  <li><a id="toc-Starlark-infrastructure" href="#Starlark-infrastructure">9 Starlark infrastructure</a></li>
+  <li><a id="toc-Indices" href="#Indices">10 Indices</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl" href="#Starlark-manual-rule">7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl" href="#Starlark-provider">7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl" href="#Starlark-toolchain">7.3 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl" href="#Extension-Starlark-symbols">7.4 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-    <li><a id="toc-Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl" href="#Emacs-Starlark-symbols">7.5 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
-  </ul></li>
-  <li><a id="toc-Indices" href="#Indices">8 Indices</a>
-  <ul class="toc-numbered-mark">
-    <li><a id="toc-Concept-index" href="#Concept-index" rel="index">8.1 Concept index</a></li>
-    <li><a id="toc-Symbol-index" href="#Symbol-index" rel="index">8.2 Symbol index</a></li>
-    <li><a id="toc-Type-index" href="#Type-index" rel="index">8.3 Type index</a></li>
+    <li><a id="toc-Concept-index" href="#Concept-index" rel="index">10.1 Concept index</a></li>
+    <li><a id="toc-Symbol-index" href="#Symbol-index" rel="index">10.2 Symbol index</a></li>
+    <li><a id="toc-Type-index" href="#Type-index" rel="index">10.3 Type index</a></li>
   </ul></li>
 </ul>
 </div>
@@ -464,7 +459,7 @@ class <code class="code">elisp/runfiles/runfiles</code>.
 <div class="chapter-level-extent" id="Protocol-buffers">
 <div class="nav-panel">
 <p>
-Next: <a href="#Starlark-symbol-reference" accesskey="n" rel="next">Starlark symbol reference</a>, Previous: <a href="#Runfiles" accesskey="p" rel="prev">Runfiles</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Building-manuals" accesskey="n" rel="next">Building manuals</a>, Previous: <a href="#Runfiles" accesskey="p" rel="prev">Runfiles</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
 <h2 class="chapter" id="Protocol-buffers-1"><span>6 Protocol buffers<a class="copiable-link" href="#Protocol-buffers-1"> &para;</a></span></h2>
 
@@ -1051,29 +1046,16 @@ from <var class="var">array</var>.  Elements are shifted left to fill in the hol
 <hr>
 </div>
 </div>
-<div class="chapter-level-extent" id="Starlark-symbol-reference">
+<div class="chapter-level-extent" id="Building-manuals">
 <div class="nav-panel">
 <p>
-Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href="#Protocol-buffers" accesskey="p" rel="prev">Protocol buffers</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Depending-on-external-libraries" accesskey="n" rel="next">Depending on external libraries</a>, Previous: <a href="#Protocol-buffers" accesskey="p" rel="prev">Protocol buffers</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h2 class="chapter" id="Starlark-symbol-reference-1"><span>7 Starlark symbol reference<a class="copiable-link" href="#Starlark-symbol-reference-1"> &para;</a></span></h2>
+<h2 class="chapter" id="Building-manuals-1"><span>7 Building manuals<a class="copiable-link" href="#Building-manuals-1"> &para;</a></span></h2>
 
-
-<ul class="mini-toc">
-<li><a href="#Starlark-manual-rule" accesskey="1">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-provider" accesskey="2">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a></li>
-<li><a href="#Starlark-toolchain" accesskey="3">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a></li>
-<li><a href="#Extension-Starlark-symbols" accesskey="4">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a></li>
-<li><a href="#Emacs-Starlark-symbols" accesskey="5">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a></li>
-</ul>
-<hr>
-<div class="section-level-extent" id="Starlark-manual-rule">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-provider" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"><span>7.1 Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_003aelisp_005fmanual_002ebzl"> &para;</a></span></h3>
-
+<p>You can use the <code class="code">elisp_manual</code> rule to generate a Texinfo manual from an
+Org-mode file.  See <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html#Top">(texinfo)Top</a>, and see <a data-manual="org" href="https://www.gnu.org/software/emacs/manual/html_mono/org.html#Top">(org)Top</a>.
+</p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fmanual"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_manual</strong> <var class="def-var-arguments">(name, src, out, [additional_inputs])</var><a class="copiable-link" href="#index-elisp_005fmanual"> &para;</a></span></dt>
 <dd><div class="example">
@@ -1108,13 +1090,87 @@ List of labels; optional; default: <code class="code">[]</code>.
 
 <hr>
 </div>
-<div class="section-level-extent" id="Starlark-provider">
+<div class="chapter-level-extent" id="Depending-on-external-libraries">
 <div class="nav-panel">
 <p>
-Next: <a href="#Starlark-toolchain" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-manual-rule" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp:elisp_manual.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Next: <a href="#Starlark-infrastructure" accesskey="n" rel="next">Starlark infrastructure</a>, Previous: <a href="#Building-manuals" accesskey="p" rel="prev">Building manuals</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"><span>7.2 Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fcommon_003aelisp_005finfo_002ebzl"> &para;</a></span></h3>
+<h2 class="chapter" id="Depending-on-external-libraries-1"><span>8 Depending on external libraries<a class="copiable-link" href="#Depending-on-external-libraries-1"> &para;</a></span></h2>
 
+<p><code class="code">rules_elisp</code> provides a module extension to make it easier to depend on
+external Emacs Lisp libraries that don’t bring their own Bazel support.
+</p>
+<dl class="first-deftp def-block">
+<dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
+<dd><div class="example">
+<pre class="example-preformatted">elisp = use_extension(&quot;@phst_rules_elisp//elisp/extensions:elisp.bzl&quot;, &quot;elisp&quot;)
+</pre></div>
+<p>Module extension for Emacs Lisp.
+</p>
+<p>The <code class="code">elisp</code> module extension provides the following tag classes:
+</p>
+<dl class="first-defop def-block">
+<dt class="defop def-line" id="index-http_005farchive-on-elisp"><span class="category-def">Tag class on <code class="code">elisp</code>: </span><span><strong class="def-name">http_archive</strong> <var class="def-var-arguments">(name, urls, integrity, [strip_prefix], [target_name], [exclude])</var><a class="copiable-link" href="#index-http_005farchive-on-elisp"> &para;</a></span></dt>
+<dd><p>Downloads an archive file over HTTP and makes its contents
+available as an <code class="code">elisp_library</code>.  This tag class is very similar to
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive"><code class="code">http_archive</code></a>,
+except that it always generates a BUILD file containing a single <code class="code">elisp_library</code>
+rule in the root package for all Emacs Lisp files in the archive.
+Test files (<code class="code">…-test.el</code>, <code class="code">…-tests.el</code>) and package metadata files (<code class="code">…-pkg.el</code>)
+are excluded.
+The <code class="code">elisp_library</code> rule is named <code class="code">library</code> by default, unless overridden
+by the <code class="code">target_name</code> attribute.
+</p>
+<p>The <code class="code">http_archive</code> tag class supports the following attributes:
+</p>
+<dl class="table">
+<dt><code class="code">name</code></dt>
+<dd><p>Name of the repository to generate.  Name; mandatory.
+</p></dd>
+<dt><code class="code">urls</code></dt>
+<dd><p>List of archive URLs to try.  See the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-urls">corresponding
+attribute for <code class="code">http_archive</code></a>.  List of strings; mandatory.
+</p></dd>
+<dt><code class="code">integrity</code></dt>
+<dd><p>Expected checksum of the archive file in
+<a class="uref" href="https://www.w3.org/TR/SRI/">Subresource Integrity</a> format.  See the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-integrity">corresponding
+attribute for <code class="code">http_archive</code></a>.  String; mandatory.
+</p></dd>
+<dt><code class="code">strip_prefix</code></dt>
+<dd><p>Directory prefix to strip from the archive contents.  See
+the
+<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix">corresponding
+attribute for <code class="code">http_archive</code></a>.  String; optional; default: <code class="code">&quot;&quot;</code>.
+</p></dd>
+<dt><code class="code">target_name</code></dt>
+<dd><p>Name of the <code class="code">elisp_library</code> target to generate.  String;
+optional; default: <code class="code">&quot;library&quot;</code>.
+</p></dd>
+<dt><code class="code">exclude</code></dt>
+<dd><p>Glob patterns of additional files to exclude from the library.
+List of strings; optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+</dd></dl>
+</dd></dl>
+
+<hr>
+</div>
+<div class="chapter-level-extent" id="Starlark-infrastructure">
+<div class="nav-panel">
+<p>
+Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href="#Depending-on-external-libraries" accesskey="p" rel="prev">Depending on external libraries</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+</div>
+<h2 class="chapter" id="Starlark-infrastructure-1"><span>9 Starlark infrastructure<a class="copiable-link" href="#Starlark-infrastructure-1"> &para;</a></span></h2>
+
+<p>The <code class="code">emacs_library</code>, <code class="code">emacs_cc_module</code>, and <code class="code">emacs_proto_library</code> return the
+<code class="code">EmacsLispInfo</code> provider to transport information about Emacs Lisp libraries
+across target boundaries.  See
+<a class="uref" href="https://bazel.build/extending/rules#providers">Providers</a> for more
+information about providers.
+</p>
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-EmacsLispInfo"><span class="category-def">Provider: </span><span><strong class="def-name">EmacsLispInfo</strong> <var class="def-var-arguments">source_files compiled_files load_path data_files transitive_source_files transitive_compiled_files transitive_load_path</var><a class="copiable-link" href="#index-EmacsLispInfo"> &para;</a></span></dt>
 <dd><div class="example">
@@ -1171,15 +1227,11 @@ provider documentation.
 </dl>
 </dd></dl>
 
-<hr>
-</div>
-<div class="section-level-extent" id="Starlark-toolchain">
-<div class="nav-panel">
-<p>
-Next: <a href="#Extension-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-provider" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/common:elisp_info.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"><span>7.3 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005ftoolchain_002ebzl"> &para;</a></span></h3>
-
+<p>To compile Emacs Lisp source files and runs tests, <code class="code">rules_elisp</code> registers the
+toolchains of type <code class="code">@phst_rules_elisp//elisp:toolchain_type</code>; see
+<a class="uref" href="https://bazel.build/extending/toolchains">Toolchains</a>.  Emacs Lisp toolchains
+are created using the &lsquo;elisp_toolchain&lsquo; rule.
+</p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005ftoolchain"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_toolchain</strong> <var class="def-var-arguments">(name, emacs, [use_default_shell_env], [execution_requirements], [wrap])</var><a class="copiable-link" href="#index-elisp_005ftoolchain"> &para;</a></span></dt>
 <dd><div class="example">
@@ -1251,81 +1303,6 @@ optional; default: <code class="code">False</code>.
 </p></dd>
 </dl>
 </dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Extension-Starlark-symbols">
-<div class="nav-panel">
-<p>
-Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;</a>, Previous: <a href="#Starlark-toolchain" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_toolchain.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"><span>7.4 Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002fextensions_003aelisp_002ebzl"> &para;</a></span></h3>
-
-<dl class="first-deftp def-block">
-<dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
-<dd><div class="example">
-<pre class="example-preformatted">elisp = use_extension(&quot;@phst_rules_elisp//elisp/extensions:elisp.bzl&quot;, &quot;elisp&quot;)
-</pre></div>
-<p>Module extension for Emacs Lisp.
-</p>
-<p>The <code class="code">elisp</code> module extension provides the following tag classes:
-</p>
-<dl class="first-defop def-block">
-<dt class="defop def-line" id="index-http_005farchive-on-elisp"><span class="category-def">Tag class on <code class="code">elisp</code>: </span><span><strong class="def-name">http_archive</strong> <var class="def-var-arguments">(name, urls, integrity, [strip_prefix], [target_name], [exclude])</var><a class="copiable-link" href="#index-http_005farchive-on-elisp"> &para;</a></span></dt>
-<dd><p>Downloads an archive file over HTTP and makes its contents
-available as an <code class="code">elisp_library</code>.  This tag class is very similar to
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive"><code class="code">http_archive</code></a>,
-except that it always generates a BUILD file containing a single <code class="code">elisp_library</code>
-rule in the root package for all Emacs Lisp files in the archive.
-Test files (<code class="code">…-test.el</code>, <code class="code">…-tests.el</code>) and package metadata files (<code class="code">…-pkg.el</code>)
-are excluded.
-The <code class="code">elisp_library</code> rule is named <code class="code">library</code> by default, unless overridden
-by the <code class="code">target_name</code> attribute.
-</p>
-<p>The <code class="code">http_archive</code> tag class supports the following attributes:
-</p>
-<dl class="table">
-<dt><code class="code">name</code></dt>
-<dd><p>Name of the repository to generate.  Name; mandatory.
-</p></dd>
-<dt><code class="code">urls</code></dt>
-<dd><p>List of archive URLs to try.  See the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-urls">corresponding
-attribute for <code class="code">http_archive</code></a>.  List of strings; mandatory.
-</p></dd>
-<dt><code class="code">integrity</code></dt>
-<dd><p>Expected checksum of the archive file in
-<a class="uref" href="https://www.w3.org/TR/SRI/">Subresource Integrity</a> format.  See the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-integrity">corresponding
-attribute for <code class="code">http_archive</code></a>.  String; mandatory.
-</p></dd>
-<dt><code class="code">strip_prefix</code></dt>
-<dd><p>Directory prefix to strip from the archive contents.  See
-the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix">corresponding
-attribute for <code class="code">http_archive</code></a>.  String; optional; default: <code class="code">&quot;&quot;</code>.
-</p></dd>
-<dt><code class="code">target_name</code></dt>
-<dd><p>Name of the <code class="code">elisp_library</code> target to generate.  String;
-optional; default: <code class="code">&quot;library&quot;</code>.
-</p></dd>
-<dt><code class="code">exclude</code></dt>
-<dd><p>Glob patterns of additional files to exclude from the library.
-List of strings; optional; default: <code class="code">[]</code>.
-</p></dd>
-</dl>
-</dd></dl>
-</dd></dl>
-
-<hr>
-</div>
-<div class="section-level-extent" id="Emacs-Starlark-symbols">
-<div class="nav-panel">
-<p>
-Previous: <a href="#Extension-Starlark-symbols" accesskey="p" rel="prev">Symbols defined in &lsquo;<samp class="samp">//elisp/extensions:elisp.bzl</samp>&rsquo;</a>, Up: <a href="#Starlark-symbol-reference" accesskey="u" rel="up">Starlark symbol reference</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
-<h3 class="section" id="Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"><span>7.5 Symbols defined in &lsquo;<samp class="samp">//elisp/toolchains:elisp_emacs_binary.bzl</samp>&rsquo;<a class="copiable-link" href="#Symbols-defined-in-_002f_002felisp_002ftoolchains_003aelisp_005femacs_005fbinary_002ebzl"> &para;</a></span></h3>
-
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
 <dd><div class="example">
@@ -1378,13 +1355,12 @@ Output file; optional; default: <code class="code">None</code>.
 
 <hr>
 </div>
-</div>
 <div class="chapter-level-extent" id="Indices">
 <div class="nav-panel">
 <p>
-Previous: <a href="#Starlark-symbol-reference" accesskey="p" rel="prev">Starlark symbol reference</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
+Previous: <a href="#Starlark-infrastructure" accesskey="p" rel="prev">Starlark infrastructure</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h2 class="chapter" id="Indices-1"><span>8 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
+<h2 class="chapter" id="Indices-1"><span>10 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
 
 
 <ul class="mini-toc">
@@ -1398,7 +1374,7 @@ Previous: <a href="#Starlark-symbol-reference" accesskey="p" rel="prev">Starlark
 <p>
 Next: <a href="#Symbol-index" accesskey="n" rel="next">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Concept-index-1"><span>8.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Concept-index-1"><span>10.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
 
 <div class="printindex cp-printindex">
 <table class="cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
@@ -1440,7 +1416,7 @@ Next: <a href="#Symbol-index" accesskey="n" rel="next">Symbol index</a>, Up: <a 
 <p>
 Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <a href="#Concept-index" accesskey="p" rel="prev">Concept index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Symbol-index-1"><span>8.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Symbol-index-1"><span>10.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
 
 <div class="printindex fn-printindex">
 <table class="fn-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
@@ -1454,12 +1430,12 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><th id="Symbol-index_fn_letter-E">E</th></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Emacs-Starlark-symbols">Emacs Starlark symbols</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Starlark-manual-rule">Starlark manual rule</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Building-manuals">Building manuals</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-toolchain">Starlark toolchain</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto"><code>elisp/proto</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fany_002dtype_002dname"><code>elisp/proto/any-type-name</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fappend_002darray"><code>elisp/proto/append-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
@@ -1508,7 +1484,7 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frlocation"><code>elisp/runfiles/rlocation</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
 <tr><td colspan="3"><hr></td></tr>
 <tr><th id="Symbol-index_fn_letter-H">H</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Extension-Starlark-symbols">Extension Starlark symbols</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
 <tr><td colspan="3"><hr></td></tr>
 </table>
 <table class="fn-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
@@ -1525,19 +1501,19 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <p>
 Previous: <a href="#Symbol-index" accesskey="p" rel="prev">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
 </div>
-<h3 class="section" id="Type-index-1"><span>8.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Type-index-1"><span>10.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
 
 <div class="printindex tp-printindex">
 <table class="tp-entries-printindex">
 <tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
 <tr><td colspan="3"><hr></td></tr>
 <tr><th id="Type-index_tp_letter-E">E</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp"><code>elisp</code></a></td><td class="printindex-index-section"><a href="#Extension-Starlark-symbols">Extension Starlark symbols</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp"><code>elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray"><code>elisp/proto/array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap"><code>elisp/proto/map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage"><code>elisp/proto/message</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frunfiles"><code>elisp/runfiles/runfiles</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-EmacsLispInfo"><code>EmacsLispInfo</code></a></td><td class="printindex-index-section"><a href="#Starlark-provider">Starlark provider</a></td></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-EmacsLispInfo"><code>EmacsLispInfo</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
 <tr><td colspan="3"><hr></td></tr>
 </table>
 </div>
