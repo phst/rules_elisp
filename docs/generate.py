@@ -171,7 +171,10 @@ class _Generator:
         self._write(
             f'#+ATTR_TEXINFO: :options {{Module extension}} {name} {tags}\n')
         self._write('#+BEGIN_deftp\n')
-        self._load(ext.origin_key)
+        self._write('#+BEGIN_SRC bazel-module\n')
+        self._write(
+            f'{name} = use_extension("{ext.origin_key.file}", "{name}")\n')
+        self._write('#+END_SRC\n')
         self._write(_markdown(ext.doc_string).lstrip())
         self._write(f'The ~{name}~ module extension '
                     f'provides the following tag classes:\n\n')
