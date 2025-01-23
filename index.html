@@ -1336,7 +1336,7 @@ Next: <a href="#Emacs-Starlark-symbols" accesskey="n" rel="next">Symbols defined
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
 <dd><div class="example">
-<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/extensions:elisp.bzl&quot;, &quot;&quot;)
+<pre class="example-preformatted">elisp = use_extension(&quot;@phst_rules_elisp//elisp/extensions:elisp.bzl&quot;, &quot;elisp&quot;)
 </pre></div>
 <p>Module extension for Emacs Lisp.
 </p>
