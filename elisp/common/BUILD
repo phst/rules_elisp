@@ -28,12 +28,11 @@ exports_files(
     visibility = ["//docs:__pkg__"],
 )
 
+# Gazelle attempts to remove the visibility attribute from elisp_info.
+# FIXME: File bug against Gazelle.
+# keep
 bzl_library(
     name = "elisp_info",
     srcs = ["elisp_info.bzl"],
     visibility = ["//visibility:public"],
 )
-
-# Gazelle attempts to remove the visibility attribute from elisp_toolchain.
-# FIXME: File bug against Gazelle.
-# gazelle:ignore

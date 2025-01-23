@@ -46,12 +46,11 @@ bzl_library(
     ],
 )
 
+# Gazelle attempts to remove the visibility attribute from elisp_toolchain.
+# FIXME: File bug against Gazelle.
+# keep
 bzl_library(
     name = "elisp_toolchain",
     srcs = ["elisp_toolchain.bzl"],
     visibility = ["//visibility:public"],
 )
-
-# Gazelle attempts to remove the visibility attribute from elisp_toolchain.
-# FIXME: File bug against Gazelle.
-# gazelle:ignore
