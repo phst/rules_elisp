@@ -13,6 +13,14 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("//private:defs.bzl", "PACKAGE_FEATURES")
+
+package(
+    default_applicable_licenses = ["//:license"],
+    features = PACKAGE_FEATURES,
+)
+
+licenses(["notice"])
 
 exports_files(
     ["elisp_info.bzl"],
