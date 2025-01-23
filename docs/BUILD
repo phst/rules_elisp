@@ -37,8 +37,13 @@ genrule(
     name = "info",
     srcs = ["manual.texi"],
     outs = ["rules_elisp.info"],
-    cmd = "$(execpath @local_texinfo//:makeinfo) --no-split --output=$@ -- $<",
-    tools = ["@local_texinfo//:makeinfo"],
+    cmd = "$(execpath :makeinfo) --no-split --output=$@ -- $<",
+    tools = [":makeinfo"],
+)
+
+py_binary(
+    name = "makeinfo",
+    srcs = ["makeinfo.py"],
 )
 
 DOCS = [
