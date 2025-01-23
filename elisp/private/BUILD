@@ -16,7 +16,18 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
-load("//private:defs.bzl", "PACKAGE_FEATURES")
+load(
+    "//private:defs.bzl",
+    "PACKAGE_FEATURES",
+    "cc_defaults",
+)
+load(
+    ":cc_launcher_config.bzl",
+    "LAUNCHER_COPTS",
+    "LAUNCHER_DEFINES",
+    "LAUNCHER_FEATURES",
+    "LAUNCHER_LINKOPTS",
+)
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -134,6 +145,38 @@ bzl_library(
     name = "module_config_info",
     srcs = ["module_config_info.bzl"],
     visibility = ["//elisp:__pkg__"],
+)
+
+cc_defaults(
+    name = "launcher_defaults",
+    copts = LAUNCHER_COPTS,
+    defines = LAUNCHER_DEFINES,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
+    ],
+)
+
+cc_defaults(
+    name = "emacs_defaults",
+    copts = [],
+    defines = [],
+    features = [
+        "-treat_warnings_as_errors",
+        "-layering_check",
+        "-parse_headers",
+        "-module_maps",
+        # Never instrument Emacs itself for coverage collection.  It doesn’t
+        # hurt, but leads to needless reinstall actions when switching between
+        # “bazel test” and “bazel coverage”.
+        "-coverage",
+        # Don’t link against the C++ standard library, as Emacs is pure C code.
+        "-default_link_libs",
+    ],
+    linkopts = [],
+    visibility = ["//elisp/toolchains:__pkg__"],
 )
 
 bzl_library(

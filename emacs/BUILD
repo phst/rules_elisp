@@ -15,7 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("//private:defs.bzl", "PACKAGE_FEATURES", "cc_defaults")
+load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -90,24 +90,4 @@ bzl_library(
     srcs = ["defs.bzl"],
     visibility = ["//visibility:public"],
     deps = ["//elisp/toolchains:elisp_emacs_binary"],
-)
-
-cc_defaults(
-    name = "defaults",
-    copts = [],
-    defines = [],
-    features = [
-        "-treat_warnings_as_errors",
-        "-layering_check",
-        "-parse_headers",
-        "-module_maps",
-        # Never instrument Emacs itself for coverage collection.  It doesn’t
-        # hurt, but leads to needless reinstall actions when switching between
-        # “bazel test” and “bazel coverage”.
-        "-coverage",
-        # Don’t link against the C++ standard library, as Emacs is pure C code.
-        "-default_link_libs",
-    ],
-    linkopts = [],
-    visibility = ["//elisp/toolchains:__pkg__"],
 )

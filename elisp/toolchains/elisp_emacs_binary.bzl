@@ -139,7 +139,7 @@ This is used by Gazelle.""",
             providers = [CcInfo],
         ),
         "_emacs_defaults": attr.label(
-            default = Label("//emacs:defaults"),
+            default = Label("//elisp/private:emacs_defaults"),
             providers = [CcDefaultInfo],
         ),
     },

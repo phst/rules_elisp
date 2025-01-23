@@ -44,7 +44,7 @@ LAUNCHER_ATTRS = {
         allow_files = [".cc"],
     ),
     "_launcher_defaults": attr.label(
-        default = Label("//elisp:launcher_defaults"),
+        default = Label("//elisp/private:launcher_defaults"),
         providers = [CcDefaultInfo],
     ),
 }
