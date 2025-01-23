@@ -62,6 +62,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "executable_only",
+    srcs = ["executable_only.bzl"],
+    visibility = ["//visibility:private"],
+)
+
+bzl_library(
     name = "load_path",
     srcs = ["load_path.bzl"],
     visibility = ["//elisp:__pkg__"],
