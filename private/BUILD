@@ -38,10 +38,7 @@ bzl_library(
         "//elisp/toolchains:__pkg__",
         "//emacs:__pkg__",
     ],
-    deps = [
-        "@bazel_skylib//lib:paths",
-        "@bazel_skylib//lib:sets",
-    ],
+    deps = ["@bazel_skylib//lib:paths"],
 )
 
 bzl_library(
