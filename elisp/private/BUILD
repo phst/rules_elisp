@@ -185,6 +185,7 @@ bzl_library(
     deps = ["@bazel_skylib//lib:modules"],
 )
 
+# keep
 bzl_library(
     name = "module_config_info",
     srcs = ["module_config_info.bzl"],
