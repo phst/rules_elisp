@@ -19,8 +19,7 @@ SHELL = /bin/sh
 
 BAZEL = bazel
 BAZELFLAGS =
-FIND = find
-GREP = grep
+GIT = git
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -46,9 +45,7 @@ check-extra:
         # We don’t want any Go rules in the public packages, as our users would
         # have to depend on the Go rules then as well.
 	echo 'Looking for unwanted Go targets in public packages'
-	! $(FIND) elisp emacs -type f \
-	  -exec $(GREP) -F -e '@rules_go' -n -- '{}' '+' \
-	  || { echo 'Unwanted Go targets found'; exit 1; }
+	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
