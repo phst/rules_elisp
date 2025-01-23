@@ -13,6 +13,8 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load("//private:defs.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -62,8 +64,8 @@ bzl_library(
     srcs = ["cc_launcher.bzl"],
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
+        ":generated",
         "//private:defs",
-        "//private:generated",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
@@ -79,6 +81,28 @@ bzl_library(
     ],
 )
 
+expand_template(
+    name = "expand",
+    out = "generated.expanded.bzl",
+    substitutions = {
+        "[[chr]]": ", ".join(['"\\%o"' % i for i in range(0x100)]),
+        "[[ord]]": ", ".join(['"\\%o": %d' % (i, i) for i in range(0x100)]),
+    },
+    template = "generated.template.bzl",
+)
+
+diff_test(
+    name = "generated_test",
+    timeout = "short",
+    failure_message = """Please run
+
+    bazel build //elisp/private:generated.expanded.bzl
+
+and copy the generated file to //elisp/private:generated.bzl.""",
+    file1 = "generated.bzl",
+    file2 = "generated.expanded.bzl",
+)
+
 bzl_library(
     name = "module_config",
     srcs = ["module_config.bzl"],
@@ -89,3 +113,10 @@ bzl_library(
     name = "executable_only",
     srcs = ["executable_only.bzl"],
 )
+
+bzl_library(
+    name = "generated",
+    srcs = ["generated.bzl"],
+)
+
+# gazelle:ignore generated.*.bzl

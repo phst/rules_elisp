@@ -15,13 +15,13 @@
 # Generated file; do not edit.
 # To regenerate, run
 #
-#    bazel run //private:generated.expanded.bzl
+#    bazel run //elisp/private:generated.expanded.bzl
 #
-# and copy the output to //private:generated.bzl.
+# and copy the output to //elisp/private:generated.bzl.
 
 """Internal generated definitions."""
 
-visibility(["//elisp/private"])
+visibility("private")
 
 # Starlark doesn’t have `chr` or `ord` functions, so we replicate them here.
 # CHR maps ordinals to single-character strings, and ORD does the reverse.  This
