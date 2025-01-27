@@ -110,6 +110,7 @@ bzl_library(
     visibility = ["//visibility:public"],
     deps = [
         "//elisp/common:elisp_info",
+        "//elisp/private:cc_default_info",
         "//elisp/private:load_path",
         "//elisp/private:module_config_info",
         "//private:defs",

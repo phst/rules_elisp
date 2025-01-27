@@ -14,7 +14,8 @@
 
 """Defines the internal `module_config` rule."""
 
-load("//private:defs.bzl", "CcDefaultInfo", "parse_features")
+load("//private:defs.bzl", "parse_features")
+load(":cc_default_info.bzl", "CcDefaultInfo")
 load(":module_config_info.bzl", "ModuleConfigInfo")
 
 visibility(["//elisp"])

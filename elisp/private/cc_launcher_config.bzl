@@ -18,11 +18,11 @@ load(
     "//private:defs.bzl",
     "COPTS",
     "CXXOPTS",
-    "CcDefaultInfo",
     "DEFINES",
     "FEATURES",
     "LINKOPTS",
 )
+load(":cc_default_info.bzl", "CcDefaultInfo")
 
 visibility([
     "//elisp",

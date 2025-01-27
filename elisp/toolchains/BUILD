@@ -37,6 +37,7 @@ bzl_library(
     srcs = ["elisp_emacs_binary.bzl"],
     visibility = ["//visibility:public"],
     deps = [
+        "//elisp/private:cc_default_info",
         "//elisp/private:cc_launcher",
         "//elisp/private:cc_launcher_config",
         "//private:defs",

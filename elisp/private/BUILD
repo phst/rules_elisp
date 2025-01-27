@@ -75,8 +75,8 @@ bzl_library(
     srcs = ["cc_launcher.bzl"],
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
+        ":cc_default_info",
         ":generated",
-        "//private:defs",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
@@ -89,13 +89,19 @@ bzl_library(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
     ],
-    deps = ["//private:defs"],
+    deps = [
+        ":cc_default_info",
+        "//private:defs",
+    ],
 )
 
 bzl_library(
     name = "cc_defaults",
     srcs = ["cc_defaults.bzl"],
-    deps = ["//private:defs"],
+    deps = [
+        ":cc_default_info",
+        "//private:defs",
+    ],
 )
 
 bzl_library(
@@ -134,6 +140,7 @@ bzl_library(
     name = "module_config",
     srcs = ["module_config.bzl"],
     deps = [
+        ":cc_default_info",
         ":module_config_info",
         "//private:defs",
     ],
@@ -210,6 +217,16 @@ alias(
     target_compatible_with = [
         "@platforms//os:windows",
         "@platforms//cpu:x86_64",
+    ],
+)
+
+# keep
+bzl_library(
+    name = "cc_default_info",
+    srcs = ["cc_default_info.bzl"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
     ],
 )
 

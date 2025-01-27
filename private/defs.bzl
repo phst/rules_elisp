@@ -186,17 +186,6 @@ DEFINES = [
 
 LINKOPTS = []
 
-CcDefaultInfo = provider(
-    doc = "Internal provider for default C++ flags",
-    fields = {
-        "features": "Default features",
-        "disabled_features": "Features to disable",
-        "defines": "Local preprocessor definitions",
-        "copts": "Default compiler flags",
-        "linkopts": "Default linker flags",
-    },
-)
-
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10

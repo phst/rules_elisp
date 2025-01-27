@@ -18,12 +18,9 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain", "use_cc_toolcha
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
+load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:load_path.bzl", "resolve_load_path")
 load("//elisp/private:module_config_info.bzl", "ModuleConfigInfo")
-load(
-    "//private:defs.bzl",
-    "CcDefaultInfo",
-)
 
 visibility("public")
 

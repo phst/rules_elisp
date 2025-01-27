@@ -17,7 +17,7 @@
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
-load("//private:defs.bzl", "CcDefaultInfo")
+load(":cc_default_info.bzl", "CcDefaultInfo")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//elisp/toolchains"])
