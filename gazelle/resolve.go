@@ -42,7 +42,7 @@ func (elisp) Resolve(
 	var deps []string
 	for _, feat := range imp.Requires {
 		lbl := resolveFeature(c, ix, from, feat)
-		if lbl == nil {
+		if lbl == label.NoLabel {
 			log.Printf("%s: no rule for required feature %s found", from, feat)
 			continue
 		}
@@ -57,8 +57,8 @@ func (elisp) Resolve(
 	}
 }
 
-func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) *label.Label {
-	if lbl := getExtension(c).provider(feat); lbl != nil {
+func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) label.Label {
+	if lbl := getExtension(c).provider(feat); lbl != label.NoLabel {
 		return lbl
 	}
 
@@ -72,7 +72,7 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 		return s
 	})
 	if len(res) == 0 {
-		return nil
+		return label.NoLabel
 	}
 	if len(res) > 1 {
 		var s []string
@@ -85,7 +85,7 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 	closest := slices.MinFunc(res, func(a, b resolve.FindResult) int {
 		return cmp.Compare(distance(a.Label, from), distance(b.Label, from))
 	})
-	return &closest.Label
+	return closest.Label
 }
 
 func distance(a, b label.Label) int {

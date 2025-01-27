@@ -62,13 +62,9 @@ func (e *extension) addProvider(lbl label.Label, feat Feature) {
 	e.providers[feat] = lbl
 }
 
-func (e *extension) provider(feat Feature) *label.Label {
+func (e *extension) provider(feat Feature) label.Label {
 	if e == nil {
-		return nil
+		return label.NoLabel
 	}
-	lbl, ok := e.providers[feat]
-	if !ok {
-		return nil
-	}
-	return &lbl
+	return e.providers[feat]
 }
