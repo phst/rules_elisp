@@ -16,6 +16,7 @@ package gazelle
 
 import (
 	"log"
+	"slices"
 	"sort"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -61,6 +62,13 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 
 	spec := feat.importSpec()
 	res := ix.FindRulesByImportWithConfig(c, spec, languageName)
+	res = slices.DeleteFunc(res, func(r resolve.FindResult) bool {
+		s := r.IsSelfImport(from)
+		if s {
+			log.Printf("%s: ignoring self-import %s", from, r.Label)
+		}
+		return s
+	})
 	if len(res) == 0 {
 		return nil
 	}
