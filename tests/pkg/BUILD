@@ -36,7 +36,7 @@ elisp_library(
 )
 
 elisp_test(
-    name = "lib_test",
+    name = "test",
     size = "small",
     srcs = ["test.el"],
     deps = [":lib"],

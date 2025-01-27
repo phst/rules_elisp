@@ -73,7 +73,7 @@ go_test(
 )
 
 elisp_test(
-    name = "test_test",
+    name = "test",
     size = "small",
     srcs = ["test.el"],
     data = [
