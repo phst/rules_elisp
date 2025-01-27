@@ -77,6 +77,7 @@ go_test(
         ":library",
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
+        "@gazelle//config",
         "@gazelle//label",
         "@gazelle//language",
         "@gazelle//repo",

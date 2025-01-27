@@ -1,4 +1,4 @@
-// Copyright 2022 Google LLC
+// Copyright 2022, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package gazelle_test
 import (
 	"testing"
 
+	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
 	"github.com/bazelbuild/bazel-gazelle/language"
 	"github.com/bazelbuild/bazel-gazelle/repo"
@@ -29,7 +30,7 @@ import (
 
 func TestResolve(t *testing.T) {
 	lang := gazelle.NewLanguage()
-	cfg := testtools.NewTestConfig(t, nil, []language.Language{lang}, nil)
+	cfg := testtools.NewTestConfig(t, []config.Configurer{new(resolve.Configurer)}, []language.Language{lang}, nil)
 	build, err := rule.LoadData("pkg/BUILD", "pkg", []byte(`
 elisp_library(
     name = "lib",

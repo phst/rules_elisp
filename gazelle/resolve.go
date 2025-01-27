@@ -63,6 +63,10 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 	}
 
 	spec := feat.importSpec()
+	if lbl, ok := resolve.FindRuleWithOverride(c, spec, languageName); ok && lbl != label.NoLabel {
+		return lbl
+	}
+
 	res := ix.FindRulesByImportWithConfig(c, spec, languageName)
 	res = slices.DeleteFunc(res, func(r resolve.FindResult) bool {
 		s := r.IsSelfImport(from)

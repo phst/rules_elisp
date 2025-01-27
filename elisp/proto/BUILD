@@ -273,4 +273,4 @@ exports_files(
 )
 
 # gazelle:go_generate_proto false
-# gazelle:elisp_provide :module=elisp/proto/module
+# gazelle:resolve elisp elisp/proto/module :module
