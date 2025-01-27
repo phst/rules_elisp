@@ -53,12 +53,12 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        shell.quote("--binary=$(rlocationpath :test_test)"),
+        shell.quote("--binary=$(rlocationpath :test)"),
         shell.quote("--test-el=$(rlocationpath :test.el)"),
     ],
     data = [
+        ":test",
         ":test.el",
-        ":test_test",
     ],
     embedsrcs = [
         "JUnit.xsd",
