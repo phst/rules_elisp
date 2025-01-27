@@ -19,6 +19,7 @@ import (
 	"log"
 	"slices"
 	"sort"
+	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -74,7 +75,12 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 		return nil
 	}
 	if len(res) > 1 {
-		log.Printf("%s: %d rules for required feature %s found", from, len(res), feat)
+		var s []string
+		for _, r := range res {
+			s = append(s, r.Label.String())
+		}
+		sort.Strings(s)
+		log.Printf("%s: multiple rules for required feature %s found: %s", from, feat, strings.Join(s, ", "))
 	}
 	closest := slices.MinFunc(res, func(a, b resolve.FindResult) int {
 		return cmp.Compare(distance(a.Label, from), distance(b.Label, from))
