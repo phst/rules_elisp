@@ -44,6 +44,7 @@ elisp_test(
     size = "small",
     srcs = ["proto-test.el"],
     flaky = True,  # https://debbugs.gnu.org/46722
+    # keep
     deps = [
         ":any_elisp_proto",
         ":compiler_plugin_elisp_proto",

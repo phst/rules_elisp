@@ -157,4 +157,5 @@ elisp_test(
     ],
 )
 
+# gazelle:lang go,proto,starlark
 # gazelle:go_generate_proto false

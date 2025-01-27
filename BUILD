@@ -51,5 +51,3 @@ exports_files(
     ["index.html"],
     visibility = ["//docs:__pkg__"],
 )
-
-# gazelle:lang go,proto,starlark
