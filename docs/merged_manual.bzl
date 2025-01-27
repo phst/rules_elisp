@@ -16,7 +16,6 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:sets.bzl", "sets")
-load("//private:defs.bzl", "repository_relative_filename")
 
 visibility("private")
 
@@ -40,13 +39,12 @@ def _merged_manual_impl(ctx):
     if sets.length(roots) != 1:
         fail("multiple roots: %s", sets.str(roots))
     (root,) = sets.to_list(roots)
+    include_dir = paths.join(root.path, ctx.file.main.owner.package)
 
     args = ctx.actions.args()
     args.add(ctx.outputs.out)
     args.add(ctx.file.main)
-    args.add(ctx.file.main.owner.package)
-    args.add(root.path)
-    args.add_all(orgs, expand_directories = False, map_each = repository_relative_filename)
+    args.add(include_dir)
     ctx.actions.run(
         outputs = [ctx.outputs.out],
         inputs = [ctx.file.main] + orgs,
