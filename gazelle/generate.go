@@ -113,7 +113,7 @@ type Imports struct {
 }
 
 var (
-	testFilePattern = regexp.MustCompile(`[-_](?:unit)?tests?\.el$`)
+	testFilePattern = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)
 	requirePattern  = regexp.MustCompile(`(?m)^\(require '([-/\w]+)\)`)
 )
 
