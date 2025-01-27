@@ -15,6 +15,7 @@
 package gazelle
 
 import (
+	"cmp"
 	"log"
 	"slices"
 	"sort"
@@ -75,5 +76,18 @@ func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, f
 	if len(res) > 1 {
 		log.Printf("%s: %d rules for required feature %s found", from, len(res), feat)
 	}
-	return &res[0].Label
+	closest := slices.MinFunc(res, func(a, b resolve.FindResult) int {
+		return cmp.Compare(distance(a.Label, from), distance(b.Label, from))
+	})
+	return &closest.Label
+}
+
+func distance(a, b label.Label) int {
+	if a.Repo != b.Repo {
+		return 2
+	}
+	if a.Pkg != b.Pkg {
+		return 1
+	}
+	return 0
 }
