@@ -31,7 +31,7 @@ import (
 // GenerateRules implements [language.Language.GenerateRules].  It generates
 // elisp_library, elisp_proto_library, or elisp_test rules, one per source file.
 // It adds the features required by each file to the
-// [language.GenerateResult.Imports] slice as [Imports] structures.
+// [language.GenerateResult.Imports] slice as [imports] structures.
 func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	fsys := os.DirFS(args.Dir)
 	pkg := bazelPackage(args.Rel)
@@ -57,32 +57,32 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 // string for the root package), and file names the source file within the
 // package.  Return nil if file doesn’t name an Emacs Lisp or protocol buffer
 // definition file or on any error.
-func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Imports) {
+func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, imports) {
 	if file == ".dir-locals.el" {
 		// Never generate a rule for .dir-locals.el, as it can’t be
 		// compiled.
-		return nil, Imports{}
+		return nil, imports{}
 	}
 	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" {
 		r := rule.NewRule(protoLibraryKind, stem+"_elisp_proto")
 		r.SetAttr("deps", []string{":" + stem + "_proto"})
-		return r, Imports{}
+		return r, imports{}
 	}
 	if stem, ok := strings.CutSuffix(file, ".org"); ok && stem != "" {
 		r := rule.NewRule(manualKind, stem)
 		r.SetAttr("src", file)
 		r.SetAttr("out", stem+".texi")
-		return r, Imports{}
+		return r, imports{}
 	}
 	src := srcFile(label.New("", string(pkg), file))
 	if !src.valid() {
 		// Probably not an Emacs Lisp file.  Don’t print an error.
-		return nil, Imports{}
+		return nil, imports{}
 	}
 	b, err := fs.ReadFile(fsys, file)
 	if err != nil {
 		log.Printf("unreadable source file %s: %s", file, err)
-		return nil, Imports{}
+		return nil, imports{}
 	}
 	// We assume that most files are libraries and only assume a test file
 	// if the filename makes that likely.  We don’t look at the file
@@ -104,27 +104,27 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 		r.SetAttr("load_path", loadPath.attr(pkg))
 	}
 	// Also return required features.
-	requiresMap := make(map[Feature]struct{})
+	requiresMap := make(map[feature]struct{})
 	for _, m := range requirePattern.FindAllSubmatch(b, -1) {
-		feat := Feature(m[1])
+		feat := feature(m[1])
 		if _, ok := builtinFeatures[feat]; ok {
 			continue
 		}
 		requiresMap[feat] = struct{}{}
 	}
-	var requires []Feature
+	var requires []feature
 	for f := range requiresMap {
 		requires = append(requires, f)
 	}
 	slices.Sort(requires)
-	return r, Imports{requires}
+	return r, imports{requires}
 }
 
-// Imports documents which features an Emacs Lisp file requires.  The
+// imports documents which features an Emacs Lisp file requires.  The
 // implementation of [language.Language.GenerateRules] returned by [NewLanguage]
 // uses this type for [language.GenerateResult.Imports].
-type Imports struct {
-	Requires []Feature
+type imports struct {
+	Requires []feature
 }
 
 var (

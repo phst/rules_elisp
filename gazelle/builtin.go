@@ -23,7 +23,7 @@ import (
 
 var builtinFeatures = decodeBuiltinFeatures(builtinFeaturesJSON)
 
-func decodeBuiltinFeatures(b []byte) map[Feature]struct{} {
+func decodeBuiltinFeatures(b []byte) map[feature]struct{} {
 	var data struct {
 		BuiltinFeatures []string `json:"builtinFeatures"`
 	}
@@ -33,9 +33,9 @@ func decodeBuiltinFeatures(b []byte) map[Feature]struct{} {
 	if len(data.BuiltinFeatures) == 0 {
 		panic("no builtin features")
 	}
-	m := make(map[Feature]struct{}, len(data.BuiltinFeatures))
+	m := make(map[feature]struct{}, len(data.BuiltinFeatures))
 	for _, f := range data.BuiltinFeatures {
-		m[Feature(f)] = struct{}{}
+		m[feature(f)] = struct{}{}
 	}
 	return m
 }
