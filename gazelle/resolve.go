@@ -33,17 +33,17 @@ import (
 // mappings for the features in imports.
 func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
-	r *rule.Rule, importsAny any, from label.Label,
+	r *rule.Rule, imports any, from label.Label,
 ) {
 	if r.Kind() == protoLibraryKind {
 		return
 	}
-	imp, ok := importsAny.(imports)
+	reqs, ok := imports.(requires)
 	if !ok {
 		return
 	}
 	var deps []string
-	for _, feat := range imp {
+	for _, feat := range reqs {
 		lbl := resolveFeature(c, ix, from, feat)
 		if lbl == label.NoLabel {
 			log.Printf("%s: no rule for required feature %s found", from, feat)

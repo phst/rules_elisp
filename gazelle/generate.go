@@ -57,7 +57,7 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 // string for the root package), and file names the source file within the
 // package.  Return nil if file doesn’t name an Emacs Lisp or protocol buffer
 // definition file or on any error.
-func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, imports) {
+func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, requires) {
 	if file == ".dir-locals.el" {
 		// Never generate a rule for .dir-locals.el, as it can’t be
 		// compiled.
@@ -120,10 +120,10 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, import
 	return r, requires
 }
 
-// imports documents which features an Emacs Lisp file requires.  The
+// requires documents which features an Emacs Lisp file requires.  The
 // implementation of [language.Language.GenerateRules] returned by [NewLanguage]
 // uses this type for [language.GenerateResult.Imports].
-type imports []feature
+type requires []feature
 
 var (
 	testFilePattern = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)

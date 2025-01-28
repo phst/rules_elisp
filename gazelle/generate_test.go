@@ -91,11 +91,11 @@ func TestGenerateRules(t *testing.T) {
 					newRule("elisp_proto_library", "my_elisp_proto", stringList("deps", ":my_proto")),
 				},
 				Imports: []any{
-					imports(nil),
-					imports(nil),
-					imports{"lib-2"},
-					imports{"lib-1"},
-					imports(nil),
+					requires(nil),
+					requires(nil),
+					requires{"lib-2"},
+					requires{"lib-1"},
+					requires(nil),
 				},
 			},
 		},
@@ -106,7 +106,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_2", stringList("srcs", "lib-2.el"), stringList("load_path", ".")),
 				},
-				Imports: []any{imports(nil)},
+				Imports: []any{requires(nil)},
 			},
 		},
 		{
@@ -116,7 +116,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_3", stringList("srcs", "lib-3.el"), stringList("load_path", "/a")),
 				},
-				Imports: []any{imports(nil)},
+				Imports: []any{requires(nil)},
 			},
 		},
 	} {
