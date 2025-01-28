@@ -98,10 +98,19 @@ func (e elisp) ApparentLoads(moduleToApparentName func(string) string) []rule.Lo
 }
 
 func loads(repo string) []rule.LoadInfo {
-	return []rule.LoadInfo{{
-		Name:    label.New(repo, "elisp", "defs.bzl").String(),
-		Symbols: []string{libraryKind, protoLibraryKind, binaryKind, testKind},
-	}}
+	return []rule.LoadInfo{
+		load(libraryKind, repo, "elisp"),
+		load(protoLibraryKind, repo, "elisp/proto"),
+		load(binaryKind, repo, "elisp"),
+		load(testKind, repo, "elisp"),
+	}
+}
+
+func load(kind, repo, pkg string) rule.LoadInfo {
+	return rule.LoadInfo{
+		Name:    label.New(repo, pkg, kind+".bzl").String(),
+		Symbols: []string{kind},
+	}
 }
 
 func (elisp) Fix(c *config.Config, f *rule.File) {}

@@ -98,7 +98,9 @@ some_rule(name = "module")
 	testtools.CheckFiles(t, dir, []testtools.FileSpec{
 		{
 			Path: "BUILD.bazel",
-			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_proto_library", "elisp_test")
+			Content: `load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
+load("@rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
 
 proto_library(
     name = "my_proto",
@@ -136,7 +138,7 @@ elisp_proto_library(
 `,
 		}, {
 			Path: "pkg/BUILD.bazel",
-			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library")
+			Content: `load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_2",
@@ -147,7 +149,7 @@ elisp_library(
 		},
 		{
 			Path: "a/b/BUILD.bazel",
-			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library")
+			Content: `load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_3",
