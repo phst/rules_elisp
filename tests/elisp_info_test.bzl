@@ -15,7 +15,7 @@
 """Unit tests for //elisp/common:elisp_info.bzl."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
-load("//elisp:defs.bzl", "EmacsLispInfo")
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 
 visibility("private")
 
