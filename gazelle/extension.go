@@ -16,15 +16,11 @@ package gazelle
 
 import (
 	"log"
-	"maps"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
-	"github.com/bazelbuild/bazel-gazelle/label"
 )
 
-type extension struct {
-	providers map[Feature]label.Label
-}
+type extension struct{}
 
 func initExtension(c *config.Config) *extension {
 	ext := getExtension(c)
@@ -49,22 +45,5 @@ func getExtension(c *config.Config) *extension {
 }
 
 func (e *extension) clone() *extension {
-	return &extension{maps.Clone(e.providers)}
-}
-
-func (e *extension) addProvider(lbl label.Label, feat Feature) {
-	if e.providers == nil {
-		e.providers = make(map[Feature]label.Label)
-	}
-	if prev, ok := e.providers[feat]; ok {
-		log.Printf("feature %s provided by both %s and %s", feat, prev, lbl)
-	}
-	e.providers[feat] = lbl
-}
-
-func (e *extension) provider(feat Feature) label.Label {
-	if e == nil {
-		return label.NoLabel
-	}
-	return e.providers[feat]
+	return &extension{}
 }
