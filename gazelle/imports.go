@@ -30,21 +30,30 @@ import (
 // returns the features that the source files likely provide.  It doesn’t
 // actually parse the source files.
 func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
-	if r.Kind() == protoLibraryKind {
-		stem, ok := strings.CutSuffix(r.Name(), "_elisp_proto")
-		if !ok || stem == "" {
-			return nil
-		}
-		feat := Feature(path.Join(f.Pkg, stem+".proto"))
-		return []resolve.ImportSpec{feat.importSpec()}
-	}
-	if r.Kind() != libraryKind {
+	pkg := bazelPackage(f.Pkg)
+	var provides []Feature
+	switch r.Kind() {
+	case libraryKind:
+		provides = libraryProvides(pkg, r)
+	case protoLibraryKind:
+		provides = protoProvides(pkg, r)
+	case binaryKind, testKind:
+		// Never provide any feature.
+	default:
+		// Don’t touch rules we don’t know about.
 		return nil
 	}
-	pkg := bazelPackage(f.Pkg)
+	imports := []resolve.ImportSpec{} // never nil
+	for _, p := range provides {
+		imports = append(imports, p.importSpec())
+	}
+	return imports
+}
+
+func libraryProvides(pkg bazelPackage, r *rule.Rule) []Feature {
 	srcs := r.AttrStrings("srcs")
 	load := loadPathFromAttr(r.AttrStrings("load_path"), pkg)
-	imports := []resolve.ImportSpec{} // never nil
+	var provides []Feature
 	for _, src := range srcs {
 		lbl, err := label.Parse(src)
 		if err != nil {
@@ -56,22 +65,22 @@ func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.Imp
 			continue
 		}
 		feat := potentialProvides(src, load)
-		imports = append(imports, feat...)
+		provides = append(provides, feat...)
 	}
-	return imports
+	return provides
 }
 
 // potentialProvides returns the features that the file might provide, assuming
 // the load path is loadPath.
-func potentialProvides(file sourceFile, loadPath loadPath) []resolve.ImportSpec {
-	var r []resolve.ImportSpec
+func potentialProvides(file sourceFile, loadPath loadPath) []Feature {
+	var r []Feature
 	for _, dir := range loadPath {
 		feat := potentialProvide(file, dir)
 		if !feat.valid() {
 			// The source file is not within the load path element.
 			continue
 		}
-		r = append(r, feat.importSpec())
+		r = append(r, feat)
 	}
 	return r
 }
@@ -89,4 +98,13 @@ func potentialProvide(file sourceFile, dir loadDirectory) Feature {
 		return ""
 	}
 	return Feature(s)
+}
+
+func protoProvides(pkg bazelPackage, r *rule.Rule) []Feature {
+	stem, ok := strings.CutSuffix(r.Name(), "_elisp_proto")
+	if !ok || stem == "" {
+		return nil
+	}
+	feat := Feature(path.Join(string(pkg), stem+".proto"))
+	return []Feature{feat}
 }
