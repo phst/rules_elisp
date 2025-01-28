@@ -92,7 +92,6 @@ bzl_library(
     deps = [
         ":cc_config",
         ":cc_default_info",
-        "//private:defs",
     ],
 )
 

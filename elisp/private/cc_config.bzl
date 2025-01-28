@@ -16,6 +16,11 @@
 
 visibility(["//elisp/private/tools", "//elisp/proto"])
 
+FEATURES = select({
+    Label("//private:treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
+    Label("//conditions:default"): [],
+})
+
 # Shared C++ compilation options.
 COPTS = select({
     Label("@rules_cc//cc/compiler:msvc-cl"): [

@@ -20,7 +20,7 @@ load("@rules_python//python:py_library.bzl", "py_library")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:defs.bzl", "elisp_binary", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
-load("//elisp/private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "LINKOPTS")
+load("//elisp/private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load(
     "//elisp/private:cc_launcher_config.bzl",
     "LAUNCHER_COPTS",
@@ -32,7 +32,6 @@ load(
 load("//elisp/private:executable_only.bzl", "executable_only")
 load(
     "//private:defs.bzl",
-    "FEATURES",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
 )
 load("//private:package_features.bzl", "PACKAGE_FEATURES")

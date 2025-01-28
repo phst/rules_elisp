@@ -36,11 +36,6 @@ visibility([
     "//tests/pkg",
 ])
 
-FEATURES = select({
-    Label(":treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
-    Label("//conditions:default"): [],
-})
-
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10

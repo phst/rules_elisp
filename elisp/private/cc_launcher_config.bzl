@@ -14,11 +14,7 @@
 
 """Exposes constants to configure C++ launchers."""
 
-load(
-    "//private:defs.bzl",
-    "FEATURES",
-)
-load(":cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "LINKOPTS")
+load(":cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load(":cc_default_info.bzl", "CcDefaultInfo")
 
 visibility([
