@@ -68,7 +68,7 @@ INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_INFO = install-info
 
-install: check
+install:
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
 	$(INSTALL) -d -- '$(INFODIR)'
 	$(INSTALL_DATA) -- \
