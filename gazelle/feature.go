@@ -1,4 +1,4 @@
-// Copyright 2021, 2022 Google LLC
+// Copyright 2021, 2022, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,9 +29,3 @@ func (f Feature) importSpec() resolve.ImportSpec {
 		Imp:  string(f),
 	}
 }
-
-type features []Feature
-
-func (f features) Len() int           { return len(f) }
-func (f features) Less(i, j int) bool { return f[i] < f[j] }
-func (f features) Swap(i, j int)      { f[i], f[j] = f[j], f[i] }

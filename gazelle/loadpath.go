@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2024 Google LLC
+// Copyright 2021, 2022, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@ package gazelle
 import (
 	"path"
 	"regexp"
-	"sort"
+	"slices"
 	"strings"
 
 	"github.com/bazelbuild/bazel-gazelle/pathtools"
@@ -92,7 +92,7 @@ func loadPathForFile(name sourceFile, content []byte) loadPath {
 	for dir := range dirs {
 		r = append(r, dir)
 	}
-	sort.Sort(r)
+	slices.Sort(r)
 	return r
 }
 
@@ -107,10 +107,6 @@ func loadPathFromAttr(attr []string, pkg bazelPackage) loadPath {
 	}
 	return r
 }
-
-func (p loadPath) Len() int           { return len(p) }
-func (p loadPath) Less(i, j int) bool { return p[i] < p[j] }
-func (p loadPath) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
 // attr returns the corresponding value for load_path attributes within the
 // given package.

@@ -19,6 +19,7 @@ import (
 	"log"
 	"os"
 	"regexp"
+	"slices"
 	"sort"
 
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -98,11 +99,11 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 		}
 		requiresMap[feat] = struct{}{}
 	}
-	var requires features
+	var requires []Feature
 	for f := range requiresMap {
 		requires = append(requires, f)
 	}
-	sort.Sort(requires)
+	slices.Sort(requires)
 	return r, Imports{requires}
 }
 
