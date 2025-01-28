@@ -15,15 +15,15 @@
 package gazelle_test
 
 import (
-	"os"
+	"flag"
 	"os/exec"
-	"path/filepath"
 	"testing"
 
-	_ "embed"
-
 	"github.com/bazelbuild/bazel-gazelle/testtools"
+	"github.com/bazelbuild/rules_go/go/runfiles"
 )
+
+var gazelleBinary = flag.String("gazelle", "", "location of the Gazelle binary")
 
 func TestGazelleBinary(t *testing.T) {
 	dir, clean := testtools.CreateFiles(t, []testtools.FileSpec{
@@ -86,8 +86,8 @@ some_rule(name = "module")
 	})
 	t.Cleanup(clean)
 
-	bin := filepath.Join(dir, "gazelle.exe")
-	if err := os.WriteFile(bin, gazelleBinary, 0500); err != nil {
+	bin, err := runfiles.Rlocation(*gazelleBinary)
+	if err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(bin, "update", "-repo_root="+dir)
@@ -171,6 +171,3 @@ elisp_library(
 		},
 	})
 }
-
-//go:embed binary.exe
-var gazelleBinary []byte

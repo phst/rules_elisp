@@ -70,7 +70,8 @@ go_test(
         "imports_test.go",
         "resolve_test.go",
     ],
-    embedsrcs = ["binary.exe"],
+    args = ["--gazelle=$(rlocationpath :binary)"],
+    data = [":binary"],
     deps = [
         ":library",
         "@com_github_bazelbuild_buildtools//build",
@@ -82,6 +83,7 @@ go_test(
         "@gazelle//resolve",
         "@gazelle//rule",
         "@gazelle//testtools",
+        "@rules_go//go/runfiles",
     ],
 )
 
@@ -89,11 +91,4 @@ copy_file(
     name = "copy_builtin_features",
     src = "//emacs:builtin_features",
     out = "builtin_features.json",
-)
-
-copy_file(
-    name = "copy_binary",
-    testonly = True,
-    src = ":binary",
-    out = "binary.exe",
 )
