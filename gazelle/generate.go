@@ -68,6 +68,12 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 		r.SetAttr("deps", []string{":" + stem + "_proto"})
 		return r, Imports{}
 	}
+	if stem, ok := strings.CutSuffix(file, ".org"); ok && stem != "" {
+		r := rule.NewRule(manualKind, stem)
+		r.SetAttr("src", file)
+		r.SetAttr("out", stem+".texi")
+		return r, Imports{}
+	}
 	src := srcFile(label.New("", string(pkg), file))
 	if !src.valid() {
 		// Probably not an Emacs Lisp file.  Don’t print an error.

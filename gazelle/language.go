@@ -86,6 +86,9 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 			MergeableAttrs: map[string]bool{"srcs": true},
 			ResolveAttrs:   map[string]bool{"deps": true},
 		},
+		manualKind: {
+			NonEmptyAttrs: map[string]bool{"src": true},
+		},
 	}
 }
 
@@ -103,6 +106,7 @@ func loads(repo string) []rule.LoadInfo {
 		load(protoLibraryKind, repo, "elisp/proto"),
 		load(binaryKind, repo, "elisp"),
 		load(testKind, repo, "elisp"),
+		load(manualKind, repo, "elisp"),
 	}
 }
 
@@ -120,6 +124,7 @@ const (
 	protoLibraryKind = "elisp_proto_library"
 	binaryKind       = "elisp_binary"
 	testKind         = "elisp_test"
+	manualKind       = "elisp_manual"
 )
 
 const moduleName = "phst_rules_elisp"

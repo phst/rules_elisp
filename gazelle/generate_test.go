@@ -58,6 +58,10 @@ func TestGenerateRules(t *testing.T) {
 			Content: "",
 		},
 		{
+			Path:    "doc.org",
+			Content: "",
+		},
+		{
 			Path:    "subdir/lib-2.el",
 			Content: `(provide 'lib-2)`,
 		},
@@ -78,15 +82,17 @@ func TestGenerateRules(t *testing.T) {
 	}{
 		{
 			pkg:   "",
-			files: []string{"MODULE.bazel", "lib-1.el", "lib-1-test.el", "empty.el", "my.proto", "nonexisting.el"},
+			files: []string{"MODULE.bazel", "lib-1.el", "lib-1-test.el", "empty.el", "my.proto", "doc.org", "nonexisting.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
+					newRule("elisp_manual", "doc", attr{"src", "doc.org"}, attr{"out", "doc.texi"}),
 					newRule("elisp_library", "empty", strings("srcs", "empty.el")),
 					newRule("elisp_library", "lib_1", strings("srcs", "lib-1.el")),
 					newRule("elisp_test", "lib_1_test", strings("srcs", "lib-1-test.el")),
 					newRule("elisp_proto_library", "my_elisp_proto", strings("deps", ":my_proto")),
 				},
 				Imports: []any{
+					gazelle.Imports{},
 					gazelle.Imports{},
 					gazelle.Imports{Requires: []gazelle.Feature{"lib-2"}},
 					gazelle.Imports{Requires: []gazelle.Feature{"lib-1"}},

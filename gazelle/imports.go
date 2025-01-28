@@ -37,7 +37,7 @@ func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.Imp
 		provides = libraryProvides(pkg, r)
 	case protoLibraryKind:
 		provides = protoProvides(pkg, r)
-	case binaryKind, testKind:
+	case binaryKind, testKind, manualKind:
 		// Never provide any feature.
 	default:
 		// Don’t touch rules we don’t know about.

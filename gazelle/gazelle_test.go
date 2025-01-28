@@ -72,6 +72,10 @@ some_rule(name = "module")
 			Content: "",
 		},
 		{
+			Path:    "doc.org",
+			Content: "",
+		},
+		{
 			Path:    "pkg/lib-2.el",
 			Content: `(provide 'lib-2)`,
 		},
@@ -99,6 +103,7 @@ some_rule(name = "module")
 		{
 			Path: "BUILD.bazel",
 			Content: `load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
 load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
 load("@rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
 
@@ -109,6 +114,12 @@ proto_library(
 
 some_rule(name = "module")
 # gazelle:resolve elisp module :module
+
+elisp_manual(
+    name = "doc",
+    src = "doc.org",
+    out = "doc.texi",
+)
 
 elisp_library(
     name = "empty",
