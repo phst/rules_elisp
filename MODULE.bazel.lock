@@ -226,7 +226,7 @@
     },
     "//elisp/private:deps.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "fZc0Io/sRdeps+qLGAnM4M5hi8Chz0A55SqzxM9b0bU=",
+        "bzlTransitiveDigest": "CZuRCZSMcbpRS4lVjIvrkScUrzEopklLIWbUMdfPUaI=",
         "usagesDigest": "EqKS/SVbWZp+fTJ+aALcUuM8cWsVZwS2b3kXOFIXpSw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},

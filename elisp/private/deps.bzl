@@ -34,6 +34,7 @@ def _emacs_repository_impl(ctx):
         Label("//private:emacs.BUILD.template"),
         {
             '"[elisp_emacs_binary.bzl]"': repr(str(Label("//elisp/toolchains:elisp_emacs_binary.bzl"))),
+            '"[cc_library.bzl]"': repr(str(Label("@rules_cc//cc:cc_library.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
             '"[src]"': repr(output),
             '"[strip_prefix]"': repr(ctx.attr.strip_prefix),

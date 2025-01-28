@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("[cc_library.bzl]", "cc_library")
 load("[elisp_emacs_binary.bzl]", "elisp_emacs_binary")
 
 package(
