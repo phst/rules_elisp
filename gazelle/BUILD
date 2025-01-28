@@ -62,15 +62,34 @@ go_library(
     ],
 )
 
+# keep
 go_test(
     name = "gazelle_test",
-    timeout = "short",
+    size = "small",
     srcs = [
-        "gazelle_test.go",
         "generate_test.go",
         "imports_test.go",
         "resolve_test.go",
     ],
+    embed = [":gazelle"],
+    deps = [
+        "@com_github_bazelbuild_buildtools//build",
+        "@com_github_google_go_cmp//cmp",
+        "@gazelle//config",
+        "@gazelle//label",
+        "@gazelle//language",
+        "@gazelle//repo",
+        "@gazelle//resolve",
+        "@gazelle//rule",
+        "@gazelle//testtools",
+    ],
+)
+
+# keep
+go_test(
+    name = "integration_test",
+    timeout = "short",
+    srcs = ["gazelle_test.go"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
@@ -83,15 +102,6 @@ go_test(
         "//gazelle/testdata:BUILD",
     ],
     deps = [
-        ":gazelle",
-        "@com_github_bazelbuild_buildtools//build",
-        "@com_github_google_go_cmp//cmp",
-        "@gazelle//config",
-        "@gazelle//label",
-        "@gazelle//language",
-        "@gazelle//repo",
-        "@gazelle//resolve",
-        "@gazelle//rule",
         "@gazelle//testtools",
         "@rules_go//go/runfiles",
     ],
