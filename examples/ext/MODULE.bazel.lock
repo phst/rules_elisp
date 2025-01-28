@@ -223,7 +223,7 @@
     },
     "@@phst_rules_elisp+//elisp/private:deps.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "fZc0Io/sRdeps+qLGAnM4M5hi8Chz0A55SqzxM9b0bU=",
+        "bzlTransitiveDigest": "CZuRCZSMcbpRS4lVjIvrkScUrzEopklLIWbUMdfPUaI=",
         "usagesDigest": "gPsIyFJ+lcaUSBLBkR834M5K3bmMa0nStuDITfaIfU8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
