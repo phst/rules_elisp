@@ -64,7 +64,6 @@ go_test(
         "JUnit.xsd",
         "coverage.dat",
     ],
-    rundir = ".",
     deps = [
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
