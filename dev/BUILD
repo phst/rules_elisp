@@ -134,5 +134,6 @@ gazelle_binary(
     languages = DEFAULT_LANGUAGES + [
         "//gazelle:library",
         "@bazel_skylib_gazelle_plugin//bzl",
+        "@gazelle//language/bazel/visibility",
     ],
 )
