@@ -74,7 +74,7 @@ def _elisp_http_archive_impl(ctx):
         "BUILD.bazel",
         Label("//elisp/private/tools:BUILD.template"),
         {
-            '"[defs_bzl]"': repr(str(ctx.attr._defs_bzl)),
+            '"[elisp_library.bzl]"': repr(str(ctx.attr._library_bzl)),
             '"[target_name]"': repr(ctx.attr.target_name),
             "[[exclude]]": repr(ctx.attr.exclude),
         },
@@ -88,7 +88,7 @@ _elisp_http_archive = repository_rule(
         "strip_prefix": attr.string(mandatory = True),
         "target_name": attr.string(mandatory = True),
         "exclude": attr.string_list(mandatory = True),
-        "_defs_bzl": attr.label(default = Label("//elisp:defs.bzl")),
+        "_library_bzl": attr.label(default = Label("//elisp:elisp_library.bzl")),
     },
     implementation = _elisp_http_archive_impl,
 )

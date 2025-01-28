@@ -33,7 +33,7 @@ def _emacs_repository_impl(ctx):
         "BUILD.bazel",
         Label("//private:emacs.BUILD.template"),
         {
-            '"[defs_bzl]"': repr(str(Label("//emacs:defs.bzl"))),
+            '"[elisp_emacs_binary.bzl]"': repr(str(Label("//elisp/toolchains:elisp_emacs_binary.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
             '"[src]"': repr(output),
             '"[strip_prefix]"': repr(ctx.attr.strip_prefix),
