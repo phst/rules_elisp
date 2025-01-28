@@ -1,0 +1,3 @@
+proto_library(name = "my_proto", srcs = ["my.proto"])
+some_rule(name = "module")
+# gazelle:resolve elisp module :module

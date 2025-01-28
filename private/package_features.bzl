@@ -30,6 +30,7 @@ visibility([
     "//emacs",
     "//examples",
     "//gazelle",
+    "//gazelle/testdata",
     "//tests",
     "//tests/pkg",
 ])

@@ -1,0 +1,44 @@
+load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
+load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
+load("@rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
+
+proto_library(
+    name = "my_proto",
+    srcs = ["my.proto"],
+)
+
+some_rule(name = "module")
+# gazelle:resolve elisp module :module
+
+elisp_manual(
+    name = "doc",
+    src = "doc.org",
+    out = "doc.texi",
+)
+
+elisp_library(
+    name = "empty",
+    srcs = ["empty.el"],
+)
+
+elisp_library(
+    name = "lib_1",
+    srcs = ["lib-1.el"],
+    deps = [
+        ":module",
+        ":my_elisp_proto",
+        "//pkg:lib_2",
+    ],
+)
+
+elisp_test(
+    name = "lib_1_test",
+    srcs = ["lib-1-test.el"],
+    deps = [":lib_1"],
+)
+
+elisp_proto_library(
+    name = "my_elisp_proto",
+    deps = [":my_proto"],
+)
