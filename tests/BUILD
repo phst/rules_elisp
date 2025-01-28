@@ -21,7 +21,9 @@ load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_library", "elisp_test")
+load("//elisp:elisp_binary.bzl", "elisp_binary")
+load("//elisp:elisp_library.bzl", "elisp_library")
+load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":defs.bzl", "elisp_test_suite")
 
@@ -38,7 +40,8 @@ bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],
     deps = [
-        "//elisp:defs",
+        "//elisp:elisp_library",
+        "//elisp/common:elisp_info",
         "@bazel_skylib//lib:unittest",
     ],
 )

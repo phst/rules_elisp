@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023, 2024 Google LLC
+# Copyright 2020, 2021, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,7 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
+load("@phst_rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@phst_rules_elisp//elisp:elisp_test.bzl", "elisp_test")
 
 package(
     default_applicable_licenses = ["@phst_rules_elisp//:license"],

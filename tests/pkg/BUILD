@@ -16,7 +16,8 @@
 # so that they can use external repositories loaded as development-only
 # dependencies in our MODULE.bazel file, e.g. the Go rules.
 
-load("//elisp:defs.bzl", "elisp_library", "elisp_test")
+load("//elisp:elisp_library.bzl", "elisp_library")
+load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(

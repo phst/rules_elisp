@@ -19,9 +19,13 @@ load("@protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
 load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_library")
 load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("@rules_python//python:py_test.bzl", "py_test")
-load("//elisp:defs.bzl", "elisp_binary", "elisp_cc_module", "elisp_library", "elisp_proto_library", "elisp_test")
+load("//elisp:elisp_binary.bzl", "elisp_binary")
+load("//elisp:elisp_cc_module.bzl", "elisp_cc_module")
+load("//elisp:elisp_library.bzl", "elisp_library")
+load("//elisp:elisp_test.bzl", "elisp_test")
 load("//elisp/private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load(":elisp_proto_library.bzl", "elisp_proto_library")
 
 package(
     default_applicable_licenses = ["//:license"],
