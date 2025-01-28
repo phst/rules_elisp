@@ -34,20 +34,6 @@ config_setting(
     flag_values = {":treat_warnings_as_errors": "true"},
 )
 
-# keep
-bzl_library(
-    name = "defs",
-    srcs = ["defs.bzl"],
-    visibility = [
-        "//docs:__pkg__",
-        "//elisp:__pkg__",
-        "//elisp/private:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//elisp/toolchains:__pkg__",
-        "//emacs:__pkg__",
-    ],
-)
-
 bzl_library(
     name = "package_features",
     srcs = ["package_features.bzl"],
