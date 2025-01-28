@@ -45,8 +45,10 @@ bzl_library(
     ],
 )
 
+# keep
 bzl_library(
     name = "elisp_info_test",
+    srcs = ["elisp_info_test.bzl"],
     deps = [
         "//elisp/common:elisp_info",
         "@bazel_skylib//lib:unittest",
