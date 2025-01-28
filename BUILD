@@ -51,3 +51,5 @@ exports_files(
     ["index.html"],
     visibility = ["//docs:__pkg__"],
 )
+
+# gazelle:default_visibility //visibility:private
