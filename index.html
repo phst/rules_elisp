@@ -511,10 +511,9 @@ By convention, for a <code class="code">proto_library</code> rule named
 Other <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules can then depend
 on this rule.  This rule generates and byte-compiles Emacs Lisp representations
 of the protocol buffer definitions listed in the <code class="code">deps</code> attribute and all their
-direct and indirect dependencies.  The feature symbol for <code class="code">require</code> is
-<code class="code"><var class="var">package</var>/​<var class="var">name</var></code>, where
-<code class="code">/​/​<var class="var">package</var>:<var class="var">name</var></code> is the label of the
-corresponding <code class="code">proto_library</code> rule.
+direct and indirect dependencies.  The feature symbol for <code class="code">require</code> is the
+filename of the original <code class="code">.proto</code> file listed in the <code class="code">proto_library</code> rule,
+relative to its repository root.
 </p>
 <p>The <code class="code">elisp_proto_library</code> rule supports the following attributes:
 </p>

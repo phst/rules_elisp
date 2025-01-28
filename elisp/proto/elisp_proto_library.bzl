@@ -172,10 +172,9 @@ By convention, for a `proto_library` rule named
 Other `elisp_library`, `elisp_binary`, and `elisp_test` rules can then depend
 on this rule.  This rule generates and byte-compiles Emacs Lisp representations
 of the protocol buffer definitions listed in the `deps` attribute and all their
-direct and indirect dependencies.  The feature symbol for `require` is
-<code><var>package</var>/<var>name</var></code>, where
-<code>//<var>package</var>:<var>name</var></code> is the label of the
-corresponding `proto_library` rule.""",
+direct and indirect dependencies.  The feature symbol for `require` is the
+filename of the original `.proto` file listed in the `proto_library` rule,
+relative to its repository root.""",
     provides = [EmacsLispInfo],
     toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_proto_library_impl,
