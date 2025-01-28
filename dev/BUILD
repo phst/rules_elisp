@@ -18,8 +18,8 @@ load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "ga
 load("@phst_license_test//:def.bzl", "license_test")
 load("@pip//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
-load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
+load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
