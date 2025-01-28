@@ -71,7 +71,6 @@ go_test(
         "resolve_test.go",
     ],
     embedsrcs = ["binary.exe"],
-    rundir = ".",
     deps = [
         ":library",
         "@com_github_bazelbuild_buildtools//build",
