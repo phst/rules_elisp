@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2022, 2023 Google LLC
+# Copyright 2020, 2021, 2022, 2023, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for defs.bzl."""
+"""Unit tests for //elisp/common:elisp_info.bzl."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
-load("//elisp:defs.bzl", "EmacsLispInfo", "elisp_library")
+load("//elisp:defs.bzl", "EmacsLispInfo")
 
 visibility("private")
 
@@ -68,22 +68,3 @@ def _provider_test_impl(ctx):
     return analysistest.end(env)
 
 provider_test = analysistest.make(_provider_test_impl)
-
-def _test_provider():
-    elisp_library(
-        name = "provider_test_subject",
-        srcs = ["provider-test.el"],
-        tags = ["manual"],
-    )
-    provider_test(
-        name = "provider_test",
-        target_under_test = ":provider_test_subject",
-        size = "small",
-    )
-
-def elisp_test_suite(*, name):
-    _test_provider()
-    native.test_suite(
-        name = name,
-        tests = [":provider_test"],
-    )

@@ -25,7 +25,7 @@ load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
-load(":defs.bzl", "elisp_test_suite")
+load(":elisp_test_suite.bzl", "elisp_test_suite")
 
 package(
     default_applicable_licenses = ["//:license"],
@@ -37,10 +37,17 @@ package(
 licenses(["notice"])
 
 bzl_library(
-    name = "defs",
-    srcs = ["defs.bzl"],
+    name = "elisp_test_suite",
+    srcs = ["elisp_test_suite.bzl"],
     deps = [
+        ":elisp_info_test",
         "//elisp:elisp_library",
+    ],
+)
+
+bzl_library(
+    name = "elisp_info_test",
+    deps = [
         "//elisp/common:elisp_info",
         "@bazel_skylib//lib:unittest",
     ],
