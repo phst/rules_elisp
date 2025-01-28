@@ -85,7 +85,7 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"MODULE.bazel", "lib-1.el", "lib-1-test.el", "empty.el", "my.proto", "doc.org", "nonexisting.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_manual", "doc", attr{"src", "doc.org"}, attr{"out", "doc.texi"}),
+					newRule("elisp_manual", "doc", attr("src", "doc.org"), attr("out", "doc.texi")),
 					newRule("elisp_library", "empty", strings("srcs", "empty.el")),
 					newRule("elisp_library", "lib_1", strings("srcs", "lib-1.el")),
 					newRule("elisp_test", "lib_1_test", strings("srcs", "lib-1-test.el")),
@@ -136,21 +136,20 @@ func TestGenerateRules(t *testing.T) {
 	}
 }
 
-func newRule(kind, name string, attrs ...attr) *rule.Rule {
+func newRule(kind, name string, attrs ...rule.KeyValue) *rule.Rule {
 	r := rule.NewRule(kind, name)
 	for _, a := range attrs {
-		r.SetAttr(a.name, a.value)
+		r.SetAttr(a.Key, a.Value)
 	}
 	return r
 }
 
-type attr struct {
-	name  string
-	value any
+func attr(name string, value any) rule.KeyValue {
+	return rule.KeyValue{Key: name, Value: value}
 }
 
-func strings(name string, values ...string) attr {
-	return attr{name, values}
+func strings(name string, values ...string) rule.KeyValue {
+	return attr(name, values)
 }
 
 func transformRule(r *rule.Rule) ruleInfo {
