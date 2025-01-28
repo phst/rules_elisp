@@ -101,7 +101,7 @@ bzl_library(
     srcs = ["cc_defaults.bzl"],
     deps = [
         ":cc_default_info",
-        "//private:defs",
+        ":features",
     ],
 )
 
@@ -142,8 +142,8 @@ bzl_library(
     srcs = ["module_config.bzl"],
     deps = [
         ":cc_default_info",
+        ":features",
         ":module_config_info",
-        "//private:defs",
     ],
 )
 
@@ -250,6 +250,11 @@ bzl_library(
 bzl_library(
     name = "executable_only",
     srcs = ["executable_only.bzl"],
+)
+
+bzl_library(
+    name = "features",
+    srcs = ["features.bzl"],
 )
 
 bzl_library(

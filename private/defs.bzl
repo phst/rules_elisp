@@ -44,17 +44,3 @@ FEATURES = select({
 # FIXME: This restriction is arbitrary; elisp_binary rules should accept any
 # number of input files if necessary.
 MAX_MANUAL_ADDITIONAL_INPUTS = 10
-
-def parse_features(features):
-    """Parse a list of feature strings.
-
-    Args:
-      features (list of str): feature strings from some `features` attribute
-
-    Returns:
-      a pair (features, disabled_features) of lists of strings
-    """
-    return (
-        [f for f in features if not f.startswith("-")],
-        [f.removeprefix("-") for f in features if f.startswith("-")],
-    )

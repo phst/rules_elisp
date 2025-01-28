@@ -14,8 +14,8 @@
 
 """Defines the internal `cc_defaults` rule."""
 
-load("//private:defs.bzl", "parse_features")
 load(":cc_default_info.bzl", "CcDefaultInfo")
+load(":features.bzl", "parse_features")
 
 visibility("private")
 
