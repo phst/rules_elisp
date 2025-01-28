@@ -86,10 +86,10 @@ func TestGenerateRules(t *testing.T) {
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
 					newRule("elisp_manual", "doc", attr("src", "doc.org"), attr("out", "doc.texi")),
-					newRule("elisp_library", "empty", strings("srcs", "empty.el")),
-					newRule("elisp_library", "lib_1", strings("srcs", "lib-1.el")),
-					newRule("elisp_test", "lib_1_test", strings("srcs", "lib-1-test.el")),
-					newRule("elisp_proto_library", "my_elisp_proto", strings("deps", ":my_proto")),
+					newRule("elisp_library", "empty", stringList("srcs", "empty.el")),
+					newRule("elisp_library", "lib_1", stringList("srcs", "lib-1.el")),
+					newRule("elisp_test", "lib_1_test", stringList("srcs", "lib-1-test.el")),
+					newRule("elisp_proto_library", "my_elisp_proto", stringList("deps", ":my_proto")),
 				},
 				Imports: []any{
 					gazelle.Imports{},
@@ -105,7 +105,7 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"lib-2.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_library", "lib_2", strings("srcs", "lib-2.el"), strings("load_path", ".")),
+					newRule("elisp_library", "lib_2", stringList("srcs", "lib-2.el"), stringList("load_path", ".")),
 				},
 				Imports: []any{gazelle.Imports{}},
 			},
@@ -115,7 +115,7 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"lib-3.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_library", "lib_3", strings("srcs", "lib-3.el"), strings("load_path", "/a")),
+					newRule("elisp_library", "lib_3", stringList("srcs", "lib-3.el"), stringList("load_path", "/a")),
 				},
 				Imports: []any{gazelle.Imports{}},
 			},
@@ -148,7 +148,7 @@ func attr(name string, value any) rule.KeyValue {
 	return rule.KeyValue{Key: name, Value: value}
 }
 
-func strings(name string, values ...string) rule.KeyValue {
+func stringList(name string, values ...string) rule.KeyValue {
 	return attr(name, values)
 }
 
