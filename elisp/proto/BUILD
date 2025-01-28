@@ -47,7 +47,6 @@ elisp_test(
     size = "small",
     srcs = ["proto-test.el"],
     flaky = True,  # https://debbugs.gnu.org/46722
-    # keep
     deps = [
         ":any_elisp_proto",
         ":compiler_plugin_elisp_proto",
@@ -56,7 +55,7 @@ elisp_test(
         ":proto",
         ":test_elisp_proto",
         ":timestamp_elisp_proto",
-        ":type_elisp_proto",
+        ":type_elisp_proto",  # keep
         ":wrappers_elisp_proto",
     ],
 )
@@ -277,3 +276,5 @@ exports_files(
 
 # gazelle:go_generate_proto false
 # gazelle:resolve elisp elisp/proto/module :module
+# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ :${1}_elisp_proto
+# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ :${1}_${2}_elisp_proto
