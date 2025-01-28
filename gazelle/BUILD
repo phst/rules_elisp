@@ -62,7 +62,6 @@ go_library(
     ],
 )
 
-# keep
 go_test(
     name = "gazelle_test",
     size = "small",
@@ -85,11 +84,10 @@ go_test(
     ],
 )
 
-# keep
 go_test(
     name = "integration_test",
     timeout = "short",
-    srcs = ["gazelle_test.go"],
+    srcs = ["integration_test.go"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.

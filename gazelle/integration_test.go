@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gazelle_test
+package gazelle_x_test
 
 import (
 	"flag"
