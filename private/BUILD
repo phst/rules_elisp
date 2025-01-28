@@ -35,11 +35,11 @@ config_setting(
 )
 
 bzl_library(
-    name = "package_features",
-    srcs = ["package_features.bzl"],
+    name = "junit_xsd",
+    srcs = ["junit_xsd.bzl"],
 )
 
 bzl_library(
-    name = "repositories",
-    srcs = ["repositories.bzl"],
+    name = "package_features",
+    srcs = ["package_features.bzl"],
 )
