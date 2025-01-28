@@ -1,0 +1,7 @@
+load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+
+elisp_library(
+    name = "lib_3",
+    srcs = ["lib-3.el"],
+    load_path = ["/a"],
+)
