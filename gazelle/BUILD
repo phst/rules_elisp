@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 load("@rules_go//go:def.bzl", "go_library", "go_test")
@@ -70,7 +71,11 @@ go_test(
         "imports_test.go",
         "resolve_test.go",
     ],
-    args = ["--gazelle=$(rlocationpath :binary)"],
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
+        # add additional quoting.
+        shell.quote("--gazelle=$(rlocationpath :binary)"),
+    ],
     data = [":binary"],
     deps = [
         ":library",
