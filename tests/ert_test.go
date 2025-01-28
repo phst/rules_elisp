@@ -34,7 +34,7 @@ import (
 
 var (
 	binary                = flag.String("binary", "", "location of the binary file relative to the runfiles root")
-	test_el               = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	testEl                = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
 	jUnitXsd              = flag.String("junit-xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfile root")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
@@ -44,7 +44,7 @@ func Test(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	source, err := rf.Rlocation(*test_el)
+	source, err := rf.Rlocation(*testEl)
 	if err != nil {
 		t.Fatal(err)
 	}
