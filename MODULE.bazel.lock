@@ -190,7 +190,7 @@
   "moduleExtensions": {
     "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "RYezbHZ/C0TAy977PILVDBTVUvg/M1HaC2D+5TElgb8=",
+        "bzlTransitiveDigest": "G0RHDJ5V1ZFGhSnA6W7a/UYmgjRwY6JXOAq7JlIOvMo=",
         "usagesDigest": "dzh9Ut9m42pH4+Q0DEkPKJBrv71oNjdwfGFgXMV9dG0=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -226,7 +226,7 @@
     },
     "//elisp/private:deps.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "CZuRCZSMcbpRS4lVjIvrkScUrzEopklLIWbUMdfPUaI=",
+        "bzlTransitiveDigest": "dgNpA2fOwtJot3Khoa2Dev68zw3+eeo0EAUZFQ4qsTU=",
         "usagesDigest": "EqKS/SVbWZp+fTJ+aALcUuM8cWsVZwS2b3kXOFIXpSw=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
