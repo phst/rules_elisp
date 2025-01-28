@@ -14,6 +14,7 @@
 
 """Defines the internal `merged_manual` rule."""
 
+load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@bazel_skylib//lib:sets.bzl", "sets")
 
@@ -24,11 +25,15 @@ def _merged_manual_impl(ctx):
     roots = sets.make()
     for bin in ctx.files.includes:
         org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"), sibling = bin)
+        args = ctx.actions.args()
+        if bazel_features.docs.utf8_enabled:
+            args.add("--utf8")
+        args.add("--").add(bin).add(org)
         ctx.actions.run(
             outputs = [org],
             inputs = [bin],
             executable = ctx.executable._generate,
-            arguments = [ctx.actions.args().add("--").add(bin).add(org)],
+            arguments = [args],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file %{output}",
             toolchain = None,

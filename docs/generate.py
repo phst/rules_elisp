@@ -36,6 +36,7 @@ from stardoc.proto import stardoc_output_pb2
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
+    parser.add_argument('--utf8', action='store_true')
     parser.add_argument('input', type=pathlib.Path)
     parser.add_argument('output', type=pathlib.Path)
     opts = parser.parse_args()
@@ -43,7 +44,7 @@ def main() -> None:
     # Force Unix-style line endings for consistent results.  See
     # https://github.com/bazelbuild/stardoc/issues/110.
     with opts.output.open(mode='xt', encoding='utf-8', newline='\n') as file:
-        generator = _Generator(file)
+        generator = _Generator(file, utf8=opts.utf8)
         generator.run(module)
 
 
@@ -71,14 +72,15 @@ class _Generator:
         True: 'mandatory',
     }
 
-    def __init__(self, file: io.TextIOBase):
+    def __init__(self, file: io.TextIOBase, *, utf8: bool):
         self._file = file
+        self._utf8 = utf8
 
     def run(self, module: stardoc_output_pb2.ModuleInfo) -> None:
         """Writes the generated Org Mode output."""
         doc = module.module_docstring
         if len(doc) > 100 and '\n' in doc:
-            self._write(_markdown(doc))
+            self._write(self._markdown(doc))
         for rule in module.rule_info:
             self._rule(rule)
         for provider in module.provider_info:
@@ -101,7 +103,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options Rule {name} ({attrs})\n')
         self._write('#+BEGIN_deffn\n')
         self._load(rule.origin_key)
-        self._write(_markdown(rule.doc_string).lstrip())
+        self._write(self._markdown(rule.doc_string).lstrip())
         self._write(f'The ~{name}~ rule supports the following attributes:\n\n')
         for attr in rule.attribute:
             self._attribute(attr)
@@ -114,7 +116,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options {name} ({params})\n')
         self._write('#+BEGIN_defun\n')
         self._load(func.origin_key)
-        self._write(_markdown(func.doc_string).lstrip())
+        self._write(self._markdown(func.doc_string).lstrip())
         for param in func.parameter:
             self._parameter(param)
         returns = getattr(func, 'return').doc_string
@@ -125,7 +127,7 @@ class _Generator:
         self._write('#+END_defun\n\n')
 
     def _parameter(self, param: stardoc_output_pb2.FunctionParamInfo) -> None:
-        doc = _markdown(param.doc_string).strip()
+        doc = self._markdown(param.doc_string).strip()
         if not doc.endswith('.'):
             raise ValueError(
                 f'documentation string {doc!r} should end with a period')
@@ -141,10 +143,10 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options Provider {name} {fields}\n')
         self._write('#+BEGIN_deftp\n')
         self._load(provider.origin_key)
-        self._write(_markdown(provider.doc_string).lstrip())
+        self._write(self._markdown(provider.doc_string).lstrip())
         self._write(f'The ~{name}~ provider has the following fields:\n\n')
         for field in provider.field_info:
-            doc = _markdown(field.doc_string).strip()
+            doc = self._markdown(field.doc_string).strip()
             if not doc.endswith('.'):
                 raise ValueError(
                     f'documentation string {doc!r} should end with a period')
@@ -158,7 +160,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options Aspect {name} {attrs}\n')
         self._write('#+BEGIN_deffn\n')
         self._load(aspect.origin_key)
-        self._write(_markdown(aspect.doc_string).lstrip())
+        self._write(self._markdown(aspect.doc_string).lstrip())
         if aspect.aspect_attribute:
             attrs = ', '.join(f'~{a}~' for a in aspect.aspect_attribute)
             self._write(f'This aspect propagates along the following '
@@ -177,7 +179,7 @@ class _Generator:
         self._write(
             f'{name} = use_extension("{ext.origin_key.file}", "{name}")\n')
         self._write('#+END_SRC\n\n')
-        self._write(_markdown(ext.doc_string).lstrip())
+        self._write(self._markdown(ext.doc_string).lstrip())
         self._write(f'The ~{name}~ module extension '
                     f'provides the following tag classes:\n\n')
         for tag in ext.tag_class:
@@ -192,7 +194,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options '
                     f'{{Tag class}} {extension_name} {name} ({attrs})\n')
         self._write('#+BEGIN_defop\n')
-        self._write(_markdown(tag.doc_string).lstrip())
+        self._write(self._markdown(tag.doc_string).lstrip())
         self._write(
             f'The ~{name}~ tag class supports the following attributes:\n\n')
         for attr in tag.attribute:
@@ -207,7 +209,7 @@ class _Generator:
             f'#+ATTR_TEXINFO: :options {{Repository rule}} {name} ({attrs})\n')
         self._write('#+BEGIN_deffn\n')
         self._load(rule.origin_key)
-        self._write(_markdown(rule.doc_string).lstrip())
+        self._write(self._markdown(rule.doc_string).lstrip())
         self._write(f'The ~{name}~ repository rule '
                     f'supports the following attributes:\n\n')
         for attr in rule.attribute:
@@ -225,7 +227,7 @@ class _Generator:
         self._write(f'#+ATTR_TEXINFO: :options {name} ({attrs})\n')
         self._write('#+BEGIN_defmac\n')
         self._load(macro.origin_key)
-        self._write(_markdown(macro.doc_string).lstrip())
+        self._write(self._markdown(macro.doc_string).lstrip())
         self._write(
             f'The ~{name}~ macro supports the following attributes:\n\n')
         for attr in macro.attribute:
@@ -244,7 +246,7 @@ class _Generator:
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         if attr.doc_string.startswith('Deprecated;'):
             return
-        doc = _markdown(attr.doc_string).strip()
+        doc = self._markdown(attr.doc_string).strip()
         if not doc.endswith('.'):
             raise ValueError(
                 f'documentation string {doc!r} should end with a period')
@@ -266,16 +268,17 @@ class _Generator:
     def _write(self, text: str) -> None:
         self._file.write(text)
 
-
-def _markdown(text: str) -> str:
-    """Convert a Markdown snippet to Org-mode."""
-    # Bazel (including Stardoc) interprets all files as Latin-1,
-    # cf. https://bazel.build/concepts/build-files.  However, our files all use
-    # UTF-8, leading to double encoding.  Reverse that effect here.
-    text = text.strip().encode('latin-1').decode('utf-8')
-    document = commonmark.Parser().parse(text)
-    text = _OrgRenderer().render(document)
-    return text + '\n'
+    def _markdown(self, text: str) -> str:
+        """Convert a Markdown snippet to Org-mode."""
+        text = text.strip()
+        # Bazel before 8.1 (including Stardoc) interprets all files as Latin-1,
+        # cf. https://bazel.build/concepts/build-files.  However, our files all
+        # use UTF-8, leading to double encoding.  Reverse that effect here.
+        if not self._utf8:
+            text = text.encode('latin-1').decode('utf-8')
+        document = commonmark.Parser().parse(text)
+        text = _OrgRenderer().render(document)
+        return text + '\n'
 
 
 def _fill(text: str, *,
