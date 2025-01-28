@@ -77,9 +77,9 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"MODULE.bazel", "lib-1.el", "lib-1-test.el", "empty.el", "nonexisting.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_library", "empty", []string{"empty.el"}, nil),
-					newRule("elisp_library", "lib_1", []string{"lib-1.el"}, nil),
-					newRule("elisp_test", "lib_1_test", []string{"lib-1-test.el"}, nil),
+					newRule("elisp_library", "empty", strings("srcs", "empty.el")),
+					newRule("elisp_library", "lib_1", strings("srcs", "lib-1.el")),
+					newRule("elisp_test", "lib_1_test", strings("srcs", "lib-1-test.el")),
 				},
 				Imports: []interface{}{
 					gazelle.Imports{},
@@ -93,7 +93,7 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"lib-2.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_library", "lib_2", []string{"lib-2.el"}, []string{"."}),
+					newRule("elisp_library", "lib_2", strings("srcs", "lib-2.el"), strings("load_path", ".")),
 				},
 				Imports: []interface{}{gazelle.Imports{}},
 			},
@@ -103,7 +103,7 @@ func TestGenerateRules(t *testing.T) {
 			files: []string{"lib-3.el"},
 			want: language.GenerateResult{
 				Gen: []*rule.Rule{
-					newRule("elisp_library", "lib_3", []string{"lib-3.el"}, []string{"/a"}),
+					newRule("elisp_library", "lib_3", strings("srcs", "lib-3.el"), strings("load_path", "/a")),
 				},
 				Imports: []interface{}{gazelle.Imports{}},
 			},
@@ -124,15 +124,21 @@ func TestGenerateRules(t *testing.T) {
 	}
 }
 
-func newRule(kind, name string, srcs, loadPath []string) *rule.Rule {
+func newRule(kind, name string, attrs ...attr) *rule.Rule {
 	r := rule.NewRule(kind, name)
-	if srcs != nil {
-		r.SetAttr("srcs", srcs)
-	}
-	if loadPath != nil {
-		r.SetAttr("load_path", loadPath)
+	for _, a := range attrs {
+		r.SetAttr(a.name, a.value)
 	}
 	return r
+}
+
+type attr struct {
+	name  string
+	value any
+}
+
+func strings(name string, values ...string) attr {
+	return attr{name, values}
 }
 
 func transformRule(r *rule.Rule) ruleInfo {
