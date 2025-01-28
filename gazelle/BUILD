@@ -27,17 +27,17 @@ package(
 licenses(["notice"])
 
 gazelle(
-    name = "gazelle",
+    name = "wrapper",
     gazelle = ":binary",
 )
 
 gazelle_binary(
     name = "binary",
-    languages = [":library"],
+    languages = [":gazelle"],
 )
 
 go_library(
-    name = "library",
+    name = "gazelle",
     srcs = [
         "builtin.go",
         "feature.go",
@@ -83,7 +83,7 @@ go_test(
         "//gazelle/testdata:BUILD",
     ],
     deps = [
-        ":library",
+        ":gazelle",
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
         "@gazelle//config",

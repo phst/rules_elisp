@@ -132,7 +132,7 @@ gazelle_test(
 gazelle_binary(
     name = "gazelle_binary",
     languages = DEFAULT_LANGUAGES + [
-        "//gazelle:library",
+        "//gazelle",
         "@bazel_skylib_gazelle_plugin//bzl",
         "@gazelle//language/bazel/visibility",
     ],
