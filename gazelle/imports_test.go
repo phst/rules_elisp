@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gazelle_test
+package gazelle
 
 import (
 	"path"
@@ -24,11 +24,10 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/google/go-cmp/cmp"
-	"github.com/phst/rules_elisp/gazelle"
 )
 
 func TestImports(t *testing.T) {
-	lang := gazelle.NewLanguage()
+	lang := NewLanguage()
 	config := testtools.NewTestConfig(t, nil, []language.Language{lang}, nil)
 	for _, tc := range []struct {
 		desc, pkg, build string
