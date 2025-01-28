@@ -61,6 +61,9 @@ check-extra:
 	! $(GIT) grep -I -r -F -L -e 'features = PACKAGE_FEATURES' \
 	  -- '*/BUILD' '*/BUILD.bazel' ':^/examples/ext/'
 
+clean:
+	$(BAZEL) clean
+
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
 INSTALL = install
