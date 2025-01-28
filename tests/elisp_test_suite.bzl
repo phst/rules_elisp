@@ -14,7 +14,7 @@
 
 """Unit tests for our rules and providers."""
 
-load("//elisp:defs.bzl", "elisp_library")
+load("//elisp:elisp_library.bzl", "elisp_library")
 load(":elisp_info_test.bzl", "provider_test")
 
 visibility("private")
