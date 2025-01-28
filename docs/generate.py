@@ -172,11 +172,11 @@ class _Generator:
         tags = ' '.join(t.tag_name for t in ext.tag_class)
         self._write(
             f'#+ATTR_TEXINFO: :options {{Module extension}} {name} {tags}\n')
-        self._write('#+BEGIN_deftp\n')
+        self._write('#+BEGIN_deftp\n\n')
         self._write('#+BEGIN_SRC bazel-module\n')
         self._write(
             f'{name} = use_extension("{ext.origin_key.file}", "{name}")\n')
-        self._write('#+END_SRC\n')
+        self._write('#+END_SRC\n\n')
         self._write(_markdown(ext.doc_string).lstrip())
         self._write(f'The ~{name}~ module extension '
                     f'provides the following tag classes:\n\n')
@@ -237,9 +237,9 @@ class _Generator:
             raise ValueError('unknown file')
         if not key.name:
             raise ValueError(f'unknown symbol name in file {key.file}')
-        self._write('#+BEGIN_SRC bazel-starlark\n')
+        self._write('\n#+BEGIN_SRC bazel-starlark\n')
         self._write(f'load("{key.file}", "{key.name}")\n')
-        self._write('#+END_SRC\n')
+        self._write('#+END_SRC\n\n')
 
     def _attribute(self, attr: stardoc_output_pb2.AttributeInfo) -> None:
         if attr.doc_string.startswith('Deprecated;'):

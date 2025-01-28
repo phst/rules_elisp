@@ -146,9 +146,12 @@ Abseil FAQ</a> how to correctly change the C++ standard for your project.
 </p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_library</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [outs], [data], [load_path], [deps])</var><a class="copiable-link" href="#index-elisp_005flibrary"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_library.bzl&quot;, &quot;elisp_library&quot;)
 </pre></div>
+
 <p>Byte-compiles Emacs Lisp source files and makes the compiled output
 available to dependencies.  All sources are byte-compiled.
 <code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this binary
@@ -210,9 +213,12 @@ default: <code class="code">[]</code>; required providers: <code class="code">Em
 </dd></dl>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fcc_005fmodule"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_cc_module</strong> <var class="def-var-arguments">(name, [srcs], [deps], [data], [copts], [linkopts], [local_defines])</var><a class="copiable-link" href="#index-elisp_005fcc_005fmodule"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_cc_module.bzl&quot;, &quot;elisp_cc_module&quot;)
 </pre></div>
+
 <p>Builds an Emacs dynamic module from C and C+​+​ source files.
 For background on Emacs modules, see
 <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Dynamic-Modules">Emacs Dynamic Modules</a>, and see
@@ -281,9 +287,12 @@ attribute for <code class="code">cc_library</code></a>.  List of strings; option
 </dd></dl>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_binary</strong> <var class="def-var-arguments">(name, [fatal_warnings], src, [data], [deps], [interactive], [input_args], [output_args])</var><a class="copiable-link" href="#index-elisp_005fbinary"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_binary.bzl&quot;, &quot;elisp_binary&quot;)
 </pre></div>
+
 <p>Binary rule that loads a single Emacs Lisp file.
 The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless <code class="code">interactive</code> is <code class="code">True</code>.
@@ -344,9 +353,12 @@ toolchains that specify <code class="code">wrap = True</code>.  List of integers
 </dd></dl>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005ftest"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_test</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [data], [deps], [skip_tests], [skip_tags])</var><a class="copiable-link" href="#index-elisp_005ftest"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_test.bzl&quot;, &quot;elisp_test&quot;)
 </pre></div>
+
 <p>Runs ERT tests that are defined in the source files.
 The given source files should contain ERT tests defined with <code class="code">ert-deftest</code>.
 For details, see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#How-to-Write-Tests">How to Write Tests</a>.
@@ -501,9 +513,12 @@ its repository root.  For example, if the above BUILD file is in a package named
 </p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fproto_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_proto_library</strong> <var class="def-var-arguments">(name, deps)</var><a class="copiable-link" href="#index-elisp_005fproto_005flibrary"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl&quot;, &quot;elisp_proto_library&quot;)
 </pre></div>
+
 <p>Generates Emacs bindings for a protocol buffer library.
 By convention, for a <code class="code">proto_library</code> rule named
 <code class="code"><var class="var">prefix</var>_​proto</code> there should be a corresponding
@@ -1057,9 +1072,12 @@ Org-mode file.  See <a data-manual="texinfo" href="https://www.gnu.org/software/
 </p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005fmanual"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_manual</strong> <var class="def-var-arguments">(name, src, out, [additional_inputs])</var><a class="copiable-link" href="#index-elisp_005fmanual"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp:elisp_manual.bzl&quot;, &quot;elisp_manual&quot;)
 </pre></div>
+
 <p>Generates a GNU Texinfo manual from an Org Mode file.
 See <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html#Top">GNU Texinfo</a>, and see <a data-manual="org" href="https://www.gnu.org/software/emacs/manual/html_mono/org.html#Top">the Org Mode manual</a>.
 Uses Org’s exporting functionality; see <a data-manual="org" href="https://www.gnu.org/software/emacs/manual/html_mono/org.html#Exporting">Exporting</a>.
@@ -1101,9 +1119,12 @@ external Emacs Lisp libraries that don’t bring their own Bazel support.
 </p>
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-elisp"><span class="category-def">Module extension: </span><span><strong class="def-name">elisp</strong> <var class="def-var-arguments">http_archive</var><a class="copiable-link" href="#index-elisp"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">elisp = use_extension(&quot;@phst_rules_elisp//elisp/extensions:elisp.bzl&quot;, &quot;elisp&quot;)
 </pre></div>
+
 <p>Module extension for Emacs Lisp.
 </p>
 <p>The <code class="code">elisp</code> module extension provides the following tag classes:
@@ -1172,9 +1193,12 @@ information about providers.
 </p>
 <dl class="first-deftp def-block">
 <dt class="deftp def-line" id="index-EmacsLispInfo"><span class="category-def">Provider: </span><span><strong class="def-name">EmacsLispInfo</strong> <var class="def-var-arguments">source_files compiled_files load_path data_files transitive_source_files transitive_compiled_files transitive_load_path</var><a class="copiable-link" href="#index-EmacsLispInfo"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/common:elisp_info.bzl&quot;, &quot;EmacsLispInfo&quot;)
 </pre></div>
+
 <p>Provider for Emacs Lisp libraries.
 The <code class="code">elisp_library</code>, <code class="code">elisp_proto_library</code>, and <code class="code">elisp_cc_module</code> rules
 produce this provider.
@@ -1233,9 +1257,12 @@ are created using the &lsquo;elisp_toolchain&lsquo; rule.
 </p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005ftoolchain"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_toolchain</strong> <var class="def-var-arguments">(name, emacs, [use_default_shell_env], [execution_requirements], [wrap])</var><a class="copiable-link" href="#index-elisp_005ftoolchain"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/toolchains:elisp_toolchain.bzl&quot;, &quot;elisp_toolchain&quot;)
 </pre></div>
+
 <p>Toolchain rule for Emacs Lisp.
 This toolchain configures how to run Emacs.
 The executable passed to the <code class="code">emacs</code> attribute must be a binary
@@ -1304,9 +1331,12 @@ optional; default: <code class="code">False</code>.
 </dd></dl>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
-<dd><div class="example">
+<dd>
+
+<div class="example">
 <pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/toolchains:elisp_emacs_binary.bzl&quot;, &quot;elisp_emacs_binary&quot;)
 </pre></div>
+
 <p>Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.
 </p>
