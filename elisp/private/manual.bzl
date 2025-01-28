@@ -12,26 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Internal-only rules and functions.
+"""Internal configuration for `elisp_manual`."""
 
-These definitions are internal and subject to change without notice."""
+visibility(["//elisp", "//elisp/private/tools"])
 
-visibility([
-    # keep sorted
-    "//",
-    "//dev",
-    "//docs",
-    "//elisp",
-    "//elisp/common",
-    "//elisp/extensions",
-    "//elisp/private",
-    "//elisp/private/tools",
-    "//elisp/proto",
-    "//elisp/runfiles",
-    "//elisp/toolchains",
-    "//emacs",
-    "//examples",
-    "//gazelle",
-    "//tests",
-    "//tests/pkg",
-])
+# FIXME: This restriction is arbitrary; elisp_binary rules should accept any
+# number of input files if necessary.
+MAX_MANUAL_ADDITIONAL_INPUTS = 10

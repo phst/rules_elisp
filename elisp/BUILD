@@ -155,7 +155,7 @@ bzl_library(
     name = "elisp_manual",
     srcs = ["elisp_manual.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["//private:defs"],
+    deps = ["//elisp/private:manual"],
 )
 
 bzl_library(

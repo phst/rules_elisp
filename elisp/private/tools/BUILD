@@ -31,7 +31,7 @@ load(
 )
 load("//elisp/private:executable_only.bzl", "executable_only")
 load(
-    "//private:defs.bzl",
+    "//elisp/private:manual.bzl",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
 )
 load("//private:package_features.bzl", "PACKAGE_FEATURES")

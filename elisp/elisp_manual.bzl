@@ -15,7 +15,7 @@
 """Defines the `elisp_manual` rule."""
 
 load(
-    "//private:defs.bzl",
+    "//elisp/private:manual.bzl",
     "MAX_MANUAL_ADDITIONAL_INPUTS",
 )
 

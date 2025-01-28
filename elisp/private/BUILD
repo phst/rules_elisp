@@ -241,6 +241,13 @@ bzl_library(
     deps = ["@bazel_skylib//lib:paths"],
 )
 
+# keep
+bzl_library(
+    name = "manual",
+    srcs = ["manual.bzl"],
+    visibility = ["//elisp:__pkg__"],
+)
+
 bzl_library(
     name = "cc_config",
     srcs = ["cc_config.bzl"],
