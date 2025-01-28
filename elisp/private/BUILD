@@ -18,13 +18,7 @@ load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":cc_defaults.bzl", "cc_defaults")
-load(
-    ":cc_launcher_config.bzl",
-    "LAUNCHER_COPTS",
-    "LAUNCHER_DEFINES",
-    "LAUNCHER_FEATURES",
-    "LAUNCHER_LINKOPTS",
-)
+load(":cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
 
 package(
     default_applicable_licenses = ["//:license"],

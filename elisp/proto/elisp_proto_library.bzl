@@ -19,11 +19,7 @@ load("@protobuf//bazel/common:proto_common.bzl", "proto_common")
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:compile.bzl", "compile")
-load(
-    "//elisp/private:filenames.bzl",
-    "check_relative_filename",
-    "repository_relative_filename",
-)
+load("//elisp/private:filenames.bzl", "check_relative_filename", "repository_relative_filename")
 
 visibility("public")
 

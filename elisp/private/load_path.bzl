@@ -15,10 +15,7 @@
 """Private utility functions to work with the Emacs load path."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load(
-    ":filenames.bzl",
-    "check_relative_filename",
-)
+load(":filenames.bzl", "check_relative_filename")
 
 visibility("//elisp")
 

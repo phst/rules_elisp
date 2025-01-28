@@ -14,10 +14,7 @@
 
 """Defines the `elisp_manual` rule."""
 
-load(
-    "//elisp/private:manual.bzl",
-    "MAX_MANUAL_ADDITIONAL_INPUTS",
-)
+load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
 
 visibility("public")
 

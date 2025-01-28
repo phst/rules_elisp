@@ -15,10 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("//elisp/private:module_config.bzl", "module_config")
 load("//elisp/toolchains:elisp_toolchain.bzl", "elisp_toolchain")
-load(
-    "//private:package_features.bzl",
-    "PACKAGE_FEATURES",
-)
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],

@@ -15,21 +15,14 @@
 """Defines the rule `elisp_emacs_binary`, which compiles Emacs for use in
 Bazel."""
 
-load(
-    "@rules_cc//cc:action_names.bzl",
-    "CPP_LINK_EXECUTABLE_ACTION_NAME",
-    "C_COMPILE_ACTION_NAME",
-)
+load("@rules_cc//cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
-load(
-    "//elisp/private:filenames.bzl",
-    "runfile_location",
-)
+load("//elisp/private:filenames.bzl", "runfile_location")
 
 visibility("public")
 

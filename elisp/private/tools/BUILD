@@ -23,19 +23,9 @@ load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
 load("//elisp/private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
-load(
-    "//elisp/private:cc_launcher_config.bzl",
-    "LAUNCHER_COPTS",
-    "LAUNCHER_DEFINES",
-    "LAUNCHER_DEPS",
-    "LAUNCHER_FEATURES",
-    "LAUNCHER_LINKOPTS",
-)
+load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
 load("//elisp/private:executable_only.bzl", "executable_only")
-load(
-    "//elisp/private:manual.bzl",
-    "MAX_MANUAL_ADDITIONAL_INPUTS",
-)
+load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
