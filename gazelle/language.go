@@ -19,6 +19,7 @@
 package gazelle
 
 import (
+	"cmp"
 	"flag"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
@@ -28,11 +29,16 @@ import (
 )
 
 // NewLanguage returns a Gazelle language object for Emacs Lisp.
+//
+// The returned [language.Language] also implements
+// [language.ModuleAwareLanguage].
 func NewLanguage() language.Language {
 	return elisp{}
 }
 
 const languageName = "elisp"
+
+var _ language.ModuleAwareLanguage = elisp{}
 
 type elisp struct{}
 
@@ -84,8 +90,16 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 }
 
 func (elisp) Loads() []rule.LoadInfo {
+	return loads(moduleName)
+}
+
+func (e elisp) ApparentLoads(moduleToApparentName func(string) string) []rule.LoadInfo {
+	return loads(cmp.Or(moduleToApparentName(moduleName), moduleName))
+}
+
+func loads(repo string) []rule.LoadInfo {
 	return []rule.LoadInfo{{
-		Name:    "@phst_rules_elisp//elisp:defs.bzl",
+		Name:    label.New(repo, "elisp", "defs.bzl").String(),
 		Symbols: []string{libraryKind, protoLibraryKind, binaryKind, testKind},
 	}}
 }
@@ -98,3 +112,5 @@ const (
 	binaryKind       = "elisp_binary"
 	testKind         = "elisp_test"
 )
+
+const moduleName = "phst_rules_elisp"

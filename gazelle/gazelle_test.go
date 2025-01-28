@@ -28,8 +28,10 @@ import (
 func TestGazelleBinary(t *testing.T) {
 	dir, clean := testtools.CreateFiles(t, []testtools.FileSpec{
 		{
-			Path:    "MODULE.bazel",
-			Content: `module(name = "test")`,
+			Path: "MODULE.bazel",
+			Content: `module(name = "test")
+bazel_dep(name = "phst_rules_elisp", repo_name = "rules_elisp")
+`,
 		},
 		{
 			Path: "BUILD.bazel",
@@ -96,7 +98,7 @@ some_rule(name = "module")
 	testtools.CheckFiles(t, dir, []testtools.FileSpec{
 		{
 			Path: "BUILD.bazel",
-			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_proto_library", "elisp_test")
+			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_proto_library", "elisp_test")
 
 proto_library(
     name = "my_proto",
@@ -134,7 +136,7 @@ elisp_proto_library(
 `,
 		}, {
 			Path: "pkg/BUILD.bazel",
-			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library")
+			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_2",
@@ -145,7 +147,7 @@ elisp_library(
 		},
 		{
 			Path: "a/b/BUILD.bazel",
-			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library")
+			Content: `load("@rules_elisp//elisp:defs.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_3",
