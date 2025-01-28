@@ -86,11 +86,11 @@ elisp_test(
     ] + select({
         # We also need to explicitly include the marker file that Bazel would
         # generate to indicate that a file should be instrumented.  See the
-        # commentary in //elisp:defs.bzl for details.  Again, for real tests,
-        # Bazel itself takes care of this.  We also skip this if we’re already
-        # collecting coverage information, because then the marker file is
-        # already present, and including it here would trigger a symlink target
-        # clash.
+        # commentary in //elisp:elisp_test.bzl for details.  Again, for real
+        # tests, Bazel itself takes care of this.  We also skip this if we’re
+        # already collecting coverage information, because then the marker file
+        # is already present, and including it here would trigger a symlink
+        # target clash.
         ":coverage": [],
         "//conditions:default": ["test-lib.el.instrument"],
     }),

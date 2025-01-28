@@ -1,6 +1,6 @@
 ;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -119,7 +119,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          ;; If coverage is enabled, check for a file with a well-known
          ;; extension first.  The Bazel runfiles machinery is expected to
          ;; generate these files for source files that should be instrumented.
-         ;; See the commentary in //elisp:defs.bzl for details.
+         ;; See the commentary in //elisp:elisp_test.bzl for details.
          (load-suffixes (if coverage-enabled
                             (cons ".el.instrument" load-suffixes)
                           load-suffixes))
@@ -163,10 +163,10 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          :before-until load-source-file-function
          (lambda (fullname file _noerror _nomessage)
            ;; If we got a magic filename that tells us to instrument a file,
-           ;; then instrument the corresponding source file if that exists.
-           ;; See the commentary in //elisp:defs.bzl for details.  In all other
-           ;; cases, we defer to the normal ‘load-source-file-function’, which
-           ;; is also responsible for raising errors if desired.
+           ;; then instrument the corresponding source file if that exists.  See
+           ;; the commentary in //elisp:elisp_test.bzl for details.  In all
+           ;; other cases, we defer to the normal ‘load-source-file-function’,
+           ;; which is also responsible for raising errors if desired.
            (when (string-suffix-p ".el.instrument" fullname)
              (cl-callf2 string-remove-suffix ".instrument" fullname)
              (cl-callf2 string-remove-suffix ".instrument" file)
