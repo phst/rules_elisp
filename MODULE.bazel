@@ -73,7 +73,7 @@ junit_xsd(
 )
 
 # Local toolchains
-register_toolchains("@phst_rules_elisp//elisp:hermetic_toolchain")
+register_toolchains("//elisp:hermetic_toolchain")
 
 # C++-specific dependencies
 register_toolchains("@local_config_cc_toolchains//:all")
