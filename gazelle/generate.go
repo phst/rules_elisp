@@ -114,8 +114,9 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Import
 	return r, Imports{requires}
 }
 
-// Imports documents which features an Emacs Lisp file requires.
-// [GenerateRules] uses this type for [language.GenerateResult.Imports].
+// Imports documents which features an Emacs Lisp file requires.  The
+// implementation of [language.Language.GenerateRules] returned by [NewLanguage]
+// uses this type for [language.GenerateResult.Imports].
 type Imports struct {
 	Requires []Feature
 }
