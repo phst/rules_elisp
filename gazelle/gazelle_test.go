@@ -35,7 +35,7 @@ func TestGazelleBinary(t *testing.T) {
 			Path: "BUILD.bazel",
 			Content: `
 some_rule(name = "module")
-# gazelle:elisp_provide :module=module
+# gazelle:resolve elisp module :module
 `,
 		},
 		{
@@ -93,7 +93,7 @@ some_rule(name = "module")
 			Content: `load("@phst_rules_elisp//elisp:defs.bzl", "elisp_library", "elisp_test")
 
 some_rule(name = "module")
-# gazelle:elisp_provide :module=module
+# gazelle:resolve elisp module :module
 
 elisp_library(
     name = "empty",
