@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+// Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import (
 var (
 	binary                = flag.String("binary", "", "location of the binary file relative to the runfiles root")
 	test_el               = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	jUnitXsd              = flag.String("junit-xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfile root")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
@@ -95,8 +96,7 @@ func Test(t *testing.T) {
 	}
 	t.Log("test process exited")
 
-	schema := filepath.Join(tempDir, "JUnit.xsd")
-	err = os.WriteFile(schema, jUnitXsd, 0400)
+	schema, err := rf.Rlocation(*jUnitXsd)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -337,9 +337,6 @@ func (t *timestamp) UnmarshalText(b []byte) error {
 func toTime(t timestamp) time.Time { return time.Time(t) }
 
 func bothEmpty(a, b string) bool { return (a == "") == (b == "") }
-
-//go:embed JUnit.xsd
-var jUnitXsd []byte
 
 //go:embed coverage.dat
 var wantCoverage string

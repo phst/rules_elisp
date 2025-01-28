@@ -18,7 +18,6 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -67,15 +66,14 @@ go_test(
         # add additional quoting.
         shell.quote("--binary=$(rlocationpath :test)"),
         shell.quote("--test-el=$(rlocationpath :test.el)"),
+        shell.quote("--junit-xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
     ],
     data = [
         ":test",
         ":test.el",
+        "@junit_xsd//:JUnit.xsd",
     ],
-    embedsrcs = [
-        "JUnit.xsd",
-        "coverage.dat",
-    ],
+    embedsrcs = ["coverage.dat"],
     deps = [
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
@@ -126,13 +124,6 @@ exports_files(
 config_setting(
     name = "coverage",
     values = {"collect_code_coverage": "true"},
-)
-
-copy_file(
-    name = "copy_junit_xsd",
-    testonly = True,
-    src = "@junit_xsd//:JUnit.xsd",
-    out = "JUnit.xsd",
 )
 
 elisp_binary(
