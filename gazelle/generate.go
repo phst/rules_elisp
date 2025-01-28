@@ -31,7 +31,7 @@ import (
 // GenerateRules implements [language.Language.GenerateRules].  It generates
 // elisp_library, elisp_proto_library, or elisp_test rules, one per source file.
 // It adds the features required by each file to the
-// [language.GenerateResult.Imports] slice as [imports] structures.
+// [language.GenerateResult.Imports] slice as [imports] slices.
 func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	fsys := os.DirFS(args.Dir)
 	pkg := bazelPackage(args.Rel)
@@ -61,28 +61,28 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, import
 	if file == ".dir-locals.el" {
 		// Never generate a rule for .dir-locals.el, as it can’t be
 		// compiled.
-		return nil, imports{}
+		return nil, nil
 	}
 	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" {
 		r := rule.NewRule(protoLibraryKind, stem+"_elisp_proto")
 		r.SetAttr("deps", []string{":" + stem + "_proto"})
-		return r, imports{}
+		return r, nil
 	}
 	if stem, ok := strings.CutSuffix(file, ".org"); ok && stem != "" {
 		r := rule.NewRule(manualKind, stem)
 		r.SetAttr("src", file)
 		r.SetAttr("out", stem+".texi")
-		return r, imports{}
+		return r, nil
 	}
 	src := srcFile(label.New("", string(pkg), file))
 	if !src.valid() {
 		// Probably not an Emacs Lisp file.  Don’t print an error.
-		return nil, imports{}
+		return nil, nil
 	}
 	b, err := fs.ReadFile(fsys, file)
 	if err != nil {
 		log.Printf("unreadable source file %s: %s", file, err)
-		return nil, imports{}
+		return nil, nil
 	}
 	// We assume that most files are libraries and only assume a test file
 	// if the filename makes that likely.  We don’t look at the file
@@ -117,15 +117,13 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, import
 		requires = append(requires, f)
 	}
 	slices.Sort(requires)
-	return r, imports{requires}
+	return r, requires
 }
 
 // imports documents which features an Emacs Lisp file requires.  The
 // implementation of [language.Language.GenerateRules] returned by [NewLanguage]
 // uses this type for [language.GenerateResult.Imports].
-type imports struct {
-	Requires []feature
-}
+type imports []feature
 
 var (
 	testFilePattern = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)
