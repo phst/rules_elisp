@@ -46,8 +46,6 @@ func (elisp) KnownDirectives() []string { return nil }
 func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 	// We always rely on the imports index to write deps attributes.
 	c.IndexLibraries = true
-
-	initExtension(c)
 }
 
 func (elisp) Name() string { return languageName }
