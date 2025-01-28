@@ -187,7 +187,7 @@
     },
     "@@phst_rules_elisp+//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "yQz/G08CFUmWT+LSTWj5Cln5VJGdpdMChEhJUt7RIDo=",
+        "bzlTransitiveDigest": "RYezbHZ/C0TAy977PILVDBTVUvg/M1HaC2D+5TElgb8=",
         "usagesDigest": "VKYj6lzvfUzIuICEHfBh+99ZoqFiEr9KR+03L+rSdH8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
@@ -223,7 +223,7 @@
     },
     "@@phst_rules_elisp+//elisp/private:deps.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "HXdnqUddjHnPqOIc5bCvIqw8KAKkXitkc/EjiVBC00A=",
+        "bzlTransitiveDigest": "fZc0Io/sRdeps+qLGAnM4M5hi8Chz0A55SqzxM9b0bU=",
         "usagesDigest": "gPsIyFJ+lcaUSBLBkR834M5K3bmMa0nStuDITfaIfU8=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
