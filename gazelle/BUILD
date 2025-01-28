@@ -74,11 +74,11 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        shell.quote("--gazelle=$(rlocationpath :gazelle)"),
+        shell.quote("--gazelle=$(rlocationpath :wrapper)"),
         shell.quote("--testdata=$(rlocationpath //gazelle/testdata:BUILD)"),
     ],
     data = [
-        ":gazelle",
+        ":wrapper",
         "//gazelle/testdata",
         "//gazelle/testdata:BUILD",
     ],
