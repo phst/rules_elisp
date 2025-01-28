@@ -33,7 +33,7 @@ import (
 // mappings for the features in imports.
 func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
-	r *rule.Rule, imports interface{}, from label.Label,
+	r *rule.Rule, imports any, from label.Label,
 ) {
 	imp, ok := imports.(Imports)
 	if !ok {

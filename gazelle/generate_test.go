@@ -81,7 +81,7 @@ func TestGenerateRules(t *testing.T) {
 					newRule("elisp_library", "lib_1", strings("srcs", "lib-1.el")),
 					newRule("elisp_test", "lib_1_test", strings("srcs", "lib-1-test.el")),
 				},
-				Imports: []interface{}{
+				Imports: []any{
 					gazelle.Imports{},
 					gazelle.Imports{Requires: []gazelle.Feature{"lib-2"}},
 					gazelle.Imports{Requires: []gazelle.Feature{"lib-1"}},
@@ -95,7 +95,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_2", strings("srcs", "lib-2.el"), strings("load_path", ".")),
 				},
-				Imports: []interface{}{gazelle.Imports{}},
+				Imports: []any{gazelle.Imports{}},
 			},
 		},
 		{
@@ -105,7 +105,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_3", strings("srcs", "lib-3.el"), strings("load_path", "/a")),
 				},
-				Imports: []interface{}{gazelle.Imports{}},
+				Imports: []any{gazelle.Imports{}},
 			},
 		},
 	} {
@@ -147,7 +147,7 @@ func transformRule(r *rule.Rule) ruleInfo {
 		Name:        r.Name(),
 		Args:        r.Args(),
 		Attr:        make(map[string]build.Expr),
-		PrivateAttr: make(map[string]interface{}),
+		PrivateAttr: make(map[string]any),
 		Comments:    r.Comments(),
 	}
 	for _, k := range r.AttrKeys() {
@@ -163,6 +163,6 @@ type ruleInfo struct {
 	Kind, Name  string
 	Args        []build.Expr
 	Attr        map[string]build.Expr
-	PrivateAttr map[string]interface{}
+	PrivateAttr map[string]any
 	Comments    []string
 }
