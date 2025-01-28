@@ -75,3 +75,8 @@ install:
 	  bazel-bin/docs/rules_elisp.info \
 	  '$(INFODIR)/rules_elisp.info'
 	$(INSTALL_INFO) -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+
+uninstall:
+	$(INSTALL_INFO) --delete -- \
+	  '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+	rm -- '$(INFODIR)/rules_elisp.info'
