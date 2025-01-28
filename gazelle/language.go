@@ -14,9 +14,8 @@
 
 // Package gazelle implements Gazelle support for Emacs Lisp.  It generates and
 // maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
-// rules from the phst_rules_elisp repository.  See
-// https://github.com/phst/rules_elisp and
-// https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
+// rules from the phst_rules_elisp repository.  See https://phst.eu/rules_elisp
+// and https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
 package gazelle
 
 import (
