@@ -107,6 +107,14 @@ go_test(
 
 copy_file(
     name = "copy_builtin_features",
-    src = "//emacs:builtin_features",
+    src = ":builtin_features",
     out = "builtin_features.json",
+)
+
+alias(
+    name = "builtin_features",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:builtin_features",
+        "//conditions:default": "@gnu_emacs_29.4//:builtin_features",
+    }),
 )

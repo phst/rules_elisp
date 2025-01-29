@@ -49,7 +49,7 @@ cc_library(
 filegroup(
     name = "builtin_features",
     srcs = ["builtin_features.json"],
-    visibility = ["[emacs_pkg]"],
+    visibility = ["[gazelle_pkg]"],
 )
 
 # Local Variables:

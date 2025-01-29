@@ -39,15 +39,6 @@ alias(
 )
 
 alias(
-    name = "builtin_features",
-    actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:builtin_features",
-        "//conditions:default": "@gnu_emacs_29.4//:builtin_features",
-    }),
-    visibility = ["//gazelle:__pkg__"],
-)
-
-alias(
     name = "emacs_28.2",
     actual = select({
         "@platforms//os:windows": "@gnu_emacs_windows_28.2//:emacs",
