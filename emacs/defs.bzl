@@ -12,7 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel."""
+"""Defines the rule `emacs_binary`, which compiles Emacs for use in Bazel.
+
+This file is deprecated; use `elisp_emacs_binary` from
+//elisp/toolchains:elisp_emacs_binary.bzl instead."""
 
 load("//elisp/toolchains:elisp_emacs_binary.bzl", "elisp_emacs_binary")
 

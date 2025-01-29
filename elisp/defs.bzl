@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines rules to work with Emacs Lisp files in Bazel."""
+"""Defines rules to work with Emacs Lisp files in Bazel.
+
+This file is deprecated; use the rule-specific Starlark files in the packages
+`elisp`, `elisp/proto`, `elisp/common` and `elisp/toolchains` instead, such as
+//elisp:elisp_library.bzl."""
 
 load("//elisp/common:elisp_info.bzl", _EmacsLispInfo = "EmacsLispInfo")
 load("//elisp/proto:elisp_proto_library.bzl", _elisp_proto_library = "elisp_proto_library")
