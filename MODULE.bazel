@@ -148,7 +148,7 @@ git_override(
 bazel_dep(name = "phst_merge_bazel_lockfiles", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_merge_bazel_lockfiles",
-    commit = "73ba2806e8a4f67d2d00d9c9bcbb734152021dbd",
+    commit = "2a4ca3559505a8ee01cee7808546613d3d4c6fa6",
     remote = "https://github.com/phst/merge-bazel-lockfiles.git",
 )
 
