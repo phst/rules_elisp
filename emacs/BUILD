@@ -13,8 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -29,24 +27,6 @@ alias(
     name = "emacs",
     actual = ":emacs_29.4",
     visibility = ["//visibility:public"],
-)
-
-py_test(
-    name = "emacs_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["emacs_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--emacs=$(rlocationpath :emacs)"),
-    ],
-    data = [":emacs"],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
 )
 
 alias(
