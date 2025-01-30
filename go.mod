@@ -20,7 +20,7 @@ toolchain go1.23.5
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.42.0
-	github.com/bazelbuild/buildtools v0.0.0-20250128121225-1d7634006480
+	github.com/bazelbuild/buildtools v0.0.0-20250130132114-635c1223b1e6
 	github.com/bazelbuild/rules_go v0.52.0
 	github.com/google/go-cmp v0.6.0
 )
