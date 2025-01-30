@@ -10,6 +10,8 @@ github.com/bazelbuild/buildtools v0.0.0-20250122150430-a84ab464140c h1:2xZh3m/69
 github.com/bazelbuild/buildtools v0.0.0-20250122150430-a84ab464140c/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
 github.com/bazelbuild/buildtools v0.0.0-20250128121225-1d7634006480 h1:roY1wEc6EAldFDRBDXI+9XU7ej5Bc4nFvCmMaucP8W4=
 github.com/bazelbuild/buildtools v0.0.0-20250128121225-1d7634006480/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
+github.com/bazelbuild/buildtools v0.0.0-20250130132114-635c1223b1e6 h1:WII9so3DyHOAiK23xo1WgO/7M0qonj525m49bMi39/c=
+github.com/bazelbuild/buildtools v0.0.0-20250130132114-635c1223b1e6/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
 github.com/bazelbuild/rules_go v0.52.0 h1:+ozpngVAW67pCAwfhepaXSSrG3yHcj8K9hNAxSYBno4=
 github.com/bazelbuild/rules_go v0.52.0/go.mod h1:M+YrupNArA7OiTlv++rFUgQ6Sm+ZXbQ5HPUj0cGa0us=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
