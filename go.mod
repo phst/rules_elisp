@@ -16,7 +16,7 @@ module github.com/phst/rules_elisp
 
 go 1.22.9
 
-toolchain go1.23.5
+toolchain go1.23.6
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.42.0
