@@ -38,4 +38,6 @@ build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
 # Treat warnings as errors, but only for this repository.
 build --//private:treat_warnings_as_errors
 
+build --compilation_mode=dbg --host_compilation_mode=dbg
+
 import %workspace%/c-std.bazelrc
