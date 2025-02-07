@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Module extensions for Emacs Lisp."""
+"""Module extensions for Emacs Lisp.
+
+This file is deprecated; use //elisp/extensions:elisp.bzl instead."""
 
 load("//elisp/extensions:elisp.bzl", _elisp = "elisp")
 
