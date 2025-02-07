@@ -14,8 +14,7 @@
 
 """Defines the `elisp_binary` rule."""
 
-load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
-load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
@@ -49,17 +48,13 @@ def _elisp_binary_impl(ctx):
     ]
 
 elisp_binary = rule(
-    attrs = COMPILE_ATTRS | {
+    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
+    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+    attrs = CC_TOOLCHAIN_ATTRS | COMPILE_ATTRS | {
         "src": attr.label(
             doc = "Source file to load.",
             allow_single_file = [".el"],
             mandatory = True,
-        ),
-        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
-        # fixed.
-        "_cc_toolchain": attr.label(
-            default = Label("@rules_cc//cc:current_cc_toolchain"),
-            providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
             default = LAUNCHER_DEPS + [Label("//elisp/private/tools:binary")],
