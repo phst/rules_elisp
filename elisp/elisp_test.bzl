@@ -18,9 +18,9 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
-load("//elisp/private:binary.bzl", _binary = "binary")
+load("//elisp/private:binary.bzl", "binary")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
-load("//elisp/private:compile.bzl", _COMPILE_ATTRS = "COMPILE_ATTRS")
+load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
 visibility("public")
 
@@ -37,7 +37,7 @@ def _elisp_test_impl(ctx):
     ]
     if ctx.var["COMPILATION_MODE"] != "opt":
         args.append("--module-assertions")
-    executable, runfiles = _binary(
+    executable, runfiles = binary(
         ctx,
         srcs = ctx.files.srcs,
         # “local = 1” is equivalent to adding a “local” tag,
@@ -95,7 +95,7 @@ def _elisp_test_impl(ctx):
     ]
 
 elisp_test = rule(
-    attrs = _COMPILE_ATTRS | {
+    attrs = COMPILE_ATTRS | {
         "srcs": attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",
