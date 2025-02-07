@@ -14,8 +14,7 @@
 
 """Defines the `elisp_test` rule."""
 
-load("@rules_cc//cc:find_cc_toolchain.bzl", "use_cc_toolchain")
-load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
@@ -95,7 +94,9 @@ def _elisp_test_impl(ctx):
     ]
 
 elisp_test = rule(
-    attrs = COMPILE_ATTRS | {
+    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
+    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+    attrs = CC_TOOLCHAIN_ATTRS | COMPILE_ATTRS | {
         "srcs": attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",
@@ -105,12 +106,6 @@ elisp_test = rule(
             # “bazel build --compile_one_dependency”.  See
             # https://github.com/bazelbuild/bazel/blob/7.4.1/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L74.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
-        ),
-        # FIXME: Remove once https://github.com/bazelbuild/bazel/issues/7260 is
-        # fixed.
-        "_cc_toolchain": attr.label(
-            default = Label("@rules_cc//cc:current_cc_toolchain"),
-            providers = [cc_common.CcToolchainInfo],
         ),
         "_launcher_deps": attr.label_list(
             default = LAUNCHER_DEPS + [Label("//elisp/private/tools:test")],
