@@ -58,7 +58,7 @@ jobs:
           cc: ${{matrix.cc}}
       - name: Run Bazel tests
         shell: pwsh
-        run: python build.py -- check
+        run: python build.py
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
         shell: bash
