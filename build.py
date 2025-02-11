@@ -45,7 +45,6 @@ class Builder:
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
         self._bazel = pathlib.Path(bazel)
-        self._github = os.getenv('CI') == 'true'
         self._workspace = pathlib.Path(
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
             or pathlib.Path(__file__).parent
