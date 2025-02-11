@@ -21,12 +21,12 @@ toolchain go1.24.0
 require (
 	github.com/bazelbuild/bazel-gazelle v0.42.0
 	github.com/bazelbuild/buildtools v0.0.0-20250204160707-ad48c76ab9b5
-	github.com/bazelbuild/rules_go v0.52.0
+	github.com/bazelbuild/rules_go v0.53.0
 	github.com/google/go-cmp v0.6.0
 )
 
 require (
 	golang.org/x/mod v0.21.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 )
