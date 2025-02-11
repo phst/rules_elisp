@@ -37,12 +37,9 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
-          $cwds = $PWD, (Join-Path $PWD 'examples' 'ext')
-          foreach ($cwd in $cwds) {
-            Push-Location $cwd
-            bazelisk mod deps --lockfile_mode=update
-            Pop-Location
-          }
+          bazelisk mod deps --lockfile_mode=update
+          Set-Location $(Join-Path 'examples' 'ext')
+          bazelisk mod deps --lockfile_mode=update
       - name: Upload lockfiles
         uses: actions/upload-artifact@v4
         with:
