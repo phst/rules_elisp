@@ -35,7 +35,7 @@ jobs:
       - name: Regenerate lockfiles
         shell: pwsh
         run: |
-          $ErrorActionPreference = Stop
+          $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           bazelisk mod deps --lockfile_mode=update
           Set-Location $(Join-Path examples ext)
