@@ -28,25 +28,6 @@ import sys
 from typing import Optional
 
 
-class Builder:
-    """Builds the project."""
-
-    def __init__(self) -> None:
-        bazel = shutil.which('bazelisk') or shutil.which('bazel')
-        if not bazel:
-            raise FileNotFoundError('neither Bazelisk nor Bazel found')
-        self._bazel = pathlib.Path(bazel)
-
-    def check(self) -> None:
-        """Builds and tests the project."""
-        # Test both default toolchain and versioned toolchains.
-        _test(self._bazel)
-        for version in sorted(_VERSIONS):
-            _test(self._bazel,
-                  f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
-        _test(self._bazel, cwd=pathlib.Path('examples', 'ext'))
-
-
 def _test(bazel: pathlib.Path, *opts: str,
           cwd: Optional[pathlib.Path] = None) -> None:
     args = [bazel, 'test'] + list(opts) + ['--', '//...']
@@ -64,9 +45,17 @@ def main() -> None:
     """Builds the project."""
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
-    builder = Builder()
+    bazel = shutil.which('bazelisk') or shutil.which('bazel')
+    if not bazel:
+        raise FileNotFoundError('neither Bazelisk nor Bazel found')
+    bazel = pathlib.Path(bazel)
     try:
-        builder.check()
+        # Test both default toolchain and versioned toolchains.
+        _test(bazel)
+        for version in sorted(_VERSIONS):
+            _test(bazel,
+                  f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
+        _test(bazel, cwd=pathlib.Path('examples', 'ext'))
     except subprocess.CalledProcessError as ex:
         print(_quote(ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
