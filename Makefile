@@ -27,7 +27,7 @@ all:
 generate: compdb coverage
 
 check: all check-extra
-	./build.py
+	./check.ps1
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python

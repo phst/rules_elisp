@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@rules_license//rules:license.bzl", "license")
-load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -29,12 +28,6 @@ exports_files(["LICENSE"])
 license(
     name = "license",
     license_kind = "@rules_license//licenses/spdx:Apache-2.0",
-)
-
-py_binary(
-    name = "build",
-    srcs = ["build.py"],
-    main = "build.py",
 )
 
 exports_files(
