@@ -53,8 +53,8 @@ class Builder:
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
         self._test(cwd=pathlib.Path('examples', 'ext'))
 
-    def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
-        _run([self._bazel, 'test'] + list(args) + ['--', '//...'], cwd=cwd)
+    def _test(self, *opts: str, cwd: Optional[pathlib.Path] = None) -> None:
+        _run([self._bazel, 'test'] + list(opts) + ['--', '//...'], cwd=cwd)
 
 
 # All potentially supported Emacs versions.
