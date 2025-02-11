@@ -18,7 +18,7 @@
 
 Mimics a trivial version of Make."""
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 import io
 import pathlib
 import shlex
@@ -26,14 +26,6 @@ import shutil
 import subprocess
 import sys
 from typing import Optional
-
-
-def _run(args: Sequence[str | pathlib.Path], *,
-         cwd: Optional[pathlib.Path] = None) -> None:
-    if cwd:
-        print('cd', shlex.quote(str(cwd)), '&&', end=' ')
-    print(_quote(args))
-    subprocess.run(args, check=True, cwd=cwd)
 
 
 class Builder:
@@ -54,7 +46,11 @@ class Builder:
         self._test(cwd=pathlib.Path('examples', 'ext'))
 
     def _test(self, *opts: str, cwd: Optional[pathlib.Path] = None) -> None:
-        _run([self._bazel, 'test'] + list(opts) + ['--', '//...'], cwd=cwd)
+        args = [self._bazel, 'test'] + list(opts) + ['--', '//...']
+        if cwd:
+            print('cd', shlex.quote(str(cwd)), '&&', end=' ')
+        print(_quote(args))
+        subprocess.run(args, check=True, cwd=cwd)
 
 
 # All potentially supported Emacs versions.
