@@ -44,7 +44,6 @@ class Builder:
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
         self._bazel = pathlib.Path(bazel)
-        self._workspace = pathlib.Path(__file__).parent.absolute()
 
     def check(self) -> None:
         """Builds and tests the project."""
@@ -52,7 +51,7 @@ class Builder:
         self._test()
         for version in sorted(_VERSIONS):
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
-        self._test(cwd=self._workspace / 'examples' / 'ext')
+        self._test(cwd=pathlib.Path('examples', 'ext'))
 
     def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
         _run([self._bazel, 'test'] + list(args) + ['--', '//...'], cwd=cwd)
