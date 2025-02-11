@@ -41,7 +41,7 @@ def _test(bazel: pathlib.Path, *opts: str,
 _VERSIONS = frozenset({'28.2', '29.4'})
 
 
-def main() -> None:
+def _main() -> None:
     """Builds the project."""
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
@@ -66,4 +66,4 @@ def _quote(args: Iterable[str | pathlib.Path]) -> str:
 
 
 if __name__ == '__main__':
-    main()
+    _main()
