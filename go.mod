@@ -14,7 +14,7 @@
 
 module github.com/phst/rules_elisp
 
-go 1.22.9
+go 1.24
 
 toolchain go1.24.0
 
