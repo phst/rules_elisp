@@ -56,13 +56,11 @@ def _run(args: Sequence[str | pathlib.Path], *,
 class Builder:
     """Builds the project."""
 
-    def __init__(self, *,
-                 profiles: Optional[pathlib.Path]) -> None:
+    def __init__(self) -> None:
         bazel = shutil.which('bazelisk') or shutil.which('bazel')
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
         self._bazel = pathlib.Path(bazel)
-        self._profiles = profiles
         self._github = os.getenv('CI') == 'true'
         self._workspace = pathlib.Path(
             os.getenv('BUILD_WORKSPACE_DIRECTORY')
@@ -93,33 +91,23 @@ class Builder:
     @target
     def test(self) -> None:
         """Runs the Bazel tests."""
-        self._test(profile='test')
+        self._test()
 
     @target
     def versions(self) -> None:
         """Runs the Bazel tests for all supported Emacs versions."""
         for version in sorted(_VERSIONS):
-            self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain',
-                       profile=version)
+            self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
 
-    def _test(self, *args: str, profile: str,
-              cwd: Optional[pathlib.Path] = None) -> None:
+    def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
         options = []
-        if self._profiles:
-            self._profiles.mkdir(exist_ok=True)
-            profile_file = self._profiles / (profile + '.json.gz')
-            options += [
-                '--generate_json_trace_profile',
-                '--experimental_announce_profile_path',
-                '--profile=' + str(profile_file),
-            ]
         options.extend(args)
         _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd)
 
     @target
     def ext(self) -> None:
         """Run the tests in the example workspace."""
-        self._test(cwd=self._workspace / 'examples' / 'ext', profile='ext')
+        self._test(cwd=self._workspace / 'examples' / 'ext')
 
 
 # All potentially supported Emacs versions.
@@ -131,10 +119,9 @@ def main() -> None:
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--profiles', type=_path)
     parser.add_argument('goals', nargs='*', default=['check'])
     args = parser.parse_args()
-    builder = Builder(profiles=args.profiles)
+    builder = Builder()
     try:
         builder.build(args.goals)
     except subprocess.CalledProcessError as ex:
