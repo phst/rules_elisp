@@ -18,9 +18,7 @@
 
 Mimics a trivial version of Make."""
 
-import argparse
-from collections.abc import Callable, Iterable, Sequence
-import functools
+from collections.abc import Iterable, Sequence
 import io
 import os
 import pathlib
@@ -29,20 +27,6 @@ import shutil
 import subprocess
 import sys
 from typing import Optional
-
-_Target = Callable[['Builder'], None]
-_targets: dict[str, _Target] = {}
-
-
-def target(func: _Target) -> _Target:
-    """Decorator to mark a function as a build target."""
-    name = func.__name__
-    @functools.wraps(func)
-    def wrapper(self: 'Builder') -> None:
-        print(f'building target {name}')
-        func(self)
-    _targets[name] = wrapper
-    return wrapper
 
 
 def _run(args: Sequence[str | pathlib.Path], *,
@@ -67,20 +51,6 @@ class Builder:
             or pathlib.Path(__file__).parent
         ).absolute()
 
-    def build(self, goals: Sequence[str]) -> None:
-        """Builds the specified goals."""
-        if not goals:
-            raise ValueError('no goals provided')
-        funcs = []
-        for goal in goals:
-            func = _targets.get(goal)
-            if not func:
-                raise KeyError(f'unknown goal {goal}')
-            funcs.append(func)
-        for func in funcs:
-            func(self)
-
-    @target
     def check(self) -> None:
         """Builds and tests the project."""
         # Test both default toolchain and versioned toolchains.
@@ -88,12 +58,10 @@ class Builder:
         self.versions()
         self.ext()
 
-    @target
     def test(self) -> None:
         """Runs the Bazel tests."""
         self._test()
 
-    @target
     def versions(self) -> None:
         """Runs the Bazel tests for all supported Emacs versions."""
         for version in sorted(_VERSIONS):
@@ -104,7 +72,6 @@ class Builder:
         options.extend(args)
         _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd)
 
-    @target
     def ext(self) -> None:
         """Run the tests in the example workspace."""
         self._test(cwd=self._workspace / 'examples' / 'ext')
@@ -118,12 +85,9 @@ def main() -> None:
     """Builds the project."""
     if isinstance(sys.stdout, io.TextIOWrapper):
         sys.stdout.reconfigure(encoding='utf-8', line_buffering=True)
-    parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('goals', nargs='*', default=['check'])
-    args = parser.parse_args()
     builder = Builder()
     try:
-        builder.build(args.goals)
+        builder.check()
     except subprocess.CalledProcessError as ex:
         print(_quote(ex.cmd), 'failed with exit code', ex.returncode)
         sys.exit(ex.returncode)
