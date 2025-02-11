@@ -35,10 +35,10 @@ jobs:
       - name: Regenerate lockfiles
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
+          $ErrorActionPreference = Stop
           $PSNativeCommandUseErrorActionPreference = $true
           bazelisk mod deps --lockfile_mode=update
-          Set-Location $(Join-Path 'examples' 'ext')
+          Set-Location $(Join-Path examples ext)
           bazelisk mod deps --lockfile_mode=update
       - name: Upload lockfiles
         uses: actions/upload-artifact@v4
