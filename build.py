@@ -20,7 +20,6 @@ Mimics a trivial version of Make."""
 
 from collections.abc import Iterable, Sequence
 import io
-import os
 import pathlib
 import shlex
 import shutil
@@ -45,10 +44,7 @@ class Builder:
         if not bazel:
             raise FileNotFoundError('neither Bazelisk nor Bazel found')
         self._bazel = pathlib.Path(bazel)
-        self._workspace = pathlib.Path(
-            os.getenv('BUILD_WORKSPACE_DIRECTORY')
-            or pathlib.Path(__file__).parent
-        ).absolute()
+        self._workspace = pathlib.Path(__file__).parent.absolute()
 
     def check(self) -> None:
         """Builds and tests the project."""
