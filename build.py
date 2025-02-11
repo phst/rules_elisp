@@ -53,27 +53,15 @@ class Builder:
     def check(self) -> None:
         """Builds and tests the project."""
         # Test both default toolchain and versioned toolchains.
-        self.test()
-        self.versions()
-        self.ext()
-
-    def test(self) -> None:
-        """Runs the Bazel tests."""
         self._test()
-
-    def versions(self) -> None:
-        """Runs the Bazel tests for all supported Emacs versions."""
         for version in sorted(_VERSIONS):
             self._test(f'--extra_toolchains=//elisp:emacs_{version}_toolchain')
+        self._test(cwd=self._workspace / 'examples' / 'ext')
 
     def _test(self, *args: str, cwd: Optional[pathlib.Path] = None) -> None:
         options = []
         options.extend(args)
         _run([self._bazel, 'test'] + options + ['--', '//...'], cwd=cwd)
-
-    def ext(self) -> None:
-        """Run the tests in the example workspace."""
-        self._test(cwd=self._workspace / 'examples' / 'ext')
 
 
 # All potentially supported Emacs versions.
