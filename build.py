@@ -129,12 +129,6 @@ def main() -> None:
         sys.exit(ex.returncode)
 
 
-def _path(value: str) -> pathlib.Path:
-    if not value:
-        raise ValueError('missing file name')
-    return pathlib.Path(value).absolute()
-
-
 def _quote(args: Iterable[str | pathlib.Path]) -> str:
     return shlex.join(map(str, args))
 
