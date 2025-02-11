@@ -121,17 +121,6 @@ class Builder:
         """Run the tests in the example workspace."""
         self._test(cwd=self._workspace / 'examples' / 'ext', profile='ext')
 
-    @target
-    def lock(self) -> None:
-        """Manually update MODULE.bazel.lock."""
-        cwds = (
-            self._workspace,
-            self._workspace / 'examples' / 'ext',
-        )
-        for cwd in cwds:
-            _run([self._bazel, 'mod', 'deps', '--lockfile_mode=update'],
-                 cwd=cwd)
-
 
 # All potentially supported Emacs versions.
 _VERSIONS = frozenset({'28.2', '29.4'})
