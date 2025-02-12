@@ -23,7 +23,7 @@ $candidates = @(
     Get-Command -Name bazelisk, bazel -Type Application, ExternalScript
 )
 
-if ($candidates.Length -eq 0) {
+if (! $candidates) {
     throw 'neither Bazelisk nor Bazel found'
 }
 
