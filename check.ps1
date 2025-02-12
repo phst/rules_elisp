@@ -38,6 +38,8 @@ $versions = '28.2', '29.4'
 
 $VerbosePreference = 'Continue'
 
+Set-Location -Path $PSScriptRoot
+
 # Test both default toolchain and versioned toolchains.
 Run-Tests
 
