@@ -43,5 +43,5 @@ foreach ($version in $versions) {
     Run-Tests "--extra_toolchains=//elisp:emacs_${version}_toolchain"
 }
 
-Set-Location $(Join-Path examples ext)
+Join-Path examples ext | Set-Location
 Run-Tests
