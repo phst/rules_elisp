@@ -17,7 +17,9 @@
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
-$candidates = @(Get-Command bazelisk, bazel -Type Application, ExternalScript)
+$candidates = @(
+    Get-Command -Name bazelisk, bazel -Type Application, ExternalScript
+)
 
 if ($candidates.Length -eq 0) {
     throw 'neither Bazelisk nor Bazel found'
@@ -27,7 +29,7 @@ $bazel = $candidates[0].Path
 
 function Run-Tests {
     $rest = @('test') + $args + @('--', '//...')
-    Write-Verbose "cd $(Get-Location) && ${bazel} ${rest}"
+    Write-Verbose -Message "cd $(Get-Location) && ${bazel} ${rest}"
     & $bazel @rest
 }
 
@@ -43,5 +45,5 @@ foreach ($version in $versions) {
     Run-Tests "--extra_toolchains=//elisp:emacs_${version}_toolchain"
 }
 
-Join-Path examples ext | Set-Location
+Join-Path -Path examples -ChildPath ext | Set-Location
 Run-Tests

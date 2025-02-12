@@ -38,7 +38,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
           $PSNativeCommandUseErrorActionPreference = $true
           bazelisk mod deps --lockfile_mode=update
-          Join-Path examples ext | Set-Location
+          Join-Path -Path examples -ChildPath ext | Set-Location
           bazelisk mod deps --lockfile_mode=update
       - name: Upload lockfiles
         uses: actions/upload-artifact@v4
