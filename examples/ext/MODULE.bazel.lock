@@ -1,5 +1,5 @@
 {
-  "lockFileVersion": 16,
+  "lockFileVersion": 18,
   "registryFileHashes": {
     "https://bcr.bazel.build/bazel_registry.json": "8a28e4aff06ee60aed2a8c281907fb8bcbf3b753c91fb5a5c57da3215d5b3497",
     "https://bcr.bazel.build/modules/abseil-cpp/20210324.2/MODULE.bazel": "7cd0312e064fde87c8d1cd79ba06c876bd23630c83466e9500321be55c96ace2",
@@ -502,7 +502,7 @@
     },
     "@@rules_python+//python/extensions:pip.bzl%pip": {
       "general": {
-        "bzlTransitiveDigest": "cYt6BzkHB59fSsNwXPO0aIvR82xYoL5Of7bNunWMz+0=",
+        "bzlTransitiveDigest": "3uITpaYo9YHOWD287yHNGWSmzNvRivTEuCwy0+VmCr8=",
         "usagesDigest": "n9jpMMhlUeIqiP6WDEMMzBeS0105RRWD8AVBgnTOvgI=",
         "recordedFileInputs": {
           "@@protobuf+//python/requirements.txt": "983be60d3cec4b319dcab6d48aeb3f5b2f7c3350f26b3a9e97486c37967c73c5",
