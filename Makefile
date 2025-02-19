@@ -30,7 +30,8 @@ check: all check-extra
 	./check.ps1
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
-COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python
+COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-check_python \
+  --features=-parse_headers --host_features=-parse_headers
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 
 compdb:
