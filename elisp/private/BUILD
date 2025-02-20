@@ -156,7 +156,13 @@ cc_defaults(
 
 cc_defaults(
     name = "emacs_defaults",
-    copts = [],
+    copts = select({
+        ":gcc_or_clang": [
+            # Compiler output is never piped to a terminal.
+            "-fno-diagnostics-color",
+        ],
+        "//conditions:default": [],
+    }),
     defines = [],
     features = [
         "-treat_warnings_as_errors",
