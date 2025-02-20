@@ -834,9 +834,10 @@ TABLE."
     (declare (indent 2) (debug t))
     (macroexp-let2* nil ((key key) (table table))
       (let ((value (make-symbol "value"))
-            (default (cons nil nil)))  ; unique object
-        `(let ((,value (gethash ,key ,table ',default)))
-           (if (eq ,value ',default)
+            (default (make-symbol "default")))
+        `(let* ((,default (cons nil nil))  ; unique object
+                (,value (gethash ,key ,table ,default)))
+           (if (eq ,value ,default)
                (puthash ,key ,(macroexp-progn body) ,table)
              ,value))))))
 
