@@ -102,7 +102,7 @@ def _build(*, source: Union[pathlib.Path,
             subprocess.run(command, check=True, cwd=build, env=env,
                            stdin=subprocess.DEVNULL,
                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                           encoding='utf-8', errors='backslashescape')
+                           encoding='utf-8', errors='backslashreplace')
         except subprocess.CalledProcessError as ex:
             print('command', ' '.join(map(shlex.quote, command)),
                   'failed, output follows:')
