@@ -220,73 +220,79 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                              collect test))
         (or tests (message "Empty shard with index %d" shard-index)))
       (message "Running %d tests" (length tests))
-      (while tests
-        (message "Running test %s" (ert-test-name (car tests)))
-        (let* ((test (pop tests))
-               (name (ert-test-name test))
-               (start-time (current-time))
-               (result (ert-run-test test))
-               (duration (time-subtract nil start-time))
-               (expected (ert-test-result-expected-p test result))
-               (failed
-                (and (not expected)
-                     ;; A test that passed unexpectedly should count as failed
-                     ;; for the XML report.
-                     (ert-test-result-type-p result '(or :passed :failed))))
-               (status (ert-string-for-test-result result expected))
-               (tag nil)
-               (failure-message nil)
-               (type nil)
-               (description nil))
-          (message "Test %s %s and took %d ms" name status
-                   (* (float-time duration) 1000))
-          (cl-incf total)
-          (unless expected
-            (cl-incf unexpected)
-            ;; Print a nice error message that should point back to the source
-            ;; file in a compilation buffer.  We don’t want to find the
-            ;; “.el.instrument” files when printing the error message, so bind
-            ;; ‘load-suffixes’ temporarily to its original value.
-            (let ((load-suffixes original-load-suffixes))
-              (when-let ((prefix (elisp/ert/message--prefix name)))
-                (message "%s: Test %s %s" prefix name status)))
-            (and fail-fast (setq tests nil)))
-          (and failed (cl-incf failures))
-          (and (not expected) (not failed) (cl-incf errors))
-          (when (ert-test-skipped-p result)
-            (cl-incf skipped)
-            (setq tag 'skipped))
-          (and (not expected) (ert-test-passed-p result)
-               ;; Fake an error so that the test is marked as failed in the XML
-               ;; report.
-               (setq tag 'failure
-                     failure-message "Test passed unexpectedly"
-                     type 'error))
-          (when (ert-test-result-with-condition-p result)
-            (let ((message (elisp/ert/failure--message name result))
-                  (condition (ert-test-result-with-condition-condition result)))
-              (message "%s" message)
-              (unless (symbolp (car condition))
-                ;; This shouldn’t normally happen, but happens due to a bug in
-                ;; ERT for forms such as (should (integerp (ert-fail "Boo"))).
-                (push 'ert-test-failed condition))
-              (setq failure-message (error-message-string condition)
-                    description message)
+      (ert-run-tests
+       `(member ,@tests)
+       (lambda (&rest args)
+         (pcase args
+           (`(test-started ,_stats ,test)
+            (message "Running test %s" (ert-test-name test)))
+           (`(test-ended ,_stats ,test ,result)
+            (let* ((name (ert-test-name test))
+                   (duration (ert-test-result-duration result))
+                   (expected (ert-test-result-expected-p test result))
+                   (failed
+                    (and (not expected)
+                         ;; A test that passed unexpectedly should count as failed
+                         ;; for the XML report.
+                         (ert-test-result-type-p result '(or :passed :failed))))
+                   (status (ert-string-for-test-result result expected))
+                   (tag nil)
+                   (failure-message nil)
+                   (type nil)
+                   (description nil))
+              (message "Test %s %s and took %d ms" name status
+                       (* duration 1000))
+              (cl-incf total)
               (unless expected
-                (setq tag (if failed 'failure 'error)
-                      type (car condition)))))
-          (let ((report (and tag
-                             `((,tag
-                                ((message . ,failure-message)
-                                 ,@(and type `((type . ,(symbol-name type)))))
-                                ,@(and description `(,description)))))))
-            (push `(testcase ((name . ,(symbol-name name))
-                              ;; classname is required, but we don’t have test
-                              ;; classes, so fill in a dummy value.
-                              (classname . "ERT")
-                              (time . ,(format-time-string "%s.%N" duration)))
-                             ,@report)
-                  test-reports))))
+                (cl-incf unexpected)
+                ;; Print a nice error message that should point back to the
+                ;; source file in a compilation buffer.  We don’t want to find
+                ;; the “.el.instrument” files when printing the error message,
+                ;; so bind ‘load-suffixes’ temporarily to its original value.
+                (let ((load-suffixes original-load-suffixes))
+                  (when-let ((prefix (elisp/ert/message--prefix name)))
+                    (message "%s: Test %s %s" prefix name status)))
+                (and fail-fast (setq tests nil)))
+              (and failed (cl-incf failures))
+              (and (not expected) (not failed) (cl-incf errors))
+              (when (ert-test-skipped-p result)
+                (cl-incf skipped)
+                (setq tag 'skipped))
+              (and (not expected) (ert-test-passed-p result)
+                   ;; Fake an error so that the test is marked as failed in the
+                   ;; XML report.
+                   (setq tag 'failure
+                         failure-message "Test passed unexpectedly"
+                         type 'error))
+              (when (ert-test-result-with-condition-p result)
+                (let ((message (elisp/ert/failure--message name result))
+                      (condition
+                       (ert-test-result-with-condition-condition result)))
+                  (message "%s" message)
+                  (unless (symbolp (car condition))
+                    ;; This shouldn’t normally happen, but happens due to a bug
+                    ;; in ERT for forms such as
+                    ;; (should (integerp (ert-fail "Boo"))).
+                    (push 'ert-test-failed condition))
+                  (setq failure-message (error-message-string condition)
+                        description message)
+                  (unless expected
+                    (setq tag (if failed 'failure 'error)
+                          type (car condition)))))
+              (let ((report
+                     (and tag
+                          `((,tag
+                             ((message . ,failure-message)
+                              ,@(and type `((type . ,(symbol-name type)))))
+                             ,@(and description `(,description)))))))
+                (push `(testcase
+                        ((name . ,(symbol-name name))
+                         ;; classname is required, but we don’t have test
+                         ;; classes, so fill in a dummy value.
+                         (classname . "ERT")
+                         (time . ,(format-time-string "%s.%N" duration)))
+                                 ,@report)
+                      test-reports)))))))
       (message "Running %d tests finished, %d results unexpected"
                total unexpected)
       (unless (member report-file '(nil ""))
