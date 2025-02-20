@@ -130,7 +130,7 @@ def _build(*, source: Union[pathlib.Path,
         'CC=' + cc.resolve().as_posix(),
         'CFLAGS=' + cflags,
         'LDFLAGS=' + ldflags)
-    run('make', 'install')
+    run('make', 'install', 'MAKEINFO=:')
 
     features = _builtin_features(build / 'lisp') if builtin_features else None
 
