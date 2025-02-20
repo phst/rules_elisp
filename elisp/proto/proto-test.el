@@ -1,6 +1,6 @@
 ;;; proto-test.el --- unit tests for protocol buffer support  -*- lexical-binding: t; -*-
 
-;; Copyright 2022, 2023, 2024 Google LLC
+;; Copyright 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -59,15 +59,16 @@
   (should-error (elisp/proto/make 'google/protobuf/Duration :seconds)))
 
 (ert-deftest elisp/proto/make/scalars ()
-  (elisp/proto/Test-new :optional_int32 1
-                        :optional_int64 2
-                        :optional_uint32 3
-                        :optional_uint64 4
-                        :optional_float 5
-                        :optional_double 6
-                        :optional_bool 7
-                        :optional_string "8"
-                        :optional_bytes "9"))
+  (ignore
+   (elisp/proto/Test-new :optional_int32 1
+                         :optional_int64 2
+                         :optional_uint32 3
+                         :optional_uint64 4
+                         :optional_float 5
+                         :optional_double 6
+                         :optional_bool 7
+                         :optional_string "8"
+                         :optional_bytes "9")))
 
 (ert-deftest elisp/proto/clear-message ()
   (let ((message (google/protobuf/Duration-new :seconds 333)))
