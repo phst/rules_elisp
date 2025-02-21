@@ -48,8 +48,11 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
+local_emacs_repository = use_repo_rule("//elisp/private:deps.bzl", "local_emacs_repository")
+
+local_emacs_repository(name = "local_emacs")
+
 deps = use_extension("//elisp/private:deps.bzl", "deps")
-deps.local_emacs(name = "local_emacs")
 deps.emacs(
     source_integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
     version = "28.2",
@@ -60,7 +63,6 @@ deps.emacs(
     version = "29.4",
     windows_integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
 )
-use_repo(deps, "local_emacs")
 use_repo(deps, "gnu_emacs_28.2")
 use_repo(deps, "gnu_emacs_29.4")
 use_repo(deps, "gnu_emacs_windows_28.2")

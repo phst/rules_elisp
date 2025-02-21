@@ -229,8 +229,8 @@
     },
     "//elisp/private:deps.bzl%deps": {
       "general": {
-        "bzlTransitiveDigest": "9aajlgEh0fekQdGLZffoIslMfR9Nn5TnOGqCu83b8xI=",
-        "usagesDigest": "EqKS/SVbWZp+fTJ+aALcUuM8cWsVZwS2b3kXOFIXpSw=",
+        "bzlTransitiveDigest": "/ImF1fX1fy5s+6MCRooOji5iSDob1X3j6MD4cmtGDXU=",
+        "usagesDigest": "Tz/qdDhoOSyQxA4E+Ja2at2qV/NwqdKBEZg7QHxvI70=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -282,10 +282,6 @@
                 "@@platforms//cpu:x86_64"
               ]
             }
-          },
-          "local_emacs": {
-            "repoRuleId": "@@//elisp/private:deps.bzl%_local_emacs_repository",
-            "attributes": {}
           }
         },
         "moduleExtensionMetadata": {
