@@ -56,6 +56,15 @@ alias(
     visibility = ["//visibility:public"],
 )
 
+alias(
+    name = "emacs_30.1",
+    actual = select({
+        "@platforms//os:windows": "@gnu_emacs_windows_30.1//:emacs",
+        "//conditions:default": "@gnu_emacs_30.1//:emacs",
+    }),
+    visibility = ["//visibility:public"],
+)
+
 bzl_library(
     name = "defs",
     srcs = ["defs.bzl"],

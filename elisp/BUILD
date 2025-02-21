@@ -49,6 +49,12 @@ toolchain(
 )
 
 toolchain(
+    name = "emacs_30.1_toolchain",
+    toolchain = "emacs_30.1",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
     name = "local_toolchain",
     toolchain = ":local",
     toolchain_type = ":toolchain_type",
@@ -73,6 +79,11 @@ elisp_toolchain(
 elisp_toolchain(
     name = "emacs_29.4",
     emacs = "//emacs:emacs_29.4",
+)
+
+elisp_toolchain(
+    name = "emacs_30.1",
+    emacs = "//emacs:emacs_30.1",
 )
 
 bzl_library(
