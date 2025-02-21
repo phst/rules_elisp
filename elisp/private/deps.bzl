@@ -80,7 +80,7 @@ def _local_emacs_repository_impl(ctx):
         executable = False,
     )
 
-_local_emacs_repository = repository_rule(
+local_emacs_repository = repository_rule(
     implementation = _local_emacs_repository_impl,
     local = True,
 )
@@ -109,8 +109,6 @@ def _deps_impl(ctx):
                     Label("@platforms//cpu:x86_64"),
                 ],
             )
-        for local_emacs in module.tags.local_emacs:
-            _local_emacs_repository(name = local_emacs.name)
     return modules.use_all_repos(ctx)
 
 deps = module_extension(
@@ -120,11 +118,6 @@ deps = module_extension(
                 "version": attr.string(mandatory = True),
                 "source_integrity": attr.string(mandatory = True),
                 "windows_integrity": attr.string(mandatory = True),
-            },
-        ),
-        "local_emacs": tag_class(
-            attrs = {
-                "name": attr.string(mandatory = True),
             },
         ),
     },
