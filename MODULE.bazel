@@ -52,21 +52,51 @@ local_emacs_repository = use_repo_rule("//elisp/private:deps.bzl", "local_emacs_
 
 local_emacs_repository(name = "local_emacs")
 
-deps = use_extension("//elisp/private:deps.bzl", "deps")
-deps.emacs(
-    source_integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
-    version = "28.2",
-    windows_integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
+emacs_repository = use_repo_rule("//elisp/private:deps.bzl", "emacs_repository")
+
+emacs_repository(
+    name = "gnu_emacs_28.2",
+    integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
+    mode = "source",
+    output = "emacs.tar.xz",
+    path = "/emacs/emacs-28.2.tar.xz",
+    strip_prefix = "emacs-28.2",
 )
-deps.emacs(
-    source_integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
-    version = "29.4",
-    windows_integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
+
+emacs_repository(
+    name = "gnu_emacs_windows_28.2",
+    integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
+    mode = "release",
+    output = "emacs.zip",
+    path = "/emacs/windows/emacs-28/emacs-28.2.zip",
+    strip_prefix = "emacs-28.2",
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
 )
-use_repo(deps, "gnu_emacs_28.2")
-use_repo(deps, "gnu_emacs_29.4")
-use_repo(deps, "gnu_emacs_windows_28.2")
-use_repo(deps, "gnu_emacs_windows_29.4")
+
+emacs_repository(
+    name = "gnu_emacs_29.4",
+    integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
+    mode = "source",
+    output = "emacs.tar.xz",
+    path = "/emacs/emacs-29.4.tar.xz",
+    strip_prefix = "emacs-29.4",
+)
+
+emacs_repository(
+    name = "gnu_emacs_windows_29.4",
+    integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
+    mode = "release",
+    output = "emacs.zip",
+    path = "/emacs/windows/emacs-29/emacs-29.4.zip",
+    strip_prefix = "",
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+)
 
 junit_xsd = use_repo_rule("//private:junit_xsd.bzl", "junit_xsd")
 

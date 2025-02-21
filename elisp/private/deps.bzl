@@ -45,7 +45,7 @@ def _emacs_repository_impl(ctx):
         executable = False,
     )
 
-_emacs_repository = repository_rule(
+emacs_repository = repository_rule(
     attrs = {
         "path": attr.string(mandatory = True),
         "integrity": attr.string(mandatory = True),
@@ -86,40 +86,8 @@ local_emacs_repository = repository_rule(
 )
 
 def _deps_impl(ctx):
-    for module in ctx.modules:
-        for emacs in module.tags.emacs:
-            major, _, _ = emacs.version.partition(".")
-            _emacs_repository(
-                name = "gnu_emacs_" + emacs.version,
-                path = "/emacs/emacs-{}.tar.xz".format(emacs.version),
-                integrity = emacs.source_integrity,
-                output = "emacs.tar.xz",
-                strip_prefix = "emacs-{}".format(emacs.version),
-                mode = "source",
-            )
-            _emacs_repository(
-                name = "gnu_emacs_windows_" + emacs.version,
-                path = "/emacs/windows/emacs-{}/emacs-{}.zip".format(major, emacs.version),
-                integrity = emacs.windows_integrity,
-                output = "emacs.zip",
-                strip_prefix = "emacs-{}".format(emacs.version) if major == "28" else "",
-                mode = "release",
-                target_compatible_with = [
-                    Label("@platforms//os:windows"),
-                    Label("@platforms//cpu:x86_64"),
-                ],
-            )
     return modules.use_all_repos(ctx)
 
 deps = module_extension(
-    tag_classes = {
-        "emacs": tag_class(
-            attrs = {
-                "version": attr.string(mandatory = True),
-                "source_integrity": attr.string(mandatory = True),
-                "windows_integrity": attr.string(mandatory = True),
-            },
-        ),
-    },
     implementation = _deps_impl,
 )
