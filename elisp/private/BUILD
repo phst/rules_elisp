@@ -189,12 +189,6 @@ selects.config_setting_group(
     visibility = ["//visibility:private"],
 )
 
-bzl_library(
-    name = "deps",
-    srcs = ["deps.bzl"],
-    deps = ["@bazel_skylib//lib:modules"],
-)
-
 # keep
 bzl_library(
     name = "module_config_info",
@@ -251,6 +245,11 @@ bzl_library(
 bzl_library(
     name = "cc_config",
     srcs = ["cc_config.bzl"],
+)
+
+bzl_library(
+    name = "deps",
+    srcs = ["deps.bzl"],
 )
 
 bzl_library(
