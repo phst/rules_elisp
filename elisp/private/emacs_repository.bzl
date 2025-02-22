@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Non-module dependencies."""
+"""Defines the `emacs_repository` repository rule."""
 
 visibility("private")
 
@@ -53,32 +53,4 @@ emacs_repository = repository_rule(
         "target_compatible_with": attr.label_list(),
     },
     implementation = _emacs_repository_impl,
-)
-
-def _local_emacs_repository_impl(ctx):
-    windows = ctx.os.name.startswith("windows")
-    emacs = ctx.getenv("EMACS", "emacs")
-    if windows and not emacs.lower().endswith(".exe"):
-        emacs += ".exe"
-    sep = "\\" if windows else "/"
-    if sep not in emacs:
-        emacs = ctx.which(emacs)
-
-    # Don’t fail during the loading phase if Emacs isn’t locally installed, only
-    # when Emacs is actually needed.
-    if emacs:
-        ctx.symlink(emacs, "source.exe")
-    ctx.template(
-        "BUILD.bazel",
-        Label("//elisp/private/tools:local.BUILD.template"),
-        {
-            '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
-            '"[elisp_pkg]"': repr(str(Label("//elisp:__pkg__"))),
-        },
-        executable = False,
-    )
-
-local_emacs_repository = repository_rule(
-    implementation = _local_emacs_repository_impl,
-    local = True,
 )

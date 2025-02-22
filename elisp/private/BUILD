@@ -248,8 +248,8 @@ bzl_library(
 )
 
 bzl_library(
-    name = "deps",
-    srcs = ["deps.bzl"],
+    name = "emacs_repository",
+    srcs = ["emacs_repository.bzl"],
 )
 
 bzl_library(
@@ -265,6 +265,11 @@ bzl_library(
 bzl_library(
     name = "generated",
     srcs = ["generated.bzl"],
+)
+
+bzl_library(
+    name = "local_emacs_repository",
+    srcs = ["local_emacs_repository.bzl"],
 )
 
 bzl_library(

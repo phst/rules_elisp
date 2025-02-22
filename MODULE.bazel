@@ -48,11 +48,11 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
-local_emacs_repository = use_repo_rule("//elisp/private:deps.bzl", "local_emacs_repository")
+local_emacs_repository = use_repo_rule("//elisp/private:local_emacs_repository.bzl", "local_emacs_repository")
 
 local_emacs_repository(name = "local_emacs")
 
-emacs_repository = use_repo_rule("//elisp/private:deps.bzl", "emacs_repository")
+emacs_repository = use_repo_rule("//elisp/private:emacs_repository.bzl", "emacs_repository")
 
 emacs_repository(
     name = "gnu_emacs_28.2",
