@@ -48,10 +48,6 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
-local_emacs_repository = use_repo_rule("//elisp/private:local_emacs_repository.bzl", "local_emacs_repository")
-
-local_emacs_repository(name = "local_emacs")
-
 emacs_repository = use_repo_rule("//elisp/private:emacs_repository.bzl", "emacs_repository")
 
 emacs_repository(
@@ -97,6 +93,10 @@ emacs_repository(
         "@platforms//cpu:x86_64",
     ],
 )
+
+local_emacs_repository = use_repo_rule("//elisp/private:local_emacs_repository.bzl", "local_emacs_repository")
+
+local_emacs_repository(name = "local_emacs")
 
 junit_xsd = use_repo_rule("//private:junit_xsd.bzl", "junit_xsd")
 
