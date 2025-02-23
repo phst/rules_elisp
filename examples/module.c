@@ -1,4 +1,4 @@
-// Copyright 2020, 2022, 2023 Google LLC
+// Copyright 2020, 2022, 2023, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ static void Provide(emacs_env* env, const char* feature) {
 int emacs_module_init(struct emacs_runtime* rt) {
   if (rt->size < sizeof *rt) return 1;
   emacs_env* env = rt->get_environment(rt);
-  if (env->size < sizeof(struct emacs_env_28)) return 2;
+  if (env->size < sizeof(struct emacs_env_29)) return 2;
   Defun(env, "module-func", 0, 0, ModuleFunc);
   Provide(env, "examples/module");
   return 0;
