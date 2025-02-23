@@ -72,11 +72,6 @@ elisp_toolchain(
 )
 
 elisp_toolchain(
-    name = "emacs_28.2",
-    emacs = "//emacs:emacs_28.2",
-)
-
-elisp_toolchain(
     name = "emacs_29.4",
     emacs = "//emacs:emacs_29.4",
 )
