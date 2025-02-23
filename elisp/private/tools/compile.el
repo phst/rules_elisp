@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -66,7 +66,6 @@ treat warnings as errors."
             ;; Ensure filenames in the output are relative to the current
             ;; directory.
             (byte-compile-root-dir default-directory)
-            (warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
             (byte-compile-dest-file-function (lambda (_) out))
             (byte-compile-error-on-warn elisp/fatal--warnings)
             (elisp/current-repository current-repo)

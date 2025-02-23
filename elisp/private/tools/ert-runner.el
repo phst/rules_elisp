@@ -71,7 +71,6 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                         elisp/ert/edebug--before
                                         elisp/ert/edebug--after)
                                       (bound-and-true-p edebug-behavior-alist)))
-         (warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
          (source-dir (getenv "TEST_SRCDIR"))
          (temp-dir (getenv "TEST_TMPDIR"))
          (temporary-file-directory

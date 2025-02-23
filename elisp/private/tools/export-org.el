@@ -1,6 +1,6 @@
 ;;; export-org.el --- export Org-mode file to Texinfo manual  -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -34,8 +34,7 @@
    (setq command-line-args-left nil)
    (cl-callf expand-file-name input)
    (cl-callf expand-file-name output)
-   (let ((warning-fill-column 1000)  ; https://debbugs.gnu.org/52281
-         (coding-system-for-read 'utf-8-unix)
+   (let ((coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
          (format-alist nil)
          (after-insert-file-functions nil)
