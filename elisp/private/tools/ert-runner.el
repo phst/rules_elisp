@@ -618,15 +618,17 @@ corresponding element in the return value will be nil."
                 do (elisp/ert/instrument--branch vector branches clause
                                                  index nil nil))
        branches))
-    (`(,(or 'condition-case 'condition-case-unless-debug)
-       ,_var ,bodyform . ,(and (pred proper-list-p) clauses))
+    ((or `(,(or 'condition-case 'condition-case-unless-debug)
+           ,_var ,(and bodyform (let body (list bodyform))) .
+           ,(and (pred proper-list-p) clauses))
+         `(handler-bind ,(and (pred proper-list-p) clauses) . ,body))
      ;; Similar to the ‘cond’ case, but here we have one branch for each handler
      ;; as well as one branch for a successful exit.
      (let ((branches (make-vector (1+ (length clauses)) nil)))
        ;; Specifying a THEN-INDEX and ELSE-INDEX instead of a BRANCH-INDEX
        ;; forces evaluation after the form finishes, which is exactly what we
        ;; want here.
-       (elisp/ert/instrument--branch vector branches (list bodyform) nil 0 0)
+       (elisp/ert/instrument--branch vector branches body nil 0 0)
        (cl-loop for clause in clauses
                 and index from 1
                 when (listp clause)  ; gently skip over syntax errors
