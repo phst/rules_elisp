@@ -17,7 +17,6 @@ package ert_test
 import (
 	"encoding/xml"
 	"flag"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -111,7 +110,7 @@ func Test(t *testing.T) {
 	t.Log("XML validation complete")
 
 	t.Log("parsing XML report")
-	b, err := ioutil.ReadFile(reportName)
+	b, err := os.ReadFile(reportName)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -300,7 +299,7 @@ func Test(t *testing.T) {
 	if len(files) != 1 {
 		t.Fatalf("got %d coverage files %v, want exactly one", len(files), files)
 	}
-	b, err = ioutil.ReadFile(files[0])
+	b, err = os.ReadFile(files[0])
 	if err != nil {
 		t.Error(err)
 	}
