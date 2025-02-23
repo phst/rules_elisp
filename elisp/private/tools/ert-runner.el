@@ -218,8 +218,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                    (expected (ert-test-result-expected-p test result))
                    (failed
                     (and (not expected)
-                         ;; A test that passed unexpectedly should count as failed
-                         ;; for the XML report.
+                         ;; A test that passed unexpectedly should count as
+                         ;; failed for the XML report.
                          (ert-test-result-type-p result '(or :passed :failed))))
                    (status (ert-string-for-test-result result expected))
                    (tag nil)
