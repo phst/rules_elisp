@@ -60,6 +60,8 @@
   (error "Boo"))
 
 (ert-deftest abort ()
+  ;; https://bugs.gnu.org/76447
+  (skip-unless (not (string-equal emacs-version "30.1")))
   (signal 'undefined-error-symbol '("Boo")))
 
 (ert-deftest throw ()
