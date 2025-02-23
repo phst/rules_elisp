@@ -357,18 +357,18 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 // version check to ensure that both emacs-module.h and the running Emacs binary
 // are recent enough, using this pattern:
 //
-//   #if EMACS_MAJOR_VERSION >= 29
-//   if (IsEmacs29(ctx)) {
-//     …code that assumes Emacs 29…
+//   #if EMACS_MAJOR_VERSION >= 30
+//   if (IsEmacs30(ctx)) {
+//     …code that assumes Emacs 30…
 //     return …;
 //   }
 //   #endif
 //   …fallback code…
 
-// Uncomment the code below once we actually need a check for Emacs 29:
-// #if EMACS_MAJOR_VERSION >= 29
-// static bool IsEmacs29(struct Context ctx) {
-//   enum { kMinimumSize = sizeof(struct emacs_env_29) };
+// Uncomment the code below once we actually need a check for Emacs 30:
+// #if EMACS_MAJOR_VERSION >= 30
+// static bool IsEmacs30(struct Context ctx) {
+//   enum { kMinimumSize = sizeof(struct emacs_env_30) };
 //   return ctx.env->size >= kMinimumSize;
 // }
 // #endif
