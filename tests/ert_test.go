@@ -280,6 +280,17 @@ func Test(t *testing.T) {
 			},
 		},
 	}
+	if emacsVersion == "30.1" {
+		// https://bugs.gnu.org/76447
+		abort := &wantReport.TestCases[0]
+		abort.Failure = message{}
+		abort.Skipped = message{
+			Message:     `Test skipped: ((skip-unless (not (string-equal emacs-version "30.1"))) :form (not t) :value nil)`,
+			Description: "something",
+		}
+		wantReport.Failures--
+		wantReport.Skipped++
+	}
 	if diff := cmp.Diff(
 		gotReport, wantReport,
 		cmp.Transformer("time.Time", toTime),
