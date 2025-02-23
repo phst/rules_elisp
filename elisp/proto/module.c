@@ -168,7 +168,7 @@ enum { kMaxIO = 0x7FFFF000 };
 
 #include "emacs-module.h"
 
-#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 28
+#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 29
 #  error Emacs module header too old
 #endif
 
@@ -4281,7 +4281,7 @@ enum InitializationResult {
 int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   enum {
     kMinimumRuntimeSize = sizeof *rt,
-    kMinimumEnvironmentSize = sizeof(struct emacs_env_28)
+    kMinimumEnvironmentSize = sizeof(struct emacs_env_29)
   };
   if (rt->size < kMinimumRuntimeSize) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
