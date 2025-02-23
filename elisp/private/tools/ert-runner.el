@@ -178,16 +178,6 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                (push (elisp/ert/load--instrument fullname file) load-buffers)
                t))))
         ;; Work around another Edebug specification issue fixed with Emacs
-        ;; commit aeb25f9d3d12a18ef3881e23b32a34615355d4d0.
-        (when (< emacs-major-version 29)
-          (put #'cl-define-compiler-macro 'edebug-form-spec
-               `(&define name
-                         ([&optional "&whole" arg]
-                          ,@(car
-                             (or (get 'cl-macro-list 'edebug-elem-spec)
-                                 (edebug-get-spec 'cl-macro-list))))
-                         cl-declarations-or-string def-body)))
-        ;; Work around another Edebug specification issue fixed with Emacs
         ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
         (when (eql emacs-major-version 29)
           (put #'cl-define-compiler-macro 'edebug-form-spec
