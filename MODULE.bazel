@@ -51,28 +51,6 @@ use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 emacs_repository = use_repo_rule("//elisp/private:emacs_repository.bzl", "emacs_repository")
 
 emacs_repository(
-    name = "gnu_emacs_28.2",
-    integrity = "sha256-7iEYIjPvMjLcl7SGry2G4UBC27ZbvFNd9WLDqFgjJIg=",
-    mode = "source",
-    output = "emacs.tar.xz",
-    path = "/emacs/emacs-28.2.tar.xz",
-    strip_prefix = "emacs-28.2",
-)
-
-emacs_repository(
-    name = "gnu_emacs_windows_28.2",
-    integrity = "sha384-tUs1Z43gBYwoXJS9/dvv+ObDS7AWC4dQ4ceAAvlWOrHwjf667bGu+4d48UEuapxp",
-    mode = "release",
-    output = "emacs.zip",
-    path = "/emacs/windows/emacs-28/emacs-28.2.zip",
-    strip_prefix = "emacs-28.2",
-    target_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-)
-
-emacs_repository(
     name = "gnu_emacs_29.4",
     integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
     mode = "source",
