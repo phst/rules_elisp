@@ -198,10 +198,7 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
     (when shard-status-file
       (let ((coding-system-for-write 'no-conversion)
             (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil)
-            ;; Work around https://bugs.gnu.org/54294.
-            (create-lockfiles (and create-lockfiles
-                                     (>= emacs-major-version 29))))
+            (write-region-post-annotation-function nil))
         (write-region "" nil (concat "/:" shard-status-file) :append)))
     (mapc #'load (reverse elisp/ert/test--sources))
     (let ((tests (ert-select-tests selector t))
