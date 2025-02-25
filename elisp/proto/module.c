@@ -110,20 +110,14 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
-#  if MAXDWORD > SIZE_MAX
-#    error unsupported architecture
-#  endif
+static_assert(MAXDWORD <= SIZE_MAX, "unsupported architecture");
 #else
 #  include <sys/types.h>
 #  include <unistd.h>
-#  if SSIZE_MAX > SIZE_MAX
-#    error unsupported architecture
-#  endif
+static_assert(SSIZE_MAX <= SIZE_MAX, "unsupported architecture");
 // See Linux and macOS man pages for read(2) and write(2).
 enum { kMaxIO = 0x7FFFF000 };
-#  if kMaxIO > INT_MAX
-#    error unsupported architecture
-#  endif
+static_assert(kMaxIO <= INT_MAX, "unsupported architecture");
 #endif
 
 #ifndef INT32_MAX
@@ -142,29 +136,13 @@ enum { kMaxIO = 0x7FFFF000 };
 #  error this file requires the uint64_t type
 #endif
 
-#if INTMAX_MAX > UINTMAX_MAX
-#  error unsupported architecture
-#endif
-
-#if PTRDIFF_MAX > SIZE_MAX
-#  error unsupported architecture
-#endif
-
-#if SIZE_MAX > UINTMAX_MAX
-#  error unsupported architecture
-#endif
-
-#if LLONG_MAX > INTMAX_MAX || LLONG_MIN < INTMAX_MIN
-#  error unsupported architecture
-#endif
-
-#if INT_MAX > SIZE_MAX
-#  error unsupported architecture
-#endif
-
-#if INT_MAX > PTRDIFF_MAX
-#  error unsupported architecture
-#endif
+static_assert(INTMAX_MAX <= UINTMAX_MAX, "unsupported architecture");
+static_assert(PTRDIFF_MAX <= SIZE_MAX, "unsupported architecture");
+static_assert(SIZE_MAX <= UINTMAX_MAX, "unsupported architecture");
+static_assert(LLONG_MAX <= INTMAX_MAX && LLONG_MIN >= INTMAX_MIN,
+              "unsupported architecture");
+static_assert(INT_MAX <= SIZE_MAX, "unsupported architecture");
+static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
 
 #include "emacs-module.h"
 
