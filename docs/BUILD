@@ -119,7 +119,10 @@ py_binary(
 
 py_proto_library(
     name = "stardoc_output_py_proto",
-    tags = ["no-python-check"],
+    tags = [
+        "no-pylint",
+        "no-pytype",
+    ],
     deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )
 

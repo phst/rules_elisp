@@ -12,20 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the `check_python` aspect."""
-
-load("@rules_python//python:py_info.bzl", "PyInfo")
+"""Defines the `check_python` helper function."""
 
 visibility("private")
 
-def _check_python_impl(target, ctx):
-    tags = ctx.rule.attr.tags
+def check_python(
+        ctx,
+        *,
+        info,
+        stem,
+        program,
+        program_args = None,
+        additional_inputs = [],
+        mnemonic,
+        progress_message):
+    """Run Pylint or Pytype on Python source files.
 
-    # TODO: Require PyInfo provider using required_providers, see below.
-    if "no-python-check" in tags or PyInfo not in target:
-        return []
-    info = target[PyInfo]
-    stem = "_{}.python-check".format(target.label.name)
+    Args:
+      ctx: the rule context
+      info: a PyInfo object
+      stem: base name of files that will be generated
+      program: name of the program to run, either "pylint" or "pytype"
+      program_args: additional arguments for the program, either an Args object
+          or None
+      additional_inputs: list of additional input files for the program,
+          e.g. .pylintrc
+      mnemonic: mnemonic for the action, as for ctx.actions.run
+      progress_message: progress message for the action, as for ctx.actions.run
+
+    Returns:
+      a dummy file that should be added to an optional output group
+    """
     params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".stamp")
     params = struct(
@@ -39,10 +56,8 @@ def _check_python_impl(target, ctx):
         ],
     )
     ctx.actions.write(params_file, json.encode(params))
-    pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
     args.add(output_file, format = "--out=%s")
-    args.add(pylintrc, format = "--pylintrc=%s")
     args.add(params_file, format = "--params=%s")
     args.add_all(
         info.imports,
@@ -59,42 +74,19 @@ def _check_python_impl(target, ctx):
     )
     args.add(ctx.workspace_name, format = "--import=%s")
     args.add(ctx.workspace_name, format = "--workspace-name=%s")
-    if "no-pytype" not in tags:
-        args.add("--pytype")
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
-            direct = [params_file, pylintrc],
+            direct = [params_file] + additional_inputs,
             transitive = [info.transitive_sources],
         ),
         executable = ctx.executable._check,
-        arguments = [args],
-        mnemonic = "PythonCheck",
-        progress_message = "Performing static analysis of target %{label}",
+        arguments = [args, program, program_args or ctx.actions.args()],
+        mnemonic = mnemonic,
+        progress_message = progress_message,
         toolchain = None,
     )
-    return [
-        OutputGroupInfo(check_python = depset([output_file])),
-    ]
-
-check_python = aspect(
-    implementation = _check_python_impl,
-    attrs = {
-        "_check": attr.label(
-            default = Label("//dev:check_python"),
-            executable = True,
-            cfg = "exec",
-        ),
-        "_pylintrc": attr.label(
-            default = Label("//:.pylintrc"),
-            allow_single_file = True,
-        ),
-    },
-    # The Python rules don’t advertise the PyInfo provider, so we can’t use
-    # required_providers here.
-    # TODO: File bug against rules_python.
-    # required_providers = [PyInfo],
-)
+    return output_file
 
 def _repository_name(file):
     # Skip empty string for main repository.

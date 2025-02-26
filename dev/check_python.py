@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023, 2024 Google LLC
+# Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -34,8 +34,10 @@ def main() -> None:
     parser.add_argument('--import', type=pathlib.PurePosixPath, action='append',
                         default=[], dest='path')
     parser.add_argument('--workspace-name', type=str, required=True)
-    parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
-    parser.add_argument('--pytype', action='store_true', default=False)
+    subparsers = parser.add_subparsers(required=True, dest='program')
+    pylint = subparsers.add_parser('pylint', allow_abbrev=False)
+    pylint.add_argument('--pylintrc', type=pathlib.Path, required=True)
+    subparsers.add_parser('pytype', allow_abbrev=False)
     args = parser.parse_args()
     workspace_name = args.workspace_name
     dirs = [d for d in sys.path if os.path.basename(d) == workspace_name]
@@ -87,19 +89,20 @@ def main() -> None:
     env = dict(os.environ,
                PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
                PYTHONPATH=os.pathsep.join(orig_path + repository_path))
-    result = subprocess.run(
-        [sys.executable, '-m', 'pylint',
-         # We’d like to add “--” after the options, but that’s not possible due
-         # to https://github.com/PyCQA/pylint/issues/7003.
-         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
-        + [str(file.relative_to(cwd)) for file in sorted(srcs)],
-        check=False, cwd=cwd, env=env,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-        encoding='utf-8', errors='backslashreplace')
-    if result.returncode:
-        print(result.stdout)
-        sys.exit(result.returncode)
-    if platform.system() != 'Windows' and args.pytype:
+    if args.program == 'pylint':
+        result = subprocess.run(
+            [sys.executable, '-m', 'pylint',
+             # We’d like to add “--” after the options, but that’s not possible
+             # due to https://github.com/PyCQA/pylint/issues/7003.
+             '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
+            + [str(file.relative_to(cwd)) for file in sorted(srcs)],
+            check=False, cwd=cwd, env=env,
+            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+            encoding='utf-8', errors='backslashreplace')
+        if result.returncode:
+            print(result.stdout)
+            sys.exit(result.returncode)
+    if platform.system() != 'Windows' and args.program == 'pytype':
         result = subprocess.run(
             [sys.executable, '-m', 'pytype',
              '--pythonpath=' + os.pathsep.join(repository_path),
