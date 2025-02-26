@@ -58,6 +58,8 @@ runs:
         # --incompatible_enforce_starlark_utf8 was added in Bazel 8.1.
         # FIXME: Add it to the project’s .bazelrc once we drop support for
         # Bazel 8.0 and below.
+        # See https://bazel.build/configure/windows#clang for how to configure
+        # Bazel to use Clang on Windows.
         bazelrc: |
           common --announce_rc
           common --show_progress_rate_limit=10
@@ -72,6 +74,10 @@ runs:
           ${{
             inputs.bazel-version == 'latest' &&
             'common --incompatible_enforce_starlark_utf8=error'
+          }}
+          ${{
+            runner.os == 'Windows' && inputs.cc == 'clang' &&
+            'build --config=clang-cl'
           }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
