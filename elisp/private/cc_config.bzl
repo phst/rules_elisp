@@ -23,7 +23,7 @@ FEATURES = select({
 
 # Shared C++ compilation options.
 COPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [
+    Label(":msvc_or_clang_cl"): [
         "/W4",
         "/utf-8",
         "/permissive-",
@@ -48,10 +48,20 @@ COPTS = select({
         "--system-header-prefix=upb/",
     ],
     Label("//conditions:default"): [],
+}) + select({
+    Label("@rules_cc//cc/compiler:clang-cl"): [
+        # Allow Clang-CL to include windows.h without error.
+        "-Wno-error=ignored-attributes",
+        "-Wno-error=ignored-pragma-intrinsic",
+        "-Wno-error=macro-redefined",
+        "-Wno-error=pragma-pack",
+        "-Wno-error=unknown-pragmas",
+    ],
+    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [],
+    Label(":msvc_or_clang_cl"): [],
     Label("@rules_cc//cc/compiler:gcc"): [
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
@@ -61,7 +71,7 @@ CXXOPTS = select({
 })
 
 CONLYOPTS = select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): [],
+    Label(":msvc_or_clang_cl"): [],
     Label(":gcc_or_clang"): ["-Wvla"],
 })
 
