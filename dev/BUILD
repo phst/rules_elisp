@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
@@ -63,7 +64,8 @@ compile_pip_requirements(
     tags = [
         # Don’t try to run Pylint or Pytype.  This target doesn’t contain any of
         # our source files.
-        "no-python-check",
+        "no-pylint",
+        "no-pytype",
     ],
 )
 
@@ -136,4 +138,28 @@ gazelle_binary(
         "@bazel_skylib_gazelle_plugin//bzl",
         "@gazelle//language/bazel/visibility",
     ],
+)
+
+bzl_library(
+    name = "pylint",
+    srcs = ["pylint.bzl"],
+    deps = [
+        ":check_python_bzl",
+        "@rules_python//python:py_info_bzl",
+    ],
+)
+
+bzl_library(
+    name = "pytype",
+    srcs = ["pytype.bzl"],
+    deps = [
+        ":check_python_bzl",
+        "@rules_python//python:py_info_bzl",
+    ],
+)
+
+# keep
+bzl_library(
+    name = "check_python_bzl",
+    srcs = ["check_python.bzl"],
 )
