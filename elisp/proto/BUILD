@@ -140,7 +140,7 @@ elisp_cc_module(
     name = "module",
     srcs = ["module.c"],
     copts = COPTS + CONLYOPTS + select({
-        "@rules_cc//cc/compiler:msvc-cl": ["/wd4100"],
+        "//elisp/private:msvc_or_clang_cl": ["/wd4100"],
         "//elisp/private:gcc_or_clang": ["-fvisibility=hidden"],
     }),
     features = FEATURES + ["-default_link_libs"],

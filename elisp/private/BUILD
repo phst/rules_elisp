@@ -189,6 +189,15 @@ selects.config_setting_group(
     visibility = ["//visibility:private"],
 )
 
+selects.config_setting_group(
+    name = "msvc_or_clang_cl",
+    match_any = [
+        "@rules_cc//cc/compiler:msvc-cl",
+        "@rules_cc//cc/compiler:clang-cl",
+    ],
+    visibility = ["//visibility:private"],
+)
+
 # keep
 bzl_library(
     name = "module_config_info",
@@ -240,6 +249,17 @@ bzl_library(
     name = "manual",
     srcs = ["manual.bzl"],
     visibility = ["//elisp:__pkg__"],
+)
+
+# https://bazel.build/configure/windows#clang
+platform(
+    name = "windows_clang_cl",
+    constraint_values = [
+        "@platforms//cpu:x86_64",
+        "@platforms//os:windows",
+        "@rules_cc//cc/private/toolchain:clang-cl",
+    ],
+    visibility = ["//visibility:private"],
 )
 
 bzl_library(

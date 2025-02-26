@@ -27,7 +27,7 @@ LAUNCHER_FEATURES = FEATURES
 LAUNCHER_COPTS = COPTS + CXXOPTS
 LAUNCHER_DEFINES = DEFINES
 LAUNCHER_LINKOPTS = LINKOPTS + select({
-    Label("@rules_cc//cc/compiler:msvc-cl"): ["/SUBSYSTEM:CONSOLE"],
+    Label(":msvc_or_clang_cl"): ["/SUBSYSTEM:CONSOLE"],
     Label(":gcc_or_clang"): [],
 })
 
