@@ -46,4 +46,8 @@ build --//private:treat_warnings_as_errors
 
 build --compilation_mode=dbg --host_compilation_mode=dbg
 
+build:clang-cl --compiler=clang-cl --host_compiler=clang-cl
+build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-clang-cl'
+build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
+
 import %workspace%/c-std.bazelrc

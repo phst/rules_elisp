@@ -41,8 +41,6 @@ jobs:
             cc: msvc
           - os: windows-latest
             cc: gcc
-          - os: windows-latest
-            cc: clang
           # Exclude non-default compilers for now.  We should add them later.
           - os: macos-latest
             cc: gcc
