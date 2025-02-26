@@ -55,6 +55,8 @@ runs:
         # one version --lockfile_mode=error can work.  --lockfile_mode=update
         # would be useless since we never use the updated lockfiles, so switch
         # lockfiles off entirely in other Bazel versions.
+        # See https://bazel.build/configure/windows#clang for how to configure
+        # Bazel to use Clang on Windows.
         bazelrc: |
           common --announce_rc
           common --show_progress_rate_limit=10
@@ -66,6 +68,10 @@ runs:
           build --nostamp
           build --experimental_repository_cache_hardlinks
           test --test_output=errors
+          ${{
+            runner.os == 'Windows' && inputs.cc == 'clang' &&
+            'build --compiler=clang-cl --host_compiler=clang-cl --extra_toolchains=@local_config_cc//:cc-toolchain-x64_windows-clang-cl --extra_execution_platforms=@phst_rules_elisp//elisp/private:windows_clang_cl'
+          }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
