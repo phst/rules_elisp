@@ -55,6 +55,9 @@ runs:
         # one version --lockfile_mode=error can work.  --lockfile_mode=update
         # would be useless since we never use the updated lockfiles, so switch
         # lockfiles off entirely in other Bazel versions.
+        # --incompatible_enforce_starlark_utf8 was added in Bazel 8.1.
+        # FIXME: Add it to the project’s .bazelrc once we drop support for
+        # Bazel 8.0 and below.
         bazelrc: |
           common --announce_rc
           common --show_progress_rate_limit=10
@@ -66,6 +69,10 @@ runs:
           build --nostamp
           build --experimental_repository_cache_hardlinks
           test --test_output=errors
+          ${{
+            inputs.bazel-version == 'latest' &&
+            'common --incompatible_enforce_starlark_utf8=error'
+          }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
