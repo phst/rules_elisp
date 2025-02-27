@@ -65,7 +65,8 @@ def main() -> None:
 
     if args.builtin_features:
         data = {'builtinFeatures': sorted(features)}
-        with args.builtin_features.open('wt', encoding='utf-8') as file:
+        with args.builtin_features.open('wt', encoding='utf-8',
+                                        newline='\n') as file:
             json.dump(data, file)
 
     if args.module_header:
