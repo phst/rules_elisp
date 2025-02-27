@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -24,10 +24,20 @@
 
 (require 'ert)
 
+(defvar elisp/runfiles/rlocations
+  (let ((table (make-hash-table :test #'equal)))
+    (while command-line-args-left
+      (pcase (pop command-line-args-left)
+        ((rx bos (let key (+ (not ?=))) ?= (let value (+ anychar)) eos)
+         (puthash key value table))
+        (other (error "Unknown command-line argument %S" other))))
+    table))
+
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
          (filename (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test.txt" runfiles))
+                    (gethash "test.txt" elisp/runfiles/rlocations)
+                    runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
@@ -53,7 +63,7 @@
 
 (ert-deftest elisp/runfiles/special-chars/manifest ()
   (let* ((manifest (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+                    (gethash "test-manifest" elisp/runfiles/rlocations)))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (pcase-dolist (`(,source ,target)
@@ -70,7 +80,7 @@
 
 (ert-deftest elisp/runfiles/make/empty-file ()
   (let* ((manifest (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+                    (gethash "test-manifest" elisp/runfiles/rlocations)))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
@@ -81,14 +91,19 @@
 See https://github.com/bazelbuild/bazel/issues/14336 for
 context."
   (let* ((manifest (elisp/runfiles/rlocation
-                    "phst_rules_elisp/elisp/runfiles/test-manifest"))
+                    (gethash "test-manifest" elisp/runfiles/rlocations)))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (should (equal (elisp/runfiles/rlocation "foo/bar/baz" runfiles)
                    "/:runfiles/foo/bar/baz"))))
 
 (ert-deftest elisp/runfiles/file-handler ()
-  (let ((file-name-handler-alist file-name-handler-alist))
+  (let* ((file-name-handler-alist file-name-handler-alist)
+         (rlocation (gethash "test.txt" elisp/runfiles/rlocations))
+         (repository (string-trim-right rlocation (rx ?/ (* anychar))))
+         (virtual-repo-root (concat "/bazel-runfile:" repository))
+         (virtual-file (concat "/bazel-runfile:" rlocation))
+         (virtual-dir (concat virtual-repo-root "/elisp/")))
     (elisp/runfiles/install-handler)
     (should (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
     (should (eql (cl-count #'elisp/runfiles/file-handler file-name-handler-alist
@@ -99,44 +114,29 @@ context."
     (should (eql (cl-count #'elisp/runfiles/file-handler file-name-handler-alist
                            :key #'cdr :test #'eq)
                  1))
-    (should
-     (file-exists-p "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (file-readable-p
-             "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should
-     (natnump
-      (file-modes "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")))
-    (access-file "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
-                 "elisp/runfiles/file-handler")
-    (should (equal (expand-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (expand-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
-                    "/foobar")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
+    (should (file-exists-p virtual-file))
+    (should (file-readable-p virtual-file))
+    (should (natnump (file-modes virtual-file)))
+    (access-file virtual-file "elisp/runfiles/file-handler")
+    (should (equal (expand-file-name virtual-file) virtual-file))
+    (should (equal (expand-file-name virtual-file "/foobar") virtual-file))
+    (should (equal (expand-file-name "runfiles/test.txt" virtual-dir)
+                   virtual-file))
     (should (equal (expand-file-name "runfiles/test.txt"
-                                     "/bazel-runfile:phst_rules_elisp/elisp/")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (expand-file-name "runfiles/test.txt"
-                                     "/bazel-runfile:phst_rules_elisp/elisp")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (should (equal (file-relative-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"
-                    "/bazel-runfile:phst_rules_elisp/elisp/")
+                                     (concat virtual-repo-root "/elisp"))
+                   virtual-file))
+    (should (equal (file-relative-name virtual-file virtual-dir)
                    "runfiles/test.txt"))
-    (should (equal (file-truename "/bazel-runfile:phst_rules_elisp/elisp/")
-                   "/bazel-runfile:phst_rules_elisp/elisp/"))
-    (should (equal (abbreviate-file-name
-                    "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt")
-                   "/bazel-runfile:phst_rules_elisp/elisp/runfiles/test.txt"))
-    (let ((load-path '("/bazel-runfile:phst_rules_elisp")))
+    (should (equal (file-truename virtual-dir) virtual-dir))
+    (should (equal (abbreviate-file-name virtual-file) virtual-file))
+    (let ((load-path (list virtual-repo-root)))
       (require 'elisp/runfiles/test-lib))))
 
 (ert-deftest elisp/runfiles/repo-mapping ()
   (let ((temp-dir (make-temp-file "elisp-test-" :directory ".runfiles")))
     (copy-file
-     (elisp/runfiles/rlocation "phst_rules_elisp/elisp/runfiles/test-mapping")
+     (elisp/runfiles/rlocation
+      (gethash "test-mapping" elisp/runfiles/rlocations))
      (expand-file-name "_repo_mapping" temp-dir))
     (let ((runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
                                          :directory temp-dir)))
