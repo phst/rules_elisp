@@ -53,7 +53,7 @@ class AddPathTest(absltest.TestCase):
             # Runfiles manifests contain POSIX-style filenames even on Windows.
             manifest.write_text(
                 'repository/runfiles.elc ' + runfiles_elc.as_posix() + '\n',
-                encoding='ascii')
+                encoding='ascii', newline='\n')
             load.add_path(
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
                 args,
