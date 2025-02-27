@@ -31,16 +31,19 @@ elisp_library(
     visibility = ["//visibility:public"],
 )
 
+TEST_DATA = [
+    "test.txt",
+    "test-lib.elc",
+    "test-manifest",
+    "test-mapping",
+]
+
 elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    data = [
-        "test.txt",
-        "test-lib.elc",
-        "test-manifest",
-        "test-mapping",
-    ],
+    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA],
+    data = TEST_DATA,
     deps = [":runfiles"],
 )
 
