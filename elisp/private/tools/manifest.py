@@ -1,4 +1,4 @@
-# Copyright 2021, 2022 Google LLC
+# Copyright 2021, 2022, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ If a file was created, appropriate arguments are added to args."""
         with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
             name = pathlib.Path(directory) / 'manifest.json'
             args += ['--manifest=' + os.path.abspath(name), '--']
-            with name.open(mode='xt', encoding='utf-8') as file:
+            with name.open(mode='xt', encoding='utf-8', newline='\n') as file:
                 yield file
 
 
