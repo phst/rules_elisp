@@ -190,6 +190,8 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
             (write-region-post-annotation-function nil))
         (write-region "" nil (concat "/:" shard-status-file) :append)))
     (mapc #'load (reverse elisp/ert/test--sources))
+    (when-let ((args command-line-args-left))
+      (error "Unprocessed command-line arguments: %S" args))
     (let ((tests (ert-select-tests selector t))
           (total 0)
           (unexpected 0)
