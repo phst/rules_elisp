@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("//elisp:elisp_library.bzl", "elisp_library")
+load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -23,9 +24,25 @@ package(
 
 licenses(["notice"])
 
+TEST_DATA = [
+    "test.txt",
+    "test-lib.elc",
+    "test-manifest",
+    "test-mapping",
+]
+
+elisp_test(
+    name = "runfiles_test",
+    size = "small",
+    srcs = ["runfiles-test.el"],
+    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA],
+    data = TEST_DATA,
+    deps = ["//elisp/runfiles"],
+)
+
 elisp_library(
-    name = "runfiles",
-    srcs = ["runfiles.el"],
-    outs = ["runfiles.elc"],
-    visibility = ["//visibility:public"],
+    name = "test_lib",
+    testonly = True,
+    srcs = ["test-lib.el"],
+    outs = ["test-lib.elc"],
 )

@@ -1,6 +1,6 @@
 ;;; test-lib.el --- test library for runfiles test   -*- lexical-binding: t; -*-
 
-;; Copyright 2021 Google LLC
+;; Copyright 2021, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 
 ;;; Commentary:
 
-;; Test library for //elisp/runfiles:runfiles_test.
+;; Test library for //tests/runfiles:runfiles_test.
 
 ;;; Code:
 
-(provide 'elisp/runfiles/test-lib)
+(provide 'tests/runfiles/test-lib)
 ;;; test-lib.el ends here

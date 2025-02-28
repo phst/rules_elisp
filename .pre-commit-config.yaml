@@ -47,4 +47,4 @@ repos:
     - id: pretty-format-json
     - id: requirements-txt-fixer
     - id: trailing-whitespace
-      exclude: '(\.(el|patch)|^elisp/runfiles/test-manifest|^index\.html)$'
+      exclude: '(\.(el|patch)|^tests/runfiles/test-manifest|^index\.html)$'

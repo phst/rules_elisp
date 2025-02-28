@@ -33,6 +33,7 @@ visibility([
     "//gazelle/testdata",
     "//tests",
     "//tests/pkg",
+    "//tests/runfiles",
 ])
 
 # Features for all packages.  These may not contain select expressions.
