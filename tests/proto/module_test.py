@@ -14,7 +14,7 @@
 
 """Unit tests for //elisp/proto:module.
 
-Most tests are in //elisp/proto:proto-test.el; this file contains tests that
+Most tests are in //tests/proto:proto-test.el; this file contains tests that
 require a fresh Emacs process.
 """
 
@@ -29,7 +29,7 @@ from elisp.private.tools import runfiles
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string('cat', None, 'location of the //elisp/proto:cat target',
+flags.DEFINE_string('cat', None, 'location of the //tests/proto:cat target',
                     required=True)
 
 

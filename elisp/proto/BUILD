@@ -13,16 +13,11 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@protobuf//bazel:upb_c_proto_library.bzl", "upb_c_proto_library")
 load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_library")
 load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
-load("@rules_python//python:py_test.bzl", "py_test")
-load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_cc_module.bzl", "elisp_cc_module")
 load("//elisp:elisp_library.bzl", "elisp_library")
-load("//elisp:elisp_test.bzl", "elisp_test")
 load("//elisp/private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":elisp_proto_library.bzl", "elisp_proto_library")
@@ -40,24 +35,6 @@ elisp_library(
     srcs = ["proto.el"],
     visibility = ["//visibility:public"],
     deps = [":module"],
-)
-
-elisp_test(
-    name = "proto_test",
-    size = "small",
-    srcs = ["proto-test.el"],
-    flaky = True,  # https://debbugs.gnu.org/46722
-    deps = [
-        ":any_elisp_proto",
-        ":compiler_plugin_elisp_proto",
-        ":descriptor_elisp_proto",
-        ":duration_elisp_proto",
-        ":proto",
-        ":test_elisp_proto",
-        ":timestamp_elisp_proto",
-        ":type_elisp_proto",  # keep
-        ":wrappers_elisp_proto",
-    ],
 )
 
 # Well-known protocol buffers.  See @protobuf//:BUILD.
@@ -168,6 +145,7 @@ elisp_cc_module(
     }),
     features = FEATURES + ["-default_link_libs"],
     local_defines = DEFINES,
+    visibility = ["//tests/proto:__pkg__"],
     deps = [
         ":any_upb_c_proto",
         ":any_upb_proto_reflection",
@@ -190,31 +168,6 @@ elisp_cc_module(
         "@protobuf//upb/util:required_fields",
         "@protobuf//upb/wire",
     ],
-)
-
-py_test(
-    name = "module_test",
-    srcs = ["module_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--cat=$(rlocationpath :cat)"),
-    ],
-    data = [":cat"],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
-
-elisp_binary(
-    name = "cat",
-    testonly = True,
-    src = "cat.el",
-    input_args = [2],
-    output_args = [2],
-    deps = [":module"],
 )
 
 upb_c_proto_library(
@@ -257,24 +210,11 @@ upb_c_proto_library(
     deps = ["@protobuf//:compiler_plugin_proto"],
 )
 
-proto_library(
-    name = "test_proto",
-    testonly = True,
-    srcs = ["test.proto"],
-)
-
-elisp_proto_library(
-    name = "test_elisp_proto",
-    testonly = True,
-    deps = [":test_proto"],
-)
-
 exports_files(
     ["elisp_proto_library.bzl"],
     visibility = ["//docs:__pkg__"],
 )
 
-# gazelle:go_generate_proto false
 # gazelle:resolve elisp elisp/proto/module :module
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ :${1}_elisp_proto
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ :${1}_${2}_elisp_proto
