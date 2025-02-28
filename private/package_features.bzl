@@ -33,6 +33,7 @@ visibility([
     "//gazelle/testdata",
     "//tests",
     "//tests/pkg",
+    "//tests/proto",
     "//tests/runfiles",
 ])
 
