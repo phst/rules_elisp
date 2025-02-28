@@ -376,6 +376,13 @@ only runs if it’s not suppressed by either facility.
 the <code class="code">:nocover</code> tag are also skipped.  You can use this tag to skip tests that
 normally pass, but don’t work under coverage for some reason.
 </p>
+<p>Test files can access additional command-line arguments passed via the <code class="code">args</code>
+attribute or the <code class="code">--test_arg</code> Bazel option via the <code class="code">command-line-args-left</code>
+variable.  After processing known arguments, test files must remove them from
+<code class="code">command-line-args-left</code> so that it’s empty after all test files are loaded.
+Emacs will not automatically process these arguments using
+<code class="code">command-switch-alist</code> or <code class="code">command-line-functions</code>.
+</p>
 <p>The <code class="code">elisp_test</code> rule supports the following attributes:
 </p>
 <dl class="table">

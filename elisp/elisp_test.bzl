@@ -165,7 +165,14 @@ only runs if it’s not suppressed by either facility.
 
 In coverage mode (i.e., when run under `bazel coverage`), all tests tagged with
 the `:nocover` tag are also skipped.  You can use this tag to skip tests that
-normally pass, but don’t work under coverage for some reason.""",
+normally pass, but don’t work under coverage for some reason.
+
+Test files can access additional command-line arguments passed via the `args`
+attribute or the `--test_arg` Bazel option via the `command-line-args-left`
+variable.  After processing known arguments, test files must remove them from
+`command-line-args-left` so that it’s empty after all test files are loaded.
+Emacs will not automatically process these arguments using
+`command-switch-alist` or `command-line-functions`.""",
     fragments = ["cpp"],
     test = True,
     toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
