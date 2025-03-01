@@ -71,7 +71,7 @@ def main() -> None:
                 '--option',
                 str(run_files.resolve(pathlib.PurePosixPath(
                     'phst_rules_elisp/elisp/private/tools/binary.cc'))),
-                ' \t\n\r\f äα𝐴🐈\'\\"',
+                ' \t\n\r\f äα𝐴🐈\'\\"',
                 '/:' + str(output_file),
             ]
             self.assertListEqual(got, want)

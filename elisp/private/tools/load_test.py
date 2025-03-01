@@ -33,14 +33,14 @@ class AddPathTest(absltest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
                           [pathlib.PurePosixPath('foo'),
-                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
+                           pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
                           pathlib.PurePosixPath('unused/runfiles.elc'))
         base = pathlib.Path(directory)
         self.assertListEqual(
             args,
             ['--foo',
              '--directory=' + str(base / 'foo'),
-             '--directory=' + str(base / 'bar \t\n\r\f äα𝐴🐈\'\0\\"')])
+             '--directory=' + str(base / 'bar \t\n\r\f äα𝐴🐈\'\0\\"')])
 
     def test_manifest(self) -> None:
         """Unit test for manifest-based runfiles."""
@@ -58,7 +58,7 @@ class AddPathTest(absltest.TestCase):
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
                 args,
                 [pathlib.PurePosixPath('foo'),
-                 pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
+                 pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
                 pathlib.PurePosixPath('repository/runfiles.elc'))
         self.assertListEqual(
             args,
@@ -66,7 +66,7 @@ class AddPathTest(absltest.TestCase):
              '--load=' + str(runfiles_elc),
              '--funcall=elisp/runfiles/install-handler',
              '--directory=/bazel-runfile:foo',
-             '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])
+             '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])
 
 
 if __name__ == '__main__':

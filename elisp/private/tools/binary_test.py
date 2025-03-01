@@ -45,7 +45,7 @@ class BinaryTest(absltest.TestCase):
             run_files.resolve(pathlib.PurePosixPath(FLAGS.launcher)),
             '--option',
             input_file,
-            ''' \t\n\r\f äα𝐴🐈'\\\"''',
+            ''' \t\n\r\f äα𝐴🐈'\\\"''',
             r'/:C:\Temp\output.dat' if windows else '/:/tmp/output.dat',
         ]
         subprocess.run(args, check=True)

@@ -1,6 +1,6 @@
 __init__.py 
 foo/bar runfiles/foo/bar
-testäα𝐴🐈'.txt /runfiles/testäα𝐴🐈'.txt
+testäα𝐴🐈'.txt /runfiles/testäα𝐴🐈'.txt
 target-with-space /runfiles/with space\and backslash
  target-with-newline /runfiles/with\nnewline\band backslash
  source\swith\sspace,\nnewline,\band\sbackslash /runfiles/with space,\nnewline,\band backslash

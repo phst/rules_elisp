@@ -47,7 +47,7 @@ class ManifestTest(absltest.TestCase):
         with io.StringIO() as file:
             manifest.write(opts,
                            [pathlib.PurePath('in-1'), pathlib.PurePath('in-2')],
-                           [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')],
+                           [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')],
                            file)
             self.assertDictEqual(
                 json.loads(file.getvalue()),
@@ -55,8 +55,8 @@ class ManifestTest(absltest.TestCase):
                     'root': 'RUNFILES_ROOT',
                     'loadPath': ['load-dir'],
                     'inputFiles': ['in-1', 'in-2', 'load-file', 'data-file'],
-                    'outputFiles': ['out \t\n\r\f äα𝐴🐈\'\0\\"'],
-                    'tags': ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"'],
+                    'outputFiles': ['out \t\n\r\f äα𝐴🐈\'\0\\"'],
+                    'tags': ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"'],
                 })
 
 

@@ -49,7 +49,7 @@
 (ert-deftest elisp/runfiles/special-chars/directory ()
   (let* ((windows (memq system-type '(ms-dos windows-nt)))
          (directory (make-temp-file "runfiles-test-" :directory))
-         (filename (concat "testäα𝐴🐈' " (unless windows "\t\n\\") ".txt"))
+         (filename (concat "testäα𝐴🐈' " (unless windows "\t\n\\") ".txt"))
          (target (expand-file-name filename directory))
          (runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
                                         :directory directory))
@@ -67,8 +67,8 @@
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (pcase-dolist (`(,source ,target)
-                   '(("testäα𝐴🐈'.txt"
-                      "/:/runfiles/testäα𝐴🐈'.txt")
+                   '(("testäα𝐴🐈'.txt"
+                      "/:/runfiles/testäα𝐴🐈'.txt")
                      ("target-with-space"
                       "/:/runfiles/with space\\and backslash")
                      ("target-with-newline"
