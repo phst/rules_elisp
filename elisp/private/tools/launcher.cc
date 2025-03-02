@@ -14,7 +14,10 @@
 
 #include <cstdlib>
 
+#include "absl/base/log_severity.h"
 #include "absl/container/fixed_array.h"
+#include "absl/log/globals.h"
+#include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/meta/type_traits.h"
 #include "absl/status/status.h"
@@ -32,6 +35,8 @@ int
     main
 #endif
 (int argc, rules_elisp::NativeChar** argv) {
+  absl::InitializeLog();
+  absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
   const absl::StatusOr<int> code =
