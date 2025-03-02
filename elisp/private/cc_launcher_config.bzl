@@ -44,8 +44,11 @@ LAUNCHER_ATTRS = {
 
 LAUNCHER_DEPS = [
     Label("//elisp/private/tools:platform"),
+    Label("@abseil-cpp//absl/base:log_severity"),
     Label("@abseil-cpp//absl/container:fixed_array"),
     Label("@abseil-cpp//absl/log"),
+    Label("@abseil-cpp//absl/log:globals"),
+    Label("@abseil-cpp//absl/log:initialize"),
     Label("@abseil-cpp//absl/meta:type_traits"),
     Label("@abseil-cpp//absl/status"),
     Label("@abseil-cpp//absl/status:statusor"),
