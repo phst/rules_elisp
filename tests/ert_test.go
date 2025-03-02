@@ -66,7 +66,7 @@ func Test(t *testing.T) {
 	}
 	coverageDir := t.TempDir()
 
-	cmd := exec.Command(bin, "arg 1", "arg\n2")
+	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
 	env := os.Environ()
 	env = append(env, rf.Env()...)
 	// See

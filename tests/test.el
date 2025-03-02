@@ -25,7 +25,7 @@
 (require 'tests/test-lib)
 
 ;; Ensure that command-line arguments are passed on correctly.
-(cl-assert (equal command-line-args-left '("arg 1" "arg\n2")) :show-args)
+(cl-assert (equal command-line-args-left '("arg 1" "arg\n2 äα𝐴🐈'")) :show-args)
 (defconst remaining-args (cl-copy-list command-line-args-left))
 (setq command-line-args-left nil)
 
@@ -77,7 +77,7 @@
   (tests/test-function nil))
 
 (ert-deftest command-line ()
-  (should (equal remaining-args '("arg 1" "arg\n2"))))
+  (should (equal remaining-args '("arg 1" "arg\n2 äα𝐴🐈'"))))
 
 (ert-deftest nocover ()
   :tags '(:nocover)

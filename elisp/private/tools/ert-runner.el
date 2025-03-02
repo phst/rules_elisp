@@ -122,7 +122,9 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
          (load-suffixes (if coverage-enabled
                             (cons ".el.instrument" load-suffixes)
                           load-suffixes))
-         (load-buffers ()))
+         (load-buffers ())
+         (command-line-args-left (mapcar #'elisp/ert/unquote--argument
+                                         command-line-args-left)))
     ;; TEST_SRCDIR and TEST_TMPDIR are required,
     ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
     (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
@@ -352,10 +354,15 @@ This list is populated by --skip-tag command-line options.")
   (cl-check-type option symbol)
   (let ((argument (pop command-line-args-left)))
     (or argument (error "Missing value for --%s" option))
-    (if (memq system-type '(ms-dos windows-nt cygwin))
-        (decode-coding-string (url-unhex-string argument :allow-newlines)
-                              'utf-8-unix)
-      argument)))
+    (elisp/ert/unquote--argument argument)))
+
+(defun elisp/ert/unquote--argument (argument)
+  "Unquote ARGUMENT for Windows.
+See //elisp/private/tools:run_test.py."
+  (if (memq system-type '(ms-dos windows-nt cygwin))
+      (decode-coding-string (url-unhex-string argument :allow-newlines)
+                            'utf-8-unix)
+    argument))
 
 (defun elisp/ert/make--selector (skip-tags)
   "Build an ERT selector from environment and command line.
