@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
@@ -67,11 +66,6 @@ cc_binary(
     ],
     visibility = ["//tests/tools:__pkg__"],
     deps = LAUNCHER_DEPS + [":binary"],
-)
-
-build_test(
-    name = "launcher_test",
-    targets = [":launcher"],
 )
 
 cc_library(
@@ -218,11 +212,7 @@ elisp_library(
     testonly = True,
     srcs = ["ert-runner.el"],
     outs = ["ert-runner.elc"],
-)
-
-build_test(
-    name = "ert_runner_test",
-    targets = [":ert_runner"],
+    visibility = ["//tests/tools:__pkg__"],
 )
 
 py_library(
@@ -306,12 +296,8 @@ bootstrap(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/tools:__pkg__",
     ],
-)
-
-build_test(
-    name = "compile_test",
-    targets = [":compile"],
 )
 
 elisp_binary(

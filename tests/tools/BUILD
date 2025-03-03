@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -65,4 +66,19 @@ py_test(
         "//elisp/private/tools:runfiles",
         "@abseil-py//absl/testing:absltest",
     ],
+)
+
+build_test(
+    name = "launcher_test",
+    targets = ["//elisp/private/tools:launcher"],
+)
+
+build_test(
+    name = "ert_runner_test",
+    targets = ["//elisp/private/tools:ert_runner"],
+)
+
+build_test(
+    name = "compile_test",
+    targets = ["//elisp/private/tools:compile"],
 )
