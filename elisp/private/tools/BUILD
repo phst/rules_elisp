@@ -229,16 +229,7 @@ build_test(
 py_library(
     name = "manifest",
     srcs = ["manifest.py"],
-)
-
-py_test(
-    name = "manifest_test",
-    size = "small",
-    srcs = ["manifest_test.py"],
-    deps = [
-        ":manifest",
-        "@abseil-py//absl/testing:absltest",
-    ],
+    visibility = ["//tests/tools:__pkg__"],
 )
 
 py_library(

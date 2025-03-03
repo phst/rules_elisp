@@ -45,3 +45,13 @@ py_test(
         "@abseil-py//absl/testing:absltest",
     ],
 )
+
+py_test(
+    name = "manifest_test",
+    size = "small",
+    srcs = ["manifest_test.py"],
+    deps = [
+        "//elisp/private/tools:manifest",
+        "@abseil-py//absl/testing:absltest",
+    ],
+)
