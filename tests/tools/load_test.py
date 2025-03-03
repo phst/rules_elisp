@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for elisp.load."""
+"""Unit tests for elisp.private.tools.load."""
 
 import pathlib
 import platform
