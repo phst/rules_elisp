@@ -66,6 +66,7 @@ cc_binary(
             'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
+    visibility = ["//tests/tools:__pkg__"],
     deps = LAUNCHER_DEPS + [":binary"],
 )
 
@@ -124,28 +125,6 @@ cc_library(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",
         "@rules_cc//cc/runfiles",
-    ],
-)
-
-py_test(
-    name = "binary_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["binary_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote("--launcher=$(rlocationpath :launcher)"),
-        shell.quote("--binary-cc=$(rlocationpath :binary.cc)"),
-    ],
-    data = [
-        "binary.cc",
-        ":launcher",
-    ],
-    deps = [
-        ":runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
     ],
 )
 
@@ -288,6 +267,7 @@ py_library(
         "//examples:__pkg__",
         "//tests:__pkg__",
         "//tests/proto:__pkg__",
+        "//tests/tools:__pkg__",
         "//tests/wrap:__pkg__",
     ],
     deps = ["@rules_python//python/runfiles"],
@@ -385,6 +365,11 @@ exports_files(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
     ],
+)
+
+exports_files(
+    ["binary.cc"],
+    visibility = ["//tests/tools:__pkg__"],
 )
 
 exports_files(
