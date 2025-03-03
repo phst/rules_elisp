@@ -26,10 +26,12 @@ from elisp.private.tools import runfiles
 
 FLAGS = flags.FLAGS
 
-flags.DEFINE_string(
-    'launcher', None, 'location of the //elisp:launcher target', required=True)
-flags.DEFINE_string(
-    'binary-cc', None, 'location of the //elisp:binary.cc file', required=True)
+flags.DEFINE_string('launcher', None,
+                    'location of the //elisp/private/tools:launcher target',
+                    required=True)
+flags.DEFINE_string('binary-cc', None,
+                    'location of the //elisp/private/tools:binary.cc file',
+                    required=True)
 
 
 class BinaryTest(absltest.TestCase):
