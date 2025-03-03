@@ -55,3 +55,14 @@ py_test(
         "@abseil-py//absl/testing:absltest",
     ],
 )
+
+py_test(
+    name = "load_test",
+    size = "small",
+    srcs = ["load_test.py"],
+    deps = [
+        "//elisp/private/tools:load",
+        "//elisp/private/tools:runfiles",
+        "@abseil-py//absl/testing:absltest",
+    ],
+)

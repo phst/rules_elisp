@@ -18,7 +18,6 @@ load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python:py_library.bzl", "py_library")
-load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
@@ -235,18 +234,8 @@ py_library(
 py_library(
     name = "load",
     srcs = ["load.py"],
+    visibility = ["//tests/tools:__pkg__"],
     deps = [":runfiles"],
-)
-
-py_test(
-    name = "load_test",
-    size = "small",
-    srcs = ["load_test.py"],
-    deps = [
-        ":load",
-        ":runfiles",
-        "@abseil-py//absl/testing:absltest",
-    ],
 )
 
 py_library(
