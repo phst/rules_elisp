@@ -188,6 +188,7 @@ C/C++ compiler.  See the [corresponding attribute for
     },
     provides = [EmacsLispInfo],
     fragments = ["cpp"],
+    host_fragments = ["cpp"],
     toolchains = use_cc_toolchain(),
     implementation = _elisp_cc_module_impl,
 )

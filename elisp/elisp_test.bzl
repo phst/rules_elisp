@@ -174,6 +174,7 @@ variable.  After processing known arguments, test files must remove them from
 Emacs will not automatically process these arguments using
 `command-switch-alist` or `command-line-functions`.""",
     fragments = ["cpp"],
+    host_fragments = ["cpp"],
     test = True,
     toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_test_impl,

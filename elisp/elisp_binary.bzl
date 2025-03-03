@@ -97,6 +97,7 @@ The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
     fragments = ["cpp"],
+    host_fragments = ["cpp"],
     toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
     implementation = _elisp_binary_impl,
 )

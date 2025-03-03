@@ -136,6 +136,7 @@ This is used by Gazelle.""",
 The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
     fragments = ["cpp"],
+    host_fragments = ["cpp"],
     toolchains = use_cc_toolchain() + [Label("@rules_shell//shell:toolchain_type")],
     implementation = _elisp_emacs_binary_impl,
 )
