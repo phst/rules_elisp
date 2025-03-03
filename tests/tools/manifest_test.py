@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for elisp.manifest."""
+"""Unit tests for elisp.private.tools.manifest."""
 
 import argparse
 import io
