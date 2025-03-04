@@ -51,3 +51,4 @@ build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-c
 build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
 
 import %workspace%/c-std.bazelrc
+import %workspace%/macos-gcc.bazelrc

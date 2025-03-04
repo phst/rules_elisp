@@ -1,0 +1,43 @@
+# Copyright 2025 Philipp Stephani
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Support for building with GCC on macOS.  Ideally “CC=gcc-14” would suffice,
+# but there seem to be various bugs in GCC and rules_cc that we need to work
+# around.
+
+# By default, rules_cc unconditionally links in libc++ on macOS (see
+# configure_unix_toolchain in //cc/private/toolchain:unix_cc_configure.bzl), but
+# with GCC the headers come from libstdc++, causing link failures.  Force
+# linking with libstdc++ instead.  This needs to happen via BAZEL_LINKLIBS to
+# override the default set in configure_unix_toolchain.
+# TODO: File bug against rules_cc.  It should’t default to libstd++ when
+# compiling with GCC.
+common:macos-gcc --repo_env='BAZEL_LINKLIBS=-lstdc++'
+
+# Without _DARWIN_C_SOURCE, including cstdlib from libstdc++ fails if
+# _POSIX_C_SOURCE is defined.  See the logic in
+# /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/sys/cdefs.h
+# and /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/_stdlib.h.
+# TODO: File bug against Homebrew and/or GCC.
+build:macos-gcc --copt='-D_DARWIN_C_SOURCE' --host_copt='-D_DARWIN_C_SOURCE'
+
+# The macos_default_link_flags feature unconditionally adds -fobjc-link-runtime,
+# which isn’t supported by GCC.
+# TODO: File bug against rules_cc.
+build:macos-gcc --features='-macos_default_link_flags'
+build:macos-gcc --host_features='-macos_default_link_flags'
+
+# Local Variables:
+# mode: bazelrc
+# End:
