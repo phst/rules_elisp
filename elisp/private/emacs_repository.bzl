@@ -17,14 +17,10 @@
 visibility("private")
 
 def _emacs_repository_impl(ctx):
-    path = ctx.attr.path
     output = ctx.attr.output
     ctx.download(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
-        url = [
-            "https://ftpmirror.gnu.org" + path,
-            "https://ftp.gnu.org/gnu" + path,
-        ],
+        url = ctx.attr.urls or fail("archive URLs missing"),
         output = output,
     )
     ctx.template(
@@ -45,7 +41,7 @@ def _emacs_repository_impl(ctx):
 
 emacs_repository = repository_rule(
     attrs = {
-        "path": attr.string(mandatory = True),
+        "urls": attr.string_list(mandatory = True, allow_empty = False),
         "integrity": attr.string(mandatory = True),
         "output": attr.string(mandatory = True),
         "strip_prefix": attr.string(),
