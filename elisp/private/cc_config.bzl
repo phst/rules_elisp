@@ -78,6 +78,7 @@ DEFINES = [
         "STRICT",
         "NOMINMAX",
         "WIN32_LEAN_AND_MEAN",
+        "NONAMELESSUNION",
     ],
 })
 
