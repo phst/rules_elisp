@@ -38,7 +38,6 @@ repos:
   - id: double-quote-string-fixer
   - id: end-of-file-fixer
   - id: fix-byte-order-marker
-    exclude: '\.def$'
   - id: fix-encoding-pragma
     args: [--remove]
   - id: forbid-submodules
