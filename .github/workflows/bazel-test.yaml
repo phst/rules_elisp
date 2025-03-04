@@ -41,9 +41,6 @@ jobs:
             cc: msvc
           - os: windows-latest
             cc: gcc-14
-          # Exclude non-default compilers for now.  We should add them later.
-          - os: macos-latest
-            cc: gcc-14
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:

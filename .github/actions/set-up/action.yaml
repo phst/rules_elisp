@@ -76,6 +76,10 @@ runs:
             'common --incompatible_enforce_starlark_utf8=error'
           }}
           ${{
+            runner.os == 'macOS' && startsWith(inputs.cc, 'gcc') &&
+            'common --config=macos-gcc'
+          }}
+          ${{
             runner.os == 'Windows' && inputs.cc == 'clang' &&
             'build --config=clang-cl'
           }}
