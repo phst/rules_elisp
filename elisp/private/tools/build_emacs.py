@@ -227,7 +227,15 @@ def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
     for parent, _dirs, files in os.walk(root):
         parent = pathlib.Path(parent)
         for file in files:
-            os.utime(parent / file, (stamp, stamp))
+            try:
+                os.utime(parent / file, (stamp, stamp))
+            except FileNotFoundError:
+                # This can happen on Windows if the filename is too long, see
+                # https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+                # and
+                # https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation.
+                # Nothing we can do about it.
+                pass
 
 
 if __name__ == '__main__':
