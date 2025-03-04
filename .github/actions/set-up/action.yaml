@@ -24,7 +24,7 @@ inputs:
     required: false
     default: >-
       ${{
-      runner.os == 'Linux' && 'gcc-14'
+      runner.os == 'Linux' && 'gcc'
       || (runner.os == 'macOS' && 'clang' || 'msvc')
       }}
 
