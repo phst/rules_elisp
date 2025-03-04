@@ -31,7 +31,7 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         bazel: [7.2.1, 7.5.0, 8.1.1, latest]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        cc: [gcc, clang, msvc]
+        cc: [gcc-14, clang, msvc]
         exclude:
           # Visual C++ works only on Windows.  Windows doesn’t use the CC
           # environment variable and always uses Visual C++ by default.
@@ -40,10 +40,10 @@ jobs:
           - os: macos-latest
             cc: msvc
           - os: windows-latest
-            cc: gcc
+            cc: gcc-14
           # Exclude non-default compilers for now.  We should add them later.
           - os: macos-latest
-            cc: gcc
+            cc: gcc-14
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
