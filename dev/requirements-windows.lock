@@ -32,9 +32,9 @@ platformdirs==2.4.0 \
     --hash=sha256:367a5e80b3d04d2428ffa76d33f124cf11e8fff2acdaa9b43d545f5c7d661ef2 \
     --hash=sha256:8868bbe3c3c80d42f20156f22e7131d2fb321f5bc86a2a345375c6481a67021d
     # via pylint
-pylint==3.3.4 \
-    --hash=sha256:289e6a1eb27b453b08436478391a48cd53bb0efb824873f949e709350f3de018 \
-    --hash=sha256:74ae7a38b177e69a9b525d0794bd8183820bfa7eb68cc1bee6e8ed22a42be4ce
+pylint==3.3.5 \
+    --hash=sha256:38d0f784644ed493d91f76b5333a0e370a1c1bc97c22068a77523b4bf1e82c31 \
+    --hash=sha256:7cb170929a371238530b2eeea09f5f28236d106b70308c3d46a9c0cf11634633
     # via -r dev/requirements.txt
 tomlkit==0.11.0 \
     --hash=sha256:0f4050db66fd445b885778900ce4dd9aea8c90c4721141fde0d6ade893820ef1 \
