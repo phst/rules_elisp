@@ -46,6 +46,11 @@ check-extra:
         # We don’t want any Go rules in the public packages, as our users would
         # have to depend on the Go rules then as well.
 	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
+        # Restrict loaded Starlark files in public packages to well-known
+        # official repositories to avoid dependency creep.
+	! $(GIT) grep -I -r -E -n -e '^load\("@' \
+	  --and --not -e '@(bazel_skylib|protobuf|rules_cc|rules_python)//' \
+	  -- elisp emacs
         # Find BUILD files without default visibility.  See
         # https://opensource.google/documentation/reference/thirdparty/new_license_rules#new_requirements.
 	! $(GIT) grep -I -r -F -L \
