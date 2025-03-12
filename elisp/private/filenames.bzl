@@ -16,7 +16,12 @@
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 
-visibility(["//elisp/proto", "//emacs", "//elisp/toolchains"])
+visibility([
+    # keep sorted
+    "//elisp/proto",
+    "//elisp/toolchains",
+    "//emacs",
+])
 
 def check_relative_filename(filename):
     """Returns `filename`, checking whether it is relative.
