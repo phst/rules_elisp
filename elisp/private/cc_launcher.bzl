@@ -110,12 +110,10 @@ def _cpp_string(string, *, native):
     if "\000" in string:
         fail("String {} can’t be transferred to C++".format(string))
 
-    # Interpret the string as UTF-8.  That’s not really correct,
-    # cf. https://bazel.build/concepts/build-files.  However, we assume that in
-    # practice all BUILD files do in fact use UTF-8 instead of Latin-1.  Due to
-    # the implementation of Starlark strings, the string will actually be a
-    # sequence of UTF-8 code units (and not code points), so we have to decode
-    # it first.
+    # Interpret the string as UTF-8,
+    # cf. https://bazel.build/concepts/build-files#file_encoding.  Due to the
+    # implementation of Starlark strings, the string will actually be a sequence
+    # of UTF-8 code units (and not code points), so we have to decode it first.
     string = "".join([_cpp_char(c) for c in _decode_utf8(string)])
     string = '"' + string + '"'
     if native:
