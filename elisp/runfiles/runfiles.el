@@ -499,7 +499,7 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
             (after-insert-file-functions nil))
         (insert-file-contents filename))
       ;; Perform the same parsing as
-      ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/cpp/runfiles/runfiles_src.cc#L274.
+      ;; https://github.com/bazelbuild/rules_cc/blob/0.1.1/cc/runfiles/runfiles.cc#L274.
       (while (not (eobp))
         (let ((line (buffer-substring-no-properties
                      (point) (line-end-position)))
