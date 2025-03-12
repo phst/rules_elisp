@@ -231,7 +231,7 @@
     "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
         "bzlTransitiveDigest": "5AIa6Q4q3OjcnCXgF6i3aFdno3Xj6oW8795qmAiNerY=",
-        "usagesDigest": "dzh9Ut9m42pH4+Q0DEkPKJBrv71oNjdwfGFgXMV9dG0=",
+        "usagesDigest": "npTbN5S3ZviiMfeJIN6H/MKRJZVKrtLGSssndXBi8zs=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
@@ -240,10 +240,10 @@
             "repoRuleId": "@@//elisp/extensions:elisp.bzl%_elisp_http_archive",
             "attributes": {
               "urls": [
-                "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip"
+                "https://github.com/magnars/dash.el/archive/refs/tags/2.20.0.zip"
               ],
-              "integrity": "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
-              "strip_prefix": "dash.el-2.19.1/",
+              "integrity": "sha384-25uwEahS6SGEeyat+3yTddDwvqPJxpjWxovKFvvWgxYh2WZIVxye1VqJ1tVI7wYb",
+              "strip_prefix": "dash.el-2.20.0/",
               "target_name": "dash",
               "exclude": [
                 "dash-functional.el"

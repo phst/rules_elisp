@@ -26,12 +26,10 @@ elisp = use_extension("@phst_rules_elisp//elisp/extensions:elisp.bzl", "elisp")
 elisp.http_archive(
     name = "dash",
     exclude = ["dash-functional.el"],
-    integrity = "sha256-FSggKxdDwpkenNRiTcKYPrms/7Neno4OZowSzDZSccU=",
-    strip_prefix = "dash.el-2.19.1/",
+    integrity = "sha384-25uwEahS6SGEeyat+3yTddDwvqPJxpjWxovKFvvWgxYh2WZIVxye1VqJ1tVI7wYb",
+    strip_prefix = "dash.el-2.20.0/",
     target_name = "dash",
-    urls = [
-        "https://github.com/magnars/dash.el/archive/refs/tags/2.19.1.zip",  # 2021-08-26
-    ],
+    urls = ["https://github.com/magnars/dash.el/archive/refs/tags/2.20.0.zip"],
 )
 use_repo(elisp, "dash")
 
