@@ -151,7 +151,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
     We do this here so that the Emacs Lisp code doesn’t have to depend on the
     runfiles library.
     """
-    files = manifest_file.read_text('iso-8859-1').splitlines()
+    files = manifest_file.read_text('utf-8').splitlines()
     edited = False
     for i, file in enumerate(files):
         file = pathlib.Path(file)
@@ -165,7 +165,7 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
             except FileNotFoundError:
                 _logger.warning('instrumented file %s not found', file)
     if edited:
-        with manifest_file.open(mode='w', encoding='iso-8859-1',
+        with manifest_file.open(mode='w', encoding='utf-8',
                                 newline='\n') as stream:
             for file in files:
                 stream.write(file + '\n')
