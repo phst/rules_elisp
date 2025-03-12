@@ -166,6 +166,9 @@ def _decode_utf8(string):
     Returns:
       a list of Unicode code points (integers)
     """
+
+    # FIXME: Bazel should provide native support for this,
+    # cf. https://github.com/bazelbuild/starlark/issues/112.
     ret = []
     skip = 0
     for i in range(len(string)):
