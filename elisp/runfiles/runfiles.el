@@ -494,7 +494,7 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
     (with-temp-buffer
       ;; See
       ;; https://github.com/bazelbuild/bazel/issues/374#issuecomment-2594713891.
-      (let ((coding-system-for-read 'utf-8)
+      (let ((coding-system-for-read 'utf-8-unix)
             (format-alist nil)
             (after-insert-file-functions nil))
         (insert-file-contents filename))
