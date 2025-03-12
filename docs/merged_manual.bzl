@@ -27,6 +27,8 @@ def _merged_manual_impl(ctx):
         org = ctx.actions.declare_file(paths.replace_extension(bin.basename, ".org"), sibling = bin)
         args = ctx.actions.args()
         if bazel_features.docs.utf8_enabled:
+            # FIXME: remove this code path once we drop support for Bazel 8.0
+            # and before.
             args.add("--utf8")
         args.add("--").add(bin).add(org)
         ctx.actions.run(
