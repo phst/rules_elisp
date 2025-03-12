@@ -19,6 +19,8 @@ MODULE.bazel                    text eol=lf
 WORKSPACE                       text eol=lf
 WORKSPACE.bzlmod                text eol=lf
 *.bzl                           text eol=lf
+/tests/runfiles/test-manifest   text eol=lf
+/tests/runfiles/test-mapping    text eol=lf
 
 # We enforce Unix-style line endings for the Stardoc files to address
 # https://github.com/bazelbuild/stardoc/issues/110.
