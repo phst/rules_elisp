@@ -1,6 +1,6 @@
 ;;; runfiles.el --- access to Bazel runfiles  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -492,8 +492,8 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
   (let ((manifest (make-hash-table :test #'equal))
         (filename (expand-file-name filename)))
     (with-temp-buffer
-      ;; At least Java hard-codes UTF-8 for the runfiles manifest, see
-      ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/java/runfiles/Runfiles.java#L492.
+      ;; See
+      ;; https://github.com/bazelbuild/bazel/issues/374#issuecomment-2594713891.
       (let ((coding-system-for-read 'utf-8)
             (format-alist nil)
             (after-insert-file-functions nil))
