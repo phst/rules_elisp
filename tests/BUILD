@@ -119,10 +119,7 @@ elisp_test(
         ":coverage": [],
         "//conditions:default": ["test-lib.el.instrument"],
     }),
-    # Test a few Unicode characters.  Technically this shouldn’t be allowed
-    # because BUILD files are interpreted as Latin-1,
-    # cf. https://bazel.build/concepts/build-files.  However, in practice we’ve
-    # always interpreted them as UTF-8.
+    # Test a few Unicode characters.
     skip_tags = ["skip-from-attribute \t\n\r\014 äα𝐴🐈'\\\""],
     skip_tests = ["filter-via-skip-tests-attribute-äα𝐴🐈"],
     tags = ["manual"],
