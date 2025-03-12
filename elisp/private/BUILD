@@ -70,6 +70,7 @@ bzl_library(
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
         ":cc_default_info",
+        ":filenames",
         ":generated",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",

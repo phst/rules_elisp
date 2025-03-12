@@ -18,6 +18,7 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(":cc_default_info.bzl", "CcDefaultInfo")
+load(":filenames.bzl", "check_relative_filename")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//elisp/toolchains"])
@@ -61,7 +62,7 @@ def cc_launcher(ctx, *, header, args, native = True):
         srcs = ctx.files._launcher_srcs,
         compilation_contexts = [info.compilation_context for info in infos],
         local_defines = defaults.defines + [
-            'RULES_ELISP_HEADER="' + header + '"',
+            'RULES_ELISP_HEADER="' + check_relative_filename(header) + '"',
             "RULES_ELISP_LAUNCHER_ARGS=" + _cpp_strings(args, native = native),
         ],
         user_compile_flags = defaults.copts,
