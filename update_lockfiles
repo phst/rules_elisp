@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2024 Philipp Stephani
+# Copyright 2024, 2025 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -59,7 +59,7 @@ for dir in . examples/ext; do
   windows="lockfiles-Windows-X64/${out:?}"
   bazel run \
     --lockfile_mode=off \
-    --output_groups='-check_python' \
+    --output_groups='-pylint,-pytype' \
     -- \
     @phst_merge_bazel_lockfiles//:merge \
     --linux-amd64="${linux:?}" \
