@@ -36,7 +36,7 @@ bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 
 # Work around https://github.com/bazelbuild/rules_apple/issues/2660.
 # FIXME: Remove once fixed upstream in the protobuf module.
-bazel_dep(name = "rules_apple", version = "3.19.1")
+bazel_dep(name = "rules_apple", version = "3.20.0")
 
 # Work around missing swiftc error on Windows.  See
 # https://github.com/bazelbuild/rules_swift/pull/1483.
