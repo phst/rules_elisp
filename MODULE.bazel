@@ -34,6 +34,15 @@ bazel_dep(name = "protobuf", version = "30.0")
 # FIXME: Remove once fixed upstream in googletest and abseil-cpp.
 bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
 
+# Work around https://github.com/bazelbuild/rules_apple/issues/2660.
+# FIXME: Remove once fixed upstream in the protobuf module.
+bazel_dep(name = "rules_apple", version = "3.19.1")
+
+# Work around missing swiftc error on Windows.  See
+# https://github.com/bazelbuild/rules_swift/pull/1483.
+# FIXME: Remove once fixed upstream in the rules_apple module.
+bazel_dep(name = "rules_swift", version = "2.7.0")
+
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.53.0", dev_dependency = True)
