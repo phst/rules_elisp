@@ -29,10 +29,13 @@ if (! $candidates) {
 
 $bazel = $candidates[0].Path
 
+function Run-Bazel {
+    Write-Verbose -Message "cd $(Get-Location) && ${bazel} ${args}"
+    & $bazel @args
+}
+
 function Run-Tests {
-    $rest = @('test') + $args + @('--', '//...')
-    Write-Verbose -Message "cd $(Get-Location) && ${bazel} ${rest}"
-    & $bazel @rest
+    Run-Bazel 'test' @args '--' '//...'
 }
 
 # All potentially supported Emacs versions.
