@@ -36,6 +36,7 @@ function Run-Bazel {
 
 function Run-Tests {
     Run-Bazel 'test' @args '--' '//...'
+    Run-Bazel 'mod' 'graph' > $null
 }
 
 # All potentially supported Emacs versions.
