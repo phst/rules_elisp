@@ -4617,7 +4617,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "(fn message)",
         kNoSideEffects, PackAny);
   Defun(ctx, "elisp/proto/unpack-any", 1, 1,
-        "Unpack the messages wrapped in ANY.\n"
+        "Unpack the message wrapped in ANY.\n"
         "ANY must be a google.protobuf.Any message.\n\n"
         "(fn any)",
         kNoSideEffects, UnpackAny);
