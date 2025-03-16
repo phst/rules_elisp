@@ -117,6 +117,11 @@ qualified name of a protocol buffer message type, and FIELDS is a list
 of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
 where FULL-NAME specifies the qualified name of a protocol buffer
 enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
+  (cl-check-type proto-file elisp/proto/simple-string)
+  (cl-check-type descriptor string)
+  (cl-check-type deps list)
+  (cl-check-type messages list)
+  (cl-check-type enums list)
   (with-temp-buffer
     (let* ((feature proto-file)
            (output-file (concat proto-file ".el"))
