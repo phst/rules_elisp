@@ -973,6 +973,13 @@
                          "google.protobuf.UninterpretedOption.NamePart"
                          ("name_part" "is_extension"))))))
 
+(ert-deftest elisp/proto/function-type ()
+  (skip-unless (fboundp 'comp-function-type-spec))
+  (when (fboundp 'comp-function-type-spec)
+    (should (equal
+             (comp-function-type-spec #'elisp/proto/make)
+             '((function (symbol &rest t) elisp/proto/message) . declared)))))
+
 (put #'time-equal-p 'ert-explainer #'elisp/proto/explain--time-equal-p)
 
 (defun elisp/proto/explain--time-equal-p (a b)

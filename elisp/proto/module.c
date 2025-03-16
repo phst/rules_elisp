@@ -202,6 +202,7 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kSymbolValue, "symbol-value")                                \
   X(kFunctionPut, "function-put")                                \
   X(kNumberp, "numberp")                                         \
+  X(kString, "string")                                           \
   X(kStringp, "stringp")                                         \
   X(kMultibyteStringP, "multibyte-string-p")                     \
   X(kUnibyteStringP, "elisp/proto/unibyte-string-p")             \
@@ -210,6 +211,7 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kList, "list")                                               \
   X(kNreverse, "nreverse")                                       \
   X(kUnibyteString, "unibyte-string")                            \
+  X(kVector, "vector")                                           \
   X(kMakeVector, "make-vector")                                  \
   X(kLength, "length")                                           \
   X(kAref, "aref")                                               \
@@ -246,8 +248,11 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kFieldKeywordP, "elisp/proto/field-keyword-p")               \
   X(kTypeUrlP, "elisp/proto/type-url-p")                         \
   X(kArenaP, "elisp/proto/arena-p")                              \
+  X(kMessage, "elisp/proto/message")                             \
   X(kMessageP, "elisp/proto/message-p")                          \
+  X(kArray, "elisp/proto/array")                                 \
   X(kArrayP, "elisp/proto/array-p")                              \
+  X(kMap, "elisp/proto/map")                                     \
   X(kMapP, "elisp/proto/map-p")                                  \
   X(kScalarFieldP, "elisp/proto/scalar-field-p")                 \
   X(kMapFieldP, "elisp/proto/map-field-p")                       \
@@ -260,15 +265,23 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kObjectPtr, "elisp/proto/object--ptr")                       \
   X(kArrayNew, "elisp/proto/array--new")                         \
   X(kMapNew, "elisp/proto/map--new")                             \
+  X(kTimestamp, "google/protobuf/Timestamp")                     \
   X(kTimestampP, "google/protobuf/Timestamp-p")                  \
   X(kTimestampNew, "google/protobuf/Timestamp--new")             \
+  X(kDuration, "google/protobuf/Duration")                       \
   X(kDurationP, "google/protobuf/Duration-p")                    \
   X(kDurationNew, "google/protobuf/Duration--new")               \
+  X(kAny, "google/protobuf/Any")                                 \
   X(kAnyP, "google/protobuf/Any-p")                              \
   X(kSeqLength, "seq-length")                                    \
   X(kSeqDoIndexed, "seq-do-indexed")                             \
   X(kMapDo, "map-do")                                            \
+  X(kFunctionType, "function-type")                              \
   X(kSideEffectFree, "side-effect-free")                         \
+  X(kFunction, "function")                                       \
+  X(kSymbol, "symbol")                                           \
+  X(kAndOptional, "&optional")                                   \
+  X(kAndRest, "&rest")                                           \
   X(kCAllowPartial, ":allow-partial")                            \
   X(kCDiscardUnknown, ":discard-unknown")                        \
   X(kCDeterministic, ":deterministic")                           \
@@ -445,6 +458,12 @@ static emacs_value List2(struct Context ctx, emacs_value arg1,
                          emacs_value arg2) {
   emacs_value args[] = {arg1, arg2};
   return List(ctx, 2, args);
+}
+
+static emacs_value List3(struct Context ctx, emacs_value arg1, emacs_value arg2,
+                         emacs_value arg3) {
+  emacs_value args[] = {arg1, arg2, arg3};
+  return List(ctx, 3, args);
 }
 
 static emacs_value List5(struct Context ctx, emacs_value arg1, emacs_value arg2,
@@ -2983,6 +3002,54 @@ static bool WriteHandle(struct Context ctx, int fd, upb_StringView* data) {
 
 /// Function definitions
 
+enum { kMaxParams = 4 };
+
+struct Parameters {
+  enum GlobalSymbol types[kMaxParams];
+};
+
+static struct Parameters Params0(void) {
+  struct Parameters ret = {{kNil}};
+  return ret;
+}
+
+static struct Parameters Params1(enum GlobalSymbol a) {
+  struct Parameters ret = {{a, kNil}};
+  return ret;
+}
+
+static struct Parameters Params2(enum GlobalSymbol a, enum GlobalSymbol b) {
+  struct Parameters ret = {{a, b, kNil}};
+  return ret;
+}
+
+static struct Parameters Params3(enum GlobalSymbol a, enum GlobalSymbol b,
+                                 enum GlobalSymbol c) {
+  struct Parameters ret = {{a, b, c, kNil}};
+  return ret;
+}
+
+static struct Parameters Params4(enum GlobalSymbol a, enum GlobalSymbol b,
+                                 enum GlobalSymbol c, enum GlobalSymbol d) {
+  struct Parameters ret = {{a, b, c, d}};
+  return ret;
+}
+
+static emacs_value FunctionType(struct Context ctx, struct Parameters params,
+                                enum GlobalSymbol return_type) {
+  ptrdiff_t num_params;
+  emacs_value param_types[kMaxParams];
+  for (num_params = 0; num_params < kMaxParams; ++num_params) {
+    enum GlobalSymbol type = params.types[num_params];
+    if (type == kNil) break;
+    param_types[num_params] = GlobalSymbol(ctx, type);
+  }
+  assert(return_type != kNil);
+  return List3(ctx, GlobalSymbol(ctx, kFunction),
+               List(ctx, num_params, param_types),
+               GlobalSymbol(ctx, return_type));
+}
+
 enum Declarations { kDefault = 0, kNoSideEffects = 0x01 };
 
 static void FunctionPut(struct Context ctx, emacs_value function,
@@ -2997,8 +3064,9 @@ static void FunctionPut(struct Context ctx, emacs_value function,
 // see Info node ‘(elisp) Function Documentation’.  The exported functions will
 // receive a valid pointer to a Globals structure as data pointer.
 static void Defun(struct Context ctx, const char* name, ptrdiff_t min_arity,
-                  ptrdiff_t max_arity, const char* doc, enum Declarations decls,
-                  Function fun) {
+                  ptrdiff_t max_arity, const char* doc,
+                  struct Parameters params, enum GlobalSymbol return_type,
+                  enum Declarations decls, Function fun) {
   assert(doc != NULL && strlen(doc) > 0);
   assert((max_arity == 0) !=
          (strstr(doc, "\n\n(") != NULL && doc[strlen(doc) - 1] == ')'));
@@ -3006,6 +3074,8 @@ static void Defun(struct Context ctx, const char* name, ptrdiff_t min_arity,
   emacs_value function = MakeFunction(ctx, min_arity, max_arity, fun, doc,
                                       (struct Globals*)ctx.globals);
   FuncallSymbol2(ctx, kDefalias, symbol, function);
+  FuncallSymbol3(ctx, kFunctionPut, symbol, GlobalSymbol(ctx, kFunctionType),
+                 FunctionType(ctx, params, return_type));
   if (decls & kSideEffectFree) {
     FunctionPut(ctx, symbol, kSideEffectFree, GlobalSymbol(ctx, kT));
   }
@@ -4288,7 +4358,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "structure type.  KEYS are keyword-value pairs to initialize\n"
         "the fields with.\n\n"
         "(fn type &rest keys)",
-        kNoSideEffects, Make);
+        Params3(kSymbol, kAndRest, kT), kMessage, kNoSideEffects, Make);
   Defun(ctx, "elisp/proto/parse", 2, 4,
         "Parse a serialized protocol buffer message.\n"
         "TYPE must be a symbol denoting a generated protocol buffer\n"
@@ -4298,6 +4368,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "If ALLOW-PARTIAL is non-nil, don’t check whether required fields\n"
         "are present.\n\n"
         "(fn type serialized &key allow-partial)",
+        Params4(kSymbol, kUnibyteString, kAndRest, kT), kMessage,
         kNoSideEffects, Parse);
   Defun(ctx, "elisp/proto/parse-json", 2, 4,
         "Parse a protocol buffer message from its JSON representation.\n"
@@ -4307,7 +4378,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "TYPE.  Return a mutable message object of the given TYPE.\n"
         "If DISCARD-UNKNOWN is non-nil, ignore unknown fields.\n\n"
         "(fn type json &key discard-unknown)",
-        kNoSideEffects, ParseJson);
+        Params4(kSymbol, kString, kAndRest, kT), kMessage, kNoSideEffects,
+        ParseJson);
   Defun(ctx, "elisp/proto/serialize", 1, 7,
         "Serialize a protocol buffer MESSAGE to its binary form.\n"
         "The return value is a unibyte string.\n"
@@ -4316,7 +4388,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "If DETERMINISTIC is non-nil, attempt to produce more deterministic\n"
         "output.\n\n"
         "(fn message &key allow-partial discard-unknown deterministic)",
-        kNoSideEffects, Serialize);
+        Params3(kMessage, kAndRest, kT), kUnibyteString, kNoSideEffects,
+        Serialize);
   Defun(ctx, "elisp/proto/serialize-text", 1, 7,
         "Serialize a protocol buffer MESSAGE to its text representation.\n"
         "If COMPACT is non-nil, use a more compact representation.\n"
@@ -4324,19 +4397,20 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "If DETERMINISTIC is non-nil, attempt to produce more deterministic\n"
         "output.\n\n"
         "(fn message &key compact discard-unknown deterministic)",
-        kNoSideEffects, SerializeText);
+        Params3(kMessage, kAndRest, kT), kString, kNoSideEffects,
+        SerializeText);
   Defun(ctx, "elisp/proto/serialize-json", 1, 5,
         "Serialize a protocol buffer MESSAGE to its JSON representation.\n"
         "If EMIT-DEFAULTS is non-nil, emit default values.\n"
         "If PROTO-NAMES is non-nil, use protocol buffer (snake-case)\n"
         "instead of JSON (camel-case) names.\n\n"
         "(fn message &key emit-defaults proto-names)",
-        kNoSideEffects, SerializeJson);
+        Params3(kMessage, kAndRest, kT), kString, kNoSideEffects, SerializeJson);
   Defun(ctx, "elisp/proto/message-mutable-p", 1, 1,
         "Return whether the protocol buffer MESSAGE is mutable.\n"
         "Signal an error if MESSAGE is not a protocol buffer message.\n\n"
         "(fn message)",
-        kNoSideEffects, MessageMutableP);
+        Params1(kMessage), kT, kNoSideEffects, MessageMutableP);
   Defun(ctx, "elisp/proto/print-message", 1, 2,
         "Print protocol buffer MESSAGE to STREAM.\n"
         "MESSAGE must be a protocol buffer message object, i.e., its type\n"
@@ -4344,13 +4418,13 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "STREAM must be an output stream as defined\n"
         "in the Info node ‘(elisp) Output Streams’.\n\n"
         "(fn message &optional stream)",
-        0, PrintMessage);
+        Params3(kMessage, kAndOptional, kT), kT, 0, PrintMessage);
   Defun(ctx, "elisp/proto/clear-message", 1, 1,
         "Clear all fields in MESSAGE.\n"
         "MESSAGE must be a mutable protocol buffer message object, i.e.,\n"
         "its type must be a subtype of ‘elisp/proto/message’.\n\n"
         "(fn message)",
-        0, ClearMessage);
+        Params1(kMessage), kT, 0, ClearMessage);
   Defun(ctx, "elisp/proto/has-field", 2, 2,
         "Return non-nil if the FIELD is present in MESSAGE.\n"
         "MESSAGE must be a protocol buffer message object, i.e., its type\n"
@@ -4358,7 +4432,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "denoting a valid field in MESSAGE.  Signal an error if the field\n"
         "has no notion of presence, e.g. for repeated fields.\n\n"
         "(fn message field)",
-        kNoSideEffects, HasField);
+        Params2(kMessage, kSymbol), kT, kNoSideEffects, HasField);
   Defun(ctx, "elisp/proto/field", 2, 2,
         "Return the value of the FIELD in the MESSAGE.\n"
         "MESSAGE must be a protocol buffer message object, i.e., its type\n"
@@ -4366,7 +4440,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "denoting a valid field in MESSAGE.  Return nil if FIELD denotes a\n"
         "non-scalar field that is not present in MESSAGE.\n\n"
         "(fn message field)",
-        kNoSideEffects, Field);
+        Params2(kMessage, kSymbol), kT, kNoSideEffects, Field);
   Defun(ctx, "elisp/proto/mutable-field", 2, 2,
         "Return the mutable value of the FIELD in the MESSAGE.\n"
         "MESSAGE must be a mutable protocol buffer message object, i.e.,\n"
@@ -4375,55 +4449,55 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "If FIELD denotes a non-scalar field that is not present in MESSAGE,\n"
         "create the field and return a mutable value for it.\n\n"
         "(fn message field)",
-        0, MutableField);
+        Params2(kMessage, kSymbol), kT, 0, MutableField);
   Defun(ctx, "elisp/proto/set-field", 3, 3,
         "Set the FIELD in the MESSAGE to VALUE and return VALUE.\n"
         "MESSAGE must be a mutable protocol buffer message object, i.e.,\n"
         "its type must be a subtype of ‘elisp/proto/message’.\n"
         "FIELD must be a symbol denoting a valid field in MESSAGE.\n\n"
         "(fn message field value)",
-        0, SetField);
+        Params3(kMessage, kSymbol, kT), kT, 0, SetField);
   Defun(ctx, "elisp/proto/clear-field", 2, 2,
         "Clear the FIELD in the MESSAGE.\n"
         "MESSAGE must be a mutable protocol buffer message object, i.e.,\n"
         "its type must be a subtype of ‘elisp/proto/message’.\n"
         "FIELD must be a symbol denoting a valid field in MESSAGE.\n\n"
         "(fn message field)",
-        0, ClearField);
+        Params2(kMessage, kSymbol), kT, 0, ClearField);
   Defun(ctx, "elisp/proto/array-mutable-p", 1, 1,
         "Return whether the protocol buffer ARRAY is mutable.\n"
         "Signal an error if ARRAY is not a protocol buffer array.\n\n"
         "(fn array)",
-        kNoSideEffects, ArrayMutableP);
+        Params1(kArray), kT, kNoSideEffects, ArrayMutableP);
   Defun(ctx, "elisp/proto/print-array", 1, 2,
         "Print protocol buffer ARRAY to STREAM.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n"
         "STREAM must be an output stream as defined\n"
         "in the Info node ‘(elisp) Output Streams’.\n\n"
         "(fn message &optional stream)",
-        0, PrintArray);
+        Params3(kMessage, kAndOptional, kT), kT, 0, PrintArray);
   Defun(ctx, "elisp/proto/array-length", 1, 1,
         "Return the number of elements in the protocol buffer ARRAY.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n\n"
         "(fn array)",
-        kNoSideEffects, ArrayLength);
+        Params1(kArray), kInteger, kNoSideEffects, ArrayLength);
   Defun(ctx, "elisp/proto/array-elt", 2, 2,
         "Return the element at INDEX in the protocol buffer ARRAY.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n\n"
         "(fn array index)",
-        kNoSideEffects, ArrayElt);
+        Params2(kArray, kInteger), kT, kNoSideEffects, ArrayElt);
   Defun(ctx, "elisp/proto/set-array-elt", 3, 3,
         "Set the element at INDEX in the protocol buffer ARRAY to VALUE.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.  Return VALUE.\n\n"
         "(fn array index value)",
-        0, SetArrayElt);
+        Params3(kArray, kInteger, kT), kT, 0, SetArrayElt);
   Defun(ctx, "elisp/proto/array-pop", 2, 2,
         "Remove and return the element at INDEX in the protocol buffer ARRAY.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.\n\n"
         "(fn array index)",
-        0, ArrayPop);
+        Params2(kArray, kInteger), kT, 0, ArrayPop);
   Defun(ctx, "elisp/proto/array-delete", 2, 3,
         "Delete an element range from the protocol buffer ARRAY.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
@@ -4433,18 +4507,18 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "negative, in which case they count from the end of ARRAY.\n"
         "The remaining elements after TO are shifted to the left.\n\n"
         "(fn array from &optional to)",
-        0, ArrayDelete);
+        Params4(kArray, kInteger, kAndOptional, kT), kT, 0, ArrayDelete);
   Defun(ctx, "elisp/proto/do-array", 2, 2,
         "Call FUNCTION for each element in ARRAY.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n\n"
         "(fn function array)",
-        0, DoArray);
+        Params2(kFunction, kArray), kT, 0, DoArray);
   Defun(ctx, "elisp/proto/copy-array", 1, 1,
         "Return a shallow copy of ARRAY.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n"
         "The return value is mutable.\n\n"
         "(fn array)",
-        kNoSideEffects, CopyArray);
+        Params1(kArray), kArray, kNoSideEffects, CopyArray);
   Defun(ctx, "elisp/proto/subarray", 2, 3,
         "Return a shallow copy of a subarray of ARRAY.\n"
         "ARRAY must be a protocol buffer array of type\n"
@@ -4454,85 +4528,86 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "negative, in which case they count from the end of ARRAY.\n"
         "The return value is mutable.\n\n"
         "(fn array from &optional to)",
+        Params4(kArray, kInteger, kAndOptional, kT), kArray,
         kNoSideEffects, Subarray);
   Defun(ctx, "elisp/proto/make-vector-from-array", 1, 1,
         "Return a shallow copy of ARRAY as a vector.\n"
         "ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.\n\n"
         "(fn array)",
-        kNoSideEffects, MakeVectorFromArray);
+        Params1(kArray), kVector, kNoSideEffects, MakeVectorFromArray);
   Defun(ctx, "elisp/proto/clear-array", 1, 1,
         "Remove all elements from the protocol buffer ARRAY.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.\n"
         "After this function returns, ARRAY is empty.\n\n"
         "(fn array)",
-        0, ClearArray);
+        Params1(kArray), kT, 0, ClearArray);
   Defun(ctx, "elisp/proto/replace-array", 2, 2,
         "Replace the elements from the protocol buffer DEST with SOURCE.\n"
         "DEST must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’ and SOURCE must be a generalized sequence.\n"
         "Clear DEST and then copy all elements from SOURCE into DEST.\n\n"
         "(fn dest source)",
-        0, ReplaceArray);
+        Params2(kArray, kT), kT, 0, ReplaceArray);
   Defun(ctx, "elisp/proto/append-array", 2, 2,
         "Append VALUE to the protocol buffer ARRAY.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.\n\n"
         "(fn array value)",
-        0, AppendArray);
+        Params2(kArray, kT), kT, 0, AppendArray);
   Defun(ctx, "elisp/proto/extend-array", 2, 2,
         "Append SOURCE to the protocol buffer array DEST.\n"
         "DEST must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’ and SOURCE must be a generalized sequence.\n\n"
         "(fn dest source)",
-        0, ExtendArray);
+        Params2(kArray, kT), kT, 0, ExtendArray);
   Defun(ctx, "elisp/proto/sort-array", 2, 2,
         "Sort the protocol buffer ARRAY in place, comparing values with PRED.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.\n\n"
         "(fn array pred)",
-        0, SortArray);
+        Params2(kArray, kFunction), kT, 0, SortArray);
   Defun(ctx, "elisp/proto/nreverse-array", 1, 1,
         "Reverse the protocol buffer ARRAY in place.\n"
         "ARRAY must be a mutable protocol buffer array of type\n"
         "‘elisp/proto/array’.\n\n"
         "(fn array)",
-        0, NreverseArray);
+        Params1(kArray), kT, 0, NreverseArray);
   Defun(ctx, "elisp/proto/map-mutable-p", 1, 1,
         "Return whether the protocol buffer MAP is mutable.\n"
         "Signal an error if MAP is not a protocol buffer map.\n\n"
         "(fn map)",
-        kNoSideEffects, MapMutableP);
+        Params1(kMap), kT, kNoSideEffects, MapMutableP);
   Defun(ctx, "elisp/proto/print-map", 1, 2,
         "Print protocol buffer MAP to STREAM.\n"
         "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n"
         "STREAM must be an output stream as defined\n"
         "in the Info node ‘(elisp) Output Streams’.\n\n"
         "(fn map &optional stream)",
-        0, PrintMap);
+        Params3(kMap, kAndOptional, kT), kT, 0, PrintMap);
   Defun(ctx, "elisp/proto/map-length", 1, 1,
         "Return the number of elements in the protocol buffer MAP.\n"
         "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n\n"
         "(fn map)",
-        kNoSideEffects, MapLength);
+        Params1(kMap), kInteger, kNoSideEffects, MapLength);
   Defun(ctx, "elisp/proto/map-contains-key", 2, 2,
         "Return whether the protocol buffer MAP contains KEY.\n"
         "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n\n"
         "(fn map key)",
-        kNoSideEffects, MapContainsKey);
+        Params2(kMap, kT), kT, kNoSideEffects, MapContainsKey);
   Defun(ctx, "elisp/proto/map-get", 2, 3,
         "Return the value mapped to KEY in the protocol buffer MAP.\n"
         "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n"
         "Return DEFAULT if KEY isn’t present in MAP.\n\n"
         "(fn map key &optional default)",
-        kNoSideEffects, MapGet);
+        Params4(kMap, kT, kAndOptional, kT), kT, kNoSideEffects, MapGet);
   Defun(ctx, "elisp/proto/map-put", 3, 3,
         "Insert a VALUE with a KEY into the protocol buffer MAP.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
         "If an entry with KEY is already present in MAP, overwrite it.\n"
         "Return VALUE.\n\n"
         "(fn map key value)",
-        0, MapPut);
+        Params3(kMap, kT, kT), kT, 0, MapPut);
   Defun(ctx, "elisp/proto/map-set", 3, 3,
         "Insert a VALUE with a KEY into the protocol buffer MAP.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
@@ -4540,26 +4615,26 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "and return nil; otherwise insert a new entry and return\n"
         "a non-nil value.\n\n"
         "(fn map key value)",
-        0, MapSet);
+        Params3(kMap, kT, kT), kT, 0, MapSet);
   Defun(ctx, "elisp/proto/map-delete", 2, 2,
         "Attempt to remove KEY from the protocol buffer MAP.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
         "Return whether KEY has been removed.\n\n"
         "(fn map key)",
-        0, MapDelete);
+        Params2(kMap, kT), kT, 0, MapDelete);
   Defun(ctx, "elisp/proto/map-pop", 2, 3,
         "Remove the KEY from the protocol buffer MAP and return its value.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
         "If an entry with KEY is present in MAP, remove the entry and return\n"
         "its value.  Otherwise, don’t modify MAP and return DEFAULT.\n\n"
         "(fn map key &optional default)",
-        0, MapPop);
+        Params4(kMap, kT, kAndOptional, kT), kT, 0, MapPop);
   Defun(ctx, "elisp/proto/clear-map", 1, 1,
         "Remove all entries from the protocol buffer MAP.\n"
         "MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.\n"
         "After this function returns, MAP is empty.\n\n"
         "(fn map)",
-        0, ClearMap);
+        Params1(kMap), kT, 0, ClearMap);
   Defun(ctx, "elisp/proto/update-map", 2, 2,
         "Update the protocol buffer map DEST from the given SOURCE.\n"
         "DEST must be a mutable protocol buffer map of type ‘elisp/proto/map’\n"
@@ -4567,71 +4642,71 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "SOURCE into DEST.  If a key from SOURCE is already present in DEST,\n"
         "overwrite it.\n\n"
         "(fn dest source)",
-        0, UpdateMap);
+        Params2(kMap, kT), kT, 0, UpdateMap);
   Defun(ctx, "elisp/proto/replace-map", 2, 2,
         "Replace the entries from the protocol buffer DEST with SOURCE.\n"
         "DEST must be a mutable protocol buffer map of type ‘elisp/proto/map’\n"
         "and SOURCE must be a generalized map.  Clear DEST and then copy\n"
         "all entries from SOURCE into DEST.\n\n"
         "(fn DEST SOURCE)",
-        0, ReplaceMap);
+        Params2(kMap, kT), kT, 0, ReplaceMap);
   Defun(ctx, "elisp/proto/copy-map", 1, 1,
         "Return a shallow copy of MAP.\n"
         "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n"
         "The return value is mutable.\n\n"
         "(fn map)",
-        kNoSideEffects, CopyMap);
+        Params1(kMap), kMap, kNoSideEffects, CopyMap);
   Defun(ctx, "elisp/proto/do-map", 2, 2,
         "Call FUNCTION for each element in MAP.\n"
         "MAP must be a protocol buffer array of type ‘elisp/proto/map’.\n"
         "Call FUNCTION with two arguments, the key and the value.\n\n"
         "(fn function map)",
-        0, DoMap);
+        Params2(kFunction, kMap), kT, 0, DoMap);
   Defun(ctx, "elisp/proto/timestamp", 1, 1,
         "Return a time value stored in a protocol buffer TIMESTAMP.\n"
         "TIMESTAMP must be a google.protobuf.Timestamp message.\n\n"
         "(fn timestamp)",
-        kNoSideEffects, Timestamp);
+        Params1(kTimestamp), kT, kNoSideEffects, Timestamp);
   Defun(ctx, "elisp/proto/duration", 1, 1,
         "Return a time value stored in a protocol buffer DURATION.\n"
         "DURATION must be a google.protobuf.Duration message.\n\n"
         "(fn duration)",
-        kNoSideEffects, Duration);
+        Params1(kDuration), kT, kNoSideEffects, Duration);
   Defun(ctx, "elisp/proto/set-timestamp", 2, 2,
         "Set the protocol buffer TIMESTAMP to the given TIME.\n"
         "TIMESTAMP must be a mutable google.protobuf.Timestamp message.\n"
         "Return TIME.\n\n"
         "(fn timestamp time)",
-        0, SetTimestamp);
+        Params2(kTimestamp, kT), kT, 0, SetTimestamp);
   Defun(ctx, "elisp/proto/set-duration", 2, 2,
         "Set the protocol buffer DURATION to the given TIME.\n"
         "DURATION must be a mutable google.protobuf.Duration message.\n"
         "Return TIME.\n\n"
         "(fn duration time)",
-        0, SetDuration);
+        Params2(kMessage, kT), kT, 0, SetDuration);
   Defun(ctx, "elisp/proto/make-timestamp", 1, 1,
         "Return a google.protobuf.Timestamp message with the given TIME.\n\n"
         "(fn time)",
-        kNoSideEffects, MakeTimestamp);
+        Params1(kT), kTimestamp, kNoSideEffects, MakeTimestamp);
   Defun(ctx, "elisp/proto/make-duration", 1, 1,
         "Return a google.protobuf.Duration message with the given TIME.\n\n"
         "(fn time)",
-        kNoSideEffects, MakeDuration);
+        Params1(kT), kDuration, kNoSideEffects, MakeDuration);
   Defun(ctx, "elisp/proto/pack-any", 1, 1,
         "Return a new mutable google.protobuf.Any message wrapping MESSAGE.\n\n"
         "(fn message)",
-        kNoSideEffects, PackAny);
+        Params1(kMessage), kAny, kNoSideEffects, PackAny);
   Defun(ctx, "elisp/proto/unpack-any", 1, 1,
         "Unpack the message wrapped in ANY.\n"
         "ANY must be a google.protobuf.Any message.\n\n"
         "(fn any)",
-        kNoSideEffects, UnpackAny);
+        Params1(kAny), kMessage, kNoSideEffects, UnpackAny);
   Defun(ctx, "elisp/proto/any-type-name", 1, 1,
         "Return the type name of the messaged packed inside ANY.\n"
         "The return value is the full name of the message type.\n"
         "ANY must be a google.protobuf.Any message.\n\n"
         "(fn any)",
-        kNoSideEffects, AnyTypeName);
+        Params1(kAny), kString, kNoSideEffects, AnyTypeName);
   // The check functions are technically side-effect-free, but their return
   // value is never used, so don’t mark them as such to prevent the byte
   // compiler from complaining.
@@ -4640,29 +4715,29 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "If a required field is not set, signal an error of type\n"
         "‘elisp/proto/missing-required-field’.\n\n"
         "(fn message)",
-        0, CheckRequired);
+        Params1(kMessage), kT, 0, CheckRequired);
   Defun(ctx, "elisp/proto/check-field-name", 2, 2,
         "Check if FIELD is a field in the protocol buffer message TYPE.\n"
         "Signal an error of type ‘elisp/proto/unknown-field’ if not.\n\n"
         "(fn type field)",
-        0, CheckFieldName);
+        Params2(kSymbol, kSymbol), kT, 0, CheckFieldName);
   Defun(ctx, "elisp/proto/check-field-keyword", 2, 2,
         "Check if KEYWORD refers a field in the protocol buffer message TYPE.\n"
         "Signal an error of type ‘elisp/proto/unknown-field’ if not.\n\n"
         "(fn type keyword)",
-        0, CheckFieldKeyword);
+        Params2(kSymbol, kSymbol), kT, 0, CheckFieldKeyword);
   Defun(ctx, "elisp/proto/insert-stdin", 0, 0,
         "Insert standard input into current buffer.\n"
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.",
-        0, InsertStdin);
+        Params0(), kT, 0, InsertStdin);
   Defun(ctx, "elisp/proto/write-stdout", 1, 1,
         "Write STRING to standard output.\n"
         "STRING must be a unibyte string.\n"
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn string)",
-        0, WriteStdout);
+        Params1(kString), kT, 0, WriteStdout);
   Defun(ctx, "elisp/proto/parse-code-generator-request", 1, 1,
         "Parse a protocol buffer code generator request.\n"
         "SERIALIZED must be the serialized form of a\n"
@@ -4675,7 +4750,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",
-        kNoSideEffects, ParseCodeGeneratorRequest);
+        Params1(kString), kList, kNoSideEffects, ParseCodeGeneratorRequest);
   Defun(ctx, "elisp/proto/serialize-code-generator-response", 1, 1,
         "Generate and serialize a protocol buffer generator response.\n"
         "FILES must be a list of (NAME . CONTENT) pairs,\n"
@@ -4687,7 +4762,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn files)",
-        kNoSideEffects, SerializeCodeGeneratorResponse);
+        Params1(kList), kString, kNoSideEffects,
+        SerializeCodeGeneratorResponse);
   Defun(ctx, "elisp/proto/register-file-descriptor", 1, 1,
         "Register a protocol buffer file descriptor set.\n"
         "SERIALIZED must be the serialized form of a\n"
@@ -4695,7 +4771,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.\n\n"
         "(fn serialized)",
-        0, RegisterFileDescriptor);
+        Params1(kString), kT, 0, RegisterFileDescriptor);
   DefineError(ctx, kUnknownField, "Unknown protocol buffer message field",
               kNil);
   DefineError(ctx, kAtomicField,
