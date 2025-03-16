@@ -107,6 +107,16 @@ VALUES is a list of (NAME NUMBER) pairs."
   (terpri))
 
 (cl-defun elisp/proto/generate-file ((proto-file descriptor deps messages enums))
+  "Generate code for a single protocol buffer definition file.
+PROTO-FILE is the name of the protocol buffer definition file, relative
+to its repository root.  DESCRIPTOR is a unibyte string containing the
+serialized file descriptor message for PROTO-FILE.  DEPS is a list of
+other protocol buffer files that PROTO-FILE depends on.  MESSAGES is a
+list of (FULL-NAME . FIELDS) pairs, where FULL-NAME specifies the
+qualified name of a protocol buffer message type, and FIELDS is a list
+of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
+where FULL-NAME specifies the qualified name of a protocol buffer
+enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
   (with-temp-buffer
     (let* ((feature proto-file)
            (output-file (concat proto-file ".el"))
