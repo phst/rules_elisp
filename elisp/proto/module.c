@@ -4500,10 +4500,10 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         kNoSideEffects, MapMutableP);
   Defun(ctx, "elisp/proto/print-map", 1, 2,
         "Print protocol buffer MAP to STREAM.\n"
-        "ARRAY must be a protocol buffer map of type ‘elisp/proto/map’.\n"
+        "MAP must be a protocol buffer map of type ‘elisp/proto/map’.\n"
         "STREAM must be an output stream as defined\n"
         "in the Info node ‘(elisp) Output Streams’.\n\n"
-        "(fn message &optional stream)",
+        "(fn map &optional stream)",
         0, PrintMap);
   Defun(ctx, "elisp/proto/map-length", 1, 1,
         "Return the number of elements in the protocol buffer MAP.\n"
