@@ -290,7 +290,7 @@ of DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and ID-FORMAT."
                 files)
       files)))
 
-(defun elisp/runfiles/handle--expand-file-name (filename &optional directory)
+(defun elisp/runfiles/handle--expand-file-name (filename directory)
   "Implementation of ‘expand-file-name’ for Bazel runfiles.
 See Info node ‘(elisp) File Name Expansion’ for the meaning of
 FILENAME and DIRECTORY."
