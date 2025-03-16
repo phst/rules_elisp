@@ -54,6 +54,7 @@ MANIFEST specifies the filename of a runfile manifest.  DIRECTORY
 specifies the runfile directory.  Either of them can be nil or
 empty.  If the runfiles aren’t found at either location, signal
 an error of type ‘elisp/runfiles/not-found’."
+  (declare (ftype (function (&rest t) elisp/runfiles/runfiles)))
   (cl-check-type manifest (or null string))
   (cl-check-type directory (or null string))
   (unless manifest
@@ -87,6 +88,7 @@ an error of type ‘elisp/runfiles/not-found’."
 Cache the result once created; this means that changes to the
 runfile-specific environmental variables don’t take effect once
 the global instance is initialized."
+  (declare (ftype (function () elisp/runfiles/runfiles)))
   (or elisp/runfiles/global--cache
       (setq elisp/runfiles/global--cache (elisp/runfiles/make))))
 
@@ -108,6 +110,10 @@ runfiles tree.  Signal an error of type ‘elisp/runfiles/empty’ if
 FILENAME is present in the runfiles manifest, but doesn’t map to
 a real file on the filesystem; this indicates that an empty file
 should be used in its place."
+  (declare (ftype (function (elisp/runfiles/filename
+                             &optional (or null elisp/runfiles/runfiles)
+                             &rest t)
+                            string)))
   (cl-check-type filename elisp/runfiles/filename)
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
@@ -132,7 +138,8 @@ a Bazel action (e.g., ‘elisp_library’ targets).  The result is
 only meaningful while byte compilation is in progress (e.g.,
 while expanding macros during byte compilation).  Return nil if
 the current repository can’t be determined."
-    (declare (side-effect-free error-free))
+    (declare (ftype (function () (or null string)))
+             (side-effect-free error-free))
     ;; ‘elisp/current-repository’ is bound by //elisp:compile.el.
     (or (bound-and-true-p elisp/current-repository)
         (pcase (macroexp-file-name)
@@ -170,6 +177,9 @@ identifier (see Info node ‘(elisp) Magic File Names’); if the
 returned values are on the same remote host as REMOTE, return the
 local names on that host, otherwise signal an error of type
 ‘elisp/runfiles/remote’."
+  (declare (ftype (function (&optional (or null elisp/runfiles/runfiles)
+                                       (or string null))
+                            list)))
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type remote (or string null))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
@@ -178,6 +188,7 @@ local names on that host, otherwise signal an error of type
 
 (defun elisp/runfiles/filename-p (string)
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
+  (declare (ftype (function (string) t)))
   (let ((case-fold-search nil))
     ;; This uses similar criteria as
     ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/cpp/runfiles/runfiles_src.cc#L221-L223.
@@ -216,6 +227,7 @@ magic string \"/bazel-runfile:\" will resolve to a file in the
 runfiles tree.  For example, \"/bazel-runfile:dir/file\" will
 have the same effect as using
 ‘(elisp/runfiles/get \"dir/file\")’."
+  (declare (ftype (function () t)))
   (cl-pushnew (cons (rx bos "/bazel-runfile:") #'elisp/runfiles/file-handler)
               file-name-handler-alist
               :test #'equal))
@@ -225,6 +237,7 @@ have the same effect as using
 See Info node ‘(elisp)Magic File Names’ for background on file
 name handlers.  OPERATION is the file operation to perform, an
 ARGS are the arguments to the operation."
+  (declare (ftype (function (symbol &rest t) t)))
   (let ((inhibit-file-name-handlers
          (cons #'elisp/runfiles/file-handler
                (and (eq inhibit-file-name-operation operation)
@@ -261,6 +274,7 @@ ARGS are the arguments to the operation."
   "Implementation of ‘abbreviate-file-name’ for Bazel runfiles.
 See Info node ‘(elisp) Directory Names’ for the meaning of
 FILENAME."
+  (declare (ftype (function (string) string)))
   ;; We don’t support abbreviated file names, so we return the file name
   ;; unchanged.
   filename)
@@ -270,6 +284,8 @@ FILENAME."
   "Implementation of ‘directory-files’ for Bazel runfiles.
 See Info node ‘(elisp) Contents of Directories’ for the meaning of
 DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and COUNT."
+  (declare (ftype (function (string t (or null string) t (or null integer))
+                            list)))
   (let ((files (directory-files (elisp/runfiles/transform--name directory) nil
                                 match-regexp nosort count)))
     (if full-name
@@ -281,6 +297,9 @@ DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and COUNT."
   "Implementation of ‘directory-files-and-attributes’ for Bazel runfiles.
 See Info node ‘(elisp) Contents of Directories’ for the meaning of
 DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, ID-FORMAT, and COUNT."
+  (declare (ftype (function
+                   (string t (or null string) t symbol (or null integer))
+                   list)))
   (let ((files (directory-files-and-attributes
                 (elisp/runfiles/transform--name directory) nil
                 match-regexp nosort id-format count)))
@@ -294,6 +313,7 @@ DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, ID-FORMAT, and COUNT."
   "Implementation of ‘expand-file-name’ for Bazel runfiles.
 See Info node ‘(elisp) File Name Expansion’ for the meaning of
 FILENAME and DIRECTORY."
+  (declare (ftype (function (string (or null string)) string)))
   (cond ((string-prefix-p "/bazel-runfile:" filename)
          ;; Bazel runfile names are always canonical (or invalid), so return the
          ;; name as-is.
@@ -309,6 +329,7 @@ FILENAME and DIRECTORY."
   "Implementation of ‘file-remote-p’ for Bazel runfiles.
 See Info node ‘(elisp) Magic File Names’ for the meaning of FILE
 and IDENTIFICATION."
+  (declare (ftype (function (string symbol t) (or null string))))
   (pcase-exhaustive file
     ((rx bos "/bazel-runfile:" (let name (* anything)) eos)
      (cl-ecase identification
@@ -321,6 +342,7 @@ and IDENTIFICATION."
   "Implementation of ‘get-file-buffer’ for Bazel runfiles.
 See Info node ‘(elisp) Buffer File Name’ for the meaning of
 FILENAME."
+  (declare (ftype (function (string) (or null buffer))))
   ;; We accept both buffers visiting FILENAME directly as well as the
   ;; transformed filename.
   (or (get-file-buffer filename)
@@ -331,6 +353,7 @@ FILENAME."
   "Implementation of ‘process-file’ for Bazel runfiles.
 See Info node ‘(elisp) Synchronous Processes’ for the meaning of
 PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
+  (declare (ftype (function (string string t t &rest string) t)))
   (let ((default-directory (elisp/runfiles/transform--name default-directory)))
     (apply #'process-file
            (elisp/runfiles/transform--name program)
@@ -352,6 +375,7 @@ PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
   "Implementation of ‘start-file-process’ for Bazel runfiles.
 See Info node ‘(elisp) Asynchronous Processes’ for the meaning of
 NAME, BUFFER-OR-NAME, PROGRAM, and ARGS."
+  (declare (ftype (function (string t string &rest string) process)))
   (let ((default-directory (elisp/runfiles/transform--name default-directory)))
     (apply #'start-file-process
            name buffer-or-name (elisp/runfiles/transform--name program) args)))
@@ -360,6 +384,7 @@ NAME, BUFFER-OR-NAME, PROGRAM, and ARGS."
   "Implementation of ‘unhandled-file-name-directory’ for Bazel runfiles.
 See Info node ‘(elisp) Magic File Names’ for the meaning of
 FILENAME."
+  (declare (ftype (function (string) string)))
   (file-name-as-directory
    (condition-case nil
        (elisp/runfiles/transform--name filename)
@@ -440,6 +465,7 @@ found.  This is useful for predicates like ‘file-readable-p’.")
 ARGS are the arguments to the operation; they are handled as
 determined by the constant ‘elisp/runfiles/generic--handlers’,
 which see."
+  (declare (ftype (function (symbol list) t)))
   (let ((match (assq operation elisp/runfiles/generic--handlers)))
     (unless match
       (error "Unhandled file name operation %s" operation))
@@ -468,6 +494,7 @@ which see."
   "Return the filename in the filesystem corresponding to the runfile FILENAME.
 If FILENAME doesn’t start with \"/bazel-runfile:\", return it
 unchanged."
+  (declare (ftype (function (string) string)))
   (pcase-exhaustive filename
     ((and (pred stringp) (rx bos "/bazel-runfile:" (let name (* anything)) eos))
      (elisp/runfiles/rlocation name))
@@ -487,6 +514,7 @@ unchanged."
 (defun elisp/runfiles/make--manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
 Return an object of type ‘elisp/runfiles/runfiles--manifest’."
+  (declare (ftype (function (string) elisp/runfiles/runfiles--manifest)))
   (let ((manifest (make-hash-table :test #'equal))
         (filename (expand-file-name filename)))
     (with-temp-buffer
@@ -577,6 +605,7 @@ identifier."
 (defun elisp/runfiles/make--directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
 Return an object of type ‘elisp/runfiles/runfiles--directory’."
+  (declare (ftype (function (string) elisp/runfiles/runfiles--directory)))
   (elisp/runfiles/directory--make
    (file-name-as-directory (expand-file-name directory))))
 
@@ -611,6 +640,7 @@ The return value is a hashtable mapping (CANONICAL . APPARENT)
 pairs to the mapped repository; see URL
 ‘https://github.com/bazelbuild/proposals/blob/main/designs/2022-07-21-locating-runfiles-with-bzlmod.md#1-emit-a-repository-mapping-manifest-for-each-executable-target’.
 If there’s no repository mapping file, the return value is nil."
+  (declare (ftype (function (string) (or null string))))
   (cl-check-type file string)
   (with-temp-buffer
     (let ((coding-system-for-read 'us-ascii)

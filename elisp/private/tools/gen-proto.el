@@ -42,6 +42,7 @@
 (defun elisp/proto/generate-message (full-name fields)
   "Generate code for the protocol buffer message type FULL-NAME.
 FIELDS is a list of field names."
+  (declare (ftype (function (string list) t)))
   (cl-check-type full-name string)
   (cl-check-type fields list)
   (let* ((print-escape-newlines nil)
@@ -80,7 +81,7 @@ This type corresponds to the protocol buffer message type ‘%s’."
     (terpri)
     (pp `(defun ,public-constructor (,@(and fields '(&rest fields)))
            ,public-constructor-doc
-           (declare (side-effect-free t))
+           (declare (ftype (function (&rest t) ,struct)) (side-effect-free t))
            ,(if fields
                 `(apply #'elisp/proto/make ',struct fields)
               `(elisp/proto/make ',struct))))
@@ -94,6 +95,7 @@ This type corresponds to the protocol buffer message type ‘%s’."
 (defun elisp/proto/generate-enum (full-name values)
   "Generate code for the protocol buffer enumeration type FULL-NAME.
 VALUES is a list of (NAME NUMBER) pairs."
+  (declare (ftype (function (string list) t)))
   (cl-check-type full-name string)
   (cl-check-type values list)
   (let* ((parent (string-trim-right full-name (rx ?. (+ (not (any ?.))))))
@@ -117,6 +119,7 @@ qualified name of a protocol buffer message type, and FIELDS is a list
 of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
 where FULL-NAME specifies the qualified name of a protocol buffer
 enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
+  (declare (ftype (function (cons) t)))
   (cl-check-type proto-file elisp/proto/simple-string)
   (cl-check-type descriptor string)
   (cl-check-type deps list)

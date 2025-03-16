@@ -41,7 +41,8 @@
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
 NAME is the name of the test."
-  (declare (side-effect-free error-free))
+  (declare (ftype (function (symbol ert-test-result-with-condition) string))
+           (side-effect-free error-free))
   (cl-check-type name symbol)
   (cl-check-type result ert-test-result-with-condition)
   (with-temp-buffer
@@ -81,6 +82,7 @@ NAME is the name of the test."
 FILE is an abbreviated name as described in
 ‘load-source-file-function’, which see.  Return a live buffer
 visiting the file."
+  (declare (ftype (function (string string) buffer)))
   (cl-check-type fullname string)
   (cl-check-type file string)
   ;; Similar to testcover.el, we use Edebug to collect coverage
@@ -115,6 +117,7 @@ visiting the file."
 (defun elisp/ert/new--definition (name)
   "Enable line coverage collection for NAME.
 This can be used as ‘edebug-new-definition-function’."
+  (declare (ftype (function (symbol) t)))
   (cl-check-type name symbol)
   ;; Check for duplicate names, if possible.  Duplicates cause subtle errors
   ;; that are otherwise very hard to debug, cf. https://debbugs.gnu.org/41853.
@@ -131,6 +134,7 @@ This can be used as ‘edebug-new-definition-function’."
   "Instrument FORM to collect line and branch coverage information.
 This can be used as ‘edebug-after-instrumentation-function’.
 Return FORM."
+  (declare (ftype (function (t) t)))
   (let ((seen (make-hash-table :test #'eq)))
     (elisp/ert/instrument--form seen nil form))
   form)
@@ -190,6 +194,7 @@ VECTOR is either nil (for a toplevel definition) or a vector of
 optional ‘elisp/ert/coverage--data’ objects with the same length
 as the offset vector.  The vector is attached to the
 ‘elisp/ert/coverage’ property of the symbol being defined."
+  (declare (ftype (function (hash-table (or null vector)) t)))
   (cl-check-type seen hash-table)
   (cl-check-type vector (or null vector))
   (unless (gethash form seen)
@@ -242,6 +247,7 @@ Return nil if FORM doesn’t define a branching construct.
 Otherwise, return a new vector containing per-branch
 frequencies (hit counts).  If a branch can’t be instrumented, the
 corresponding element in the return value will be nil."
+  (declare (ftype (function (vector t) (or null vector))))
   (cl-check-type vector vector)
   (pcase form
     (`(,(or 'if 'when 'unless 'while) ,cond . ,_)
@@ -335,6 +341,11 @@ THEN-INDEX, and ELSE-INDEX will be used for the ‘branch-index’,
 ‘then-index’, and ‘else-index’ properties of the
 ‘elisp/ert/coverage--data’ object of the newly-instrumented form,
 respectively."
+  (declare
+   (ftype
+    (function
+     (vector vector list (or natnum null) (or natnum null) (or natnum null))
+     t)))
   (cl-check-type vector vector)
   (cl-check-type branches vector)
   (cl-check-type branch-index (or natnum null))
@@ -373,6 +384,7 @@ respectively."
 (defun elisp/ert/edebug--enter (func args body)
   "Implementation of ‘edebug-enter’ for ERT coverage instrumentation.
 See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
+  (declare (ftype (function (symbol list function) t)))
   (cl-check-type func symbol)
   (cl-check-type args list)
   (cl-check-type body function)
@@ -384,6 +396,7 @@ See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
   "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
 BEFORE-INDEX is the index into ‘elisp/ert/frequency--vector’ for
 the beginning of the form.  Return (before . BEFORE-INDEX)."
+  (declare (ftype (function (natnum) cons)))
   (cl-check-type before-index natnum)
   (let ((data (elisp/ert/coverage--data before-index)))
     ;; Increment hit count.  We prefer doing that here because the beginning of
@@ -408,6 +421,7 @@ BEFORE-INDEX and AFTER-INDEX are the indices into
 ‘elisp/ert/frequency--vector’ for the beginning and end of the
 form, respectively.  VALUE is the value of the form.  Return
 VALUE."
+  (declare (ftype (function (t natnum t) t)))
   (cl-check-type after-index natnum)
   ;; Edebug uses two different forms for instrumentation: For list forms it
   ;; emits (edebug-after (edebug-before BEFORE-INDEX) AFTER-INDEX form), but for
@@ -441,7 +455,8 @@ VALUE."
 (defun elisp/ert/coverage--data (index)
   "Return INDEX’th element of the current coverage vector.
 The return value is of type ‘elisp/ert/coverage--data’."
-  (declare (side-effect-free t))
+  (declare (ftype (function (natnum) elisp/ert/coverage--data))
+           (side-effect-free t))
   (cl-check-type index natnum)
   (let ((data (aref elisp/ert/coverage--vector index)))
     (unless data
@@ -462,6 +477,7 @@ The return value is of type ‘elisp/ert/coverage--data’."
   "Write a coverage report to a file in COVERAGE-DIR.
 BUFFERS is a list of buffers containing Emacs Lisp sources
 instrumented using Edebug."
+  (declare (ftype (function (string list) t)))
   (cl-check-type coverage-dir string)
   (cl-check-type buffers list)
   (with-temp-buffer
@@ -484,7 +500,7 @@ instrumented using Edebug."
     "Return the value associated with KEY in TABLE.
 If no such value exists, evaluate BODY and put its value into
 TABLE."
-    (declare (indent 2) (debug t))
+    (declare (ftype (function (t t &rest t) t)) (indent 2) (debug t))
     (macroexp-let2* nil ((key key) (table table))
       (let ((value (make-symbol "value"))
             (default (make-symbol "default")))
@@ -498,6 +514,7 @@ TABLE."
   "Insert a coverage report into the current buffer.
 BUFFER must be a different buffer visiting an Emacs Lisp source
 file that has been instrumented with Edebug."
+  (declare (ftype (function (buffer) t)))
   (cl-check-type buffer buffer)
   (let ((file-name (elisp/ert/sanitize--string
                     (elisp/ert/file--display-name (buffer-file-name buffer))))
@@ -648,6 +665,7 @@ TEST should be an ERT test symbol.  If possible, return a prefix
 of the form “FILE:LINE” as described in the GNU Coding Standards;
 see Info node ‘(standards) Errors’.  If the file and line can’t
 be determined, return nil."
+  (declare (ftype (function (symbol) (or null string))))
   (cl-check-type test symbol)
   (let ((case-fold-search nil)
         (directory default-directory))
@@ -691,7 +709,8 @@ be determined, return nil."
 
 (defun elisp/ert/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
-  (declare (side-effect-free error-free))
+  (declare (ftype (function (string) string))
+           (side-effect-free error-free))
   (cl-check-type string string)
   ;; The coverage file is line-based, so the string shouldn’t contain any
   ;; newlines.
@@ -701,6 +720,7 @@ be determined, return nil."
 (defun elisp/ert/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
 DIRECTORY is the directory that could contain FILENAME."
+  (declare (ftype (function (string &optional string) string)))
   (cl-check-type filename string)
   (cl-check-type directory (or null string))
   (unless directory (setq directory default-directory))
@@ -725,6 +745,7 @@ DIRECTORY is the directory that could contain FILENAME."
   "Return whether FILE-1 and FILE-2 are probably the same file.
 This is more lenient than ‘file-equal-p’ because it also treats
 exact copies as equal."
+  (declare (ftype (function (string string) boolean)))
   (cl-check-type file-1 string)
   (cl-check-type file-2 string)
   (or (file-equal-p file-1 file-2)
@@ -749,7 +770,8 @@ exact copies as equal."
 
 (defun elisp/ert/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
-  (declare (side-effect-free t))
+  (declare (ftype (function (list) list))
+           (side-effect-free t))
   ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
   ;; cf. https://debbugs.gnu.org/41094.  Use a hashtable to avoid infinite loops
   ;; on cyclic data structures.
@@ -773,7 +795,8 @@ exact copies as equal."
 (defun elisp/ert/check--xml-name (symbol)
   "Check that SYMBOL maps to a valid XML name.
 Return SYMBOL."
-  (declare (side-effect-free t))
+  (declare (ftype (function (symbol) symbol))
+           (side-effect-free t))
   (cl-check-type symbol symbol)
   (let ((name (symbol-name symbol)))
     ;; Allow only known-safe characters in tags.  Also see
@@ -787,7 +810,8 @@ Return SYMBOL."
 
 (defun elisp/ert/sanitize--xml-string (string)
   "Return a sanitized variant of STRING containing only valid XML characters."
-  (declare (side-effect-free error-free))
+  (declare (ftype (function (string) string))
+           (side-effect-free error-free))
   (cl-check-type string string)
   (let ((case-fold-search nil))
     (replace-regexp-in-string

@@ -28,7 +28,7 @@
 ;;; Code:
 
 (require 'bytecomp)
-(eval-when-compile (require 'cl-lib))
+(require 'cl-lib)
 
 (unless noninteractive
   (error "This file works only in batch mode"))
@@ -40,6 +40,11 @@
 
 ;; Ensure filenames in the output are relative to the current directory.
 (setq byte-compile-root-dir default-directory)
+
+;; Emacs 29 doesn’t yet support the ‘ftype’ declaration.  Ensure that
+;; compilation works without warnings.
+(cl-pushnew '(ftype ignore) defun-declarations-alist :test #'eq :key #'car)
+(cl-pushnew '(ftype ignore) macro-declarations-alist :test #'eq :key #'car)
 
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
   (setq command-line-args-left nil
