@@ -2985,6 +2985,12 @@ static bool WriteHandle(struct Context ctx, int fd, upb_StringView* data) {
 
 enum Declarations { kDefault = 0, kNoSideEffects = 0x01 };
 
+static void FunctionPut(struct Context ctx, emacs_value function,
+                        enum GlobalSymbol property, emacs_value value) {
+  FuncallSymbol3(ctx, kFunctionPut, function, GlobalSymbol(ctx, property),
+                 value);
+}
+
 // Defines an exported function, like ‘defun’.  The name may only contain ASCII
 // characters.  The documentation string is required.  If the function accepts
 // arguments, the documentation string must also contain a calling convention;
@@ -3001,8 +3007,7 @@ static void Defun(struct Context ctx, const char* name, ptrdiff_t min_arity,
                                       (struct Globals*)ctx.globals);
   FuncallSymbol2(ctx, kDefalias, symbol, function);
   if (decls & kSideEffectFree) {
-    FuncallSymbol3(ctx, kFunctionPut, symbol,
-                   GlobalSymbol(ctx, kSideEffectFree), GlobalSymbol(ctx, kT));
+    FunctionPut(ctx, symbol, kSideEffectFree, GlobalSymbol(ctx, kT));
   }
 }
 
