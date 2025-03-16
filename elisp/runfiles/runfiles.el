@@ -266,24 +266,24 @@ FILENAME."
   filename)
 
 (defun elisp/runfiles/handle--directory-files
-    (directory full-name match-regexp nosort)
+    (directory full-name match-regexp nosort count)
   "Implementation of ‘directory-files’ for Bazel runfiles.
-See Info node ‘(elisp) Contents of Directories’ for the meaning
-of DIRECTORY, FULL-NAME, MATCH-REGEXP, and NOSORT."
+See Info node ‘(elisp) Contents of Directories’ for the meaning of
+DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and COUNT."
   (let ((files (directory-files (elisp/runfiles/transform--name directory) nil
-                                match-regexp nosort)))
+                                match-regexp nosort count)))
     (if full-name
         (mapcar (lambda (file) (expand-file-name file directory)) files)
       files)))
 
 (defun elisp/runfiles/handle--directory-files-and-attributes
-    (directory full-name match-regexp nosort id-format)
+    (directory full-name match-regexp nosort id-format count)
   "Implementation of ‘directory-files-and-attributes’ for Bazel runfiles.
-See Info node ‘(elisp) Contents of Directories’ for the meaning
-of DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and ID-FORMAT."
+See Info node ‘(elisp) Contents of Directories’ for the meaning of
+DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, ID-FORMAT, and COUNT."
   (let ((files (directory-files-and-attributes
                 (elisp/runfiles/transform--name directory) nil
-                match-regexp nosort id-format)))
+                match-regexp nosort id-format count)))
     (if full-name
         (mapcar (lambda (info)
                   (setcar info (expand-file-name (car info) directory)))

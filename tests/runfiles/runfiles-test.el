@@ -134,7 +134,10 @@ context."
     (should (equal (file-truename virtual-dir) virtual-dir))
     (should (equal (abbreviate-file-name virtual-file) virtual-file))
     (let ((load-path (list virtual-repo-root)))
-      (require 'tests/runfiles/test-lib))))
+      (require 'tests/runfiles/test-lib))
+    (should (cl-subsetp '("test.txt" "test-manifest" "test-mapping")
+                        (directory-files (concat virtual-dir "runfiles/"))
+                        :test #'string-equal))))
 
 (ert-deftest elisp/runfiles/repo-mapping ()
   (let ((temp-dir (make-temp-file "elisp-test-" :directory ".runfiles")))
