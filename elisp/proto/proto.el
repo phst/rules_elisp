@@ -63,6 +63,7 @@ unevaluated keyword arguments.  Make a best-effort attempt to
 print a warning if any keyword in KEYS doesn’t refer to a field
 in TYPE.  In any case, return FORM.  This internal function is
 meant to be used in compiler macros."
+  (declare (ftype (function (t symbol t) t)))
   ;; Emacs turns errors in compiler macros into messages, see
   ;; ‘macroexp--compiler-macro’.  Print a compiler warning instead.
   (if-let ((message (elisp/proto/keys--message type keys)))
@@ -75,7 +76,8 @@ TYPE should be a message structure type symbol; KEYS are the
 unevaluated keyword arguments.  If KEYS are valid keyword-value
 pairs for TYPE, or if their validity can’t be determined
 statically, return nil."
-  (declare (side-effect-free t))
+  (declare (ftype (function (symbol t) (or null string)))
+           (side-effect-free t))
   (condition-case-unless-debug err
       (cl-loop for (key . _) on keys by #'cddr
                when (macroexp-const-p key)

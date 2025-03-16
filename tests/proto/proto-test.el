@@ -985,7 +985,8 @@
 (defun elisp/proto/explain--time-equal-p (a b)
   "ERT explainer for ‘time-equal-p’.
 A and B are the time values to compare."
-  (declare (side-effect-free error-free))
+  (declare (ftype (function (t t) list))
+           (side-effect-free error-free))
   (unless (time-equal-p a b)
     `(different-time-values
       ,(format-time-string "%F %T.%N %Z" a)
