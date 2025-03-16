@@ -1,4 +1,4 @@
-;;; runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
+;;; ert-runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
 ;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
@@ -1153,4 +1153,4 @@ Return SYMBOL."
                   (operation &rest args))
 
 (provide 'elisp/ert/runner)
-;;; runner.el ends here
+;;; ert-runner.el ends here

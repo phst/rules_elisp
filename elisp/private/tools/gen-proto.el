@@ -1,6 +1,6 @@
-;;; generate.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
+;;; gen-proto.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
 
-;; Copyright 2021, 2022, 2023, 2024 Google LLC
+;; Copyright 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -167,4 +167,4 @@ VALUES is a list of (NAME NUMBER) pairs."
 ;; Info node ‘(emacs) Specifying File Variables’.
 
 
-;;; generate.el ends here
+;;; gen-proto.el ends here
