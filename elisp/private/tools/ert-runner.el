@@ -1152,5 +1152,4 @@ TESTBRIDGE_TEST_ONLY environmental variable as test selector."
                                           load-buffers))
       (kill-emacs (min unexpected 1)))))
 
-(provide 'elisp/ert/runner)
 ;;; ert-runner.el ends here
