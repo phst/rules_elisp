@@ -43,11 +43,6 @@
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
 
-(defvar elisp/ert/testing--in-progress nil
-  "Whether tests are currently running.
-Used to detect recursive invocation of
-‘elisp/ert/run-batch-and-exit’.")
-
 (defvar elisp/ert/skip--tests nil
   "Test symbols to be skipped.
 This list is populated by --skip-test command-line options.")
@@ -867,11 +862,7 @@ Return SYMBOL."
 (unless noninteractive
   (error "This file works only in batch mode"))
 
-(when elisp/ert/testing--in-progress
-  (error "Recursive test invocation"))
-
-(let* ((elisp/ert/testing--in-progress t)
-       (attempt-stack-overflow-recovery nil)
+(let* ((attempt-stack-overflow-recovery nil)
        (attempt-orderly-shutdown-on-fatal-signal nil)
        (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
        ;; We perform our own coverage instrumentation.

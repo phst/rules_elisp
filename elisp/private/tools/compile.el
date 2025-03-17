@@ -32,24 +32,15 @@
 
 (defvar elisp/current-repository)
 
-(defvar elisp/compilation--in-progress nil
-  "Whether a byte compilation is currently running.
-Used to detect recursive invocation of
-‘elisp/compile-batch-and-exit’.")
-
 (unless noninteractive
   (error "This file works only in batch mode"))
-
-(when elisp/compilation--in-progress
-  (error "Recursive compilation"))
 
 (pcase command-line-args-left
   (`(,fatal-warn ,current-repo ,src ,out)
    (setq command-line-args-left nil)
-   (let* ((elisp/compilation--in-progress t)
-          ;; Leaving these enabled leads to undefined behavior and doesn’t
-          ;; make sense in batch mode.
-          (attempt-stack-overflow-recovery nil)
+   ;; Leaving these enabled leads to undefined behavior and doesn’t make sense
+   ;; in batch mode.
+   (let* ((attempt-stack-overflow-recovery nil)
           (attempt-orderly-shutdown-on-fatal-signal nil)
           ;; Ensure filenames in the output are relative to the current
           ;; directory.
