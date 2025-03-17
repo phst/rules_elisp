@@ -70,15 +70,13 @@ def main() -> None:
         load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
         runner = run_files.resolve(opts.runner_elc)
         args.append('--load=' + str(runner))
-        # Note that using equals signs for --test-source, --skip-test, and
-        # --skip-tag doesn’t work.
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
-            args += ['--test-source', '/:' + _quote(str(abs_name))]
+            args.append('--test-source=/:' + _quote(str(abs_name)))
         for test in opts.skip_test:
-            args += ['--skip-test', _quote(test)]
+            args.append('--skip-test=' + _quote(test))
         for tag in opts.skip_tag:
-            args += ['--skip-tag', _quote(tag)]
+            args.append('--skip-tag=' + _quote(tag))
         args.append('--')
         args.extend(map(_quote, opts.argv[1:]))
         env.update(run_files.environment())

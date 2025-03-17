@@ -56,13 +56,6 @@ This list is populated by --skip-test command-line options.")
   "Test tags to be skipped.
 This list is populated by --skip-tag command-line options.")
 
-(defun elisp/ert/pop--argument (option)
-  "Pop argument for OPTION from the command line."
-  (cl-check-type option symbol)
-  (let ((argument (pop command-line-args-left)))
-    (or argument (error "Missing value for --%s" option))
-    (elisp/ert/unquote--argument argument)))
-
 (defun elisp/ert/unquote--argument (argument)
   "Unquote ARGUMENT for Windows.
 See //elisp/private/tools:run_test.py."
@@ -863,15 +856,12 @@ Return SYMBOL."
   (while (and continue command-line-args-left)
     (pcase (pop command-line-args-left)
       ("--" (setq continue nil))
-      ("--test-source"
-       (let ((file (elisp/ert/pop--argument 'test-source)))
-         (push file elisp/ert/test--sources)))
-      ("--skip-test"
-       (let ((test (elisp/ert/pop--argument 'skip-test)))
-         (push (intern test) elisp/ert/skip--tests)))
-      ("--skip-tag"
-       (let ((tag (elisp/ert/pop--argument 'skip-tag)))
-         (push (intern tag) elisp/ert/skip--tags)))
+      ((rx bos "--test-source=" (let file (+ anything)) eos)
+       (push (elisp/ert/unquote--argument file) elisp/ert/test--sources))
+      ((rx bos "--skip-test=" (let test (+ anything)) eos)
+       (push (intern (elisp/ert/unquote--argument test)) elisp/ert/skip--tests))
+      ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
+       (push (intern (elisp/ert/unquote--argument tag)) elisp/ert/skip--tags))
       (unknown (error "Unknown command-line switch %s" unknown)))))
 
 (unless noninteractive
