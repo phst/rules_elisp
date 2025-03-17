@@ -25,7 +25,6 @@ def _bootstrap_impl(ctx):
     args = ctx.actions.args()
     args.add(compile, format = "--load=%s")
     args.add("--fatal-warnings")
-    args.add("--funcall=elisp/compile-batch-and-exit")
     args.add(src.owner.workspace_name)
     args.add(src)
     args.add(out)

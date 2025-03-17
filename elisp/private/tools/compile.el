@@ -32,9 +32,6 @@
 
 (defvar elisp/current-repository)
 
-(add-to-list 'command-switch-alist
-             (cons "--fatal-warnings" #'elisp/fatal-warnings))
-
 (defvar elisp/fatal--warnings nil
   "Whether byte compilation warnings should be treated as errors.
 The --fatal-warnings option sets this variable.")
@@ -48,33 +45,31 @@ Used to detect recursive invocation of
   "Process the --fatal-warnings command-line option."
   (setq elisp/fatal--warnings t))
 
-(defun elisp/compile-batch-and-exit ()
-  "Byte-compiles a single Emacs Lisp file and exits Emacs.
-There must be exactly two remaining arguments on the command
-line.  These are interpreted as source and output file,
-respectively.  If compilation fails, exit with a nonzero exit
-code.  If the command line option --fatal-warnings is given,
-treat warnings as errors."
-  (unless noninteractive
-    (error "This function works only in batch mode"))
-  (when elisp/compilation--in-progress
-    (error "Recursive invocation of ‘elisp/compile-batch-and-exit’"))
-  (pcase command-line-args-left
-    (`(,current-repo ,src ,out)
-     (setq command-line-args-left nil)
-     (let* ((elisp/compilation--in-progress t)
-            ;; Leaving these enabled leads to undefined behavior and doesn’t
-            ;; make sense in batch mode.
-            (attempt-stack-overflow-recovery nil)
-            (attempt-orderly-shutdown-on-fatal-signal nil)
-            ;; Ensure filenames in the output are relative to the current
-            ;; directory.
-            (byte-compile-root-dir default-directory)
-            (byte-compile-dest-file-function (lambda (_) out))
-            (byte-compile-error-on-warn elisp/fatal--warnings)
-            (elisp/current-repository current-repo)
-            (success (byte-compile-file src)))
-       (kill-emacs (if success 0 1))))
-    (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT"))))
+(unless noninteractive
+  (error "This file works only in batch mode"))
+
+(when elisp/compilation--in-progress
+  (error "Recursive compilation"))
+
+(when (string-equal (car command-line-args-left) "--fatal-warnings")
+  (elisp/fatal-warnings (pop command-line-args-left)))
+
+(pcase command-line-args-left
+  (`(,current-repo ,src ,out)
+   (setq command-line-args-left nil)
+   (let* ((elisp/compilation--in-progress t)
+          ;; Leaving these enabled leads to undefined behavior and doesn’t
+          ;; make sense in batch mode.
+          (attempt-stack-overflow-recovery nil)
+          (attempt-orderly-shutdown-on-fatal-signal nil)
+          ;; Ensure filenames in the output are relative to the current
+          ;; directory.
+          (byte-compile-root-dir default-directory)
+          (byte-compile-dest-file-function (lambda (_) out))
+          (byte-compile-error-on-warn elisp/fatal--warnings)
+          (elisp/current-repository current-repo)
+          (success (byte-compile-file src)))
+     (kill-emacs (if success 0 1))))
+  (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT")))
 
 ;;; compile.el ends here

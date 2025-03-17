@@ -194,7 +194,6 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             )
         )
         args = ctx.actions.args()
-        args.add(ctx.file._compile, format = "--load=%s")
         args.add_all(
             # We don’t add the full transitive load path here because the
             # direct load path would only contain the file to be compiled.
@@ -210,9 +209,9 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             uniquify = True,
             expand_directories = False,
         )
+        args.add(ctx.file._compile, format = "--load=%s")
         if fatal_warnings:
             args.add("--fatal-warnings")
-        args.add("--funcall=elisp/compile-batch-and-exit")
         args.add(src.owner.workspace_name)
         args.add(src)
         args.add(out)
