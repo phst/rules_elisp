@@ -210,8 +210,7 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
             expand_directories = False,
         )
         args.add(ctx.file._compile, format = "--load=%s")
-        if fatal_warnings:
-            args.add("--fatal-warnings")
+        args.add("1" if fatal_warnings else "")
         args.add(src.owner.workspace_name)
         args.add(src)
         args.add(out)

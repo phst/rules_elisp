@@ -20,7 +20,7 @@
 ;;
 ;; Usage:
 ;;
-;;   emacs --quick --batch --load=compile.el CURRENT-REPO SOURCE DEST
+;;   emacs --quick --batch --load=compile.el FATAL-WARN CURRENT-REPO SOURCE DEST
 ;;
 ;; Compiles the Emacs Lisp file SOURCE and stores the compiled output in the
 ;; file DEST.  Exits with a zero status only if compilation succeeds.
@@ -32,18 +32,10 @@
 
 (defvar elisp/current-repository)
 
-(defvar elisp/fatal--warnings nil
-  "Whether byte compilation warnings should be treated as errors.
-The --fatal-warnings option sets this variable.")
-
 (defvar elisp/compilation--in-progress nil
   "Whether a byte compilation is currently running.
 Used to detect recursive invocation of
 ‘elisp/compile-batch-and-exit’.")
-
-(defun elisp/fatal-warnings (_arg)
-  "Process the --fatal-warnings command-line option."
-  (setq elisp/fatal--warnings t))
 
 (unless noninteractive
   (error "This file works only in batch mode"))
@@ -51,11 +43,8 @@ Used to detect recursive invocation of
 (when elisp/compilation--in-progress
   (error "Recursive compilation"))
 
-(when (string-equal (car command-line-args-left) "--fatal-warnings")
-  (elisp/fatal-warnings (pop command-line-args-left)))
-
 (pcase command-line-args-left
-  (`(,current-repo ,src ,out)
+  (`(,fatal-warn ,current-repo ,src ,out)
    (setq command-line-args-left nil)
    (let* ((elisp/compilation--in-progress t)
           ;; Leaving these enabled leads to undefined behavior and doesn’t
@@ -66,10 +55,10 @@ Used to detect recursive invocation of
           ;; directory.
           (byte-compile-root-dir default-directory)
           (byte-compile-dest-file-function (lambda (_) out))
-          (byte-compile-error-on-warn elisp/fatal--warnings)
+          (byte-compile-error-on-warn (not (string-empty-p fatal-warn)))
           (elisp/current-repository current-repo)
           (success (byte-compile-file src)))
      (kill-emacs (if success 0 1))))
-  (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT")))
+  (_ (error "Usage: emacs elisp/compile.el FATAL-WARN CURRENT-REPO SRC OUT")))
 
 ;;; compile.el ends here

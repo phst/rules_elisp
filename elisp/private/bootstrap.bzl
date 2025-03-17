@@ -24,7 +24,7 @@ def _bootstrap_impl(ctx):
     compile = ctx.file._compile
     args = ctx.actions.args()
     args.add(compile, format = "--load=%s")
-    args.add("--fatal-warnings")
+    args.add("1")  # fatal warnings
     args.add(src.owner.workspace_name)
     args.add(src)
     args.add(out)
