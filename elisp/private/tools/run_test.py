@@ -79,7 +79,7 @@ def main() -> None:
             args += ['--skip-test', _quote(test)]
         for tag in opts.skip_tag:
             args += ['--skip-tag', _quote(tag)]
-        args.append('--funcall=elisp/ert/run-batch-and-exit')
+        args.append('--')
         args.extend(map(_quote, opts.argv[1:]))
         env.update(run_files.environment())
         if manifest_file:
