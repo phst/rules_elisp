@@ -44,6 +44,10 @@ The --fatal-warnings option sets this variable.")
 Used to detect recursive invocation of
 ‘elisp/compile-batch-and-exit’.")
 
+(defun elisp/fatal-warnings (_arg)
+  "Process the --fatal-warnings command-line option."
+  (setq elisp/fatal--warnings t))
+
 (defun elisp/compile-batch-and-exit ()
   "Byte-compiles a single Emacs Lisp file and exits Emacs.
 There must be exactly two remaining arguments on the command
@@ -72,10 +76,6 @@ treat warnings as errors."
             (success (byte-compile-file src)))
        (kill-emacs (if success 0 1))))
     (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT"))))
-
-(defun elisp/fatal-warnings (_arg)
-  "Process the --fatal-warnings command-line option."
-  (setq elisp/fatal--warnings t))
 
 (provide 'elisp/compile)
 ;;; compile.el ends here
