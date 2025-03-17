@@ -39,11 +39,6 @@
 (require 'warnings)
 (require 'xml)
 
-(add-to-list 'command-switch-alist
-             (cons "--test-source" #'elisp/ert/test-source))
-(add-to-list 'command-switch-alist (cons "--skip-test" #'elisp/ert/skip-test))
-(add-to-list 'command-switch-alist (cons "--skip-tag" #'elisp/ert/skip-tag))
-
 (defvar elisp/ert/test--sources ()
   "Test source files to be loaded.
 This list is populated by --test-source command-line options.")
@@ -879,278 +874,285 @@ Return SYMBOL."
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
 
-(defun elisp/ert/run-batch-and-exit ()
-  "Run ERT tests in batch mode.
-This is similar to ‘ert-run-tests-batch-and-exit’, but uses the
-TESTBRIDGE_TEST_ONLY environmental variable as test selector."
-  (unless noninteractive
-    (error "This function works only in batch mode"))
-  (when elisp/ert/testing--in-progress
-    (error "Recursive invocation of ‘elisp/ert/run-batch-and-exit’"))
-  (let* ((elisp/ert/testing--in-progress t)
-         (attempt-stack-overflow-recovery nil)
-         (attempt-orderly-shutdown-on-fatal-signal nil)
-         (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
-         ;; We perform our own coverage instrumentation.
-         (edebug-behavior-alist (cons '(elisp/ert/coverage
-                                        elisp/ert/edebug--enter
-                                        elisp/ert/edebug--before
-                                        elisp/ert/edebug--after)
-                                      (bound-and-true-p edebug-behavior-alist)))
-         (source-dir (getenv "TEST_SRCDIR"))
-         (temp-dir (getenv "TEST_TMPDIR"))
-         (temporary-file-directory
-          (file-name-as-directory (concat "/:" temp-dir)))
-         ;; We could get the repository name from the TEST_WORKSPACE environment
-         ;; variable, but that one’s optional
-         ;; (cf. https://bazel.build/reference/test-encyclopedia#initial-conditions).
-         (repository-name (file-name-nondirectory
-                           (directory-file-name default-directory)))
-         (runfiles-handler-installed
-          (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
-         ;; If the runfiles filename handler is installed, use that.  It’s more
-         ;; correct and should also work on Windows.
-         (resource-root (file-name-as-directory
-                         (if runfiles-handler-installed
-                             (concat "/bazel-runfile:" repository-name)
-                           default-directory)))
-         ;; Best-effort support for ‘ert-resource-directory’ and
-         ;; ‘ert-resource-file’.  The directory returned by
-         ;; ‘ert-resource-directory’ will typically be in the execution root and
-         ;; no longer be valid when the test runs.  Therefore, strip out
-         ;; everything up to the repository directory in the execution root
-         ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
-         ;; and replace it with the default directory.  Robust tests should use
-         ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
-         (ert-resource-directory-trim-left-regexp
-          (rx (* nonl) ?/ (literal repository-name) ?/))
-         (ert-resource-directory-format
-          (concat (replace-regexp-in-string (rx ?%) "%%" resource-root
-                                            :fixedcase :literal)
-                  "%s-resources/"))
-         (report-file (getenv "XML_OUTPUT_FILE"))
-         (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
-         (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
-         (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
-         (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
-         (shard-status-file (getenv "TEST_SHARD_STATUS_FILE"))
-         (coverage-enabled (equal (getenv "COVERAGE") "1"))
-         (coverage-manifest (getenv "COVERAGE_MANIFEST"))
-         (coverage-dir (getenv "COVERAGE_DIR"))
-         (verbose-coverage (not (member (getenv "VERBOSE_COVERAGE") '(nil ""))))
-         (selector (elisp/ert/make--selector
-                    (and coverage-enabled '(:nocover))))
-         (original-load-suffixes load-suffixes)
-         ;; If coverage is enabled, check for a file with a well-known
-         ;; extension first.  The Bazel runfiles machinery is expected to
-         ;; generate these files for source files that should be instrumented.
-         ;; See the commentary in //elisp:elisp_test.bzl for details.
-         (load-suffixes (if coverage-enabled
-                            (cons ".el.instrument" load-suffixes)
-                          load-suffixes))
-         (load-buffers ())
-         (command-line-args-left (mapcar #'elisp/ert/unquote--argument
-                                         command-line-args-left)))
-    ;; TEST_SRCDIR and TEST_TMPDIR are required,
-    ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
-    (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
-    (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
-    (and coverage-enabled (member coverage-manifest '(nil ""))
-         (error "Coverage requested but COVERAGE_MANIFEST not set"))
-    (and coverage-enabled (member coverage-dir '(nil ""))
-         (error "Coverage requested but COVERAGE_DIR not set"))
-    (unless (and (natnump shard-count) (natnump shard-index)
-                 (< shard-index shard-count))
-      (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
-             shard-count shard-index))
+(let ((continue t))
+  (while (and continue command-line-args-left)
+    (pcase (pop command-line-args-left)
+      ("--" (setq continue nil))
+      ("--test-source" (elisp/ert/test-source nil))
+      ("--skip-test" (elisp/ert/skip-test nil))
+      ("--skip-tag" (elisp/ert/skip-tag nil))
+      (unknown (error "Unknown command-line switch %s" unknown)))))
+
+(unless noninteractive
+  (error "This file works only in batch mode"))
+
+(when elisp/ert/testing--in-progress
+  (error "Recursive test invocation"))
+
+(let* ((elisp/ert/testing--in-progress t)
+       (attempt-stack-overflow-recovery nil)
+       (attempt-orderly-shutdown-on-fatal-signal nil)
+       (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
+       ;; We perform our own coverage instrumentation.
+       (edebug-behavior-alist (cons '(elisp/ert/coverage
+                                      elisp/ert/edebug--enter
+                                      elisp/ert/edebug--before
+                                      elisp/ert/edebug--after)
+                                    (bound-and-true-p edebug-behavior-alist)))
+       (source-dir (getenv "TEST_SRCDIR"))
+       (temp-dir (getenv "TEST_TMPDIR"))
+       (temporary-file-directory
+        (file-name-as-directory (concat "/:" temp-dir)))
+       ;; We could get the repository name from the TEST_WORKSPACE environment
+       ;; variable, but that one’s optional
+       ;; (cf. https://bazel.build/reference/test-encyclopedia#initial-conditions).
+       (repository-name (file-name-nondirectory
+                         (directory-file-name default-directory)))
+       (runfiles-handler-installed
+        (rassq #'elisp/runfiles/file-handler file-name-handler-alist))
+       ;; If the runfiles filename handler is installed, use that.  It’s more
+       ;; correct and should also work on Windows.
+       (resource-root (file-name-as-directory
+                       (if runfiles-handler-installed
+                           (concat "/bazel-runfile:" repository-name)
+                         default-directory)))
+       ;; Best-effort support for ‘ert-resource-directory’ and
+       ;; ‘ert-resource-file’.  The directory returned by
+       ;; ‘ert-resource-directory’ will typically be in the execution root and
+       ;; no longer be valid when the test runs.  Therefore, strip out
+       ;; everything up to the repository directory in the execution root
+       ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
+       ;; and replace it with the default directory.  Robust tests should use
+       ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
+       (ert-resource-directory-trim-left-regexp
+        (rx (* nonl) ?/ (literal repository-name) ?/))
+       (ert-resource-directory-format
+        (concat (replace-regexp-in-string (rx ?%) "%%" resource-root
+                                          :fixedcase :literal)
+                "%s-resources/"))
+       (report-file (getenv "XML_OUTPUT_FILE"))
+       (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
+       (random-seed (or (getenv "TEST_RANDOM_SEED") ""))
+       (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
+       (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
+       (shard-status-file (getenv "TEST_SHARD_STATUS_FILE"))
+       (coverage-enabled (equal (getenv "COVERAGE") "1"))
+       (coverage-manifest (getenv "COVERAGE_MANIFEST"))
+       (coverage-dir (getenv "COVERAGE_DIR"))
+       (verbose-coverage (not (member (getenv "VERBOSE_COVERAGE") '(nil ""))))
+       (selector (elisp/ert/make--selector
+                  (and coverage-enabled '(:nocover))))
+       (original-load-suffixes load-suffixes)
+       ;; If coverage is enabled, check for a file with a well-known
+       ;; extension first.  The Bazel runfiles machinery is expected to
+       ;; generate these files for source files that should be instrumented.
+       ;; See the commentary in //elisp:elisp_test.bzl for details.
+       (load-suffixes (if coverage-enabled
+                          (cons ".el.instrument" load-suffixes)
+                        load-suffixes))
+       (load-buffers ())
+       (command-line-args-left (mapcar #'elisp/ert/unquote--argument
+                                       command-line-args-left)))
+  ;; TEST_SRCDIR and TEST_TMPDIR are required,
+  ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
+  (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
+  (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
+  (and coverage-enabled (member coverage-manifest '(nil ""))
+       (error "Coverage requested but COVERAGE_MANIFEST not set"))
+  (and coverage-enabled (member coverage-dir '(nil ""))
+       (error "Coverage requested but COVERAGE_DIR not set"))
+  (unless (and (natnump shard-count) (natnump shard-index)
+               (< shard-index shard-count))
+    (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
+           shard-count shard-index))
+  (when coverage-enabled
+    (when verbose-coverage
+      (message "Reading coverage manifest %s" coverage-manifest))
+    (let ((format-alist nil)
+          (after-insert-file-functions nil)
+          ;; See
+          ;; https://github.com/bazelbuild/bazel/issues/374#issuecomment-2594713891.
+          (coding-system-for-read 'utf-8-unix)
+          (instrumented-files ()))
+      (with-temp-buffer
+        (insert-file-contents (concat "/:" coverage-manifest))
+        (while (not (eobp))
+          ;; The filenames in the coverage manifest are typically relative to
+          ;; the current directory, so expand them here.
+          (push (expand-file-name
+                 (buffer-substring-no-properties (point) (line-end-position)))
+                instrumented-files)
+          (forward-line)))
+      (when verbose-coverage
+        (message "Found %d files in coverage manifest"
+                 (length instrumented-files)))
+      ;; We don’t bother removing the advises since we are going to kill
+      ;; Emacs anyway.
+      (add-function
+       :before-until load-source-file-function
+       (lambda (fullname file _noerror _nomessage)
+         ;; If we got a magic filename that tells us to instrument a file,
+         ;; then instrument the corresponding source file if that exists.  See
+         ;; the commentary in //elisp:elisp_test.bzl for details.  In all
+         ;; other cases, we defer to the normal ‘load-source-file-function’,
+         ;; which is also responsible for raising errors if desired.
+         (when (string-suffix-p ".el.instrument" fullname)
+           (cl-callf2 string-remove-suffix ".instrument" fullname)
+           (cl-callf2 string-remove-suffix ".instrument" file)
+           (when (and (file-readable-p fullname)
+                      ;; We still need to check whether Bazel wants us to
+                      ;; instrument the file.
+                      (cl-find fullname instrumented-files
+                               :test #'elisp/ert/file--equal-p))
+             (push (elisp/ert/load--instrument fullname file) load-buffers)
+             t))))
+      ;; Work around another Edebug specification issue fixed with Emacs
+      ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
+      (when (eql emacs-major-version 29)
+        (put #'cl-define-compiler-macro 'edebug-form-spec
+             '(&define [&name symbolp "@cl-compiler-macro"]
+                       cl-macro-list
+                       cl-declarations-or-string def-body)))))
+  (random random-seed)
+  (when shard-status-file
+    (let ((coding-system-for-write 'no-conversion)
+          (write-region-annotate-functions nil)
+          (write-region-post-annotation-function nil))
+      (write-region "" nil (concat "/:" shard-status-file) :append)))
+  (mapc #'load (reverse elisp/ert/test--sources))
+  (when-let ((args command-line-args-left))
+    (error "Unprocessed command-line arguments: %S" args))
+  (let ((load-file-name nil)  ; hide ourselves from ‘macroexp-warn-and-return’
+        (tests (ert-select-tests selector t))
+        (total 0)
+        (unexpected 0)
+        (errors 0)
+        (failures 0)
+        (skipped 0)
+        (test-reports ())
+        (start-time (current-time)))
+    (or tests (error "Selector %S doesn’t match any tests" selector))
+    (when (> shard-count 1)
+      (setq tests (cl-loop for test in tests
+                           for i from 0
+                           when (eql (mod i shard-count) shard-index)
+                           collect test))
+      (or tests (message "Empty shard with index %d" shard-index)))
+    (message "Running %d tests" (length tests))
+    (ert-run-tests
+     `(member ,@tests)
+     (lambda (&rest args)
+       (pcase args
+         (`(test-started ,_stats ,test)
+          (message "Running test %s" (ert-test-name test)))
+         (`(test-ended ,_stats ,test ,result)
+          (let* ((name (ert-test-name test))
+                 (duration (ert-test-result-duration result))
+                 (expected (ert-test-result-expected-p test result))
+                 (failed
+                  (and (not expected)
+                       ;; A test that passed unexpectedly should count as
+                       ;; failed for the XML report.
+                       (ert-test-result-type-p result '(or :passed :failed))))
+                 (status (ert-string-for-test-result result expected))
+                 (tag nil)
+                 (failure-message nil)
+                 (type nil)
+                 (description nil))
+            (message "Test %s %s and took %d ms" name status
+                     (* duration 1000))
+            (cl-incf total)
+            (unless expected
+              (cl-incf unexpected)
+              ;; Print a nice error message that should point back to the
+              ;; source file in a compilation buffer.  We don’t want to find
+              ;; the “.el.instrument” files when printing the error message,
+              ;; so bind ‘load-suffixes’ temporarily to its original value.
+              (let ((load-suffixes original-load-suffixes))
+                (when-let ((prefix (elisp/ert/message--prefix name)))
+                  (message "%s: Test %s %s" prefix name status)))
+              (and fail-fast (setq tests nil)))
+            (and failed (cl-incf failures))
+            (and (not expected) (not failed) (cl-incf errors))
+            (when (ert-test-skipped-p result)
+              (cl-incf skipped)
+              (setq tag 'skipped))
+            (and (not expected) (ert-test-passed-p result)
+                 ;; Fake an error so that the test is marked as failed in the
+                 ;; XML report.
+                 (setq tag 'failure
+                       failure-message "Test passed unexpectedly"
+                       type 'error))
+            (when (ert-test-result-with-condition-p result)
+              (let ((message (elisp/ert/failure--message name result))
+                    (condition
+                     (ert-test-result-with-condition-condition result)))
+                (message "%s" message)
+                (unless (symbolp (car condition))
+                  ;; This shouldn’t normally happen, but happens due to a bug
+                  ;; in ERT for forms such as
+                  ;; (should (integerp (ert-fail "Boo"))).
+                  (push 'ert-test-failed condition))
+                (setq failure-message (error-message-string condition)
+                      description message)
+                (unless expected
+                  (setq tag (if failed 'failure 'error)
+                        type (car condition)))))
+            (let ((report
+                   (and tag
+                        `((,tag
+                           ((message . ,failure-message)
+                            ,@(and type `((type . ,(symbol-name type)))))
+                           ,@(and description `(,description)))))))
+              (push `(testcase
+                      ((name . ,(symbol-name name))
+                       ;; classname is required, but we don’t have test
+                       ;; classes, so fill in a dummy value.
+                       (classname . "ERT")
+                       (time . ,(format-time-string "%s.%N" duration)))
+                      ,@report)
+                    test-reports)))))))
+    (message "Running %d tests finished, %d results unexpected"
+             total unexpected)
+    (unless (member report-file '(nil ""))
+      (with-temp-buffer
+        ;; The expected format of the XML output file isn’t well-documented.
+        ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
+        ;; only states that the XML file is “based on the JUnit test result
+        ;; schema”, referring to
+        ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
+        ;; https://llg.cubic.org/docs/junit/ and
+        ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
+        ;; bit of documentation.
+        (xml-print
+         (elisp/ert/sanitize--xml
+          `((testsuite
+             ((name . "ERT")  ; required
+              (hostname . "localhost")  ; required
+              (tests . ,(number-to-string total))
+              (errors . ,(number-to-string errors))
+              (failures . ,(number-to-string failures))
+              (skipped . ,(number-to-string skipped))
+              (time . ,(format-time-string "%s.%N"
+                                           (time-subtract nil start-time)))
+              ;; No timezone or fractional seconds allowed.
+              (timestamp . ,(format-time-string "%FT%T" start-time)))
+             (properties () (property ((name . "emacs-version")
+                                       (value . ,emacs-version))))
+             ,@(nreverse test-reports)
+             (system-out) (system-err)))))
+        (let ((coding-system-for-write 'utf-8-unix)
+              (write-region-annotate-functions nil)
+              (write-region-post-annotation-function nil)
+              ;; Work around https://bugs.gnu.org/54294.
+              (create-lockfiles (and create-lockfiles
+                                     (>= emacs-major-version 29))))
+          (write-region nil nil (concat "/:" report-file)))))
     (when coverage-enabled
       (when verbose-coverage
-        (message "Reading coverage manifest %s" coverage-manifest))
-      (let ((format-alist nil)
-            (after-insert-file-functions nil)
-            ;; See
-            ;; https://github.com/bazelbuild/bazel/issues/374#issuecomment-2594713891.
-            (coding-system-for-read 'utf-8-unix)
-            (instrumented-files ()))
-        (with-temp-buffer
-          (insert-file-contents (concat "/:" coverage-manifest))
-          (while (not (eobp))
-            ;; The filenames in the coverage manifest are typically relative to
-            ;; the current directory, so expand them here.
-            (push (expand-file-name
-                   (buffer-substring-no-properties (point) (line-end-position)))
-                  instrumented-files)
-            (forward-line)))
-        (when verbose-coverage
-          (message "Found %d files in coverage manifest"
-                   (length instrumented-files)))
-        ;; We don’t bother removing the advises since we are going to kill
-        ;; Emacs anyway.
-        (add-function
-         :before-until load-source-file-function
-         (lambda (fullname file _noerror _nomessage)
-           ;; If we got a magic filename that tells us to instrument a file,
-           ;; then instrument the corresponding source file if that exists.  See
-           ;; the commentary in //elisp:elisp_test.bzl for details.  In all
-           ;; other cases, we defer to the normal ‘load-source-file-function’,
-           ;; which is also responsible for raising errors if desired.
-           (when (string-suffix-p ".el.instrument" fullname)
-             (cl-callf2 string-remove-suffix ".instrument" fullname)
-             (cl-callf2 string-remove-suffix ".instrument" file)
-             (when (and (file-readable-p fullname)
-                        ;; We still need to check whether Bazel wants us to
-                        ;; instrument the file.
-                        (cl-find fullname instrumented-files
-                                 :test #'elisp/ert/file--equal-p))
-               (push (elisp/ert/load--instrument fullname file) load-buffers)
-               t))))
-        ;; Work around another Edebug specification issue fixed with Emacs
-        ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
-        (when (eql emacs-major-version 29)
-          (put #'cl-define-compiler-macro 'edebug-form-spec
-               '(&define [&name symbolp "@cl-compiler-macro"]
-                         cl-macro-list
-                         cl-declarations-or-string def-body)))))
-    (random random-seed)
-    (when shard-status-file
-      (let ((coding-system-for-write 'no-conversion)
-            (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil))
-        (write-region "" nil (concat "/:" shard-status-file) :append)))
-    (mapc #'load (reverse elisp/ert/test--sources))
-    (when-let ((args command-line-args-left))
-      (error "Unprocessed command-line arguments: %S" args))
-    (let ((tests (ert-select-tests selector t))
-          (total 0)
-          (unexpected 0)
-          (errors 0)
-          (failures 0)
-          (skipped 0)
-          (test-reports ())
-          (start-time (current-time)))
-      (or tests (error "Selector %S doesn’t match any tests" selector))
-      (when (> shard-count 1)
-        (setq tests (cl-loop for test in tests
-                             for i from 0
-                             when (eql (mod i shard-count) shard-index)
-                             collect test))
-        (or tests (message "Empty shard with index %d" shard-index)))
-      (message "Running %d tests" (length tests))
-      (ert-run-tests
-       `(member ,@tests)
-       (lambda (&rest args)
-         (pcase args
-           (`(test-started ,_stats ,test)
-            (message "Running test %s" (ert-test-name test)))
-           (`(test-ended ,_stats ,test ,result)
-            (let* ((name (ert-test-name test))
-                   (duration (ert-test-result-duration result))
-                   (expected (ert-test-result-expected-p test result))
-                   (failed
-                    (and (not expected)
-                         ;; A test that passed unexpectedly should count as
-                         ;; failed for the XML report.
-                         (ert-test-result-type-p result '(or :passed :failed))))
-                   (status (ert-string-for-test-result result expected))
-                   (tag nil)
-                   (failure-message nil)
-                   (type nil)
-                   (description nil))
-              (message "Test %s %s and took %d ms" name status
-                       (* duration 1000))
-              (cl-incf total)
-              (unless expected
-                (cl-incf unexpected)
-                ;; Print a nice error message that should point back to the
-                ;; source file in a compilation buffer.  We don’t want to find
-                ;; the “.el.instrument” files when printing the error message,
-                ;; so bind ‘load-suffixes’ temporarily to its original value.
-                (let ((load-suffixes original-load-suffixes))
-                  (when-let ((prefix (elisp/ert/message--prefix name)))
-                    (message "%s: Test %s %s" prefix name status)))
-                (and fail-fast (setq tests nil)))
-              (and failed (cl-incf failures))
-              (and (not expected) (not failed) (cl-incf errors))
-              (when (ert-test-skipped-p result)
-                (cl-incf skipped)
-                (setq tag 'skipped))
-              (and (not expected) (ert-test-passed-p result)
-                   ;; Fake an error so that the test is marked as failed in the
-                   ;; XML report.
-                   (setq tag 'failure
-                         failure-message "Test passed unexpectedly"
-                         type 'error))
-              (when (ert-test-result-with-condition-p result)
-                (let ((message (elisp/ert/failure--message name result))
-                      (condition
-                       (ert-test-result-with-condition-condition result)))
-                  (message "%s" message)
-                  (unless (symbolp (car condition))
-                    ;; This shouldn’t normally happen, but happens due to a bug
-                    ;; in ERT for forms such as
-                    ;; (should (integerp (ert-fail "Boo"))).
-                    (push 'ert-test-failed condition))
-                  (setq failure-message (error-message-string condition)
-                        description message)
-                  (unless expected
-                    (setq tag (if failed 'failure 'error)
-                          type (car condition)))))
-              (let ((report
-                     (and tag
-                          `((,tag
-                             ((message . ,failure-message)
-                              ,@(and type `((type . ,(symbol-name type)))))
-                             ,@(and description `(,description)))))))
-                (push `(testcase
-                        ((name . ,(symbol-name name))
-                         ;; classname is required, but we don’t have test
-                         ;; classes, so fill in a dummy value.
-                         (classname . "ERT")
-                         (time . ,(format-time-string "%s.%N" duration)))
-                                 ,@report)
-                      test-reports)))))))
-      (message "Running %d tests finished, %d results unexpected"
-               total unexpected)
-      (unless (member report-file '(nil ""))
-        (with-temp-buffer
-          ;; The expected format of the XML output file isn’t well-documented.
-          ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
-          ;; only states that the XML file is “based on the JUnit test result
-          ;; schema”, referring to
-          ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
-          ;; https://llg.cubic.org/docs/junit/ and
-          ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
-          ;; bit of documentation.
-          (xml-print
-           (elisp/ert/sanitize--xml
-            `((testsuite
-               ((name . "ERT")  ; required
-                (hostname . "localhost")  ; required
-                (tests . ,(number-to-string total))
-                (errors . ,(number-to-string errors))
-                (failures . ,(number-to-string failures))
-                (skipped . ,(number-to-string skipped))
-                (time . ,(format-time-string "%s.%N"
-                                             (time-subtract nil start-time)))
-                ;; No timezone or fractional seconds allowed.
-                (timestamp . ,(format-time-string "%FT%T" start-time)))
-               (properties () (property ((name . "emacs-version")
-                                         (value . ,emacs-version))))
-               ,@(nreverse test-reports)
-               (system-out) (system-err)))))
-          (let ((coding-system-for-write 'utf-8-unix)
-                (write-region-annotate-functions nil)
-                (write-region-post-annotation-function nil)
-                ;; Work around https://bugs.gnu.org/54294.
-                (create-lockfiles (and create-lockfiles
-                                       (>= emacs-major-version 29))))
-            (write-region nil nil (concat "/:" report-file)))))
-      (when coverage-enabled
-        (when verbose-coverage
-          (message "Writing coverage report into directory %s" coverage-dir))
-        (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
-                                          load-buffers))
-      (kill-emacs (min unexpected 1)))))
+        (message "Writing coverage report into directory %s" coverage-dir))
+      (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
+                                        load-buffers))
+    (kill-emacs (min unexpected 1))))
 
-(provide 'elisp/ert/runner)
 ;;; ert-runner.el ends here
