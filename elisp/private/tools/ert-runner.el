@@ -56,21 +56,6 @@ This list is populated by --skip-test command-line options.")
   "Test tags to be skipped.
 This list is populated by --skip-tag command-line options.")
 
-(defun elisp/ert/test-source (_arg)
-  "Handle the --test-source command-line argument."
-  (let ((file (elisp/ert/pop--argument 'test-source)))
-    (push file elisp/ert/test--sources)))
-
-(defun elisp/ert/skip-test (_arg)
-  "Handle the --skip-test command-line argument."
-  (let ((test (elisp/ert/pop--argument 'skip-test)))
-    (push (intern test) elisp/ert/skip--tests)))
-
-(defun elisp/ert/skip-tag (_arg)
-  "Handle the --skip-tag command-line argument."
-  (let ((tag (elisp/ert/pop--argument 'skip-tag)))
-    (push (intern tag) elisp/ert/skip--tags)))
-
 (defun elisp/ert/pop--argument (option)
   "Pop argument for OPTION from the command line."
   (cl-check-type option symbol)
@@ -878,9 +863,15 @@ Return SYMBOL."
   (while (and continue command-line-args-left)
     (pcase (pop command-line-args-left)
       ("--" (setq continue nil))
-      ("--test-source" (elisp/ert/test-source nil))
-      ("--skip-test" (elisp/ert/skip-test nil))
-      ("--skip-tag" (elisp/ert/skip-tag nil))
+      ("--test-source"
+       (let ((file (elisp/ert/pop--argument 'test-source)))
+         (push file elisp/ert/test--sources)))
+      ("--skip-test"
+       (let ((test (elisp/ert/pop--argument 'skip-test)))
+         (push (intern test) elisp/ert/skip--tests)))
+      ("--skip-tag"
+       (let ((tag (elisp/ert/pop--argument 'skip-tag)))
+         (push (intern tag) elisp/ert/skip--tags)))
       (unknown (error "Unknown command-line switch %s" unknown)))))
 
 (unless noninteractive
