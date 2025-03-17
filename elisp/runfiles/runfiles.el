@@ -373,8 +373,6 @@ FILENAME."
     (copy-file file newfile arg arg arg arg)
     (diff-latest-backup-file file)
     (directory-file-name arg)
-    (directory-files file arg arg arg)
-    (directory-files-and-attributes file arg arg arg arg)
     (dired-uncache file)
     (file-accessible-directory-p file noerror)
     (file-attributes file arg)
