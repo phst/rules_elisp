@@ -20,7 +20,7 @@
 ;;
 ;; Usage:
 ;;
-;;   emacs --quick --batch --load=compile.el SOURCE DEST
+;;   emacs --quick --batch --load=compile.el CURRENT-REPO SOURCE DEST
 ;;
 ;; Compiles the Emacs Lisp file SOURCE and stores the compiled output in the
 ;; file DEST.  Exits with a zero status only if compilation succeeds.
