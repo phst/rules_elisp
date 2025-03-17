@@ -77,5 +77,4 @@ treat warnings as errors."
        (kill-emacs (if success 0 1))))
     (_ (error "Usage: emacs elisp/compile.el CURRENT-REPO SRC OUT"))))
 
-(provide 'elisp/compile)
 ;;; compile.el ends here
