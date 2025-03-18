@@ -35,19 +35,19 @@
 (unless noninteractive
   (error "This file works only in batch mode"))
 
+;; Leaving these enabled leads to undefined behavior and doesn’t make sense in
+;; batch mode.
+(setq attempt-stack-overflow-recovery nil
+      attempt-orderly-shutdown-on-fatal-signal nil)
+
+;; Ensure filenames in the output are relative to the current directory.
+(setq byte-compile-root-dir default-directory)
+
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
-  (setq command-line-args-left nil)
-  ;; Leaving these enabled leads to undefined behavior and doesn’t make sense
-  ;; in batch mode.
-  (let* ((attempt-stack-overflow-recovery nil)
-         (attempt-orderly-shutdown-on-fatal-signal nil)
-         ;; Ensure filenames in the output are relative to the current
-         ;; directory.
-         (byte-compile-root-dir default-directory)
-         (byte-compile-dest-file-function (lambda (_) out))
-         (byte-compile-error-on-warn (not (string-empty-p fatal-warn)))
-         (elisp/current-repository current-repo)
-         (success (byte-compile-file src)))
-    (kill-emacs (if success 0 1))))
+  (setq command-line-args-left nil
+        byte-compile-dest-file-function (lambda (_) out)
+        byte-compile-error-on-warn (not (string-empty-p fatal-warn))
+        elisp/current-repository current-repo)
+  (kill-emacs (if (byte-compile-file src) 0 1)))
 
 ;;; compile.el ends here

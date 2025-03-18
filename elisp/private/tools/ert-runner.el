@@ -839,16 +839,17 @@ Return SYMBOL."
 (unless noninteractive
   (error "This file works only in batch mode"))
 
-(let* ((attempt-stack-overflow-recovery nil)
-       (attempt-orderly-shutdown-on-fatal-signal nil)
-       (edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
-       ;; We perform our own coverage instrumentation.
-       (edebug-behavior-alist (cons '(elisp/ert/coverage
-                                      elisp/ert/edebug--enter
-                                      elisp/ert/edebug--before
-                                      elisp/ert/edebug--after)
-                                    (bound-and-true-p edebug-behavior-alist)))
-       (source-dir (getenv "TEST_SRCDIR"))
+(setq attempt-stack-overflow-recovery nil
+      attempt-orderly-shutdown-on-fatal-signal nil
+      edebug-initial-mode 'Go-nonstop  ; ‘step’ doesn’t work in batch mode
+      ;; We perform our own coverage instrumentation.
+      edebug-behavior-alist (cons '(elisp/ert/coverage
+                                    elisp/ert/edebug--enter
+                                    elisp/ert/edebug--before
+                                    elisp/ert/edebug--after)
+                                  (bound-and-true-p edebug-behavior-alist)))
+
+(let* ((source-dir (getenv "TEST_SRCDIR"))
        (temp-dir (getenv "TEST_TMPDIR"))
        (temporary-file-directory
         (file-name-as-directory (concat "/:" temp-dir)))
