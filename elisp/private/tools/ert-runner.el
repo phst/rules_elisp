@@ -39,14 +39,6 @@
 (require 'warnings)
 (require 'xml)
 
-(defun elisp/ert/unquote--argument (argument)
-  "Unquote ARGUMENT for Windows.
-See //elisp/private/tools:run_test.py."
-  (if (memq system-type '(ms-dos windows-nt cygwin))
-      (decode-coding-string (url-unhex-string argument :allow-newlines)
-                            'utf-8-unix)
-    argument))
-
 (defun elisp/ert/make--selector (skip-tests skip-tags)
   "Build an ERT selector from environment and command line.
 SKIP-TESTS is a list of test symbols to skip, and SKIP-TAGS is a list of
@@ -912,23 +904,29 @@ Return SYMBOL."
                (< shard-index shard-count))
     (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
            shard-count shard-index))
-  (let ((continue t))
-    (while (and continue command-line-args-left)
-      (pcase (pop command-line-args-left)
-        ("--" (setq continue nil))
-        ((rx bos "--test-source=" (let file (+ anything)) eos)
-         (push (elisp/ert/unquote--argument file) test-sources))
-        ((rx bos "--skip-test=" (let test (+ anything)) eos)
-         (push (intern (elisp/ert/unquote--argument test)) skip-tests))
-        ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
-         (push (intern (elisp/ert/unquote--argument tag)) skip-tags))
-        (unknown (error "Unknown command-line switch %s" unknown)))))
-  (cl-callf nreverse test-sources)
-  (cl-callf nreverse skip-tests)
-  (cl-callf nreverse skip-tags)
-  (when coverage-enabled
-    (push :nocover skip-tags))
-  (cl-callf2 mapcar #'elisp/ert/unquote--argument command-line-args-left)
+  (cl-flet ((unquote (if (memq system-type '(ms-dos windows-nt cygwin))
+                         (lambda (argument)
+                           (decode-coding-string
+                            (url-unhex-string argument :allow-newlines)
+                            'utf-8-unix))
+                       #'identity)))
+    (let ((continue t))
+      (while (and continue command-line-args-left)
+        (pcase (pop command-line-args-left)
+          ("--" (setq continue nil))
+          ((rx bos "--test-source=" (let file (+ anything)) eos)
+           (push (unquote file) test-sources))
+          ((rx bos "--skip-test=" (let test (+ anything)) eos)
+           (push (intern (unquote test)) skip-tests))
+          ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
+           (push (intern (unquote tag)) skip-tags))
+          (unknown (error "Unknown command-line switch %s" unknown)))))
+    (cl-callf nreverse test-sources)
+    (cl-callf nreverse skip-tests)
+    (cl-callf nreverse skip-tags)
+    (when coverage-enabled
+      (push :nocover skip-tags))
+    (cl-callf2 mapcar #'unquote command-line-args-left))
   (setq selector (elisp/ert/make--selector skip-tests skip-tags))
   (when coverage-enabled
     (when verbose-coverage
