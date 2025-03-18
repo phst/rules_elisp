@@ -97,6 +97,25 @@ func TestReportContent(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
+		"TESTBRIDGE_TEST_ONLY=",
+		"TEST_TARGET=//tests:test_test",
+	)
+
+	got := parseReport(t, file)
+	want := reportTemplate()
+	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
+		t.Error("-got +want:\n", diff)
+	}
+}
+
+func TestReportSkipTag(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "report.xml")
+
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	runTest(t,
+		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
 	)
