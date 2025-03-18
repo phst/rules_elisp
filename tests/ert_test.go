@@ -38,7 +38,52 @@ var (
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
-func Test(t *testing.T) {
+func TestExitCode(t *testing.T) {
+	rf, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, err := rf.Rlocation(*testEl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use the ancestor of the source file as repository directory so that
+	// filenames in the coverage report are correct.
+	workspace := filepath.Dir(filepath.Dir(source))
+	t.Logf("running test in workspace directory %s", workspace)
+	bin, err := rf.Rlocation(*binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("using test binary %s", bin)
+
+	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
+	env := os.Environ()
+	env = append(env, rf.Env()...)
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	env = append(env,
+		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
+		"TEST_TARGET=//tests:test_test",
+	)
+	cmd.Env = env
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Dir = workspace
+	switch err := cmd.Run().(type) {
+	case nil:
+		t.Error("test binary succeeded unexpectedly")
+	case *exec.ExitError:
+		if err.ExitCode() != 1 {
+			t.Errorf("test binary: got exit code %d, want 1", err.ExitCode())
+		}
+	default:
+		t.Error(err)
+	}
+	t.Log("test process exited")
+}
+
+func TestReportValid(t *testing.T) {
 	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
@@ -58,13 +103,6 @@ func Test(t *testing.T) {
 	t.Logf("using test binary %s", bin)
 	tempDir := t.TempDir()
 	reportName := filepath.Join(tempDir, "report.xml")
-	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
-	t.Logf("writing coverage manifest %s", coverageManifest)
-	err = os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400)
-	if err != nil {
-		t.Error(err)
-	}
-	coverageDir := t.TempDir()
 
 	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
 	env := os.Environ()
@@ -75,25 +113,13 @@ func Test(t *testing.T) {
 		"XML_OUTPUT_FILE="+reportName,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
-		"COVERAGE=1",
-		"COVERAGE_MANIFEST="+coverageManifest,
-		"COVERAGE_DIR="+coverageDir,
 	)
 	cmd.Env = env
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Dir = workspace
-	switch err := cmd.Run().(type) {
-	case nil:
-		t.Error("test binary succeeded unexpectedly")
-	case *exec.ExitError:
-		if err.ExitCode() != 1 {
-			t.Errorf("test binary: got exit code %d, want 1", err.ExitCode())
-		}
-	default:
-		t.Error(err)
-	}
-	t.Log("test process exited")
+	err = cmd.Run()
+	t.Log("test process exited, error:", err)
 
 	schema, err := rf.Rlocation(*jUnitXsd)
 	if err != nil {
@@ -108,6 +134,45 @@ func Test(t *testing.T) {
 		t.Errorf("error validating XML report file: %s", err)
 	}
 	t.Log("XML validation complete")
+}
+
+func TestReportContent(t *testing.T) {
+	rf, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, err := rf.Rlocation(*testEl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use the ancestor of the source file as repository directory so that
+	// filenames in the coverage report are correct.
+	workspace := filepath.Dir(filepath.Dir(source))
+	t.Logf("running test in workspace directory %s", workspace)
+	bin, err := rf.Rlocation(*binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("using test binary %s", bin)
+	tempDir := t.TempDir()
+	reportName := filepath.Join(tempDir, "report.xml")
+
+	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
+	env := os.Environ()
+	env = append(env, rf.Env()...)
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	env = append(env,
+		"XML_OUTPUT_FILE="+reportName,
+		"TESTBRIDGE_TEST_ONLY=(not (or (tag skip) (tag :nocover)))",
+		"TEST_TARGET=//tests:test_test",
+	)
+	cmd.Env = env
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Dir = workspace
+	err = cmd.Run()
+	t.Log("test process exited, error:", err)
 
 	t.Log("parsing XML report")
 	b, err := os.ReadFile(reportName)
@@ -301,6 +366,53 @@ func Test(t *testing.T) {
 	); diff != "" {
 		t.Error("XML test report (-got +want):\n", diff)
 	}
+}
+
+func TestCoverage(t *testing.T) {
+	rf, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	source, err := rf.Rlocation(*testEl)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Use the ancestor of the source file as repository directory so that
+	// filenames in the coverage report are correct.
+	workspace := filepath.Dir(filepath.Dir(source))
+	t.Logf("running test in workspace directory %s", workspace)
+	bin, err := rf.Rlocation(*binary)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Logf("using test binary %s", bin)
+	tempDir := t.TempDir()
+	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
+	t.Logf("writing coverage manifest %s", coverageManifest)
+	err = os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400)
+	if err != nil {
+		t.Error(err)
+	}
+	coverageDir := t.TempDir()
+
+	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
+	env := os.Environ()
+	env = append(env, rf.Env()...)
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	env = append(env,
+		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
+		"TEST_TARGET=//tests:test_test",
+		"COVERAGE=1",
+		"COVERAGE_MANIFEST="+coverageManifest,
+		"COVERAGE_DIR="+coverageDir,
+	)
+	cmd.Env = env
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Dir = workspace
+	err = cmd.Run()
+	t.Log("test process exited, error:", err)
 
 	t.Logf("looking for coverage files in %s", coverageDir)
 	files, err := filepath.Glob(filepath.Join(coverageDir, "e*.dat"))
@@ -310,7 +422,7 @@ func Test(t *testing.T) {
 	if len(files) != 1 {
 		t.Fatalf("got %d coverage files %v, want exactly one", len(files), files)
 	}
-	b, err = os.ReadFile(files[0])
+	b, err := os.ReadFile(files[0])
 	if err != nil {
 		t.Error(err)
 	}
