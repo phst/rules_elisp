@@ -130,7 +130,8 @@ func TestReportSharded(t *testing.T) {
 		"expect-failure", "expect-failure-but-pass", "filter", "nocover",
 		"pass", "skip", "throw",
 	)
-	want.Failures = 2
+	want.Errors = 1
+	want.Failures = 1
 	want.Skipped = 0
 	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
 		t.Error("-got +want:\n", diff)
@@ -230,8 +231,8 @@ func reportTemplate() report {
 		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
 		Tests:      14,
-		Errors:     0,
-		Failures:   9,
+		Errors:     4,
+		Failures:   5,
 		Skipped:    1,
 		Time:       wantElapsed,
 		Timestamp:  timestamp(time.Now()),
@@ -241,7 +242,7 @@ func reportTemplate() report {
 				Name:      "abort",
 				ClassName: "ERT",
 				Time:      wantElapsed,
-				Failure: message{
+				Error: message{
 					Message:     `peculiar error: "Boo"`,
 					Type:        `undefined-error-symbol`,
 					Description: nonEmpty,
@@ -261,7 +262,7 @@ func reportTemplate() report {
 				Name:      "error",
 				ClassName: "ERT",
 				Time:      wantElapsed,
-				Failure: message{
+				Error: message{
 					Message:     `Boo`,
 					Type:        `error`,
 					Description: nonEmpty,
@@ -339,7 +340,7 @@ func reportTemplate() report {
 				Name:      "special-chars",
 				ClassName: "ERT",
 				Time:      wantElapsed,
-				Failure: message{
+				Error: message{
 					Message:     "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->",
 					Type:        `error`,
 					Description: nonEmpty,
@@ -349,7 +350,7 @@ func reportTemplate() report {
 				Name:      "throw",
 				ClassName: "ERT",
 				Time:      wantElapsed,
-				Failure: message{
+				Error: message{
 					Message:     `No catch for tag: unknown-tag, hi`,
 					Type:        `no-catch`,
 					Description: nonEmpty,
@@ -360,12 +361,12 @@ func reportTemplate() report {
 	if emacsVersion == "30.1" {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
-		abort.Failure = message{}
+		abort.Error = message{}
 		abort.Skipped = message{
 			Message:     `Test skipped: ((skip-unless (not (string-equal emacs-version "30.1"))) :form (not t) :value nil)`,
 			Description: nonEmpty,
 		}
-		r.Failures--
+		r.Errors--
 		r.Skipped++
 	}
 	return r
