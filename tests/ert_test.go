@@ -104,6 +104,7 @@ func TestReportContent(t *testing.T) {
 	got := parseReport(t, file)
 	want := reportTemplate()
 	want.delete("filter")
+	want.Failures--
 	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
 		t.Error("-got +want:\n", diff)
 	}
@@ -172,9 +173,9 @@ func reportTemplate() report {
 	r := report{
 		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
-		Tests:      13,
+		Tests:      14,
 		Errors:     0,
-		Failures:   8,
+		Failures:   9,
 		Skipped:    1,
 		Time:       wantElapsed,
 		Timestamp:  timestamp(time.Now()),
@@ -315,9 +316,11 @@ func reportTemplate() report {
 }
 
 func (r *report) delete(tests ...string) {
+	oldLen := len(r.TestCases)
 	r.TestCases = slices.DeleteFunc(r.TestCases, func(c testCase) bool {
 		return slices.Contains(tests, c.Name)
 	})
+	r.Tests += len(r.TestCases) - oldLen
 }
 
 var reportOpts = cmp.Options{
