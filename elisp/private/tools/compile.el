@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'bytecomp)
+(eval-when-compile (require 'cl-lib))
 
 (unless noninteractive
   (error "This file works only in batch mode"))
