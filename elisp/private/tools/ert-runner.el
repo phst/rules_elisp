@@ -36,7 +36,6 @@
 (require 'rx)
 (require 'subr-x)
 (require 'trampver)  ; load eagerly to work around https://debbugs.gnu.org/11218
-(require 'warnings)
 (require 'xml)
 
 (defun elisp/ert/failure--message (name result)

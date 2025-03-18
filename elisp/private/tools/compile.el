@@ -28,7 +28,6 @@
 ;;; Code:
 
 (require 'bytecomp)
-(require 'warnings)
 
 (unless noninteractive
   (error "This file works only in batch mode"))

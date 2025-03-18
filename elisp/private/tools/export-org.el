@@ -25,7 +25,6 @@
 (require 'org)
 (require 'ox)
 (require 'ox-texinfo)
-(require 'warnings)
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
