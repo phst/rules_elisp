@@ -903,26 +903,20 @@ Return SYMBOL."
     (cl-callf2 mapcar #'unquote command-line-args-left))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
-  (cl-flet ((invert (sel)
-              (if sel `(not ,sel) t)))
-    (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
-           (filter (if (member test-filter '(nil "")) t (read test-filter)))
-           (skip-tags-sel
-            (invert
-             (pcase (mapcar (lambda (tag) `(tag ,tag)) skip-tags)
-               ('() nil)
-               (`(,elt) elt)
-               (elts `(or ,@elts)))))
-           (skip-tests-sel
-            (invert (pcase skip-tests
-                      ('() nil)
-                      (`(,elt) elt)
-                      (elts `(member ,@elts))))))
-      (setq selector
-            (pcase (delq t (list filter skip-tags-sel skip-tests-sel))
-              ('() t)
-              (`(,elt) elt)
-              (elts `(and ,@elts))))))
+  (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
+         (filters (list (if (member test-filter '(nil "")) t (read test-filter))
+                        (pcase (mapcar (lambda (tag) `(tag ,tag)) skip-tags)
+                          ('() t)
+                          (`(,elt) `(not ,elt))
+                          (elts `(not (or ,@elts))))
+                        (pcase skip-tests
+                          ('() t)
+                          (`(,elt) `(not ,elt))
+                          (elts `(not (member ,@elts)))))))
+    (setq selector (pcase (delq t filters)
+                     ('() t)
+                     (`(,elt) elt)
+                     (elts `(and ,@elts)))))
   (when coverage-enabled
     (when verbose-coverage
       (message "Reading coverage manifest %s" coverage-manifest))
