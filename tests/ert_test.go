@@ -100,16 +100,7 @@ func TestReportContent(t *testing.T) {
 		"TEST_TARGET=//tests:test_test",
 	)
 
-	t.Log("parsing XML report")
-	b, err := os.ReadFile(reportName)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var gotReport report
-	err = xml.Unmarshal(b, &gotReport)
-	if err != nil {
-		t.Error(err)
-	}
+	gotReport := parseReport(t, reportName)
 	wantReport := reportTemplate()
 	wantReport.delete("filter")
 	if diff := cmp.Diff(gotReport, wantReport, reportOpts); diff != "" {
@@ -160,6 +151,20 @@ type report struct {
 	Timestamp  timestamp  `xml:"timestamp,attr"`
 	Properties properties `xml:"properties"`
 	TestCases  []testCase `xml:"testcase"`
+}
+
+func parseReport(t *testing.T, file string) report {
+	t.Helper()
+	t.Log("parsing XML report")
+	b, err := os.ReadFile(file)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var r report
+	if err := xml.Unmarshal(b, &r); err != nil {
+		t.Fatal(err)
+	}
+	return r
 }
 
 func reportTemplate() report {
