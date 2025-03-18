@@ -39,18 +39,6 @@
 (require 'warnings)
 (require 'xml)
 
-(defvar elisp/ert/test--sources ()
-  "Test source files to be loaded.
-This list is populated by --test-source command-line options.")
-
-(defvar elisp/ert/skip--tests nil
-  "Test symbols to be skipped.
-This list is populated by --skip-test command-line options.")
-
-(defvar elisp/ert/skip--tags nil
-  "Test tags to be skipped.
-This list is populated by --skip-tag command-line options.")
-
 (defun elisp/ert/unquote--argument (argument)
   "Unquote ARGUMENT for Windows.
 See //elisp/private/tools:run_test.py."
@@ -59,12 +47,13 @@ See //elisp/private/tools:run_test.py."
                             'utf-8-unix)
     argument))
 
-(defun elisp/ert/make--selector (skip-tags)
+(defun elisp/ert/make--selector (skip-tests skip-tags)
   "Build an ERT selector from environment and command line.
-SKIP-TAGS is a list of additional tags to skip."
+SKIP-TESTS is a list of test symbols to skip, and SKIP-TAGS is a list of
+test tag symbols to skip."
   (declare (side-effect-free error-free))
+  (cl-check-type skip-tests list)
   (cl-check-type skip-tags list)
-  (cl-callf append skip-tags (reverse elisp/ert/skip--tags))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
   (cl-flet ((combine (op def elts)
@@ -79,9 +68,9 @@ SKIP-TAGS is a list of additional tags to skip."
             (invert
              (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
                                                 skip-tags)))))
-           (skip-tests
-            (invert (combine 'member nil (reverse elisp/ert/skip--tests)))))
-      (combine 'and t (delq t (list filter skip-tags-sel skip-tests))))))
+           (skip-tests-sel
+            (invert (combine 'member nil skip-tests))))
+      (combine 'and t (delq t (list filter skip-tags-sel skip-tests-sel))))))
 
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
@@ -847,18 +836,6 @@ Return SYMBOL."
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
 
-(let ((continue t))
-  (while (and continue command-line-args-left)
-    (pcase (pop command-line-args-left)
-      ("--" (setq continue nil))
-      ((rx bos "--test-source=" (let file (+ anything)) eos)
-       (push (elisp/ert/unquote--argument file) elisp/ert/test--sources))
-      ((rx bos "--skip-test=" (let test (+ anything)) eos)
-       (push (intern (elisp/ert/unquote--argument test)) elisp/ert/skip--tests))
-      ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
-       (push (intern (elisp/ert/unquote--argument tag)) elisp/ert/skip--tags))
-      (unknown (error "Unknown command-line switch %s" unknown)))))
-
 (unless noninteractive
   (error "This file works only in batch mode"))
 
@@ -912,8 +889,6 @@ Return SYMBOL."
        (coverage-manifest (getenv "COVERAGE_MANIFEST"))
        (coverage-dir (getenv "COVERAGE_DIR"))
        (verbose-coverage (not (member (getenv "VERBOSE_COVERAGE") '(nil ""))))
-       (selector (elisp/ert/make--selector
-                  (and coverage-enabled '(:nocover))))
        (original-load-suffixes load-suffixes)
        ;; If coverage is enabled, check for a file with a well-known
        ;; extension first.  The Bazel runfiles machinery is expected to
@@ -923,8 +898,7 @@ Return SYMBOL."
                           (cons ".el.instrument" load-suffixes)
                         load-suffixes))
        (load-buffers ())
-       (command-line-args-left (mapcar #'elisp/ert/unquote--argument
-                                       command-line-args-left)))
+       test-sources skip-tests skip-tags selector)
   ;; TEST_SRCDIR and TEST_TMPDIR are required,
   ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
   (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
@@ -937,6 +911,24 @@ Return SYMBOL."
                (< shard-index shard-count))
     (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
            shard-count shard-index))
+  (let ((continue t))
+    (while (and continue command-line-args-left)
+      (pcase (pop command-line-args-left)
+        ("--" (setq continue nil))
+        ((rx bos "--test-source=" (let file (+ anything)) eos)
+         (push (elisp/ert/unquote--argument file) test-sources))
+        ((rx bos "--skip-test=" (let test (+ anything)) eos)
+         (push (intern (elisp/ert/unquote--argument test)) skip-tests))
+        ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
+         (push (intern (elisp/ert/unquote--argument tag)) skip-tags))
+        (unknown (error "Unknown command-line switch %s" unknown)))))
+  (cl-callf nreverse test-sources)
+  (cl-callf nreverse skip-tests)
+  (cl-callf nreverse skip-tags)
+  (when coverage-enabled
+    (push :nocover skip-tags))
+  (cl-callf2 mapcar #'elisp/ert/unquote--argument command-line-args-left)
+  (setq selector (elisp/ert/make--selector skip-tests skip-tags))
   (when coverage-enabled
     (when verbose-coverage
       (message "Reading coverage manifest %s" coverage-manifest))
@@ -991,7 +983,7 @@ Return SYMBOL."
           (write-region-annotate-functions nil)
           (write-region-post-annotation-function nil))
       (write-region "" nil (concat "/:" shard-status-file) :append)))
-  (mapc #'load (reverse elisp/ert/test--sources))
+  (mapc #'load test-sources)
   (when-let ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
   (let ((load-file-name nil)  ; hide ourselves from ‘macroexp-warn-and-return’
