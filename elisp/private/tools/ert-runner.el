@@ -1021,9 +1021,16 @@ Return SYMBOL."
                (expected (ert-test-result-expected-p test result))
                (failed
                 (and (not expected)
-                     ;; A test that passed unexpectedly should count as
-                     ;; failed for the XML report.
-                     (ert-test-result-type-p result '(or :passed :failed))))
+                     ;; Only actual failures reported with ‘ert-fail’ count as
+                     ;; failures, other signals count as errors.  See the
+                     ;; distinction in JUnit.xsd and
+                     ;; https://stackoverflow.com/a/3426034.
+                     (or (and (ert-test-failed-p result)
+                              (eq (car (ert-test-failed-condition result))
+                                  'ert-test-failed))
+                         ;; A test that passed unexpectedly should count as
+                         ;; failed for the XML report.
+                         (ert-test-passed-p result))))
                (status (ert-string-for-test-result result expected))
                (tag nil)
                (failure-message nil)
