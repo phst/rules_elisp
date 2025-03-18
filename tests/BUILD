@@ -18,6 +18,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -91,7 +92,10 @@ go_test(
         ":test.el",
         "@junit_xsd//:JUnit.xsd",
     ],
-    embedsrcs = ["coverage.dat"],
+    embedsrcs = [
+        "coverage.dat",
+        "version.txt",
+    ],
     deps = [
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
@@ -162,4 +166,16 @@ py_test(
         "@abseil-py//absl/flags",
         "@abseil-py//absl/testing:absltest",
     ],
+)
+
+run_binary(
+    name = "version",
+    outs = ["version.txt"],
+    args = ["/:$(execpath version.txt)"],
+    tool = ":print_version",
+)
+
+elisp_binary(
+    name = "print_version",
+    src = "print-version.el",
 )

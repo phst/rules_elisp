@@ -141,14 +141,6 @@ func TestReportContent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	var emacsVersion string
-	for _, prop := range gotReport.Properties.Properties {
-		if prop.Name == "emacs-version" {
-			emacsVersion = prop.Value
-			break
-		}
-	}
-	t.Logf("got Emacs version %s", emacsVersion)
 	// Margin for time comparisons.  One hour is excessive, but we only
 	// care about catching obvious bugs here.
 	const margin = time.Hour
@@ -425,6 +417,9 @@ func (d description) String() string {
 	}
 	return ""
 }
+
+//go:embed version.txt
+var emacsVersion string
 
 //go:embed coverage.dat
 var wantCoverage string
