@@ -105,7 +105,7 @@ func TestReportContent(t *testing.T) {
 	want := reportTemplate()
 	want.delete("filter")
 	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
-		t.Error("XML test report (-got +want):\n", diff)
+		t.Error("-got +want:\n", diff)
 	}
 }
 
@@ -363,7 +363,7 @@ func TestCoverage(t *testing.T) {
 	// representations of test filenames.
 	got = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(got, "$1$2")
 	if diff := cmp.Diff(got, wantCoverage); diff != "" {
-		t.Error("coverage report (-got +want):\n", diff)
+		t.Error("-got +want:\n", diff)
 	}
 
 	if *regenerateCoverageDat {
