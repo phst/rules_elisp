@@ -95,7 +95,7 @@ func TestReportContent(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"XML_OUTPUT_FILE="+reportName,
-		"TESTBRIDGE_TEST_ONLY=(not (or (tag skip) (tag :nocover)))",
+		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
 	)
 
@@ -158,9 +158,9 @@ func TestReportContent(t *testing.T) {
 	wantReport := report{
 		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
-		Tests:      12,
+		Tests:      13,
 		Errors:     0,
-		Failures:   7,
+		Failures:   8,
 		Skipped:    1,
 		Time:       wantElapsed,
 		Timestamp:  timestamp(time.Now()),
@@ -222,6 +222,16 @@ func TestReportContent(t *testing.T) {
 			},
 			{
 				Name:      "fail",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
+					Type:        `ert-test-failed`,
+					Description: nonEmpty,
+				},
+			},
+			{
+				Name:      "nocover",
 				ClassName: "ERT",
 				Time:      wantElapsed,
 				Failure: message{
