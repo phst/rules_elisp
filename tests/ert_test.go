@@ -23,6 +23,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"testing"
 	"time"
 
@@ -104,44 +105,65 @@ func TestReportContent(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	type message struct {
-		Message     string      `xml:"message,attr"`
-		Type        string      `xml:"type,attr"`
-		Description description `xml:",chardata"`
-	}
-	type property struct {
-		Name  string `xml:"name,attr"`
-		Value string `xml:"value,attr"`
-	}
-	type properties struct {
-		Properties []property `xml:"property"`
-	}
-	type testCase struct {
-		Name      string  `xml:"name,attr"`
-		ClassName string  `xml:"classname,attr"`
-		Time      float64 `xml:"time,attr"`
-		Skipped   message `xml:"skipped"`
-		Error     message `xml:"error"`
-		Failure   message `xml:"failure"`
-	}
-	type report struct {
-		XMLName    xml.Name
-		Name       string     `xml:"name,attr"`
-		Tests      int        `xml:"tests,attr"`
-		Errors     int        `xml:"errors,attr"`
-		Failures   int        `xml:"failures,attr"`
-		Skipped    int        `xml:"skipped,attr"`
-		Time       float64    `xml:"time,attr"`
-		Timestamp  timestamp  `xml:"timestamp,attr"`
-		Properties properties `xml:"properties"`
-		TestCases  []testCase `xml:"testcase"`
-	}
 	var gotReport report
 	err = xml.Unmarshal(b, &gotReport)
 	if err != nil {
 		t.Error(err)
 	}
-	wantReport := report{
+	wantReport := reportTemplate()
+	wantReport.delete("filter")
+	if diff := cmp.Diff(gotReport, wantReport, reportOpts); diff != "" {
+		t.Error("XML test report (-got +want):\n", diff)
+	}
+}
+
+// Margin for time comparisons.  One hour is excessive, but we only
+// care about catching obvious bugs here.
+const margin = time.Hour
+
+// This, together with the EquateApprox below, ensures that the elapsed
+// time is nonnegative and below the margin.
+var wantElapsed = margin.Seconds() / 2
+
+type message struct {
+	Message     string      `xml:"message,attr"`
+	Type        string      `xml:"type,attr"`
+	Description description `xml:",chardata"`
+}
+
+type property struct {
+	Name  string `xml:"name,attr"`
+	Value string `xml:"value,attr"`
+}
+
+type properties struct {
+	Properties []property `xml:"property"`
+}
+
+type testCase struct {
+	Name      string  `xml:"name,attr"`
+	ClassName string  `xml:"classname,attr"`
+	Time      float64 `xml:"time,attr"`
+	Skipped   message `xml:"skipped"`
+	Error     message `xml:"error"`
+	Failure   message `xml:"failure"`
+}
+
+type report struct {
+	XMLName    xml.Name
+	Name       string     `xml:"name,attr"`
+	Tests      int        `xml:"tests,attr"`
+	Errors     int        `xml:"errors,attr"`
+	Failures   int        `xml:"failures,attr"`
+	Skipped    int        `xml:"skipped,attr"`
+	Time       float64    `xml:"time,attr"`
+	Timestamp  timestamp  `xml:"timestamp,attr"`
+	Properties properties `xml:"properties"`
+	TestCases  []testCase `xml:"testcase"`
+}
+
+func reportTemplate() report {
+	r := report{
 		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
 		Tests:      13,
@@ -217,6 +239,16 @@ func TestReportContent(t *testing.T) {
 				},
 			},
 			{
+				Name:      "filter",
+				ClassName: "ERT",
+				Time:      wantElapsed,
+				Failure: message{
+					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
+					Type:        `ert-test-failed`,
+					Description: nonEmpty,
+				},
+			},
+			{
 				Name:      "nocover",
 				ClassName: "ERT",
 				Time:      wantElapsed,
@@ -264,27 +296,23 @@ func TestReportContent(t *testing.T) {
 	}
 	if emacsVersion == "30.1" {
 		// https://bugs.gnu.org/76447
-		abort := &wantReport.TestCases[0]
+		abort := &r.TestCases[0]
 		abort.Failure = message{}
 		abort.Skipped = message{
 			Message:     `Test skipped: ((skip-unless (not (string-equal emacs-version "30.1"))) :form (not t) :value nil)`,
 			Description: nonEmpty,
 		}
-		wantReport.Failures--
-		wantReport.Skipped++
+		r.Failures--
+		r.Skipped++
 	}
-	if diff := cmp.Diff(gotReport, wantReport, reportOpts); diff != "" {
-		t.Error("XML test report (-got +want):\n", diff)
-	}
+	return r
 }
 
-// Margin for time comparisons.  One hour is excessive, but we only
-// care about catching obvious bugs here.
-const margin = time.Hour
-
-// This, together with the EquateApprox below, ensures that the elapsed
-// time is nonnegative and below the margin.
-var wantElapsed = margin.Seconds() / 2
+func (r *report) delete(tests ...string) {
+	r.TestCases = slices.DeleteFunc(r.TestCases, func(c testCase) bool {
+		return slices.Contains(tests, c.Name)
+	})
+}
 
 var reportOpts = cmp.Options{
 	cmp.Transformer("time.Time", toTime),
