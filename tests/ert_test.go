@@ -52,8 +52,10 @@ func TestExitCode(t *testing.T) {
 	case nil:
 		t.Error("test binary succeeded unexpectedly")
 	case *exec.ExitError:
-		if err.ExitCode() != 1 {
-			t.Errorf("test binary: got exit code %d, want 1", err.ExitCode())
+		got := err.ExitCode()
+		const want = 1
+		if got != want {
+			t.Errorf("test binary: got exit code %d, want %d", got, want)
 		}
 	default:
 		t.Error(err)
