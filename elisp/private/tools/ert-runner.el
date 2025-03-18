@@ -39,31 +39,6 @@
 (require 'warnings)
 (require 'xml)
 
-(defun elisp/ert/make--selector (skip-tests skip-tags)
-  "Build an ERT selector from environment and command line.
-SKIP-TESTS is a list of test symbols to skip, and SKIP-TAGS is a list of
-test tag symbols to skip."
-  (declare (side-effect-free error-free))
-  (cl-check-type skip-tests list)
-  (cl-check-type skip-tags list)
-  ;; We optimize the test selector somewhat.  It’s displayed to the user if no
-  ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
-  (cl-flet ((combine (op def elts)
-              (cond ((null elts) def)
-                    ((cdr elts) `(,op ,@elts))
-                    (t (car elts))))
-            (invert (sel)
-              (if sel `(not ,sel) t)))
-    (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
-           (filter (if (member test-filter '(nil "")) t (read test-filter)))
-           (skip-tags-sel
-            (invert
-             (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
-                                                skip-tags)))))
-           (skip-tests-sel
-            (invert (combine 'member nil skip-tests))))
-      (combine 'and t (delq t (list filter skip-tags-sel skip-tests-sel))))))
-
 (defun elisp/ert/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
 NAME is the name of the test."
@@ -927,7 +902,25 @@ Return SYMBOL."
     (when coverage-enabled
       (push :nocover skip-tags))
     (cl-callf2 mapcar #'unquote command-line-args-left))
-  (setq selector (elisp/ert/make--selector skip-tests skip-tags))
+  ;; We optimize the test selector somewhat.  It’s displayed to the user if no
+  ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
+  (cl-flet ((combine (op def elts)
+              (cond ((null elts) def)
+                    ((cdr elts) `(,op ,@elts))
+                    (t (car elts))))
+            (invert (sel)
+              (if sel `(not ,sel) t)))
+    (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
+           (filter (if (member test-filter '(nil "")) t (read test-filter)))
+           (skip-tags-sel
+            (invert
+             (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
+                                                skip-tags)))))
+           (skip-tests-sel
+            (invert (combine 'member nil skip-tests))))
+      (setq selector
+            (combine 'and t
+                     (delq t (list filter skip-tags-sel skip-tests-sel))))))
   (when coverage-enabled
     (when verbose-coverage
       (message "Reading coverage manifest %s" coverage-manifest))
