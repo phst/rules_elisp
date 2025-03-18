@@ -903,23 +903,26 @@ Return SYMBOL."
     (cl-callf2 mapcar #'unquote command-line-args-left))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
-  (cl-flet ((combine (op def elts)
-              (pcase elts
-                ('() def)
-                (`(,elt) elt)
-                (elts `(,op ,@elts))))
-            (invert (sel)
+  (cl-flet ((invert (sel)
               (if sel `(not ,sel) t)))
     (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
            (filter (if (member test-filter '(nil "")) t (read test-filter)))
            (skip-tags-sel
             (invert
-             (combine 'or nil (mapcar (lambda (tag) `(tag ,tag)) skip-tags))))
+             (pcase (mapcar (lambda (tag) `(tag ,tag)) skip-tags)
+               ('() nil)
+               (`(,elt) elt)
+               (elts `(or ,@elts)))))
            (skip-tests-sel
-            (invert (combine 'member nil skip-tests))))
+            (invert (pcase skip-tests
+                      ('() nil)
+                      (`(,elt) elt)
+                      (elts `(member ,@elts))))))
       (setq selector
-            (combine 'and t
-                     (delq t (list filter skip-tags-sel skip-tests-sel))))))
+            (pcase (delq t (list filter skip-tags-sel skip-tests-sel))
+              ('() t)
+              (`(,elt) elt)
+              (elts `(and ,@elts))))))
   (when coverage-enabled
     (when verbose-coverage
       (message "Reading coverage manifest %s" coverage-manifest))
