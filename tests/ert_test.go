@@ -24,6 +24,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -97,7 +98,6 @@ func TestReportContent(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
-		"TESTBRIDGE_TEST_ONLY=",
 		"TEST_TARGET=//tests:test_test",
 	)
 
@@ -423,7 +423,20 @@ func runTest(t *testing.T, testEnv ...string) error {
 	go log(t, "Emacs", r)
 
 	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
-	env := os.Environ()
+	// Only keep required variables from
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	requiredEnv := []string{
+		"LOGNAME",
+		"TEST_SRCDIR",
+		"TEST_TMPDIR",
+		"TZ",
+		"USER",
+		"BAZEL_TEST",
+	}
+	env := slices.DeleteFunc(os.Environ(), func(s string) bool {
+		name, _, _ := strings.Cut(s, "=")
+		return !slices.Contains(requiredEnv, name)
+	})
 	env = append(env, rf.Env()...)
 	env = append(env, testEnv...)
 	cmd.Env = env
