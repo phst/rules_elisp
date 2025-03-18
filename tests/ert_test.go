@@ -141,12 +141,6 @@ func TestReportContent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	// Margin for time comparisons.  One hour is excessive, but we only
-	// care about catching obvious bugs here.
-	const margin = time.Hour
-	// This, together with the EquateApprox below, ensures that the elapsed
-	// time is nonnegative and below the margin.
-	wantElapsed := margin.Seconds() / 2
 	wantReport := report{
 		XMLName:    xml.Name{Local: "testsuite"},
 		Name:       "ERT",
@@ -279,14 +273,23 @@ func TestReportContent(t *testing.T) {
 		wantReport.Failures--
 		wantReport.Skipped++
 	}
-	if diff := cmp.Diff(
-		gotReport, wantReport,
-		cmp.Transformer("time.Time", toTime),
-		cmpopts.EquateApprox(0, wantElapsed),
-		cmpopts.EquateApproxTime(margin),
-	); diff != "" {
+	if diff := cmp.Diff(gotReport, wantReport, reportOpts); diff != "" {
 		t.Error("XML test report (-got +want):\n", diff)
 	}
+}
+
+// Margin for time comparisons.  One hour is excessive, but we only
+// care about catching obvious bugs here.
+const margin = time.Hour
+
+// This, together with the EquateApprox below, ensures that the elapsed
+// time is nonnegative and below the margin.
+var wantElapsed = margin.Seconds() / 2
+
+var reportOpts = cmp.Options{
+	cmp.Transformer("time.Time", toTime),
+	cmpopts.EquateApprox(0, wantElapsed),
+	cmpopts.EquateApproxTime(margin),
 }
 
 func TestCoverage(t *testing.T) {
