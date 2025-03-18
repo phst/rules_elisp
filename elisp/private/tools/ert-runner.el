@@ -38,7 +38,7 @@
 (require 'trampver)  ; load eagerly to work around https://debbugs.gnu.org/11218
 (require 'xml)
 
-(defun elisp/ert/failure--message (name result)
+(defun elisp/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
 NAME is the name of the test."
   (declare (ftype (function (symbol ert-test-result-with-condition) string))
@@ -77,7 +77,7 @@ NAME is the name of the test."
       (insert ?\n)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
-(defun elisp/ert/load--instrument (fullname file)
+(defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
 FILE is an abbreviated name as described in
 ‘load-source-file-function’, which see.  Return a live buffer
@@ -98,9 +98,8 @@ visiting the file."
         (format-alist nil)
         (after-insert-file-functions nil)
         (edebug-all-defs t)
-        (edebug-new-definition-function #'elisp/ert/new--definition)
-        (edebug-after-instrumentation-function
-         #'elisp/ert/after--instrumentation))
+        (edebug-new-definition-function #'elisp/new--definition)
+        (edebug-after-instrumentation-function #'elisp/after--instrumentation))
     (with-current-buffer buffer
       (insert-file-contents fullname :visit)
       ;; The file buffer needs to be current for Edebug
@@ -114,7 +113,7 @@ visiting the file."
     (progress-reporter-done reporter)
     buffer))
 
-(defun elisp/ert/new--definition (name)
+(defun elisp/new--definition (name)
   "Enable line coverage collection for NAME.
 This can be used as ‘edebug-new-definition-function’."
   (declare (ftype (function (symbol) t)))
@@ -123,30 +122,29 @@ This can be used as ‘edebug-new-definition-function’."
   ;; that are otherwise very hard to debug, cf. https://debbugs.gnu.org/41853.
   (when (get name 'edebug-behavior)
     (error "Symbol ‘%s’ instrumented twice" name))
-  (put name 'edebug-behavior 'elisp/ert/coverage)
+  (put name 'edebug-behavior 'elisp/coverage)
   (let ((offsets (caddr (get name 'edebug))))
     ;; Unlike Edebug, we initialize the coverage data to nil and only set the
     ;; “before” entry to a non-nil value so that we can easily distinguish
     ;; between “before” and “after” positions later.
-    (put name 'elisp/ert/coverage (make-vector (length offsets) nil))))
+    (put name 'elisp/coverage (make-vector (length offsets) nil))))
 
-(defun elisp/ert/after--instrumentation (form)
+(defun elisp/after--instrumentation (form)
   "Instrument FORM to collect line and branch coverage information.
 This can be used as ‘edebug-after-instrumentation-function’.
 Return FORM."
   (declare (ftype (function (t) t)))
   (let ((seen (make-hash-table :test #'eq)))
-    (elisp/ert/instrument--form seen nil form))
+    (elisp/instrument--form seen nil form))
   form)
 
-(cl-defstruct (elisp/ert/coverage--data
-               (:constructor elisp/ert/make--coverage-data)
+(cl-defstruct (elisp/coverage--data
+               (:constructor elisp/make--coverage-data)
                (:copier nil))
   "Coverage data for a specific form.
 The ‘edebug-after-instrumentation-function’ initializes the
-‘elisp/ert/coverage’ property of each instrumented symbol to a
-vector.  Some elements of the vector will be objects of this
-type."
+‘elisp/coverage’ property of each instrumented symbol to a vector.  Some
+elements of the vector will be objects of this type."
   (hits
    0
    :type natnum
@@ -187,13 +185,13 @@ specifying the element that should be incremented whenever the
 underlying form finishes successfully with a non-nil value.  Nil
 if no branch element should be incremented."))
 
-(defun elisp/ert/instrument--form (seen vector form)
+(defun elisp/instrument--form (seen vector form)
   "Instrument FORM to collect line coverage information.
-SEEN is a hashtable used to prevent infinite recursion.
-VECTOR is either nil (for a toplevel definition) or a vector of
-optional ‘elisp/ert/coverage--data’ objects with the same length
-as the offset vector.  The vector is attached to the
-‘elisp/ert/coverage’ property of the symbol being defined."
+SEEN is a hashtable used to prevent infinite recursion.  VECTOR is
+either nil (for a toplevel definition) or a vector of optional
+‘elisp/coverage--data’ objects with the same length as the offset
+vector.  The vector is attached to the ‘elisp/coverage’ property of the
+symbol being defined."
   (declare (ftype (function (hash-table (or null vector)) t)))
   (cl-check-type seen hash-table)
   (cl-check-type vector (or null vector))
@@ -201,12 +199,12 @@ as the offset vector.  The vector is attached to the
     (puthash form t seen)
     (pcase form
       (`(edebug-enter ',func ,_args ,body)
-       (let ((vector (get func 'elisp/ert/coverage)))
-         (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
-         (elisp/ert/instrument--form seen vector body)))
+       (let ((vector (get func 'elisp/coverage)))
+         (cl-check-type vector vector)  ; set by ‘elisp/new--definition’
+         (elisp/instrument--form seen vector body)))
       ((or `(edebug-after (edebug-before ,index) ,_after-index ,form)
            `(edebug-after ,_ ,index ,form))
-       (cl-check-type vector vector)  ; set by ‘elisp/ert/new--definition’
+       (cl-check-type vector vector)  ; set by ‘elisp/new--definition’
        (cl-check-type index natnum)
        (cl-check-type (aref vector index) null)  ; not yet prepared
        ;; We prefer setting the “before” entry to a non-nil value so that we can
@@ -216,43 +214,42 @@ as the offset vector.  The vector is attached to the
        ;; instrumented and forms that are instrumented but not executed.  The
        ;; second branch of the ‘or’ above is chosen for forms without a “before”
        ;; entry, in which case we have to fall back to the “after” entry.
-       (let ((data (aset vector index (elisp/ert/make--coverage-data))))
-         (elisp/ert/instrument--form seen vector form)
+       (let ((data (aset vector index (elisp/make--coverage-data))))
+         (elisp/instrument--form seen vector form)
          ;; Determine whether this is a branching form.  If so, generate a
          ;; branch frequency vector and attach it to DATA.
-         (when-let ((branches (elisp/ert/instrument--branches vector form)))
-           (setf (elisp/ert/coverage--data-branches data) branches))))
+         (when-let ((branches (elisp/instrument--branches vector form)))
+           (setf (elisp/coverage--data-branches data) branches))))
       ((pred proper-list-p)
        ;; Use ‘dolist’ where possible to avoid deep recursion.
        (dolist (element form)
-         (elisp/ert/instrument--form seen vector element)))
+         (elisp/instrument--form seen vector element)))
       (`(,car . ,cdr)
-       (elisp/ert/instrument--form seen vector car)
-       (elisp/ert/instrument--form seen vector cdr))
+       (elisp/instrument--form seen vector car)
+       (elisp/instrument--form seen vector cdr))
       ((pred vectorp)
        (cl-loop for element across form
-                do (elisp/ert/instrument--form seen vector element)))
+                do (elisp/instrument--form seen vector element)))
       ;; Literals that can’t be instrumented.
       ((or (pred symbolp) (pred numberp) (pred stringp)))
       ;; Everything else is unexpected.
-      (_ (signal 'elisp/ert/syntax-error (list form))))))
+      (_ (signal 'elisp/syntax-error (list form))))))
 
-(define-error 'elisp/ert/syntax-error "Syntax error" 'invalid-read-syntax)
+(define-error 'elisp/syntax-error "Syntax error" 'invalid-read-syntax)
 
-(defun elisp/ert/instrument--branches (vector form)
+(defun elisp/instrument--branches (vector form)
   "Instrument a branching FORM.
-VECTOR is the coverage data vector attached to the
-‘elisp/ert/coverage’ property of the symbol being defined.
-Return nil if FORM doesn’t define a branching construct.
-Otherwise, return a new vector containing per-branch
-frequencies (hit counts).  If a branch can’t be instrumented, the
-corresponding element in the return value will be nil."
+VECTOR is the coverage data vector attached to the ‘elisp/coverage’
+property of the symbol being defined.  Return nil if FORM doesn’t define
+a branching construct.  Otherwise, return a new vector containing
+per-branch frequencies (hit counts).  If a branch can’t be instrumented,
+the corresponding element in the return value will be nil."
   (declare (ftype (function (vector t) (or null vector))))
   (cl-check-type vector vector)
   (pcase form
     (`(,(or 'if 'when 'unless 'while) ,cond . ,_)
      (let ((branches (vector nil nil)))
-       (elisp/ert/instrument--branch vector branches (list cond) nil 0 1)
+       (elisp/instrument--branch vector branches (list cond) nil 0 1)
        branches))
     (`(,(or 'and 'or) . ,(and (pred proper-list-p) conditions))
      ;; The last condition form won’t introduce a new branch.
@@ -262,8 +259,8 @@ corresponding element in the return value will be nil."
      (let ((branches (make-vector (* 2 (length conditions)) nil)))
        (cl-loop for form in conditions
                 and index from 0 by 2
-                do (elisp/ert/instrument--branch vector branches (list form)
-                                                 nil index (1+ index)))
+                do (elisp/instrument--branch vector branches (list form)
+                                             nil index (1+ index)))
        branches))
     (`(,(or 'cond
             'cl-case 'cl-ecase
@@ -280,8 +277,8 @@ corresponding element in the return value will be nil."
                 ;; ‘cl-case’ clauses etc., we can just instrument the entire
                 ;; CLAUSE in all cases.  Note that this will miss CLAUSES with
                 ;; an empty body, but that’s life.
-                do (elisp/ert/instrument--branch vector branches clause
-                                                 index nil nil))
+                do (elisp/instrument--branch vector branches clause
+                                             index nil nil))
        branches))
     ((or `(,(or 'condition-case 'condition-case-unless-debug)
            ,_var ,(and bodyform (let body (list bodyform))) .
@@ -293,16 +290,16 @@ corresponding element in the return value will be nil."
        ;; Specifying a THEN-INDEX and ELSE-INDEX instead of a BRANCH-INDEX
        ;; forces evaluation after the form finishes, which is exactly what we
        ;; want here.
-       (elisp/ert/instrument--branch vector branches body nil 0 0)
+       (elisp/instrument--branch vector branches body nil 0 0)
        (cl-loop for clause in clauses
                 and index from 1
                 when (listp clause)  ; gently skip over syntax errors
-                do (elisp/ert/instrument--branch vector branches clause
-                                                 index nil nil))
+                do (elisp/instrument--branch vector branches clause
+                                             index nil nil))
        branches))
     (`(,(or 'if-let 'when-let) (,(pred symbolp) ,expr) . ,_)
      (let ((branches (vector nil nil)))
-       (elisp/ert/instrument--branch vector branches (list expr) nil 0 1)
+       (elisp/instrument--branch vector branches (list expr) nil 0 1)
        branches))
     (`(,(or 'if-let 'if-let* 'when-let 'when-let* 'and-let*)
        ,(and (pred proper-list-p) spec) . ,_)
@@ -316,8 +313,8 @@ corresponding element in the return value will be nil."
                           ;; instrumented because Edebug doesn’t instrument
                           ;; symbols matched using ‘symbolp’.
                           (and (pred symbolp) form))
-                      (elisp/ert/instrument--branch
-                       vector branches (list form) nil index (1+ index)))))
+                      (elisp/instrument--branch vector branches (list form)
+                                                nil index (1+ index)))))
        branches))
     (`(cl-loop . ,(and (pred proper-list-p) rest))
      (when-let ((conditions (cl-loop for (keyword form) on rest
@@ -326,20 +323,19 @@ corresponding element in the return value will be nil."
        (let ((branches (make-vector (* 2 (length conditions)) nil)))
          (cl-loop for form in conditions
                   and index from 0 by 2
-                  do (elisp/ert/instrument--branch
-                      vector branches (list form) nil index (1+ index)))
+                  do (elisp/instrument--branch vector branches (list form)
+                                               nil index (1+ index)))
          branches)))))
 
-(defun elisp/ert/instrument--branch
+(defun elisp/instrument--branch
     (vector branches forms branch-index then-index else-index)
   "Instrument a single branch of a branching form.
-VECTOR is the coverage data vector attached to the
-‘elisp/ert/coverage’ property of the symbol being defined.
-BRANCHES is the branch frequency vector for the parent form.
-FORMS is the list of forms to be instrumented.  BRANCH-INDEX,
-THEN-INDEX, and ELSE-INDEX will be used for the ‘branch-index’,
-‘then-index’, and ‘else-index’ properties of the
-‘elisp/ert/coverage--data’ object of the newly-instrumented form,
+VECTOR is the coverage data vector attached to the ‘elisp/coverage’
+property of the symbol being defined.  BRANCHES is the branch frequency
+vector for the parent form.  FORMS is the list of forms to be
+instrumented.  BRANCH-INDEX, THEN-INDEX, and ELSE-INDEX will be used for
+the ‘branch-index’, ‘then-index’, and ‘else-index’ properties of the
+‘elisp/coverage--data’ object of the newly-instrumented form,
 respectively."
   (declare
    (ftype
@@ -358,16 +354,16 @@ respectively."
   (cl-dolist (form forms)
     ;; Look for the first form that has any Edebug instrumentation.
     (pcase form
-      ;; Prefer the “before” spot, like ‘elisp/ert/instrument--form’.
+      ;; Prefer the “before” spot, like ‘elisp/instrument--form’.
       ((or `(edebug-after (edebug-before ,form-index) ,_after-index ,_form)
            `(edebug-after ,_ ,form-index ,_form))
-       ;; The data object has been prepared by ‘elisp/ert/instrument--form’.
+       ;; The data object has been prepared by ‘elisp/instrument--form’.
        (let ((data (aref vector form-index)))
-         (cl-check-type data elisp/ert/coverage--data)
-         (setf (elisp/ert/coverage--data-parent-branches data) branches
-               (elisp/ert/coverage--data-branch-index data) branch-index
-               (elisp/ert/coverage--data-then-index data) then-index
-               (elisp/ert/coverage--data-else-index data) else-index))
+         (cl-check-type data elisp/coverage--data)
+         (setf (elisp/coverage--data-parent-branches data) branches
+               (elisp/coverage--data-branch-index data) branch-index
+               (elisp/coverage--data-then-index data) then-index
+               (elisp/coverage--data-else-index data) else-index))
        ;; Initialize branch frequency vector.  Some elements might remain nil,
        ;; if Edebug hasn’t generated any instrumentation for the form.
        (dolist (i (list branch-index then-index else-index))
@@ -375,90 +371,89 @@ respectively."
        (cl-return)))))
 
 ;; Innermost function being executed, dynamically bound by
-;; ‘elisp/ert/edebug--enter’.
-(defvar elisp/ert/coverage--function)
+;; ‘elisp/edebug--enter’.
+(defvar elisp/coverage--function)
 
-;; Current coverage data vector, dynamically bound by ‘elisp/ert/edebug--enter’.
-(defvar elisp/ert/coverage--vector)
+;; Current coverage data vector, dynamically bound by ‘elisp/edebug--enter’.
+(defvar elisp/coverage--vector)
 
-(defun elisp/ert/edebug--enter (func args body)
+(defun elisp/edebug--enter (func args body)
   "Implementation of ‘edebug-enter’ for ERT coverage instrumentation.
 See ‘edebug-enter’ for the meaning of FUNC, ARGS, and BODY."
   (declare (ftype (function (symbol list function) t)))
   (cl-check-type func symbol)
   (cl-check-type args list)
   (cl-check-type body function)
-  (let ((elisp/ert/coverage--function func)
-        (elisp/ert/coverage--vector (get func 'elisp/ert/coverage)))
+  (let ((elisp/coverage--function func)
+        (elisp/coverage--vector (get func 'elisp/coverage)))
     (funcall body)))
 
-(defun elisp/ert/edebug--before (before-index)
+(defun elisp/edebug--before (before-index)
   "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
-BEFORE-INDEX is the index into ‘elisp/ert/frequency--vector’ for
+BEFORE-INDEX is the index into ‘elisp/frequency--vector’ for
 the beginning of the form.  Return (before . BEFORE-INDEX)."
   (declare (ftype (function (natnum) cons)))
   (cl-check-type before-index natnum)
-  (let ((data (elisp/ert/coverage--data before-index)))
+  (let ((data (elisp/coverage--data before-index)))
     ;; Increment hit count.  We prefer doing that here because the beginning of
     ;; a form tends to be more interesting and the end, and we’d like to
     ;; increment the hit count for the first line of a form instead of the last.
-    ;; See ‘elisp/ert/edebug--after’ for a case where this isn’t possible.
-    (cl-incf (elisp/ert/coverage--data-hits data))
+    ;; See ‘elisp/edebug--after’ for a case where this isn’t possible.
+    (cl-incf (elisp/coverage--data-hits data))
     ;; If this is a subform of a branching form and we’re supposed to
     ;; unconditionally increment a branch frequency, do so now.
-    (when-let ((branches (elisp/ert/coverage--data-parent-branches data))
-               (branch-index (elisp/ert/coverage--data-branch-index data)))
+    (when-let ((branches (elisp/coverage--data-parent-branches data))
+               (branch-index (elisp/coverage--data-branch-index data)))
       (cl-incf (aref branches branch-index))))
   ;; The return value gets passed to the BEFORE-INDEX argument of
   ;; ‘edebug-after’.  Pick a form that allows it to distinguish this case from
   ;; the case of a plain variable, which doesn’t involve ‘edebug-before’.
   `(before . ,before-index))
 
-(defun elisp/ert/edebug--after (before after-index value)
+(defun elisp/edebug--after (before after-index value)
   "Implementation of ‘edebug-before’ for ERT coverage instrumentation.
-BEFORE is normally of the form (before . BEFORE-INDEX).
-BEFORE-INDEX and AFTER-INDEX are the indices into
-‘elisp/ert/frequency--vector’ for the beginning and end of the
-form, respectively.  VALUE is the value of the form.  Return
-VALUE."
+BEFORE is normally of the form (before . BEFORE-INDEX).  BEFORE-INDEX
+and AFTER-INDEX are the indices into ‘elisp/frequency--vector’ for the
+beginning and end of the form, respectively.  VALUE is the value of the
+form.  Return VALUE."
   (declare (ftype (function (t natnum t) t)))
   (cl-check-type after-index natnum)
   ;; Edebug uses two different forms for instrumentation: For list forms it
   ;; emits (edebug-after (edebug-before BEFORE-INDEX) AFTER-INDEX form), but for
   ;; variables it just emits (edebug-after 0 AFTER-INDEX form).  We prefer
   ;; incrementing the hit count for the beginning of the form, see
-  ;; ‘elisp/ert/edebug--before’.  However, where this isn’t possible, increment
-  ;; the hit count for the end of them form.  This should only happen for
-  ;; variables that rarely span more than one line.
+  ;; ‘elisp/edebug--before’.  However, where this isn’t possible, increment the
+  ;; hit count for the end of them form.  This should only happen for variables
+  ;; that rarely span more than one line.
   (let (incrementp form-index)
     (pcase before
       ;; Increment line hit count only if ‘edebug-before’ hasn’t incremented it
       ;; yet.
       (`(before . ,before-index) (setq incrementp nil form-index before-index))
       (_ (setq incrementp t form-index after-index)))
-    (let ((data (elisp/ert/coverage--data form-index)))
+    (let ((data (elisp/coverage--data form-index)))
       (when incrementp
         ;; Increment line hit count, because that hasn’t happened yet in
         ;; ‘edebug-before’.
-        (cl-incf (elisp/ert/coverage--data-hits data)))
+        (cl-incf (elisp/coverage--data-hits data)))
       ;; Check if this form is a condition of a branching form such as ‘if’.  If
       ;; so, increment the branch hit count for the “then” or “else” branch
       ;; depending on VALUE.  We need to do this in ‘edebug-after’ because only
       ;; then we know the return value of the form.
-      (when-let ((branches (elisp/ert/coverage--data-parent-branches data))
+      (when-let ((branches (elisp/coverage--data-parent-branches data))
                  (branch-index (if value
-                                   (elisp/ert/coverage--data-then-index data)
-                                 (elisp/ert/coverage--data-else-index data))))
+                                   (elisp/coverage--data-then-index data)
+                                 (elisp/coverage--data-else-index data))))
         (cl-incf (aref branches branch-index)))))
   value)
 
-(defun elisp/ert/coverage--data (index)
+(defun elisp/coverage--data (index)
   "Return INDEX’th element of the current coverage vector.
-The return value is of type ‘elisp/ert/coverage--data’."
-  (declare (ftype (function (natnum) elisp/ert/coverage--data))
+The return value is of type ‘elisp/coverage--data’."
+  (declare (ftype (function (natnum) elisp/coverage--data))
            (side-effect-free t))
   (cl-check-type index natnum)
-  (let ((data (aref elisp/ert/coverage--vector index)))
+  (let ((data (aref elisp/coverage--vector index)))
     (unless data
       ;; This is typically an error in the Edebug specification of a macro being
       ;; expanded, not a bug in this library.  Give the user a more helpful
@@ -466,14 +461,13 @@ The return value is of type ‘elisp/ert/coverage--data’."
       ;; look through the body of the ‘edebug/coverage--function’.  The most
       ;; common error is to use ‘form’ where ‘def-form’ would be required; see
       ;; Info node ‘(elisp) Specification List’.
-      (signal 'elisp/ert/missing-coverage-data
-              (list elisp/ert/coverage--function
-                    elisp/ert/coverage--vector index)))
-    (cl-the elisp/ert/coverage--data data)))
+      (signal 'elisp/missing-coverage-data
+              (list elisp/coverage--function elisp/coverage--vector index)))
+    (cl-the elisp/coverage--data data)))
 
-(define-error 'elisp/ert/missing-coverage-data "Missing coverage data")
+(define-error 'elisp/missing-coverage-data "Missing coverage data")
 
-(defun elisp/ert/write--coverage-report (coverage-dir buffers)
+(defun elisp/write--coverage-report (coverage-dir buffers)
   "Write a coverage report to a file in COVERAGE-DIR.
 BUFFERS is a list of buffers containing Emacs Lisp sources
 instrumented using Edebug."
@@ -488,15 +482,15 @@ instrumented using Edebug."
           (create-lockfiles (and create-lockfiles (>= emacs-major-version 29)))
           (test-name (getenv "TEST_TARGET")))
       (unless (member test-name '(nil ""))
-        (insert "TN:" (elisp/ert/sanitize--string test-name) ?\n))
+        (insert "TN:" (elisp/sanitize--string test-name) ?\n))
       (dolist (buffer buffers)
-        (elisp/ert/insert--coverage-report buffer)
+        (elisp/insert--coverage-report buffer)
         (kill-buffer buffer))
       (write-region nil nil (expand-file-name "emacs-lisp.dat" coverage-dir)
                     :append))))
 
 (eval-when-compile
-  (defmacro elisp/ert/hash--get-or-put (key table &rest body)
+  (defmacro elisp/hash--get-or-put (key table &rest body)
     "Return the value associated with KEY in TABLE.
 If no such value exists, evaluate BODY and put its value into
 TABLE."
@@ -510,14 +504,14 @@ TABLE."
                (puthash ,key ,(macroexp-progn body) ,table)
              ,value))))))
 
-(defun elisp/ert/insert--coverage-report (buffer)
+(defun elisp/insert--coverage-report (buffer)
   "Insert a coverage report into the current buffer.
 BUFFER must be a different buffer visiting an Emacs Lisp source
 file that has been instrumented with Edebug."
   (declare (ftype (function (buffer) t)))
   (cl-check-type buffer buffer)
-  (let ((file-name (elisp/ert/sanitize--string
-                    (elisp/ert/file--display-name (buffer-file-name buffer))))
+  (let ((file-name (elisp/sanitize--string
+                    (elisp/file--display-name (buffer-file-name buffer))))
         (functions ())
         (functions-hit 0)
         (lines (make-hash-table :test #'eql))
@@ -530,12 +524,11 @@ file that has been instrumented with Edebug."
        for data in edebug-form-data
        ;; Yuck!  More messing around with Edebug internals.
        for name = (edebug--form-data-name data)
-       for ours = (eq (get name 'edebug-behavior) 'elisp/ert/coverage)
-       for coverage = (get name
-                           (if ours 'elisp/ert/coverage 'edebug-freq-count))
+       for ours = (eq (get name 'edebug-behavior) 'elisp/coverage)
+       for coverage = (get name (if ours 'elisp/coverage 'edebug-freq-count))
        for frequency = (if ours
                            (lambda (cov)
-                             (and cov (elisp/ert/coverage--data-hits cov)))
+                             (and cov (elisp/coverage--data-hits cov)))
                          #'identity)
        ;; We don’t really know the number of function calls, so assume it’s the
        ;; same as the hit count of the first breakpoint.
@@ -549,7 +542,7 @@ file that has been instrumented with Edebug."
        (unless (eq (marker-buffer begin) buffer)
          (error "Function %s got redefined in some other file" name))
        (cl-incf functions-hit (min calls 1))
-       (elisp/ert/hash--get-or-put begin-line lines 0)
+       (elisp/hash--get-or-put begin-line lines 0)
        (cl-assert (eql (length coverage) (length offsets)) :show-args)
        (cl-loop
         for offset across offsets
@@ -561,7 +554,7 @@ file that has been instrumented with Edebug."
         ;; position will typically contain a closing parenthesis or space.  We
         ;; don’t consider this a covered line since it typically only contains
         ;; unimportant pieces of the form.  An exception is a plain variable;
-        ;; see the discussion in ‘elisp/ert/edebug--after’.
+        ;; see the discussion in ‘elisp/edebug--after’.
         for ok = (if ours
                      ;; If we added our own coverage instrumentation, the
                      ;; coverage data is set only for form beginnings and
@@ -580,22 +573,21 @@ file that has been instrumented with Edebug."
             (when ours
               ;; Collect branch coverage information if the form has multiple
               ;; branches.
-              (when-let ((frequencies
-                          (elisp/ert/coverage--data-branches cov)))
+              (when-let ((frequencies (elisp/coverage--data-branches cov)))
                 ;; Remove branches that Edebug didn’t instrument.
                 (cl-callf2 cl-remove nil frequencies)
                 ;; If fewer than two branches are left, we don’t really have any
                 ;; meaningful branch coverage data.
                 (when (> (length frequencies) 1)
-                  (let* ((u (elisp/ert/hash--get-or-put line branches
+                  (let* ((u (elisp/hash--get-or-put line branches
                               (make-hash-table :test #'eql)))
-                         (v (elisp/ert/hash--get-or-put offset u
+                         (v (elisp/hash--get-or-put offset u
                               (make-vector (length frequencies) 0))))
                     (cl-loop for f across frequencies
                              and n across-ref v
                              do (cl-callf max n f)))))))))
        (push (list begin-line
-                   (elisp/ert/sanitize--string (symbol-name name))
+                   (elisp/sanitize--string (symbol-name name))
                    calls)
              functions)))
     (cl-callf sort functions #'car-less-than-car)
@@ -659,7 +651,7 @@ file that has been instrumented with Edebug."
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (length vector))))))
 
-(defun elisp/ert/message--prefix (test)
+(defun elisp/message--prefix (test)
   "Return a message prefix for TEST.
 TEST should be an ERT test symbol.  If possible, return a prefix
 of the form “FILE:LINE” as described in the GNU Coding Standards;
@@ -704,10 +696,10 @@ be determined, return nil."
             ;; filename relative to the test working directory
             ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).
             (format "%s:%d"
-                    (elisp/ert/file--display-name file directory)
+                    (elisp/file--display-name file directory)
                     (line-number-at-pos))))))))
 
-(defun elisp/ert/sanitize--string (string)
+(defun elisp/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
   (declare (ftype (function (string) string))
            (side-effect-free error-free))
@@ -717,7 +709,7 @@ be determined, return nil."
   (let ((case-fold-search nil))
     (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string)))
 
-(defun elisp/ert/file--display-name (filename &optional directory)
+(defun elisp/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
 DIRECTORY is the directory that could contain FILENAME."
   (declare (ftype (function (string &optional string) string)))
@@ -741,7 +733,7 @@ DIRECTORY is the directory that could contain FILENAME."
         (absolute (abbreviate-file-name (file-name-unquote filename))))
     (if (< (length relative) (length absolute)) relative absolute)))
 
-(defun elisp/ert/file--equal-p (file-1 file-2)
+(defun elisp/file--equal-p (file-1 file-2)
   "Return whether FILE-1 and FILE-2 are probably the same file.
 This is more lenient than ‘file-equal-p’ because it also treats
 exact copies as equal."
@@ -768,7 +760,7 @@ exact copies as equal."
                                                      buffer-2 nil nil)
                           0)))))))))
 
-(defun elisp/ert/sanitize--xml (tree)
+(defun elisp/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
   (declare (ftype (function (list) list))
            (side-effect-free t))
@@ -782,8 +774,8 @@ exact copies as equal."
                   (let ((existing (gethash obj map marker)))
                     (if (not (eq existing marker)) existing
                       (let ((new (cl-etypecase obj
-                                   (symbol (elisp/ert/check--xml-name obj))
-                                   (string (elisp/ert/sanitize--xml-string obj))
+                                   (symbol (elisp/check--xml-name obj))
+                                   (string (elisp/sanitize--xml-string obj))
                                    ((and list (satisfies proper-list-p))
                                     (mapcar #'walk obj))
                                    (cons
@@ -792,7 +784,7 @@ exact copies as equal."
                         new)))))
       (walk tree))))
 
-(defun elisp/ert/check--xml-name (symbol)
+(defun elisp/check--xml-name (symbol)
   "Check that SYMBOL maps to a valid XML name.
 Return SYMBOL."
   (declare (ftype (function (symbol) symbol))
@@ -808,7 +800,7 @@ Return SYMBOL."
       (error "Invalid XML symbol %s" symbol)))
   symbol)
 
-(defun elisp/ert/sanitize--xml-string (string)
+(defun elisp/sanitize--xml-string (string)
   "Return a sanitized variant of STRING containing only valid XML characters."
   (declare (ftype (function (string) string))
            (side-effect-free error-free))
@@ -833,10 +825,10 @@ Return SYMBOL."
       attempt-orderly-shutdown-on-fatal-signal nil
       edebug-initial-mode 'Go-nonstop  ; ‘step’ doesn’t work in batch mode
       ;; We perform our own coverage instrumentation.
-      edebug-behavior-alist (cons '(elisp/ert/coverage
-                                    elisp/ert/edebug--enter
-                                    elisp/ert/edebug--before
-                                    elisp/ert/edebug--after)
+      edebug-behavior-alist (cons '(elisp/coverage
+                                    elisp/edebug--enter
+                                    elisp/edebug--before
+                                    elisp/edebug--after)
                                   (bound-and-true-p edebug-behavior-alist)))
 
 (let* ((source-dir (getenv "TEST_SRCDIR"))
@@ -979,8 +971,8 @@ Return SYMBOL."
                       ;; We still need to check whether Bazel wants us to
                       ;; instrument the file.
                       (cl-find fullname instrumented-files
-                               :test #'elisp/ert/file--equal-p))
-             (push (elisp/ert/load--instrument fullname file) load-buffers)
+                               :test #'elisp/file--equal-p))
+             (push (elisp/load--instrument fullname file) load-buffers)
              t))))
       ;; Work around another Edebug specification issue fixed with Emacs
       ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
@@ -1046,7 +1038,7 @@ Return SYMBOL."
               ;; the “.el.instrument” files when printing the error message,
               ;; so bind ‘load-suffixes’ temporarily to its original value.
               (let ((load-suffixes original-load-suffixes))
-                (when-let ((prefix (elisp/ert/message--prefix name)))
+                (when-let ((prefix (elisp/message--prefix name)))
                   (message "%s: Test %s %s" prefix name status)))
               (and fail-fast (setq tests nil)))
             (and failed (cl-incf failures))
@@ -1061,7 +1053,7 @@ Return SYMBOL."
                        failure-message "Test passed unexpectedly"
                        type 'error))
             (when (ert-test-result-with-condition-p result)
-              (let ((message (elisp/ert/failure--message name result))
+              (let ((message (elisp/failure--message name result))
                     (condition
                      (ert-test-result-with-condition-condition result)))
                 (message "%s" message)
@@ -1102,7 +1094,7 @@ Return SYMBOL."
         ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
         ;; bit of documentation.
         (xml-print
-         (elisp/ert/sanitize--xml
+         (elisp/sanitize--xml
           `((testsuite
              ((name . "ERT")  ; required
               (hostname . "localhost")  ; required
@@ -1128,8 +1120,7 @@ Return SYMBOL."
     (when coverage-enabled
       (when verbose-coverage
         (message "Writing coverage report into directory %s" coverage-dir))
-      (elisp/ert/write--coverage-report (concat "/:" coverage-dir)
-                                        load-buffers))
+      (elisp/write--coverage-report (concat "/:" coverage-dir) load-buffers))
     (kill-emacs (min unexpected 1))))
 
 ;;; ert-runner.el ends here
