@@ -30,8 +30,6 @@
 (require 'bytecomp)
 (require 'warnings)
 
-(defvar elisp/current-repository)
-
 (unless noninteractive
   (error "This file works only in batch mode"))
 
@@ -46,8 +44,8 @@
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
   (setq command-line-args-left nil
         byte-compile-dest-file-function (lambda (_) out)
-        byte-compile-error-on-warn (not (string-empty-p fatal-warn))
-        elisp/current-repository current-repo)
-  (kill-emacs (if (byte-compile-file src) 0 1)))
+        byte-compile-error-on-warn (not (string-empty-p fatal-warn)))
+  (dlet ((elisp/current-repository current-repo))
+    (kill-emacs (if (byte-compile-file src) 0 1))))
 
 ;;; compile.el ends here
