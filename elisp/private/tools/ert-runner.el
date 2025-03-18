@@ -1002,11 +1002,12 @@ Return SYMBOL."
                            when (eql (mod i shard-count) shard-index)
                            collect test))
       (or tests (message "Empty shard with index %d" shard-index)))
-    (message "Running %d tests" (length tests))
     (ert-run-tests
      `(member ,@tests)
      (lambda (&rest args)
        (pcase args
+         (`(run-started ,stats)
+          (message "Running %d tests" (ert-stats-total stats)))
          (`(test-started ,_stats ,test)
           (message "Running test %s" (ert-test-name test)))
          (`(test-ended ,_stats ,test ,result)
