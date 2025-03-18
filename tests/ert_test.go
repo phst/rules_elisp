@@ -108,6 +108,43 @@ func TestReportContent(t *testing.T) {
 	}
 }
 
+func TestReportSharded(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "report.xml")
+	statusFile := filepath.Join(dir, "shard-status")
+
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	runTest(t,
+		"XML_OUTPUT_FILE="+file,
+		"TEST_TARGET=//tests:test_test",
+		"TEST_SHARD_STATUS_FILE="+statusFile,
+		"TEST_TOTAL_SHARDS=5",
+		"TEST_SHARD_INDEX=2",
+	)
+
+	got := parseReport(t, file)
+	want := reportTemplate()
+	want.delete(
+		"abort", "command-line", "error", "ert-fail",
+		"expect-failure", "expect-failure-but-pass", "filter", "nocover",
+		"pass", "skip", "throw",
+	)
+	want.Failures = 2
+	want.Skipped = 0
+	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
+		t.Error("-got +want:\n", diff)
+	}
+
+	stat, err := os.Lstat(statusFile)
+	if err != nil {
+		t.Fatalf("shard status file: %s", err)
+	}
+	if m := stat.Mode(); !m.IsRegular() {
+		t.Errorf("shard status file %s isn’t regular; mode = %s", statusFile, m)
+	}
+}
+
 func TestReportSkipTag(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "report.xml")
