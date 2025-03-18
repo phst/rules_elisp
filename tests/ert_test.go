@@ -180,13 +180,9 @@ func TestReportContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	type message struct {
-		Message     string `xml:"message,attr"`
-		Type        string `xml:"type,attr"`
-		Description string `xml:",chardata"`
-	}
-	isDescription := func(p cmp.Path) bool {
-		f, ok := p.Last().(cmp.StructField)
-		return ok && f.Name() == "Description"
+		Message     string      `xml:"message,attr"`
+		Type        string      `xml:"type,attr"`
+		Description description `xml:",chardata"`
 	}
 	type property struct {
 		Name  string `xml:"name,attr"`
@@ -252,7 +248,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     `peculiar error: "Boo"`,
 					Type:        `undefined-error-symbol`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -272,7 +268,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     `Boo`,
 					Type:        `error`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -282,7 +278,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     `Test failed: "Fail!"`,
 					Type:        `ert-test-failed`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -306,7 +302,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
 					Type:        `ert-test-failed`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -320,7 +316,7 @@ func TestReportContent(t *testing.T) {
 				Time:      wantElapsed,
 				Skipped: message{
 					Message:     "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)",
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -330,7 +326,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->",
 					Type:        `error`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 			{
@@ -340,7 +336,7 @@ func TestReportContent(t *testing.T) {
 				Failure: message{
 					Message:     `No catch for tag: unknown-tag, hi`,
 					Type:        `no-catch`,
-					Description: "something",
+					Description: nonEmpty,
 				},
 			},
 		},
@@ -351,7 +347,7 @@ func TestReportContent(t *testing.T) {
 		abort.Failure = message{}
 		abort.Skipped = message{
 			Message:     `Test skipped: ((skip-unless (not (string-equal emacs-version "30.1"))) :form (not t) :value nil)`,
-			Description: "something",
+			Description: nonEmpty,
 		}
 		wantReport.Failures--
 		wantReport.Skipped++
@@ -361,8 +357,6 @@ func TestReportContent(t *testing.T) {
 		cmp.Transformer("time.Time", toTime),
 		cmpopts.EquateApprox(0, wantElapsed),
 		cmpopts.EquateApproxTime(margin),
-		// We only check that the description isn’t absent or empty.
-		cmp.FilterPath(isDescription, cmp.Comparer(bothEmpty)),
 	); diff != "" {
 		t.Error("XML test report (-got +want):\n", diff)
 	}
@@ -458,7 +452,25 @@ func (t *timestamp) UnmarshalText(b []byte) error {
 
 func toTime(t timestamp) time.Time { return time.Time(t) }
 
-func bothEmpty(a, b string) bool { return (a == "") == (b == "") }
+type description bool
+
+const (
+	empty    description = false
+	nonEmpty description = true
+)
+
+func (d *description) UnmarshalText(b []byte) error {
+	// We only check that the description isn’t absent or empty.
+	*d = len(b) > 0
+	return nil
+}
+
+func (d description) String() string {
+	if d == nonEmpty {
+		return "something"
+	}
+	return ""
+}
 
 //go:embed coverage.dat
 var wantCoverage string
