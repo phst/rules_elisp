@@ -990,7 +990,7 @@ Return SYMBOL."
   (mapc #'load test-sources)
   (when-let ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
-  (let ((load-file-name nil)  ; hide ourselves from ‘macroexp-warn-and-return’
+  (let ((load-file-name nil)    ; hide ourselves from ‘macroexp-warn-and-return’
         (tests (ert-select-tests selector t))
         (total 0)
         (unexpected 0)
@@ -1096,7 +1096,7 @@ Return SYMBOL."
         (xml-print
          (elisp/sanitize--xml
           `((testsuite
-             ((name . "ERT")  ; required
+             ((name . "ERT")            ; required
               (hostname . "localhost")  ; required
               (tests . ,(number-to-string total))
               (errors . ,(number-to-string errors))
