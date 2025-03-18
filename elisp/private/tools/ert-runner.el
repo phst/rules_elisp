@@ -913,8 +913,7 @@ Return SYMBOL."
            (filter (if (member test-filter '(nil "")) t (read test-filter)))
            (skip-tags-sel
             (invert
-             (combine 'or nil (nreverse (mapcar (lambda (tag) `(tag ,tag))
-                                                skip-tags)))))
+             (combine 'or nil (mapcar (lambda (tag) `(tag ,tag)) skip-tags))))
            (skip-tests-sel
             (invert (combine 'member nil skip-tests))))
       (setq selector
