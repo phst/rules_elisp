@@ -823,13 +823,14 @@ Return SYMBOL."
 
 (setq attempt-stack-overflow-recovery nil
       attempt-orderly-shutdown-on-fatal-signal nil
-      edebug-initial-mode 'Go-nonstop  ; ‘step’ doesn’t work in batch mode
-      ;; We perform our own coverage instrumentation.
-      edebug-behavior-alist (cons '(elisp/coverage
-                                    elisp/edebug--enter
-                                    elisp/edebug--before
-                                    elisp/edebug--after)
-                                  (bound-and-true-p edebug-behavior-alist)))
+      edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
+
+;; We perform our own coverage instrumentation.
+(push '(elisp/coverage
+        elisp/edebug--enter
+        elisp/edebug--before
+        elisp/edebug--after)
+      edebug-behavior-alist)
 
 (let* ((source-dir (getenv "TEST_SRCDIR"))
        (temp-dir (getenv "TEST_TMPDIR"))
