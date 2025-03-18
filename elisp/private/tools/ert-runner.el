@@ -904,9 +904,10 @@ Return SYMBOL."
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
   (cl-flet ((combine (op def elts)
-              (cond ((null elts) def)
-                    ((cdr elts) `(,op ,@elts))
-                    (t (car elts))))
+              (pcase elts
+                ('() def)
+                (`(,elt) elt)
+                (elts `(,op ,@elts))))
             (invert (sel)
               (if sel `(not ,sel) t)))
     (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
