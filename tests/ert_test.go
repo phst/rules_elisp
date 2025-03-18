@@ -63,12 +63,12 @@ func TestExitCode(t *testing.T) {
 }
 
 func TestReportValid(t *testing.T) {
-	tempDir := t.TempDir()
-	reportName := filepath.Join(tempDir, "report.xml")
+	dir := t.TempDir()
+	file := filepath.Join(dir, "report.xml")
 	runTest(t,
 		// See
 		// https://bazel.build/reference/test-encyclopedia#initial-conditions.
-		"XML_OUTPUT_FILE="+reportName,
+		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
 	)
@@ -77,10 +77,10 @@ func TestReportValid(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Logf("validing XML report %s against schema %s", reportName, schema)
+	t.Logf("validing XML report %s against schema %s", file, schema)
 	r, w := io.Pipe()
 	go log(t, "xmllint", r)
-	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
+	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, file)
 	cmd.Stdout = w
 	cmd.Stderr = w
 	if err := cmd.Run(); err != nil {
@@ -90,21 +90,21 @@ func TestReportValid(t *testing.T) {
 }
 
 func TestReportContent(t *testing.T) {
-	tempDir := t.TempDir()
-	reportName := filepath.Join(tempDir, "report.xml")
+	dir := t.TempDir()
+	file := filepath.Join(dir, "report.xml")
 
 	// See
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
-		"XML_OUTPUT_FILE="+reportName,
+		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
 	)
 
-	gotReport := parseReport(t, reportName)
-	wantReport := reportTemplate()
-	wantReport.delete("filter")
-	if diff := cmp.Diff(gotReport, wantReport, reportOpts); diff != "" {
+	got := parseReport(t, file)
+	want := reportTemplate()
+	want.delete("filter")
+	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
 		t.Error("XML test report (-got +want):\n", diff)
 	}
 }
@@ -328,9 +328,9 @@ var reportOpts = cmp.Options{
 
 func TestCoverage(t *testing.T) {
 	tempDir := t.TempDir()
-	coverageManifest := filepath.Join(tempDir, "coverage-manifest.txt")
-	t.Logf("writing coverage manifest %s", coverageManifest)
-	if err := os.WriteFile(coverageManifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
+	manifest := filepath.Join(tempDir, "coverage-manifest.txt")
+	t.Logf("writing coverage manifest %s", manifest)
+	if err := os.WriteFile(manifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
 		t.Error(err)
 	}
 	coverageDir := t.TempDir()
@@ -341,7 +341,7 @@ func TestCoverage(t *testing.T) {
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
 		"TEST_TARGET=//tests:test_test",
 		"COVERAGE=1",
-		"COVERAGE_MANIFEST="+coverageManifest,
+		"COVERAGE_MANIFEST="+manifest,
 		"COVERAGE_DIR="+coverageDir,
 	)
 
@@ -357,12 +357,12 @@ func TestCoverage(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	gotCoverage := string(b)
+	got := string(b)
 	// See geninfo(1) for the coverage file format.  Depending on the exact
 	// runfiles layout, the test runner might have printed different
 	// representations of test filenames.
-	gotCoverage = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(gotCoverage, "$1$2")
-	if diff := cmp.Diff(gotCoverage, wantCoverage); diff != "" {
+	got = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(got, "$1$2")
+	if diff := cmp.Diff(got, wantCoverage); diff != "" {
 		t.Error("coverage report (-got +want):\n", diff)
 	}
 
@@ -371,7 +371,7 @@ func TestCoverage(t *testing.T) {
 		if workspace == "" {
 			t.Fatal("to regenerate //tests:coverage.dat, run “bazel run -- //tests:go_default_test --regenerate-coverage-dat”")
 		}
-		if err := os.WriteFile(filepath.Join(workspace, "tests", "coverage.dat"), []byte(gotCoverage), 0644); err != nil {
+		if err := os.WriteFile(filepath.Join(workspace, "tests", "coverage.dat"), []byte(got), 0644); err != nil {
 			t.Fatal(err)
 		}
 	}
