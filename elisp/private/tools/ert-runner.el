@@ -998,7 +998,7 @@ Return SYMBOL."
   (mapc #'load test-sources)
   (when-let ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
-  (setq load-file-name nil)  ; hide ourselves from ‘macroexp-warn-and-return’
+  (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
   (setq tests (ert-select-tests selector t))
   (or tests (error "Selector %S doesn’t match any tests" selector))
   (when (> shard-count 1)
@@ -1097,8 +1097,8 @@ Return SYMBOL."
       (xml-print
        (elisp/sanitize--xml
         `((testsuite
-           ((name . "ERT")            ; required
-            (hostname . "localhost")  ; required
+           ((name . "ERT")              ; required
+            (hostname . "localhost")    ; required
             (tests . ,(number-to-string total))
             (errors . ,(number-to-string errors))
             (failures . ,(number-to-string failures))
