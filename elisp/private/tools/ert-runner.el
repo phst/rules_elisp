@@ -478,8 +478,6 @@ instrumented using Edebug."
     (let ((coding-system-for-write 'utf-8-unix)
           (write-region-annotate-functions nil)
           (write-region-post-annotation-function nil)
-          ;; Work around https://bugs.gnu.org/54294.
-          (create-lockfiles (and create-lockfiles (>= emacs-major-version 29)))
           (test-name (getenv "TEST_TARGET")))
       (unless (member test-name '(nil ""))
         (insert "TN:" (elisp/sanitize--string test-name) ?\n))
@@ -1115,10 +1113,7 @@ Return SYMBOL."
            (system-out) (system-err)))))
       (let ((coding-system-for-write 'utf-8-unix)
             (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil)
-            ;; Work around https://bugs.gnu.org/54294.
-            (create-lockfiles (and create-lockfiles
-                                   (>= emacs-major-version 29))))
+            (write-region-post-annotation-function nil))
         (write-region nil nil (concat "/:" report-file)))))
   (when coverage-enabled
     (when verbose-coverage
