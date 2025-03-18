@@ -15,8 +15,10 @@
 package ert_test
 
 import (
+	"bufio"
 	"encoding/xml"
 	"flag"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -73,9 +75,11 @@ func TestReportValid(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("validing XML report %s against schema %s", reportName, schema)
+	r, w := io.Pipe()
+	go log(t, "xmllint", r)
 	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = w
+	cmd.Stderr = w
 	err = cmd.Run()
 	if err != nil {
 		t.Errorf("error validating XML report file: %s", err)
@@ -354,17 +358,30 @@ func runTest(t *testing.T, testEnv ...string) error {
 	}
 	t.Logf("using test binary %s", bin)
 
+	r, w := io.Pipe()
+	go log(t, "Emacs", r)
+
 	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
 	env := os.Environ()
 	env = append(env, rf.Env()...)
 	env = append(env, testEnv...)
 	cmd.Env = env
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = w
+	cmd.Stderr = w
 	cmd.Dir = workspace
 	err = cmd.Run()
 	t.Log("test process exited, error:", err)
 	return err
+}
+
+func log(t *testing.T, p string, r io.Reader) {
+	s := bufio.NewScanner(r)
+	for s.Scan() {
+		t.Logf("[%s] %s", p, s.Bytes())
+	}
+	if err := s.Err(); err != nil {
+		t.Errorf("[%s] error: %s", p, err)
+	}
 }
 
 type timestamp time.Time
