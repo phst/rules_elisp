@@ -81,8 +81,7 @@ func TestReportValid(t *testing.T) {
 	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, reportName)
 	cmd.Stdout = w
 	cmd.Stderr = w
-	err = cmd.Run()
-	if err != nil {
+	if err := cmd.Run(); err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}
 	t.Log("XML validation complete")
