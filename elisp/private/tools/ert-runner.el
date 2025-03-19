@@ -178,7 +178,7 @@ failure messages."
       (let ((coding-system-for-write 'utf-8-unix)
             (write-region-annotate-functions nil)
             (write-region-post-annotation-function nil))
-        (write-region nil nil (concat "/:" file))))))
+        (write-region nil nil file)))))
 
 (defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
@@ -818,6 +818,16 @@ If NAME is unset or set to the empty string, return nil."
   (let ((value (getenv name)))
     (and value (not (string-empty-p value)) value)))
 
+(defun elisp/env--file (name)
+  "Return a file name from the environment variable NAME.
+If NAME is unset or set to the empty string, return nil.  Otherwise,
+assume the file name always refers to a local file, and quote it."
+  (declare (ftype (function (string) (or null string)))
+           (side-effect-free error-free))
+  (cl-check-type name string)
+  (when-let ((value (elisp/env--var name)))
+    (concat "/:" value)))
+
 (defun elisp/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
 DIRECTORY is the directory that could contain FILENAME."
@@ -946,11 +956,10 @@ Return SYMBOL."
 (unless (elisp/env--var "TEST_SRCDIR")
   (error "TEST_SRCDIR not set"))
 
-(let ((temp-dir (elisp/env--var "TEST_TMPDIR")))
+(let ((temp-dir (elisp/env--file "TEST_TMPDIR")))
   (unless temp-dir
     (error "TEST_TMPDIR not set"))
-  (setq temporary-file-directory
-        (file-name-as-directory (concat "/:" temp-dir))))
+  (setq temporary-file-directory (file-name-as-directory temp-dir)))
 
 ;; We could get the repository name from the TEST_WORKSPACE environment
 ;; variable, but that one’s optional
@@ -982,19 +991,19 @@ Return SYMBOL."
 
 (random (or (elisp/env--var "TEST_RANDOM_SEED") ""))
 
-(when-let ((shard-status-file (elisp/env--var "TEST_SHARD_STATUS_FILE")))
+(when-let ((shard-status-file (elisp/env--file "TEST_SHARD_STATUS_FILE")))
   (let ((coding-system-for-write 'no-conversion)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
-    (write-region "" nil (concat "/:" shard-status-file) :append)))
+    (write-region "" nil shard-status-file :append)))
 
-(let* ((report-file (elisp/env--var "XML_OUTPUT_FILE"))
+(let* ((report-file (elisp/env--file "XML_OUTPUT_FILE"))
        (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
        (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
        (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
-       (coverage-manifest (elisp/env--var "COVERAGE_MANIFEST"))
-       (coverage-dir (elisp/env--var "COVERAGE_DIR"))
+       (coverage-manifest (elisp/env--file "COVERAGE_MANIFEST"))
+       (coverage-dir (elisp/env--file "COVERAGE_DIR"))
        (verbose-coverage (and (elisp/env--var "VERBOSE_COVERAGE") t))
        (original-load-suffixes load-suffixes)
        ;; If coverage is enabled, check for a file with a well-known
@@ -1065,7 +1074,7 @@ Return SYMBOL."
           (coding-system-for-read 'utf-8-unix)
           (instrumented-files ()))
       (with-temp-buffer
-        (insert-file-contents (concat "/:" coverage-manifest))
+        (insert-file-contents coverage-manifest)
         (while (not (eobp))
           ;; The filenames in the coverage manifest are typically relative to
           ;; the current directory, so expand them here.
@@ -1156,8 +1165,7 @@ Return SYMBOL."
         (when coverage-enabled
           (when verbose-coverage
             (message "Writing coverage report into directory %s" coverage-dir))
-          (elisp/write--coverage-report (concat "/:" coverage-dir)
-                                        load-buffers))))))
+          (elisp/write--coverage-report coverage-dir load-buffers))))))
   (kill-emacs exit-code))
 
 ;;; ert-runner.el ends here
