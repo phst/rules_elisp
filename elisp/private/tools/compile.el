@@ -39,7 +39,7 @@
       attempt-orderly-shutdown-on-fatal-signal nil)
 
 ;; Ensure filenames in the output are relative to the current directory.
-(setq byte-compile-root-dir default-directory)
+(setq byte-compile-root-dir (file-name-quote default-directory))
 
 ;; Emacs 29 doesn’t yet support the ‘ftype’ declaration.  Ensure that
 ;; compilation works without warnings.
