@@ -165,19 +165,20 @@ failure messages."
                          ;; A test that passed unexpectedly should count
                          ;; as failed for the XML report.
                          (ert-test-passed-p result))))
-               (tag nil)
+               (error (and (not expected) (not failed)))
+               (skipped (ert-test-skipped-p result))
+               (tag (cond (failed 'failure)
+                          (error 'error)
+                          (skipped 'skipped)))
                (failure-message nil)
                (type nil)
                (description nil))
           (and failed (cl-incf failures))
-          (and (not expected) (not failed) (cl-incf errors))
-          (when (ert-test-skipped-p result)
-            (setq tag 'skipped))
+          (and error (cl-incf errors))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in
                ;; the XML report.
-               (setq tag 'failure
-                     failure-message "Test passed unexpectedly"
+               (setq failure-message "Test passed unexpectedly"
                      type 'error))
           (when (ert-test-result-with-condition-p result)
             (let ((condition
@@ -190,8 +191,7 @@ failure messages."
               (setq failure-message (error-message-string condition)
                     description (gethash test failure-messages))
               (unless expected
-                (setq tag (if failed 'failure 'error)
-                      type (car condition)))))
+                (setq type (car condition)))))
           (let ((report
                  (and tag
                       `((,tag
