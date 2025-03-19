@@ -1129,48 +1129,51 @@ Return SYMBOL."
                          when (eql (mod i shard-count) shard-index)
                          collect test))
     (or tests (message "Empty shard with index %d" shard-index)))
-  (ert-run-tests
-   `(member ,@tests)
-   (lambda (&rest args)
-     (pcase-exhaustive args
-       (`(run-started ,stats)
-        (message "Running %d tests" (ert-stats-total stats)))
-       (`(test-started ,_stats ,test)
-        (message "Running test %s" (ert-test-name test)))
-       (`(test-ended ,_stats ,test ,result)
-        (let* ((name (ert-test-name test))
-               (duration (ert-test-result-duration result))
-               (expected (ert-test-result-expected-p test result))
-               (status (ert-string-for-test-result result expected)))
-          (message "Test %s %s and took %d ms" name status
-                   (* duration 1000))
-          (unless expected
-            ;; Print a nice error message that should point back to the
-            ;; source file in a compilation buffer.  We don’t want to find
-            ;; the “.el.instrument” files when printing the error message,
-            ;; so bind ‘load-suffixes’ temporarily to its original value.
-            (let ((load-suffixes original-load-suffixes))
-              (when-let ((prefix (elisp/message--prefix name)))
-                (message "%s: Test %s %s" prefix name status)))
-            (and fail-fast (setq tests nil)))
-          (when (ert-test-result-with-condition-p result)
-            (let ((message (elisp/failure--message name result)))
-              (message "%s" message)
-              ;; elisp/failure--message is potentially slow, cache its results.
-              (puthash test message failure-messages)))))
-       (`(run-ended ,stats ,_abortedp)
-        (let ((completed (ert-stats-completed stats))
-              (unexpected (ert-stats-completed-unexpected stats)))
-          (message "Running %d tests finished, %d results unexpected"
-                   completed unexpected)
-          (setq exit-code (min unexpected 1)))
-        (when report-file
-          (elisp/write--report report-file start-time tests stats
-                               failure-messages))
-        (when coverage-enabled
-          (when verbose-coverage
-            (message "Writing coverage report into directory %s" coverage-dir))
-          (elisp/write--coverage-report coverage-dir load-buffers))))))
+  (cl-block nil
+    (ert-run-tests
+     `(member ,@tests)
+     (lambda (&rest args)
+       (pcase-exhaustive args
+         (`(run-started ,stats)
+          (message "Running %d tests" (ert-stats-total stats)))
+         (`(test-started ,_stats ,test)
+          (message "Running test %s" (ert-test-name test)))
+         (`(test-ended ,_stats ,test ,result)
+          (let* ((name (ert-test-name test))
+                 (duration (ert-test-result-duration result))
+                 (expected (ert-test-result-expected-p test result))
+                 (status (ert-string-for-test-result result expected)))
+            (message "Test %s %s and took %d ms" name status
+                     (* duration 1000))
+            (unless expected
+              ;; Print a nice error message that should point back to the
+              ;; source file in a compilation buffer.  We don’t want to find
+              ;; the “.el.instrument” files when printing the error message,
+              ;; so bind ‘load-suffixes’ temporarily to its original value.
+              (let ((load-suffixes original-load-suffixes))
+                (when-let ((prefix (elisp/message--prefix name)))
+                  (message "%s: Test %s %s" prefix name status))))
+            (when (ert-test-result-with-condition-p result)
+              (let ((message (elisp/failure--message name result)))
+                (message "%s" message)
+                ;; elisp/failure--message is potentially slow, cache its
+                ;; results.
+                (puthash test message failure-messages)))
+            (and fail-fast (not expected) (cl-return))))
+         (`(run-ended ,stats ,_abortedp)
+          (let ((completed (ert-stats-completed stats))
+                (unexpected (ert-stats-completed-unexpected stats)))
+            (message "Running %d tests finished, %d results unexpected"
+                     completed unexpected)
+            (setq exit-code (min unexpected 1)))
+          (when report-file
+            (elisp/write--report report-file start-time tests stats
+                                 failure-messages))
+          (when coverage-enabled
+            (when verbose-coverage
+              (message "Writing coverage report into directory %s"
+                       coverage-dir))
+            (elisp/write--coverage-report coverage-dir load-buffers)))))))
   (kill-emacs exit-code))
 
 ;;; ert-runner.el ends here
