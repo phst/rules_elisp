@@ -49,6 +49,10 @@
       (set var (cons '(ftype ignore) value)))))
 
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
+  (let ((file-name-handler-alist ()))
+    (cl-flet ((quote-file (file) (concat "/:" (expand-file-name file))))
+      (cl-callf quote-file src)
+      (cl-callf quote-file out)))
   (setq command-line-args-left nil
         byte-compile-dest-file-function (lambda (_) out)
         byte-compile-error-on-warn (not (string-empty-p fatal-warn)))
