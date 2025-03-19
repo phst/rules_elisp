@@ -224,8 +224,8 @@ failure messages."
         (xml-print
          (walk
           `((testsuite
-             ((name . "ERT")              ; required
-              (hostname . "localhost")    ; required
+             ((name . "ERT")            ; required
+              (hostname . "localhost")  ; required
               (tests . ,(number-to-string (ert-stats-completed stats)))
               (errors . ,(number-to-string errors))
               (failures . ,(number-to-string failures))
