@@ -80,6 +80,54 @@ NAME is the name of the test."
       (insert ?\n)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
+(defun elisp/message--prefix (test)
+  "Return a message prefix for TEST.
+TEST should be an ERT test symbol.  If possible, return a prefix
+of the form “FILE:LINE” as described in the GNU Coding Standards;
+see Info node ‘(standards) Errors’.  If the file and line can’t
+be determined, return nil."
+  (declare (ftype (function (symbol) (or null string))))
+  (cl-check-type test symbol)
+  (let ((case-fold-search nil)
+        (directory default-directory))
+    ;; Yuck!  ‘ert--test’ is an implementation detail.
+    (when-let ((file (symbol-file test 'ert--test)))
+      ;; The filename typically refers to a compiled file in the execution root.
+      ;; Try to resolve it to a source file.  See
+      ;; https://bazel.build/remote/output-directories#layout-diagram.
+      (when (string-match (rx "/execroot/"
+                              (+ (not (any ?/))) ?/ ; repository
+                              (+ (not (any ?/))) ?/ ; bazel-out
+                              (+ (not (any ?/))) ?/ ; configuration
+                              "bin/"
+                              (group (+ nonl)) ".elc" eos)
+                          file)
+        ;; We can use the filename relative to the Bazel binary directory since
+        ;; that corresponds to a source filename relative to some repository
+        ;; root.  ‘find-library-name’ will find the corresponding source file
+        ;; because all repository roots are in the ‘load-path’.
+        (cl-callf2 match-string-no-properties 1 file))
+      ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
+      ;; we’re only attempting to print a log message here, ignore them and move
+      ;; on.
+      (when-let ((file (ignore-errors (find-library-name file))))
+        (with-temp-buffer
+          (let ((coding-system-for-read 'utf-8-unix)
+                (format-alist nil)
+                (after-insert-file-functions nil))
+            (insert-file-contents file))
+          (emacs-lisp-mode)
+          (when (re-search-forward
+                 (rx bol (* space) "(ert-deftest" (+ space)
+                     (literal (symbol-name test)) (or space eol))
+                 nil t)
+            ;; Try to print nice and short filenames.  We do this by using the
+            ;; filename relative to the test working directory
+            ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).
+            (format "%s:%d"
+                    (elisp/file--display-name file directory)
+                    (line-number-at-pos))))))))
+
 
 ;;;; XML report generation:
 
@@ -813,57 +861,6 @@ file that has been instrumented with Edebug."
                (insert (format "DA:%d,%d\n" line freq)))
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (length vector))))))
-
-
-;;;; Message formatting:
-
-(defun elisp/message--prefix (test)
-  "Return a message prefix for TEST.
-TEST should be an ERT test symbol.  If possible, return a prefix
-of the form “FILE:LINE” as described in the GNU Coding Standards;
-see Info node ‘(standards) Errors’.  If the file and line can’t
-be determined, return nil."
-  (declare (ftype (function (symbol) (or null string))))
-  (cl-check-type test symbol)
-  (let ((case-fold-search nil)
-        (directory default-directory))
-    ;; Yuck!  ‘ert--test’ is an implementation detail.
-    (when-let ((file (symbol-file test 'ert--test)))
-      ;; The filename typically refers to a compiled file in the execution root.
-      ;; Try to resolve it to a source file.  See
-      ;; https://bazel.build/remote/output-directories#layout-diagram.
-      (when (string-match (rx "/execroot/"
-                              (+ (not (any ?/))) ?/ ; repository
-                              (+ (not (any ?/))) ?/ ; bazel-out
-                              (+ (not (any ?/))) ?/ ; configuration
-                              "bin/"
-                              (group (+ nonl)) ".elc" eos)
-                          file)
-        ;; We can use the filename relative to the Bazel binary directory since
-        ;; that corresponds to a source filename relative to some repository
-        ;; root.  ‘find-library-name’ will find the corresponding source file
-        ;; because all repository roots are in the ‘load-path’.
-        (cl-callf2 match-string-no-properties 1 file))
-      ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
-      ;; we’re only attempting to print a log message here, ignore them and move
-      ;; on.
-      (when-let ((file (ignore-errors (find-library-name file))))
-        (with-temp-buffer
-          (let ((coding-system-for-read 'utf-8-unix)
-                (format-alist nil)
-                (after-insert-file-functions nil))
-            (insert-file-contents file))
-          (emacs-lisp-mode)
-          (when (re-search-forward
-                 (rx bol (* space) "(ert-deftest" (+ space)
-                     (literal (symbol-name test)) (or space eol))
-                 nil t)
-            ;; Try to print nice and short filenames.  We do this by using the
-            ;; filename relative to the test working directory
-            ;; (i.e. $TEST_SRCDIR/$TEST_WORKSPACE).
-            (format "%s:%d"
-                    (elisp/file--display-name file directory)
-                    (line-number-at-pos))))))))
 
 
 ;;;; Coverage utilities:
