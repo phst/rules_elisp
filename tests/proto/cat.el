@@ -20,27 +20,31 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl-lib))
+
 (require 'elisp/proto/module)
 
 (set-binary-mode 'stdin :binary)
 (set-binary-mode 'stdout :binary)
 
-(with-temp-buffer
-  (set-buffer-multibyte nil)
-  (let ((args command-line-args-left)
-        (coding-system-for-read 'no-conversion)
-        (coding-system-for-write 'no-conversion)
-        (inhibit-modification-hooks t)
-        (write-region-annotate-functions nil)
-        (write-region-post-annotation-function nil))
-    (setq command-line-args-left nil)
-    (pcase-exhaustive args
-      (`(">" ,file)
-       (elisp/proto/insert-stdin)
-       (write-region nil nil (concat "/:" file)))
-      (`("<" ,file)
-       (insert-file-contents-literally (concat "/:" file))
-       (elisp/proto/write-stdout
-        (buffer-substring-no-properties (point-min) (point-max)))))))
+(cl-destructuring-bind (op file) command-line-args-left
+  (setq command-line-args-left nil)
+  (let ((file-name-handler-alist ()))
+    (setq file (concat "/:" (expand-file-name file))))
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (let ((coding-system-for-read 'no-conversion)
+          (coding-system-for-write 'no-conversion)
+          (inhibit-modification-hooks t)
+          (write-region-annotate-functions nil)
+          (write-region-post-annotation-function nil))
+      (pcase-exhaustive op
+        (">"
+         (elisp/proto/insert-stdin)
+         (write-region nil nil file))
+        ("<"
+         (insert-file-contents-literally file)
+         (elisp/proto/write-stdout
+          (buffer-substring-no-properties (point-min) (point-max))))))))
 
 ;;; cat.el ends here

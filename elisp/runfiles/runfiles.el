@@ -58,8 +58,10 @@ an error of type ‘elisp/runfiles/not-found’."
   (cl-check-type manifest (or null string))
   (cl-check-type directory (or null string))
   (cl-flet ((env (var)
-              (let ((value (getenv var)))
-                (and value (not (string-empty-p value)) (concat "/:" value)))))
+              (let ((value (getenv var))
+                    (file-name-handler-alist ()))
+                (and value (not (string-empty-p value))
+                     (concat "/:" (expand-file-name value))))))
     (unless manifest
       (when-let ((value (env "RUNFILES_MANIFEST_FILE")))
         (setq manifest value)))
