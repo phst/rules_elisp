@@ -1002,8 +1002,8 @@ exact copies as equal."
 
 (let* ((report-file (elisp/env--file "XML_OUTPUT_FILE"))
        (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
-       (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
-       (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
+       (shard-count (cl-parse-integer (or (getenv "TEST_TOTAL_SHARDS") "1")))
+       (shard-index (cl-parse-integer (or (getenv "TEST_SHARD_INDEX") "0")))
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
        (coverage-manifest (elisp/env--file "COVERAGE_MANIFEST"))
        (coverage-dir (elisp/env--file "COVERAGE_DIR"))
