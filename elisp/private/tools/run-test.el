@@ -173,8 +173,8 @@ failure messages."
                (failure-message nil)
                (type nil)
                (description nil))
-          (and failed (cl-incf failures))
-          (and error (cl-incf errors))
+          (when failed (cl-incf failures))
+          (when error (cl-incf errors))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in
                ;; the XML report.
@@ -198,11 +198,11 @@ failure messages."
                    ;; classes, so fill in a dummy value.
                    (classname . "ERT")
                    (time . ,(format-time-string "%s.%N" duration)))
-                  ,@(and tag
-                         `((,tag
-                            ((message . ,failure-message)
-                             ,@(and type `((type . ,(symbol-name type)))))
-                            ,@(and description `(,description))))))
+                  ,@(when tag
+                      `((,tag
+                         ((message . ,failure-message)
+                          ,@(when type `((type . ,(symbol-name type)))))
+                         ,@(when description `(,description))))))
                 test-reports))))
     (with-temp-file file
       ;; The expected format of the XML output file isn’t
@@ -1023,7 +1023,7 @@ exact copies as equal."
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
        (coverage-manifest (elisp/env--file "COVERAGE_MANIFEST"))
        (coverage-dir (elisp/env--file "COVERAGE_DIR"))
-       (verbose-coverage (and (elisp/env--var "VERBOSE_COVERAGE") t))
+       (verbose-coverage (when (elisp/env--var "VERBOSE_COVERAGE") t))
        (original-load-suffixes load-suffixes)
        ;; If coverage is enabled, check for a file with a well-known
        ;; extension first.  The Bazel runfiles machinery is expected to
@@ -1136,13 +1136,15 @@ exact copies as equal."
     (error "Unprocessed command-line arguments: %S" args))
   (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
   (setq tests (ert-select-tests selector t))
-  (or tests (error "Selector %S doesn’t match any tests" selector))
+  (unless tests
+    (error "Selector %S doesn’t match any tests" selector))
   (when (> shard-count 1)
     (setq tests (cl-loop for test in tests
                          for i from 0
                          when (eql (mod i shard-count) shard-index)
                          collect test))
-    (or tests (message "Empty shard with index %d" shard-index)))
+    (unless tests
+      (message "Empty shard with index %d" shard-index)))
   (cl-block nil
     (ert-run-tests
      `(member ,@tests)
