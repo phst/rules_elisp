@@ -20,25 +20,24 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl-lib))
 (require 'org)
 (require 'ox)
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
-(pcase command-line-args-left
-  (`(,output ,main ,include-dir)
-   (setq command-line-args-left nil)
-   (let* ((coding-system-for-read 'utf-8-unix)
-          (coding-system-for-write 'utf-8-unix)
-          (format-alist nil)
-          (after-insert-file-functions nil)
-          (write-region-annotate-functions nil)
-          (write-region-post-annotation-function nil))
-     (with-temp-buffer
-       (insert-file-contents main :visit)
-       (org-mode)
-       (org-export-expand-include-keyword nil include-dir)
-       (write-region nil nil output))))
-  (_ (user-error "Usage: docs/merge OUTPUT.org MAIN.org INCLUDE-DIR")))
+(cl-destructuring-bind (output main include-dir) command-line-args-left
+  (setq command-line-args-left nil)
+  (let* ((coding-system-for-read 'utf-8-unix)
+         (coding-system-for-write 'utf-8-unix)
+         (format-alist nil)
+         (after-insert-file-functions nil)
+         (write-region-annotate-functions nil)
+         (write-region-post-annotation-function nil))
+    (with-temp-buffer
+      (insert-file-contents main :visit)
+      (org-mode)
+      (org-export-expand-include-keyword nil include-dir)
+      (write-region nil nil output))))
 
 ;;; merge.el ends here

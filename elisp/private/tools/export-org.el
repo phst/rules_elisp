@@ -22,30 +22,29 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl-lib))
 (require 'org)
 (require 'ox)
 (require 'ox-texinfo)
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
-(pcase command-line-args-left
-  (`(,output ,input . ,_)
-   (setq command-line-args-left nil)
-   (cl-callf expand-file-name input)
-   (cl-callf expand-file-name output)
-   (let ((coding-system-for-read 'utf-8-unix)
-         (coding-system-for-write 'utf-8-unix)
-         (format-alist nil)
-         (after-insert-file-functions nil)
-         (write-region-annotate-functions nil)
-         (write-region-post-annotation-function nil)
-         (org-export-coding-system 'utf-8-unix)
-         (org-export-time-stamp-file nil)
-         (org-export-use-babel nil))
-     (with-temp-buffer
-       (insert-file-contents input :visit)
-       (setq default-directory (file-name-directory input))
-       (write-region (org-export-as 'texinfo) nil output))))
-  (_ (user-error "Usage: elisp/export-org OUTPUT INPUT ADDITIONAL-INPUTS")))
+(cl-destructuring-bind (output input . additional-inputs) command-line-args-left
+  (setq command-line-args-left nil)
+  (cl-callf expand-file-name input)
+  (cl-callf expand-file-name output)
+  (let ((coding-system-for-read 'utf-8-unix)
+        (coding-system-for-write 'utf-8-unix)
+        (format-alist nil)
+        (after-insert-file-functions nil)
+        (write-region-annotate-functions nil)
+        (write-region-post-annotation-function nil)
+        (org-export-coding-system 'utf-8-unix)
+        (org-export-time-stamp-file nil)
+        (org-export-use-babel nil))
+    (with-temp-buffer
+      (insert-file-contents input :visit)
+      (setq default-directory (file-name-directory input))
+      (write-region (org-export-as 'texinfo) nil output))))
 
 ;;; export-org.el ends here
