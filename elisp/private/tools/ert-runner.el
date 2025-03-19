@@ -1132,7 +1132,7 @@ Return SYMBOL."
   (ert-run-tests
    `(member ,@tests)
    (lambda (&rest args)
-     (pcase args
+     (pcase-exhaustive args
        (`(run-started ,stats)
         (message "Running %d tests" (ert-stats-total stats)))
        (`(test-started ,_stats ,test)
