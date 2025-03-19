@@ -40,8 +40,8 @@
           (write-region-post-annotation-function nil))
       (pcase-exhaustive op
         (">"
-         (elisp/proto/insert-stdin)
-         (write-region nil nil file))
+         (with-temp-file file
+           (elisp/proto/insert-stdin)))
         ("<"
          (insert-file-contents-literally file)
          (elisp/proto/write-stdout

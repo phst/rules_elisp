@@ -39,10 +39,9 @@
          (after-insert-file-functions nil)
          (write-region-annotate-functions nil)
          (write-region-post-annotation-function nil))
-    (with-temp-buffer
+    (with-temp-file output
       (insert-file-contents main :visit)
       (org-mode)
-      (org-export-expand-include-keyword nil include-dir)
-      (write-region nil nil output))))
+      (org-export-expand-include-keyword nil include-dir))))
 
 ;;; merge.el ends here

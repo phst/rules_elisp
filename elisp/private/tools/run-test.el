@@ -90,7 +90,10 @@ failure messages."
   (cl-check-type failure-messages hash-table)
   (let ((errors 0)
         (failures 0)
-        (test-reports ()))
+        (test-reports ())
+        (coding-system-for-write 'utf-8-unix)
+        (write-region-annotate-functions nil)
+        (write-region-post-annotation-function nil))
     (dolist (test tests)
       (when-let ((result (ert-test-most-recent-result test)))
         (let* ((name (ert-test-name test))
@@ -149,7 +152,7 @@ failure messages."
                      (time . ,(format-time-string "%s.%N" duration)))
                     ,@report)
                   test-reports)))))
-    (with-temp-buffer
+    (with-temp-file file
       ;; The expected format of the XML output file isn’t
       ;; well-documented.
       ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
@@ -175,11 +178,7 @@ failure messages."
            (properties () (property ((name . "emacs-version")
                                      (value . ,emacs-version))))
            ,@(nreverse test-reports)
-           (system-out) (system-err)))))
-      (let ((coding-system-for-write 'utf-8-unix)
-            (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil))
-        (write-region nil nil file)))))
+           (system-out) (system-err))))))))
 
 (defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
