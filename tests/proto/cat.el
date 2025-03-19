@@ -1,6 +1,6 @@
 ;;; cat.el --- helper binary for module test -*- lexical-binding: t; -*-
 
-;; Copyright 2024 Philipp Stephani
+;; Copyright 2024, 2025 Philipp Stephani
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 ;;; Commentary:
 
-;; Test helper binary for //elisp/proto:module_test.
+;; Test helper binary for //tests/proto:module_test.
 
 ;;; Code:
 
