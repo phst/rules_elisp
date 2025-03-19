@@ -1008,14 +1008,14 @@ Return SYMBOL."
                        (if runfiles-handler-installed
                            (concat "/bazel-runfile:" repository-name)
                          default-directory))))
-       ;; Best-effort support for ‘ert-resource-directory’ and
-       ;; ‘ert-resource-file’.  The directory returned by
-       ;; ‘ert-resource-directory’ will typically be in the execution root and
-       ;; no longer be valid when the test runs.  Therefore, strip out
-       ;; everything up to the repository directory in the execution root
-       ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
-       ;; and replace it with the default directory.  Robust tests should use
-       ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
+  ;; Best-effort support for ‘ert-resource-directory’ and
+  ;; ‘ert-resource-file’.  The directory returned by
+  ;; ‘ert-resource-directory’ will typically be in the execution root and
+  ;; no longer be valid when the test runs.  Therefore, strip out
+  ;; everything up to the repository directory in the execution root
+  ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
+  ;; and replace it with the default directory.  Robust tests should use
+  ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
   (setq ert-resource-directory-trim-left-regexp
         (rx (* nonl) ?/ (literal repository-name) ?/)
         ert-resource-directory-format
