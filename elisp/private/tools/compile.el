@@ -28,7 +28,7 @@
 ;;; Code:
 
 (require 'bytecomp)
-(require 'cl-lib)
+(eval-when-compile (require 'cl-lib))
 
 (unless noninteractive
   (error "This file works only in batch mode"))
@@ -43,8 +43,10 @@
 
 ;; Emacs 29 doesn’t yet support the ‘ftype’ declaration.  Ensure that
 ;; compilation works without warnings.
-(cl-pushnew '(ftype ignore) defun-declarations-alist :test #'eq :key #'car)
-(cl-pushnew '(ftype ignore) macro-declarations-alist :test #'eq :key #'car)
+(dolist (var '(defun-declarations-alist macro-declarations-alist))
+  (let ((value (symbol-value var)))
+    (unless (assq 'ftype value)
+      (set var (cons '(ftype ignore) value)))))
 
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
   (setq command-line-args-left nil
