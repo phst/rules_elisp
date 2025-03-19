@@ -167,6 +167,48 @@ func TestReportSkipTag(t *testing.T) {
 	}
 }
 
+func TestReportFailFast(t *testing.T) {
+	dir := t.TempDir()
+	file := filepath.Join(dir, "report.xml")
+
+	// See
+	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
+	runTest(t,
+		"XML_OUTPUT_FILE="+file,
+		"TESTBRIDGE_TEST_RUNNER_FAIL_FAST=1",
+		"TEST_TARGET=//tests:test_test",
+	)
+
+	got := parseReport(t, file)
+	want := reportTemplate()
+	want.delete(
+		"ert-fail",
+		"expect-failure",
+		"expect-failure-but-pass",
+		"fail",
+		"filter",
+		"nocover",
+		"pass",
+		"skip",
+		"special-chars",
+		"throw",
+	)
+	want.Errors = 1
+	want.Failures = 0
+	want.Skipped = 1
+	if emacsVersion != "30.1" {
+		want.delete(
+			"command-line",
+			"coverage",
+			"error",
+		)
+		want.Skipped = 0
+	}
+	if diff := cmp.Diff(got, want, reportOpts); diff != "" {
+		t.Error("-got +want:\n", diff)
+	}
+}
+
 // Margin for time comparisons.  One hour is excessive, but we only
 // care about catching obvious bugs here.
 const margin = time.Hour
