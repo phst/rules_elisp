@@ -204,6 +204,7 @@ failure messages."
                               ,@(when description `(,description))))))
                 test-reports))))
     (with-temp-file file
+      (insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
       ;; The expected format of the XML output file isn’t
       ;; well-documented.
       ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
