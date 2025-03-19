@@ -72,7 +72,7 @@ def main() -> None:
         args.append('--load=' + str(run_test_elc))
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
-            args.append('--test-source=/:' + _quote(str(abs_name)))
+            args.append('--test-source=' + _quote(str(abs_name)))
         for test in opts.skip_test:
             args.append('--skip-test=' + _quote(test))
         for tag in opts.skip_tag:

@@ -1037,7 +1037,7 @@ Return SYMBOL."
         (pcase (pop command-line-args-left)
           ("--" (setq continue nil))
           ((rx bos "--test-source=" (let file (+ anything)) eos)
-           (push (unquote file) test-sources))
+           (push (concat "/:" (unquote file)) test-sources))
           ((rx bos "--skip-test=" (let test (+ anything)) eos)
            (push (intern (unquote test)) skip-tests))
           ((rx bos "--skip-tag=" (let tag (+ anything)) eos)
