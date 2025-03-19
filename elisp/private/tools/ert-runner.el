@@ -826,7 +826,11 @@ assume the file name always refers to a local file, and quote it."
            (side-effect-free error-free))
   (cl-check-type name string)
   (when-let ((value (elisp/env--var name)))
-    (concat "/:" value)))
+    ;; Expand relative filenames so that they are unaffected by changes to
+    ;; ‘default-directory’.  Note that ‘expand-file-name’ can’t expand quoted
+    ;; filenames, so do this before quoting.
+    (let ((file-name-handler-alist ()))
+      (concat "/:" (expand-file-name value)))))
 
 (defun elisp/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
