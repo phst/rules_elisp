@@ -27,6 +27,6 @@
   (let ((coding-system-for-write 'utf-8-unix)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
-    (write-region emacs-version nil file)))
+    (write-region emacs-version nil (concat "/:" file))))
 
 ;;; print-version.el ends here

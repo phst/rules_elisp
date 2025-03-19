@@ -171,7 +171,7 @@ py_test(
 run_binary(
     name = "version",
     outs = ["version.txt"],
-    args = ["/:$(execpath version.txt)"],
+    args = ["$(execpath version.txt)"],
     tool = ":print_version",
 )
 
