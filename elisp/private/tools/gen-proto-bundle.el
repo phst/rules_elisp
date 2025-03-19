@@ -68,4 +68,4 @@
         (prin1 `(provide ',(intern feature))) (terpri) (terpri)
         (insert ";;; " output-name " ends here\n")))))
 
-;;; generate-bundle.el ends here
+;;; gen-proto-bundle.el ends here
