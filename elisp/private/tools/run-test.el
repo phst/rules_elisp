@@ -963,12 +963,6 @@ Return SYMBOL."
      string :fixedcase :literal)))
 
 
-;;; Forward declarations:
-
-(declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
-                  (operation &rest args))
-
-
 ;;; Main code:
 
 (unless noninteractive
@@ -994,6 +988,9 @@ Return SYMBOL."
   (unless temp-dir
     (error "TEST_TMPDIR not set"))
   (setq temporary-file-directory (file-name-as-directory temp-dir)))
+
+(declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
+                  (operation &rest args))
 
 ;; We could get the repository name from the TEST_WORKSPACE environment
 ;; variable, but that one’s optional
