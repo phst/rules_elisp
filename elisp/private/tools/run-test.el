@@ -145,8 +145,6 @@ failure messages."
   (let ((errors 0)
         (failures 0)
         (test-reports ())
-        (map (make-hash-table :test #'eq))
-        (marker (cons nil nil))
         (coding-system-for-write 'utf-8-unix)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
@@ -220,17 +218,11 @@ failure messages."
       ;; generates invalid XML, cf. https://debbugs.gnu.org/41094.  Use a
       ;; hashtable to avoid infinite loops on cyclic data structures.
       (cl-labels ((walk (obj)
-                    (let ((existing (gethash obj map marker)))
-                      (if (not (eq existing marker)) existing
-                        (let ((new (cl-etypecase obj
-                                     (symbol (elisp/check--xml-name obj))
-                                     (string (elisp/sanitize--xml-string obj))
-                                     ((and list (satisfies proper-list-p))
-                                      (mapcar #'walk obj))
-                                     (cons (cons (walk (car obj))
-                                                 (walk (cdr obj)))))))
-                          (puthash obj new map)
-                          new)))))
+                    (cl-etypecase obj
+                      (symbol (elisp/check--xml-name obj))
+                      (string (elisp/sanitize--xml-string obj))
+                      ((and list (satisfies proper-list-p)) (mapcar #'walk obj))
+                      (cons (cons (walk (car obj)) (walk (cdr obj)))))))
         (xml-print
          (walk
           `((testsuite
