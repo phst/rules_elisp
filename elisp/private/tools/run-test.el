@@ -199,10 +199,9 @@ failure messages."
                    (classname . "ERT")
                    (time . ,(format-time-string "%s.%N" duration)))
                   ,@(when tag
-                      `((,tag
-                         ((message . ,failure-message)
-                          ,@(when type `((type . ,(symbol-name type)))))
-                         ,@(when description `(,description))))))
+                      `((,tag ((message . ,failure-message)
+                               ,@(when type `((type . ,(symbol-name type)))))
+                              ,@(when description `(,description))))))
                 test-reports))))
     (with-temp-file file
       ;; The expected format of the XML output file isn’t
