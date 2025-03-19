@@ -688,7 +688,7 @@ instrumented using Edebug."
 If no such value exists, evaluate BODY and put its value into
 TABLE."
     (declare (ftype (function (t t &rest t) t)) (indent 2) (debug t))
-    (macroexp-let2* nil ((key key) (table table))
+    (cl-once-only (key table)
       (cl-with-gensyms (value default)
         `(let* ((,default (cons nil nil)) ; unique object
                 (,value (gethash ,key ,table ,default)))
