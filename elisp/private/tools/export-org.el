@@ -18,7 +18,7 @@
 
 ;; Internal implementation of the ‘elisp_manual’ Bazel rule.
 ;; Usage:
-;;    emacs export-org.el OUTPUT.texi INPUT.org 〈ADDITIONAL-INPUTS〉
+;;    emacs export-org.el OUTPUT.texi INPUT.org
 
 ;;; Code:
 
@@ -29,7 +29,7 @@
 
 (unless noninteractive (user-error "This file works only in batch mode"))
 
-(cl-destructuring-bind (output input . additional-inputs) command-line-args-left
+(cl-destructuring-bind (output input) command-line-args-left
   (setq command-line-args-left nil)
   (cl-callf expand-file-name input)
   (cl-callf expand-file-name output)

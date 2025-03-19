@@ -31,7 +31,7 @@ def _elisp_manual_impl(ctx):
         outputs = [out],
         inputs = [src] + additional_inputs,
         executable = ctx.executable._export,
-        arguments = [ctx.actions.args().add(out).add(src).add_all(additional_inputs, expand_directories = False)],
+        arguments = [ctx.actions.args().add(out).add(src)],
         mnemonic = "Export",
         progress_message = "Exporting %{input} into Texinfo file",
         toolchain = None,
