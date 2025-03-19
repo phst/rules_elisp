@@ -862,9 +862,6 @@ file that has been instrumented with Edebug."
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (length vector))))))
 
-
-;;;; Coverage utilities:
-
 (defun elisp/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
   (declare (ftype (function (string) string))
