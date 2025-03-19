@@ -580,9 +580,8 @@ instrumented using Edebug."
   (with-temp-buffer
     (let ((coding-system-for-write 'utf-8-unix)
           (write-region-annotate-functions nil)
-          (write-region-post-annotation-function nil)
-          (test-name (getenv "TEST_TARGET")))
-      (unless (member test-name '(nil ""))
+          (write-region-post-annotation-function nil))
+      (when-let ((test-name (elisp/env--var "TEST_TARGET")))
         (insert "TN:" (elisp/sanitize--string test-name) ?\n))
       (dolist (buffer buffers)
         (elisp/insert--coverage-report buffer)
@@ -810,6 +809,15 @@ be determined, return nil."
   (let ((case-fold-search nil))
     (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string)))
 
+(defun elisp/env--var (name)
+  "Return the value of the environment variable NAME.
+If NAME is unset or set to the empty string, return nil."
+  (declare (ftype (function (string) (or null string)))
+           (side-effect-free error-free))
+  (cl-check-type name string)
+  (let ((value (getenv name)))
+    (and value (not (string-empty-p value)) value)))
+
 (defun elisp/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
 DIRECTORY is the directory that could contain FILENAME."
@@ -935,10 +943,12 @@ Return SYMBOL."
 
 ;; TEST_SRCDIR and TEST_TMPDIR are required,
 ;; cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
-(let ((source-dir (getenv "TEST_SRCDIR"))
-      (temp-dir (getenv "TEST_TMPDIR")))
-  (and (member source-dir '(nil "")) (error "TEST_SRCDIR not set"))
-  (and (member temp-dir '(nil "")) (error "TEST_TMPDIR not set"))
+(unless (elisp/env--var "TEST_SRCDIR")
+  (error "TEST_SRCDIR not set"))
+
+(let ((temp-dir (elisp/env--var "TEST_TMPDIR")))
+  (unless temp-dir
+    (error "TEST_TMPDIR not set"))
   (setq temporary-file-directory
         (file-name-as-directory (concat "/:" temp-dir))))
 
@@ -970,22 +980,22 @@ Return SYMBOL."
                                           :fixedcase :literal)
                 "%s-resources/")))
 
-(random (or (getenv "TEST_RANDOM_SEED") ""))
+(random (or (elisp/env--var "TEST_RANDOM_SEED") ""))
 
-(when-let ((shard-status-file (getenv "TEST_SHARD_STATUS_FILE")))
+(when-let ((shard-status-file (elisp/env--var "TEST_SHARD_STATUS_FILE")))
   (let ((coding-system-for-write 'no-conversion)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
     (write-region "" nil (concat "/:" shard-status-file) :append)))
 
-(let* ((report-file (getenv "XML_OUTPUT_FILE"))
+(let* ((report-file (elisp/env--var "XML_OUTPUT_FILE"))
        (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
        (shard-count (string-to-number (or (getenv "TEST_TOTAL_SHARDS") "1")))
        (shard-index (string-to-number (or (getenv "TEST_SHARD_INDEX") "0")))
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
-       (coverage-manifest (getenv "COVERAGE_MANIFEST"))
-       (coverage-dir (getenv "COVERAGE_DIR"))
-       (verbose-coverage (not (member (getenv "VERBOSE_COVERAGE") '(nil ""))))
+       (coverage-manifest (elisp/env--var "COVERAGE_MANIFEST"))
+       (coverage-dir (elisp/env--var "COVERAGE_DIR"))
+       (verbose-coverage (and (elisp/env--var "VERBOSE_COVERAGE") t))
        (original-load-suffixes load-suffixes)
        ;; If coverage is enabled, check for a file with a well-known
        ;; extension first.  The Bazel runfiles machinery is expected to
@@ -1027,8 +1037,8 @@ Return SYMBOL."
     (cl-callf2 mapcar #'unquote command-line-args-left))
   ;; We optimize the test selector somewhat.  It’s displayed to the user if no
   ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
-  (let* ((test-filter (getenv "TESTBRIDGE_TEST_ONLY"))
-         (filters (list (if (member test-filter '(nil "")) t (read test-filter))
+  (let* ((test-filter (elisp/env--var "TESTBRIDGE_TEST_ONLY"))
+         (filters (list (if test-filter (read test-filter) t)
                         (pcase (mapcar (lambda (tag) `(tag ,tag)) skip-tags)
                           ('() t)
                           (`(,elt) `(not ,elt))
@@ -1042,9 +1052,9 @@ Return SYMBOL."
                      (`(,elt) elt)
                      (elts `(and ,@elts)))))
   (when coverage-enabled
-    (when (member coverage-manifest '(nil ""))
+    (unless coverage-manifest
       (error "Coverage requested but COVERAGE_MANIFEST not set"))
-    (when (member coverage-dir '(nil ""))
+    (unless coverage-dir
       (error "Coverage requested but COVERAGE_DIR not set"))
     (when verbose-coverage
       (message "Reading coverage manifest %s" coverage-manifest))
@@ -1140,7 +1150,7 @@ Return SYMBOL."
           (message "Running %d tests finished, %d results unexpected"
                    completed unexpected)
           (setq exit-code (min unexpected 1)))
-        (unless (member report-file '(nil ""))
+        (when report-file
           (elisp/write--report report-file start-time tests stats
                                failure-messages))
         (when coverage-enabled
