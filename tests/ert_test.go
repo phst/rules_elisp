@@ -16,6 +16,7 @@ package ert_test
 
 import (
 	"bufio"
+	"context"
 	"encoding/xml"
 	"flag"
 	"io"
@@ -481,6 +482,12 @@ func TestCoverage(t *testing.T) {
 
 func runTest(t *testing.T, testEnv ...string) error {
 	t.Helper()
+	d, ok := t.Deadline()
+	if !ok {
+		d = time.Now().Add(time.Minute)
+	}
+	ctx, cancel := context.WithDeadline(context.Background(), d.Add(-10*time.Second))
+	defer cancel()
 	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
@@ -502,7 +509,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	r, w := io.Pipe()
 	go log(t, "Emacs", r)
 
-	cmd := exec.Command(bin, "arg 1", "arg\n2 äα𝐴🐈'")
+	cmd := exec.CommandContext(ctx, bin, "arg 1", "arg\n2 äα𝐴🐈'")
 	// Only keep required variables from
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	requiredEnv := []string{
