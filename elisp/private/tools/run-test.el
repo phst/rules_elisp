@@ -689,9 +689,8 @@ If no such value exists, evaluate BODY and put its value into
 TABLE."
     (declare (ftype (function (t t &rest t) t)) (indent 2) (debug t))
     (macroexp-let2* nil ((key key) (table table))
-      (let ((value (make-symbol "value"))
-            (default (make-symbol "default")))
-        `(let* ((,default (cons nil nil))  ; unique object
+      (cl-with-gensyms (value default)
+        `(let* ((,default (cons nil nil)) ; unique object
                 (,value (gethash ,key ,table ,default)))
            (if (eq ,value ,default)
                (puthash ,key ,(macroexp-progn body) ,table)

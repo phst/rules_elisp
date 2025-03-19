@@ -1,6 +1,6 @@
 ;;; proto.el --- basic protocol buffer functionality  -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2022, 2023 Google LLC
+;; Copyright 2020, 2021, 2022, 2023, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -106,19 +106,19 @@ plain symbol FIELD, which is a shorthand for (FIELD FIELD).  NAME
 names a field in the protocol buffer message type TYPE.  The
 value of the field is matched against PATTERN."
   (cl-check-type type (and symbol (not null) (not keyword)))
-  (let ((message (make-symbol "message"))
-        (pairs (mapcar (lambda (field)
-                         (pcase-exhaustive field
-                           (`(,name ,pattern) `(,name . ,pattern))
-                           (name `(,name . ,name))))
-                       fields)))
-    (pcase-dolist (`(,name . ,_) pairs)
-      (elisp/proto/check-field-name type name))
-    `(and (pred ,(intern (format "%s-p" type)))
-          ,message
-          ,@(mapcar (pcase-lambda (`(,name . ,pattern))
-                      `(let ,pattern (elisp/proto/field ,message ',name)))
-                    pairs))))
+  (cl-with-gensyms (message)
+    (let ((pairs (mapcar (lambda (field)
+                           (pcase-exhaustive field
+                             (`(,name ,pattern) `(,name . ,pattern))
+                             (name `(,name . ,name))))
+                         fields)))
+      (pcase-dolist (`(,name . ,_) pairs)
+        (elisp/proto/check-field-name type name))
+      `(and (pred ,(intern (format "%s-p" type)))
+            ,message
+            ,@(mapcar (pcase-lambda (`(,name . ,pattern))
+                        `(let ,pattern (elisp/proto/field ,message ',name)))
+                      pairs)))))
 
 (cl-defmethod cl-print-object ((message elisp/proto/message) stream)
   "Print protocol buffer MESSAGE to STREAM.
