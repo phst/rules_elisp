@@ -28,6 +28,11 @@
 
 (cl-destructuring-bind (output main include-dir) command-line-args-left
   (setq command-line-args-left nil)
+  (let ((file-name-handler-alist ()))
+    (cl-flet ((quote-file (file) (concat "/:" (expand-file-name file))))
+      (cl-callf quote-file output)
+      (cl-callf quote-file main)
+      (cl-callf quote-file include-dir)))
   (let* ((coding-system-for-read 'utf-8-unix)
          (coding-system-for-write 'utf-8-unix)
          (format-alist nil)
