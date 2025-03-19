@@ -38,6 +38,9 @@
 (require 'trampver)  ; load eagerly to work around https://debbugs.gnu.org/11218
 (require 'xml)
 
+
+;;;; Message formatting:
+
 (defun elisp/failure--message (name result)
   "Return a failure message for the RESULT of a failing test.
 NAME is the name of the test."
@@ -76,6 +79,9 @@ NAME is the name of the test."
         (indent-rigidly point (point) 4))
       (insert ?\n)
       (buffer-substring-no-properties (point-min) (point-max)))))
+
+
+;;;; XML report generation:
 
 (defun elisp/write--report (file start-time tests stats failure-messages)
   "Write XML report to FILE.
@@ -179,6 +185,9 @@ failure messages."
                                      (value . ,emacs-version))))
            ,@(nreverse test-reports)
            (system-out) (system-err))))))))
+
+
+;;;; Coverage support:
 
 (defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
@@ -751,6 +760,9 @@ file that has been instrumented with Edebug."
       (insert (format "LH:%d\nLF:%d\nend_of_record\n"
                       lines-hit (length vector))))))
 
+
+;;;; Message formatting:
+
 (defun elisp/message--prefix (test)
   "Return a message prefix for TEST.
 TEST should be an ERT test symbol.  If possible, return a prefix
@@ -799,6 +811,9 @@ be determined, return nil."
                     (elisp/file--display-name file directory)
                     (line-number-at-pos))))))))
 
+
+;;;; Coverage utilities:
+
 (defun elisp/sanitize--string (string)
   "Return a sanitized version of STRING for the coverage file."
   (declare (ftype (function (string) string))
@@ -808,6 +823,9 @@ be determined, return nil."
   ;; newlines.
   (let ((case-fold-search nil))
     (replace-regexp-in-string (rx (not (any alnum blank punct))) "?" string)))
+
+
+;;;; Environment variable utilities:
 
 (defun elisp/env--var (name)
   "Return the value of the environment variable NAME.
@@ -831,6 +849,9 @@ assume the file name always refers to a local file, and quote it."
     ;; filenames, so do this before quoting.
     (let ((file-name-handler-alist ()))
       (concat "/:" (expand-file-name value)))))
+
+
+;;;; File utilities:
 
 (defun elisp/file--display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
@@ -882,6 +903,9 @@ exact copies as equal."
                      (eql (compare-buffer-substrings buffer-1 nil nil
                                                      buffer-2 nil nil)
                           0)))))))))
+
+
+;;;; XML sanitzation:
 
 (defun elisp/sanitize--xml (tree)
   "Return a sanitized version of the XML TREE."
@@ -938,8 +962,14 @@ Return SYMBOL."
          (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
      string :fixedcase :literal)))
 
+
+;;; Forward declarations:
+
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
+
+
+;;; Main code:
 
 (unless noninteractive
   (error "This file works only in batch mode"))
