@@ -270,6 +270,7 @@ Return SYMBOL."
        (let ((c (string-to-char s)))
          (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
      string :fixedcase :literal)))
+
 
 ;;;; Coverage support:
 
