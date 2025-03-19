@@ -37,9 +37,9 @@
     (pcase-exhaustive args
       (`(">" ,file)
        (elisp/proto/insert-stdin)
-       (write-region nil nil file))
+       (write-region nil nil (concat "/:" file)))
       (`("<" ,file)
-       (insert-file-contents-literally file)
+       (insert-file-contents-literally (concat "/:" file))
        (elisp/proto/write-stdout
         (buffer-substring-no-properties (point-min) (point-max)))))))
 

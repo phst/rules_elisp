@@ -31,9 +31,11 @@
 
 (cl-destructuring-bind (output input) command-line-args-left
   (setq command-line-args-left nil)
-  (cl-callf expand-file-name input)
-  (cl-callf expand-file-name output)
-  (let ((coding-system-for-read 'utf-8-unix)
+  ;; ‘expand-file-name’ doesn’t work with quoted file names, so quote them after
+  ;; expanding.
+  (let ((input (concat "/:" (expand-file-name input)))
+        (output (concat "/:" (expand-file-name output)))
+        (coding-system-for-read 'utf-8-unix)
         (coding-system-for-write 'utf-8-unix)
         (format-alist nil)
         (after-insert-file-functions nil)
