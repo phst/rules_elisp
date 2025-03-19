@@ -892,14 +892,11 @@ Return SYMBOL."
                           (cons ".el.instrument" load-suffixes)
                         load-suffixes))
        (load-buffers ())
-       (total 0)
-       (unexpected 0)
        (errors 0)
        (failures 0)
-       (skipped 0)
        (test-reports ())
        (start-time (current-time))
-       test-sources skip-tests skip-tags selector tests)
+       test-sources skip-tests skip-tags selector tests exit-code)
   (unless (and (natnump shard-count) (natnump shard-index)
                (< shard-index shard-count))
     (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
@@ -1038,9 +1035,7 @@ Return SYMBOL."
                (description nil))
           (message "Test %s %s and took %d ms" name status
                    (* duration 1000))
-          (cl-incf total)
           (unless expected
-            (cl-incf unexpected)
             ;; Print a nice error message that should point back to the
             ;; source file in a compilation buffer.  We don’t want to find
             ;; the “.el.instrument” files when printing the error message,
@@ -1052,7 +1047,6 @@ Return SYMBOL."
           (and failed (cl-incf failures))
           (and (not expected) (not failed) (cl-incf errors))
           (when (ert-test-skipped-p result)
-            (cl-incf skipped)
             (setq tag 'skipped))
           (and (not expected) (ert-test-passed-p result)
                ;; Fake an error so that the test is marked as failed in the
@@ -1089,9 +1083,12 @@ Return SYMBOL."
                      (time . ,(format-time-string "%s.%N" duration)))
                     ,@report)
                   test-reports))))
-       (`(run-ended ,_stats ,_abortedp)
-        (message "Running %d tests finished, %d results unexpected"
-                 total unexpected)
+       (`(run-ended ,stats ,_abortedp)
+        (let ((completed (ert-stats-completed stats))
+              (unexpected (ert-stats-completed-unexpected stats)))
+          (message "Running %d tests finished, %d results unexpected"
+                   completed unexpected)
+          (setq exit-code (min unexpected 1)))
         (unless (member report-file '(nil ""))
           (with-temp-buffer
             ;; The expected format of the XML output file isn’t well-documented.
@@ -1105,12 +1102,12 @@ Return SYMBOL."
             (xml-print
              (elisp/sanitize--xml
               `((testsuite
-                 ((name . "ERT")              ; required
-                  (hostname . "localhost")    ; required
-                  (tests . ,(number-to-string total))
+                 ((name . "ERT")           ; required
+                  (hostname . "localhost") ; required
+                  (tests . ,(number-to-string (ert-stats-completed stats)))
                   (errors . ,(number-to-string errors))
                   (failures . ,(number-to-string failures))
-                  (skipped . ,(number-to-string skipped))
+                  (skipped . ,(number-to-string (ert-stats-skipped stats)))
                   (time . ,(format-time-string "%s.%N"
                                                (time-subtract nil start-time)))
                   ;; No timezone or fractional seconds allowed.
@@ -1128,6 +1125,6 @@ Return SYMBOL."
             (message "Writing coverage report into directory %s" coverage-dir))
           (elisp/write--coverage-report (concat "/:" coverage-dir)
                                         load-buffers))))))
-  (kill-emacs (min unexpected 1)))
+  (kill-emacs exit-code))
 
 ;;; ert-runner.el ends here
