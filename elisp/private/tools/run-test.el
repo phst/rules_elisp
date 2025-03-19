@@ -192,20 +192,18 @@ failure messages."
                     description (gethash test failure-messages))
               (unless expected
                 (setq type (car condition)))))
-          (let ((report
-                 (and tag
-                      `((,tag
-                         ((message . ,failure-message)
-                          ,@(and type `((type . ,(symbol-name type)))))
-                         ,@(and description `(,description)))))))
-            (push `(testcase
-                    ((name . ,(symbol-name name))
-                     ;; classname is required, but we don’t have test
-                     ;; classes, so fill in a dummy value.
-                     (classname . "ERT")
-                     (time . ,(format-time-string "%s.%N" duration)))
-                    ,@report)
-                  test-reports)))))
+          (push `(testcase
+                  ((name . ,(symbol-name name))
+                   ;; classname is required, but we don’t have test
+                   ;; classes, so fill in a dummy value.
+                   (classname . "ERT")
+                   (time . ,(format-time-string "%s.%N" duration)))
+                  ,@(and tag
+                         `((,tag
+                            ((message . ,failure-message)
+                             ,@(and type `((type . ,(symbol-name type)))))
+                            ,@(and description `(,description))))))
+                test-reports))))
     (with-temp-file file
       ;; The expected format of the XML output file isn’t
       ;; well-documented.
