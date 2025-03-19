@@ -186,6 +186,60 @@ failure messages."
            ,@(nreverse test-reports)
            (system-out) (system-err))))))))
 
+(defun elisp/sanitize--xml (tree)
+  "Return a sanitized version of the XML TREE."
+  (declare (ftype (function (list) list))
+           (side-effect-free t))
+  ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
+  ;; cf. https://debbugs.gnu.org/41094.  Use a hashtable to avoid infinite loops
+  ;; on cyclic data structures.
+  (cl-check-type tree list)
+  (let ((map (make-hash-table :test #'eq))
+        (marker (cons nil nil)))
+    (cl-labels ((walk (obj)
+                  (let ((existing (gethash obj map marker)))
+                    (if (not (eq existing marker)) existing
+                      (let ((new (cl-etypecase obj
+                                   (symbol (elisp/check--xml-name obj))
+                                   (string (elisp/sanitize--xml-string obj))
+                                   ((and list (satisfies proper-list-p))
+                                    (mapcar #'walk obj))
+                                   (cons
+                                    (cons (walk (car obj)) (walk (cdr obj)))))))
+                        (puthash obj new map)
+                        new)))))
+      (walk tree))))
+
+(defun elisp/check--xml-name (symbol)
+  "Check that SYMBOL maps to a valid XML name.
+Return SYMBOL."
+  (declare (ftype (function (symbol) symbol))
+           (side-effect-free t))
+  (cl-check-type symbol symbol)
+  (let ((name (symbol-name symbol)))
+    ;; Allow only known-safe characters in tags.  Also see
+    ;; https://www.w3.org/TR/xml/#sec-common-syn.
+    (when (or (string-prefix-p "xml" name :ignore-case)
+              (not (string-match-p (rx bos (any "a-z" "A-Z" ?_)
+                                       (* (any "a-z" "A-Z" "0-9" ?- ?_)) eos)
+                                   name)))
+      (error "Invalid XML symbol %s" symbol)))
+  symbol)
+
+(defun elisp/sanitize--xml-string (string)
+  "Return a sanitized variant of STRING containing only valid XML characters."
+  (declare (ftype (function (string) string))
+           (side-effect-free error-free))
+  (cl-check-type string string)
+  (let ((case-fold-search nil))
+    (replace-regexp-in-string
+     ;; https://www.w3.org/TR/xml/#charsets
+     (rx (not (any #x9 #xA #xD (#x20 . #xD7FF) (#xE000 . #xFFFD)
+                   (#x10000 . #x10FFFF))))
+     (lambda (s)
+       (let ((c (string-to-char s)))
+         (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
+     string :fixedcase :literal)))
 
 ;;;; Coverage support:
 
@@ -903,64 +957,6 @@ exact copies as equal."
                      (eql (compare-buffer-substrings buffer-1 nil nil
                                                      buffer-2 nil nil)
                           0)))))))))
-
-
-;;;; XML sanitzation:
-
-(defun elisp/sanitize--xml (tree)
-  "Return a sanitized version of the XML TREE."
-  (declare (ftype (function (list) list))
-           (side-effect-free t))
-  ;; This is necessary because ‘xml-print’ sometimes generates invalid XML,
-  ;; cf. https://debbugs.gnu.org/41094.  Use a hashtable to avoid infinite loops
-  ;; on cyclic data structures.
-  (cl-check-type tree list)
-  (let ((map (make-hash-table :test #'eq))
-        (marker (cons nil nil)))
-    (cl-labels ((walk (obj)
-                  (let ((existing (gethash obj map marker)))
-                    (if (not (eq existing marker)) existing
-                      (let ((new (cl-etypecase obj
-                                   (symbol (elisp/check--xml-name obj))
-                                   (string (elisp/sanitize--xml-string obj))
-                                   ((and list (satisfies proper-list-p))
-                                    (mapcar #'walk obj))
-                                   (cons
-                                    (cons (walk (car obj)) (walk (cdr obj)))))))
-                        (puthash obj new map)
-                        new)))))
-      (walk tree))))
-
-(defun elisp/check--xml-name (symbol)
-  "Check that SYMBOL maps to a valid XML name.
-Return SYMBOL."
-  (declare (ftype (function (symbol) symbol))
-           (side-effect-free t))
-  (cl-check-type symbol symbol)
-  (let ((name (symbol-name symbol)))
-    ;; Allow only known-safe characters in tags.  Also see
-    ;; https://www.w3.org/TR/xml/#sec-common-syn.
-    (when (or (string-prefix-p "xml" name :ignore-case)
-              (not (string-match-p (rx bos (any "a-z" "A-Z" ?_)
-                                       (* (any "a-z" "A-Z" "0-9" ?- ?_)) eos)
-                                   name)))
-      (error "Invalid XML symbol %s" symbol)))
-  symbol)
-
-(defun elisp/sanitize--xml-string (string)
-  "Return a sanitized variant of STRING containing only valid XML characters."
-  (declare (ftype (function (string) string))
-           (side-effect-free error-free))
-  (cl-check-type string string)
-  (let ((case-fold-search nil))
-    (replace-regexp-in-string
-     ;; https://www.w3.org/TR/xml/#charsets
-     (rx (not (any #x9 #xA #xD (#x20 . #xD7FF) (#xE000 . #xFFFD)
-                   (#x10000 . #x10FFFF))))
-     (lambda (s)
-       (let ((c (string-to-char s)))
-         (format (if (< c #x10000) "\\u%04X" "\\U%08X") c)))
-     string :fixedcase :literal)))
 
 
 ;;; Main code:
