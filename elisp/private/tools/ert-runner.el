@@ -1088,44 +1088,46 @@ Return SYMBOL."
                      (classname . "ERT")
                      (time . ,(format-time-string "%s.%N" duration)))
                     ,@report)
-                  test-reports)))))))
-  (message "Running %d tests finished, %d results unexpected"
-           total unexpected)
-  (unless (member report-file '(nil ""))
-    (with-temp-buffer
-      ;; The expected format of the XML output file isn’t well-documented.
-      ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
-      ;; only states that the XML file is “based on the JUnit test result
-      ;; schema”, referring to
-      ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
-      ;; https://llg.cubic.org/docs/junit/ and
-      ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
-      ;; bit of documentation.
-      (xml-print
-       (elisp/sanitize--xml
-        `((testsuite
-           ((name . "ERT")              ; required
-            (hostname . "localhost")    ; required
-            (tests . ,(number-to-string total))
-            (errors . ,(number-to-string errors))
-            (failures . ,(number-to-string failures))
-            (skipped . ,(number-to-string skipped))
-            (time . ,(format-time-string "%s.%N"
-                                         (time-subtract nil start-time)))
-            ;; No timezone or fractional seconds allowed.
-            (timestamp . ,(format-time-string "%FT%T" start-time)))
-           (properties () (property ((name . "emacs-version")
-                                     (value . ,emacs-version))))
-           ,@(nreverse test-reports)
-           (system-out) (system-err)))))
-      (let ((coding-system-for-write 'utf-8-unix)
-            (write-region-annotate-functions nil)
-            (write-region-post-annotation-function nil))
-        (write-region nil nil (concat "/:" report-file)))))
-  (when coverage-enabled
-    (when verbose-coverage
-      (message "Writing coverage report into directory %s" coverage-dir))
-    (elisp/write--coverage-report (concat "/:" coverage-dir) load-buffers))
+                  test-reports))))
+       (`(run-ended ,_stats ,_abortedp)
+        (message "Running %d tests finished, %d results unexpected"
+                 total unexpected)
+        (unless (member report-file '(nil ""))
+          (with-temp-buffer
+            ;; The expected format of the XML output file isn’t well-documented.
+            ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
+            ;; only states that the XML file is “based on the JUnit test result
+            ;; schema”, referring to
+            ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
+            ;; https://llg.cubic.org/docs/junit/ and
+            ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a
+            ;; bit of documentation.
+            (xml-print
+             (elisp/sanitize--xml
+              `((testsuite
+                 ((name . "ERT")              ; required
+                  (hostname . "localhost")    ; required
+                  (tests . ,(number-to-string total))
+                  (errors . ,(number-to-string errors))
+                  (failures . ,(number-to-string failures))
+                  (skipped . ,(number-to-string skipped))
+                  (time . ,(format-time-string "%s.%N"
+                                               (time-subtract nil start-time)))
+                  ;; No timezone or fractional seconds allowed.
+                  (timestamp . ,(format-time-string "%FT%T" start-time)))
+                 (properties () (property ((name . "emacs-version")
+                                           (value . ,emacs-version))))
+                 ,@(nreverse test-reports)
+                 (system-out) (system-err)))))
+            (let ((coding-system-for-write 'utf-8-unix)
+                  (write-region-annotate-functions nil)
+                  (write-region-post-annotation-function nil))
+              (write-region nil nil (concat "/:" report-file)))))
+        (when coverage-enabled
+          (when verbose-coverage
+            (message "Writing coverage report into directory %s" coverage-dir))
+          (elisp/write--coverage-report (concat "/:" coverage-dir)
+                                        load-buffers))))))
   (kill-emacs (min unexpected 1)))
 
 ;;; ert-runner.el ends here
