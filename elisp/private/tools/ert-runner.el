@@ -77,6 +77,109 @@ NAME is the name of the test."
       (insert ?\n)
       (buffer-substring-no-properties (point-min) (point-max)))))
 
+(defun elisp/write--report (file start-time tests stats failure-messages)
+  "Write XML report to FILE.
+START-TIME is a time value specifying when the test run started, TESTS
+is a list of ‘ert-test’ structures, STATS is an ERT statistics object,
+and FAILURE-MESSAGES is a hash table mapping ‘ert-test’ structures to
+failure messages."
+  (declare (ftype (function (string t list cl-structure-object hash-table) t)))
+  (cl-check-type file string)
+  (cl-check-type tests list)
+  (cl-check-type stats cl-structure-object)
+  (cl-check-type failure-messages hash-table)
+  (let ((errors 0)
+        (failures 0)
+        (test-reports ()))
+    (dolist (test tests)
+      (let* ((name (ert-test-name test))
+             (result (ert-test-most-recent-result test))
+             (duration (ert-test-result-duration result))
+             (expected (ert-test-result-expected-p test result))
+             (failed (and (not expected)
+                          ;; Only actual failures reported with ‘ert-fail’
+                          ;; count as failures, other signals count as
+                          ;; errors.  See the distinction in JUnit.xsd and
+                          ;; https://stackoverflow.com/a/3426034.
+                          (or (and (ert-test-failed-p result)
+                                   (eq (car (ert-test-failed-condition result))
+                                       'ert-test-failed))
+                              ;; A test that passed unexpectedly should count
+                              ;; as failed for the XML report.
+                              (ert-test-passed-p result))))
+             (tag nil)
+             (failure-message nil)
+             (type nil)
+             (description nil))
+        (and failed (cl-incf failures))
+        (and (not expected) (not failed) (cl-incf errors))
+        (when (ert-test-skipped-p result)
+          (setq tag 'skipped))
+        (and (not expected) (ert-test-passed-p result)
+             ;; Fake an error so that the test is marked as failed in
+             ;; the XML report.
+             (setq tag 'failure
+                   failure-message "Test passed unexpectedly"
+                   type 'error))
+        (when (ert-test-result-with-condition-p result)
+          (let ((condition
+                 (ert-test-result-with-condition-condition result)))
+            (unless (symbolp (car condition))
+              ;; This shouldn’t normally happen, but happens due to a
+              ;; bug in ERT for forms such as
+              ;; (should (integerp (ert-fail "Boo"))).
+              (push 'ert-test-failed condition))
+            (setq failure-message (error-message-string condition)
+                  description (gethash test failure-messages))
+            (unless expected
+              (setq tag (if failed 'failure 'error)
+                    type (car condition)))))
+        (let ((report
+               (and tag
+                    `((,tag
+                       ((message . ,failure-message)
+                        ,@(and type `((type . ,(symbol-name type)))))
+                       ,@(and description `(,description)))))))
+          (push `(testcase
+                  ((name . ,(symbol-name name))
+                   ;; classname is required, but we don’t have test
+                   ;; classes, so fill in a dummy value.
+                   (classname . "ERT")
+                   (time . ,(format-time-string "%s.%N" duration)))
+                  ,@report)
+                test-reports))))
+    (with-temp-buffer
+      ;; The expected format of the XML output file isn’t
+      ;; well-documented.
+      ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
+      ;; only states that the XML file is “based on the JUnit test
+      ;; result schema”, referring to
+      ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
+      ;; https://llg.cubic.org/docs/junit/ and
+      ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain
+      ;; a bit of documentation.
+      (xml-print
+       (elisp/sanitize--xml
+        `((testsuite
+           ((name . "ERT")              ; required
+            (hostname . "localhost")    ; required
+            (tests . ,(number-to-string (ert-stats-completed stats)))
+            (errors . ,(number-to-string errors))
+            (failures . ,(number-to-string failures))
+            (skipped . ,(number-to-string (ert-stats-skipped stats)))
+            (time . ,(format-time-string "%s.%N"
+                                         (time-subtract nil start-time)))
+            ;; No timezone or fractional seconds allowed.
+            (timestamp . ,(format-time-string "%FT%T" start-time)))
+           (properties () (property ((name . "emacs-version")
+                                     (value . ,emacs-version))))
+           ,@(nreverse test-reports)
+           (system-out) (system-err)))))
+      (let ((coding-system-for-write 'utf-8-unix)
+            (write-region-annotate-functions nil)
+            (write-region-post-annotation-function nil))
+        (write-region nil nil (concat "/:" file))))))
+
 (defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
 FILE is an abbreviated name as described in
@@ -1038,98 +1141,8 @@ Return SYMBOL."
                    completed unexpected)
           (setq exit-code (min unexpected 1)))
         (unless (member report-file '(nil ""))
-          (let ((errors 0)
-                (failures 0)
-                (test-reports ()))
-            (dolist (test tests)
-              (let* ((name (ert-test-name test))
-                     (result (ert-test-most-recent-result test))
-                     (duration (ert-test-result-duration result))
-                     (expected (ert-test-result-expected-p test result))
-                     (failed
-                      (and (not expected)
-                           ;; Only actual failures reported with ‘ert-fail’
-                           ;; count as failures, other signals count as
-                           ;; errors.  See the distinction in JUnit.xsd and
-                           ;; https://stackoverflow.com/a/3426034.
-                           (or (and (ert-test-failed-p result)
-                                    (eq (car (ert-test-failed-condition result))
-                                        'ert-test-failed))
-                               ;; A test that passed unexpectedly should count
-                               ;; as failed for the XML report.
-                               (ert-test-passed-p result))))
-                     (tag nil)
-                     (failure-message nil)
-                     (type nil)
-                     (description nil))
-                (and failed (cl-incf failures))
-                (and (not expected) (not failed) (cl-incf errors))
-                (when (ert-test-skipped-p result)
-                  (setq tag 'skipped))
-                (and (not expected) (ert-test-passed-p result)
-                     ;; Fake an error so that the test is marked as failed in
-                     ;; the XML report.
-                     (setq tag 'failure
-                           failure-message "Test passed unexpectedly"
-                           type 'error))
-                (when (ert-test-result-with-condition-p result)
-                  (let ((condition
-                         (ert-test-result-with-condition-condition result)))
-                    (unless (symbolp (car condition))
-                      ;; This shouldn’t normally happen, but happens due to a
-                      ;; bug in ERT for forms such as
-                      ;; (should (integerp (ert-fail "Boo"))).
-                      (push 'ert-test-failed condition))
-                    (setq failure-message (error-message-string condition)
-                          description (gethash test failure-messages))
-                    (unless expected
-                      (setq tag (if failed 'failure 'error)
-                            type (car condition)))))
-                (let ((report
-                       (and tag
-                            `((,tag
-                               ((message . ,failure-message)
-                                ,@(and type `((type . ,(symbol-name type)))))
-                               ,@(and description `(,description)))))))
-                  (push `(testcase
-                          ((name . ,(symbol-name name))
-                           ;; classname is required, but we don’t have test
-                           ;; classes, so fill in a dummy value.
-                           (classname . "ERT")
-                           (time . ,(format-time-string "%s.%N" duration)))
-                          ,@report)
-                        test-reports))))
-            (with-temp-buffer
-              ;; The expected format of the XML output file isn’t
-              ;; well-documented.
-              ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
-              ;; only states that the XML file is “based on the JUnit test
-              ;; result schema”, referring to
-              ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
-              ;; https://llg.cubic.org/docs/junit/ and
-              ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain
-              ;; a bit of documentation.
-              (xml-print
-               (elisp/sanitize--xml
-                `((testsuite
-                   ((name . "ERT")           ; required
-                    (hostname . "localhost") ; required
-                    (tests . ,(number-to-string (ert-stats-completed stats)))
-                    (errors . ,(number-to-string errors))
-                    (failures . ,(number-to-string failures))
-                    (skipped . ,(number-to-string (ert-stats-skipped stats)))
-                    (time . ,(format-time-string "%s.%N"
-                                                 (time-subtract nil start-time)))
-                    ;; No timezone or fractional seconds allowed.
-                    (timestamp . ,(format-time-string "%FT%T" start-time)))
-                   (properties () (property ((name . "emacs-version")
-                                             (value . ,emacs-version))))
-                   ,@(nreverse test-reports)
-                   (system-out) (system-err)))))
-              (let ((coding-system-for-write 'utf-8-unix)
-                    (write-region-annotate-functions nil)
-                    (write-region-post-annotation-function nil))
-                (write-region nil nil (concat "/:" report-file))))))
+          (elisp/write--report report-file start-time tests stats
+                               failure-messages))
         (when coverage-enabled
           (when verbose-coverage
             (message "Writing coverage report into directory %s" coverage-dir))
