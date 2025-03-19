@@ -19,7 +19,6 @@ import (
 	"context"
 	"encoding/xml"
 	"flag"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -80,12 +79,8 @@ func TestReportValid(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("validing XML report %s against schema %s", file, schema)
-	r, w := io.Pipe()
-	go log(t, "xmllint", r)
 	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, file)
-	cmd.Stdout = w
-	cmd.Stderr = w
-	if err := cmd.Run(); err != nil {
+	if err := run(t, "xmllint", cmd); err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}
 	t.Log("XML validation complete")
@@ -506,9 +501,6 @@ func runTest(t *testing.T, testEnv ...string) error {
 	}
 	t.Logf("using test binary %s", bin)
 
-	r, w := io.Pipe()
-	go log(t, "Emacs", r)
-
 	cmd := exec.CommandContext(ctx, bin, "arg 1", "arg\n2 äα𝐴🐈'")
 	// Only keep required variables from
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
@@ -527,15 +519,28 @@ func runTest(t *testing.T, testEnv ...string) error {
 	env = append(env, rf.Env()...)
 	env = append(env, testEnv...)
 	cmd.Env = env
-	cmd.Stdout = w
-	cmd.Stderr = w
 	cmd.Dir = workspace
-	err = cmd.Run()
+	err = run(t, "Emacs", cmd)
 	t.Log("test process exited, error:", err)
 	return err
 }
 
-func log(t *testing.T, p string, r io.Reader) {
+func run(t *testing.T, p string, c *exec.Cmd) error {
+	t.Helper()
+	if c.Stdout != nil {
+		t.Fatalf("%s: exec.Cmd.Stdout already set", p)
+	}
+	if c.Stderr != nil {
+		t.Fatalf("%s: exec.Cmd.Stderr already set", p)
+	}
+	r, err := c.StdoutPipe()
+	if err != nil {
+		t.Fatalf("%s: %s", p, err)
+	}
+	c.Stderr = c.Stdout
+	if err := c.Start(); err != nil {
+		t.Fatalf("%s: %s", p, err)
+	}
 	s := bufio.NewScanner(r)
 	for s.Scan() {
 		t.Logf("[%s] %s", p, s.Bytes())
@@ -543,6 +548,7 @@ func log(t *testing.T, p string, r io.Reader) {
 	if err := s.Err(); err != nil {
 		t.Errorf("[%s] error: %s", p, err)
 	}
+	return c.Wait()
 }
 
 type timestamp time.Time
