@@ -74,8 +74,8 @@ build_test(
 )
 
 build_test(
-    name = "ert_runner_test",
-    targets = ["//elisp/private/tools:ert_runner"],
+    name = "run_test_el_test",
+    targets = ["//elisp/private/tools:run_test_el"],
 )
 
 build_test(

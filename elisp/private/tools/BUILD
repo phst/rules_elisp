@@ -162,7 +162,7 @@ cc_library(
     copts = COPTS + CXXOPTS,
     data = [
         ":run_test_stripped",
-        "//elisp/private/tools:ert-runner.elc",
+        "//elisp/private/tools:run-test.elc",
         "//elisp/runfiles:runfiles.elc",
     ],
     features = FEATURES,
@@ -174,7 +174,7 @@ cc_library(
         shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
         shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--runner-elc=$(rlocationpath //elisp/private/tools:ert-runner.elc))*")',
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--run-test-elc=$(rlocationpath //elisp/private/tools:run-test.elc))*")',
         ])),
     ],
     visibility = ["//elisp:__pkg__"],
@@ -208,10 +208,10 @@ executable_only(
 )
 
 elisp_library(
-    name = "ert_runner",
+    name = "run_test_el",
     testonly = True,
-    srcs = ["ert-runner.el"],
-    outs = ["ert-runner.elc"],
+    srcs = ["run-test.el"],
+    outs = ["run-test.elc"],
     visibility = ["//tests/tools:__pkg__"],
 )
 

@@ -40,7 +40,7 @@ def main() -> None:
     parser.add_argument('--mode', choices=('direct', 'wrap'), required=True)
     parser.add_argument('--runfiles-elc', type=pathlib.PurePosixPath,
                         required=True)
-    parser.add_argument('--runner-elc', type=pathlib.PurePosixPath,
+    parser.add_argument('--run-test-elc', type=pathlib.PurePosixPath,
                         required=True)
     parser.add_argument('--rule-tag', action='append', default=[])
     parser.add_argument('--load-directory', action='append',
@@ -68,8 +68,8 @@ def main() -> None:
         if opts.module_assertions:
             args.append('--module-assertions')
         load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
-        runner = run_files.resolve(opts.runner_elc)
-        args.append('--load=' + str(runner))
+        run_test_elc = run_files.resolve(opts.run_test_elc)
+        args.append('--load=' + str(run_test_elc))
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
             args.append('--test-source=/:' + _quote(str(abs_name)))

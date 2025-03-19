@@ -1,4 +1,4 @@
-;;; ert-runner.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
+;;; run-test.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
 ;; Copyright 2020, 2021, 2022, 2023, 2024, 2025 Google LLC
 ;;
@@ -1176,4 +1176,4 @@ Return SYMBOL."
             (elisp/write--coverage-report coverage-dir load-buffers)))))))
   (kill-emacs exit-code))
 
-;;; ert-runner.el ends here
+;;; run-test.el ends here
