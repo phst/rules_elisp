@@ -214,8 +214,7 @@ failure messages."
       ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain
       ;; a bit of documentation.
       ;; Sanitizing the tree is necessary because ‘xml-print’ sometimes
-      ;; generates invalid XML, cf. https://debbugs.gnu.org/41094.  Use a
-      ;; hashtable to avoid infinite loops on cyclic data structures.
+      ;; generates invalid XML, cf. https://debbugs.gnu.org/41094.
       (cl-labels ((walk (obj)
                     (cl-etypecase obj
                       (symbol (elisp/check--xml-name obj))
