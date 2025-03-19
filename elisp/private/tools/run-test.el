@@ -197,7 +197,7 @@ failure messages."
                    ;; classname is required, but we don’t have test
                    ;; classes, so fill in a dummy value.
                    (classname . "ERT")
-                   (time . ,(format-time-string "%s.%N" duration)))
+                   (time . ,(format-time-string "%s.%3N" duration)))
                   ,@(when tag
                       `((,tag ((message . ,failure-message)
                                ,@(when type `((type . ,(symbol-name type)))))
@@ -231,7 +231,7 @@ failure messages."
               (errors . ,(number-to-string errors))
               (failures . ,(number-to-string failures))
               (skipped . ,(number-to-string (ert-stats-skipped stats)))
-              (time . ,(format-time-string "%s.%N"
+              (time . ,(format-time-string "%s.%3N"
                                            (time-subtract nil start-time)))
               ;; No timezone or fractional seconds allowed.
               (timestamp . ,(format-time-string "%FT%T" start-time)))
