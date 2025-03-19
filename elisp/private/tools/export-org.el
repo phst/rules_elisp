@@ -33,9 +33,11 @@
   (setq command-line-args-left nil)
   ;; ‘expand-file-name’ doesn’t work with quoted file names, so quote them after
   ;; expanding.
-  (let ((input (concat "/:" (expand-file-name input)))
-        (output (concat "/:" (expand-file-name output)))
-        (coding-system-for-read 'utf-8-unix)
+  (let ((file-name-handler-alist))
+    (cl-flet ((quote-file (file) (concat "/:" (expand-file-name file))))
+      (cl-callf quote-file input)
+      (cl-callf quote-file output)))
+  (let ((coding-system-for-read 'utf-8-unix)
         (coding-system-for-write 'utf-8-unix)
         (format-alist nil)
         (after-insert-file-functions nil)
