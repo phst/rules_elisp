@@ -183,11 +183,6 @@ failure messages."
           (when (ert-test-result-with-condition-p result)
             (let ((condition
                    (ert-test-result-with-condition-condition result)))
-              (unless (symbolp (car condition))
-                ;; This shouldn’t normally happen, but happens due to a
-                ;; bug in ERT for forms such as
-                ;; (should (integerp (ert-fail "Boo"))).
-                (push 'ert-test-failed condition))
               (setq failure-message (error-message-string condition)
                     description (gethash test failure-messages))
               (unless expected
