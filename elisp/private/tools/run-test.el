@@ -181,8 +181,7 @@ failure messages."
                (setq failure-message "Test passed unexpectedly"
                      type 'error))
           (when (ert-test-result-with-condition-p result)
-            (let ((condition
-                   (ert-test-result-with-condition-condition result)))
+            (let ((condition (ert-test-result-with-condition-condition result)))
               (setq failure-message (error-message-string condition)
                     description (gethash test failure-messages))
               (unless expected
