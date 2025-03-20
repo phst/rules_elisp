@@ -270,39 +270,39 @@ Return SYMBOL."
 
 (defun elisp/load--instrument (fullname file)
   "Load and instrument the Emacs Lisp file FULLNAME.
-FILE is an abbreviated name as described in
-‘load-source-file-function’, which see.  Return a live buffer
-visiting the file."
+FILE is an abbreviated name as described in ‘load-source-file-function’,
+which see.  Return a live buffer containing the file contents."
   (declare (ftype (function (string string) buffer)))
   (cl-check-type fullname string)
   (cl-check-type file string)
-  ;; Similar to testcover.el, we use Edebug to collect coverage
-  ;; information.  The rest of this function is similar to
-  ;; ‘load-with-code-conversion’, but we ignore some edge cases.
-  (let ((buffer (generate-new-buffer (format "*%s*" file)))
-        (reporter (make-progress-reporter
+  ;; Similar to testcover.el, we use Edebug to collect coverage information.
+  (let ((reporter (make-progress-reporter
                    (format-message "Loading and instrumenting %s..." file)))
-        (load-in-progress t)
-        (load-file-name fullname)
-        (set-auto-coding-for-load t)
-        (inhibit-file-name-operation nil)
         (format-alist nil)
         (after-insert-file-functions nil)
-        (edebug-all-defs t)
-        (edebug-new-definition-function #'elisp/new--definition)
-        (edebug-after-instrumentation-function #'elisp/after--instrumentation))
-    (with-current-buffer buffer
-      (insert-file-contents fullname :visit)
-      ;; The file buffer needs to be current for Edebug
-      ;; instrumentation to work.
-      (eval-buffer buffer nil fullname nil :do-allow-print)
-      ;; Yuck!  We have to mess with internal Edebug data here.
-      ;; Byte-compile all functions to be a bit more realistic.
-      (dolist (data edebug-form-data)
-        (byte-compile (edebug--form-data-name data))))
-    (do-after-load-evaluation fullname)
+        cloned-buffer)
+    (load-with-code-conversion
+     fullname file nil :nomessage
+     (lambda (buffer file)
+       ;; ‘load-with-code-conversion’ unconditionally kills the buffer being
+       ;; evaluated, so we need to clone it.
+       (with-current-buffer buffer
+         (setq cloned-buffer (clone-buffer (format "*%s*" file))))
+       ;; The file buffer needs to be current for Edebug instrumentation to
+       ;; work.
+       (with-current-buffer cloned-buffer
+         (let ((edebug-all-defs t)
+               (edebug-new-definition-function #'elisp/new--definition)
+               (edebug-after-instrumentation-function
+                #'elisp/after--instrumentation))
+           (eval-buffer cloned-buffer nil file nil :do-allow-print)
+           ;; Yuck!  We have to mess with internal Edebug data here.
+           ;; Byte-compile all functions to be a bit more realistic.
+           (dolist (data edebug-form-data)
+             (byte-compile (edebug--form-data-name data))))
+         (setq-local elisp/source--file file))))
     (progress-reporter-done reporter)
-    buffer))
+    cloned-buffer))
 
 (defun elisp/new--definition (name)
   "Enable line coverage collection for NAME.
@@ -693,12 +693,14 @@ TABLE."
 
 (defun elisp/insert--coverage-report (buffer)
   "Insert a coverage report into the current buffer.
-BUFFER must be a different buffer visiting an Emacs Lisp source
-file that has been instrumented with Edebug."
+BUFFER must be a different buffer containing the contents of an Emacs
+Lisp source file that has been instrumented with Edebug using
+‘elisp/load--instrument’."
   (declare (ftype (function (buffer) t)))
   (cl-check-type buffer buffer)
   (let ((file-name (elisp/sanitize--string
-                    (elisp/file--display-name (buffer-file-name buffer))))
+                    (elisp/file--display-name
+                     (buffer-local-value 'elisp/source--file buffer))))
         (functions ())
         (functions-hit 0)
         (lines (make-hash-table :test #'eql))
