@@ -1004,14 +1004,6 @@ exact copies as equal."
        (coverage-manifest (elisp/env--file "COVERAGE_MANIFEST"))
        (coverage-dir (elisp/env--file "COVERAGE_DIR"))
        (verbose-coverage (when (elisp/env--var "VERBOSE_COVERAGE") t))
-       (original-load-suffixes load-suffixes)
-       ;; If coverage is enabled, check for a file with a well-known
-       ;; extension first.  The Bazel runfiles machinery is expected to
-       ;; generate these files for source files that should be instrumented.
-       ;; See the commentary in //elisp:elisp_test.bzl for details.
-       (load-suffixes (if coverage-enabled
-                          (cons ".el.instrument" load-suffixes)
-                        load-suffixes))
        (load-buffers ())
        (failure-messages (make-hash-table :test #'eq))
        (start-time (current-time))
@@ -1111,7 +1103,14 @@ exact copies as equal."
              '(&define [&name symbolp "@cl-compiler-macro"]
                        cl-macro-list
                        cl-declarations-or-string def-body)))))
-  (mapc #'load test-sources)
+  ;; If coverage is enabled, check for a file with a well-known extension first.
+  ;; The Bazel runfiles machinery is expected to generate these files for source
+  ;; files that should be instrumented.  See the commentary in
+  ;; //elisp:elisp_test.bzl for details.
+  (let ((load-suffixes (if coverage-enabled
+                           (cons ".el.instrument" load-suffixes)
+                         load-suffixes)))
+    (mapc #'load test-sources))
   (when-let ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
   (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
@@ -1142,13 +1141,10 @@ exact copies as equal."
             (message "Test %s %s and took %d ms" name status
                      (* duration 1000))
             (unless expected
-              ;; Print a nice error message that should point back to the
-              ;; source file in a compilation buffer.  We don’t want to find
-              ;; the “.el.instrument” files when printing the error message,
-              ;; so bind ‘load-suffixes’ temporarily to its original value.
-              (let ((load-suffixes original-load-suffixes))
-                (when-let ((prefix (elisp/message--prefix name)))
-                  (message "%s: Test %s %s" prefix name status))))
+              ;; Print a nice error message that should point back to the source
+              ;; file in a compilation buffer.
+              (when-let ((prefix (elisp/message--prefix name)))
+                (message "%s: Test %s %s" prefix name status)))
             (when (ert-test-result-with-condition-p result)
               (let ((message (elisp/failure--message name result)))
                 (message "%s" message)
