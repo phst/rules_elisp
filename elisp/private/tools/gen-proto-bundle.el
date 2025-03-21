@@ -20,7 +20,7 @@
 ;;
 ;; Usage:
 ;;
-;;   elisp/proto/generate-bundle OUTPUT-FILE TARGET FEATURE DEPENDENCIES...
+;;   gen-proto-bundle OUTPUT-FILE TARGET FEATURE DEPENDENCIES...
 
 ;;; Code:
 

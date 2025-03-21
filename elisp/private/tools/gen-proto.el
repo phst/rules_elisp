@@ -22,7 +22,7 @@
 ;;
 ;; Usage:
 ;;
-;;   elisp/proto/generate DESCRIPTOR-FILE OUTPUT-FILE FEATURE
+;;   gen-proto DESCRIPTOR-FILE OUTPUT-FILE FEATURE
 
 ;;; Code:
 
