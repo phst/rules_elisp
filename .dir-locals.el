@@ -26,4 +26,6 @@
  ("elisp/runfiles/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../")))))
  ("examples/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../" "./" "ext/" "../bazel-bin/" "../bazel-bin/external/protobuf/")))))
  ("tests/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../")))))
- ("tests/pkg/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../"))))))
+ ("tests/pkg/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../")))))
+ ("tests/proto/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../")))))
+ ("tests/runfiles/" . ((emacs-lisp-mode . ((elisp-flymake-byte-compile-load-path "../../"))))))
