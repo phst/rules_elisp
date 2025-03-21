@@ -32,14 +32,14 @@
 
 (require 'elisp/proto/proto)
 
-(cl-deftype elisp/proto/simple-string ()
+(cl-deftype @simple-string ()
   '(and string
         (satisfies (lambda (string)
                      (string-match-p
                       (rx bos (+ (any blank alnum ?- "_+./:@~")) eos)
                       string)))))
 
-(defun elisp/proto/generate-message (full-name fields)
+(defun @generate-message (full-name fields)
   "Generate code for the protocol buffer message type FULL-NAME.
 FIELDS is a list of field names."
   (declare (ftype (function (string list) t)))
@@ -89,10 +89,10 @@ This type corresponds to the protocol buffer message type ‘%s’."
     (when fields
       (pp `(cl-define-compiler-macro ,public-constructor
                (&whole form &rest keys)
-             (elisp/proto/check--keys form ',struct keys)))
+             (elisp/proto/proto--check-keys form ',struct keys)))
       (terpri))))
 
-(defun elisp/proto/generate-enum (full-name values)
+(defun @generate-enum (full-name values)
   "Generate code for the protocol buffer enumeration type FULL-NAME.
 VALUES is a list of (NAME NUMBER) pairs."
   (declare (ftype (function (string list) t)))
@@ -108,7 +108,7 @@ VALUES is a list of (NAME NUMBER) pairs."
         (terpri))))
   (terpri))
 
-(cl-defun elisp/proto/generate-file ((proto-file descriptor deps messages enums))
+(cl-defun @generate-file ((proto-file descriptor deps messages enums))
   "Generate code for a single protocol buffer definition file.
 PROTO-FILE is the name of the protocol buffer definition file, relative
 to its repository root.  DESCRIPTOR is a unibyte string containing the
@@ -120,7 +120,7 @@ of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
 where FULL-NAME specifies the qualified name of a protocol buffer
 enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
   (declare (ftype (function (cons) t)))
-  (cl-check-type proto-file elisp/proto/simple-string)
+  (cl-check-type proto-file @simple-string)
   (cl-check-type descriptor string)
   (cl-check-type deps list)
   (cl-check-type messages list)
@@ -138,7 +138,7 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
            (print-escape-newlines t)
            (print-escape-nonascii t)
            (pp-escape-newlines t))
-      (cl-check-type output-name elisp/proto/simple-string)
+      (cl-check-type output-name @simple-string)
       (insert ";;; " output-name " --- protocol buffer library " proto-file
               " -*- lexical-binding: t; -*-\n\n"
               ";;; Commentary:\n\n"
@@ -149,15 +149,15 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
       (prin1 '(require 'cl-lib)) (terpri) (terpri)
       (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
       (dolist (dep deps)
-        (cl-check-type dep elisp/proto/simple-string)
+        (cl-check-type dep @simple-string)
         (prin1 `(require ',(intern dep))) (terpri))
       (when deps (terpri))
       (prin1 `(elisp/proto/register-file-descriptor ,descriptor))
       (terpri) (terpri)
       (pcase-dolist (`(,full-name . ,fields) messages)
-        (elisp/proto/generate-message full-name fields))
+        (@generate-message full-name fields))
       (pcase-dolist (`(,full-name . ,values) enums)
-        (elisp/proto/generate-enum full-name values))
+        (@generate-enum full-name values))
       (prin1 `(provide ',(intern feature))) (terpri) (terpri)
       (insert ";; Local Variables:\n"
               ;; Generated docstrings can be overly long if they contain lengthy
@@ -177,12 +177,16 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
                 (elisp/proto/insert-stdin)
                 (buffer-substring-no-properties (point-min) (point-max))))
        (request (elisp/proto/parse-code-generator-request stdin))
-       (response (mapcar #'elisp/proto/generate-file request))
+       (response (mapcar #'@generate-file request))
        (stdout (elisp/proto/serialize-code-generator-response response)))
   (elisp/proto/write-stdout stdout))
 
 ;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
 ;; Info node ‘(emacs) Specifying File Variables’.
 
+
+;; Local Variables:
+;; read-symbol-shorthands: (("@" . "elisp/private/tools/gen-proto--"))
+;; End:
 
 ;;; gen-proto.el ends here

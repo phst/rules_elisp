@@ -261,10 +261,10 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
     "elisp/proto/serialized-code-generator-request-p")           \
   X(kSerializedFileDescriptorProtoP,                             \
     "elisp/proto/serialized-file-descriptor-proto-p")            \
-  X(kObjectArena, "elisp/proto/object--arena")                   \
-  X(kObjectPtr, "elisp/proto/object--ptr")                       \
-  X(kArrayNew, "elisp/proto/array--new")                         \
-  X(kMapNew, "elisp/proto/map--new")                             \
+  X(kObjectArena, "elisp/proto/proto--object-arena")             \
+  X(kObjectPtr, "elisp/proto/proto--object-ptr")                 \
+  X(kArrayNew, "elisp/proto/proto--array-new")                   \
+  X(kMapNew, "elisp/proto/proto--map-new")                       \
   X(kTimestamp, "google/protobuf/Timestamp")                     \
   X(kTimestampP, "google/protobuf/Timestamp-p")                  \
   X(kTimestampNew, "google/protobuf/Timestamp--new")             \

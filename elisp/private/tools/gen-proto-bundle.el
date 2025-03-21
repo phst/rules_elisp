@@ -26,7 +26,7 @@
 
 (eval-when-compile (require 'cl-lib))
 
-(cl-deftype elisp/proto/simple-string ()
+(cl-deftype @simple-string ()
   '(and string
         (satisfies (lambda (string)
                      (string-match-p
@@ -37,14 +37,14 @@
     (output-file target feature . dependencies)
     command-line-args-left
   (setq command-line-args-left nil)
-  (cl-check-type target elisp/proto/simple-string)
-  (cl-check-type feature elisp/proto/simple-string)
+  (cl-check-type target @simple-string)
+  (cl-check-type feature @simple-string)
   (let ((file-name-handler-alist ()))
     (setq output-file (concat "/:" (expand-file-name output-file))))
   (let ((coding-system-for-read 'utf-8-unix)
         (coding-system-for-write 'utf-8-unix)
         (output-name (file-name-nondirectory output-file)))
-    (cl-check-type output-name elisp/proto/simple-string)
+    (cl-check-type output-name @simple-string)
     (with-temp-file output-file
       (let ((standard-output (current-buffer))
             (print-level nil)
@@ -63,10 +63,14 @@
                 ";;   " target "\n\n"
                 ";;; Code:\n\n")
         (dolist (dep dependencies)
-          (cl-check-type dep elisp/proto/simple-string)
+          (cl-check-type dep @simple-string)
           (prin1 `(require ',(intern dep))) (terpri))
         (when dependencies (terpri))
         (prin1 `(provide ',(intern feature))) (terpri) (terpri)
         (insert ";;; " output-name " ends here\n")))))
+
+;; Local Variables:
+;; read-symbol-shorthands: (("@" . "elisp/private/tools/gen-proto-bundle--"))
+;; End:
 
 ;;; gen-proto-bundle.el ends here

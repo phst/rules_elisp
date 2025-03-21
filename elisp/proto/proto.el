@@ -30,7 +30,7 @@
 (require 'elisp/proto/module)
 
 (cl-defstruct (elisp/proto/object
-               (:conc-name elisp/proto/object--)
+               (:conc-name @object-)
                (:constructor nil)
                (:copier nil)
                (:predicate nil)
@@ -41,7 +41,7 @@ This type is internal and should not be used directly."
   (ptr nil :type user-ptr :read-only t))
 
 (cl-defstruct (elisp/proto/message
-               (:conc-name elisp/proto/message--)
+               (:conc-name @message-)
                (:constructor nil)
                (:copier nil)
                (:include elisp/proto/object)
@@ -53,10 +53,10 @@ The fields are internal and should not be accessed directly.")
 
 (cl-define-compiler-macro elisp/proto/make (&whole form type &rest keys)
   (if (macroexp-const-p type)
-      (elisp/proto/check--keys form (eval type t) keys)
+      (@check-keys form (eval type t) keys)
     form))
 
-(defun elisp/proto/check--keys (form type keys)
+(defun @check-keys (form type keys)
   "Check whether KEYS are valid keyword arguments to initialize TYPE.
 TYPE should be a message structure type symbol; KEYS are the
 unevaluated keyword arguments.  Make a best-effort attempt to
@@ -66,11 +66,11 @@ meant to be used in compiler macros."
   (declare (ftype (function (t symbol t) t)))
   ;; Emacs turns errors in compiler macros into messages, see
   ;; ‘macroexp--compiler-macro’.  Print a compiler warning instead.
-  (if-let ((message (elisp/proto/keys--message type keys)))
+  (if-let ((message (@keys-message type keys)))
       (macroexp-warn-and-return message form 'callargs)
     form))
 
-(defun elisp/proto/keys--message (type keys)
+(defun @keys-message (type keys)
   "Return a warning message if KEYS are not valid to initialize TYPE.
 TYPE should be a message structure type symbol; KEYS are the
 unevaluated keyword arguments.  If KEYS are valid keyword-value
@@ -129,9 +129,9 @@ in the Info node ‘(elisp) Output Streams’."
   (elisp/proto/print-message message stream))
 
 (cl-defstruct (elisp/proto/array
-               (:conc-name elisp/proto/array--)
+               (:conc-name @array-)
                (:constructor nil)
-               (:constructor elisp/proto/array--new (arena ptr))
+               (:constructor @array-new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
                :noinline)
@@ -223,9 +223,9 @@ TYPE specifies the return type, one of ‘vector’, ‘string’, or ‘list’
 ;; the same reason, we also don’t specialize ‘seq-concatenate’.
 
 (cl-defstruct (elisp/proto/map
-               (:conc-name elisp/proto/map--)
+               (:conc-name @map-)
                (:constructor nil)
-               (:constructor elisp/proto/map--new (arena ptr))
+               (:constructor @map-new (arena ptr))
                (:copier nil)
                (:include elisp/proto/object)
                :noinline)
@@ -299,4 +299,9 @@ MAP, overwrite it.  Return VALUE."
 (gv-define-simple-setter elisp/proto/duration elisp/proto/set-duration)
 
 (provide 'elisp/proto/proto)
+
+;; Local Variables:
+;; read-symbol-shorthands: (("@" . "elisp/proto/proto--"))
+;; End:
+
 ;;; proto.el ends here
