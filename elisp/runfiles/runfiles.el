@@ -33,9 +33,9 @@
 ;;;; Main interface:
 
 (cl-defstruct (elisp/runfiles/runfiles
-               (:conc-name elisp/runfiles/runfiles--)
+               (:conc-name @runfiles-)
                (:constructor nil)
-               (:constructor elisp/runfiles/runfiles--make (impl repo-mapping))
+               (:constructor @runfiles-make (impl repo-mapping))
                (:copier nil)
                :noinline)
   "Provides access to Bazel runfiles.
@@ -71,19 +71,18 @@ an error of type ‘elisp/runfiles/not-found’."
   (let* ((impl (or (and manifest (not (string-empty-p manifest))
                         (file-regular-p manifest)
                         (file-readable-p manifest)
-                        (elisp/runfiles/make--manifest manifest))
+                        (@make-manifest manifest))
                    (and directory (not (string-empty-p directory))
                         (file-accessible-directory-p directory)
-                        (elisp/runfiles/make--directory directory))
+                        (@make-directory directory))
                    (signal 'elisp/runfiles/not-found
                            (list "Runfiles not found" manifest directory))))
          (mapping (when-let ((file (ignore-error elisp/runfiles/not-found
-                                     (elisp/runfiles/rlocation--internal
-                                      impl "_repo_mapping"))))
-                    (elisp/runfiles/parse--repo-mapping file))))
-    (elisp/runfiles/runfiles--make impl mapping)))
+                                     (@rlocation impl "_repo_mapping"))))
+                    (@parse-repo-mapping file))))
+    (@runfiles-make impl mapping)))
 
-(defvar elisp/runfiles/global--cache nil
+(defvar @global-cache nil
   "Cache for ‘elisp/runfiles/get’.")
 
 (defun elisp/runfiles/get ()
@@ -92,8 +91,7 @@ Cache the result once created; this means that changes to the
 runfile-specific environmental variables don’t take effect once
 the global instance is initialized."
   (declare (ftype (function () elisp/runfiles/runfiles)))
-  (or elisp/runfiles/global--cache
-      (setq elisp/runfiles/global--cache (elisp/runfiles/make))))
+  (or @global-cache (setq @global-cache (elisp/runfiles/make))))
 
 (cl-deftype elisp/runfiles/filename ()
   '(and string (satisfies elisp/runfiles/filename-p)))
@@ -121,7 +119,7 @@ should be used in its place."
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
-  (when-let ((table (elisp/runfiles/runfiles--repo-mapping runfiles))
+  (when-let ((table (@runfiles-repo-mapping runfiles))
              (canonical caller-repo))
     (pcase-exhaustive filename
       ((rx bos
@@ -130,8 +128,7 @@ should be used in its place."
            eos)
        (when-let ((mapping (gethash (cons canonical apparent) table)))
          (setq filename (concat mapping rest))))))
-  (elisp/runfiles/rlocation--internal (elisp/runfiles/runfiles--impl runfiles)
-                                      filename))
+  (@rlocation (@runfiles-impl runfiles) filename))
 
 (eval-and-compile
   (defun elisp/runfiles/current-repo ()
@@ -186,8 +183,7 @@ local names on that host, otherwise signal an error of type
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type remote (or string null))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
-  (elisp/runfiles/env-vars--internal (elisp/runfiles/runfiles--impl runfiles)
-                                     remote))
+  (@env-vars (@runfiles-impl runfiles) remote))
 
 (defun elisp/runfiles/filename-p (string)
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
@@ -246,7 +242,8 @@ ARGS are the arguments to the operation."
                (and (eq inhibit-file-name-operation operation)
                     inhibit-file-name-handlers)))
         (inhibit-file-name-operation operation)
-        (handler-func (intern (format "elisp/runfiles/handle--%s" operation))))
+        (handler-func
+         (intern (format "elisp/runfiles/runfiles--%s" operation))))
     (cond
      ((fboundp handler-func)
       ;; A specific handler exists; call it.
@@ -271,9 +268,9 @@ ARGS are the arguments to the operation."
       ;; These operations would require the runfiles tree to be writable.
       (signal 'elisp/runfiles/read-only nil))
      ;; Attempt to handle everything else in a generic way.
-     (t (elisp/runfiles/handle--generic operation args)))))
+     (t (@handle-generic operation args)))))
 
-(defun elisp/runfiles/handle--abbreviate-file-name (filename)
+(defun @abbreviate-file-name (filename)
   "Implementation of ‘abbreviate-file-name’ for Bazel runfiles.
 See Info node ‘(elisp) Directory Names’ for the meaning of
 FILENAME."
@@ -282,20 +279,19 @@ FILENAME."
   ;; unchanged.
   filename)
 
-(defun elisp/runfiles/handle--directory-files
-    (directory full-name match-regexp nosort count)
+(defun @directory-files (directory full-name match-regexp nosort count)
   "Implementation of ‘directory-files’ for Bazel runfiles.
 See Info node ‘(elisp) Contents of Directories’ for the meaning of
 DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, and COUNT."
   (declare (ftype (function (string t (or null string) t (or null integer))
                             list)))
-  (let ((files (directory-files (elisp/runfiles/transform--name directory) nil
+  (let ((files (directory-files (@transform-name directory) nil
                                 match-regexp nosort count)))
     (if full-name
         (mapcar (lambda (file) (expand-file-name file directory)) files)
       files)))
 
-(defun elisp/runfiles/handle--directory-files-and-attributes
+(defun @directory-files-and-attributes
     (directory full-name match-regexp nosort id-format count)
   "Implementation of ‘directory-files-and-attributes’ for Bazel runfiles.
 See Info node ‘(elisp) Contents of Directories’ for the meaning of
@@ -304,7 +300,7 @@ DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, ID-FORMAT, and COUNT."
                    (string t (or null string) t symbol (or null integer))
                    list)))
   (let ((files (directory-files-and-attributes
-                (elisp/runfiles/transform--name directory) nil
+                (@transform-name directory) nil
                 match-regexp nosort id-format count)))
     (if full-name
         (mapcar (lambda (info)
@@ -312,7 +308,7 @@ DIRECTORY, FULL-NAME, MATCH-REGEXP, NOSORT, ID-FORMAT, and COUNT."
                 files)
       files)))
 
-(defun elisp/runfiles/handle--expand-file-name (filename directory)
+(defun @expand-file-name (filename directory)
   "Implementation of ‘expand-file-name’ for Bazel runfiles.
 See Info node ‘(elisp) File Name Expansion’ for the meaning of
 FILENAME and DIRECTORY."
@@ -328,7 +324,7 @@ FILENAME and DIRECTORY."
                  (concat (file-name-as-directory directory) filename)
                (expand-file-name filename directory))))))
 
-(defun elisp/runfiles/handle--file-remote-p (file identification _connected)
+(defun @file-remote-p (file identification _connected)
   "Implementation of ‘file-remote-p’ for Bazel runfiles.
 See Info node ‘(elisp) Magic File Names’ for the meaning of FILE
 and IDENTIFICATION."
@@ -341,7 +337,7 @@ and IDENTIFICATION."
        ((user host) nil)
        (localname name)))))
 
-(defun elisp/runfiles/handle--get-file-buffer (filename)
+(defun @get-file-buffer (filename)
   "Implementation of ‘get-file-buffer’ for Bazel runfiles.
 See Info node ‘(elisp) Buffer File Name’ for the meaning of
 FILENAME."
@@ -349,51 +345,49 @@ FILENAME."
   ;; We accept both buffers visiting FILENAME directly as well as the
   ;; transformed filename.
   (or (get-file-buffer filename)
-      (get-file-buffer (elisp/runfiles/transform--name filename))))
+      (get-file-buffer (@transform-name filename))))
 
-(defun elisp/runfiles/handle--process-file
-    (program infile buffer display &rest args)
+(defun @process-file (program infile buffer display &rest args)
   "Implementation of ‘process-file’ for Bazel runfiles.
 See Info node ‘(elisp) Synchronous Processes’ for the meaning of
 PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
   (declare (ftype (function (string string t t &rest string) t)))
-  (let ((default-directory (elisp/runfiles/transform--name default-directory)))
+  (let ((default-directory (@transform-name default-directory)))
     (apply #'process-file
-           (elisp/runfiles/transform--name program)
-           (elisp/runfiles/transform--name infile)
+           (@transform-name program)
+           (@transform-name infile)
            (pcase-exhaustive buffer
              (`(:file ,stdout)
-              `(:file ,(elisp/runfiles/transform--name stdout)))
+              `(:file ,(@transform-name stdout)))
              (`((:file ,stdout) ,stderr)
-              `((:file ,(elisp/runfiles/transform--name stdout))
-                ,(elisp/runfiles/transform--name stderr)))
+              `((:file ,(@transform-name stdout))
+                ,(@transform-name stderr)))
              (`(,stdout ,stderr)
-              `(,stdout ,(elisp/runfiles/transform--name stderr)))
+              `(,stdout ,(@transform-name stderr)))
              (buffer buffer))
            display
            args)))
 
-(defun elisp/runfiles/handle--start-file-process
-    (name buffer-or-name program &rest args)
+(defun @start-file-process (name buffer-or-name program &rest args)
   "Implementation of ‘start-file-process’ for Bazel runfiles.
 See Info node ‘(elisp) Asynchronous Processes’ for the meaning of
 NAME, BUFFER-OR-NAME, PROGRAM, and ARGS."
   (declare (ftype (function (string t string &rest string) process)))
-  (let ((default-directory (elisp/runfiles/transform--name default-directory)))
+  (let ((default-directory (@transform-name default-directory)))
     (apply #'start-file-process
-           name buffer-or-name (elisp/runfiles/transform--name program) args)))
+           name buffer-or-name (@transform-name program) args)))
 
-(defun elisp/runfiles/handle--unhandled-file-name-directory (filename)
+(defun @unhandled-file-name-directory (filename)
   "Implementation of ‘unhandled-file-name-directory’ for Bazel runfiles.
 See Info node ‘(elisp) Magic File Names’ for the meaning of
 FILENAME."
   (declare (ftype (function (string) string)))
   (file-name-as-directory
    (condition-case nil
-       (elisp/runfiles/transform--name filename)
+       (@transform-name filename)
      (elisp/runfiles/not-found temporary-file-directory))))
 
-(defconst elisp/runfiles/generic--handlers
+(defconst @generic-handlers
   '((add-name-to-file file newfile arg)
     (access-file file arg)
     (byte-compiler-base-file-name file)
@@ -449,9 +443,8 @@ of ARGS must be one of the following symbols:
 - ‘arg’: Don’t modify the argument; pass it on as-is.  This is
   for arguments that don’t represent filenames.
 
-- ‘file’: Transform the filename using
-  ‘elisp/runfiles/transform--filename’.  This is for files the
-  operation should read.
+- ‘file’: Transform the filename using ‘@transform-name’.  This is for
+  files the operation should read.
 
 - ‘newfile’: Signal an error of type ‘elisp/runfiles/read-only’
   if the argument is a Bazel runfile filename, otherwise pass it
@@ -463,25 +456,23 @@ element.  If ‘noerror’ is present, return nil instead of
 signaling an ‘elisp/runfiles/not-found’ error if a runfile isn’t
 found.  This is useful for predicates like ‘file-readable-p’.")
 
-(defun elisp/runfiles/handle--generic (operation args)
+(defun @handle-generic (operation args)
   "Handle file operation OPERATION in a generic way.
-ARGS are the arguments to the operation; they are handled as
-determined by the constant ‘elisp/runfiles/generic--handlers’,
-which see."
+ARGS are the arguments to the operation; they are handled as determined
+by the constant ‘@generic-handlers’, which see."
   (declare (ftype (function (symbol list) t)))
-  (let ((match (assq operation elisp/runfiles/generic--handlers)))
+  (let ((match (assq operation @generic-handlers)))
     (unless match
       (error "Unhandled file name operation %s" operation))
     (cl-flet ((invoke ()
-                (let ((default-directory
-                       (elisp/runfiles/transform--name default-directory)))
+                (let ((default-directory (@transform-name default-directory)))
                   (apply operation
                          (cl-loop
                           for type in (remq 'noerror (cdr match))
                           for arg in args
                           collect
                           (cl-ecase type
-                            (file (elisp/runfiles/transform--name arg))
+                            (file (@transform-name arg))
                             (newfile
                              (if (string-prefix-p "/bazel-runfile:" arg)
                                  (signal 'elisp/runfiles/read-only nil)
@@ -493,7 +484,7 @@ which see."
             (elisp/runfiles/not-found nil))
         (invoke)))))
 
-(defun elisp/runfiles/transform--name (filename)
+(defun @transform-name (filename)
   "Return the filename in the filesystem corresponding to the runfile FILENAME.
 If FILENAME doesn’t start with \"/bazel-runfile:\", return it
 unchanged."
@@ -506,18 +497,18 @@ unchanged."
 
 ;;;; Implementations of the ‘elisp/runfiles/runfiles’ type:
 
-(cl-defstruct (elisp/runfiles/runfiles--manifest
+(cl-defstruct (@manifest
                (:constructor nil)
-               (:constructor elisp/runfiles/manifest--make (filename manifest))
+               (:constructor @manifest-make (filename manifest))
                (:copier nil))
   "Manifest-based runfiles implementation."
   (filename nil :read-only t :type string)
   (manifest nil :read-only t :type hash-table))
 
-(defun elisp/runfiles/make--manifest (filename)
+(defun @make-manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
-Return an object of type ‘elisp/runfiles/runfiles--manifest’."
-  (declare (ftype (function (string) elisp/runfiles/runfiles--manifest)))
+Return an object of type ‘@manifest’."
+  (declare (ftype (function (string) @manifest)))
   (let ((manifest (make-hash-table :test #'equal))
         (filename (expand-file-name filename)))
     (with-temp-buffer
@@ -556,14 +547,13 @@ Return an object of type ‘elisp/runfiles/runfiles--manifest’."
                         manifest))
               (_ (syntax-error)))))
         (forward-line)))
-    (elisp/runfiles/manifest--make filename manifest)))
+    (@manifest-make filename manifest)))
 
-(cl-defmethod elisp/runfiles/rlocation--internal
-  ((runfiles elisp/runfiles/runfiles--manifest) filename)
+(cl-defmethod @rlocation ((runfiles @manifest) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (let* ((table (elisp/runfiles/runfiles--manifest-manifest runfiles))
-         (manifest-file (elisp/runfiles/runfiles--manifest-filename runfiles))
+  (let* ((table (@manifest-manifest runfiles))
+         (manifest-file (@manifest-filename runfiles))
          (result (gethash filename table)))
     (unless result
       ;; Look for ancestor directory mapping.  See
@@ -586,45 +576,41 @@ RUNFILES is a runfiles object and FILENAME the name to look up."
       (:empty (signal 'elisp/runfiles/empty (list filename manifest-file)))
       (otherwise result))))
 
-(cl-defmethod elisp/runfiles/env-vars--internal
-  ((runfiles elisp/runfiles/runfiles--manifest) remote)
+(cl-defmethod @env-vars ((runfiles @manifest) remote)
   "Implementation of ‘elisp/runfiles/env-vars’ for manifest-based runfiles.
 RUNFILES is a runfiles object, and REMOTE is the remote host
 identifier."
-  (let ((filename (elisp/runfiles/runfiles--manifest-filename runfiles)))
+  (let ((filename (@manifest-filename runfiles)))
     (unless (equal (file-remote-p filename) remote)
       (signal 'elisp/runfiles/remote (list filename remote)))
     (list (concat "RUNFILES_MANIFEST_FILE="
                   (file-name-unquote (file-local-name filename)))
           "RUNFILES_DIR" "JAVA_RUNFILES")))
 
-(cl-defstruct (elisp/runfiles/runfiles--directory
+(cl-defstruct (@directory
                (:constructor nil)
-               (:constructor elisp/runfiles/directory--make (directory))
+               (:constructor @directory-make (directory))
                (:copier nil))
   "Directory-based runfiles implementation."
   (directory nil :read-only t :type string))
 
-(defun elisp/runfiles/make--directory (directory)
+(defun @make-directory (directory)
   "Create a directory-based runfiles object for DIRECTORY.
-Return an object of type ‘elisp/runfiles/runfiles--directory’."
-  (declare (ftype (function (string) elisp/runfiles/runfiles--directory)))
-  (elisp/runfiles/directory--make
-   (file-name-as-directory (expand-file-name directory))))
+Return an object of type ‘@directory’."
+  (declare (ftype (function (string) @directory)))
+  (@directory-make (file-name-as-directory (expand-file-name directory))))
 
-(cl-defmethod elisp/runfiles/rlocation--internal
-  ((runfiles elisp/runfiles/runfiles--directory) filename)
+(cl-defmethod @rlocation ((runfiles @directory) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for directory-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (let ((directory (elisp/runfiles/runfiles--directory-directory runfiles)))
+  (let ((directory (@directory-directory runfiles)))
     (expand-file-name filename directory)))
 
-(cl-defmethod elisp/runfiles/env-vars--internal
-  ((runfiles elisp/runfiles/runfiles--directory) remote)
+(cl-defmethod @env-vars ((runfiles @directory) remote)
   "Implementation of ‘elisp/runfiles/env-vars’ for directory-based runfiles.
 RUNFILES is a runfiles object, and REMOTE is the remote host
 identifier."
-  (let ((directory (elisp/runfiles/runfiles--directory-directory runfiles)))
+  (let ((directory (@directory-directory runfiles)))
     (unless (equal (file-remote-p directory) remote)
       (signal 'elisp/runfiles/remote (list directory remote)))
     (let ((directory (file-name-unquote (file-local-name directory))))
@@ -637,7 +623,7 @@ identifier."
 
 ;;;; Repository mappings
 
-(defun elisp/runfiles/parse--repo-mapping (file)
+(defun @parse-repo-mapping (file)
   "Parse and return repository mappings from FILE.
 The return value is a hashtable mapping (CANONICAL . APPARENT)
 pairs to the mapped repository; see URL
@@ -669,4 +655,9 @@ If there’s no repository mapping file, the return value is nil."
           table)))))
 
 (provide 'elisp/runfiles/runfiles)
+
+;; Local Variables:
+;; read-symbol-shorthands: (("@" . "elisp/runfiles/runfiles--"))
+;; End:
+
 ;;; runfiles.el ends here

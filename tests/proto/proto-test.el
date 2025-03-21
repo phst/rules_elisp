@@ -980,9 +980,9 @@
              (comp-function-type-spec #'elisp/proto/make)
              '((function (symbol &rest t) elisp/proto/message) . declared)))))
 
-(put #'time-equal-p 'ert-explainer #'elisp/proto/explain--time-equal-p)
+(put #'time-equal-p 'ert-explainer #'@explain-time-equal-p)
 
-(defun elisp/proto/explain--time-equal-p (a b)
+(defun @explain-time-equal-p (a b)
   "ERT explainer for ‘time-equal-p’.
 A and B are the time values to compare."
   (declare (ftype (function (t t) list))
@@ -992,5 +992,9 @@ A and B are the time values to compare."
       ,(format-time-string "%F %T.%N %Z" a)
       ,(format-time-string "%F %T.%N %Z" b)
       :difference ,(format-time-string "%F %T.%N" (time-subtract a b) t))))
+
+;; Local Variables:
+;; read-symbol-shorthands: (("@" . "tests/proto/proto-test--"))
+;; End:
 
 ;;; proto-test.el ends here
