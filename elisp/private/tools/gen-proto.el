@@ -19,10 +19,6 @@
 ;;; Commentary:
 
 ;; Generates Emacs Lisp bindings for a protocol buffer definition.
-;;
-;; Usage:
-;;
-;;   gen-proto DESCRIPTOR-FILE OUTPUT-FILE FEATURE
 
 ;;; Code:
 
