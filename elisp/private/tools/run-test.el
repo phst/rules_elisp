@@ -1105,19 +1105,22 @@ exact copies as equal."
   (setq tests (ert-select-tests selector t))
   (unless tests
     (error "Selector %S doesn’t match any tests" selector))
-  (let ((shard-count (cl-parse-integer (or (getenv "TEST_TOTAL_SHARDS") "1")))
-        (shard-index (cl-parse-integer (or (getenv "TEST_SHARD_INDEX") "0"))))
-    (unless (and (natnump shard-count) (natnump shard-index)
-                 (< shard-index shard-count))
-      (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
-             shard-count shard-index))
-    (when (> shard-count 1)
-      (setq tests (cl-loop for test in tests
-                           for i from 0
-                           when (eql (mod i shard-count) shard-index)
-                           collect test))
-      (unless tests
-        (message "Empty shard with index %d" shard-index))))
+  (cl-flet ((env-int (name)
+              (when-let ((value (getenv name)))
+                (cl-parse-integer value))))
+    (let ((shard-count (or (env-int "TEST_TOTAL_SHARDS") 1))
+          (shard-index (or (env-int "TEST_SHARD_INDEX") 0)))
+      (unless (and (natnump shard-count) (natnump shard-index)
+                   (< shard-index shard-count))
+        (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
+               shard-count shard-index))
+      (when (> shard-count 1)
+        (setq tests (cl-loop for test in tests
+                             for i from 0
+                             when (eql (mod i shard-count) shard-index)
+                             collect test))
+        (unless tests
+          (message "Empty shard with index %d" shard-index)))))
   (cl-block nil
     (ert-run-tests
      `(member ,@tests)
