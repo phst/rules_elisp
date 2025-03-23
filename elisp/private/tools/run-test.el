@@ -991,8 +991,7 @@ exact copies as equal."
         (write-region-post-annotation-function nil))
     (write-region "" nil shard-status-file :append)))
 
-(let* ((report-file (@env-file "XML_OUTPUT_FILE"))
-       (fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
+(let* ((fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
        (shard-count (cl-parse-integer (or (getenv "TEST_TOTAL_SHARDS") "1")))
        (shard-index (cl-parse-integer (or (getenv "TEST_SHARD_INDEX") "0")))
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
@@ -1152,7 +1151,7 @@ exact copies as equal."
             (message "Running %d tests finished, %d results unexpected"
                      completed unexpected)
             (setq exit-code (min unexpected 1)))
-          (when report-file
+          (when-let ((report-file (@env-file "XML_OUTPUT_FILE")))
             (@write-report report-file start-time tests stats failure-messages))
           (when coverage-enabled
             (when verbose-coverage
