@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/xml"
 	"flag"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -548,6 +549,7 @@ func run(t *testing.T, p string, c *exec.Cmd) error {
 	if err := s.Err(); err != nil {
 		t.Errorf("[%s] error: %s", p, err)
 	}
+	io.Copy(io.Discard, r)
 	return c.Wait()
 }
 
