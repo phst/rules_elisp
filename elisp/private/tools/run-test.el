@@ -1116,7 +1116,7 @@ exact copies as equal."
                shard-count shard-index))
       (when (> shard-count 1)
         (setq tests (cl-loop for test in tests
-                             for i from 0
+                             and i from 0
                              when (eql (mod i shard-count) shard-index)
                              collect test))
         (unless tests

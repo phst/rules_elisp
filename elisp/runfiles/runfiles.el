@@ -469,7 +469,7 @@ by the constant ‘@generic-handlers’, which see."
                   (apply operation
                          (cl-loop
                           for type in (remq 'noerror (cdr match))
-                          for arg in args
+                          and arg in args
                           collect
                           (cl-ecase type
                             (file (@transform-name arg))
