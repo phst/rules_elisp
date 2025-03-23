@@ -992,8 +992,6 @@ exact copies as equal."
     (write-region "" nil shard-status-file :append)))
 
 (let* ((fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
-       (shard-count (cl-parse-integer (or (getenv "TEST_TOTAL_SHARDS") "1")))
-       (shard-index (cl-parse-integer (or (getenv "TEST_SHARD_INDEX") "0")))
        (coverage-enabled (equal (getenv "COVERAGE") "1"))
        (coverage-manifest (@env-file "COVERAGE_MANIFEST"))
        (coverage-dir (@env-file "COVERAGE_DIR"))
@@ -1002,10 +1000,6 @@ exact copies as equal."
        (failure-messages (make-hash-table :test #'eq))
        (start-time (current-time))
        test-sources skip-tests skip-tags selector tests exit-code)
-  (unless (and (natnump shard-count) (natnump shard-index)
-               (< shard-index shard-count))
-    (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
-           shard-count shard-index))
   (cl-flet ((unquote (if (memq system-type '(ms-dos windows-nt cygwin))
                          (lambda (argument)
                            (decode-coding-string
@@ -1111,13 +1105,19 @@ exact copies as equal."
   (setq tests (ert-select-tests selector t))
   (unless tests
     (error "Selector %S doesn’t match any tests" selector))
-  (when (> shard-count 1)
-    (setq tests (cl-loop for test in tests
-                         for i from 0
-                         when (eql (mod i shard-count) shard-index)
-                         collect test))
-    (unless tests
-      (message "Empty shard with index %d" shard-index)))
+  (let ((shard-count (cl-parse-integer (or (getenv "TEST_TOTAL_SHARDS") "1")))
+        (shard-index (cl-parse-integer (or (getenv "TEST_SHARD_INDEX") "0"))))
+    (unless (and (natnump shard-count) (natnump shard-index)
+                 (< shard-index shard-count))
+      (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
+             shard-count shard-index))
+    (when (> shard-count 1)
+      (setq tests (cl-loop for test in tests
+                           for i from 0
+                           when (eql (mod i shard-count) shard-index)
+                           collect test))
+      (unless tests
+        (message "Empty shard with index %d" shard-index))))
   (cl-block nil
     (ert-run-tests
      `(member ,@tests)
