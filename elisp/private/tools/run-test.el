@@ -869,13 +869,18 @@ assume the file name always refers to a local file, and quote it."
   (cl-check-type name string)
   (when-let ((value (@getenv name)))
     ;; Expand relative filenames so that they are unaffected by changes to
-    ;; ‘default-directory’.  Note that ‘expand-file-name’ can’t expand quoted
-    ;; filenames, so do this before quoting.
-    (let ((file-name-handler-alist ()))
-      (concat "/:" (expand-file-name value)))))
+    ;; ‘default-directory’.
+    (@expand-and-quote value)))
 
 
 ;;;; File utilities:
+
+(defun @expand-and-quote (filename)
+  "Make FILENAME absolute, and quote the result."
+  ;; Note that ‘expand-file-name’ can’t expand quoted filenames, so expand
+  ;; before quoting, but suppress any filename handler.
+  (let ((file-name-handler-alist ()))
+    (concat "/:" (expand-file-name filename))))
 
 (defun @file-display-name (filename &optional directory)
   "Return a relative or absolute name for FILENAME, whichever is shorter.
@@ -1067,10 +1072,8 @@ exact copies as equal."
           ;; The filenames in the coverage manifest are typically relative to
           ;; the current directory, so expand them here.
           (let ((file-name-handler-alist ()))
-            (push (concat "/:"
-                          (expand-file-name
-                           (buffer-substring-no-properties
-                            (point) (line-end-position))))
+            (push (@expand-and-quote
+                   (buffer-substring-no-properties (point) (line-end-position)))
                   instrumented-files))
           (forward-line)))
       (when verbose-coverage
