@@ -1910,8 +1910,9 @@ static upb_Array* NewArray(struct Context ctx, upb_Arena* arena,
 
 // Parse an index argument for a sequence of the given size.  The sequence
 // itself is only used for error reporting and can be nil.
-static size_t ExtractIndex(struct Context ctx, emacs_value sequence,
-                           size_t size, emacs_value index) {
+static size_t ExtractIndex(struct Context ctx, const upb_Array* array,
+                           emacs_value sequence, emacs_value index) {
+  size_t size = upb_Array_Size(array);
   if (size > INTMAX_MAX) {
     OverflowError1(ctx, MakeUInteger(ctx, size));
     return 0;
@@ -1943,10 +1944,9 @@ static emacs_value SetArrayElement(emacs_env* env,
   struct Context ctx = {env, child_ctx->globals};
   assert(nargs == 2);
   upb_Array* array = child_ctx->array;
-  size_t length = upb_Array_Size(array);
   upb_MessageValue value =
       AdoptSingular(ctx, child_ctx->arena, child_ctx->type, args[0]);
-  size_t index = ExtractIndex(ctx, Nil(ctx), length, args[1]);
+  size_t index = ExtractIndex(ctx, array, Nil(ctx), args[1]);
   if (!Success(ctx)) return NULL;
   upb_Array_Set(array, index, value);
   return Nil(ctx);
@@ -2048,26 +2048,26 @@ struct RangeArg {
 };
 
 // Parses a range argument pair following the conventions of ‘substring’ or
-// ‘seq-subseq’.  The sequence argument is only used for error reporting and can
-// be nil.
-static struct RangeArg ExtractRange(struct Context ctx, emacs_value sequence,
-                                    size_t size, ptrdiff_t nargs,
-                                    emacs_value* args) {
+// ‘seq-subseq’.  The first argument is only used for error reporting and can be
+// nil.
+static struct RangeArg ExtractRange(struct Context ctx, const upb_Array* array,
+                                    ptrdiff_t nargs, emacs_value* args) {
   struct RangeArg null = {false, 0, 0};
+  size_t size = upb_Array_Size(array);
   if (size > INTMAX_MAX) {
     OverflowError0(ctx);
     return null;
   }
   intmax_t ssize = (intmax_t)size;
-  assert(nargs == 1 || nargs == 2);
-  emacs_value to_arg = nargs == 2 ? args[1] : Nil(ctx);
-  intmax_t from = ExtractInteger(ctx, args[0]);
+  assert(nargs == 2 || nargs == 3);
+  emacs_value to_arg = nargs == 3 ? args[2] : Nil(ctx);
+  intmax_t from = ExtractInteger(ctx, args[1]);
   if (from < 0) from += ssize;
   intmax_t to = IsNil(ctx, to_arg) ? ssize : ExtractInteger(ctx, to_arg);
   if (to < 0) to += ssize;
   if (from < 0 || from > ssize || to < 0 || to > ssize || to < from ||
       !Success(ctx)) {
-    Signal3(ctx, kArgsOutOfRange, sequence, args[0], to_arg);
+    Signal3(ctx, kArgsOutOfRange, args[0], args[1], to_arg);
     return null;
   }
   assert((uintmax_t)from <= SIZE_MAX);
@@ -3495,8 +3495,7 @@ static emacs_value ArrayElt(emacs_env* env,
   struct ArrayArg array = ExtractArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
   const upb_FieldDef* type = array.type;
-  size_t index =
-      ExtractIndex(ctx, args[0], upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, array.value, args[0], args[1]);
   if (!Success(ctx)) return NULL;
   return MakeSingular(ctx, array.arena, type,
                       upb_Array_Get(array.value, index));
@@ -3510,8 +3509,7 @@ static emacs_value SetArrayElt(emacs_env* env,
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
   emacs_value elt = args[2];
-  size_t index =
-      ExtractIndex(ctx, args[0], upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, array.value, args[0], args[1]);
   if (!Success(ctx)) return NULL;
   upb_MessageValue val = AdoptSingular(ctx, array.arena.ptr, array.type, elt);
   if (!Success(ctx)) return NULL;
@@ -3526,8 +3524,7 @@ static emacs_value ArrayPop(emacs_env* env,
   assert(nargs == 2);
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
-  size_t index =
-      ExtractIndex(ctx, args[0], upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, array.value, args[0], args[1]);
   if (!Success(ctx)) return NULL;
   emacs_value elt = MakeSingular(ctx, array.arena, array.type,
                                  upb_Array_Get(array.value, index));
@@ -3577,8 +3574,7 @@ static emacs_value Subarray(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   assert(nargs == 2 || nargs == 3);
   struct ArrayArg array = ExtractArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
-  struct RangeArg range = ExtractRange(
-      ctx, args[0], upb_Array_Size(array.value), nargs - 1, args + 1);
+  struct RangeArg range = ExtractRange(ctx, array.value, nargs, args);
   if (!range.ok) return NULL;
   upb_Array* copy = ShallowCopyArray(ctx, array.arena.ptr, array.type,
                                      array.value, range.from, range.to);
@@ -3615,8 +3611,7 @@ static emacs_value ArrayDelete(emacs_env* env,
   assert(nargs == 2 || nargs == 3);
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
-  size_t size = upb_Array_Size(array.value);
-  struct RangeArg range = ExtractRange(ctx, args[0], size, nargs - 1, args + 1);
+  struct RangeArg range = ExtractRange(ctx, array.value, nargs, args);
   if (!range.ok) return NULL;
   upb_Array_Delete(array.value, range.from, range.to - range.from);
   return Nil(ctx);
