@@ -1066,9 +1066,12 @@ exact copies as equal."
         (while (not (eobp))
           ;; The filenames in the coverage manifest are typically relative to
           ;; the current directory, so expand them here.
-          (push (expand-file-name
-                 (buffer-substring-no-properties (point) (line-end-position)))
-                instrumented-files)
+          (let ((file-name-handler-alist ()))
+            (push (concat "/:"
+                          (expand-file-name
+                           (buffer-substring-no-properties
+                            (point) (line-end-position))))
+                  instrumented-files))
           (forward-line)))
       (when verbose-coverage
         (message "Found %d files in coverage manifest"
