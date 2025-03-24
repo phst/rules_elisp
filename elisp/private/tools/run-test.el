@@ -1110,7 +1110,7 @@ exact copies as equal."
   ;; Load test source files.  If coverage is enabled, check for a file with a
   ;; well-known extension first.  The Bazel runfiles machinery is expected to
   ;; generate these files for source files that should be instrumented.  See the
-  ;; commentary in //elisp:elisp_test.bzl for details.
+  ;; commentary in //elisp/private:binary.bzl for details.
   (let ((load-suffixes (if coverage-enabled
                            (cons ".el.instrument" load-suffixes)
                          load-suffixes)))
