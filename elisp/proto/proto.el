@@ -58,11 +58,10 @@ The fields are internal and should not be accessed directly.")
 
 (defun @check-keys (form type keys)
   "Check whether KEYS are valid keyword arguments to initialize TYPE.
-TYPE should be a message structure type symbol; KEYS are the
-unevaluated keyword arguments.  Make a best-effort attempt to
-print a warning if any keyword in KEYS doesn’t refer to a field
-in TYPE.  In any case, return FORM.  This internal function is
-meant to be used in compiler macros."
+TYPE should be a message structure type symbol; KEYS are the unevaluated
+keyword arguments.  Make a best-effort attempt to print a warning if any
+keyword in KEYS doesn’t refer to a field in TYPE.  In any case, return
+FORM.  This internal function is meant to be used in compiler macros."
   (declare (ftype (function (t symbol t) t)))
   ;; Emacs turns errors in compiler macros into messages, see
   ;; ‘macroexp--compiler-macro’.  Print a compiler warning instead.
@@ -72,10 +71,9 @@ meant to be used in compiler macros."
 
 (defun @keys-message (type keys)
   "Return a warning message if KEYS are not valid to initialize TYPE.
-TYPE should be a message structure type symbol; KEYS are the
-unevaluated keyword arguments.  If KEYS are valid keyword-value
-pairs for TYPE, or if their validity can’t be determined
-statically, return nil."
+TYPE should be a message structure type symbol; KEYS are the unevaluated
+keyword arguments.  If KEYS are valid keyword-value pairs for TYPE, or
+if their validity can’t be determined statically, return nil."
   (declare (ftype (function (symbol t) (or null string)))
            (side-effect-free t))
   (condition-case-unless-debug err
@@ -99,12 +97,12 @@ statically, return nil."
 
 (pcase-defmacro elisp/proto (type &rest fields)
   "Extract FIELDS from a protocol buffer message of type TYPE.
-TYPE must be the name of a generated protocol buffer structure
-type, i.e., a type that is derived from ‘elisp/proto/message’.
-Each field in FIELDS is a list (NAME PATTERN).  It can also be a
-plain symbol FIELD, which is a shorthand for (FIELD FIELD).  NAME
-names a field in the protocol buffer message type TYPE.  The
-value of the field is matched against PATTERN."
+TYPE must be the name of a generated protocol buffer structure type,
+i.e., a type that is derived from ‘elisp/proto/message’.  Each field in
+FIELDS is a list (NAME PATTERN).  It can also be a plain symbol FIELD,
+which is a shorthand for (FIELD FIELD).  NAME names a field in the
+protocol buffer message type TYPE.  The value of the field is matched
+against PATTERN."
   (cl-check-type type (and symbol (not null) (not keyword)))
   (cl-with-gensyms (message)
     (let ((pairs (mapcar (lambda (field)
@@ -122,10 +120,9 @@ value of the field is matched against PATTERN."
 
 (cl-defmethod cl-print-object ((message elisp/proto/message) stream)
   "Print protocol buffer MESSAGE to STREAM.
-MESSAGE must be a protocol buffer message object, i.e., its type
-must be a subtype of ‘elisp/proto/message’.
-STREAM must be an output stream as defined
-in the Info node ‘(elisp) Output Streams’."
+MESSAGE must be a protocol buffer message object, i.e., its type must be
+a subtype of ‘elisp/proto/message’.  STREAM must be an output stream as
+defined in the Info node ‘(elisp) Output Streams’."
   (elisp/proto/print-message message stream))
 
 (cl-defstruct (elisp/proto/array
@@ -137,19 +134,18 @@ in the Info node ‘(elisp) Output Streams’."
                :noinline)
   "Wraps a protocol buffer message array.
 Such an array is typically the result of obtaining the value of a
-repeated field using ‘elisp/proto/field’ or
-‘elisp/proto/mutable-field’.  Arrays returned by
-‘elisp/proto/field’ are immutable; arrays returned by
-‘elisp/proto/mutable-field’ are mutable.  The ‘elisp/proto/array’
-type implements the generalized sequence type defined by the
-‘seq.el’ library; see the Info node ‘(elisp) Sequence Functions’.
-The fields are internal and should not be accessed directly.")
+repeated field using ‘elisp/proto/field’ or ‘elisp/proto/mutable-field’.
+Arrays returned by ‘elisp/proto/field’ are immutable; arrays returned by
+‘elisp/proto/mutable-field’ are mutable.  The ‘elisp/proto/array’ type
+implements the generalized sequence type defined by the ‘seq.el’
+library; see the Info node ‘(elisp) Sequence Functions’.  The fields are
+internal and should not be accessed directly.")
 
 (cl-defmethod cl-print-object ((array elisp/proto/array) stream)
   "Print protocol buffer ARRAY to STREAM.
 ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.
-STREAM must be an output stream as defined
-in the Info node ‘(elisp) Output Streams’."
+STREAM must be an output stream as defined in the Info node ‘(elisp)
+Output Streams’."
   (elisp/proto/print-array array stream))
 
 (gv-define-simple-setter elisp/proto/array-elt elisp/proto/set-array-elt)
@@ -187,22 +183,21 @@ The return value is mutable."
 
 (cl-defmethod seq-subseq ((array elisp/proto/array) start &optional end)
   "Return a shallow copy of a subarray of ARRAY from START to END.
-ARRAY must be a protocol buffer array of type
-‘elisp/proto/array’.  The return value is mutable."
+ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.  The
+return value is mutable."
   (elisp/proto/subarray array start end))
 
 (cl-defmethod seq-sort (pred (array elisp/proto/array))
   "Return a sorted shallow copy of the protocol buffer ARRAY in place.
-Compare values with PRED.  ARRAY must be a protocol buffer array
-of type ‘elisp/proto/array’."
+Compare values with PRED.  ARRAY must be a protocol buffer array of type
+‘elisp/proto/array’."
   (let ((copy (elisp/proto/copy-array array)))
     (elisp/proto/sort-array copy pred)
     copy))
 
 (cl-defmethod seq-reverse ((array elisp/proto/array))
   "Return a reversed shallow copy of the protocol buffer ARRAY.
-ARRAY must be a protocol buffer array of type
-‘elisp/proto/array’."
+ARRAY must be a protocol buffer array of type ‘elisp/proto/array’."
   (let ((copy (elisp/proto/copy-array array)))
     (elisp/proto/nreverse-array copy)
     copy))
@@ -214,8 +209,8 @@ ARRAY must be a protocol buffer array of type ‘elisp/proto/array’."
 
 (cl-defmethod seq-into ((array elisp/proto/array) type)
   "Return a shallow copy of ARRAY as TYPE.
-ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.
-TYPE specifies the return type, one of ‘vector’, ‘string’, or ‘list’."
+ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.  TYPE
+specifies the return type, one of ‘vector’, ‘string’, or ‘list’."
   (seq-into (elisp/proto/make-vector-from-array array) type))
 
 ;; Note that we don’t specialize ‘seq-into’ for a TYPE of ‘elisp/proto/array’
@@ -230,28 +225,26 @@ TYPE specifies the return type, one of ‘vector’, ‘string’, or ‘list’
                (:include elisp/proto/object)
                :noinline)
   "Wraps a protocol buffer message array.
-Such an array is typically the result of obtaining the value of a
-map field using ‘elisp/proto/field’ or
-‘elisp/proto/mutable-field’.  Maps returned by
-‘elisp/proto/field’ are immutable; maps returned by
-‘elisp/proto/mutable-field’ are mutable.  The ‘elisp/proto/map’
-type implements the generalized map type defined by the ‘map.el’
-library.  The fields are internal and should not be accessed
-directly.")
+Such an array is typically the result of obtaining the value of a map
+field using ‘elisp/proto/field’ or ‘elisp/proto/mutable-field’.  Maps
+returned by ‘elisp/proto/field’ are immutable; maps returned by
+‘elisp/proto/mutable-field’ are mutable.  The ‘elisp/proto/map’ type
+implements the generalized map type defined by the ‘map.el’ library.
+The fields are internal and should not be accessed directly.")
 
 (cl-defmethod cl-print-object ((map elisp/proto/map) stream)
   "Print protocol buffer MAP to STREAM.
-ARRAY must be a protocol buffer map of type ‘elisp/proto/map’.
-STREAM must be an output stream as defined
-in the Info node ‘(elisp) Output Streams’."
+ARRAY must be a protocol buffer map of type ‘elisp/proto/map’.  STREAM
+must be an output stream as defined in the Info node ‘(elisp) Output
+Streams’."
   (elisp/proto/print-map map stream))
 
 (gv-define-simple-setter elisp/proto/map-get elisp/proto/map-put)
 
 (cl-defmethod map-elt ((map elisp/proto/map) key &optional default)
   "Return the value mapped to KEY in the protocol buffer MAP.
-MAP must be a protocol buffer map of type ‘elisp/proto/map’.
-Return DEFAULT if KEY isn't present in MAP."
+MAP must be a protocol buffer map of type ‘elisp/proto/map’.  Return
+DEFAULT if KEY isn't present in MAP."
   (elisp/proto/map-get map key default))
 
 (cl-defmethod map-delete ((map elisp/proto/map) key)
@@ -267,14 +260,14 @@ MAP must be a protocol buffer map of type ‘elisp/proto/map’."
 
 (cl-defmethod map-copy ((map elisp/proto/map))
   "Return a shallow copy of MAP.
-MAP must be a protocol buffer map of type ‘elisp/proto/map’.
-The return value is mutable."
+MAP must be a protocol buffer map of type ‘elisp/proto/map’.  The return
+value is mutable."
   (elisp/proto/copy-map map))
 
 (cl-defmethod map-do (function (map elisp/proto/map))
   "Call FUNCTION for each element in MAP.
-MAP must be a protocol buffer array of type ‘elisp/proto/map’.
-Call FUNCTION with two arguments, the key and the value."
+MAP must be a protocol buffer array of type ‘elisp/proto/map’.  Call
+FUNCTION with two arguments, the key and the value."
   (elisp/proto/do-map function map))
 
 (cl-defmethod mapp ((_ elisp/proto/map))
@@ -288,9 +281,9 @@ MAP must be a protocol buffer map of type ‘elisp/proto/map’."
 
 (cl-defmethod map-put! ((map elisp/proto/map) key value)
   "Insert a VALUE with a KEY into the protocol buffer MAP.
-MAP must be a mutable protocol buffer map of type
-‘elisp/proto/map’.  If an entry with KEY is already present in
-MAP, overwrite it.  Return VALUE."
+MAP must be a mutable protocol buffer map of type ‘elisp/proto/map’.  If
+an entry with KEY is already present in MAP, overwrite it.  Return
+VALUE."
   (condition-case nil
       (elisp/proto/map-put map key value)
     (elisp/proto/immutable (signal 'map-not-inplace (list map)))))
