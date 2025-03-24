@@ -257,6 +257,7 @@ ARGS are the arguments to the operation."
      ((memq operation '(delete-directory
                         delete-file
                         dired-compress-file
+                        lock-file
                         make-directory
                         make-directory-internal
                         rename-file
@@ -264,6 +265,7 @@ ARGS are the arguments to the operation."
                         set-file-modes
                         set-file-selinux-context
                         set-file-times
+                        unlock-file
                         write-region))
       ;; These operations would require the runfiles tree to be writable.
       (signal 'elisp/runfiles/read-only nil))
@@ -403,8 +405,10 @@ FILENAME."
     (file-equal-p file file noerror)
     (file-executable-p file noerror)
     (file-exists-p file noerror)
+    (file-group-gid)
     (file-in-directory-p file file noerror)
     (file-local-copy file)
+    (file-locked-p file)
     (file-modes file)
     (file-name-all-completions file file noerror)
     (file-name-as-directory arg)
@@ -421,13 +425,18 @@ FILENAME."
     (file-name-sans-versions arg arg)
     (file-selinux-context file)
     (file-symlink-p file noerror)
+    (file-system-info file)
     (file-truename arg)
+    (file-user-uid)
     (insert-directory file arg arg arg)
     (insert-file-contents file arg arg arg arg)
     (load file arg arg arg arg)
+    (list-system-processes nil)
     (make-auto-save-file-name)
+    (make-lock-file-name file)
     (make-nearby-temp-file file arg arg)
     (make-symbolic-link name newfile arg)
+    (memory-info)
     (set-visited-file-modtime arg)
     (shell-command arg arg arg)
     (substitute-in-file-name arg)
