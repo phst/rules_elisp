@@ -15,10 +15,3 @@
 # examples/ext contains another Bazel repository, it should be ignored when
 # building the main repository.
 examples/ext
-
-# Work around https://github.com/bazelbuild/bazel/issues/10653.
-# TODO: Remove once we drop support for Bazel versions below 7.1.
-bazel-rules_elisp
-bazel-bin
-bazel-out
-bazel-testlogs
