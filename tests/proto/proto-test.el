@@ -341,6 +341,11 @@
          (array (elisp/proto/field message 'repeated_int32)))
     (should (equal (seq-map #'1+ array) '(2 3 4)))))
 
+(ert-deftest elisp/proto/array/seq-into/array ()
+  (let* ((message (tests/proto/Test-new :repeated_int32 [1 2 3]))
+         (array (elisp/proto/field message 'repeated_int32)))
+    (should (eq (seq-into array 'elisp/proto/array) array))))
+
 (ert-deftest elisp/proto/copy-array ()
   (let* ((message (tests/proto/Test-new :repeated_int32 [1 2 3]))
          (array (elisp/proto/field message 'repeated_int32))
@@ -631,6 +636,11 @@
     (should (elisp/proto/map-mutable-p copy))
     (should (eql (map-length copy) 1))
     (should (eql (map-length map) 2))))
+
+(ert-deftest elisp/proto/map/map-into/map ()
+  (let* ((message (tests/proto/Test-new :map_int32_float '((123 . 4.5))))
+         (map (elisp/proto/field message 'map_int32_float)))
+    (should (eq (map-into map 'elisp/proto/map) map))))
 
 (ert-deftest elisp/proto/timestamp ()
   (let* ((timestamp (elisp/proto/make-timestamp

@@ -207,6 +207,11 @@ ARRAY must be a protocol buffer array of type ‘elisp/proto/array’."
 ARRAY must be a protocol buffer array of type ‘elisp/proto/array’."
   (elisp/proto/make-vector-from-array array))
 
+(cl-defmethod seq-into ((array elisp/proto/array)
+                        (_type (eql elisp/proto/array)))
+  "Return ARRAY."
+  array)
+
 (cl-defmethod seq-into ((array elisp/proto/array) type)
   "Return a shallow copy of ARRAY as TYPE.
 ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.  TYPE
@@ -263,6 +268,10 @@ MAP must be a protocol buffer map of type ‘elisp/proto/map’."
 MAP must be a protocol buffer map of type ‘elisp/proto/map’.  The return
 value is mutable."
   (elisp/proto/copy-map map))
+
+(cl-defmethod map-into ((map elisp/proto/map) (_type (eql elisp/proto/map)))
+  "Return MAP."
+  map)
 
 (cl-defmethod map-do (function (map elisp/proto/map))
   "Call FUNCTION for each element in MAP.
