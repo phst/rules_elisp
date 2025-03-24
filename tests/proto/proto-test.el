@@ -222,7 +222,10 @@
     (should-error (setf (elisp/proto/array-elt array 2) 5)
                   :type 'elisp/proto/immutable)
     (should (eql (setf (elisp/proto/array-elt mutable-array 2) 5) 5))
-    (should (eql (elisp/proto/array-elt array 2) 5))))
+    (should (eql (elisp/proto/array-elt array 2) 5))
+    (should-error (elisp/proto/array-elt array -1) :type 'args-out-of-range)
+    (should-error (elisp/proto/array-elt array 3) :type 'args-out-of-range)
+    (should-error (elisp/proto/array-elt array 55) :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/array-elt/message ()
   (let* ((message
@@ -241,7 +244,10 @@
     (should (eql (seq-elt mutable-array 1) 2))
     (should-error (setf (seq-elt array 2) 5) :type 'elisp/proto/immutable)
     (should (eql (setf (seq-elt mutable-array 2) 5) 5))
-    (should (eql (seq-elt array 2) 5))))
+    (should (eql (seq-elt array 2) 5))
+    (should-error (seq-elt array -1) :type 'args-out-of-range)
+    (should-error (seq-elt array 3) :type 'args-out-of-range)
+    (should-error (seq-elt array 55) :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/append-array ()
   (let* ((message (tests/proto/Test-new :repeated_int32 [1 2 3]))
@@ -372,7 +378,9 @@
          (mutable-array (elisp/proto/mutable-field message 'repeated_int32)))
     (should-error (elisp/proto/array-pop array 1) :type 'elisp/proto/immutable)
     (should (eql (elisp/proto/array-pop mutable-array 1) 2))
-    (should (equal (seq-into-sequence array) [1 3]))))
+    (should (equal (seq-into-sequence array) [1 3]))
+    (should-error (elisp/proto/array-pop mutable-array 2)
+                  :type 'args-out-of-range)))
 
 (ert-deftest elisp/proto/array-delete/success ()
   (pcase-dolist (`(,indices ,result)

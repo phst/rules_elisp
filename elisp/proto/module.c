@@ -1909,6 +1909,15 @@ static upb_Array* NewArray(struct Context ctx, upb_Arena* arena,
   return array;
 }
 
+// Parse an index argument for a sequence of the given size.
+static size_t ExtractIndex(struct Context ctx, size_t size, emacs_value arg) {
+  if (size == 0) {
+    ArgsOutOfRange(ctx, arg, MakeInteger(ctx, 0), MakeInteger(ctx, -1));
+    return 0;
+  }
+  return ExtractRangedUInteger(ctx, size - 1, arg);
+}
+
 struct SetArrayElementContext {
   const struct Globals* globals;
   upb_Arena* arena;
@@ -1929,7 +1938,7 @@ static emacs_value SetArrayElement(emacs_env* env,
   size_t length = upb_Array_Size(array);
   upb_MessageValue value =
       AdoptSingular(ctx, child_ctx->arena, child_ctx->type, args[0]);
-  size_t index = ExtractRangedUInteger(ctx, length, args[1]);
+  size_t index = ExtractIndex(ctx, length, args[1]);
   if (!Success(ctx)) return NULL;
   upb_Array_Set(array, index, value);
   return Nil(ctx);
@@ -3479,8 +3488,7 @@ static emacs_value ArrayElt(emacs_env* env,
   struct ArrayArg array = ExtractArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
   const upb_FieldDef* type = array.type;
-  size_t index =
-      ExtractRangedUInteger(ctx, upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, upb_Array_Size(array.value), args[1]);
   if (!Success(ctx)) return NULL;
   return MakeSingular(ctx, array.arena, type,
                       upb_Array_Get(array.value, index));
@@ -3494,8 +3502,7 @@ static emacs_value SetArrayElt(emacs_env* env,
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
   emacs_value elt = args[2];
-  size_t index =
-      ExtractRangedUInteger(ctx, upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, upb_Array_Size(array.value), args[1]);
   if (!Success(ctx)) return NULL;
   upb_MessageValue val = AdoptSingular(ctx, array.arena.ptr, array.type, elt);
   if (!Success(ctx)) return NULL;
@@ -3510,8 +3517,7 @@ static emacs_value ArrayPop(emacs_env* env,
   assert(nargs == 2);
   struct MutableArrayArg array = ExtractMutableArray(ctx, args[0]);
   if (array.type == NULL) return NULL;
-  uintmax_t index =
-      ExtractRangedUInteger(ctx, upb_Array_Size(array.value), args[1]);
+  size_t index = ExtractIndex(ctx, upb_Array_Size(array.value), args[1]);
   if (!Success(ctx)) return NULL;
   emacs_value elt = MakeSingular(ctx, array.arena, array.type,
                                  upb_Array_Get(array.value, index));
