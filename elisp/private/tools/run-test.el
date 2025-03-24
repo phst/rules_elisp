@@ -899,9 +899,9 @@ DIRECTORY is the directory that could contain FILENAME."
                                  (unless (string-empty-p repository) "/")))))
   ;; Work around https://debbugs.gnu.org/46219.
   (unless (file-remote-p filename)
-    (setq filename (file-name-quote (expand-file-name filename))))
+    (cl-callf @expand-and-quote filename))
   (unless (file-remote-p directory)
-    (setq directory (file-name-quote (expand-file-name directory))))
+    (cl-callf @expand-and-quote directory))
   (let ((relative (file-relative-name filename directory))
         (absolute (abbreviate-file-name (file-name-unquote filename))))
     (if (< (length relative) (length absolute)) relative absolute)))
