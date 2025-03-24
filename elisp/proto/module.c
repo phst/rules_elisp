@@ -1671,8 +1671,7 @@ static upb_MessageValue AdoptScalar(struct Context ctx, upb_Arena* arena,
       break;
     default:
       WrongTypeArgument(ctx, kScalarFieldP, MakeFieldName(ctx, type));
-      // Avoid compiler warnings about an uninitialized return value.
-      dest.bool_val = false;
+      dest = upb_MessageValue_Zero();
       break;
   }
   return dest;
