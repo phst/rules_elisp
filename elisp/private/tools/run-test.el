@@ -25,7 +25,6 @@
 (require 'backtrace)
 (require 'bytecomp)
 (require 'cl-lib)
-(require 'cl-macs)
 (require 'debug)
 (require 'edebug)
 (require 'ert)
