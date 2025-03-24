@@ -3521,6 +3521,7 @@ static emacs_value ArrayPop(emacs_env* env,
   if (!Success(ctx)) return NULL;
   emacs_value elt = MakeSingular(ctx, array.arena, array.type,
                                  upb_Array_Get(array.value, index));
+  if (!Success(ctx)) return NULL;
   upb_Array_Delete(array.value, index, 1);
   return elt;
 }
