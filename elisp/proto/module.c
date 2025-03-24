@@ -821,6 +821,7 @@ static struct MutableString ExtractUnibyteString(struct Context ctx,
         ctx, UCHAR_MAX,
         FuncallSymbol2(ctx, kAref, value, MakeUInteger(ctx, i)));
   }
+  data[length] = '\0';
   struct MutableString ret = {data, length};
   return ret;
 }
