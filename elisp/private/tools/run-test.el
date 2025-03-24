@@ -155,15 +155,15 @@ failure messages."
                (expected (ert-test-result-expected-p test result))
                (failed
                 (and (not expected)
-                     ;; Only actual failures reported with ‘ert-fail’
-                     ;; count as failures, other signals count as
-                     ;; errors.  See the distinction in JUnit.xsd and
+                     ;; Only actual failures reported with ‘ert-fail’ count as
+                     ;; failures, other signals count as errors.  See the
+                     ;; distinction in JUnit.xsd and
                      ;; https://stackoverflow.com/a/3426034.
                      (or (and (ert-test-failed-p result)
                               (eq (car (ert-test-failed-condition result))
                                   'ert-test-failed))
-                         ;; A test that passed unexpectedly should count
-                         ;; as failed for the XML report.
+                         ;; A test that passed unexpectedly should count as
+                         ;; failed for the XML report.
                          (ert-test-passed-p result))))
                (error (and (not expected) (not failed)))
                (skipped (ert-test-skipped-p result))
@@ -176,8 +176,8 @@ failure messages."
           (when failed (cl-incf failures))
           (when error (cl-incf errors))
           (and (not expected) (ert-test-passed-p result)
-               ;; Fake an error so that the test is marked as failed in
-               ;; the XML report.
+               ;; Fake an error so that the test is marked as failed in the
+               ;; XML report.
                (setq failure-message "Test passed unexpectedly"
                      type 'error))
           (when (ert-test-result-with-condition-p result)
@@ -188,8 +188,8 @@ failure messages."
                 (setq type (car condition)))))
           (push `(testcase
                   ((name . ,(symbol-name name))
-                   ;; classname is required, but we don’t have test
-                   ;; classes, so fill in a dummy value.
+                   ;; classname is required, but we don’t have test classes, so
+                   ;; fill in a dummy value.
                    (classname . "ERT")
                    (time . ,(format-time-string "%s.%3N" duration)))
                   ,@(when tag
@@ -199,17 +199,14 @@ failure messages."
                 test-reports))))
     (with-temp-file file
       (insert "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
-      ;; The expected format of the XML output file isn’t
-      ;; well-documented.
-      ;; https://bazel.build/reference/test-encyclopedia#initial-conditions
-      ;; only states that the XML file is “based on the JUnit test
-      ;; result schema”, referring to
-      ;; https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
+      ;; The expected format of the XML output file isn’t well-documented.
+      ;; https://bazel.build/reference/test-encyclopedia#initial-conditions only
+      ;; states that the XML file is “based on the JUnit test result schema”,
+      ;; referring to https://windyroad.com.au/dl/Open%20Source/JUnit.xsd.
       ;; https://llg.cubic.org/docs/junit/ and
-      ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain
-      ;; a bit of documentation.
-      ;; Sanitizing the tree is necessary because ‘xml-print’ sometimes
-      ;; generates invalid XML, cf. https://debbugs.gnu.org/41094.
+      ;; https://help.catchsoftware.com/display/ET/JUnit+Format contain a bit of
+      ;; documentation.  Sanitizing the tree is necessary because ‘xml-print’
+      ;; sometimes generates invalid XML, cf. https://debbugs.gnu.org/41094.
       (cl-labels ((walk (obj)
                     (cl-etypecase obj
                       (symbol (@check-xml-name obj))
@@ -976,14 +973,13 @@ exact copies as equal."
                        (if runfiles-handler-installed
                            (concat "/bazel-runfile:" repository-name)
                          default-directory))))
-  ;; Best-effort support for ‘ert-resource-directory’ and
-  ;; ‘ert-resource-file’.  The directory returned by
-  ;; ‘ert-resource-directory’ will typically be in the execution root and
-  ;; no longer be valid when the test runs.  Therefore, strip out
-  ;; everything up to the repository directory in the execution root
-  ;; (cf. https://bazel.build/remote/output-directories#layout-diagram),
-  ;; and replace it with the default directory.  Robust tests should use
-  ;; the ‘elisp/runfiles/runfiles’ library to find their data files.
+  ;; Best-effort support for ‘ert-resource-directory’ and ‘ert-resource-file’.
+  ;; The directory returned by ‘ert-resource-directory’ will typically be in the
+  ;; execution root and no longer be valid when the test runs.  Therefore, strip
+  ;; out everything up to the repository directory in the execution root
+  ;; (cf. https://bazel.build/remote/output-directories#layout-diagram), and
+  ;; replace it with the default directory.  Robust tests should use the
+  ;; ‘elisp/runfiles/runfiles’ library to find their data files.
   (setq ert-resource-directory-trim-left-regexp
         (rx (* nonl) ?/ (literal repository-name) ?/)
         ert-resource-directory-format
@@ -1079,8 +1075,8 @@ exact copies as equal."
       (when verbose-coverage
         (message "Found %d files in coverage manifest"
                  (length instrumented-files)))
-      ;; We don’t bother removing the advises since we are going to kill
-      ;; Emacs anyway.
+      ;; We don’t bother removing the advises since we are going to kill Emacs
+      ;; anyway.
       (add-function
        :before-until load-source-file-function
        (lambda (fullname file _noerror _nomessage)
@@ -1099,8 +1095,8 @@ exact copies as equal."
                                :test #'@file-equal-p))
              (push (@load-instrument fullname file) load-buffers)
              t))))
-      ;; Work around another Edebug specification issue fixed with Emacs
-      ;; commit c799ad42f705f64975771e181dee29e1d0ebe97a.
+      ;; Work around another Edebug specification issue fixed with Emacs commit
+      ;; c799ad42f705f64975771e181dee29e1d0ebe97a.
       (when (eql emacs-major-version 29)
         (put #'cl-define-compiler-macro 'edebug-form-spec
              '(&define [&name symbolp "@cl-compiler-macro"]
