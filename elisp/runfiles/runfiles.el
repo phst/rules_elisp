@@ -443,11 +443,11 @@ FILENAME."
     (temporary-file-directory)
     (verify-visited-file-modtime arg))
   "Alist of file operations that can be handled generically.
-Each element is a list (OPERATION . ARGS), where OPERATION
-specifies the file operation to be handled.  ARGS specifies how
-to transform arguments for OPERATION.  Each element of ARGS
-corresponds to the argument at the same position.  Each element
-of ARGS must be one of the following symbols:
+Each element is a list (OPERATION . ARGS), where OPERATION specifies the
+file operation to be handled.  ARGS specifies how to transform arguments
+for OPERATION.  Each element of ARGS corresponds to the argument at the
+same position.  Each element of ARGS must be one of the following
+symbols:
 
 - ‘arg’: Don’t modify the argument; pass it on as-is.  This is
   for arguments that don’t represent filenames.
@@ -455,15 +455,14 @@ of ARGS must be one of the following symbols:
 - ‘file’: Transform the filename using ‘@transform-name’.  This is for
   files the operation should read.
 
-- ‘newfile’: Signal an error of type ‘elisp/runfiles/read-only’
-  if the argument is a Bazel runfile filename, otherwise pass it
-  on as-is.  This is for files the operation would attempt to
-  create.
+- ‘newfile’: Signal an error of type ‘elisp/runfiles/read-only’ if the
+  argument is a Bazel runfile filename, otherwise pass it on as-is.
+  This is for files the operation would attempt to create.
 
-In addition, ARGS can contain the symbol ‘noerror’ as its last
-element.  If ‘noerror’ is present, return nil instead of
-signaling an ‘elisp/runfiles/not-found’ error if a runfile isn’t
-found.  This is useful for predicates like ‘file-readable-p’.")
+In addition, ARGS can contain the symbol ‘noerror’ as its last element.
+If ‘noerror’ is present, return nil instead of signaling an
+‘elisp/runfiles/not-found’ error if a runfile isn’t found.  This is
+useful for predicates like ‘file-readable-p’.")
 
 (defun @handle-generic (operation args)
   "Handle file operation OPERATION in a generic way.
