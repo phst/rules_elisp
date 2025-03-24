@@ -1075,11 +1075,11 @@ exact copies as equal."
       (add-function
        :before-until load-source-file-function
        (lambda (fullname file _noerror _nomessage)
-         ;; If we got a magic filename that tells us to instrument a file,
-         ;; then instrument the corresponding source file if that exists.  See
-         ;; the commentary in //elisp:elisp_test.bzl for details.  In all
-         ;; other cases, we defer to the normal ‘load-source-file-function’,
-         ;; which is also responsible for raising errors if desired.
+         ;; If we got a magic filename that tells us to instrument a file, then
+         ;; instrument the corresponding source file if that exists.  See the
+         ;; commentary in //elisp/private:binary.bzl for details.  In all other
+         ;; cases, we defer to the normal ‘load-source-file-function’, which is
+         ;; also responsible for raising errors if desired.
          (when (string-suffix-p ".el.instrument" fullname)
            (cl-callf2 string-remove-suffix ".instrument" fullname)
            (cl-callf2 string-remove-suffix ".instrument" file)
