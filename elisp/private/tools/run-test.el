@@ -1000,6 +1000,8 @@ exact copies as equal."
       (failure-messages (make-hash-table :test #'eq))
       (start-time (current-time))
       test-sources skip-tests skip-tags selector tests exit-code)
+
+  ;; Parse command-line options.
   (cl-flet ((unquote (if (memq system-type '(ms-dos windows-nt cygwin))
                          (lambda (argument)
                            (decode-coding-string
@@ -1023,8 +1025,10 @@ exact copies as equal."
     (when coverage-enabled
       (push :nocover skip-tags))
     (cl-callf2 mapcar #'unquote command-line-args-left))
-  ;; We optimize the test selector somewhat.  It’s displayed to the user if no
-  ;; test matches, and then we’d like to avoid empty branches such as ‘(and)’.
+
+  ;; Build up the test selector.  We optimize the test selector somewhat.  It’s
+  ;; displayed to the user if no test matches, and then we’d like to avoid empty
+  ;; branches such as ‘(and)’.
   (let* ((test-filter (@getenv "TESTBRIDGE_TEST_ONLY"))
          (filters (list (if test-filter (read test-filter) t)
                         (pcase (mapcar (lambda (tag) `(tag ,tag)) skip-tags)
@@ -1039,6 +1043,8 @@ exact copies as equal."
                      ('() t)
                      (`(,elt) elt)
                      (elts `(and ,@elts)))))
+
+  ;; Set up coverage if desired.
   (when coverage-enabled
     (unless coverage-manifest
       (error "Coverage requested but COVERAGE_MANIFEST not set"))
@@ -1091,20 +1097,29 @@ exact copies as equal."
              '(&define [&name symbolp "@cl-compiler-macro"]
                        cl-macro-list
                        cl-declarations-or-string def-body)))))
-  ;; If coverage is enabled, check for a file with a well-known extension first.
-  ;; The Bazel runfiles machinery is expected to generate these files for source
-  ;; files that should be instrumented.  See the commentary in
-  ;; //elisp:elisp_test.bzl for details.
+
+  ;; Load test source files.  If coverage is enabled, check for a file with a
+  ;; well-known extension first.  The Bazel runfiles machinery is expected to
+  ;; generate these files for source files that should be instrumented.  See the
+  ;; commentary in //elisp:elisp_test.bzl for details.
   (let ((load-suffixes (if coverage-enabled
                            (cons ".el.instrument" load-suffixes)
                          load-suffixes)))
     (mapc #'load test-sources))
+
+  ;; The test sources should have processed any remaining command-line
+  ;; arguments.
   (when-let ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
   (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
+
+  ;; We select the tests now.  ‘ert-run-tests’ could also do it, but we need the
+  ;; list of tests for sharding and reporting below.
   (setq tests (ert-select-tests selector t))
   (unless tests
     (error "Selector %S doesn’t match any tests" selector))
+
+  ;; Take test sharding into account if desired.
   (cl-flet ((env-int (name)
               (when-let ((value (getenv name)))
                 (cl-parse-integer value))))
@@ -1121,6 +1136,8 @@ exact copies as equal."
                              collect test))
         (unless tests
           (message "Empty shard with index %d" shard-index)))))
+
+  ;; Actually run the tests.  Use a block to support fail-fast behavior.
   (cl-block nil
     (ert-run-tests
      `(member ,@tests)
@@ -1161,6 +1178,8 @@ exact copies as equal."
               (message "Writing coverage report into directory %s"
                        coverage-dir))
             (@write-coverage-report coverage-dir load-buffers)))))))
+
+  ;; Report test status back to the Bazel test runner.
   (kill-emacs exit-code))
 
 ;; Local Variables:
