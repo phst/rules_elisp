@@ -1017,7 +1017,7 @@ static void ReplaceChar(struct MutableString string, char from, char to) {
 // the Lisp object, the arena will be freed.  This implements the unique
 // ownership semantics described in the section “Integrating GC with µpb” in
 // https://github.com/protocolbuffers/protobuf/blob/main/docs/upb/wrapping-upb.md.
-// All objects allocated from the arena must be wrapped in a Lisp structure that
+// All objects allocated from the arena must be wrapped in Lisp structures that
 // point to the Lisp representation of the arena; this implements the required
 // shared ownership semantics.  The MakeArena and ExtractArena functions return
 // a LispArena structure with the right constraints.
