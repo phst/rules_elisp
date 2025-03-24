@@ -187,6 +187,13 @@ ARRAY must be a protocol buffer array of type ‘elisp/proto/array’.  The
 return value is mutable."
   (elisp/proto/subarray array start end))
 
+(cl-defmethod seq-remove-at-position ((array elisp/proto/array) n)
+  "Return a copy of ARRAY with the element at index N removed.
+The return value is mutable."
+  (let ((copy (elisp/proto/copy-array array)))
+    (elisp/proto/array-pop copy n)
+    copy))
+
 (cl-defmethod seq-sort (pred (array elisp/proto/array))
   "Return a sorted shallow copy of the protocol buffer ARRAY in place.
 Compare values with PRED.  ARRAY must be a protocol buffer array of type
