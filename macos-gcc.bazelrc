@@ -21,7 +21,7 @@
 # with GCC the headers come from libstdc++, causing link failures.  Force
 # linking with libstdc++ instead.  This needs to happen via BAZEL_LINKLIBS to
 # override the default set in configure_unix_toolchain.
-# TODO: File bug against rules_cc.  It should’t default to libstd++ when
+# TODO: File bug against rules_cc.  It shouldn’t default to libstd++ when
 # compiling with GCC.
 common:macos-gcc --repo_env='BAZEL_LINKLIBS=-lstdc++'
 
