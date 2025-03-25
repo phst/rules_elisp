@@ -195,7 +195,7 @@ failure messages."
                    (classname . "ERT")
                    (time . ,(format-time-string "%s.%3N" duration)))
                   ,@(when tag
-                      `((,tag ((message . ,failure-message)
+                      `((,tag ((message . ,(cl-the string failure-message))
                                ,@(when type `((type . ,(symbol-name type)))))
                               ,@(when description `(,description))))))
                 test-reports))))
