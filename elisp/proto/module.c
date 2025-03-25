@@ -592,6 +592,9 @@ static intmax_t ExtractInteger(struct Context ctx, emacs_value value) {
   return ctx.env->extract_integer(ctx.env, value);
 }
 
+// Extracts a signed integer that should be within the range of a given C type.
+// Signals a ‘wrong-type-argument’ error with the given predicate on failure;
+// the predicate is not otherwise used.
 static intmax_t ExtractTypedInteger(struct Context ctx,
                                     enum GlobalSymbol predicate, intmax_t min,
                                     intmax_t max, emacs_value value) {
@@ -624,6 +627,9 @@ static emacs_value MakeUInteger(struct Context ctx, uintmax_t value) {
   return ctx.env->make_big_integer(ctx.env, +1, kLimbsForUintmax, limbs);
 }
 
+// Extracts an unsigned integer that should be within the range of a given
+// C type.  Signals a ‘wrong-type-argument’ error with the given predicate on
+// failure; the predicate is not otherwise used.
 static uintmax_t ExtractTypedUInteger(struct Context ctx,
                                       enum GlobalSymbol predicate,
                                       uintmax_t max, emacs_value value) {
