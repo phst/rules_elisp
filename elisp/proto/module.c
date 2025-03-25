@@ -2035,26 +2035,6 @@ static const upb_Array* AdoptSequence(struct Context ctx, upb_Arena* arena,
   return Success(ctx) ? array : NULL;
 }
 
-// Creates a shallow copy of a portion of the array using the half-open interval
-// [from, to).
-static upb_Array* ShallowCopyArray(struct Context ctx, upb_Arena* arena,
-                                   const upb_FieldDef* type,
-                                   const upb_Array* value, size_t from,
-                                   size_t to) {
-  assert(upb_FieldDef_IsRepeated(type));
-  assert(!upb_FieldDef_IsMap(type));
-  size_t old_size = upb_Array_Size(value);
-  assert(from >= 0 && from <= old_size);
-  assert(to >= from && to <= old_size);
-  size_t new_size = to - from;
-  upb_Array* copy = NewArray(ctx, arena, type, new_size);
-  if (copy == NULL) return NULL;
-  for (size_t i = 0; i < new_size; ++i) {
-    upb_Array_Set(copy, i, upb_Array_Get(value, from + i));
-  }
-  return copy;
-}
-
 struct SortContext {
   struct Context base;
   emacs_value pred;
@@ -3607,9 +3587,11 @@ static emacs_value CopyArray(emacs_env* env,
   const upb_FieldDef* type = array.type;
   const upb_Array* value = array.value;
   size_t size = upb_Array_Size(value);
-  upb_Array* copy =
-      ShallowCopyArray(ctx, array.arena.ptr, type, value, 0, size);
+  upb_Array* copy = NewArray(ctx, array.arena.ptr, type, size);
   if (copy == NULL) return NULL;
+  for (size_t i = 0; i < size; ++i) {
+    upb_Array_Set(copy, i, upb_Array_Get(array.value, i));
+  }
   return MakeMutableArray(ctx, array.arena, type, copy);
 }
 
@@ -3621,9 +3603,12 @@ static emacs_value Subarray(emacs_env* env, ptrdiff_t nargs, emacs_value* args,
   if (array.type == NULL) return NULL;
   struct RangeArg range = ExtractRange(ctx, array.value, nargs, args);
   if (!range.ok) return NULL;
-  upb_Array* copy = ShallowCopyArray(ctx, array.arena.ptr, array.type,
-                                     array.value, range.from, range.to);
+  size_t size = range.to - range.from;
+  upb_Array* copy = NewArray(ctx, array.arena.ptr, array.type, size);
   if (copy == NULL) return NULL;
+  for (size_t i = 0; i < size; ++i) {
+    upb_Array_Set(copy, i, upb_Array_Get(array.value, range.from + i));
+  }
   return MakeMutableArray(ctx, array.arena, array.type, copy);
 }
 
