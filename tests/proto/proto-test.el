@@ -672,17 +672,17 @@
                    "2022-05-04 03:02:01"))
     (should (eql (setf (elisp/proto/timestamp timestamp) 9999) 9999))))
 
-(ert-deftest elisp/proto/make-timestamp/args-out-of-range/future ()
+(ert-deftest elisp/proto/make-timestamp/overflow/future ()
   (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-timestamp timestamp)
-                  :type 'args-out-of-range)))
+                  :type 'elisp/proto/timestamp-overflow)))
 
-(ert-deftest elisp/proto/make-timestamp/args-out-of-range/past ()
+(ert-deftest elisp/proto/make-timestamp/overflow/past ()
   (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 -20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-timestamp timestamp)
-                  :type 'args-out-of-range)))
+                  :type 'elisp/proto/timestamp-overflow)))
 
 (ert-deftest elisp/proto/timestamp/time-values ()
   "Check for all known time value forms.  See Info node ‘(elisp) Time of Day’."
@@ -704,17 +704,17 @@
      (should (eql seconds -1))
      (should (eql nanos -500000000)))))
 
-(ert-deftest elisp/proto/duration/args-out-of-range/future ()
+(ert-deftest elisp/proto/duration/overflow/future ()
   (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-duration timestamp)
-                  :type 'args-out-of-range)))
+                  :type 'elisp/proto/duration-overflow)))
 
-(ert-deftest elisp/proto/duration/args-out-of-range/past ()
+(ert-deftest elisp/proto/duration/overflow/past ()
   (let ((timestamp (ignore-errors (encode-time '(0 0 0 0 0 -20000 nil nil t)))))
     (skip-unless timestamp)  ; 32-bit ‘time_t’
     (should-error (elisp/proto/make-duration timestamp)
-                  :type 'args-out-of-range)))
+                  :type 'elisp/proto/duration-overflow)))
 
 (ert-deftest elisp/proto/unknown-field ()
   (let ((duration (google/protobuf/Duration-new)))

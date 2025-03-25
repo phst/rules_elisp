@@ -268,9 +268,11 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kTimestamp, "google/protobuf/Timestamp")                     \
   X(kTimestampP, "google/protobuf/Timestamp-p")                  \
   X(kTimestampNew, "google/protobuf/Timestamp--new")             \
+  X(kTimestampOverflow, "elisp/proto/timestamp-overflow")        \
   X(kDuration, "google/protobuf/Duration")                       \
   X(kDurationP, "google/protobuf/Duration-p")                    \
   X(kDurationNew, "google/protobuf/Duration--new")               \
+  X(kDurationOverflow, "elisp/proto/duration-overflow")          \
   X(kAny, "google/protobuf/Any")                                 \
   X(kAnyP, "google/protobuf/Any-p")                              \
   X(kSeqLength, "seq-length")                                    \
@@ -2490,14 +2492,15 @@ static bool SetTimestampProto(struct Context ctx,
                               emacs_value value) {
   struct timespec time = ExtractTime(ctx, value);
   if (!Success(ctx)) return false;
+  assert(time.tv_nsec >= 0 && time.tv_nsec < 1000000000L);
   // Valid timestamp values are restricted in their range; see the comments in
   // timestamp.proto.  You can generate the magic numbers below using e.g. the
   // following Lisp form:
   //
-  // (dolist (time '("0001-01-01T00:00:00Z" "9999-12-31T23:59:59.999999999Z"))
+  // (dolist (time '("0001-01-01T00:00:00Z" "9999-12-31T23:59:59Z"))
   //   (print (time-convert (parse-iso8601-time-string time) 'integer)))
-  if (!CheckIntegerRange(ctx, time.tv_sec, -62135596800, 253402300799) ||
-      !CheckIntegerRange(ctx, time.tv_nsec, 0, 999999999)) {
+  if (time.tv_sec < -62135596800 || time.tv_sec > 253402300799) {
+    Signal1(ctx, kTimestampOverflow, value);
     return false;
   }
   // The canonical form of a timespec is compatible with the restrictions on a
@@ -2518,7 +2521,7 @@ static bool SetDurationProto(struct Context ctx, google_protobuf_Duration* msg,
   // duration.proto.
   intmax_t seconds = time.tv_sec;
   long nanos = time.tv_nsec;
-  if (!CheckIntegerRange(ctx, nanos, 0, 999999999)) return false;
+  assert(nanos >= 0 && nanos < 1000000000L);
   // The seconds and nanos fields may not be of opposite signs; see the comments
   // in duration.proto.
   if (seconds < 0 && nanos > 0) {
@@ -2527,12 +2530,13 @@ static bool SetDurationProto(struct Context ctx, google_protobuf_Duration* msg,
   }
   // Ranges are taken straight from duration.proto.  We check the seconds range
   // only now because the normalization above might have changed it.
-  if (!CheckIntegerRange(ctx, seconds, -315576000000, 315576000000) ||
-      !CheckIntegerRange(ctx, nanos, -999999999, 999999999)) {
+  if (seconds < -315576000000 || seconds > 315576000000) {
+    Signal1(ctx, kDurationOverflow, value);
     return false;
   }
   assert(seconds == 0 || (seconds < 0 && nanos <= 0) ||
          (seconds > 0 && nanos >= 0));
+  assert(nanos >= -999999999 && nanos <= 999999999);
   google_protobuf_Duration_set_seconds(msg, seconds);
   google_protobuf_Duration_set_nanos(msg, (int32_t)nanos);
   return true;
@@ -4815,6 +4819,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   DefineError(ctx, kUninitializedAny,
               "Message of type google.protobuf.Any not properly initialized",
               kNil);
+  DefineError(
+      ctx, kTimestampOverflow,
+      "Time value not representable as google.protobuf.Timestamp message",
+      kOverflowError);
+  DefineError(
+      ctx, kDurationOverflow,
+      "Time value not representable as google.protobuf.Duration message",
+      kOverflowError);
   DefineError(ctx, kFileError, "File error", kNil);
   DefineError(ctx, kRegistrationFailed,
               "Could not register file descriptor set", kNil);
