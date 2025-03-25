@@ -789,24 +789,23 @@ static struct MutableString ExtractUnibyteString(struct Context ctx,
     return null;
   }
   emacs_value lisp_length = FuncallSymbol1(ctx, kLength, value);
-  intmax_t signed_length = ExtractInteger(ctx, lisp_length);
-  if (signed_length < 0 || (uintmax_t)signed_length >= SIZE_MAX) {
+  intmax_t length = ExtractInteger(ctx, lisp_length);
+  if (length < 0 || (uintmax_t)length >= SIZE_MAX) {
     OverflowError1(ctx, lisp_length);
     return null;
   }
-  size_t length = (size_t)signed_length;
-  assert(length < SIZE_MAX);
-  size_t size = length + 1;
-  assert(size > 0 && size > length);
+  assert((uintmax_t)length < SIZE_MAX);
+  size_t size = (size_t)length + 1;
+  assert(size > 0 && size > (uintmax_t)length);
   char* data = Allocate(ctx, alloc, size);
   if (data == NULL) return null;
-  for (size_t i = 0; i < length; ++i) {
+  for (intmax_t i = 0; i < length; ++i) {
     data[i] = (char)(unsigned char)ExtractTypedUInteger(
         ctx, kBytep, UCHAR_MAX,
-        FuncallSymbol2(ctx, kAref, value, MakeUInteger(ctx, i)));
+        FuncallSymbol2(ctx, kAref, value, MakeInteger(ctx, i)));
   }
   data[length] = '\0';
-  struct MutableString ret = {data, length};
+  struct MutableString ret = {data, (size_t)length};
   return ret;
 }
 
