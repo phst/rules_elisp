@@ -574,11 +574,6 @@ static void WrongChoice(struct Context ctx, emacs_value arg, ptrdiff_t nchoices,
   Signal2(ctx, kWrongChoice, arg, List(ctx, nchoices, choices));
 }
 
-static void ArgsOutOfRange(struct Context ctx, emacs_value value,
-                           emacs_value min, emacs_value max) {
-  Signal3(ctx, kArgsOutOfRange, value, min, max);
-}
-
 typedef emacs_value (*Function)(emacs_env*, ptrdiff_t, emacs_value*, void*);
 
 static emacs_value MakeFunction(struct Context ctx, ptrdiff_t min_arity,
@@ -681,16 +676,6 @@ static uintmax_t ExtractUInteger(struct Context ctx,
     u |= (limbs[i] << (i * kLimbBits));
   }
   return u;
-}
-
-static bool CheckUIntegerRange(struct Context ctx, uintmax_t value,
-                               uintmax_t min, uintmax_t max) {
-  if (value < min || value > max) {
-    ArgsOutOfRange(ctx, MakeUInteger(ctx, value), MakeUInteger(ctx, min),
-                   MakeUInteger(ctx, max));
-    return false;
-  }
-  return true;
 }
 
 static bool CheckUIntegerConstraint(struct Context ctx, uintmax_t value,
@@ -2059,10 +2044,8 @@ static upb_Array* ShallowCopyArray(struct Context ctx, upb_Arena* arena,
   assert(upb_FieldDef_IsRepeated(type));
   assert(!upb_FieldDef_IsMap(type));
   size_t old_size = upb_Array_Size(value);
-  if (!CheckUIntegerRange(ctx, from, 0, old_size) ||
-      !CheckUIntegerRange(ctx, to, from, old_size)) {
-    return NULL;
-  }
+  assert(from >= 0 && from <= old_size);
+  assert(to >= from && to <= old_size);
   size_t new_size = to - from;
   upb_Array* copy = NewArray(ctx, arena, type, new_size);
   if (copy == NULL) return NULL;
