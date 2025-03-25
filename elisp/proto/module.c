@@ -3152,7 +3152,6 @@ ABSL_MUST_USE_RESULT static bool ParseKeys(struct Context ctx, ptrdiff_t nspecs,
     WrongTypeArgument(ctx, kPlistp, List(ctx, nargs, args));
     return false;
   }
-  if (!CheckIntegerRange(ctx, nargs / 2, 0, nspecs)) return false;
   assert(nspecs <= 32);
   uint32_t seen = 0;
   for (ptrdiff_t i = 0; i < nargs; i += 2) {
