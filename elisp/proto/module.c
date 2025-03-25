@@ -562,6 +562,16 @@ static bool CheckType(struct Context ctx, enum GlobalSymbol predicate,
   return ok;
 }
 
+static void ArgsOutOfRange2(struct Context ctx, emacs_value sequence,
+                            emacs_value index) {
+  Signal2(ctx, kArgsOutOfRange, sequence, index);
+}
+
+static void ArgsOutOfRange3(struct Context ctx, emacs_value sequence,
+                            emacs_value from, emacs_value to) {
+  Signal3(ctx, kArgsOutOfRange, sequence, from, to);
+}
+
 // Signals an error indicating that the given keyword argument is duplicated in
 // an argument list.
 static void DuplicateKey(struct Context ctx, emacs_value key) {
@@ -1911,7 +1921,7 @@ static size_t ExtractIndex(struct Context ctx, const upb_Array* array,
   intmax_t ssize = (intmax_t)size;
   intmax_t i = ExtractInteger(ctx, index);
   if (i < 0 || i >= ssize) {
-    Signal2(ctx, kArgsOutOfRange, sequence, index);
+    ArgsOutOfRange2(ctx, sequence, index);
     return 0;
   }
   assert((uintmax_t)i <= SIZE_MAX);
@@ -2039,7 +2049,7 @@ static struct RangeArg ExtractRange(struct Context ctx, const upb_Array* array,
   if (to < 0) to += ssize;
   if (from < 0 || from > ssize || to < 0 || to > ssize || to < from ||
       !Success(ctx)) {
-    Signal3(ctx, kArgsOutOfRange, args[0], args[1], to_arg);
+    ArgsOutOfRange3(ctx, args[0], args[1], to_arg);
     return null;
   }
   assert((uintmax_t)from <= SIZE_MAX);
