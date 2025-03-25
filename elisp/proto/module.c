@@ -592,20 +592,11 @@ static intmax_t ExtractInteger(struct Context ctx, emacs_value value) {
   return ctx.env->extract_integer(ctx.env, value);
 }
 
-static bool CheckIntegerType(struct Context ctx, enum GlobalSymbol predicate,
-                             intmax_t value, intmax_t min, intmax_t max) {
-  if (value < min || value > max) {
-    WrongTypeArgument(ctx, predicate, MakeInteger(ctx, value));
-    return false;
-  }
-  return true;
-}
-
 static intmax_t ExtractTypedInteger(struct Context ctx,
                                     enum GlobalSymbol predicate, intmax_t min,
                                     intmax_t max, emacs_value value) {
   intmax_t i = ExtractInteger(ctx, value);
-  CheckIntegerType(ctx, predicate, i, min, max);
+  if (i < min || i > max) WrongTypeArgument(ctx, predicate, value);
   return i;
 }
 
@@ -662,15 +653,6 @@ static uintmax_t ExtractUInteger(struct Context ctx,
   return u;
 }
 
-static bool CheckUIntegerType(struct Context ctx, enum GlobalSymbol predicate,
-                              uintmax_t value, uintmax_t max) {
-  if (value > max) {
-    WrongTypeArgument(ctx, predicate, MakeUInteger(ctx, value));
-    return false;
-  }
-  return true;
-}
-
 static uintmax_t ExtractTypedUInteger(struct Context ctx,
                                       enum GlobalSymbol predicate,
                                       uintmax_t max, emacs_value value) {
@@ -680,7 +662,7 @@ static uintmax_t ExtractTypedUInteger(struct Context ctx,
                                           value);
   }
   uintmax_t i = ExtractUInteger(ctx, predicate, value);
-  CheckUIntegerType(ctx, predicate, i, max);
+  if (i > max) WrongTypeArgument(ctx, predicate, value);
   return i;
 }
 
