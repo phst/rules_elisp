@@ -1554,7 +1554,7 @@ static struct MutableString SerializeMessageJson(struct Context ctx,
   // Otherwise we need to allocate a larger buffer.
   Free(alloc, buffer);
   bool overflow = AddOverflowSize(ctx, length, 1, &size);
-  if (overflow) OverflowError0(ctx);
+  if (overflow) return null;
   assert(size > 0);
   buffer = Allocate(ctx, alloc, size);
   if (buffer == NULL) return null;
