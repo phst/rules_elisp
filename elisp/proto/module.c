@@ -592,22 +592,6 @@ static intmax_t ExtractInteger(struct Context ctx, emacs_value value) {
   return ctx.env->extract_integer(ctx.env, value);
 }
 
-static bool CheckIntegerConstraint(struct Context ctx, intmax_t value,
-                                   intmax_t min, intmax_t max) {
-  if (value < min || value > max) {
-    OverflowError1(ctx, MakeInteger(ctx, value));
-    return false;
-  }
-  return true;
-}
-
-static intmax_t ExtractConstrainedInteger(struct Context ctx, intmax_t min,
-                                          intmax_t max, emacs_value value) {
-  intmax_t i = ExtractInteger(ctx, value);
-  CheckIntegerConstraint(ctx, i, min, max);
-  return i;
-}
-
 static bool CheckIntegerType(struct Context ctx, enum GlobalSymbol predicate,
                              intmax_t value, intmax_t min, intmax_t max) {
   if (value < min || value > max) {
@@ -676,26 +660,6 @@ static uintmax_t ExtractUInteger(struct Context ctx,
     u |= (limbs[i] << (i * kLimbBits));
   }
   return u;
-}
-
-static bool CheckUIntegerConstraint(struct Context ctx, uintmax_t value,
-                                    uintmax_t max) {
-  if (value > max) {
-    OverflowError1(ctx, MakeUInteger(ctx, value));
-    return false;
-  }
-  return true;
-}
-
-static uintmax_t ExtractConstrainedUInteger(struct Context ctx, uintmax_t max,
-                                            emacs_value value) {
-  // No need to go through big integer codepath.
-  if (max <= INTMAX_MAX) {
-    return (uintmax_t)ExtractConstrainedInteger(ctx, 0, (intmax_t)max, value);
-  }
-  uintmax_t i = ExtractUInteger(ctx, kNil, value);
-  CheckUIntegerConstraint(ctx, i, max);
-  return i;
 }
 
 static bool CheckUIntegerType(struct Context ctx, enum GlobalSymbol predicate,
@@ -853,8 +817,13 @@ static struct MutableString ExtractUnibyteString(struct Context ctx,
     WrongTypeArgument(ctx, kUnibyteStringP, value);
     return null;
   }
-  size_t length = ExtractConstrainedUInteger(
-      ctx, SIZE_MAX - 1, FuncallSymbol1(ctx, kLength, value));
+  emacs_value lisp_length = FuncallSymbol1(ctx, kLength, value);
+  intmax_t signed_length = ExtractInteger(ctx, lisp_length);
+  if (signed_length < 0 || (uintmax_t)signed_length >= SIZE_MAX) {
+    OverflowError1(ctx, lisp_length);
+    return null;
+  }
+  size_t length = (size_t)signed_length;
   assert(length < SIZE_MAX);
   size_t size = length + 1;
   assert(size > 0 && size > length);
@@ -2022,10 +1991,13 @@ static const upb_Array* AdoptSequence(struct Context ctx, upb_Arena* arena,
     // this case.
   }
   // Use generalized sequence functions to convert from an arbitrary sequence.
-  size_t length = ExtractConstrainedUInteger(
-      ctx, SIZE_MAX, FuncallSymbol1(ctx, kSeqLength, value));
-  if (!Success(ctx)) return NULL;
-  upb_Array* array = NewArray(ctx, arena, type, length);
+  emacs_value lisp_length = FuncallSymbol1(ctx, kSeqLength, value);
+  intmax_t length = ExtractInteger(ctx, lisp_length);
+  if (length < 0 || (uintmax_t)length > SIZE_MAX || !Success(ctx)) {
+    OverflowError1(ctx, lisp_length);
+    return NULL;
+  }
+  upb_Array* array = NewArray(ctx, arena, type, (size_t)length);
   if (array == NULL) return NULL;
   // Call ‘seq-do-indexed’.  For some sequence types (e.g., lists), this might
   // be more efficient than random access.
