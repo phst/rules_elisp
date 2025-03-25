@@ -642,11 +642,7 @@ static uintmax_t ExtractTypedUInteger(struct Context ctx,
   if (!ok || sign < 0 || count > kLimbsForUintmax) {
     // Don’t leak internal out-of-range signal to the user.
     ClearError(ctx);
-    if (predicate == kNil) {
-      OverflowError1(ctx, value);
-    } else {
-      WrongTypeArgument(ctx, predicate, value);
-    }
+    WrongTypeArgument(ctx, predicate, value);
     return 0;
   }
   if (sign == 0) return 0;
