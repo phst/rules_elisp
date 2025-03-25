@@ -179,6 +179,9 @@ failure messages."
                ;; XML report.
                (setq failure-message "Test passed unexpectedly"
                      type 'error))
+          (and (not expected) (ert-test-aborted-with-non-local-exit-p result)
+               (setq failure-message "Test aborted"
+                     type 'error))
           (when (ert-test-result-with-condition-p result)
             (let ((condition (ert-test-result-with-condition-condition result)))
               (setq failure-message (error-message-string condition)
