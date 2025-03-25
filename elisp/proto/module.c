@@ -206,6 +206,11 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kStringp, "stringp")                                         \
   X(kMultibyteStringP, "multibyte-string-p")                     \
   X(kUnibyteStringP, "elisp/proto/unibyte-string-p")             \
+  X(kBytep, "elisp/proto/bytep")                                 \
+  X(kInt32P, "elisp/proto/int32-p")                              \
+  X(kUint32P, "elisp/proto/uint32-p")                            \
+  X(kInt64P, "elisp/proto/int64-p")                              \
+  X(kUint64P, "elisp/proto/uint64-p")                            \
   X(kPlistp, "elisp/proto/plistp")                               \
   X(kCons, "cons")                                               \
   X(kList, "list")                                               \
@@ -592,20 +597,36 @@ static intmax_t ExtractInteger(struct Context ctx, emacs_value value) {
   return ctx.env->extract_integer(ctx.env, value);
 }
 
-static bool CheckIntegerRange(struct Context ctx, intmax_t value, intmax_t min,
-                              intmax_t max) {
+static bool CheckIntegerConstraint(struct Context ctx, intmax_t value,
+                                   intmax_t min, intmax_t max) {
   if (value < min || value > max) {
-    ArgsOutOfRange(ctx, MakeInteger(ctx, value), MakeInteger(ctx, min),
-                   MakeInteger(ctx, max));
+    OverflowError1(ctx, MakeInteger(ctx, value));
     return false;
   }
   return true;
 }
 
-static intmax_t ExtractRangedInteger(struct Context ctx, intmax_t min,
-                                     intmax_t max, emacs_value value) {
+static intmax_t ExtractConstrainedInteger(struct Context ctx, intmax_t min,
+                                          intmax_t max, emacs_value value) {
   intmax_t i = ExtractInteger(ctx, value);
-  CheckIntegerRange(ctx, i, min, max);
+  CheckIntegerConstraint(ctx, i, min, max);
+  return i;
+}
+
+static bool CheckIntegerType(struct Context ctx, enum GlobalSymbol predicate,
+                             intmax_t value, intmax_t min, intmax_t max) {
+  if (value < min || value > max) {
+    WrongTypeArgument(ctx, predicate, MakeInteger(ctx, value));
+    return false;
+  }
+  return true;
+}
+
+static intmax_t ExtractTypedInteger(struct Context ctx,
+                                    enum GlobalSymbol predicate, intmax_t min,
+                                    intmax_t max, emacs_value value) {
+  intmax_t i = ExtractInteger(ctx, value);
+  CheckIntegerType(ctx, predicate, i, min, max);
   return i;
 }
 
@@ -633,7 +654,9 @@ static emacs_value MakeUInteger(struct Context ctx, uintmax_t value) {
   return ctx.env->make_big_integer(ctx.env, +1, kLimbsForUintmax, limbs);
 }
 
-static uintmax_t ExtractUInteger(struct Context ctx, emacs_value value) {
+static uintmax_t ExtractUInteger(struct Context ctx,
+                                 enum GlobalSymbol predicate,
+                                 emacs_value value) {
   // Short-circuit if we’re already failing so that the ClearError below
   // doesn’t clear unrelated errors.
   if (!Success(ctx)) return 0;
@@ -644,8 +667,11 @@ static uintmax_t ExtractUInteger(struct Context ctx, emacs_value value) {
   if (!ok || sign < 0 || count > kLimbsForUintmax) {
     // Don’t leak internal out-of-range signal to the user.
     ClearError(ctx);
-    ArgsOutOfRange(ctx, value, MakeInteger(ctx, 0),
-                   MakeUInteger(ctx, UINTMAX_MAX));
+    if (predicate == kNil) {
+      OverflowError1(ctx, value);
+    } else {
+      WrongTypeArgument(ctx, predicate, value);
+    }
     return 0;
   }
   if (sign == 0) return 0;
@@ -667,14 +693,45 @@ static bool CheckUIntegerRange(struct Context ctx, uintmax_t value,
   return true;
 }
 
-static uintmax_t ExtractRangedUInteger(struct Context ctx, uintmax_t max,
-                                       emacs_value value) {
+static bool CheckUIntegerConstraint(struct Context ctx, uintmax_t value,
+                                    uintmax_t max) {
+  if (value > max) {
+    OverflowError1(ctx, MakeUInteger(ctx, value));
+    return false;
+  }
+  return true;
+}
+
+static uintmax_t ExtractConstrainedUInteger(struct Context ctx, uintmax_t max,
+                                            emacs_value value) {
   // No need to go through big integer codepath.
   if (max <= INTMAX_MAX) {
-    return (uintmax_t)ExtractRangedInteger(ctx, 0, (intmax_t)max, value);
+    return (uintmax_t)ExtractConstrainedInteger(ctx, 0, (intmax_t)max, value);
   }
-  uintmax_t i = ExtractUInteger(ctx, value);
-  CheckUIntegerRange(ctx, i, 0, max);
+  uintmax_t i = ExtractUInteger(ctx, kNil, value);
+  CheckUIntegerConstraint(ctx, i, max);
+  return i;
+}
+
+static bool CheckUIntegerType(struct Context ctx, enum GlobalSymbol predicate,
+                              uintmax_t value, uintmax_t max) {
+  if (value > max) {
+    WrongTypeArgument(ctx, predicate, MakeUInteger(ctx, value));
+    return false;
+  }
+  return true;
+}
+
+static uintmax_t ExtractTypedUInteger(struct Context ctx,
+                                      enum GlobalSymbol predicate,
+                                      uintmax_t max, emacs_value value) {
+  // No need to go through big integer codepath.
+  if (max <= INTMAX_MAX) {
+    return (uintmax_t)ExtractTypedInteger(ctx, predicate, 0, (intmax_t)max,
+                                          value);
+  }
+  uintmax_t i = ExtractUInteger(ctx, predicate, value);
+  CheckUIntegerType(ctx, predicate, i, max);
   return i;
 }
 
@@ -811,16 +868,16 @@ static struct MutableString ExtractUnibyteString(struct Context ctx,
     WrongTypeArgument(ctx, kUnibyteStringP, value);
     return null;
   }
-  size_t length = ExtractRangedUInteger(ctx, SIZE_MAX - 1,
-                                        FuncallSymbol1(ctx, kLength, value));
+  size_t length = ExtractConstrainedUInteger(
+      ctx, SIZE_MAX - 1, FuncallSymbol1(ctx, kLength, value));
   assert(length < SIZE_MAX);
   size_t size = length + 1;
   assert(size > 0 && size > length);
   char* data = Allocate(ctx, alloc, size);
   if (data == NULL) return null;
   for (size_t i = 0; i < length; ++i) {
-    data[i] = (char)(unsigned char)ExtractRangedUInteger(
-        ctx, UCHAR_MAX,
+    data[i] = (char)(unsigned char)ExtractTypedUInteger(
+        ctx, kBytep, UCHAR_MAX,
         FuncallSymbol2(ctx, kAref, value, MakeUInteger(ctx, i)));
   }
   data[length] = '\0';
@@ -1646,21 +1703,23 @@ static upb_MessageValue AdoptScalar(struct Context ctx, upb_Arena* arena,
       break;
     case kUpb_CType_Int32:
     case kUpb_CType_Enum:
-      dest.int32_val =
-          (int32_t)ExtractRangedInteger(ctx, INT32_MIN, INT32_MAX, value);
+      dest.int32_val = (int32_t)ExtractTypedInteger(ctx, kInt32P, INT32_MIN,
+                                                    INT32_MAX, value);
       break;
     case kUpb_CType_UInt32:
-      dest.uint32_val = (uint32_t)ExtractRangedUInteger(ctx, UINT32_MAX, value);
+      dest.uint32_val =
+          (uint32_t)ExtractTypedUInteger(ctx, kUint32P, UINT32_MAX, value);
       break;
     case kUpb_CType_Double:
       dest.double_val = ExtractNumber(ctx, value);
       break;
     case kUpb_CType_Int64:
-      dest.int64_val =
-          (int64_t)ExtractRangedInteger(ctx, INT64_MIN, INT64_MAX, value);
+      dest.int64_val = (int64_t)ExtractTypedInteger(ctx, kInt64P, INT64_MIN,
+                                                    INT64_MAX, value);
       break;
     case kUpb_CType_UInt64:
-      dest.uint64_val = (uint64_t)ExtractRangedUInteger(ctx, UINT64_MAX, value);
+      dest.uint64_val =
+          (uint64_t)ExtractTypedUInteger(ctx, kUint64P, UINT64_MAX, value);
       break;
     case kUpb_CType_String:
       // We have to allocate strings from the correct arena and may not free
@@ -1978,8 +2037,8 @@ static const upb_Array* AdoptSequence(struct Context ctx, upb_Arena* arena,
     // this case.
   }
   // Use generalized sequence functions to convert from an arbitrary sequence.
-  size_t length = ExtractRangedUInteger(ctx, SIZE_MAX,
-                                        FuncallSymbol1(ctx, kSeqLength, value));
+  size_t length = ExtractConstrainedUInteger(
+      ctx, SIZE_MAX, FuncallSymbol1(ctx, kSeqLength, value));
   if (!Success(ctx)) return NULL;
   upb_Array* array = NewArray(ctx, arena, type, length);
   if (array == NULL) return NULL;

@@ -840,8 +840,9 @@
     (should (eql (elisp/proto/field message 'optional_uint64) max))
     (let ((err (should-error
                 (cl-incf (elisp/proto/field message 'optional_uint64))
-                :type 'args-out-of-range)))
-      (should (equal err `(args-out-of-range ,too-large 0 ,max))))))
+                :type 'wrong-type-argument)))
+      (should (equal err
+                     `(wrong-type-argument elisp/proto/uint64-p ,too-large))))))
 
 (ert-deftest elisp/proto/serialize-parse ()
   (let* ((message (tests/proto/Test-new :packed_int32 [1 2 3]))
