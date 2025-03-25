@@ -624,9 +624,14 @@ static emacs_value MakeUInteger(struct Context ctx, uintmax_t value) {
   return ctx.env->make_big_integer(ctx.env, +1, kLimbsForUintmax, limbs);
 }
 
-static uintmax_t ExtractUInteger(struct Context ctx,
-                                 enum GlobalSymbol predicate,
-                                 emacs_value value) {
+static uintmax_t ExtractTypedUInteger(struct Context ctx,
+                                      enum GlobalSymbol predicate,
+                                      uintmax_t max, emacs_value value) {
+  // No need to go through big integer codepath.
+  if (max <= INTMAX_MAX) {
+    return (uintmax_t)ExtractTypedInteger(ctx, predicate, 0, (intmax_t)max,
+                                          value);
+  }
   // Short-circuit if we’re already failing so that the ClearError below
   // doesn’t clear unrelated errors.
   if (!Success(ctx)) return 0;
@@ -650,20 +655,8 @@ static uintmax_t ExtractUInteger(struct Context ctx,
   for (size_t i = 0; i < (size_t)count; ++i) {
     u |= (limbs[i] << (i * kLimbBits));
   }
+  if (u > max) WrongTypeArgument(ctx, predicate, value);
   return u;
-}
-
-static uintmax_t ExtractTypedUInteger(struct Context ctx,
-                                      enum GlobalSymbol predicate,
-                                      uintmax_t max, emacs_value value) {
-  // No need to go through big integer codepath.
-  if (max <= INTMAX_MAX) {
-    return (uintmax_t)ExtractTypedInteger(ctx, predicate, 0, (intmax_t)max,
-                                          value);
-  }
-  uintmax_t i = ExtractUInteger(ctx, predicate, value);
-  if (i > max) WrongTypeArgument(ctx, predicate, value);
-  return i;
 }
 
 static emacs_value MakeFloat(struct Context ctx, double value) {
