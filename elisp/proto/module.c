@@ -694,7 +694,7 @@ static double ExtractNumber(struct Context ctx, emacs_value value) {
 
 static emacs_value MakeString(struct Context ctx, upb_StringView value) {
   if (value.size > PTRDIFF_MAX) {
-    OverflowError0(ctx);
+    OverflowError1(ctx, MakeUInteger(ctx, value.size));
     return NULL;
   }
   return ctx.env->make_string(ctx.env, value.data, (ptrdiff_t)value.size);
@@ -793,7 +793,7 @@ static struct MutableString ExtractString(struct Context ctx,
 
 static emacs_value MakeUnibyteString(struct Context ctx, upb_StringView value) {
   if (value.size > PTRDIFF_MAX) {
-    OverflowError0(ctx);
+    OverflowError1(ctx, MakeUInteger(ctx, value.size));
     return NULL;
   }
   return ctx.env->make_unibyte_string(ctx.env, value.data,
@@ -2055,7 +2055,7 @@ static struct RangeArg ExtractRange(struct Context ctx, const upb_Array* array,
   struct RangeArg null = {false, 0, 0};
   size_t size = upb_Array_Size(array);
   if (size > INTMAX_MAX) {
-    OverflowError0(ctx);
+    OverflowError1(ctx, MakeUInteger(ctx, size));
     return null;
   }
   intmax_t ssize = (intmax_t)size;
@@ -2780,7 +2780,7 @@ static emacs_value ConvertGeneratorRequest(
       google_protobuf_compiler_CodeGeneratorRequest_file_to_generate(
           request, &names_count);
   if (names_count > PTRDIFF_MAX) {
-    OverflowError0(ctx);
+    OverflowError1(ctx, MakeUInteger(ctx, names_count));
     return NULL;
   }
   emacs_value* array = AllocateLispArray(ctx, alloc, names_count);
@@ -3590,7 +3590,7 @@ static emacs_value MakeVectorFromArray(emacs_env* env,
   if (array.type == NULL) return NULL;
   size_t size = upb_Array_Size(array.value);
   if (size > PTRDIFF_MAX) {
-    OverflowError0(ctx);
+    OverflowError1(ctx, MakeUInteger(ctx, size));
     return NULL;
   }
   ptrdiff_t ssize = (ptrdiff_t)size;
