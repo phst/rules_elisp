@@ -1425,6 +1425,11 @@ static void UnknownField(struct Context ctx, const upb_MessageDef* def,
           MakeMessageFields(ctx, def));
 }
 
+// Signals an error indicating that the given field is atomic.
+static void AtomicField(struct Context ctx, const upb_FieldDef* def) {
+  Signal1(ctx, kAtomicField, MakeFieldName(ctx, def));
+}
+
 // Signals an error indicating that the given message field is not a scalar
 // field.
 static void NotScalarField(struct Context ctx, const upb_FieldDef* def) {
@@ -3443,7 +3448,7 @@ static emacs_value MutableField(emacs_env* env,
         ctx, msg.arena, upb_FieldDef_MessageSubDef(def),
         upb_Message_Mutable(msg.value, def, msg.arena.ptr).msg);
   }
-  Signal1(ctx, kAtomicField, MakeFieldName(ctx, def));
+  AtomicField(ctx, def);
   return NULL;
 }
 
