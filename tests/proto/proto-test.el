@@ -986,6 +986,25 @@
                       (("test.Enum" (VALUE 77))))))))
   (should-error (elisp/proto/parse-code-generator-request "garbage")))
 
+(ert-deftest elisp/proto/serialize-code-generator-response ()
+  (let ((serialized (elisp/proto/serialize-code-generator-response
+                     '(("file-1" . "content-1")
+                       ("file-2" . "α🐈")))))
+    (should (stringp serialized))
+    (should-not (multibyte-string-p serialized))
+    (pcase (elisp/proto/parse 'google/protobuf/compiler/CodeGeneratorResponse
+                              serialized)
+      ((elisp/proto
+        google/protobuf/compiler/CodeGeneratorResponse
+        (file (seq (elisp/proto
+                    google/protobuf/compiler/CodeGeneratorResponse/File
+                    (name "file-1") (content "content-1"))
+                   (elisp/proto
+                    google/protobuf/compiler/CodeGeneratorResponse/File
+                    (name "file-2") (content "α🐈"))))))
+      (other (ert-fail `(unexpected-response ,(cl-prin1-to-string other))))))
+  (should-error (elisp/proto/serialize-code-generator-response "garbage")))
+
 (ert-deftest elisp/proto/reload ()
   "Check that unloading and reloading a protocol buffer library works."
   ;; Use a feature that’s not used in any other test.
