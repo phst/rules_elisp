@@ -51,9 +51,8 @@
 
 (ert-deftest elisp/proto/make/unknown-message ()
   (let ((err (should-error (elisp/proto/make (intern "unknown/Message"))
-                           :type 'wrong-type-argument)))
-    (should (equal err '(wrong-type-argument elisp/proto/message-type-p
-                                             "unknown.Message")))))
+                           :type 'elisp/proto/unknown-message-type)))
+    (should (equal err '(elisp/proto/unknown-message-type "unknown.Message")))))
 
 (ert-deftest elisp/proto/make/odd-number-of-args ()
   (should-error (elisp/proto/make 'google/protobuf/Duration :seconds)))

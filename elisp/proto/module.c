@@ -229,8 +229,11 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kOverflowError, "overflow-error")                            \
   X(kWrongTypeArgument, "wrong-type-argument")                   \
   X(kArgsOutOfRange, "args-out-of-range")                        \
+  X(kUnknownMessageType, "elisp/proto/unknown-message-type")     \
   X(kUnknownField, "elisp/proto/unknown-field")                  \
   X(kAtomicField, "elisp/proto/atomic-field")                    \
+  X(kNotScalarField, "elisp/proto/not-scalar-field")             \
+  X(kNotMapField, "elisp/proto/not-map-field")                   \
   X(kImmutable, "elisp/proto/immutable")                         \
   X(kDuplicateKey, "elisp/proto/duplicate-key")                  \
   X(kWrongChoice, "elisp/proto/wrong-choice")                    \
@@ -248,7 +251,6 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kFileError, "elisp/proto/file-error")                        \
   X(kRegistrationFailed, "elisp/proto/registration-failed")      \
   X(kUnknownProtoFile, "elisp/proto/unknown-proto-file")         \
-  X(kMessageTypeP, "elisp/proto/message-type-p")                 \
   X(kFieldNameP, "elisp/proto/field-name-p")                     \
   X(kFieldKeywordP, "elisp/proto/field-keyword-p")               \
   X(kTypeUrlP, "elisp/proto/type-url-p")                         \
@@ -259,8 +261,6 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kArrayP, "elisp/proto/array-p")                              \
   X(kMap, "elisp/proto/map")                                     \
   X(kMapP, "elisp/proto/map-p")                                  \
-  X(kScalarFieldP, "elisp/proto/scalar-field-p")                 \
-  X(kMapFieldP, "elisp/proto/map-field-p")                       \
   X(kMapEntryP, "elisp/proto/map-entry-p")                       \
   X(kSerializedCodeGeneratorRequestP,                            \
     "elisp/proto/serialized-code-generator-request-p")           \
@@ -1412,12 +1412,28 @@ static void ProtoError(struct Context ctx, enum GlobalSymbol symbol,
   Signal1(ctx, symbol, MakeString(ctx, message));
 }
 
+// Signals an error indicating that the given message type is not registered.
+static void UnknownMessageType(struct Context ctx, upb_StringView name) {
+  Signal1(ctx, kUnknownMessageType, MakeString(ctx, name));
+}
+
 // Signals an error indicating that the given message field is not one of the
 // fields in the message definition.
 static void UnknownField(struct Context ctx, const upb_MessageDef* def,
                          upb_StringView field) {
   Signal3(ctx, kUnknownField, MakeMessageName(ctx, def), Intern(ctx, field),
           MakeMessageFields(ctx, def));
+}
+
+// Signals an error indicating that the given message field is not a scalar
+// field.
+static void NotScalarField(struct Context ctx, const upb_FieldDef* def) {
+  Signal1(ctx, kNotScalarField, MakeFieldName(ctx, def));
+}
+
+// Signals an error indicating that the given message field is not a map field.
+static void NotMapField(struct Context ctx, const upb_FieldDef* def) {
+  Signal1(ctx, kNotMapField, MakeFieldName(ctx, def));
 }
 
 // Signals an error indicating that parsing a serialized message has failed.
@@ -1671,7 +1687,7 @@ static upb_MessageValue AdoptScalar(struct Context ctx, upb_Arena* arena,
           View(ExtractUnibyteString(ctx, ArenaAllocator(arena), value));
       break;
     default:
-      WrongTypeArgument(ctx, kScalarFieldP, MakeFieldName(ctx, type));
+      NotScalarField(ctx, type);
       dest = upb_MessageValue_Zero();
       break;
   }
@@ -1731,7 +1747,7 @@ static emacs_value MakeScalar(struct Context ctx, const upb_FieldDef* type,
     case kUpb_CType_Bytes:
       return MakeUnibyteString(ctx, value.str_val);
     default:
-      WrongTypeArgument(ctx, kScalarFieldP, MakeFieldName(ctx, type));
+      NotScalarField(ctx, type);
       return NULL;
   }
 }
@@ -2078,7 +2094,7 @@ static struct MapType GetMapType(struct Context ctx,
                                  const upb_FieldDef* field) {
   struct MapType null = {NULL, NULL};
   if (!upb_FieldDef_IsMap(field)) {
-    WrongTypeArgument(ctx, kMapFieldP, MakeFieldName(ctx, field));
+    NotMapField(ctx, field);
     return null;
   }
   const upb_MessageDef* def = upb_FieldDef_MessageSubDef(field);
@@ -2312,9 +2328,7 @@ static const upb_MessageDef* FindMessageByFullName(struct Context ctx,
                                                    upb_StringView full_name) {
   const upb_MessageDef* def = upb_DefPool_FindMessageByNameWithSize(
       DefPool(ctx), full_name.data, full_name.size);
-  if (def == NULL) {
-    WrongTypeArgument(ctx, kMessageTypeP, MakeString(ctx, full_name));
-  }
+  if (def == NULL) UnknownMessageType(ctx, full_name);
   return def;
 }
 
@@ -4774,10 +4788,14 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "users should not call it directly.\n\n"
         "(fn serialized)",
         Params1(kString), kT, 0, RegisterFileDescriptor);
+  DefineError(ctx, kUnknownMessageType, "Unknown protocol buffer message type",
+              kNil);
   DefineError(ctx, kUnknownField, "Unknown protocol buffer message field",
               kNil);
   DefineError(ctx, kAtomicField,
               "Field is not a message, repeated, or map field", kNil);
+  DefineError(ctx, kNotScalarField, "Field is not a scalar field", kNil);
+  DefineError(ctx, kNotMapField, "Field is not a map field", kNil);
   DefineError(ctx, kImmutable, "Immutable protocol buffer object", kNil);
   DefineError(ctx, kDuplicateKey, "Duplicate keyword argument", kNil);
   DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument", kNil);
