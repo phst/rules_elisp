@@ -229,28 +229,6 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kOverflowError, "overflow-error")                            \
   X(kWrongTypeArgument, "wrong-type-argument")                   \
   X(kArgsOutOfRange, "args-out-of-range")                        \
-  X(kUnknownMessageType, "elisp/proto/unknown-message-type")     \
-  X(kUnknownField, "elisp/proto/unknown-field")                  \
-  X(kAtomicField, "elisp/proto/atomic-field")                    \
-  X(kNotScalarField, "elisp/proto/not-scalar-field")             \
-  X(kNotMapField, "elisp/proto/not-map-field")                   \
-  X(kImmutable, "elisp/proto/immutable")                         \
-  X(kDuplicateKey, "elisp/proto/duplicate-key")                  \
-  X(kWrongChoice, "elisp/proto/wrong-choice")                    \
-  X(kParseError, "elisp/proto/parse-error")                      \
-  X(kSerializeError, "elisp/proto/serialize-error")              \
-  X(kJsonParseError, "elisp/proto/json-parse-error")             \
-  X(kJsonSerializeError, "elisp/proto/json-serialize-error")     \
-  X(kMalformed, "elisp/proto/malformed")                         \
-  X(kMalformedUtf8, "elisp/proto/malformed-utf-8")               \
-  X(kUnlinkedSubMessage, "elisp/proto/unlinked-sub-message")     \
-  X(kMissingRequiredField, "elisp/proto/missing-required-field") \
-  X(kArenaFusionFailed, "elisp/proto/arena-fusion-failed")       \
-  X(kNoPresence, "elisp/proto/no-presence")                      \
-  X(kUninitializedAny, "elisp/proto/uninitialized-any")          \
-  X(kFileError, "elisp/proto/file-error")                        \
-  X(kRegistrationFailed, "elisp/proto/registration-failed")      \
-  X(kUnknownProtoFile, "elisp/proto/unknown-proto-file")         \
   X(kFieldNameP, "elisp/proto/field-name-p")                     \
   X(kFieldKeywordP, "elisp/proto/field-keyword-p")               \
   X(kTypeUrlP, "elisp/proto/type-url-p")                         \
@@ -273,11 +251,9 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kTimestamp, "google/protobuf/Timestamp")                     \
   X(kTimestampP, "google/protobuf/Timestamp-p")                  \
   X(kTimestampNew, "google/protobuf/Timestamp--new")             \
-  X(kTimestampOverflow, "elisp/proto/timestamp-overflow")        \
   X(kDuration, "google/protobuf/Duration")                       \
   X(kDurationP, "google/protobuf/Duration-p")                    \
   X(kDurationNew, "google/protobuf/Duration--new")               \
-  X(kDurationOverflow, "elisp/proto/duration-overflow")          \
   X(kAny, "google/protobuf/Any")                                 \
   X(kAnyP, "google/protobuf/Any-p")                              \
   X(kSeqLength, "seq-length")                                    \
@@ -296,11 +272,65 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kCEmitDefaults, ":emit-defaults")                            \
   X(kCProtoNames, ":proto-names")
 
+// All error symbols.  See https://en.wikipedia.org/wiki/X_Macro for the
+// pattern.  The first parameter is an enumerator name, the second one the
+// symbol as a string literal without the “elisp/proto/” prefix, the third one
+// the error message, and the fourth one the parent symbol.
+#define ERROR_SYMBOLS                                                         \
+  X(kUnknownMessageType, "unknown-message-type",                              \
+    "Unknown protocol buffer message type", kNil)                             \
+  X(kUnknownField, "unknown-field", "Unknown protocol buffer message field",  \
+    kNil)                                                                     \
+  X(kAtomicField, "atomic-field",                                             \
+    "Field is not a message, repeated, or map field", kNil)                   \
+  X(kNotScalarField, "not-scalar-field", "Field is not a scalar field", kNil) \
+  X(kNotMapField, "not-map-field", "Field is not a map field", kNil)          \
+  X(kImmutable, "immutable", "Immutable protocol buffer object", kNil)        \
+  X(kDuplicateKey, "duplicate-key", "Duplicate keyword argument", kNil)       \
+  X(kWrongChoice, "wrong-choice", "Wrong choice of keyword argument", kNil)   \
+  X(kParseError, "parse-error",                                               \
+    "Error parsing serialized protocol buffer message", kNil)                 \
+  X(kSerializeError, "serialize-error",                                       \
+    "Error serializing protocol buffer message", kNil)                        \
+  X(kJsonParseError, "json-parse-error",                                      \
+    "Error parsing protocol buffer message from JSON", kNil)                  \
+  X(kJsonSerializeError, "json-serialize-error",                              \
+    "Error serializing protocol buffer message to JSON", kNil)                \
+  X(kMalformed, "malformed",                                                  \
+    "Serialized protocol buffer message is malformed", kParseError)           \
+  X(kMalformedUtf8, "malformed-utf-8",                                        \
+    "Serialized protocol buffer message contains malformed UTF-8",            \
+    kParseError)                                                              \
+  X(kUnlinkedSubMessage, "unlinked-sub-message",                              \
+    "Internal protocol buffer error", kParseError)                            \
+  X(kMissingRequiredField, "missing-required-field",                          \
+    "Required protocol buffer field not present", kNil)                       \
+  X(kArenaFusionFailed, "arena-fusion-failed",                                \
+    "Internal protocol buffer error", kNil)                                   \
+  X(kNoPresence, "no-presence",                                               \
+    "Protocol buffer field has no notion of presence", kNil)                  \
+  X(kUninitializedAny, "uninitialized-any",                                   \
+    "Message of type google.protobuf.Any not properly initialized", kNil)     \
+  X(kTimestampOverflow, "timestamp-overflow",                                 \
+    "Time value not representable as google.protobuf.Timestamp message",      \
+    kOverflowError)                                                           \
+  X(kDurationOverflow, "duration-overflow",                                   \
+    "Time value not representable as google.protobuf.Duration message",       \
+    kOverflowError)                                                           \
+  X(kFileError, "file-error", "File error", kNil)                             \
+  X(kRegistrationFailed, "registration-failed",                               \
+    "Could not register file descriptor set", kNil)                           \
+  X(kUnknownProtoFile, "unknown-proto-file",                                  \
+    "Unknown protocol buffer definition file", kNil)
+
 // clang-format off
 // Clang-Format gets confused by this coding structure.
 enum GlobalSymbol {
 #define X(enumerator, string) enumerator,
   GLOBAL_SYMBOLS
+#undef X
+#define X(enumerator, string, message, parent) enumerator,
+  ERROR_SYMBOLS
 #undef X
   kNumSymbols
 };
@@ -4320,6 +4350,12 @@ static const struct Globals* InitializeGlobals(emacs_env* env,
       env->make_global_ref(env, env->intern(env, (string)));
   GLOBAL_SYMBOLS
 #undef X
+#define X(enumerator, string, message, parent) \
+  assert(IsAscii(string));                     \
+  temp.symbols[enumerator] =                   \
+      env->make_global_ref(env, env->intern(env, "elisp/proto/" string));
+  ERROR_SYMBOLS
+#undef X
   // This symbol is not interned in the globals array because we use it only
   // once.
   emacs_value symbol = env->intern(env, "memory-signal-data");
@@ -4334,6 +4370,13 @@ static const struct Globals* InitializeGlobals(emacs_env* env,
   if (globals == NULL) return NULL;
   *globals = temp;
   return globals;
+}
+
+static void DefineErrors(struct Context ctx) {
+#define X(enumerator, string, message, parent) \
+  DefineError(ctx, enumerator, message, parent);
+  ERROR_SYMBOLS
+#undef X
 }
 
 enum InitializationResult {
@@ -4793,53 +4836,7 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
         "users should not call it directly.\n\n"
         "(fn serialized)",
         Params1(kString), kT, 0, RegisterFileDescriptor);
-  DefineError(ctx, kUnknownMessageType, "Unknown protocol buffer message type",
-              kNil);
-  DefineError(ctx, kUnknownField, "Unknown protocol buffer message field",
-              kNil);
-  DefineError(ctx, kAtomicField,
-              "Field is not a message, repeated, or map field", kNil);
-  DefineError(ctx, kNotScalarField, "Field is not a scalar field", kNil);
-  DefineError(ctx, kNotMapField, "Field is not a map field", kNil);
-  DefineError(ctx, kImmutable, "Immutable protocol buffer object", kNil);
-  DefineError(ctx, kDuplicateKey, "Duplicate keyword argument", kNil);
-  DefineError(ctx, kWrongChoice, "Wrong choice of keyword argument", kNil);
-  DefineError(ctx, kParseError,
-              "Error parsing serialized protocol buffer message", kNil);
-  DefineError(ctx, kSerializeError, "Error serializing protocol buffer message",
-              kNil);
-  DefineError(ctx, kJsonParseError,
-              "Error parsing protocol buffer message from JSON", kNil);
-  DefineError(ctx, kJsonSerializeError,
-              "Error serializing protocol buffer message to JSON", kNil);
-  DefineError(ctx, kMalformed,
-              "Serialized protocol buffer message is malformed", kParseError);
-  DefineError(ctx, kMalformedUtf8,
-              "Serialized protocol buffer message contains malformed UTF-8",
-              kParseError);
-  DefineError(ctx, kUnlinkedSubMessage, "Internal protocol buffer error",
-              kParseError);
-  DefineError(ctx, kMissingRequiredField,
-              "Required protocol buffer field not present", kNil);
-  DefineError(ctx, kArenaFusionFailed, "Internal protocol buffer error", kNil);
-  DefineError(ctx, kNoPresence,
-              "Protocol buffer field has no notion of presence", kNil);
-  DefineError(ctx, kUninitializedAny,
-              "Message of type google.protobuf.Any not properly initialized",
-              kNil);
-  DefineError(
-      ctx, kTimestampOverflow,
-      "Time value not representable as google.protobuf.Timestamp message",
-      kOverflowError);
-  DefineError(
-      ctx, kDurationOverflow,
-      "Time value not representable as google.protobuf.Duration message",
-      kOverflowError);
-  DefineError(ctx, kFileError, "File error", kNil);
-  DefineError(ctx, kRegistrationFailed,
-              "Could not register file descriptor set", kNil);
-  DefineError(ctx, kUnknownProtoFile, "Unknown protocol buffer definition file",
-              kNil);
+  DefineErrors(ctx);
   Provide(ctx, "elisp/proto/module");
   return kSuccess;
 }
