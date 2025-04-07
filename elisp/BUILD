@@ -181,8 +181,8 @@ module_config(
     name = "module_config",
     srcs = select({
         "@platforms//os:linux": ["//elisp/private/tools:module.lds"],
-        "@platforms//os:windows": ["//elisp/private/tools:module.def"],
         "@platforms//os:macos": [],
+        "@platforms//os:windows": ["//elisp/private/tools:module.def"],
     }),
     linkopts = select({
         # Export only symbols that make up the module interface.
@@ -190,17 +190,17 @@ module_config(
             "-Wl,--version-script=$(execpath //elisp/private/tools:module.lds)",
             "-Wl,--no-undefined",
         ],
-        "@platforms//os:windows": [
-            "/DEF:$(execpath //elisp/private/tools:module.def)",
-        ],
         "@platforms//os:macos": [
             "-Wl,-exported_symbol,_emacs_module_init",
             "-Wl,-exported_symbol,_plugin_is_GPL_compatible",
         ],
+        "@platforms//os:windows": [
+            "/DEF:$(execpath //elisp/private/tools:module.def)",
+        ],
     }),
     suffix = select({
         "@platforms//os:linux": ".so",
-        "@platforms//os:windows": ".dll",
         "@platforms//os:macos": ".dylib",
+        "@platforms//os:windows": ".dll",
     }),
 )
