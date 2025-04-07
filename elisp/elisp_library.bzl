@@ -52,6 +52,7 @@ def _elisp_library_impl(ctx):
     ]
 
 elisp_library = rule(
+    # @unsorted-dict-items
     attrs = COMPILE_ATTRS | {
         "srcs": attr.label_list(
             allow_empty = False,

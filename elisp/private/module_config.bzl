@@ -39,6 +39,7 @@ def _module_config_impl(ctx):
 
 module_config = rule(
     doc = "Internal rule to configure Emacs modules",
+    # @unsorted-dict-items
     attrs = {
         "suffix": attr.string(
             doc = "Filename suffix for Emacs modules",

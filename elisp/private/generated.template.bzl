@@ -27,4 +27,6 @@ visibility("private")
 # CHR maps ordinals to single-character strings, and ORD does the reverse.  This
 # only works for single-byte characters.
 CHR = [[[chr]]]
+
+# @unsorted-dict-items
 ORD = {[[ord]]}

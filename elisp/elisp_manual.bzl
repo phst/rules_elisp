@@ -38,6 +38,7 @@ def _elisp_manual_impl(ctx):
     )
 
 elisp_manual = rule(
+    # @unsorted-dict-items
     attrs = {
         "src": attr.label(
             doc = "Org-mode file to use as manual source; must end in `.org`.",

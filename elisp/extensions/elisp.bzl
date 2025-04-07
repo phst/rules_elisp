@@ -28,6 +28,7 @@ Test files (`…-test.el`, `…-tests.el`) and package metadata files (`…-pkg.
 are excluded.
 The `elisp_library` rule is named `library` by default, unless overridden
 by the `target_name` attribute.""",
+    # @unsorted-dict-items
     attrs = {
         "name": attr.string(
             doc = """Name of the repository to generate.""",
@@ -82,6 +83,7 @@ def _elisp_http_archive_impl(ctx):
     )
 
 _elisp_http_archive = repository_rule(
+    # @unsorted-dict-items
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
         "integrity": attr.string(mandatory = True),

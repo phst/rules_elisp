@@ -26,6 +26,7 @@ def _emacs_repository_impl(ctx):
     ctx.template(
         "BUILD.bazel",
         Label("//elisp/private/tools:emacs.BUILD.template"),
+        # @unsorted-dict-items
         {
             '"[elisp_emacs_binary.bzl]"': repr(str(Label("//elisp/toolchains:elisp_emacs_binary.bzl"))),
             '"[cc_library.bzl]"': repr(str(Label("@rules_cc//cc:cc_library.bzl"))),
@@ -40,6 +41,7 @@ def _emacs_repository_impl(ctx):
     )
 
 emacs_repository = repository_rule(
+    # @unsorted-dict-items
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
         "integrity": attr.string(mandatory = True),

@@ -18,6 +18,7 @@ visibility(["//elisp", "//elisp/toolchains"])
 
 CcDefaultInfo = provider(
     doc = "Internal provider for default C++ flags",
+    # @unsorted-dict-items
     fields = {
         "features": "Default features",
         "disabled_features": "Features to disable",

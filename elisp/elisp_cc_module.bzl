@@ -139,6 +139,7 @@ using
 to implement module functions.""",
     # FIXME: Remove CC_TOOLCHAIN_ATTRS once
     # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+    # @unsorted-dict-items
     attrs = CC_TOOLCHAIN_ATTRS | {
         "srcs": attr.label_list(
             doc = """C and C++ source files for the module.

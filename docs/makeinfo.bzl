@@ -39,6 +39,7 @@ def _makeinfo_impl(ctx):
     )
 
 makeinfo = rule(
+    # @unsorted-dict-items
     attrs = {
         "src": attr.label(mandatory = True, allow_single_file = [".texi"]),
         "out": attr.output(mandatory = True),

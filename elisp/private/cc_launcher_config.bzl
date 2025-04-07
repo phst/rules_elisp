@@ -31,6 +31,7 @@ LAUNCHER_LINKOPTS = LINKOPTS + select({
     Label(":gcc_or_clang"): [],
 })
 
+# @unsorted-dict-items
 LAUNCHER_ATTRS = {
     "_launcher_srcs": attr.label_list(
         default = [Label("//elisp/private/tools:launcher.cc")],

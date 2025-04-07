@@ -126,6 +126,7 @@ def _elisp_proto_library_impl(ctx):
 _elisp_proto_aspect = aspect(
     doc = "An aspect to generate protocol buffer libraries for Emacs Lisp.",
     attr_aspects = ["deps"],
+    # @unsorted-dict-items
     attrs = {
         "_compile": attr.label(
             default = Label("//elisp/private/tools:compile.elc"),

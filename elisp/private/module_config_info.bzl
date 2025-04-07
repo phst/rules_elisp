@@ -18,6 +18,7 @@ visibility(["//elisp"])
 
 ModuleConfigInfo = provider(
     doc = "Internal provider for system-specific Emacs module configuration",
+    # @unsorted-dict-items
     fields = {
         "suffix": "Filename suffix for Emacs modules",
         "additional_linker_inputs": "Additional inputs for the linker to build Emacs modules",

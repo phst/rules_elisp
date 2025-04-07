@@ -26,6 +26,7 @@ Load path directory entries are structures with the following fields:
   relative to the execution root.
 - `for_runfiles` is a string specifying the load directory to use at runtime,
   relative to the runfiles root.""",
+    # @unsorted-dict-items
     fields = {
         "source_files": """A list of `File` objects containing
 the Emacs Lisp source files of this library.""",

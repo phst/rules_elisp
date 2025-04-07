@@ -32,6 +32,7 @@ def _local_emacs_repository_impl(ctx):
     ctx.template(
         "BUILD.bazel",
         Label("//elisp/private/tools:local.BUILD.template"),
+        # @unsorted-dict-items
         {
             '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
             '"[elisp_pkg]"': repr(str(Label("//elisp:__pkg__"))),

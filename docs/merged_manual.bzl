@@ -63,6 +63,7 @@ def _merged_manual_impl(ctx):
     )
 
 merged_manual = rule(
+    # @unsorted-dict-items
     attrs = {
         "main": attr.label(
             allow_single_file = [".org"],

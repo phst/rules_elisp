@@ -29,6 +29,7 @@ def _elisp_toolchain_impl(ctx):
 
 elisp_toolchain = rule(
     implementation = _elisp_toolchain_impl,
+    # @unsorted-dict-items
     attrs = {
         "emacs": attr.label(
             doc = """An executable file that behaves like the Emacs binary.

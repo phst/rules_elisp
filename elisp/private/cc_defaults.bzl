@@ -31,6 +31,7 @@ def _cc_defaults_impl(ctx):
 
 cc_defaults = rule(
     implementation = _cc_defaults_impl,
+    # @unsorted-dict-items
     attrs = {
         "defines": attr.string_list(mandatory = True),
         "copts": attr.string_list(mandatory = True),

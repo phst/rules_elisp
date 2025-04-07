@@ -42,6 +42,7 @@ def _bootstrap_impl(ctx):
 
 bootstrap = rule(
     implementation = _bootstrap_impl,
+    # @unsorted-dict-items
     attrs = {
         "src": attr.label(mandatory = True, allow_single_file = [".el"]),
         "out": attr.output(mandatory = True),

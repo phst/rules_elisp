@@ -70,6 +70,7 @@ def _elisp_emacs_binary_impl(ctx):
 elisp_emacs_binary = rule(
     # FIXME: Remove CC_TOOLCHAIN_ATTRS once
     # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+    # @unsorted-dict-items
     attrs = CC_TOOLCHAIN_ATTRS | LAUNCHER_ATTRS | {
         "mode": attr.string(
             doc = """How to build and install Emacs.  Possible values are:
