@@ -35,11 +35,7 @@ buildifier_test(
     name = "buildifier_test",
     timeout = "short",
     lint_mode = "warn",
-    lint_warnings = [
-        "+native-cc",
-        "+native-proto",
-        "+native-py",
-    ],
+    lint_warnings = ["all"],
     no_sandbox = True,
     workspace = "//:MODULE.bazel",
 )
