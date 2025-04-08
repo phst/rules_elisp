@@ -57,5 +57,9 @@ build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
 # See https://bazel.build/reference/test-encyclopedia#role-test-runner.
 test:windows --test_timeout=120,600,1800,7200
 
+# Since the tests are usually in separate packages from the targets under test,
+# the default heuristic for coverage instrumentation filtering doesn’t work.
+coverage --instrumentation_filter='^//'
+
 import %workspace%/c-std.bazelrc
 import %workspace%/macos-gcc.bazelrc
