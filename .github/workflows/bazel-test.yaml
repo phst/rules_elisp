@@ -53,7 +53,16 @@ jobs:
           cc: ${{matrix.cc}}
       - name: Run Bazel tests
         shell: pwsh
-        run: ./check.ps1
+        # FIXME: Run ‘bazel coverage’ unconditionally once
+        # https://github.com/bazelbuild/bazel/issues/6374 and
+        # https://github.com/bazelbuild/bazel/issues/18839 are fixed.
+        run: >
+          ./check.ps1
+          ${{
+            runner.os != 'Windows' &&
+            (runner.os != 'macOS' || matrix.cc != 'gcc-14') &&
+            '-Coverage'
+          }}
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
         shell: bash
