@@ -13,12 +13,11 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
 load("@phst_license_test//:def.bzl", "license_test")
 load("@pip//:requirements.bzl", "requirement")
-load("@rules_go//go:def.bzl", "TOOLS_NOGO", "go_test", "nogo")
+load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -87,19 +86,6 @@ py_binary(
         "@platforms//os:macos": [requirement("pytype")],
         "//conditions:default": [],
     }),
-)
-
-go_test(
-    name = "dev_test",
-    size = "small",
-    srcs = ["version_test.go"],
-    embedsrcs = ["MODULE.bazel"],
-)
-
-copy_file(
-    name = "copy_module_bazel",
-    src = "//:MODULE.bazel",
-    out = "MODULE.bazel",
 )
 
 nogo(
