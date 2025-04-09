@@ -16,6 +16,8 @@
 
 #Requires -Version 7.4
 
+param ([switch]$Coverage)
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
@@ -36,6 +38,9 @@ function Run-Bazel {
 
 function Run-Tests {
     Run-Bazel 'test' @args '--' '//...'
+    if ($Coverage) {
+        Run-Bazel 'coverage' @args '--' '//...'
+    }
 }
 
 # All potentially supported Emacs versions.
