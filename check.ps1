@@ -36,7 +36,6 @@ function Run-Bazel {
 
 function Run-Tests {
     Run-Bazel 'test' @args '--' '//...'
-    Run-Bazel 'mod' 'graph' > $null
 }
 
 # All potentially supported Emacs versions.
@@ -53,5 +52,8 @@ foreach ($version in $versions) {
     Run-Tests "--extra_toolchains=//elisp:emacs_${version}_toolchain"
 }
 
+Run-Bazel 'mod' 'graph' > $null
+
 Join-Path -Path examples -ChildPath ext | Set-Location
 Run-Tests
+Run-Bazel 'mod' 'graph' > $null
