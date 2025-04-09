@@ -153,6 +153,14 @@ pip.parse(
 )
 use_repo(pip, "pip")
 
+# Work around https://github.com/bazel-contrib/rules_python/issues/2762.
+# FIXME: Remove once https://github.com/bazel-contrib/rules_python/issues/2762
+# is fixed upstream.
+single_version_override(
+    module_name = "rules_python",
+    version = "1.2.0",
+)
+
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
 go_sdk.nogo(nogo = "//dev:nogo")
