@@ -1100,10 +1100,11 @@ exact copies as equal."
       ;; Work around another Edebug specification issue fixed with Emacs commit
       ;; c799ad42f705f64975771e181dee29e1d0ebe97a.
       (when (eql emacs-major-version 29)
-        (put #'cl-define-compiler-macro 'edebug-form-spec
-             '(&define [&name symbolp "@cl-compiler-macro"]
-                       cl-macro-list
-                       cl-declarations-or-string def-body)))))
+        (with-eval-after-load 'cl-macs
+          (put #'cl-define-compiler-macro 'edebug-form-spec
+               '(&define [&name symbolp "@cl-compiler-macro"]
+                         cl-macro-list
+                         cl-declarations-or-string def-body))))))
 
   ;; Load test source files.  If coverage is enabled, check for a file with a
   ;; well-known extension first.  The Bazel runfiles machinery is expected to
