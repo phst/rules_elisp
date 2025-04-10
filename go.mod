@@ -18,7 +18,7 @@ go 1.24
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.42.0
-	github.com/bazelbuild/buildtools v0.0.0-20250410121944-16e6ff5138ea
+	github.com/bazelbuild/buildtools v0.0.0-20250410144851-f37c35dc3237
 	github.com/bazelbuild/rules_go v0.53.0
 	github.com/google/go-cmp v0.7.0
 )
