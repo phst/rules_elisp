@@ -163,10 +163,6 @@ single_version_override(
 
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
-
-# FIXME: Use go_sdk.from_file once
-# https://github.com/bazel-contrib/rules_go/issues/4307 is fixed.
-go_sdk.download(version = "1.23.6")
 go_sdk.nogo(nogo = "//dev:nogo")
 
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
