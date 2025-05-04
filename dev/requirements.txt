@@ -14,7 +14,7 @@
 
 commonmark==0.9.1
 
-pylint==3.3.6
+pylint==3.3.7
 
 # Pytype isn’t supported on Windows,
 # cf. https://github.com/google/pytype/tree/2024.03.19#requirements
