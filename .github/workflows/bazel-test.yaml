@@ -54,10 +54,9 @@ jobs:
         # https://github.com/bazelbuild/bazel/issues/18839 are fixed.
         run: >
           ./check.ps1
-          ${{
+          -Coverage:$${{
             runner.os != 'Windows' &&
-            (runner.os != 'macOS' || matrix.cc != 'gcc-14') &&
-            '-Coverage'
+            (runner.os != 'macOS' || matrix.cc != 'gcc-14')
           }}
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
