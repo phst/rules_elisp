@@ -193,8 +193,8 @@
     "https://bcr.bazel.build/modules/rules_swift/1.16.0/MODULE.bazel": "4a09f199545a60d09895e8281362b1ff3bb08bbde69c6fc87aff5b92fcc916ca",
     "https://bcr.bazel.build/modules/rules_swift/2.1.1/MODULE.bazel": "494900a80f944fc7aa61500c2073d9729dff0b764f0e89b824eb746959bc1046",
     "https://bcr.bazel.build/modules/rules_swift/2.4.0/MODULE.bazel": "1639617eb1ede28d774d967a738b4a68b0accb40650beadb57c21846beab5efd",
-    "https://bcr.bazel.build/modules/rules_swift/2.8.1/MODULE.bazel": "af36114a6dc7378c44f381979fe2c451d99c18d723b973bb8b8cf4c79f81a79a",
-    "https://bcr.bazel.build/modules/rules_swift/2.8.1/source.json": "131c2d608c97ce307181e7b747367d9aeff795ee10cba0e3b78db8736bc7fc67",
+    "https://bcr.bazel.build/modules/rules_swift/2.8.2/MODULE.bazel": "66888143cad7a392908e2aa6ed8cef3ec0ac93a4a19b333c0356be180bad17d3",
+    "https://bcr.bazel.build/modules/rules_swift/2.8.2/source.json": "736340026e10132c0ce8656b3c4e9ca888d95dbc5cc94fd185d06ccebfdca642",
     "https://bcr.bazel.build/modules/stardoc/0.5.0/MODULE.bazel": "f9f1f46ba8d9c3362648eea571c6f9100680efc44913618811b58cc9c02cd678",
     "https://bcr.bazel.build/modules/stardoc/0.5.1/MODULE.bazel": "1a05d92974d0c122f5ccf09291442580317cdd859f07a8655f1db9a60374f9f8",
     "https://bcr.bazel.build/modules/stardoc/0.5.3/MODULE.bazel": "c7f6948dae6999bf0db32c1858ae345f112cacf98f174c7a8bb707e41b974f1c",
@@ -255,7 +255,7 @@
     "@@apple_support+//crosstool:setup.bzl%apple_cc_configure_extension": {
       "general": {
         "bzlTransitiveDigest": "gv4nokEMGNye4Jvoh7Tw0Lzs63zfklj+n4t0UegI7Ms=",
-        "usagesDigest": "mInD7TqAmL3EQdzBt73qzvePfwHiAagcJDYr0lAb90A=",
+        "usagesDigest": "VM76MdGnijQkaHFstX1zcCakMqlR41XFbFMDeBa13DQ=",
         "recordedFileInputs": {},
         "recordedDirentsInputs": {},
         "envVariables": {},
