@@ -233,9 +233,9 @@ static absl::Nonnull<wchar_t*> Pointer(
   return string.data();
 }
 #else
-static std::vector<absl::Nonnull<char*>> Pointers(
+static std::vector<char* absl_nonnull> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  std::vector<absl::Nonnull<char*>> ptrs;
+  std::vector<char* absl_nonnull> ptrs;
   for (std::string& s : strings) {
     CHECK_EQ(s.find('\0'), s.npos) << s << " contains null character";
     ptrs.push_back(s.data());
@@ -334,11 +334,11 @@ static absl::StatusOr<NativeString> ToNative(const std::string_view string) {
 #ifndef _WIN32
 static absl::StatusOr<std::string> WorkingDirectory() {
   struct Free {
-    void operator()(const absl::Nonnull<char*> p) const { std::free(p); }
+    void operator()(char* const absl_nonnull p) const { std::free(p); }
   };
   // Assume that we always run on an OS that allocates a buffer when passed a
   // null pointer.
-  const absl::Nullable<std::unique_ptr<char, Free>> ptr(getcwd(nullptr, 0));
+  const absl_nullable std::unique_ptr<char, Free> ptr(getcwd(nullptr, 0));
   if (ptr == nullptr) return ErrnoStatus("getcwd", nullptr, 0);
   // See the Linux man page for getcwd(3) why this can happen.
   if (*ptr != '/') {
@@ -363,7 +363,7 @@ class EnvironmentBlock final {
 #endif
 
   using Pointer = std::conditional_t<Windows, std::unique_ptr<wchar_t, Free>,
-                                     const absl::Nullable<const char*>*>;
+                                     const char* const absl_nullable*>;
 
  public:
   static absl::StatusOr<EnvironmentBlock> Current() {
@@ -393,9 +393,9 @@ class EnvironmentBlock final {
 
   class Iterator final {
    private:
-    using Environ = absl::Nonnull<const absl::Nullable<const char*>*>;
+    using Environ = const char* const absl_nullable* absl_nonnull;
     using Pointer =
-        std::conditional_t<Windows, absl::Nonnull<const wchar_t*>, Environ>;
+        std::conditional_t<Windows, const wchar_t* absl_nonnull, Environ>;
 
    public:
     explicit Iterator(const Pointer ptr) : cur_(ABSL_DIE_IF_NULL(ptr)) {}
@@ -449,10 +449,10 @@ class EnvironmentBlock final {
   Sentinel end() const { return {}; }
 
  private:
-  explicit EnvironmentBlock(absl::Nonnull<Pointer> ptr)
+  explicit EnvironmentBlock(absl_nonnull Pointer ptr)
       : ptr_(std::move(ABSL_DIE_IF_NULL(ptr))) {}
 
-  absl::Nonnull<Pointer> ptr_;
+  absl_nonnull Pointer ptr_;
 };
 
 using Environment = std::conditional_t<
@@ -491,7 +491,7 @@ static absl::StatusOr<Environment> CopyEnv() {
 }
 
 using rules_cc::cc::runfiles::Runfiles;
-using RunfilesPtr = absl::Nonnull<std::unique_ptr<Runfiles>>;
+using RunfilesPtr = absl_nonnull std::unique_ptr<Runfiles>;
 
 static absl::StatusOr<RunfilesPtr> CreateRunfiles(
     const ExecutableKind kind, const std::string_view source_repository,
@@ -503,7 +503,7 @@ static absl::StatusOr<RunfilesPtr> CreateRunfiles(
       original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
   if (!argv0.ok()) return argv0.status();
   std::string error;
-  absl::Nullable<std::unique_ptr<Runfiles>> runfiles;
+  absl_nullable std::unique_ptr<Runfiles> runfiles;
   switch (kind) {
     case ExecutableKind::kBinary:
       runfiles.reset(
@@ -718,8 +718,8 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
   CHECK((code == 0) == (code_int == 0));
   return code_int;
 #else
-  const std::vector<absl::Nonnull<char*>> argv = Pointers(args);
-  const std::vector<absl::Nonnull<char*>> envp = Pointers(final_env);
+  const std::vector<char* absl_nonnull> argv = Pointers(args);
+  const std::vector<char* absl_nonnull> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());
