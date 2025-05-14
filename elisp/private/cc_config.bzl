@@ -38,6 +38,7 @@ COPTS = select({
         "-Wconversion",
         "-Wsign-conversion",
         "-pedantic",
+        "-Wno-nullability-extension",
     ],
 }) + select({
     Label("@rules_cc//cc/compiler:clang"): [
