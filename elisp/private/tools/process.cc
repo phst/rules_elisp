@@ -689,10 +689,9 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
     return WindowsStatus("CreateProcessW", Escape(args.front()),
                          Escape(command_line));
   }
-  const auto close_handles = absl::MakeCleanup([&process_info] {
-    ::CloseHandle(process_info.hProcess);
-    ::CloseHandle(process_info.hThread);
-  });
+  ::CloseHandle(process_info.hThread);
+  const auto close_handle = absl::MakeCleanup(
+      [&process_info] { ::CloseHandle(process_info.hProcess); });
   const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
   if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
   DWORD code;
