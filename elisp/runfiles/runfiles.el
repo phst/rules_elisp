@@ -26,6 +26,7 @@
 
 (require 'cl-lib)
 (require 'pcase)
+(require 'radix-tree)
 (require 'rx)
 (require 'subr-x)
 
@@ -44,7 +45,7 @@ Use ‘elisp/runfiles/make’ to create instances of
 global instance.  All structure fields are implementation
 details."
   (impl nil :read-only t)
-  (repo-mapping nil :type (or null hash-table) :read-only t))
+  (repo-mapping nil :type (or null @repo-mapping) :read-only t))
 
 (cl-defun elisp/runfiles/make (&key manifest directory)
   "Return a new instance of the type ‘elisp/runfiles/runfiles’.
@@ -118,14 +119,14 @@ in its place."
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
-  (when-let ((table (@runfiles-repo-mapping runfiles))
+  (when-let ((repo-mapping (@runfiles-repo-mapping runfiles))
              (canonical caller-repo))
     (pcase-exhaustive filename
       ((rx bos
            (let apparent (+ (not (any "/\n"))))
            (let rest (? ?/ (+ nonl)))
            eos)
-       (when-let ((mapping (gethash (cons canonical apparent) table)))
+       (when-let ((mapping (@map-repo repo-mapping canonical apparent)))
          (setq filename (concat mapping rest))))))
   (@rlocation (@runfiles-impl runfiles) filename))
 
@@ -622,13 +623,26 @@ RUNFILES is a runfiles object, and REMOTE is the remote host identifier."
 
 ;;;; Repository mappings
 
+(cl-defstruct (@repo-mapping
+               (:constructor nil)
+               (:constructor @repo-mapping-make (exact prefix))
+               (:copier nil))
+  "A parsed repository mapping; see URL
+‘https://github.com/bazelbuild/proposals/blob/main/designs/2022-07-21-locating-runfiles-with-bzlmod.md#1-emit-a-repository-mapping-manifest-for-each-executable-target’."
+  (exact nil :type hash-table :read-only t
+         :documentation "A hashtable mapping (CANONICAL . APPARENT) pairs
+to the mapped repository.")
+  (prefix nil :type list :read-only t
+          :documentation "A radix tree mapping canonical repository name
+prefixes to hashtables mapping apparent repository names to the mapped
+repository.  Prefix keys are unique, and no key is a prefix of another
+key."))
+
 (defun @parse-repo-mapping (file)
   "Parse and return repository mappings from FILE.
-The return value is a hashtable mapping (CANONICAL . APPARENT)
-pairs to the mapped repository; see URL
-‘https://github.com/bazelbuild/proposals/blob/main/designs/2022-07-21-locating-runfiles-with-bzlmod.md#1-emit-a-repository-mapping-manifest-for-each-executable-target’.
-If there’s no repository mapping file, the return value is nil."
-  (declare (ftype (function (string) (or null string))))
+The return value is a structure of type ‘@repo-mapping’.  If there’s no
+repository mapping file, the return value is nil."
+  (declare (ftype (function (string) (or null @repo-mapping))))
   (cl-check-type file string)
   (with-temp-buffer
     (let ((coding-system-for-read 'us-ascii)
@@ -637,7 +651,8 @@ If there’s no repository mapping file, the return value is nil."
           (after-insert-file-functions nil)
           (case-fold-search nil))
       (when (ignore-error file-missing (insert-file-contents file))
-        (let ((table (make-hash-table :test #'equal :size 5)))
+        (let ((exact-map (make-hash-table :test #'equal :size 5))
+              (prefix-tree radix-tree-empty))
           (while (not (eobp))
             (unless (looking-at (rx bol
                                     (group (* (not (any ",\n")))) ?,
@@ -649,9 +664,28 @@ If there’s no repository mapping file, the return value is nil."
             (let ((canonical (match-string-no-properties 1))
                   (apparent (match-string-no-properties 2))
                   (mapping (match-string-no-properties 3)))
-              (puthash (cons canonical apparent) mapping table))
+              (if (string-suffix-p "*" canonical)
+                  (let* ((prefix (substring-no-properties canonical nil -1))
+                         (table (radix-tree-lookup prefix-tree prefix)))
+                    (unless table
+                      (setq table (make-hash-table :test #'equal))
+                      (cl-callf radix-tree-insert prefix-tree prefix table))
+                    (puthash apparent mapping table))
+                (puthash (cons canonical apparent) mapping exact-map)))
             (forward-line))
-          table)))))
+          (@repo-mapping-make exact-map prefix-tree))))))
+
+(defun @map-repo (mapping canonical apparent)
+  "Look up a repository mapping in MAPPING.
+MAPPING must be a ‘@repo-mapping’ structure.  CANONICAL and
+APPARENT are the canonical and apparent repository names to look up."
+  (declare (ftype (function (@repo-mapping string string) string)))
+  (cl-check-type mapping @repo-mapping)
+  (cl-check-type canonical string)
+  (cl-check-type apparent string)
+  (or (gethash (cons canonical apparent) (@repo-mapping-exact mapping))
+      (pcase (radix-tree-prefixes (@repo-mapping-prefix mapping) canonical)
+        (`((,_ . ,table)) (gethash apparent table)))))
 
 (provide 'elisp/runfiles/runfiles)
 

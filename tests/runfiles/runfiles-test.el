@@ -156,7 +156,11 @@ context."
                        ("external/file" nil "external/file")
                        ("external/file" "" "external/file")
                        ("external/file" "main" "external/file")
-                       ("external/file" "external" "external/file")))
+                       ("external/file" "external" "external/file")
+                       ("aaa/file" "aaa" "aaa/file")
+                       ("aaa/file" "+deps+dep1" "_main/file")
+                       ("dep/file" "aaa" "dep/file")
+                       ("dep/file" "+deps+dep1" "+deps+dep1/file")))
         (ert-info ((format "Looking up file %S from repository %S"
                            file caller-repo))
           (should (equal (elisp/runfiles/rlocation file runfiles
