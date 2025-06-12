@@ -29,11 +29,6 @@ bazel_dep(name = "rules_shell", version = "0.4.1")
 bazel_dep(name = "abseil-cpp", version = "20250512.0")
 bazel_dep(name = "protobuf", version = "31.1")
 
-# Work around https://github.com/bazelbuild/bazel/issues/24426.  See
-# https://github.com/bazelbuild/bazel-central-registry/pull/3320#issuecomment-2546030208.
-# FIXME: Remove once fixed upstream in googletest and abseil-cpp.
-bazel_dep(name = "re2", version = "2024-07-02.bcr.1")
-
 # Work around https://github.com/bazelbuild/rules_apple/issues/2660.
 # FIXME: Remove once fixed upstream in the protobuf module.
 bazel_dep(name = "rules_apple", version = "4.0.0")
