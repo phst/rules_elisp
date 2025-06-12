@@ -1,2 +1,4 @@
 ,main,main
 external,main,foobar
++deps+*,aaa,_main
++deps+*,dep,+deps+dep1
