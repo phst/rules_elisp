@@ -22,6 +22,7 @@ load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
+    default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
@@ -64,7 +65,6 @@ py_test(
 
 elisp_binary(
     name = "cat",
-    testonly = True,
     src = "cat.el",
     input_args = [2],
     output_args = [2],
@@ -73,13 +73,11 @@ elisp_binary(
 
 proto_library(
     name = "test_proto",
-    testonly = True,
     srcs = ["test.proto"],
 )
 
 elisp_proto_library(
     name = "test_elisp_proto",
-    testonly = True,
     deps = [":test_proto"],
 )
 
