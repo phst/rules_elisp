@@ -23,6 +23,7 @@ package(
 
 licenses(["notice"])
 
+# keep
 alias(
     name = "emacs",
     actual = ":emacs_30.1",

@@ -23,6 +23,7 @@ package(
 
 licenses(["notice"])
 
+# keep
 elisp_library(
     name = "runfiles",
     srcs = ["runfiles.el"],
