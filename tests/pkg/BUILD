@@ -31,6 +31,7 @@ licenses(["notice"])
 
 # This library verifies that libraries can have source files from unrelated
 # packages.
+# keep
 elisp_library(
     name = "lib",
     srcs = ["//tests:test-lib.el"],
