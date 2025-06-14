@@ -130,11 +130,6 @@ elisp_test(
     deps = [":test_lib"],
 )
 
-elisp_library(
-    name = "test_lib",
-    srcs = ["test-lib.el"],
-)
-
 exports_files(
     ["test-lib.el"],
     visibility = ["//tests/pkg:__pkg__"],
@@ -178,4 +173,9 @@ run_binary(
 elisp_binary(
     name = "print_version",
     src = "print-version.el",
+)
+
+elisp_library(
+    name = "test_lib",
+    srcs = ["test-lib.el"],
 )

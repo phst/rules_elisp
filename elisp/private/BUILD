@@ -218,6 +218,7 @@ alias(
     visibility = ["//elisp/toolchains:__pkg__"],
 )
 
+# keep
 alias(
     name = "windows_cc_toolchain",
     actual = "@local_config_cc//:cc-compiler-x64_windows_mingw",

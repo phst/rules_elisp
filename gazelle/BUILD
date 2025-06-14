@@ -84,6 +84,7 @@ go_test(
     ],
 )
 
+# keep
 go_test(
     name = "integration_test",
     timeout = "short",

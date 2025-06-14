@@ -118,6 +118,7 @@ gazelle_binary(
         "//gazelle",
         "@bazel_skylib_gazelle_plugin//bzl",
         "@gazelle//language/bazel/visibility",
+        "@gazelle_cc//language/cc",
     ],
 )
 

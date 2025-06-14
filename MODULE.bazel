@@ -116,6 +116,8 @@ junit_xsd(
 register_toolchains("//elisp:hermetic_toolchain")
 
 # C++-specific dependencies
+bazel_dep(name = "gazelle_cc", version = "0.1.0", dev_dependency = True)
+
 register_toolchains("@local_config_cc_toolchains//:all")
 
 # Python-specific dependencies

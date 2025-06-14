@@ -47,3 +47,4 @@ exports_files(
 
 # gazelle:default_visibility //visibility:private
 # gazelle:exclude README.org
+# gazelle:cc_group unit

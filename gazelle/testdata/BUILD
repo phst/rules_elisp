@@ -22,6 +22,7 @@ package(
 
 licenses(["notice"])
 
+# keep
 filegroup(
     name = "testdata",
     testonly = True,
