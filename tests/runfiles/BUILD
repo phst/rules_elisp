@@ -42,6 +42,7 @@ elisp_test(
     deps = ["//elisp/runfiles"],
 )
 
+# keep
 elisp_library(
     name = "test_lib",
     srcs = ["test-lib.el"],

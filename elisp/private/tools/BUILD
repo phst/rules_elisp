@@ -79,14 +79,14 @@ cc_library(
     local_defines = DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+        "@bazel_tools//tools/cpp/runfiles",  # keep
+        "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",
-        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -157,6 +157,7 @@ executable_only(
 cc_library(
     name = "test",
     testonly = True,
+    # keep
     srcs = ["test.cc"],
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
@@ -178,15 +179,16 @@ cc_library(
         ])),
     ],
     visibility = ["//elisp:__pkg__"],
+    # keep
     deps = [
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+        "@bazel_tools//tools/cpp/runfiles",  # keep
+        "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",
-        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -207,6 +209,7 @@ executable_only(
     src = ":run_test",
 )
 
+# keep
 elisp_library(
     name = "run_test_el",
     testonly = True,
@@ -253,6 +256,10 @@ cc_library(
     linkstatic = True,
     local_defines = DEFINES,
     deps = [
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+        "@bazel_tools//tools/cpp/runfiles",  # keep
+        "@rules_cc//cc/runfiles",  # keep
         ":platform",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
@@ -267,10 +274,6 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",
-        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -304,7 +307,9 @@ elisp_binary(
     name = "gen_proto",
     src = "gen-proto.el",
     visibility = ["//elisp/proto:__pkg__"],
-    deps = ["//elisp/proto"],
+    deps = [
+        "//elisp/proto",  # keep
+    ],
 )
 
 elisp_binary(

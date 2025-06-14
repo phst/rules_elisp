@@ -81,6 +81,7 @@ elisp_proto_library(
     deps = [":test_proto"],
 )
 
+# gazelle:lang go,proto,starlark,elisp
 # gazelle:go_generate_proto false
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ //elisp/proto:${1}_elisp_proto
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ //elisp/proto:${1}_${2}_elisp_proto
