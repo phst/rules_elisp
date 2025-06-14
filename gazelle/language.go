@@ -62,6 +62,7 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 		libraryKind: {
 			NonEmptyAttrs: map[string]bool{
 				"srcs":      true,
+				"outs":      true,
 				"deps":      true,
 				"load_path": true,
 			},
