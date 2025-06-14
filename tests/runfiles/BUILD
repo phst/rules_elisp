@@ -19,6 +19,7 @@ load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
     default_applicable_licenses = ["//:license"],
+    default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
@@ -43,7 +44,6 @@ elisp_test(
 
 elisp_library(
     name = "test_lib",
-    testonly = True,
     srcs = ["test-lib.el"],
     outs = ["test-lib.elc"],
 )
