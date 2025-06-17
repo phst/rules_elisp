@@ -124,10 +124,6 @@ register_toolchains("@local_config_cc_toolchains//:all")
 python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
 python.toolchain(
     configure_coverage_tool = True,
-    # Attempt to work around nondeterminism on Windows.  See
-    # https://github.com/bazelbuild/rules_python/pull/713 and
-    # https://github.com/bazelbuild/rules_python/pull/907.
-    ignore_root_user_error = True,
     python_version = "3.12",
 )
 
