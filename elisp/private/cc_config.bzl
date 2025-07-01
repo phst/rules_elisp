@@ -38,10 +38,10 @@ COPTS = select({
         "-Wconversion",
         "-Wsign-conversion",
         "-pedantic",
-        "-Wno-nullability-extension",
     ],
 }) + select({
     Label("@rules_cc//cc/compiler:clang"): [
+        "-Wno-nullability-extension",
         # Work around https://github.com/llvm/llvm-project/issues/121984.
         "--system-header-prefix=absl/",
         "--system-header-prefix=google/",
