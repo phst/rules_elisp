@@ -1,4 +1,4 @@
-# Copyright 2023 Google LLC
+# Copyright 2023, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -27,6 +27,12 @@ build:macos --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
 build:macos --conlyopt='-std=c11' --host_conlyopt='-std=c11'
 build:windows --cxxopt='/std:c++17' --host_cxxopt='/std:c++17'
 build:windows --conlyopt='/std:c11' --host_conlyopt='/std:c11'
+
+# Work around https://github.com/actions/runner-images/issues/12435.
+# TODO: Remove once https://github.com/actions/runner-images/issues/12435 is
+# fixed.
+build:windows --copt='/D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH'
+build:windows --host_copt='/D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH'
 
 # Local Variables:
 # mode: bazelrc
