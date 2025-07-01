@@ -3126,7 +3126,7 @@ static void Defun(struct Context ctx, const char* name, ptrdiff_t min_arity,
   FuncallSymbol2(ctx, kDefalias, symbol, function);
   FuncallSymbol3(ctx, kFunctionPut, symbol, GlobalSymbol(ctx, kFunctionType),
                  FunctionType(ctx, params, return_type));
-  if (decls & kSideEffectFree) {
+  if (decls & kNoSideEffects) {
     FunctionPut(ctx, symbol, kSideEffectFree, GlobalSymbol(ctx, kT));
   }
 }
