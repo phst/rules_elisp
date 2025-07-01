@@ -28,7 +28,7 @@ COPTS = select({
         "/utf-8",
         "/permissive-",
         "/Zc:__cplusplus",
-        "/external:W2",  # TODO: shouldn’t be needed; file bug against rules_cc
+        "/external:W0",  # TODO: shouldn’t be needed; file bug against rules_cc
     ],
     Label(":gcc_or_clang"): [
         "-finput-charset=utf-8",
