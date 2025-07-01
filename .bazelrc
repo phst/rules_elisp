@@ -24,7 +24,7 @@ build --host_features=external_include_paths
 
 # The next line shouldn’t be necessary.
 # TODO: File bug against rules_cc.
-build:windows --copt='/external:W2' --host_copt='/external:W2'
+build:windows --copt='/external:W0' --host_copt='/external:W0'
 
 # Run Pylint by default.
 build --aspects='//dev:pylint.bzl%pylint'
