@@ -49,5 +49,6 @@ func TestGazelleBinary(t *testing.T) {
 		GazelleBinaryPath:    binary,
 		Timeout:              time.Minute,
 	}
+	t.Setenv("GOCOVERDIR", t.TempDir())
 	testtools.TestGazelleGenerationOnPath(t, args)
 }
