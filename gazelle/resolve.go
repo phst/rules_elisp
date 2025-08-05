@@ -63,6 +63,7 @@ func (elisp) Resolve(
 func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat feature) label.Label {
 	spec := feat.importSpec()
 	if lbl, ok := resolve.FindRuleWithOverride(c, spec, languageName); ok && lbl != label.NoLabel {
+		lbl.Repo = cmp.Or(lbl.Repo, from.Repo)
 		return lbl
 	}
 
