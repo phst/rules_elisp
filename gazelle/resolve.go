@@ -50,7 +50,9 @@ func (elisp) Resolve(
 			continue
 		}
 		// Make the label relative to the current package if possible.
-		deps = append(deps, lbl.Rel(from.Repo, from.Pkg).String())
+		lbl.Repo = cmp.Or(lbl.Repo, from.Repo)
+		lbl = lbl.Rel(from.Repo, from.Pkg)
+		deps = append(deps, lbl.String())
 	}
 	if len(deps) > 0 {
 		sort.Strings(deps)
@@ -63,7 +65,6 @@ func (elisp) Resolve(
 func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat feature) label.Label {
 	spec := feat.importSpec()
 	if lbl, ok := resolve.FindRuleWithOverride(c, spec, languageName); ok && lbl != label.NoLabel {
-		lbl.Repo = cmp.Or(lbl.Repo, from.Repo)
 		return lbl
 	}
 
