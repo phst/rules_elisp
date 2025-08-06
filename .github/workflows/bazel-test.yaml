@@ -50,7 +50,8 @@ jobs:
       - name: Run Bazel tests
         shell: pwsh
         # FIXME: Run ‘bazel coverage’ unconditionally once
-        # https://github.com/bazelbuild/bazel/issues/6374 and
+        # https://github.com/bazelbuild/bazel/issues/6374,
+        # https://github.com/bazelbuild/bazel/issues/15835, and
         # https://github.com/bazelbuild/bazel/issues/18839 are fixed.
         run: >
           ./check.ps1
