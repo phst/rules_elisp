@@ -303,6 +303,36 @@ bootstrap(
     ],
 )
 
+bootstrap(
+    name = "gen-pkg-el",
+    src = "gen-pkg-el.el",
+    out = "gen-pkg-el.elc",
+    visibility = [
+        "//elisp:__pkg__",
+        "//tests/tools:__pkg__",
+    ],
+)
+
+bootstrap(
+    name = "gen-metadata",
+    src = "gen-metadata.el",
+    out = "gen-metadata.elc",
+    visibility = [
+        "//elisp:__pkg__",
+        "//tests/tools:__pkg__",
+    ],
+)
+
+bootstrap(
+    name = "gen-autoloads",
+    src = "gen-autoloads.el",
+    out = "gen-autoloads.elc",
+    visibility = [
+        "//elisp:__pkg__",
+        "//tests/tools:__pkg__",
+    ],
+)
+
 elisp_binary(
     name = "gen_proto",
     src = "gen-proto.el",

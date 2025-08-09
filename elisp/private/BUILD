@@ -35,6 +35,18 @@ bzl_library(
 )
 
 bzl_library(
+    name = "build_package",
+    srcs = ["build_package.bzl"],
+    visibility = [
+        "//elisp:__pkg__",
+    ],
+    deps = [
+        ":run_emacs",
+        "@bazel_skylib//lib:paths",
+    ],
+)
+
+bzl_library(
     name = "compile",
     srcs = ["compile.bzl"],
     visibility = [
