@@ -525,9 +525,9 @@
         "bzlTransitiveDigest": "kOATgtRscJJXP4nevEIO5gfmzOK2ecy9MGsl5bvXFEA=",
         "usagesDigest": "uBFgyoTP0qW2ccAYpiCHWRxpPuO+kBMZJIuqd5N462w=",
         "recordedFileInputs": {
-          "@@//dev/requirements-linux.lock": "1086a107a47c09afda55830aefb0912e5226399371c18ef1dbf53feb7f7d9bd5",
-          "@@//dev/requirements-macos.lock": "1086a107a47c09afda55830aefb0912e5226399371c18ef1dbf53feb7f7d9bd5",
-          "@@//dev/requirements-windows.lock": "83b5898d31ce1d78c26f279bc4fdbfba9d181a901067178f183ab284adce0337",
+          "@@//dev/requirements-linux.lock": "e5f8efafa476a2fb66ffaaf8387b198d6ad1ae7d9e40ca051a7271c66b116d44",
+          "@@//dev/requirements-macos.lock": "e5f8efafa476a2fb66ffaaf8387b198d6ad1ae7d9e40ca051a7271c66b116d44",
+          "@@//dev/requirements-windows.lock": "7d9c38c77c5621d63da261f4d38361e0ab68a7657dc0693d9bd3959965017eee",
           "@@rules_python++internal_deps+pypi__packaging//packaging-24.0.dist-info/RECORD": "be1aea790359b4c2c9ea83d153c1a57c407742a35b95ee36d00723509f5ed5dd",
           "@@rules_python+//python/private/pypi/requirements_parser/resolve_target_platforms.py": "42bf51980528302373529bcdfddb8014e485182d6bc9d2f7d3bbe1f11d8d923d",
           "@@rules_python+//python/private/pypi/whl_installer/platform.py": "b944b908b25a2f97d6d9f491504ad5d2507402d7e37c802ee878783f87f2aa11",
@@ -718,7 +718,7 @@
               "dep_template": "@pip//{name}:{target}",
               "python_interpreter_target": "@@rules_python++python+python_3_12_host//:python",
               "repo": "pip_312",
-              "requirement": "pylint==3.3.7 --hash=sha256:2b11de8bde49f9c5059452e0c310c079c746a0a8eeaa789e5aa966ecc23e4559 --hash=sha256:43860aafefce92fca4cf6b61fe199cdc5ae54ea28f9bf4cd49de267b5195803d"
+              "requirement": "pylint==3.3.8 --hash=sha256:26698de19941363037e2937d3db9ed94fb3303fdadf7d98847875345a8bb6b05 --hash=sha256:7ef94aa692a600e82fabdd17102b73fc226758218c97473c7ad67bd4cb905d83"
             }
           },
           "pip_312_pyparsing": {
