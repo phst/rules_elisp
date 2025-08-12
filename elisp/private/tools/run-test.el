@@ -728,7 +728,7 @@ Lisp source file that has been instrumented with Edebug using
        (unless (eq (marker-buffer begin) buffer)
          (error "Function %s got redefined in some other file" name))
        (cl-incf functions-hit (min calls 1))
-       (@hash-get-or-put begin-line lines 0)
+       (@hash-get-or-put begin-line lines calls)
        (cl-assert (eql (length coverage) (length offsets)) :show-args)
        (cl-loop
         for offset across offsets

@@ -36,7 +36,7 @@ BRDA:57,0,0,3
 BRDA:57,0,1,0
 BRF:26
 BRH:10
-DA:29,0
+DA:29,1
 DA:32,1
 DA:33,1
 DA:34,0
@@ -64,6 +64,6 @@ DA:57,3
 DA:59,1
 DA:60,1
 DA:61,1
-LH:22
+LH:23
 LF:28
 end_of_record
