@@ -49,6 +49,9 @@ func TestGazelleBinary(t *testing.T) {
 		GazelleBinaryPath:    binary,
 		Timeout:              time.Minute,
 	}
+	// Set GOCOVERDIR to avoid a warning message if coverage is enabled.
+	// FIXME: Remove this once
+	// https://github.com/bazel-contrib/rules_go/issues/3513 is fixed.
 	t.Setenv("GOCOVERDIR", t.TempDir())
 	testtools.TestGazelleGenerationOnPath(t, args)
 }
