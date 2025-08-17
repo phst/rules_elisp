@@ -194,7 +194,7 @@ func TestReportFailFast(t *testing.T) {
 	want.Errors = 1
 	want.Failures = 0
 	want.Skipped = 1
-	if !emacsVersion.between(version{30, 1}, version{30, 2}) {
+	if emacsMajor != 30 {
 		want.delete(
 			"command-line",
 			"coverage",
@@ -276,7 +276,7 @@ func reportTemplate() report {
 		Skipped:    1,
 		Time:       wantElapsed,
 		Timestamp:  timestamp(time.Now()),
-		Properties: properties{[]property{{"emacs-version", emacsVersionString}}},
+		Properties: properties{[]property{{"emacs-version", emacsVersion}}},
 		TestCases: []testCase{
 			{
 				Name:      "abort",
@@ -398,12 +398,12 @@ func reportTemplate() report {
 			},
 		},
 	}
-	if emacsVersion.between(version{30, 1}, version{30, 2}) {
+	if emacsMajor == 30 {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
 		abort.Error = message{}
 		abort.Skipped = message{
-			Message:     `Test skipped: ((skip-unless (not (string-equal emacs-version "30.1"))) :form (not t) :value nil)`,
+			Message:     `Test skipped: ((skip-unless (not (eql emacs-major-version 30))) :form (not t) :value nil)`,
 			Description: nonEmpty,
 		}
 		r.Errors--
@@ -587,25 +587,13 @@ func (d description) String() string {
 }
 
 //go:embed version.txt
-var emacsVersionString string
+var emacsVersion string
 
-type version struct{ major, minor uint }
-
-func (v version) slice() []uint { return []uint{v.major, v.minor} }
-
-func (v version) less(w version) bool {
-	return slices.Compare(v.slice(), w.slice()) < 0
-}
-
-func (v version) between(a, b version) bool {
-	return !(v.less(a) || b.less(v))
-}
-
-var emacsVersion version
+var emacsMajor uint
 
 func init() {
-	if n, err := fmt.Sscanf(emacsVersionString, "%d.%d", &emacsVersion.major, &emacsVersion.minor); err != nil || n != 2 {
-		panic(fmt.Errorf("invalid Emacs version %q: %s", emacsVersionString, err))
+	if n, err := fmt.Sscanf(emacsVersion, "%d.", &emacsMajor); err != nil || n != 1 {
+		panic(fmt.Errorf("invalid Emacs version %q: %s", emacsVersion, err))
 	}
 }
 
