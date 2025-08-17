@@ -74,19 +74,19 @@ emacs_repository(
 )
 
 emacs_repository(
-    name = "gnu_emacs_30.1",
-    integrity = "sha384-2K37C4VadoRIlCTmMWJA75AtWC05CrVQ4D80EpbAu1Fyk9MXLgbIbxf0CFjcZ0jC",
+    name = "gnu_emacs_30.2",
+    integrity = "sha384-2hDJF2LcSpB7ZTLRyCpYBkXpMs1QVlANlrSPNfU6sUrrs57Q+7QY3Ff7MIYRwNRt",
     mode = "source",
     output = "emacs.tar.xz",
-    strip_prefix = "emacs-30.1",
+    strip_prefix = "emacs-30.2",
     urls = [
-        "https://ftpmirror.gnu.org/emacs/emacs-30.1.tar.xz",
-        "https://ftp.gnu.org/gnu/emacs/emacs-30.1.tar.xz",
+        "https://ftpmirror.gnu.org/emacs/emacs-30.2.tar.xz",
+        "https://ftp.gnu.org/gnu/emacs/emacs-30.2.tar.xz",
     ],
 )
 
 emacs_repository(
-    name = "gnu_emacs_windows_30.1",
+    name = "gnu_emacs_windows_30.2",
     integrity = "sha384-eRRAnADE9t62y4bk8HyAi4SM1WoygTtysP+PjN8bp18LsB9ZBIsQe16w5+8XTkpc",
     mode = "release",
     output = "emacs.zip",
@@ -96,8 +96,8 @@ emacs_repository(
         "@platforms//cpu:x86_64",
     ],
     urls = [
-        "https://ftpmirror.gnu.org/emacs/windows/emacs-30/emacs-30.1.zip",
-        "https://ftp.gnu.org/gnu/emacs/windows/emacs-30/emacs-30.1.zip",
+        "https://ftpmirror.gnu.org/emacs/windows/emacs-30/emacs-30.2.zip",
+        "https://ftp.gnu.org/gnu/emacs/windows/emacs-30/emacs-30.2.zip",
     ],
 )
 
