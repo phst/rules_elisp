@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/xml"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -193,7 +194,7 @@ func TestReportFailFast(t *testing.T) {
 	want.Errors = 1
 	want.Failures = 0
 	want.Skipped = 1
-	if emacsVersion != "30.1" {
+	if emacsVersion != (version{30, 1}) {
 		want.delete(
 			"command-line",
 			"coverage",
@@ -275,7 +276,7 @@ func reportTemplate() report {
 		Skipped:    1,
 		Time:       wantElapsed,
 		Timestamp:  timestamp(time.Now()),
-		Properties: properties{[]property{{"emacs-version", emacsVersion}}},
+		Properties: properties{[]property{{"emacs-version", emacsVersionString}}},
 		TestCases: []testCase{
 			{
 				Name:      "abort",
@@ -397,7 +398,7 @@ func reportTemplate() report {
 			},
 		},
 	}
-	if emacsVersion == "30.1" {
+	if emacsVersion == (version{30, 1}) {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
 		abort.Error = message{}
@@ -586,7 +587,17 @@ func (d description) String() string {
 }
 
 //go:embed version.txt
-var emacsVersion string
+var emacsVersionString string
+
+type version struct{ major, minor uint }
+
+var emacsVersion version
+
+func init() {
+	if n, err := fmt.Sscanf(emacsVersionString, "%d.%d", &emacsVersion.major, &emacsVersion.minor); err != nil || n != 2 {
+		panic(fmt.Errorf("invalid Emacs version %q: %s", emacsVersionString, err))
+	}
+}
 
 //go:embed coverage.dat
 var wantCoverage string
