@@ -16,15 +16,15 @@ Workaround for https://github.com/bazel-contrib/rules_python/issues/2762.
 
 --- python/private/python_bootstrap_template.txt
 +++ python/private/python_bootstrap_template.txt
-@@ -431,6 +431,7 @@
+@@ -438,6 +438,7 @@
    with open(rcfile_name, "w") as rcfile:
-     rcfile.write('''[run]
+     rcfile.write(f'''[run]
  relative_files = True
 +disable_warnings = module-not-imported, no-data-collected
+ source =
+ \t{source}
  ''')
-   PrintVerboseCoverage('Coverage entrypoint:', coverage_entrypoint)
-   # First run the target Python file via coveragepy to create a .coverage
-@@ -461,10 +461,10 @@
+@@ -470,10 +470,10 @@
      kparams['stdout'] = sys.stderr
      kparams['stderr'] = sys.stderr
  
