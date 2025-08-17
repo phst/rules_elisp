@@ -29,6 +29,7 @@
   (let ((coding-system-for-write 'utf-8-unix)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
-    (write-region emacs-version nil file)))
+    (write-region (format "%d.%d" emacs-major-version emacs-minor-version) nil
+                  file)))
 
 ;;; print-version.el ends here
