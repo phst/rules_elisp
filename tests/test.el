@@ -63,7 +63,8 @@
 
 (ert-deftest abort ()
   ;; https://bugs.gnu.org/76447
-  (skip-unless (not (string-equal emacs-version "30.1")))
+  (skip-unless (or (version< emacs-version "30.1")
+                   (version< "30.2" emacs-version)))
   (signal 'undefined-error-symbol '("Boo")))
 
 (ert-deftest throw ()
