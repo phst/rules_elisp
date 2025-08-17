@@ -194,7 +194,7 @@ func TestReportFailFast(t *testing.T) {
 	want.Errors = 1
 	want.Failures = 0
 	want.Skipped = 1
-	if emacsVersion != (version{30, 1}) {
+	if !emacsVersion.between(version{30, 1}, version{30, 2}) {
 		want.delete(
 			"command-line",
 			"coverage",
@@ -398,7 +398,7 @@ func reportTemplate() report {
 			},
 		},
 	}
-	if emacsVersion == (version{30, 1}) {
+	if emacsVersion.between(version{30, 1}, version{30, 2}) {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
 		abort.Error = message{}
@@ -590,6 +590,16 @@ func (d description) String() string {
 var emacsVersionString string
 
 type version struct{ major, minor uint }
+
+func (v version) slice() []uint { return []uint{v.major, v.minor} }
+
+func (v version) less(w version) bool {
+	return slices.Compare(v.slice(), w.slice()) < 0
+}
+
+func (v version) between(a, b version) bool {
+	return !(v.less(a) || b.less(v))
+}
 
 var emacsVersion version
 
