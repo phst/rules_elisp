@@ -64,6 +64,7 @@ runs:
           common --announce_rc
           common --show_progress_rate_limit=10
           common --remote_download_minimal
+          common --incompatible_config_setting_private_default_visibility
           common --lockfile_mode=${{inputs.bazel-version == 'latest' && 'error' || 'off'}}
           build --verbose_failures
           build --experimental_convenience_symlinks=ignore

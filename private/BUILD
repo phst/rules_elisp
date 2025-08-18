@@ -32,6 +32,11 @@ bool_flag(
 config_setting(
     name = "treat_warnings_as_errors_enabled",
     flag_values = {":treat_warnings_as_errors": "true"},
+    visibility = [
+        "//elisp/private:__pkg__",
+        "//elisp/private/tools:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 bzl_library(
