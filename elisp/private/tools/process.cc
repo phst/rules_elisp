@@ -32,6 +32,7 @@
 #  endif
 #  include <windows.h>
 #else
+#  include <limits.h>
 #  include <spawn.h>
 #  include <sys/wait.h>
 #  include <unistd.h>
@@ -84,6 +85,14 @@
 namespace rules_elisp {
 
 namespace {
+
+static constexpr std::size_t kMaxFilename{
+#ifdef _WIN32
+    MAX_PATH
+#else
+    PATH_MAX
+#endif
+};
 
 template <typename To, typename From>
 [[nodiscard]] constexpr bool Overflow(const From n) {
@@ -782,26 +791,35 @@ absl::StatusOr<int> RunEmacs(
     CHECK_EQ(mode, "source") << "invalid mode";
     release = false;
   }
-  std::vector<NativeString> args;
+  NativeString emacs;
   std::optional<DosDevice> dos_device;
   if (kWindows && release) {
     const absl::StatusOr<NativeString> root =
         ResolveRunfile(**runfiles, install);
     if (!root.ok()) return root.status();
-    // The filenames in the released Emacs archive are too long.  Create a drive
-    // letter to shorten them.
-    absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
-    if (!device.ok()) return device.status();
-    args.push_back(device->name() +
-                   RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
-    dos_device = std::move(*device);
-  } else {
-    const absl::StatusOr<NativeString> emacs = ResolveRunfile(
+    // The longest filename in the Emacs release archive has 140 characters.
+    // Round up to 150 for some buffer and the directory separator.
+    constexpr std::size_t kMaxEntry = 150;
+    static_assert(kMaxFilename > kMaxEntry);
+    constexpr std::size_t kMaxRoot = kMaxFilename - kMaxEntry;
+    if (root->length() > kMaxRoot) {
+      // The filenames in the released Emacs archive are too long.  Create a
+      // drive letter to shorten them.
+      absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
+      if (!device.ok()) return device.status();
+      emacs = device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe");
+      dos_device = std::move(*device);
+    }
+  }
+  if (!dos_device.has_value()) {
+    const absl::StatusOr<NativeString> binary = ResolveRunfile(
         **runfiles,
         absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
-    if (!emacs.ok()) return emacs.status();
-    args.push_back(*emacs);
+    if (!binary.ok()) return binary.status();
+    emacs = *binary;
   }
+  CHECK(!emacs.empty());
+  std::vector<NativeString> args = {emacs};
   if (!release) {
     const absl::StatusOr<NativeString> dump =
         ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
