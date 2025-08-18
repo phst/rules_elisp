@@ -190,7 +190,10 @@ selects.config_setting_group(
         "@rules_cc//cc/compiler:gcc",
         "@rules_cc//cc/compiler:clang",
     ],
-    visibility = ["//visibility:private"],
+    visibility = [
+        "//elisp/private/tools:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 selects.config_setting_group(
@@ -199,7 +202,10 @@ selects.config_setting_group(
         "@rules_cc//cc/compiler:msvc-cl",
         "@rules_cc//cc/compiler:clang-cl",
     ],
-    visibility = ["//visibility:private"],
+    visibility = [
+        "//elisp/private/tools:__pkg__",
+        "//elisp/proto:__pkg__",
+    ],
 )
 
 # keep
