@@ -362,7 +362,7 @@ class EnvironmentBlock final {
   };
 #endif
 
-  using Pointer = std::conditional_t<Windows, std::unique_ptr<wchar_t, Free>,
+  using Pointer = std::conditional_t<kWindows, std::unique_ptr<wchar_t, Free>,
                                      const char* const absl_nullable*>;
 
  public:
@@ -395,7 +395,7 @@ class EnvironmentBlock final {
    private:
     using Environ = const char* const absl_nullable* absl_nonnull;
     using Pointer =
-        std::conditional_t<Windows, const wchar_t* absl_nonnull, Environ>;
+        std::conditional_t<kWindows, const wchar_t* absl_nonnull, Environ>;
 
    public:
     explicit Iterator(const Pointer ptr) : cur_(ABSL_DIE_IF_NULL(ptr)) {}
@@ -427,7 +427,7 @@ class EnvironmentBlock final {
     }
 
    private:
-    std::conditional_t<Windows, std::wstring_view, Environ> cur_;
+    std::conditional_t<kWindows, std::wstring_view, Environ> cur_;
 
     ABSL_MUST_USE_RESULT bool AtEnd() const {
 #ifdef _WIN32
@@ -456,7 +456,7 @@ class EnvironmentBlock final {
 };
 
 using Environment = std::conditional_t<
-    Windows,
+    kWindows,
     absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
                         CaseInsensitiveEqual>,
     absl::flat_hash_map<std::string, std::string>>;
@@ -469,7 +469,7 @@ static absl::StatusOr<Environment> CopyEnv() {
   // current directory” variables on Windows,
   // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
   // names start with an equals sign.
-  constexpr std::size_t skip = Windows ? 1 : 0;
+  constexpr std::size_t skip = kWindows ? 1 : 0;
   for (const NativeStringView var : *block) {
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
@@ -532,7 +532,7 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-  if constexpr (Windows) absl::c_replace(resolved, '/', '\\');
+  if constexpr (kWindows) absl::c_replace(resolved, '/', '\\');
   absl::StatusOr<NativeString> native = ToNative(resolved);
   if (!native.ok()) return native.status();
 #ifdef _WIN32
@@ -776,7 +776,7 @@ absl::StatusOr<int> RunEmacs(
   bool release;
   // We currently support pre-built Emacsen only on Windows because there are no
   // official binary release archives for Unix systems.
-  if (Windows && mode == "release") {
+  if (kWindows && mode == "release") {
     release = true;
   } else {
     CHECK_EQ(mode, "source") << "invalid mode";
@@ -784,7 +784,7 @@ absl::StatusOr<int> RunEmacs(
   }
   std::vector<NativeString> args;
   std::optional<DosDevice> dos_device;
-  if (Windows && release) {
+  if (kWindows && release) {
     const absl::StatusOr<NativeString> root =
         ResolveRunfile(**runfiles, install);
     if (!root.ok()) return root.status();
@@ -832,7 +832,7 @@ absl::StatusOr<int> RunEmacs(
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
   env->insert(orig_env->begin(), orig_env->end());
-  if constexpr (Windows) {
+  if constexpr (kWindows) {
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.
     for (const NativeString& arg : args) {

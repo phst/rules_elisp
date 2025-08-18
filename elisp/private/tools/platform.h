@@ -1,4 +1,4 @@
-// Copyright 2021, 2023, 2024 Google LLC
+// Copyright 2021, 2023, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@
 
 namespace rules_elisp {
 
-constexpr inline bool Windows =
+constexpr inline bool kWindows =
 #ifdef _WIN32
     true
 #else
@@ -39,7 +39,7 @@ constexpr inline bool Windows =
 #  define RULES_ELISP_NATIVE_LITERAL(literal) literal
 #endif
 
-using NativeChar = std::conditional_t<Windows, wchar_t, char>;
+using NativeChar = std::conditional_t<kWindows, wchar_t, char>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
 }  // namespace rules_elisp
