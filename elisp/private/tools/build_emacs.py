@@ -172,6 +172,18 @@ def _unpack(*, source: tuple[pathlib.Path, pathlib.PurePosixPath],
     _unpack_archive(archive, install, prefix=prefix)
     lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
     features = _builtin_features(lisp) if builtin_features else None
+
+    if platform.system() == 'Windows':
+        # Remove native-compiled files on Windows.  Their filenames are too
+        # long, and they are not needed.
+        native = _glob_unique(
+            install / 'lib' / 'emacs' / '[0-9]*' / 'native-lisp')
+        for file in native.rglob('*.eln'):
+            file.unlink()
+        # Remove now-empty directories.
+        for directory, _, _ in native.walk(top_down=False):
+            directory.rmdir()
+
     return features
 
 
