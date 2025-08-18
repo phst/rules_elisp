@@ -235,8 +235,8 @@ static std::wstring BuildEnvironmentBlock(
   result.push_back(L'\0');
   return result;
 }
-static absl::Nonnull<wchar_t*> Pointer(
-    std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+static wchar_t* absl_nonnull
+Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   CHECK_EQ(string.find(L'\0'), string.npos)
       << Escape(string) << " contains null character";
   return string.data();
@@ -363,7 +363,7 @@ class EnvironmentBlock final {
   struct Free;
 #ifdef _WIN32
   struct Free {
-    void operator()(const absl::Nonnull<wchar_t*> p) const noexcept {
+    void operator()(wchar_t* const absl_nonnull p) const noexcept {
       const BOOL ok = ::FreeEnvironmentStringsW(p);
       // If this fails, we can’t really do much except logging the error.
       if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
@@ -377,7 +377,7 @@ class EnvironmentBlock final {
  public:
   static absl::StatusOr<EnvironmentBlock> Current() {
 #ifdef _WIN32
-    absl::Nullable<Pointer> envp(::GetEnvironmentStringsW());
+    absl_nullable Pointer envp(::GetEnvironmentStringsW());
     if (envp == nullptr) {
       // Don’t use WindowsStatus since the documentation
       // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
