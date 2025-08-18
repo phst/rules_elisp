@@ -74,15 +74,15 @@ runs:
           test --test_output=errors
           ${{
             inputs.bazel-version == 'latest' &&
-            'common --incompatible_enforce_starlark_utf8=error'
+            'common --incompatible_enforce_starlark_utf8=error' || ''
           }}
           ${{
             runner.os == 'macOS' && startsWith(inputs.cc, 'gcc') &&
-            'common --config=macos-gcc'
+            'common --config=macos-gcc' || ''
           }}
           ${{
             runner.os == 'Windows' && inputs.cc == 'clang' &&
-            'build --config=clang-cl'
+            'build --config=clang-cl' || ''
           }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
