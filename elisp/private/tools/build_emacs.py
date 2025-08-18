@@ -150,7 +150,7 @@ def _build(*, source: Union[pathlib.Path,
     # Delete source files that have a corresponding compiled file, as these
     # files don’t work well with Coverage (see
     # e.g. https://debbugs.gnu.org/40766).
-    for compiled in lisp.glob('**/*.elc'):
+    for compiled in lisp.rglob('*.elc'):
         compiled.with_suffix('.el').unlink()
 
     return features
@@ -177,7 +177,7 @@ def _unpack(*, source: tuple[pathlib.Path, pathlib.PurePosixPath],
 
 def _builtin_features(lisp: pathlib.Path) -> Set[str]:
     features = set()
-    for source in lisp.glob('**/*.el'):
+    for source in lisp.rglob('*.el'):
         with source.open('rt', encoding='ascii', errors='replace') as file:
             for line in file:
                 match = re.match(r"\(provide '([-/\w]+)\)", line, re.ASCII)
