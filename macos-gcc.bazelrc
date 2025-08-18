@@ -38,6 +38,13 @@ build:macos-gcc --copt='-D_DARWIN_C_SOURCE' --host_copt='-D_DARWIN_C_SOURCE'
 build:macos-gcc --features='-macos_default_link_flags'
 build:macos-gcc --host_features='-macos_default_link_flags'
 
+# Protocol Buffers wants to use the __builtin_arm_crc32cd intrinsic, but GCC
+# doesn’t define that.  Manually disable CRC intrinsic support to work around
+# this.
+# TODO: File bug against Protocol Buffers.
+build:macos-gcc --copt='-march=armv8-a+nocrc'
+build:macos-gcc --host_copt='-march=armv8-a+nocrc'
+
 # Local Variables:
 # mode: bazelrc
 # End:
