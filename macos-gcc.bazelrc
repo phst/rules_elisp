@@ -41,7 +41,9 @@ build:macos-gcc --host_features='-macos_default_link_flags'
 # Protocol Buffers wants to use the __builtin_arm_crc32cd intrinsic, but GCC
 # doesn’t define that.  Manually disable CRC intrinsic support to work around
 # this.
-# TODO: File bug against Protocol Buffers.
+# TODO: Remove this workaround once
+# https://github.com/protocolbuffers/protobuf/commit/cbe193ab7ef6f8979cc33a876073217b364f4118
+# has been released.
 build:macos-gcc --copt='-march=armv8-a+nocrc'
 build:macos-gcc --host_copt='-march=armv8-a+nocrc'
 
