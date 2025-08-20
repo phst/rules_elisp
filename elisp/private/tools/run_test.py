@@ -160,8 +160,8 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
                 file.stat()  # make sure file exists
                 files[i] = file.as_posix()
                 edited = True
-            except FileNotFoundError:
-                _logger.warning('instrumented file %s not found', file)
+            except FileNotFoundError as ex:
+                _logger.warning('instrumented file %s not found', ex.filename)
     if edited:
         with manifest_file.open(mode='w', encoding='utf-8',
                                 newline='\n') as stream:
