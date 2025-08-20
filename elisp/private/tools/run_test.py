@@ -89,9 +89,9 @@ def main() -> None:
             if env.get('COVERAGE') == '1':
                 coverage_manifest = env.get('COVERAGE_MANIFEST')
                 if coverage_manifest:
-                    coverage_manifest = pathlib.Path(coverage_manifest)
-                    _fix_coverage_manifest(coverage_manifest, run_files)
-                    inputs.append(coverage_manifest)
+                    path = pathlib.Path(coverage_manifest)
+                    _fix_coverage_manifest(path, run_files)
+                    inputs.append(path)
                 coverage_dir = env.get('COVERAGE_DIR')
                 if coverage_dir:
                     outputs.append(
@@ -152,13 +152,13 @@ def _fix_coverage_manifest(manifest_file: pathlib.Path,
     files = manifest_file.read_text('utf-8').splitlines()
     edited = False
     for i, file in enumerate(files):
-        file = pathlib.Path(file)
-        if not file.is_absolute() and not file.exists():
+        path = pathlib.Path(file)
+        if not path.is_absolute() and not path.exists():
             try:
-                file = run_files.resolve(
-                    pathlib.PurePosixPath(file.as_posix()))
-                file.stat()  # make sure file exists
-                files[i] = file.as_posix()
+                path = run_files.resolve(
+                    pathlib.PurePosixPath(path.as_posix()))
+                path.stat()  # make sure file exists
+                files[i] = path.as_posix()
                 edited = True
             except FileNotFoundError:
                 _logger.warning('instrumented file %s not found', file)

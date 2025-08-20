@@ -90,9 +90,9 @@ def main() -> None:
             for var in (got, want):
                 files: list[str] = var.get('inputFiles', [])
                 for i, file in enumerate(files):
-                    file = pathlib.PurePosixPath(file)
-                    if not file.is_absolute():
-                        files[i] = str(run_files.resolve(file))
+                    path = pathlib.PurePosixPath(file)
+                    if not path.is_absolute():
+                        files[i] = str(run_files.resolve(path))
             self.assertDictEqual(got, want)
 
     tests = unittest.defaultTestLoader.loadTestsFromTestCase(Test)

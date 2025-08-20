@@ -97,8 +97,8 @@ def _build(*, source: Union[pathlib.Path,
             # invoke commands through the MinGW shell, see
             # https://www.msys2.org/wiki/Launchers/#the-idea.
             env = dict(os.environ, MSYSTEM='MINGW64', CHERE_INVOKING='1')
-            command = [str(bash), '-l',
-                       '-c', ' '.join(map(shlex.quote, command))]
+            command = (str(bash), '-l',
+                       '-c', ' '.join(map(shlex.quote, command)))
         try:
             subprocess.run(command, check=True, cwd=build, env=env,
                            stdin=subprocess.DEVNULL,
@@ -225,10 +225,10 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
 def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
     stamp = time.timestamp()
     for parent, _dirs, files in os.walk(root):
-        parent = pathlib.Path(parent)
+        path = pathlib.Path(parent)
         for file in files:
             try:
-                os.utime(parent / file, (stamp, stamp))
+                os.utime(path / file, (stamp, stamp))
             except FileNotFoundError:
                 # This can happen on Windows if the filename is too long, see
                 # https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
