@@ -31,6 +31,7 @@ class ManifestTest(absltest.TestCase):
         args = ['--foo']
         with manifest.add('wrap', args) as file:
             self.assertIsNotNone(file)
+            assert file  # for Mypy
             file.write('test')
         self.assertEqual(len(args), 3)
         self.assertEqual(args[0], '--foo')

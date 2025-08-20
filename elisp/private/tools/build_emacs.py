@@ -64,6 +64,9 @@ def main() -> None:
                           builtin_features=bool(args.builtin_features))
 
     if args.builtin_features:
+        # We know that ‘features’ isn’t None, but the type system can’t express
+        # that, so help static type checkers.
+        assert features
         data = {'builtinFeatures': sorted(features)}
         with args.builtin_features.open('wt', encoding='utf-8',
                                         newline='\n') as file:
