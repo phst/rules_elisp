@@ -27,7 +27,7 @@ import urllib.parse
 import commonmark
 import commonmark.node
 import commonmark.render.renderer
-from stardoc.proto import stardoc_output_pb2
+from stardoc.proto import stardoc_output_pb2  # type: ignore[import-not-found]
 
 # The generated protocol buffer modules generate their members dynamically, so
 # Pylint can’t find them.
