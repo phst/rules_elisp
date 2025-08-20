@@ -60,12 +60,12 @@ def main() -> None:
     if not srcs:
         raise FileNotFoundError('no source files found')
     for dirpath, _, _ in os.walk(tempdir):
-        dirpath = pathlib.Path(dirpath)
-        if not dirpath.samefile(tempdir):
+        path = pathlib.Path(dirpath)
+        if not path.samefile(tempdir):
             # Mimic the Bazel behavior.  Also see
             # https://github.com/bazelbuild/bazel/issues/10076.
-            (dirpath / '__init__.py').touch()
-    srcs = frozenset(srcs)
+            (path / '__init__.py').touch()
+    srcset = frozenset(srcs)
     repository_path = [str(tempdir / d) for d in args.path]
     # Pytype wants a Python binary available under the name “python”.  See the
     # function pytype.tools.environment.check_python_exe_or_die.
@@ -95,7 +95,7 @@ def main() -> None:
              # We’d like to add “--” after the options, but that’s not possible
              # due to https://github.com/PyCQA/pylint/issues/7003.
              '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
-            + [str(file.relative_to(cwd)) for file in sorted(srcs)],
+            + [str(file.relative_to(cwd)) for file in sorted(srcset)],
             check=False, cwd=cwd, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
@@ -107,7 +107,7 @@ def main() -> None:
             [sys.executable, '-m', 'pytype',
              '--pythonpath=' + os.pathsep.join(repository_path),
              '--no-cache', '--'] + [str(file.relative_to(cwd))
-                                    for file in sorted(srcs)],
+                                    for file in sorted(srcset)],
             check=False, cwd=cwd, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
