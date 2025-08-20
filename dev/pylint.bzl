@@ -41,7 +41,7 @@ def _pylint_impl(target, ctx):
         progress_message = "Linting Python target %{label}",
     )
     return [
-        OutputGroupInfo(pylint = depset([output_file])),
+        OutputGroupInfo(_validation = depset([output_file])),
     ]
 
 pylint = aspect(

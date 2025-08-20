@@ -59,7 +59,7 @@ for dir in . examples/ext; do
   windows="lockfiles-Windows-X64/${out:?}"
   bazel run \
     --lockfile_mode=off \
-    --output_groups='-pylint,-pytype' \
+    --norun_validations \
     -- \
     @phst_merge_bazel_lockfiles//:merge \
     --linux-amd64="${linux:?}" \
