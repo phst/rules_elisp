@@ -43,7 +43,7 @@ class BinaryTest(absltest.TestCase):
         input_file = run_files.resolve(
             pathlib.PurePosixPath(getattr(FLAGS, 'binary-cc')))
         windows = platform.system() == 'Windows'
-        args = [
+        args: list[str | pathlib.Path] = [
             run_files.resolve(pathlib.PurePosixPath(FLAGS.launcher)),
             '--option',
             input_file,
