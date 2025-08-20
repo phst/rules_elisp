@@ -33,7 +33,7 @@ def _makeinfo_impl(ctx):
         inputs = [src],
         command = 'makeinfo "$@"',
         arguments = [args],
-        use_default_shell_env = True,  # required so that Bash can find the local makeinfo
+        env = {"PATH": "/opt/homebrew/bin:/usr/bin"},
         mnemonic = "Makeinfo",
         progress_message = "Generating Info manual %{output}",
     )
