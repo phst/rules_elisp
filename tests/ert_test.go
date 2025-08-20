@@ -40,6 +40,7 @@ import (
 var (
 	binary                = flag.String("binary", "", "location of the binary file relative to the runfiles root")
 	testEl                = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
 	jUnitXsd              = flag.String("junit-xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfile root")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
@@ -81,7 +82,7 @@ func TestReportValid(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("validing XML report %s against schema %s", file, schema)
-	cmd := exec.Command("xmllint", "--nonet", "--noout", "--schema", schema, file)
+	cmd := exec.Command(*xmllint, "--nonet", "--noout", "--schema", schema, file)
 	if err := run(t, "xmllint", cmd); err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}

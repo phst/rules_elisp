@@ -145,3 +145,8 @@ bzl_library(
     name = "check_python_bzl",
     srcs = ["check_python.bzl"],
 )
+
+bzl_library(
+    name = "local_binary",
+    srcs = ["local_binary.bzl"],
+)

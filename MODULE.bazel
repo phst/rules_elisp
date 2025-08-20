@@ -197,6 +197,22 @@ git_override(
     remote = "https://github.com/phst/merge-bazel-lockfiles.git",
 )
 
+# Local binaries that need to be installed on the host/exec machine.
+local_binary = use_repo_rule("//dev:local_binary.bzl", "local_binary")
+
+local_binary(
+    name = "makeinfo",
+    dev_dependency = True,
+    program = "makeinfo",
+    visibility = ["//docs:__pkg__"],
+)
+
+local_binary(
+    name = "xmllint",
+    dev_dependency = True,
+    program = "xmllint",
+)
+
 # We want to test the external example without adding its repository to the
 # registry.  So we override the dependency immediately locally.
 bazel_dep(name = "phst_rules_elisp_example", version = "0", dev_dependency = True)

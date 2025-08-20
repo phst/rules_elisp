@@ -129,4 +129,5 @@ py_proto_library(
 bzl_library(
     name = "makeinfo",
     srcs = ["makeinfo.bzl"],
+    deps = ["@makeinfo//:file"],
 )

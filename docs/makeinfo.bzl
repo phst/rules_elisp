@@ -14,6 +14,8 @@
 
 """Defines the `makeinfo` rule."""
 
+load("@makeinfo//:file.bzl", "FILE")
+
 visibility("private")
 
 def _makeinfo_impl(ctx):
@@ -22,6 +24,7 @@ def _makeinfo_impl(ctx):
         fail("Unknown output file name", out.basename)
     src = ctx.file.src
     args = ctx.actions.args()
+    args.add(FILE)
     args.add("--no-split")
     if out.extension == "html":
         args.add("--html")
@@ -31,9 +34,8 @@ def _makeinfo_impl(ctx):
     ctx.actions.run_shell(
         outputs = [out],
         inputs = [src],
-        command = 'makeinfo "$@"',
+        command = 'exec "$@"',
         arguments = [args],
-        env = {"PATH": "/opt/homebrew/bin:/usr/bin"},
         mnemonic = "Makeinfo",
         progress_message = "Generating Info manual %{output}",
     )
