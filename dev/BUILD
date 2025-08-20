@@ -57,10 +57,11 @@ compile_pip_requirements(
     requirements_in = "requirements.txt",
     requirements_txt = ":requirements_lock",
     tags = [
-        # Don’t try to run Pylint or Pytype.  This target doesn’t contain any of
-        # our source files.
+        # Don’t try to run Pylint, Pytype, or Mypy.  This target doesn’t contain
+        # any of our source files.
         "no-pylint",
         "no-pytype",
+        "no-mypy",
     ],
 )
 
