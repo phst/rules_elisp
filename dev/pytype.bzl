@@ -36,7 +36,7 @@ def _pytype_impl(target, ctx):
         progress_message = "Checking Python types in %{label}",
     )
     return [
-        OutputGroupInfo(pytype = depset([output_file])),
+        OutputGroupInfo(_validation = depset([output_file])),
     ]
 
 pytype = aspect(

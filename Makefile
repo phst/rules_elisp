@@ -30,7 +30,7 @@ check: all check-extra
 	./check.ps1
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
-COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --output_groups=-pylint,-pytype \
+COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --features=-parse_headers --host_features=-parse_headers
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 
