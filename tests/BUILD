@@ -21,6 +21,7 @@ load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
+load("@xmllint//:file.bzl", XMLLINT = "FILE")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
@@ -85,6 +86,7 @@ go_test(
         # add additional quoting.
         shell.quote("--binary=$(rlocationpath :test)"),
         shell.quote("--test-el=$(rlocationpath :test.el)"),
+        shell.quote("--xmllint=" + XMLLINT),
         shell.quote("--junit-xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
     ],
     data = [
