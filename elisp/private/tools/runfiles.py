@@ -1,4 +1,4 @@
-# Copyright 2021, 2022, 2023 Google LLC
+# Copyright 2021, 2022, 2023, 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ class Runfiles:
     """Represents a set of Bazel runfiles."""
 
     def __init__(self, env: Optional[Mapping[str, str]] = None):
-        impl = runfiles.Create(env)
+        impl = runfiles.Create(dict(env) if env else None)
         if not impl:
             raise ValueError(
                 f'No runfiles implementation for environment {env} available')

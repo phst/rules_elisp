@@ -86,7 +86,7 @@ def _runfiles_dir(env: Mapping[str, str]) -> Optional[pathlib.Path]:
     return None
 
 
-def _arg_files(argv: Sequence[str], root: pathlib.Path,
+def _arg_files(argv: Sequence[str], root: Optional[pathlib.Path],
                indices: Iterable[int]) -> Sequence[pathlib.PurePath]:
     argc = len(argv)
     result = []
