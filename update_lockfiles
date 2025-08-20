@@ -60,6 +60,7 @@ for dir in . examples/ext; do
   bazel run \
     --lockfile_mode=off \
     --norun_validations \
+    --output_groups=-mypy \
     -- \
     @phst_merge_bazel_lockfiles//:merge \
     --linux-amd64="${linux:?}" \

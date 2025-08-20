@@ -151,6 +151,18 @@ bzl_library(
 )
 
 bzl_library(
+    name = "mypy",
+    srcs = ["mypy.bzl"],
+    deps = [
+        "@rules_mypy//mypy",
+        # FIXME: Uncomment next line once
+        # https://github.com/theoremlp/rules_mypy/pull/114 is accepted and
+        # released.
+        # "@pip_types//:types"
+    ],
+)
+
+bzl_library(
     name = "local_binary",
     srcs = ["local_binary.bzl"],
 )
