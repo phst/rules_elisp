@@ -19,7 +19,7 @@ import io
 import json
 import pathlib
 
-from absl.testing import absltest
+from absl.testing import absltest  # type: ignore[import-not-found]
 
 from elisp.private.tools import manifest
 

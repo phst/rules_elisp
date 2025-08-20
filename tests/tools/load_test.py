@@ -18,7 +18,7 @@ import pathlib
 import platform
 import tempfile
 
-from absl.testing import absltest
+from absl.testing import absltest  # type: ignore[import-not-found]
 
 from elisp.private.tools import load
 from elisp.private.tools import runfiles

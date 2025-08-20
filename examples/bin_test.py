@@ -21,8 +21,8 @@ import shutil
 import subprocess
 import tempfile
 
-from absl import flags
-from absl.testing import absltest
+from absl import flags  # type: ignore[import-not-found]
+from absl.testing import absltest  # type: ignore[import-not-found]
 
 from elisp.private.tools import runfiles
 
