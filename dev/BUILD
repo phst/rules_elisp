@@ -32,6 +32,7 @@ licenses(["notice"])
 
 buildifier_test(
     name = "buildifier_test",
+    size = "medium",
     timeout = "short",
     lint_mode = "warn",
     lint_warnings = ["all"],
@@ -41,6 +42,7 @@ buildifier_test(
 
 license_test(
     name = "license_test",
+    size = "medium",
     timeout = "short",
     ignore = [
         "coverage-report/**",
@@ -103,6 +105,7 @@ gazelle(
 
 gazelle_test(
     name = "gazelle_test",
+    size = "medium",
     timeout = "short",
     gazelle = ":gazelle_binary",
     target_compatible_with = select({

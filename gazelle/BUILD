@@ -87,6 +87,7 @@ go_test(
 # keep
 go_test(
     name = "integration_test",
+    size = "medium",
     timeout = "short",
     srcs = ["integration_test.go"],
     args = [

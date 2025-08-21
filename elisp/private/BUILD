@@ -121,6 +121,7 @@ expand_template(
 
 diff_test(
     name = "generated_test",
+    size = "medium",
     timeout = "short",
     failure_message = """Please run
 

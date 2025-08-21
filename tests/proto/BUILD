@@ -49,6 +49,7 @@ elisp_test(
 
 py_test(
     name = "module_test",
+    size = "medium",
     srcs = ["module_test.py"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to

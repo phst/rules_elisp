@@ -52,6 +52,7 @@ makeinfo(
 
 diff_test(
     name = "html_test",
+    size = "medium",
     timeout = "short",
     failure_message = "\n".join([
         "Run the following command to fix:",
