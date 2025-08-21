@@ -19,7 +19,7 @@ import os
 import pathlib
 from typing import Optional
 
-from python.runfiles import runfiles
+from python.runfiles import runfiles  # type: ignore[import-not-found]
 
 class Runfiles:
     """Represents a set of Bazel runfiles."""
