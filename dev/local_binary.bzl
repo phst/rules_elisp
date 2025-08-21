@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the internal ‘local_binary’ repository rule."""
+"""Defines the internal `local_binary` repository rule."""
 
 def _local_binary_impl(ctx):
     windows = ctx.os.name.startswith("windows")
