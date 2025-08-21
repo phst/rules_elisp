@@ -14,6 +14,8 @@
 
 """Defines the internal `local_binary` repository rule."""
 
+visibility("private")
+
 def _local_binary_impl(ctx):
     windows = ctx.os.name.startswith("windows")
     program = ctx.attr.program or fail("missing program name")
