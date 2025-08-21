@@ -34,13 +34,23 @@ def _local_binary_impl(ctx):
         file = result.stdout
     if not file:
         fail("program %r not found" % program)
-    build = _BUILD_TEMPLATE.format(
-        bzl_library = repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
-        visibility = repr([str(v) for v in ctx.attr.visibility]),
+    ctx.template(
+        "BUILD.bazel",
+        Label(":local_binary.BUILD.template"),
+        {
+            '"[bzl_library.bzl]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
+            "[[visibility]]": repr([str(v) for v in ctx.attr.visibility]),
+        },
+        executable = False,
     )
-    ctx.file("BUILD.bazel", build, executable = False)
-    bzl = _BZL_TEMPLATE.format(file = repr(str(file)))
-    ctx.file("file.bzl", bzl, executable = False)
+    ctx.template(
+        "file.bzl",
+        Label(":local_binary.bzl.template"),
+        {
+            '"[file]"': repr(str(file)),
+        },
+        executable = False,
+    )
 
 local_binary = repository_rule(
     attrs = {"program": attr.string(mandatory = True)},
@@ -48,21 +58,3 @@ local_binary = repository_rule(
     configure = True,
     implementation = _local_binary_impl,
 )
-
-_BUILD_TEMPLATE = '''# Generated file; do not edit.
-
-load({bzl_library}, "bzl_library")
-
-bzl_library(
-    name = "file",
-    srcs = ["file.bzl"],
-    visibility = {visibility}
-)
-'''
-
-_BZL_TEMPLATE = """# Generated file; do not edit.
-
-visibility("public")
-
-FILE = {file}
-"""
