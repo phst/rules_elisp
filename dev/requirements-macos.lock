@@ -288,9 +288,9 @@ tomlkit==0.11.0 \
     --hash=sha256:0f4050db66fd445b885778900ce4dd9aea8c90c4721141fde0d6ade893820ef1 \
     --hash=sha256:71ceb10c0eefd8b8f11fe34e8a51ad07812cb1dc3de23247425fbc9ddc47b9dd
     # via pylint
-types-commonmark==0.9.1 \
-    --hash=sha256:60b382ec663e3e6bf0e4937d5af761899f1720e3cf33e14498bdf8ce0af46526 \
-    --hash=sha256:c23509ba155c6c087d308dd1f891d414667f847553a651d6b3882d786b2b6970
+types-commonmark==0.9.2.20250330 \
+    --hash=sha256:6c5d27e978cb36d7ad058c178a957ad8187ec9bb30700d671e9a099ae2873750 \
+    --hash=sha256:d1ea71e8a0810339797237ccfb6ea1a48d4ceb7139948252badaeb1a0bb642a8
     # via -r dev/requirements.txt
 typing-extensions==4.12.2 ; sys_platform == "linux" or sys_platform == "darwin" \
     --hash=sha256:04e5ca0351e0f3f85c6853954072df659d0d13fac324d0072316b67d7794700d \
