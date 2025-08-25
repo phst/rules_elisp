@@ -33,6 +33,10 @@ build --aspects='//dev:pylint.bzl%pylint'
 build:linux --aspects='//dev:pytype.bzl%pytype'
 build:macos --aspects='//dev:pytype.bzl%pytype'
 
+# Run Mypy by default.
+build --aspects='//dev:mypy.bzl%mypy'
+build --output_groups='+mypy'
+
 # Suppress unactionable warnings about duplicate libraries.
 # TODO: File bug against rules_cc about this.
 build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'

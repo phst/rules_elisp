@@ -197,6 +197,16 @@ git_override(
     remote = "https://github.com/phst/merge-bazel-lockfiles.git",
 )
 
+bazel_dep(name = "rules_mypy", version = "0.40.0", dev_dependency = True)
+
+types = use_extension("@rules_mypy//mypy:types.bzl", "types", dev_dependency = True)
+types.requirements(
+    name = "pip_types",
+    pip_requirements = "@pip//:requirements.bzl",
+    requirements_txt = "//dev:requirements.txt",
+)
+use_repo(types, "pip_types")
+
 # Local binaries that need to be installed on the host/exec machine.
 local_binary = use_repo_rule("//dev:local_binary.bzl", "local_binary")
 
