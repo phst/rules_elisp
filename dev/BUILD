@@ -59,10 +59,9 @@ compile_pip_requirements(
     requirements_in = "requirements.txt",
     requirements_txt = ":requirements_lock",
     tags = [
-        # Don’t try to run Pylint, Pytype, or Mypy.  This target doesn’t contain
-        # any of our source files.
+        # Don’t try to run Pylint or Mypy.  This target doesn’t contain any of
+        # our source files.
         "no-pylint",
-        "no-pytype",
         "no-mypy",
     ],
 )
@@ -82,13 +81,7 @@ py_binary(
     main = "check_python.py",
     python_version = "3.12",
     visibility = ["//private:__pkg__"],
-    deps = [requirement("pylint")] + select({
-        # Pytype doesn’t work on Windows, so don’t build it when running
-        # “bazel build //...”.
-        "@platforms//os:linux": [requirement("pytype")],
-        "@platforms//os:macos": [requirement("pytype")],
-        "//conditions:default": [],
-    }),
+    deps = [requirement("pylint")],
 )
 
 nogo(
@@ -129,15 +122,6 @@ gazelle_binary(
 bzl_library(
     name = "pylint",
     srcs = ["pylint.bzl"],
-    deps = [
-        ":check_python_bzl",
-        "@rules_python//python:py_info_bzl",
-    ],
-)
-
-bzl_library(
-    name = "pytype",
-    srcs = ["pytype.bzl"],
     deps = [
         ":check_python_bzl",
         "@rules_python//python:py_info_bzl",

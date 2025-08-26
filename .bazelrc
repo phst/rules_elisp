@@ -29,10 +29,6 @@ build:windows --copt='/external:W0' --host_copt='/external:W0'
 # Run Pylint by default.
 build --aspects='//dev:pylint.bzl%pylint'
 
-# Run Pytype on platforms where it’s supported.
-build:linux --aspects='//dev:pytype.bzl%pytype'
-build:macos --aspects='//dev:pytype.bzl%pytype'
-
 # Run Mypy by default.
 build --aspects='//dev:mypy.bzl%mypy'
 build --output_groups='+mypy'

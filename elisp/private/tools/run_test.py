@@ -108,7 +108,7 @@ def main() -> None:
             if timeout_str:
                 # Lower the timeout to account for infrastructure overhead.
                 timeout_secs = int(timeout_str) - 2
-            flags = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]  # pylint: disable=line-too-long  # pytype: disable=module-attr
+            flags = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]  # pylint: disable=line-too-long
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
@@ -120,7 +120,7 @@ def main() -> None:
                 # here only on Windows.
                 assert _WINDOWS
                 _logger.warning('test timed out, sending CTRL + BREAK')
-                signum = signal.CTRL_BREAK_EVENT  # type: ignore[attr-defined]  # pylint: disable=no-member,line-too-long  # pytype: disable=module-attr
+                signum = signal.CTRL_BREAK_EVENT  # type: ignore[attr-defined]  # pylint: disable=no-member,line-too-long
                 process.send_signal(signum)
                 _logger.info('waiting for Bazel to kill this process')
                 # We want timeouts to be reflected as actual timeout results in
