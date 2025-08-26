@@ -26,13 +26,13 @@ def check_python(
         additional_inputs = [],
         mnemonic,
         progress_message):
-    """Run Pylint or Pytype on Python source files.
+    """Run Pylint on Python source files.
 
     Args:
       ctx: the rule context
       info: a PyInfo object
       stem: base name of files that will be generated
-      program: name of the program to run, either "pylint" or "pytype"
+      program: name of the program to run, must be "pylint"
       program_args: additional arguments for the program, either an Args object
           or None
       additional_inputs: list of additional input files for the program,

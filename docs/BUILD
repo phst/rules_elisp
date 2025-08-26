@@ -112,7 +112,6 @@ py_binary(
     name = "generate",
     srcs = ["generate.py"],
     tags = [
-        "no-pytype",  # FIXME
         # Disable Mypy until
         # https://github.com/bazel-contrib/rules_mypy/pull/117 is merged and
         # released.
@@ -126,10 +125,7 @@ py_binary(
 
 py_proto_library(
     name = "stardoc_output_py_proto",
-    tags = [
-        "no-pylint",
-        "no-pytype",
-    ],
+    tags = ["no-pylint"],
     deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )
 

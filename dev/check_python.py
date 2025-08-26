@@ -12,14 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Runs Pylint and Pytype."""
+"""Runs Pylint."""
 
 import argparse
 import json
 import os
 import os.path
 import pathlib
-import platform
 import shutil
 import sys
 import subprocess
@@ -37,7 +36,6 @@ def main() -> None:
     subparsers = parser.add_subparsers(required=True, dest='program')
     pylint = subparsers.add_parser('pylint', allow_abbrev=False)
     pylint.add_argument('--pylintrc', type=pathlib.Path, required=True)
-    subparsers.add_parser('pytype', allow_abbrev=False)
     args = parser.parse_args()
     workspace_name = args.workspace_name
     dirs = [d for d in sys.path if os.path.basename(d) == workspace_name]
@@ -45,8 +43,8 @@ def main() -> None:
         raise ValueError(f'no unique workspace directory: {dirs}')
     module_space = pathlib.Path(dirs[0]).parent
     module_space_stat = module_space.stat()
-    # Set a fake PYTHONPATH so that Pylint and Pytype can find imports for the
-    # main and external repositories.
+    # Set a fake PYTHONPATH so that Pylint can find imports for the main and
+    # external repositories.
     params = json.loads(args.params.read_text(encoding='utf-8'))
     srcs = []
     tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
@@ -67,11 +65,6 @@ def main() -> None:
             (path / '__init__.py').touch()
     srcset = frozenset(srcs)
     repository_path = [str(tempdir / d) for d in args.path]
-    # Pytype wants a Python binary available under the name “python”.  See the
-    # function pytype.tools.environment.check_python_exe_or_die.
-    bindir = tempdir / 'bin'
-    bindir.mkdir()
-    (bindir / 'python').symlink_to(sys.executable)
     orig_path = []
     for entry in sys.path:
         try:
@@ -87,7 +80,6 @@ def main() -> None:
             pass  # ignore nonexisting entries
     cwd = tempdir / workspace_name
     env = dict(os.environ,
-               PATH=os.pathsep.join([str(bindir)] + os.get_exec_path()),
                PYTHONPATH=os.pathsep.join(orig_path + repository_path))
     if args.program == 'pylint':
         result = subprocess.run(
@@ -96,18 +88,6 @@ def main() -> None:
              # due to https://github.com/PyCQA/pylint/issues/7003.
              '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
             + [str(file.relative_to(cwd)) for file in sorted(srcset)],
-            check=False, cwd=cwd, env=env,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            encoding='utf-8', errors='backslashreplace')
-        if result.returncode:
-            print(result.stdout)
-            sys.exit(result.returncode)
-    if platform.system() != 'Windows' and args.program == 'pytype':
-        result = subprocess.run(
-            [sys.executable, '-m', 'pytype',
-             '--pythonpath=' + os.pathsep.join(repository_path),
-             '--no-cache', '--'] + [str(file.relative_to(cwd))
-                                    for file in sorted(srcset)],
             check=False, cwd=cwd, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
