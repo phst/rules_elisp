@@ -98,7 +98,7 @@ def main() -> None:
                         pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
             manifest.write(opts, inputs, outputs, manifest_file)
         timeout_secs = None
-        kwargs = {}
+        flags = 0
         if _WINDOWS:
             # On Windows, the Bazel test runner doesn’t gracefully kill the test
             # process, see https://github.com/bazelbuild/bazel/issues/12684.  We
@@ -109,11 +109,10 @@ def main() -> None:
                 # Lower the timeout to account for infrastructure overhead.
                 timeout_secs = int(timeout_str) - 2
             flags = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]  # pylint: disable=line-too-long  # pytype: disable=module-attr
-            kwargs['creationflags'] = flags
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
-        with subprocess.Popen(args, env=env, **kwargs) as process:
+        with subprocess.Popen(args, env=env, creationflags=flags) as process:
             try:
                 process.communicate(timeout=timeout_secs)
             except subprocess.TimeoutExpired:
