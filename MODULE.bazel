@@ -179,7 +179,7 @@ git_override(
 bazel_dep(name = "phst_update_workspace_snippets", version = "0", dev_dependency = True, repo_name = "update-workspace-snippets")
 git_override(
     module_name = "phst_update_workspace_snippets",
-    commit = "797f857c59ecd4f8e3064b31c1ece54d879a5e68",
+    commit = "c43d4130f01ee93264f135c988915b7809eaf33f",
     remote = "https://github.com/phst/update-workspace-snippets.git",
 )
 
