@@ -111,7 +111,13 @@ elisp_binary(
 py_binary(
     name = "generate",
     srcs = ["generate.py"],
-    tags = ["no-pytype"],  # FIXME
+    tags = [
+        "no-pytype",  # FIXME
+        # Disable Mypy until
+        # https://github.com/bazel-contrib/rules_mypy/pull/117 is merged and
+        # released.
+        "no-mypy",
+    ],
     deps = [
         ":stardoc_output_py_proto",
         requirement("commonmark"),
