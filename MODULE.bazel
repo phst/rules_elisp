@@ -87,7 +87,7 @@ emacs_repository(
 
 emacs_repository(
     name = "gnu_emacs_windows_30.2",
-    integrity = "sha384-eRRAnADE9t62y4bk8HyAi4SM1WoygTtysP+PjN8bp18LsB9ZBIsQe16w5+8XTkpc",
+    integrity = "sha384-MeW1g2s6e5UBWMBYEU+FCMeLnZMKaiBo6BWfc4Re/Dy//JBaN7RXRJtzXLq9QTSg",
     mode = "release",
     output = "emacs.zip",
     strip_prefix = "",
