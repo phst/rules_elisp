@@ -66,14 +66,7 @@
 // operation or if we exhibited incorrect observable behavior otherwise.  See
 // Info node ‘(elisp) Module Nonlocal’.
 
-// Microsoft Visual C++ mostly supports standard C, but doesn’t define __STDC__
-// unless compiling with /Za, which would disable C99 features.  Starting with
-// Visual C++ 2015, C99 support is good enough for us.  See
-// https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=msvc-160#standard-predefined-macros,
-// https://docs.microsoft.com/en-us/cpp/build/reference/za-ze-disable-language-extensions?view=msvc-160,
-// and
-// https://docs.microsoft.com/en-us/cpp/overview/visual-cpp-language-conformance?view=msvc-160#c-standard-library-features-1.
-#if !(defined __STDC__ || (defined _MSC_VER && _MSC_VER >= 1900))
+#ifndef __STDC__
 #  error this file requires a standards-conformant C compiler
 #endif
 
