@@ -70,8 +70,8 @@ compile_pip_requirements(
 alias(
     name = "requirements_lock",
     actual = select({
-        "@platforms//os:linux": "requirements-linux.lock",
-        "@platforms//os:macos": "requirements-macos.lock",
+        "@platforms//os:linux": "requirements-unix.lock",
+        "@platforms//os:macos": "requirements-unix.lock",
         "@platforms//os:windows": "requirements-windows.lock",
     }),
 )
