@@ -19,10 +19,8 @@ import json
 import os
 import os.path
 import pathlib
-import shutil
 import sys
 import subprocess
-import tempfile
 
 
 def main() -> None:
@@ -30,7 +28,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--out', type=pathlib.Path, required=True)
-    parser.add_argument('--import', type=pathlib.PurePosixPath, action='append',
+    parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
     parser.add_argument('--workspace-name', type=str, required=True)
     subparsers = parser.add_subparsers(required=True, dest='program')
@@ -47,24 +45,15 @@ def main() -> None:
     # external repositories.
     params = json.loads(args.params.read_text(encoding='utf-8'))
     srcs = []
-    tempdir = pathlib.Path(tempfile.mkdtemp(prefix='pylint-'))
     for file in params['srcs']:
-        dest = tempdir / workspace_name / file['rel']
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(file['src'], dest)
+        src = pathlib.Path(file['src'])
         # Don’t attempt to check generated protocol buffer files.
-        if not file['ext'] and not dest.name.endswith('_pb2.py'):
-            srcs.append(dest)
+        if not file['ext'] and not src.name.endswith('_pb2.py'):
+            srcs.append(src)
     if not srcs:
         raise FileNotFoundError('no source files found')
-    for dirpath, _, _ in os.walk(tempdir):
-        path = pathlib.Path(dirpath)
-        if not path.samefile(tempdir):
-            # Mimic the Bazel behavior.  Also see
-            # https://github.com/bazelbuild/bazel/issues/10076.
-            (path / '__init__.py').touch()
     srcset = frozenset(srcs)
-    repository_path = [str(tempdir / d) for d in args.path]
+    repository_path = [str(d) for d in args.path]
     orig_path = []
     for entry in sys.path:
         try:
@@ -78,7 +67,6 @@ def main() -> None:
                 orig_path.append(entry)
         except FileNotFoundError:
             pass  # ignore nonexisting entries
-    cwd = tempdir / workspace_name
     env = dict(os.environ,
                PYTHONPATH=os.pathsep.join(orig_path + repository_path))
     if args.program == 'pylint':
@@ -87,16 +75,13 @@ def main() -> None:
              # We’d like to add “--” after the options, but that’s not possible
              # due to https://github.com/PyCQA/pylint/issues/7003.
              '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
-            + [str(file.relative_to(cwd)) for file in sorted(srcset)],
-            check=False, cwd=cwd, env=env,
+            + [str(file) for file in sorted(srcset)],
+            check=False, env=env,
             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
             encoding='utf-8', errors='backslashreplace')
         if result.returncode:
             print(result.stdout)
             sys.exit(result.returncode)
-    # Only clean up the workspace if we exited successfully, to help with
-    # debugging.
-    shutil.rmtree(tempdir)
     args.out.touch()
 
 

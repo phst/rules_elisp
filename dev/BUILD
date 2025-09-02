@@ -132,6 +132,7 @@ bzl_library(
 bzl_library(
     name = "check_python_bzl",
     srcs = ["check_python.bzl"],
+    deps = ["@bazel_skylib//lib:paths"],
 )
 
 bzl_library(
