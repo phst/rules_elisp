@@ -17,9 +17,6 @@ common --enable_platform_specific_config
 # Specify options that might modify code generation here instead of BUILD or
 # Starlark files.  See
 # https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil.
-build:linux --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
-build:macos --cxxopt='-std=c++17' --host_cxxopt='-std=c++17'
-build:windows --cxxopt='/std:c++17' --host_cxxopt='/std:c++17'
 build:windows --conlyopt='/std:c11' --host_conlyopt='/std:c11'
 
 # Local Variables:
