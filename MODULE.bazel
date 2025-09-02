@@ -131,8 +131,8 @@ pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip", dev_depen
 pip.parse(
     hub_name = "pip",
     python_version = "3.12",
-    requirements_darwin = "//dev:requirements-macos.lock",
-    requirements_linux = "//dev:requirements-linux.lock",
+    requirements_darwin = "//dev:requirements-unix.lock",
+    requirements_linux = "//dev:requirements-unix.lock",
     requirements_windows = "//dev:requirements-windows.lock",
 )
 use_repo(pip, "pip")
