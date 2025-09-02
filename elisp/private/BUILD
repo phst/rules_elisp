@@ -164,9 +164,6 @@ cc_defaults(
             "-fno-diagnostics-color",
         ],
         "//conditions:default": [],
-    }) + select({
-        "@rules_cc//cc/compiler:gcc": ["-std=gnu11"],
-        "//conditions:default": [],
     }),
     defines = [],
     features = [
