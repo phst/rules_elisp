@@ -213,13 +213,14 @@ local_binary = use_repo_rule("//dev:local_binary.bzl", "local_binary")
 local_binary(
     name = "makeinfo",
     dev_dependency = True,
+    library_visibility = ["//docs:__pkg__"],
     program = "makeinfo",
-    visibility = ["//docs:__pkg__"],
 )
 
 local_binary(
     name = "xmllint",
     dev_dependency = True,
+    library_visibility = [],
     program = "xmllint",
 )
 

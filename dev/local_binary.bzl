@@ -39,7 +39,7 @@ def _local_binary_impl(ctx):
         Label(":local_binary.BUILD.template"),
         {
             '"[bzl_library.bzl]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
-            "[[visibility]]": repr([str(v) for v in ctx.attr.visibility]),
+            "[[visibility]]": repr([str(v) for v in ctx.attr.library_visibility]),
         },
         executable = False,
     )
@@ -53,7 +53,11 @@ def _local_binary_impl(ctx):
     )
 
 local_binary = repository_rule(
-    attrs = {"program": attr.string(mandatory = True)},
+    # @unsorted-dict-items
+    attrs = {
+        "program": attr.string(mandatory = True),
+        "library_visibility": attr.label_list(mandatory = True, allow_empty = False),
+    },
     local = True,
     configure = True,
     implementation = _local_binary_impl,
