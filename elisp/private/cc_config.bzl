@@ -72,7 +72,7 @@ CXXOPTS = select({
 })
 
 CONLYOPTS = select({
-    Label(":msvc_or_clang_cl"): [],
+    Label(":msvc_or_clang_cl"): ["/Zc:__STDC__"],
     Label(":gcc_or_clang"): ["-Wvla"],
 })
 
