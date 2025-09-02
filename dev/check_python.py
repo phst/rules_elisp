@@ -57,12 +57,6 @@ def main() -> None:
             srcs.append(dest)
     if not srcs:
         raise FileNotFoundError('no source files found')
-    for dirpath, _, _ in os.walk(tempdir):
-        path = pathlib.Path(dirpath)
-        if not path.samefile(tempdir):
-            # Mimic the Bazel behavior.  Also see
-            # https://github.com/bazelbuild/bazel/issues/10076.
-            (path / '__init__.py').touch()
     srcset = frozenset(srcs)
     repository_path = [str(tempdir / d) for d in args.path]
     orig_path = []
