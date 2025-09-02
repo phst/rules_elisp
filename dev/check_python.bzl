@@ -14,6 +14,8 @@
 
 """Defines the `check_python` helper function."""
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
+
 visibility("private")
 
 def check_python(
@@ -61,18 +63,23 @@ def check_python(
     args.add(params_file, format = "--params=%s")
     args.add_all(
         info.imports,
-        format_each = "--import=%s",
+        format_each = "--import=external/%s",
+        uniquify = True,
+        expand_directories = False,
+    )
+    args.add_all(
+        info.imports,
+        format_each = "--import=" + ctx.bin_dir.path + "/external/%s",
         uniquify = True,
         expand_directories = False,
     )
     args.add_all(
         info.transitive_sources,
-        map_each = _repository_name,
+        map_each = _import,
         format_each = "--import=%s",
         uniquify = True,
         expand_directories = False,
     )
-    args.add(ctx.workspace_name, format = "--import=%s")
     args.add(ctx.workspace_name, format = "--workspace-name=%s")
     ctx.actions.run(
         outputs = [output_file],
@@ -88,6 +95,5 @@ def check_python(
     )
     return output_file
 
-def _repository_name(file):
-    # Skip empty string for main repository.
-    return file.owner.workspace_name or None
+def _import(file):
+    return paths.join(".", file.root.path, file.owner.workspace_root)
