@@ -505,13 +505,13 @@ If FILENAME doesn’t start with \"/bazel-runfile:\", return it unchanged."
                (:copier nil))
   "Manifest-based runfiles implementation."
   (filename nil :read-only t :type string)
-  (manifest nil :read-only t :type hash-table))
+  (manifest nil :read-only t :type list))
 
 (defun @make-manifest (filename)
   "Parse the runfile manifest in the file FILENAME.
 Return an object of type ‘@manifest’."
   (declare (ftype (function (string) @manifest)))
-  (let ((manifest (make-hash-table :test #'equal))
+  (let ((manifest radix-tree-empty)
         (filename (expand-file-name filename)))
     (with-temp-buffer
       ;; See
@@ -542,11 +542,11 @@ Return an object of type ‘@manifest’."
                (when escaped
                  (cl-callf unescape key '("\\s" . " "))
                  (cl-callf unescape value))
-               (puthash key
-                        ;; Runfiles are always local, so quote them
-                        ;; unconditionally.
-                        (if (string-empty-p value) :empty (concat "/:" value))
-                        manifest))
+               (cl-callf radix-tree-insert manifest key
+                         (if (string-empty-p value) :empty
+                           ;; Runfiles are always local, so quote them
+                           ;; unconditionally.
+                           (concat "/:" value))))
               (_ (syntax-error)))))
         (forward-line)))
     (@manifest-make filename manifest)))
@@ -554,23 +554,17 @@ Return an object of type ‘@manifest’."
 (cl-defmethod @rlocation ((runfiles @manifest) filename)
   "Implementation of ‘elisp/runfiles/rlocation’ for manifest-based runfiles.
 RUNFILES is a runfiles object and FILENAME the name to look up."
-  (let* ((table (@manifest-manifest runfiles))
+  (let* ((tree (@manifest-manifest runfiles))
          (manifest-file (@manifest-filename runfiles))
-         (result (gethash filename table)))
-    (unless result
-      ;; Look for ancestor directory mapping.  See
-      ;; https://github.com/bazelbuild/bazel/issues/14336.
-      (let ((continue t)
-            (candidate filename))
-        (while continue
-          (pcase candidate
-            ((rx bos (let prefix (+ anything)) ?/ (+ anything) (? ?/) eos)
-             (if-let ((dir (gethash prefix table)))
-                 (setq result (concat dir (substring-no-properties
-                                           filename (length prefix)))
-                       continue nil)
-               (setq candidate prefix)))
-            (_ (setq continue nil)))))      )
+         (result
+          (or (radix-tree-lookup tree filename)
+              ;; Look for ancestor directory mapping.  See
+              ;; https://github.com/bazelbuild/bazel/issues/14336.
+              (pcase (radix-tree-prefixes tree filename)
+                (`((,(app (lambda (pfx) (string-remove-prefix pfx filename))
+                          (and (app string-to-char ?/) suffix))
+                    . ,result))
+                 (concat result suffix))))))
     (cl-case result
       ((nil)
        (signal 'elisp/runfiles/not-found
