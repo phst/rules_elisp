@@ -98,7 +98,9 @@ context."
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (should (equal (elisp/runfiles/rlocation "foo/bar/baz" runfiles)
-                   "/:runfiles/foo/bar/baz"))))
+                   "/:runfiles/foo/bar/baz"))
+    (should-error (elisp/runfiles/rlocation "foo/barbar" runfiles)
+                  :type 'elisp/runfiles/not-found)))
 
 (ert-deftest elisp/runfiles/file-handler ()
   (let* ((file-name-handler-alist file-name-handler-alist)
