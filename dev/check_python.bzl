@@ -61,17 +61,14 @@ def check_python(
     args = ctx.actions.args()
     args.add(output_file, format = "--out=%s")
     args.add(params_file, format = "--params=%s")
+    roots = ["", ctx.bin_dir.path]
     args.add_all(
         info.imports,
-        format_each = "--import=external/%s",
+        map_each = lambda i: [paths.join(r, "external", i) for r in roots],
+        format_each = "--import=%s",
         uniquify = True,
         expand_directories = False,
-    )
-    args.add_all(
-        info.imports,
-        format_each = "--import=" + ctx.bin_dir.path + "/external/%s",
-        uniquify = True,
-        expand_directories = False,
+        allow_closure = True,
     )
     args.add_all(
         info.transitive_sources,
