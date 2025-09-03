@@ -30,9 +30,7 @@ def main() -> None:
                         default=[], dest='sources')
     parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
-    subparsers = parser.add_subparsers(required=True, dest='program')
-    pylint = subparsers.add_parser('pylint', allow_abbrev=False)
-    pylint.add_argument('--pylintrc', type=pathlib.Path, required=True)
+    parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external repositories.
@@ -43,19 +41,18 @@ def main() -> None:
     repository_path = [str(d) for d in args.path]
     env = dict(os.environ,
                PYTHONPATH=os.pathsep.join(sys.path + repository_path))
-    if args.program == 'pylint':
-        result = subprocess.run(
-            [sys.executable, '-m', 'pylint',
-             # We’d like to add “--” after the options, but that’s not possible
-             # due to https://github.com/PyCQA/pylint/issues/7003.
-             '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
-            + [str(file) for file in sorted(srcset)],
-            check=False, env=env,
-            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-            encoding='utf-8', errors='backslashreplace')
-        if result.returncode:
-            print(result.stdout)
-            sys.exit(result.returncode)
+    result = subprocess.run(
+        [sys.executable, '-m', 'pylint',
+         # We’d like to add “--” after the options, but that’s not possible
+         # due to https://github.com/PyCQA/pylint/issues/7003.
+         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
+        + [str(file) for file in sorted(srcset)],
+        check=False, env=env,
+        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+        encoding='utf-8', errors='backslashreplace')
+    if result.returncode:
+        print(result.stdout)
+        sys.exit(result.returncode)
     args.out.touch()
 
 

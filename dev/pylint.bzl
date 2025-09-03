@@ -14,8 +14,8 @@
 
 """Defines the `pylint` aspect."""
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_python//python:py_info.bzl", "PyInfo")
-load(":check_python.bzl", "check_python")
 
 visibility("private")
 
@@ -27,18 +27,44 @@ def _pylint_impl(target, ctx):
         return []
     info = target[PyInfo]
     stem = "_{}.pylint".format(target.label.name)
+    output_file = ctx.actions.declare_file(stem + ".stamp")
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
+    args.add(output_file, format = "--out=%s")
+    args.add_all(
+        info.transitive_sources,
+        format_each = "--src=%s",
+        map_each = _source,
+        uniquify = True,
+    )
     args.add(pylintrc, format = "--pylintrc=%s")
-    output_file = check_python(
-        ctx,
-        info = info,
-        stem = stem,
-        program = "pylint",
-        program_args = args,
-        additional_inputs = [pylintrc],
+    roots = ["", ctx.bin_dir.path]
+    args.add_all(
+        info.imports,
+        map_each = lambda i: [paths.join(r, "external", i) for r in roots],
+        format_each = "--import=%s",
+        uniquify = True,
+        expand_directories = False,
+        allow_closure = True,
+    )
+    args.add_all(
+        info.transitive_sources,
+        map_each = _import,
+        format_each = "--import=%s",
+        uniquify = True,
+        expand_directories = False,
+    )
+    ctx.actions.run(
+        outputs = [output_file],
+        inputs = depset(
+            direct = [pylintrc],
+            transitive = [info.transitive_sources],
+        ),
+        executable = ctx.executable._run,
+        arguments = [args],
         mnemonic = "Pylint",
         progress_message = "Linting Python target %{label}",
+        toolchain = None,
     )
     return [
         OutputGroupInfo(_validation = depset([output_file])),
@@ -46,9 +72,10 @@ def _pylint_impl(target, ctx):
 
 pylint = aspect(
     implementation = _pylint_impl,
+    # @unsorted-dict-items
     attrs = {
-        "_check": attr.label(
-            default = Label("//dev:check_python"),
+        "_run": attr.label(
+            default = Label("//dev:run_pylint"),
             executable = True,
             cfg = "exec",
         ),
@@ -62,3 +89,10 @@ pylint = aspect(
     # TODO: File bug against rules_python.
     # required_providers = [PyInfo],
 )
+
+def _source(file):
+    # Don’t attempt to check generated protocol buffer files.
+    return None if file.owner.workspace_name or file.basename.endswith("_pb2.py") else file.path
+
+def _import(file):
+    return paths.join(".", file.root.path, file.owner.workspace_root)
