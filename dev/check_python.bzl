@@ -45,22 +45,15 @@ def check_python(
     Returns:
       a dummy file that should be added to an optional output group
     """
-    params_file = ctx.actions.declare_file(stem + ".json")
     output_file = ctx.actions.declare_file(stem + ".stamp")
-    params = struct(
-        srcs = [
-            struct(
-                src = file.path,
-            )
-            for file in info.transitive_sources.to_list()
-            # Don’t attempt to check generated protocol buffer files.
-            if not file.owner.workspace_name and not file.basename.endswith("_pb2.py")
-        ],
-    )
-    ctx.actions.write(params_file, json.encode(params))
     args = ctx.actions.args()
     args.add(output_file, format = "--out=%s")
-    args.add(params_file, format = "--params=%s")
+    args.add_all(
+        info.transitive_sources,
+        format_each = "--src=%s",
+        map_each = _source,
+        uniquify = True,
+    )
     roots = ["", ctx.bin_dir.path]
     args.add_all(
         info.imports,
@@ -80,7 +73,7 @@ def check_python(
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
-            direct = [params_file] + additional_inputs,
+            direct = additional_inputs,
             transitive = [info.transitive_sources],
         ),
         executable = ctx.executable._check,
@@ -90,6 +83,10 @@ def check_python(
         toolchain = None,
     )
     return output_file
+
+def _source(file):
+    # Don’t attempt to check generated protocol buffer files.
+    return None if file.owner.workspace_name or file.basename.endswith("_pb2.py") else file.path
 
 def _import(file):
     return paths.join(".", file.root.path, file.owner.workspace_root)
