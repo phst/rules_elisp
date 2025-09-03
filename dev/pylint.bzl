@@ -32,9 +32,8 @@ def _pylint_impl(target, ctx):
     args = ctx.actions.args()
     args.add(output_file, format = "--out=%s")
     args.add_all(
-        info.transitive_sources,
+        info.direct_original_sources,
         format_each = "--src=%s",
-        map_each = _source,
         uniquify = True,
     )
     args.add(pylintrc, format = "--pylintrc=%s")
@@ -89,10 +88,6 @@ pylint = aspect(
     # TODO: File bug against rules_python.
     # required_providers = [PyInfo],
 )
-
-def _source(file):
-    # Don’t attempt to check generated protocol buffer files.
-    return None if file.owner.workspace_name or file.basename.endswith("_pb2.py") else file.path
 
 def _import(file):
     return paths.join(".", file.root.path, file.owner.workspace_root)
