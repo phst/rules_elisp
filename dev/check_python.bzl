@@ -50,11 +50,11 @@ def check_python(
     params = struct(
         srcs = [
             struct(
-                rel = file.short_path,
                 src = file.path,
-                ext = bool(file.owner.workspace_name),
             )
             for file in info.transitive_sources.to_list()
+            # Don’t attempt to check generated protocol buffer files.
+            if not file.owner.workspace_name and not file.basename.endswith("_pb2.py")
         ],
     )
     ctx.actions.write(params_file, json.encode(params))

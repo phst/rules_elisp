@@ -45,9 +45,7 @@ def main() -> None:
     srcs = []
     for file in params['srcs']:
         src = pathlib.Path(file['src'])
-        # Don’t attempt to check generated protocol buffer files.
-        if not file['ext'] and not src.name.endswith('_pb2.py'):
-            srcs.append(src)
+        srcs.append(src)
     if not srcs:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
