@@ -30,15 +30,10 @@ def main() -> None:
     parser.add_argument('--out', type=pathlib.Path, required=True)
     parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
-    parser.add_argument('--workspace-name', type=str, required=True)
     subparsers = parser.add_subparsers(required=True, dest='program')
     pylint = subparsers.add_parser('pylint', allow_abbrev=False)
     pylint.add_argument('--pylintrc', type=pathlib.Path, required=True)
     args = parser.parse_args()
-    workspace_name = args.workspace_name
-    dirs = [d for d in sys.path if os.path.basename(d) == workspace_name]
-    if len(dirs) != 1:
-        raise ValueError(f'no unique workspace directory: {dirs}')
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external repositories.
     params = json.loads(args.params.read_text(encoding='utf-8'))
