@@ -28,6 +28,7 @@ def _pylint_impl(target, ctx):
     info = target[PyInfo]
     stem = "_{}.pylint".format(target.label.name)
     output_file = ctx.actions.declare_file(stem + ".stamp")
+    pylint = ctx.executable._pylint
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
     args.add(output_file, format = "--out=%s")
@@ -37,6 +38,7 @@ def _pylint_impl(target, ctx):
         map_each = _source,
         uniquify = True,
     )
+    args.add(pylint, format = "--pylint=%s")
     args.add(pylintrc, format = "--pylintrc=%s")
     roots = ["", ctx.bin_dir.path]
     args.add_all(
@@ -61,6 +63,7 @@ def _pylint_impl(target, ctx):
             transitive = [info.transitive_sources],
         ),
         executable = ctx.executable._run,
+        tools = [pylint],
         arguments = [args],
         mnemonic = "Pylint",
         progress_message = "Linting Python target %{label}",
@@ -76,6 +79,11 @@ pylint = aspect(
     attrs = {
         "_run": attr.label(
             default = Label("//dev:run_pylint"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "_pylint": attr.label(
+            default = Label(":pylint_bin"),
             executable = True,
             cfg = "exec",
         ),
