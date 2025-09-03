@@ -76,9 +76,8 @@ alias(
 )
 
 py_binary(
-    name = "check_python",
-    srcs = ["check_python.py"],
-    main = "check_python.py",
+    name = "run_pylint",
+    srcs = ["run_pylint.py"],
     python_version = "3.12",
     visibility = ["//private:__pkg__"],
     deps = [requirement("pylint")],
@@ -123,16 +122,9 @@ bzl_library(
     name = "pylint",
     srcs = ["pylint.bzl"],
     deps = [
-        ":check_python_bzl",
+        "@bazel_skylib//lib:paths",
         "@rules_python//python:py_info_bzl",
     ],
-)
-
-# keep
-bzl_library(
-    name = "check_python_bzl",
-    srcs = ["check_python.bzl"],
-    deps = ["@bazel_skylib//lib:paths"],
 )
 
 bzl_library(
