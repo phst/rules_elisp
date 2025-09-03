@@ -220,6 +220,7 @@ py_library(
     name = "runfiles",
     srcs = ["runfiles.py"],
     visibility = [
+        "//dev:__pkg__",
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
         "//tests/tools:__pkg__",
