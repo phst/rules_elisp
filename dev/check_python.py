@@ -15,7 +15,6 @@
 """Runs Pylint."""
 
 import argparse
-import json
 import os
 import os.path
 import pathlib
@@ -26,8 +25,9 @@ import subprocess
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--params', type=pathlib.Path, required=True)
     parser.add_argument('--out', type=pathlib.Path, required=True)
+    parser.add_argument('--src', type=pathlib.Path, action='append',
+                        default=[], dest='sources')
     parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
     subparsers = parser.add_subparsers(required=True, dest='program')
@@ -36,11 +36,7 @@ def main() -> None:
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external repositories.
-    params = json.loads(args.params.read_text(encoding='utf-8'))
-    srcs = []
-    for file in params['srcs']:
-        src = pathlib.Path(file['src'])
-        srcs.append(src)
+    srcs = args.sources
     if not srcs:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
