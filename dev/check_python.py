@@ -39,8 +39,6 @@ def main() -> None:
     dirs = [d for d in sys.path if os.path.basename(d) == workspace_name]
     if len(dirs) != 1:
         raise ValueError(f'no unique workspace directory: {dirs}')
-    module_space = pathlib.Path(dirs[0]).parent
-    module_space_stat = module_space.stat()
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external repositories.
     params = json.loads(args.params.read_text(encoding='utf-8'))
@@ -54,21 +52,8 @@ def main() -> None:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
     repository_path = [str(d) for d in args.path]
-    orig_path = []
-    for entry in sys.path:
-        try:
-            entry_stat = os.stat(entry)
-            # We have to remove the module space from the path, otherwise
-            # extension importing gets messed up because Astroid attempts to
-            # construct a module name based on the directory path, which fails
-            # if a directory name contains dots.  Work around that by not
-            # allowing imports relative to the module space.
-            if not os.path.samestat(entry_stat, module_space_stat):
-                orig_path.append(entry)
-        except FileNotFoundError:
-            pass  # ignore nonexisting entries
     env = dict(os.environ,
-               PYTHONPATH=os.pathsep.join(orig_path + repository_path))
+               PYTHONPATH=os.pathsep.join(sys.path + repository_path))
     if args.program == 'pylint':
         result = subprocess.run(
             [sys.executable, '-m', 'pylint',
