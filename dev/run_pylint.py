@@ -29,6 +29,7 @@ def main() -> None:
                         default=[], dest='sources')
     parser.add_argument('--import', type=_path_dir, action='append',
                         default=[], dest='path')
+    parser.add_argument('--pylint', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
     args = parser.parse_args()
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
@@ -39,7 +40,7 @@ def main() -> None:
     srcset = frozenset(srcs)
     repository_path = [str(d) for d in args.path]
     result = subprocess.run(
-        [sys.executable, '-m', 'pylint',
+        [str(args.pylint),
          # We’d like to add “--” after the options, but that’s not possible
          # due to https://github.com/PyCQA/pylint/issues/7003.
          '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()),

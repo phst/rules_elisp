@@ -16,10 +16,10 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
 load("@phst_license_test//:def.bzl", "license_test")
-load("@pip//:requirements.bzl", "requirement")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -80,7 +80,18 @@ py_binary(
     srcs = ["run_pylint.py"],
     python_version = "3.12",
     visibility = ["//private:__pkg__"],
-    deps = [requirement("pylint")],
+)
+
+py_console_script_binary(
+    name = "pylint_bin",
+    pkg = "@pip//pylint",
+    python_version = "3.12",
+    script = "pylint",
+    tags = [
+        # Generated file; no point in linting.
+        "no-pylint",
+        "no-mypy",
+    ],
 )
 
 nogo(
