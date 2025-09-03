@@ -80,7 +80,6 @@ def check_python(
         uniquify = True,
         expand_directories = False,
     )
-    args.add(ctx.workspace_name, format = "--workspace-name=%s")
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
