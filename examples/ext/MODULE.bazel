@@ -34,7 +34,7 @@ elisp.http_archive(
 use_repo(elisp, "dash")
 
 # Needed for building with Clang-CL on Windows.
-bazel_dep(name = "rules_cc", version = "0.2.3", dev_dependency = True)
+bazel_dep(name = "rules_cc", version = "0.2.4", dev_dependency = True)
 
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension", dev_dependency = True)
 use_repo(cc_configure, "local_config_cc")
