@@ -24,10 +24,8 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-(require 'pcase)
+(eval-when-compile (require 'cl-lib))
 (require 'radix-tree)
-(require 'rx)
 (require 'subr-x)
 
 
