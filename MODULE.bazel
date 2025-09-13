@@ -27,7 +27,7 @@ bazel_dep(name = "rules_cc", version = "0.2.4")
 bazel_dep(name = "rules_python", version = "1.5.4")
 bazel_dep(name = "rules_shell", version = "0.6.1")
 bazel_dep(name = "abseil-cpp", version = "20250814.0")
-bazel_dep(name = "protobuf", version = "32.0")
+bazel_dep(name = "protobuf", version = "32.1")
 
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True)
