@@ -15,15 +15,12 @@
 """Defines the internal `cc_defaults` rule."""
 
 load(":cc_default_info.bzl", "CcDefaultInfo")
-load(":features.bzl", "parse_features")
 
 visibility("private")
 
 def _cc_defaults_impl(ctx):
-    features, disabled_features = parse_features(ctx.attr.features)
     return CcDefaultInfo(
-        features = features,
-        disabled_features = disabled_features,
+        features = ctx.attr.features,
         defines = ctx.attr.defines,
         copts = ctx.attr.copts,
         linkopts = ctx.attr.linkopts,

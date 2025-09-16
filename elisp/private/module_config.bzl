@@ -15,18 +15,15 @@
 """Defines the internal `module_config` rule."""
 
 load(":cc_default_info.bzl", "CcDefaultInfo")
-load(":features.bzl", "parse_features")
 load(":module_config_info.bzl", "ModuleConfigInfo")
 
 visibility(["//elisp"])
 
 def _module_config_impl(ctx):
     """Implementation of the `module_config` rule."""
-    features, disabled_features = parse_features(ctx.attr.features)
     return [
         CcDefaultInfo(
-            features = features,
-            disabled_features = disabled_features,
+            features = ctx.attr.features,
             defines = [],
             copts = [],
             linkopts = [ctx.expand_location(s) for s in ctx.attr.linkopts],
