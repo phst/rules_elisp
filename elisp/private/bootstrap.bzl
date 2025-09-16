@@ -14,6 +14,8 @@
 
 """Defines the internal `bootstrap` rule."""
 
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
+load(":load_path.bzl", "resolve_load_path")
 load(":run_emacs.bzl", "run_emacs")
 
 visibility(["//elisp/private/tools"])
@@ -39,6 +41,18 @@ def _bootstrap_impl(ctx):
         manifest_basename = out.basename,
         manifest_sibling = out,
     )
+    load_path = [resolve_load_path(ctx, "")]
+    return [
+        EmacsLispInfo(
+            source_files = [src],
+            compiled_files = [out],
+            load_path = load_path,
+            data_files = [],
+            transitive_source_files = depset([src]),
+            transitive_compiled_files = depset([out]),
+            transitive_load_path = depset(direct = load_path, order = "preorder"),
+        ),
+    ]
 
 bootstrap = rule(
     implementation = _bootstrap_impl,
@@ -52,5 +66,6 @@ bootstrap = rule(
         ),
     },
     doc = "Primitive version of `elisp_library` used for bootstrapping",
+    provides = [EmacsLispInfo],
     toolchains = [Label("//elisp:toolchain_type")],
 )
