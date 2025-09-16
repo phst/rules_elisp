@@ -116,6 +116,10 @@ def _elisp_proto_library_impl(ctx):
     return [
         DefaultInfo(files = depset(info.source_files)),
         EmacsLispInfo(
+            source_files = [],
+            compiled_files = [],
+            load_path = [],
+            data_files = [],
             transitive_source_files = info.transitive_source_files,
             transitive_compiled_files = info.transitive_compiled_files,
             transitive_load_path = info.transitive_load_path,
