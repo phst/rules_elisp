@@ -14,9 +14,23 @@
 
 """Defines the internal `CcDefaultInfo` provider."""
 
+load(":features.bzl", "parse_features")
+
 visibility(["//elisp", "//elisp/toolchains"])
 
-CcDefaultInfo = provider(
+def _init_cc_default_info(*, features, defines, copts, linkopts):
+    features, disabled_features = parse_features(features)
+
+    # @unsorted-dict-items
+    return {
+        "features": features,
+        "disabled_features": disabled_features,
+        "defines": defines,
+        "copts": copts,
+        "linkopts": linkopts,
+    }
+
+CcDefaultInfo, _ = provider(
     doc = "Internal provider for default C++ flags",
     # @unsorted-dict-items
     fields = {
@@ -26,4 +40,5 @@ CcDefaultInfo = provider(
         "copts": "Default compiler flags",
         "linkopts": "Default linker flags",
     },
+    init = _init_cc_default_info,
 )

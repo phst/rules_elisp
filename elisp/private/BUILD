@@ -93,10 +93,7 @@ bzl_library(
 bzl_library(
     name = "cc_defaults",
     srcs = ["cc_defaults.bzl"],
-    deps = [
-        ":cc_default_info",
-        ":features",
-    ],
+    deps = [":cc_default_info"],
 )
 
 bzl_library(
@@ -137,7 +134,6 @@ bzl_library(
     srcs = ["module_config.bzl"],
     deps = [
         ":cc_default_info",
-        ":features",
         ":module_config_info",
     ],
 )
@@ -240,6 +236,7 @@ bzl_library(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
     ],
+    deps = [":features"],
 )
 
 bzl_library(
