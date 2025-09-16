@@ -31,7 +31,11 @@ licenses(["notice"])
 bzl_library(
     name = "bootstrap",
     srcs = ["bootstrap.bzl"],
-    deps = [":run_emacs"],
+    deps = [
+        ":load_path",
+        ":run_emacs",
+        "//elisp/common:elisp_info",
+    ],
 )
 
 bzl_library(
