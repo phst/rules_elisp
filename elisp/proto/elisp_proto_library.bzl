@@ -23,6 +23,11 @@ load("//elisp/private:filenames.bzl", "check_relative_filename", "repository_rel
 
 visibility("public")
 
+_ElispProtoInfo = provider(
+    doc = "Internal provider",
+    fields = ["files", "bundle_files"],
+)
+
 def _elisp_proto_aspect_impl(target, ctx):
     """Aspect implementation for the “elisp_proto_aspect” aspect."""
     info = target[ProtoInfo]
@@ -85,6 +90,11 @@ def _elisp_proto_aspect_impl(target, ctx):
             transitive_compiled_files = result.transitive_outs,
             transitive_load_path = result.transitive_load_path,
         ),
+        _ElispProtoInfo(
+            # FIXME: This relies on the order of the files in result.outs.
+            files = srcs + result.outs[:-1],
+            bundle_files = [bundle] + result.outs[-1:],
+        ),
     ]
 
 def _elisp_proto_feature(file):
@@ -113,8 +123,10 @@ def _elisp_proto_library_impl(ctx):
 
     # All work is done by the ‘elisp_proto_aspect’ aspect.
     info = dep[EmacsLispInfo]
+    proto_info = dep[_ElispProtoInfo]
     return [
-        DefaultInfo(files = depset(info.source_files)),
+        DefaultInfo(files = depset(proto_info.files)),
+        OutputGroupInfo(elisp_proto_bundle = depset(proto_info.bundle_files)),
         EmacsLispInfo(
             source_files = [],
             compiled_files = [],
@@ -151,7 +163,7 @@ _elisp_proto_aspect = aspect(
         ),
     },
     required_providers = [ProtoInfo],
-    provides = [EmacsLispInfo],
+    provides = [EmacsLispInfo, _ElispProtoInfo],
     toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_proto_aspect_impl,
 )
