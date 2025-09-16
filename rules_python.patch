@@ -18,22 +18,17 @@ Workaround for https://github.com/bazel-contrib/rules_python/issues/2762.
 +++ python/private/python_bootstrap_template.txt
 @@ -438,6 +438,7 @@
    with open(rcfile_name, "w") as rcfile:
-     rcfile.write(f'''[run]
+     rcfile.write('''[run]
  relative_files = True
 +disable_warnings = module-not-imported, no-data-collected
  source =
  \t{source}
- ''')
-@@ -470,10 +470,10 @@
-     kparams['stdout'] = sys.stderr
-     kparams['stderr'] = sys.stderr
- 
--  ret_code = subprocess.call(
-+  subprocess.call(
-     params,
+ '''.format(source=source))
+@@ -476,7 +476,6 @@
      **kparams
--  ) or ret_code
-+  )
+   )
+   PrintVerboseCoverage('Return code of coverage lcov:', lcov_ret_code)
+-  ret_code = lcov_ret_code or ret_code
  
    try:
      os.unlink(rcfile_name)
