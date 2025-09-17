@@ -46,7 +46,6 @@ cc_binary(
     testonly = True,
     srcs = ["launcher.cc"],
     copts = LAUNCHER_COPTS,
-    data = [":wrap_stripped"],
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
@@ -55,14 +54,8 @@ cc_binary(
         # add additional quoting.
         shell.quote('RULES_ELISP_HEADER="elisp/private/tools/binary.h"'),
         shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
+            'RULES_ELISP_NATIVE_LITERAL("--wrapper=/bin/false")',
             'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
-            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/private/tools/binary.h")',
-            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
-            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
     visibility = ["//tests/tools:__pkg__"],
@@ -109,7 +102,10 @@ cc_library(
         shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
         shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
-    visibility = ["//elisp:__pkg__"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//tests/wrap:__pkg__",
+    ],
     deps = [
         ":platform",
         ":process",
@@ -120,24 +116,6 @@ cc_library(
         "@bazel_tools//tools/cpp/runfiles",
         "@rules_cc//cc/runfiles",
     ],
-)
-
-executable_only(
-    name = "wrap_stripped",
-    testonly = True,
-    src = ":wrap",
-)
-
-py_binary(
-    name = "wrap",
-    testonly = True,
-    srcs = ["wrap.py"],
-    data = [
-        ":binary.cc",
-        ":binary.h",
-        "//elisp/runfiles:runfiles.elc",
-    ],
-    deps = [":runfiles"],
 )
 
 py_binary(
@@ -294,6 +272,7 @@ cc_library(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
+        "//tests/wrap:__pkg__",
     ],
 )
 
@@ -341,12 +320,20 @@ exports_files(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
+        "//tests/wrap:__pkg__",
     ],
 )
 
 exports_files(
-    ["binary.cc"],
-    visibility = ["//tests/tools:__pkg__"],
+    [
+        # keep sorted
+        "binary.cc",
+        "binary.h",
+    ],
+    visibility = [
+        "//tests/tools:__pkg__",
+        "//tests/wrap:__pkg__",
+    ],
 )
 
 exports_files(

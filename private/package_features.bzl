@@ -36,6 +36,7 @@ visibility([
     "//tests/proto",
     "//tests/runfiles",
     "//tests/tools",
+    "//tests/wrap",
 ])
 
 # Features for all packages.  These may not contain select expressions.

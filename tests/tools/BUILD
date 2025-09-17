@@ -34,12 +34,12 @@ py_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote("--launcher=$(rlocationpath //elisp/private/tools:launcher)"),
+        shell.quote("--launcher=$(rlocationpath //tests/wrap:launcher)"),
         shell.quote("--binary-cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
     ],
     data = [
         "//elisp/private/tools:binary.cc",
-        "//elisp/private/tools:launcher",
+        "//tests/wrap:launcher",
     ],
     deps = [
         "//elisp/private/tools:runfiles",

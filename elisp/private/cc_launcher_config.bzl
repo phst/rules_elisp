@@ -21,6 +21,7 @@ visibility([
     "//elisp",
     "//elisp/private/tools",
     "//elisp/toolchains",
+    "//tests/wrap",
 ])
 
 LAUNCHER_FEATURES = FEATURES
