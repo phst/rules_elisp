@@ -20,7 +20,6 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_go//go:def.bzl", "go_test")
-load("@rules_python//python:py_test.bzl", "py_test")
 load("@xmllint//:file.bzl", XMLLINT = "FILE")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
@@ -36,24 +35,6 @@ package(
 )
 
 licenses(["notice"])
-
-py_test(
-    name = "emacs_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["emacs_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--emacs=$(rlocationpath //emacs)"),
-    ],
-    data = ["//emacs"],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
 
 bzl_library(
     name = "elisp_test_suite",
@@ -81,12 +62,14 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = [
+        "emacs_test.go",
         "empty_test.go",
         "ert_test.go",
     ],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
+        shell.quote("--emacs=$(rlocationpath //emacs)"),
         shell.quote("--binary=$(rlocationpath :test)"),
         shell.quote("--test-el=$(rlocationpath :test.el)"),
         shell.quote("--xmllint=" + XMLLINT),
@@ -97,6 +80,7 @@ go_test(
         ":empty",
         ":test",
         ":test.el",
+        "//emacs",
         "@junit_xsd//:JUnit.xsd",
     ],
     embedsrcs = [

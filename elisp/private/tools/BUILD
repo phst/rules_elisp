@@ -245,7 +245,6 @@ py_library(
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
         "//examples:__pkg__",
-        "//tests:__pkg__",
         "//tests/tools:__pkg__",
         "//tests/wrap:__pkg__",
     ],
