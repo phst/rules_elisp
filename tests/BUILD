@@ -62,6 +62,7 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = [
+        "binary_test.go",
         "emacs_test.go",
         "empty_test.go",
         "ert_test.go",
@@ -75,12 +76,16 @@ go_test(
         shell.quote("--xmllint=" + XMLLINT),
         shell.quote("--junit-xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
         shell.quote("--empty=$(rlocationpath :empty)"),
+        shell.quote("--launcher=$(rlocationpath //tests/wrap:launcher)"),
+        shell.quote("--binary-cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
     ],
     data = [
         ":empty",
         ":test",
         ":test.el",
+        "//elisp/private/tools:binary.cc",
         "//emacs",
+        "//tests/wrap:launcher",
         "@junit_xsd//:JUnit.xsd",
     ],
     embedsrcs = [

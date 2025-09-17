@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Integration tests for the elisp_binary rule.
-package binary_test
+package ert_test
 
 import (
 	"flag"

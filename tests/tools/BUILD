@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
-load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -26,24 +24,6 @@ package(
 )
 
 licenses(["notice"])
-
-go_test(
-    name = "tools_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["binary_test.go"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote("--launcher=$(rlocationpath //tests/wrap:launcher)"),
-        shell.quote("--binary-cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
-    ],
-    data = [
-        "//elisp/private/tools:binary.cc",
-        "//tests/wrap:launcher",
-    ],
-    deps = ["@rules_go//go/runfiles"],
-)
 
 py_test(
     name = "manifest_test",

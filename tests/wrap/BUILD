@@ -54,7 +54,7 @@ cc_binary(
             'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
         ])),
     ],
-    visibility = ["//tests/tools:__pkg__"],
+    visibility = ["//tests:__pkg__"],
     deps = LAUNCHER_DEPS + ["//elisp/private/tools:binary"],
 )
 

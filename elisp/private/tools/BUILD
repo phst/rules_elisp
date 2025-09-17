@@ -330,7 +330,7 @@ exports_files(
         "binary.h",
     ],
     visibility = [
-        "//tests/tools:__pkg__",
+        "//tests:__pkg__",
         "//tests/wrap:__pkg__",
     ],
 )
