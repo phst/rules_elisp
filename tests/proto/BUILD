@@ -48,7 +48,7 @@ elisp_test(
 )
 
 go_test(
-    name = "module_test",
+    name = "proto_x_test",
     size = "medium",
     srcs = ["module_test.go"],
     args = [

@@ -16,7 +16,7 @@
 //
 // Most tests are in //tests/proto:proto-test.el; this file contains tests that
 // require a fresh Emacs process.
-package module_test
+package proto_test
 
 import (
 	"bytes"
