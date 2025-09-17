@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -26,11 +27,11 @@ package(
 
 licenses(["notice"])
 
-py_test(
-    name = "binary_test",
+go_test(
+    name = "tools_test",
     size = "medium",
     timeout = "short",
-    srcs = ["binary_test.py"],
+    srcs = ["binary_test.go"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
@@ -41,11 +42,7 @@ py_test(
         "//elisp/private/tools:binary.cc",
         "//tests/wrap:launcher",
     ],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
+    deps = ["@rules_go//go/runfiles"],
 )
 
 py_test(
