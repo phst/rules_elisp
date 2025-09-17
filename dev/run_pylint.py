@@ -27,7 +27,7 @@ def main() -> None:
     parser.add_argument('--out', type=pathlib.Path, required=True)
     parser.add_argument('--src', type=pathlib.Path, action='append',
                         default=[], dest='sources')
-    parser.add_argument('--import', type=_path_dir, action='append',
+    parser.add_argument('--import', type=pathlib.Path, action='append',
                         default=[], dest='path')
     parser.add_argument('--pylint', type=pathlib.Path, required=True)
     parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
@@ -54,12 +54,6 @@ def main() -> None:
         print(result.stdout)
         sys.exit(result.returncode)
     args.out.touch()
-
-
-def _path_dir(arg: str) -> pathlib.Path:
-    if not arg or ':' in arg:
-        raise ValueError(f'invalid path directory {arg!r}')
-    return pathlib.Path(arg)
 
 
 if __name__ == '__main__':
