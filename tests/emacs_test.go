@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Integration tests that run Emacs binaries.
-package ert_test
+package tests_test
 
 import (
 	"flag"
