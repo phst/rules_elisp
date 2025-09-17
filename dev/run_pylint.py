@@ -15,7 +15,6 @@
 """Runs Pylint."""
 
 import argparse
-import pathlib
 import shlex
 import sys
 import subprocess
@@ -24,29 +23,10 @@ import subprocess
 def main() -> None:
     """Main function."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--out', type=pathlib.Path, required=True)
-    parser.add_argument('--src', type=pathlib.Path, action='append',
-                        default=[], dest='sources')
-    parser.add_argument('--import', type=pathlib.Path, action='append',
-                        default=[], dest='path')
-    parser.add_argument('--pylint', type=pathlib.Path, required=True)
-    parser.add_argument('--pylintrc', type=pathlib.Path, required=True)
+    parser.add_argument('args', nargs='+')
     args = parser.parse_args()
-    # Set a fake PYTHONPATH so that Pylint can find imports for the main and
-    # external repositories.
-    srcs = args.sources
-    if not srcs:
-        raise FileNotFoundError('no source files found')
-    srcset = frozenset(srcs)
-    repository_path = [str(d) for d in args.path]
     result = subprocess.run(
-        [str(args.pylint),
-         # We’d like to add “--” after the options, but that’s not possible
-         # due to https://github.com/PyCQA/pylint/issues/7003.
-         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()),
-         f'--init-hook=import sys; sys.path.extend({repository_path!r})',
-         f'--output-format=text,text:{args.out}']
-        + [str(file) for file in sorted(srcset)],
+        args.args,
         check=False,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
