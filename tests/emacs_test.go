@@ -70,7 +70,6 @@ func TestRun(t *testing.T) {
 	if stderr.Len() != 0 {
 		t.Errorf("unexpected stderr: %q", stderr.Bytes())
 	}
-
 }
 
 // Test that running a binary with a wrapper works.
