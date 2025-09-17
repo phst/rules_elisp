@@ -29,16 +29,16 @@ var emptyBin = flag.String("empty", "", "runfile location of the Emacs Lisp bina
 
 // Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {
-	runFiles, err := runfiles.New()
+	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary, err := runFiles.Rlocation(*emptyBin)
+	binary, err := rf.Rlocation(*emptyBin)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(binary)
-	cmd.Env = append(os.Environ(), runFiles.Env()...)
+	cmd.Env = append(os.Environ(), rf.Env()...)
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	cmd.Stdout = stdout

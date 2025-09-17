@@ -28,16 +28,16 @@ var emacs = flag.String("emacs", "", "runfile location of the Emacs binary")
 
 // Tests that emacs --version works.
 func TestVersion(t *testing.T) {
-	runFiles, err := runfiles.New()
+	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	emacs, err := runFiles.Rlocation(*emacs)
+	emacs, err := rf.Rlocation(*emacs)
 	if err != nil {
 		t.Fatal(err)
 	}
 	cmd := exec.Command(emacs, "--version")
-	cmd.Env = append(os.Environ(), runFiles.Env()...)
+	cmd.Env = append(os.Environ(), rf.Env()...)
 	if err := cmd.Run(); err != nil {
 		t.Error(err)
 	}

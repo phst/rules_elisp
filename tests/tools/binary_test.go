@@ -32,16 +32,16 @@ var (
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
-	runFiles, err := runfiles.New()
+	rf, err := runfiles.New()
 	if err != nil {
 		t.Fatal(err)
 	}
-	inputFile, err := runFiles.Rlocation(*binaryCc)
+	inputFile, err := rf.Rlocation(*binaryCc)
 	if err != nil {
 		t.Fatal(err)
 	}
 	windows := runtime.GOOS == "windows"
-	launcher, err := runFiles.Rlocation(*launcher)
+	launcher, err := rf.Rlocation(*launcher)
 	if err != nil {
 		t.Fatal(err)
 	}
