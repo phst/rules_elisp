@@ -16,16 +16,23 @@
 package tests_test
 
 import (
+	"bytes"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var emacs = runfileFlag("//emacs")
+var (
+	emacs    = runfileFlag("//emacs")
+	empty    = runfileFlag("//tests:empty")
+	launcher = runfileFlag("//tests/wrap:launcher")
+	binaryCc = runfileFlag("//elisp/private/tools:binary.cc")
+)
 
 // Tests that emacs --version works.
 func TestVersion(t *testing.T) {
@@ -36,6 +43,54 @@ func TestVersion(t *testing.T) {
 	emacs := *emacs
 	cmd := exec.Command(emacs, "--version")
 	cmd.Env = append(os.Environ(), rf.Env()...)
+	if err := cmd.Run(); err != nil {
+		t.Error(err)
+	}
+}
+
+// Tests that the empty binary produces empty output.
+func TestRun(t *testing.T) {
+	rf, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	binary := *empty
+	cmd := exec.Command(binary)
+	cmd.Env = append(os.Environ(), rf.Env()...)
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	if err := cmd.Run(); err != nil {
+		t.Error(err)
+	}
+	if stdout.Len() != 0 {
+		t.Errorf("unexpected stdout: %q", stdout.Bytes())
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("unexpected stderr: %q", stderr.Bytes())
+	}
+
+}
+
+// Test that running a binary with a wrapper works.
+func TestRunWrapped(t *testing.T) {
+	inputFile := *binaryCc
+	windows := runtime.GOOS == "windows"
+	launcher := *launcher
+	outputFile := "/:/tmp/output.dat"
+	if windows {
+		outputFile = `/:C:\Temp\output.dat`
+	}
+	cmd := exec.Command(
+		launcher,
+		"--option",
+		inputFile,
+		" \t\n\r\f äα𝐴🐈'\\\"",
+		outputFile,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		t.Error(err)
 	}

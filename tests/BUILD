@@ -73,9 +73,7 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = [
-        "binary_test.go",
         "emacs_test.go",
-        "empty_test.go",
         "ert_test.go",
     ],
     args = [
