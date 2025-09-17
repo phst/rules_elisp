@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Unit tests for //elisp/proto:module.
+// Integration tests for //elisp/proto:module.
 //
 // Most tests are in //tests/proto:proto-test.el; this file contains tests that
 // require a fresh Emacs process.
@@ -32,7 +32,7 @@ import (
 
 var cat = flag.String("cat", "", "location of the //tests/proto:cat target")
 
-// Unit test for elisp/proto/insert-stdin.
+// Integration test for elisp/proto/insert-stdin.
 func TestInsertStdin(t *testing.T) {
 	cat, err := runfiles.Rlocation(*cat)
 	if err != nil {
@@ -63,7 +63,7 @@ func TestInsertStdin(t *testing.T) {
 	}
 }
 
-// Unit test for elisp/proto/write-stdout.
+// Integration test for elisp/proto/write-stdout.
 func TestWriteStdout(t *testing.T) {
 	cat, err := runfiles.Rlocation(*cat)
 	if err != nil {

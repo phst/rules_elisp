@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Unit tests for the elisp_binary rule.
+// Integration tests for the elisp_binary rule.
 package binary_test
 
 import (
