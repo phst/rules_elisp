@@ -1,0 +1,56 @@
+// Copyright 2020-2023, 2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Unit tests for an empty Emacs Lisp binary.
+package ert_test
+
+import (
+	"bytes"
+	"flag"
+	"os"
+	"os/exec"
+	"testing"
+
+	"github.com/bazelbuild/rules_go/go/runfiles"
+)
+
+var emptyBin = flag.String("empty", "", "runfile location of the Emacs Lisp binary to test")
+
+// Tests that the empty binary produces empty output.
+func TestRun(t *testing.T) {
+	runFiles, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	binary, err := runFiles.Rlocation(*emptyBin)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cmd := exec.Command(binary)
+	cmd.Env = append(os.Environ(), runFiles.Env()...)
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	if err := cmd.Run(); err != nil {
+		t.Error(err)
+	}
+	if stdout.Len() != 0 {
+		t.Errorf("unexpected stdout: %q", stdout.Bytes())
+	}
+	if stderr.Len() != 0 {
+		t.Errorf("unexpected stderr: %q", stderr.Bytes())
+	}
+
+}

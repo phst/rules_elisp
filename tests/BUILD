@@ -80,7 +80,10 @@ go_test(
     name = "tests_test",
     size = "medium",
     timeout = "short",
-    srcs = ["ert_test.go"],
+    srcs = [
+        "empty_test.go",
+        "ert_test.go",
+    ],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
@@ -88,8 +91,10 @@ go_test(
         shell.quote("--test-el=$(rlocationpath :test.el)"),
         shell.quote("--xmllint=" + XMLLINT),
         shell.quote("--junit-xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
+        shell.quote("--empty=$(rlocationpath :empty)"),
     ],
     data = [
+        ":empty",
         ":test",
         ":test.el",
         "@junit_xsd//:JUnit.xsd",
@@ -145,24 +150,6 @@ config_setting(
 elisp_binary(
     name = "empty",
     src = "empty.el",
-)
-
-py_test(
-    name = "empty_test",
-    size = "medium",
-    timeout = "short",
-    srcs = ["empty_test.py"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--binary=$(rlocationpath :empty)"),
-    ],
-    data = [":empty"],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
 )
 
 run_binary(
