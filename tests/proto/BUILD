@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
-load("@rules_python//python:py_test.bzl", "py_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
@@ -47,21 +47,17 @@ elisp_test(
     ],
 )
 
-py_test(
+go_test(
     name = "module_test",
     size = "medium",
-    srcs = ["module_test.py"],
+    srcs = ["module_test.go"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         shell.quote("--cat=$(rlocationpath :cat)"),
     ],
     data = [":cat"],
-    deps = [
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/flags",
-        "@abseil-py//absl/testing:absltest",
-    ],
+    deps = ["@rules_go//go/runfiles"],
 )
 
 elisp_binary(
