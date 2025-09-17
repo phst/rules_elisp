@@ -15,8 +15,6 @@
 """Runs Pylint."""
 
 import argparse
-import os
-import os.path
 import pathlib
 import shlex
 import sys
@@ -40,23 +38,18 @@ def main() -> None:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
     repository_path = [str(d) for d in args.path]
-    pythonpath = os.pathsep.join(repository_path)
-    inherited_path = os.getenv('PYTHONPATH')
-    if inherited_path:
-        pythonpath = os.pathsep.join([inherited_path, pythonpath])
-    env = dict(os.environ, PYTHONPATH=pythonpath)
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
          # We’d like to add “--” after the options, but that’s not possible
          # due to https://github.com/PyCQA/pylint/issues/7003.
-         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve())]
+         '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()),
+         f'--init-hook=import sys; sys.path.extend({repository_path!r})']
         + [str(file) for file in sorted(srcset)],
-        check=False, env=env,
+        check=False,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
     if result.returncode:
-        print('$', f'PYTHONPATH={shlex.quote(pythonpath)}',
-              shlex.join(result.args))
+        print('$', shlex.join(result.args))
         print(result.stdout)
         sys.exit(result.returncode)
     args.out.touch()
