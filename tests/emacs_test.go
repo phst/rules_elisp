@@ -24,7 +24,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var emacs = flag.String("emacs", "", "runfile location of the Emacs binary")
+var emacsRloc = flag.String("emacs", "", "location of //emacs relative to the runfiles root")
 
 // Tests that emacs --version works.
 func TestVersion(t *testing.T) {
@@ -32,7 +32,7 @@ func TestVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	emacs, err := rf.Rlocation(*emacs)
+	emacs, err := rf.Rlocation(*emacsRloc)
 	if err != nil {
 		t.Fatal(err)
 	}

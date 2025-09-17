@@ -38,10 +38,10 @@ import (
 )
 
 var (
-	binary                = flag.String("binary", "", "location of the binary file relative to the runfiles root")
-	testEl                = flag.String("test-el", "", "location of //tests:test.el relative to the runfiles root")
+	testRloc              = flag.String("test", "", "location of //tests:test relative to the runfiles root")
+	testElRloc            = flag.String("test.el", "", "location of //tests:test.el relative to the runfiles root")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
-	jUnitXsd              = flag.String("junit-xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfile root")
+	jUnitXsdRloc          = flag.String("junit.xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfiles root")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
@@ -77,7 +77,7 @@ func TestReportValid(t *testing.T) {
 		"TEST_TARGET=//tests:test_test",
 	)
 
-	schema, err := runfiles.Rlocation(*jUnitXsd)
+	schema, err := runfiles.Rlocation(*jUnitXsdRloc)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -490,7 +490,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	if err != nil {
 		t.Fatal(err)
 	}
-	source, err := rf.Rlocation(*testEl)
+	source, err := rf.Rlocation(*testElRloc)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -498,7 +498,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin, err := rf.Rlocation(*binary)
+	bin, err := rf.Rlocation(*testRloc)
 	if err != nil {
 		t.Fatal(err)
 	}

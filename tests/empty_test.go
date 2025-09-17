@@ -24,7 +24,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var emptyBin = flag.String("empty", "", "runfile location of the Emacs Lisp binary to test")
+var emptyRloc = flag.String("empty", "", "location of //tests:empty relative to the runfiles root")
 
 // Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {
@@ -32,7 +32,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary, err := rf.Rlocation(*emptyBin)
+	binary, err := rf.Rlocation(*emptyRloc)
 	if err != nil {
 		t.Fatal(err)
 	}

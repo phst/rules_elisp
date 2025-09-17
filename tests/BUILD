@@ -71,13 +71,13 @@ go_test(
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         shell.quote("--emacs=$(rlocationpath //emacs)"),
-        shell.quote("--binary=$(rlocationpath :test)"),
-        shell.quote("--test-el=$(rlocationpath :test.el)"),
+        shell.quote("--test=$(rlocationpath :test)"),
+        shell.quote("--test.el=$(rlocationpath :test.el)"),
         shell.quote("--xmllint=" + XMLLINT),
-        shell.quote("--junit-xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
+        shell.quote("--junit.xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
         shell.quote("--empty=$(rlocationpath :empty)"),
         shell.quote("--launcher=$(rlocationpath //tests/wrap:launcher)"),
-        shell.quote("--binary-cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
+        shell.quote("--binary.cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
     ],
     data = [
         ":empty",

@@ -25,8 +25,8 @@ import (
 )
 
 var (
-	launcher = flag.String("launcher", "", "location of the //elisp/private/tools:launcher target")
-	binaryCc = flag.String("binary-cc", "", "location of the //elisp/private/tools:binary.cc file")
+	launcherRloc = flag.String("launcher", "", "location of //tests/wrap:launcher relative to the runfiles root")
+	binaryCcRloc = flag.String("binary.cc", "", "location of //elisp/private/tools:binary.cc relative to the runfiles root")
 )
 
 // Test that running a binary with a wrapper works.
@@ -35,12 +35,12 @@ func TestRunWrapped(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	inputFile, err := rf.Rlocation(*binaryCc)
+	inputFile, err := rf.Rlocation(*binaryCcRloc)
 	if err != nil {
 		t.Fatal(err)
 	}
 	windows := runtime.GOOS == "windows"
-	launcher, err := rf.Rlocation(*launcher)
+	launcher, err := rf.Rlocation(*launcherRloc)
 	if err != nil {
 		t.Fatal(err)
 	}
