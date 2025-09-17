@@ -23,7 +23,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var empty = runfileFlag("empty", "location of //tests:empty relative to the runfiles root")
+var empty = runfileFlag("//tests:empty")
 
 // Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {

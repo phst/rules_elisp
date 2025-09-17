@@ -38,10 +38,10 @@ import (
 )
 
 var (
-	test                  = runfileFlag("test", "location of //tests:test relative to the runfiles root")
-	testEl                = runfileFlag("test.el", "location of //tests:test.el relative to the runfiles root")
+	test                  = runfileFlag("//tests:test")
+	testEl                = runfileFlag("//tests:test.el")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
-	jUnitXsd              = runfileFlag("junit.xsd", "location of @junit_xsd//:JUnit.xsd relative to the runfiles root")
+	jUnitXsd              = runfileFlag("@junit_xsd//:JUnit.xsd")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 

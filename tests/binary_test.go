@@ -22,8 +22,8 @@ import (
 )
 
 var (
-	launcher = runfileFlag("launcher", "location of //tests/wrap:launcher relative to the runfiles root")
-	binaryCc = runfileFlag("binary.cc", "location of //elisp/private/tools:binary.cc relative to the runfiles root")
+	launcher = runfileFlag("//tests/wrap:launcher")
+	binaryCc = runfileFlag("//elisp/private/tools:binary.cc")
 )
 
 // Test that running a binary with a wrapper works.

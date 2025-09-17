@@ -57,6 +57,17 @@ bzl_library(
 
 elisp_test_suite(name = "elisp_test")
 
+TEST_DATA = [
+    # keep sorted
+    "//elisp/private/tools:binary.cc",
+    "//emacs",
+    "//tests:empty",
+    "//tests:test",
+    "//tests:test.el",
+    "//tests/wrap:launcher",
+    "@junit_xsd//:JUnit.xsd",
+]
+
 go_test(
     name = "tests_test",
     size = "medium",
@@ -70,24 +81,12 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        shell.quote("--emacs=$(rlocationpath //emacs)"),
-        shell.quote("--test=$(rlocationpath :test)"),
-        shell.quote("--test.el=$(rlocationpath :test.el)"),
         shell.quote("--xmllint=" + XMLLINT),
-        shell.quote("--junit.xsd=$(rlocationpath @junit_xsd//:JUnit.xsd)"),
-        shell.quote("--empty=$(rlocationpath :empty)"),
-        shell.quote("--launcher=$(rlocationpath //tests/wrap:launcher)"),
-        shell.quote("--binary.cc=$(rlocationpath //elisp/private/tools:binary.cc)"),
+    ] + [
+        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
+        for t in TEST_DATA
     ],
-    data = [
-        ":empty",
-        ":test",
-        ":test.el",
-        "//elisp/private/tools:binary.cc",
-        "//emacs",
-        "//tests/wrap:launcher",
-        "@junit_xsd//:JUnit.xsd",
-    ],
+    data = TEST_DATA,
     embedsrcs = [
         "coverage.dat",
         "version.txt",

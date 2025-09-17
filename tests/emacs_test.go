@@ -17,6 +17,7 @@ package ert_test
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"os/exec"
 	"testing"
@@ -24,7 +25,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var emacs = runfileFlag("emacs", "location of //emacs relative to the runfiles root")
+var emacs = runfileFlag("//emacs")
 
 // Tests that emacs --version works.
 func TestVersion(t *testing.T) {
@@ -40,9 +41,9 @@ func TestVersion(t *testing.T) {
 	}
 }
 
-func runfileFlag(name, usage string) *string {
+func runfileFlag(name string) *string {
 	r := new(runfileFlagValue)
-	flag.Var(r, name, usage)
+	flag.Var(r, name, fmt.Sprintf("location of %s relative to the runfiles root", name))
 	return (*string)(r)
 }
 
