@@ -15,35 +15,22 @@
 package ert_test
 
 import (
-	"flag"
 	"os"
 	"os/exec"
 	"runtime"
 	"testing"
-
-	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
 var (
-	launcherRloc = flag.String("launcher", "", "location of //tests/wrap:launcher relative to the runfiles root")
-	binaryCcRloc = flag.String("binary.cc", "", "location of //elisp/private/tools:binary.cc relative to the runfiles root")
+	launcher = runfileFlag("launcher", "location of //tests/wrap:launcher relative to the runfiles root")
+	binaryCc = runfileFlag("binary.cc", "location of //elisp/private/tools:binary.cc relative to the runfiles root")
 )
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
-	rf, err := runfiles.New()
-	if err != nil {
-		t.Fatal(err)
-	}
-	inputFile, err := rf.Rlocation(*binaryCcRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	inputFile := *binaryCc
 	windows := runtime.GOOS == "windows"
-	launcher, err := rf.Rlocation(*launcherRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	launcher := *launcher
 	outputFile := "/:/tmp/output.dat"
 	if windows {
 		outputFile = `/:C:\Temp\output.dat`

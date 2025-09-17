@@ -16,7 +16,6 @@ package ert_test
 
 import (
 	"bytes"
-	"flag"
 	"os"
 	"os/exec"
 	"testing"
@@ -24,7 +23,7 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
 
-var emptyRloc = flag.String("empty", "", "location of //tests:empty relative to the runfiles root")
+var empty = runfileFlag("empty", "location of //tests:empty relative to the runfiles root")
 
 // Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {
@@ -32,10 +31,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary, err := rf.Rlocation(*emptyRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	binary := *empty
 	cmd := exec.Command(binary)
 	cmd.Env = append(os.Environ(), rf.Env()...)
 	stdout := new(bytes.Buffer)

@@ -38,10 +38,10 @@ import (
 )
 
 var (
-	testRloc              = flag.String("test", "", "location of //tests:test relative to the runfiles root")
-	testElRloc            = flag.String("test.el", "", "location of //tests:test.el relative to the runfiles root")
+	test                  = runfileFlag("test", "location of //tests:test relative to the runfiles root")
+	testEl                = runfileFlag("test.el", "location of //tests:test.el relative to the runfiles root")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
-	jUnitXsdRloc          = flag.String("junit.xsd", "", "location of @junit_xsd//:JUnit.xsd relative to the runfiles root")
+	jUnitXsd              = runfileFlag("junit.xsd", "location of @junit_xsd//:JUnit.xsd relative to the runfiles root")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
@@ -77,10 +77,7 @@ func TestReportValid(t *testing.T) {
 		"TEST_TARGET=//tests:test_test",
 	)
 
-	schema, err := runfiles.Rlocation(*jUnitXsdRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	schema := *jUnitXsd
 	t.Logf("validing XML report %s against schema %s", file, schema)
 	cmd := exec.Command(*xmllint, "--nonet", "--noout", "--schema", schema, file)
 	if err := run(t, "xmllint", cmd); err != nil {
@@ -490,18 +487,12 @@ func runTest(t *testing.T, testEnv ...string) error {
 	if err != nil {
 		t.Fatal(err)
 	}
-	source, err := rf.Rlocation(*testElRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	source := *testEl
 	// Use the ancestor of the source file as repository directory so that
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(source))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin, err := rf.Rlocation(*testRloc)
-	if err != nil {
-		t.Fatal(err)
-	}
+	bin := *test
 	t.Logf("using test binary %s", bin)
 
 	cmd := exec.CommandContext(ctx, bin, "arg 1", "arg\n2 äα𝐴🐈'")
