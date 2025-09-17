@@ -18,6 +18,7 @@ import argparse
 import os
 import os.path
 import pathlib
+import shlex
 import sys
 import subprocess
 
@@ -39,8 +40,8 @@ def main() -> None:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
     repository_path = [str(d) for d in args.path]
-    env = dict(os.environ,
-               PYTHONPATH=os.pathsep.join(sys.path + repository_path))
+    pythonpath = os.pathsep.join(sys.path + repository_path)
+    env = dict(os.environ, PYTHONPATH=pythonpath)
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
          # We’d like to add “--” after the options, but that’s not possible
@@ -51,6 +52,8 @@ def main() -> None:
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
     if result.returncode:
+        print('$', f'PYTHONPATH={shlex.quote(pythonpath)}',
+              shlex.join(result.args))
         print(result.stdout)
         sys.exit(result.returncode)
     args.out.touch()
