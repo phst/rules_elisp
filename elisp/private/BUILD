@@ -191,6 +191,7 @@ selects.config_setting_group(
     visibility = [
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/wrap:__pkg__",
     ],
 )
 
@@ -203,6 +204,7 @@ selects.config_setting_group(
     visibility = [
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/wrap:__pkg__",
     ],
 )
 

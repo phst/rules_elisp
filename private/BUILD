@@ -36,6 +36,7 @@ config_setting(
         "//elisp/private:__pkg__",
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/wrap:__pkg__",
     ],
 )
 
