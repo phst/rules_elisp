@@ -40,7 +40,10 @@ def main() -> None:
         raise FileNotFoundError('no source files found')
     srcset = frozenset(srcs)
     repository_path = [str(d) for d in args.path]
-    pythonpath = os.pathsep.join(sys.path + repository_path)
+    pythonpath = os.pathsep.join(repository_path)
+    inherited_path = os.getenv('PYTHONPATH')
+    if inherited_path:
+        pythonpath = os.pathsep.join([inherited_path, pythonpath])
     env = dict(os.environ, PYTHONPATH=pythonpath)
     result = subprocess.run(
         [sys.executable, '-m', 'pylint',
