@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -27,6 +28,12 @@ licenses(["notice"])
 elisp_library(
     name = "runfiles",
     srcs = ["runfiles.el"],
-    outs = ["runfiles.elc"],
     visibility = ["//visibility:public"],
+)
+
+select_file(
+    name = "runfiles.elc",
+    srcs = ":runfiles",
+    subpath = "/" + package_name() + "/runfiles.elc",
+    visibility = ["//elisp/private/tools:__pkg__"],
 )
