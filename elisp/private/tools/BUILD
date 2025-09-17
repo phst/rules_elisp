@@ -222,7 +222,6 @@ py_library(
     visibility = [
         "//elisp/proto:__pkg__",
         "//emacs:__pkg__",
-        "//examples:__pkg__",
         "//tests/tools:__pkg__",
     ],
     deps = ["@rules_python//python/runfiles"],
