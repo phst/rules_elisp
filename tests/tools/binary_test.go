@@ -1,0 +1,64 @@
+// Copyright 2020-2025 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// Unit tests for the elisp_binary rule.
+package binary_test
+
+import (
+	"flag"
+	"os"
+	"os/exec"
+	"runtime"
+	"testing"
+
+	"github.com/bazelbuild/rules_go/go/runfiles"
+)
+
+var (
+	launcher = flag.String("launcher", "", "location of the //elisp/private/tools:launcher target")
+	binaryCc = flag.String("binary-cc", "", "location of the //elisp/private/tools:binary.cc file")
+)
+
+// Test that running a binary with a wrapper works.
+func TestRunWrapped(t *testing.T) {
+	runFiles, err := runfiles.New()
+	if err != nil {
+		t.Fatal(err)
+	}
+	inputFile, err := runFiles.Rlocation(*binaryCc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	windows := runtime.GOOS == "windows"
+	launcher, err := runFiles.Rlocation(*launcher)
+	if err != nil {
+		t.Fatal(err)
+	}
+	outputFile := "/:/tmp/output.dat"
+	if windows {
+		outputFile = `/:C:\Temp\output.dat`
+	}
+	cmd := exec.Command(
+		launcher,
+		"--option",
+		inputFile,
+		" \t\n\r\f äα𝐴🐈'\\\"",
+		outputFile,
+	)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		t.Error(err)
+	}
+}
