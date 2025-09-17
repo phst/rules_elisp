@@ -44,7 +44,8 @@ def main() -> None:
          # We’d like to add “--” after the options, but that’s not possible
          # due to https://github.com/PyCQA/pylint/issues/7003.
          '--persistent=no', '--rcfile=' + str(args.pylintrc.resolve()),
-         f'--init-hook=import sys; sys.path.extend({repository_path!r})']
+         f'--init-hook=import sys; sys.path.extend({repository_path!r})',
+         f'--output-format=text,text:{args.out}']
         + [str(file) for file in sorted(srcset)],
         check=False,
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
@@ -53,7 +54,6 @@ def main() -> None:
         print('$', shlex.join(result.args))
         print(result.stdout)
         sys.exit(result.returncode)
-    args.out.touch()
 
 
 if __name__ == '__main__':
