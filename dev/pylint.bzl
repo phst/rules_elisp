@@ -39,18 +39,24 @@ def _pylint_impl(target, ctx):
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
     # external repositories.
     roots = ["", ctx.bin_dir.path]
-    imports_path = depset([
-        paths.join(r, "external", i)
-        for i in info.imports.to_list()
-        for r in roots
-    ])
-    external_path = depset([
-        _import(s)
-        for s in info.transitive_sources.to_list()
-    ])
-    repository_path = imports_path.to_list() + external_path.to_list()
-    init_hook = "import sys; sys.path.extend(%r)" % repository_path
-    args.add(init_hook, format = "--init-hook=%s")
+    args.add_joined(
+        info.imports,
+        join_with = ", ",
+        map_each = lambda i: [repr(paths.join(r, "external", i)) for r in roots],
+        format_joined = "--init-hook=import sys; sys.path.extend([%s])",
+        uniquify = True,
+        expand_directories = False,
+        allow_closure = True,
+    )
+    args.add_joined(
+        info.transitive_sources,
+        join_with = ", ",
+        map_each = _import,
+        format_joined = "--init-hook=import sys; sys.path.extend([%s])",
+        uniquify = True,
+        expand_directories = False,
+    )
+
     args.add(output_file, format = "--output-format=text,text:%s")
 
     # We’d like to add “--” after the options, but that’s not possible
@@ -99,4 +105,4 @@ pylint = aspect(
 )
 
 def _import(file):
-    return paths.join(".", file.root.path, file.owner.workspace_root)
+    return repr(paths.join(".", file.root.path, file.owner.workspace_root))
