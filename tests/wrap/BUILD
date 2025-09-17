@@ -1,5 +1,3 @@
-load("@rules_python//python:py_binary.bzl", "py_binary")
-
 # Copyright 2020-2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +15,7 @@ load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")  # buildifier: disable=bzl-visibility
 load("//elisp/private:executable_only.bzl", "executable_only")  # buildifier: disable=bzl-visibility
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -59,25 +58,34 @@ cc_binary(
     deps = LAUNCHER_DEPS + ["//elisp/private/tools:binary"],
 )
 
+build_test(
+    name = "launcher_test",
+    targets = [":launcher"],
+)
+
 executable_only(
     name = "wrap_stripped",
     testonly = True,
     src = ":wrap",
 )
 
-py_binary(
-    name = "wrap",
+go_library(
+    name = "wrap_lib",
     testonly = True,
-    srcs = ["wrap.py"],
+    srcs = ["main.go"],
     data = [
         "//elisp/private/tools:binary.cc",
         "//elisp/private/tools:binary.h",
         "//elisp/runfiles:runfiles.elc",
     ],
-    deps = ["//elisp/private/tools:runfiles"],
+    importpath = "github.com/phst/rules_elisp/tests/wrap",
+    deps = [
+        "@com_github_google_go_cmp//cmp",
+        "@rules_go//go/runfiles",
+    ],
 )
 
-build_test(
-    name = "launcher_test",
-    targets = [":launcher"],
+go_binary(
+    name = "wrap",
+    embed = [":wrap_lib"],
 )
