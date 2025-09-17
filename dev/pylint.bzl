@@ -31,30 +31,31 @@ def _pylint_impl(target, ctx):
     pylint = ctx.executable._pylint
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
-    args.add(output_file, format = "--out=%s")
-    args.add_all(
-        info.direct_original_sources,
-        format_each = "--src=%s",
-        uniquify = True,
-    )
-    args.add(pylint, format = "--pylint=%s")
-    args.add(pylintrc, format = "--pylintrc=%s")
+    args.add("--")
+    args.add(pylint)
+    args.add("--persistent=no")
+    args.add(pylintrc, format = "--rcfile=%s")
+
+    # Set a fake PYTHONPATH so that Pylint can find imports for the main and
+    # external repositories.
     roots = ["", ctx.bin_dir.path]
-    args.add_all(
-        info.imports,
-        map_each = lambda i: [paths.join(r, "external", i) for r in roots],
-        format_each = "--import=%s",
-        uniquify = True,
-        expand_directories = False,
-        allow_closure = True,
-    )
-    args.add_all(
-        info.transitive_sources,
-        map_each = _import,
-        format_each = "--import=%s",
-        uniquify = True,
-        expand_directories = False,
-    )
+    imports_path = depset([
+        paths.join(r, "external", i)
+        for i in info.imports.to_list()
+        for r in roots
+    ])
+    external_path = depset([
+        _import(s)
+        for s in info.transitive_sources.to_list()
+    ])
+    repository_path = imports_path.to_list() + external_path.to_list()
+    init_hook = "import sys; sys.path.extend(%r)" % repository_path
+    args.add(init_hook, format = "--init-hook=%s")
+    args.add(output_file, format = "--output-format=text,text:%s")
+
+    # We’d like to add “--” after the options, but that’s not possible
+    # due to https://github.com/PyCQA/pylint/issues/7003.
+    args.add_all(info.direct_original_sources, uniquify = True)
     ctx.actions.run(
         outputs = [output_file],
         inputs = depset(
