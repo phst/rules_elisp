@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_features//:features.bzl", "bazel_features")
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -46,5 +47,10 @@ elisp_test(
 elisp_library(
     name = "test_lib",
     srcs = ["test-lib.el"],
-    outs = ["test-lib.elc"],
+)
+
+select_file(
+    name = "test-lib.elc",
+    srcs = ":test_lib",
+    subpath = "/" + package_name() + "/test-lib.elc",
 )

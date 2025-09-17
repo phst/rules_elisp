@@ -67,8 +67,9 @@ files ending in `.el`, or module objects ending in `.so`, `.dylib`, or
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         "outs": attr.output_list(
-            doc = """List of byte-compiled Emacs Lisp files to be made available
-as targets.""",
+            doc = """Deprecated; use
+e.g. [select_file](https://github.com/bazelbuild/bazel-skylib/blob/main/docs/select_file_doc.md)
+instead.""",
         ),
         "data": attr.label_list(
             doc = "List of files to be made available at runtime.",

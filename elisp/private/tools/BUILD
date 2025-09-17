@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@bazel_skylib//rules:select_file.bzl", "select_file")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
@@ -214,8 +215,14 @@ elisp_library(
     name = "run_test_el",
     testonly = True,
     srcs = ["run-test.el"],
-    outs = ["run-test.elc"],
     visibility = ["//tests/tools:__pkg__"],
+)
+
+select_file(
+    name = "run-test.elc",
+    testonly = True,
+    srcs = ":run_test_el",
+    subpath = "/" + package_name() + "/run-test.elc",
 )
 
 py_library(
