@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Integration tests for the elisp_binary rule.
 package ert_test
 
 import (
