@@ -286,7 +286,7 @@ func reportTemplate() report {
 				Error: message{
 					Message:     `peculiar error: "Boo"`,
 					Type:        `undefined-error-symbol`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -306,7 +306,7 @@ func reportTemplate() report {
 				Error: message{
 					Message:     `Boo`,
 					Type:        `error`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -316,7 +316,7 @@ func reportTemplate() report {
 				Failure: message{
 					Message:     `Test failed: "Fail!"`,
 					Type:        `ert-test-failed`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -340,7 +340,7 @@ func reportTemplate() report {
 				Failure: message{
 					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
 					Type:        `ert-test-failed`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -350,7 +350,7 @@ func reportTemplate() report {
 				Failure: message{
 					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
 					Type:        `ert-test-failed`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -360,7 +360,7 @@ func reportTemplate() report {
 				Failure: message{
 					Message:     `Test failed: ((should (= 0 1)) :form (= 0 1) :value nil)`,
 					Type:        `ert-test-failed`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -374,7 +374,7 @@ func reportTemplate() report {
 				Time:      wantElapsed,
 				Skipped: message{
 					Message:     "Test skipped: ((skip-unless (= 1 2)) :form (= 1 2) :value nil)",
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -384,7 +384,7 @@ func reportTemplate() report {
 				Error: message{
 					Message:     "Error äöü \t \n \\u0000 \uFFFD \\uFFFE \\uFFFF 𝑨 <![CDATA[ ]]> & < > \" ' <!-- -->",
 					Type:        `error`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 			{
@@ -394,7 +394,7 @@ func reportTemplate() report {
 				Error: message{
 					Message:     `No catch for tag: unknown-tag, hi`,
 					Type:        `no-catch`,
-					Description: nonEmpty,
+					Description: nonEmptyDesc,
 				},
 			},
 		},
@@ -405,7 +405,7 @@ func reportTemplate() report {
 		abort.Error = message{}
 		abort.Skipped = message{
 			Message:     `Test skipped: ((skip-unless (not (eql emacs-major-version 30))) :form (not t) :value nil)`,
-			Description: nonEmpty,
+			Description: nonEmptyDesc,
 		}
 		r.Errors--
 		r.Skipped++
@@ -570,8 +570,8 @@ func toTime(t timestamp) time.Time { return time.Time(t) }
 type description bool
 
 const (
-	empty    description = false
-	nonEmpty description = true
+	emptyDesc    description = false
+	nonEmptyDesc description = true
 )
 
 func (d *description) UnmarshalText(b []byte) error {
@@ -581,7 +581,7 @@ func (d *description) UnmarshalText(b []byte) error {
 }
 
 func (d description) String() string {
-	if d == nonEmpty {
+	if d == nonEmptyDesc {
 		return "something"
 	}
 	return ""
