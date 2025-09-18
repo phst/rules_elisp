@@ -36,13 +36,13 @@ var (
 
 // Tests that emacs --version works.
 func TestVersion(t *testing.T) {
-	rf, err := runfiles.New()
+	rfEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
 	}
 	emacs := *emacs
 	cmd := exec.Command(emacs, "--version")
-	cmd.Env = append(os.Environ(), rf.Env()...)
+	cmd.Env = append(os.Environ(), rfEnv...)
 	if err := cmd.Run(); err != nil {
 		t.Error(err)
 	}
@@ -50,13 +50,13 @@ func TestVersion(t *testing.T) {
 
 // Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {
-	rf, err := runfiles.New()
+	rfEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
 	}
 	binary := *empty
 	cmd := exec.Command(binary)
-	cmd.Env = append(os.Environ(), rf.Env()...)
+	cmd.Env = append(os.Environ(), rfEnv...)
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	cmd.Stdout = stdout

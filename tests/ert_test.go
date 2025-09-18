@@ -483,7 +483,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	}
 	ctx, cancel := context.WithDeadline(context.Background(), d.Add(-10*time.Second))
 	defer cancel()
-	rf, err := runfiles.New()
+	rfEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -510,7 +510,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 		name, _, _ := strings.Cut(s, "=")
 		return !slices.Contains(requiredEnv, name)
 	})
-	env = append(env, rf.Env()...)
+	env = append(env, rfEnv...)
 	env = append(env, testEnv...)
 	cmd.Env = env
 	cmd.Dir = workspace

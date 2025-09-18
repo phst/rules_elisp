@@ -30,15 +30,11 @@ var (
 )
 
 func TestGazelleBinary(t *testing.T) {
-	rf, err := runfiles.New()
+	binary, err := runfiles.Rlocation(*gazelleBinary)
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary, err := rf.Rlocation(*gazelleBinary)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sentinel, err := rf.Rlocation(*testdataSentinel)
+	sentinel, err := runfiles.Rlocation(*testdataSentinel)
 	if err != nil {
 		t.Fatal(err)
 	}
