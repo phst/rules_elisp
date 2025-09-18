@@ -31,8 +31,6 @@ def _pylint_impl(target, ctx):
     pylint = ctx.executable._pylint
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
-    args.add("--")
-    args.add(pylint)
     args.add("--persistent=no")
     args.add(pylintrc, format = "--rcfile=%s")
 
@@ -62,8 +60,7 @@ def _pylint_impl(target, ctx):
             direct = [pylintrc],
             transitive = [info.transitive_sources],
         ),
-        executable = ctx.executable._run,
-        tools = [pylint],
+        executable = pylint,
         arguments = [args],
         mnemonic = "Pylint",
         progress_message = "Linting Python target %{label}",
@@ -77,11 +74,6 @@ pylint = aspect(
     implementation = _pylint_impl,
     # @unsorted-dict-items
     attrs = {
-        "_run": attr.label(
-            default = Label("//dev:run_pylint"),
-            executable = True,
-            cfg = "exec",
-        ),
         "_pylint": attr.label(
             default = Label(":pylint_bin"),
             executable = True,
