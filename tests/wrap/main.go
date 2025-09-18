@@ -79,16 +79,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("can’t read manifest: %s", err)
 	}
-	var gotManifest map[string]interface{}
+	var gotManifest map[string]any
 	if err := json.Unmarshal(jsonData, &gotManifest); err != nil {
 		log.Fatalf("can’t decode manifest: %s", err)
 	}
-	wantManifest := map[string]interface{}{
+	wantManifest := map[string]any{
 		"root":        "RUNFILES_ROOT",
-		"tags":        []interface{}{"local", "mytag"},
-		"loadPath":    []interface{}{"phst_rules_elisp"},
-		"inputFiles":  []interface{}{"phst_rules_elisp/elisp/private/tools/binary.cc", "phst_rules_elisp/elisp/private/tools/binary.h"},
-		"outputFiles": []interface{}{outputFile},
+		"tags":        []any{"local", "mytag"},
+		"loadPath":    []any{"phst_rules_elisp"},
+		"inputFiles":  []any{"phst_rules_elisp/elisp/private/tools/binary.cc", "phst_rules_elisp/elisp/private/tools/binary.h"},
+		"outputFiles": []any{outputFile},
 	}
 	if diff := cmp.Diff(
 		gotManifest, wantManifest,
