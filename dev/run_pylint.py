@@ -15,7 +15,6 @@
 """Runs Pylint."""
 
 import argparse
-import shlex
 import sys
 import subprocess
 
@@ -30,7 +29,6 @@ def main() -> None:
         check=False,
         encoding='utf-8', errors='backslashreplace')
     if result.returncode:
-        print('$', shlex.join(result.args))
         sys.exit(result.returncode)
 
 
