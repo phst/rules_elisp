@@ -18,7 +18,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -75,7 +74,7 @@ func main() {
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
 		log.Fatalf("positional arguments: -got +want:\n%s", diff)
 	}
-	jsonData, err := ioutil.ReadFile(manifestFile)
+	jsonData, err := os.ReadFile(manifestFile)
 	if err != nil {
 		log.Fatalf("can’t read manifest: %s", err)
 	}
