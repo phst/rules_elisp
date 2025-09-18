@@ -32,14 +32,16 @@ TEST_DATA = [
     "test-lib.elc",
     "test-manifest",
     "test-mapping",
-] + (["testäα𝐴🐈'.txt"] if bazel_features.docs.utf8_enabled else [])
+]
+
+UNICODE = "testäα𝐴🐈'.txt" if bazel_features.docs.utf8_enabled else "test.txt"
 
 elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA],
-    data = TEST_DATA,
+    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["unicode=$(rlocationpath %s)" % UNICODE],
+    data = TEST_DATA + ([UNICODE] if bazel_features.docs.utf8_enabled else []),
     deps = ["//elisp/runfiles"],
 )
 

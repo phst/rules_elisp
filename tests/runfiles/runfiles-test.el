@@ -24,23 +24,20 @@
 
 (require 'ert)
 
-(defvar @rlocations
-  (let ((table (make-hash-table :test #'equal)))
-    (while command-line-args-left
-      (pcase (pop command-line-args-left)
-        ((rx bos (let key (+ (not ?=))) ?= (let value (+ anychar)) eos)
-         (puthash key value table))
-        (other (error "Unknown command-line argument %S" other))))
-    table))
+(defvar @flag/test.txt)
+(defvar @flag/test-manifest)
+(defvar @flag/test-mapping)
+(defvar @flag/unicode)
 
-(defvar @test-rlocation
-  (or (gethash "testäα𝐴🐈'.txt" @rlocations)
-      (gethash "test.txt" @rlocations)
-      (error "Missing test.txt file")))
+(while command-line-args-left
+  (pcase (pop command-line-args-left)
+    ((rx bos (let key (+ (not ?=))) ?= (let value (+ anychar)) eos)
+     (set (intern (concat "tests/runfiles/runfiles-test--flag/" key)) value))
+    (other (error "Unknown command-line argument %S" other))))
 
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
-         (filename (elisp/runfiles/rlocation @test-rlocation runfiles))
+         (filename (elisp/runfiles/rlocation @flag/unicode runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (file-exists-p filename))
@@ -65,8 +62,7 @@
     (delete-directory directory :recursive)))
 
 (ert-deftest elisp/runfiles/special-chars/manifest ()
-  (let* ((manifest (elisp/runfiles/rlocation
-                    (gethash "test-manifest" @rlocations)))
+  (let* ((manifest (elisp/runfiles/rlocation @flag/test-manifest))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (pcase-dolist (`(,source ,target)
@@ -82,8 +78,7 @@
         (should (equal (elisp/runfiles/rlocation source runfiles) target))))))
 
 (ert-deftest elisp/runfiles/make/empty-file ()
-  (let* ((manifest (elisp/runfiles/rlocation
-                    (gethash "test-manifest" @rlocations)))
+  (let* ((manifest (elisp/runfiles/rlocation @flag/test-manifest))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (should-error (elisp/runfiles/rlocation "__init__.py" runfiles)
@@ -93,8 +88,7 @@
   "Check that we find runfiles in a mapped directory.
 See https://github.com/bazelbuild/bazel/issues/14336 for
 context."
-  (let* ((manifest (elisp/runfiles/rlocation
-                    (gethash "test-manifest" @rlocations)))
+  (let* ((manifest (elisp/runfiles/rlocation @flag/test-manifest))
          (runfiles (elisp/runfiles/make :manifest manifest
                                         :directory "/invalid/")))
     (should (equal (elisp/runfiles/rlocation "foo/bar/baz" runfiles)
@@ -104,7 +98,7 @@ context."
 
 (ert-deftest elisp/runfiles/file-handler ()
   (let* ((file-name-handler-alist file-name-handler-alist)
-         (rlocation @test-rlocation)
+         (rlocation @flag/test.txt)
          (repository (string-trim-right rlocation (rx ?/ (* anychar))))
          (virtual-repo-root (concat "/bazel-runfile:" repository))
          (virtual-file (concat "/bazel-runfile:" rlocation))
@@ -144,7 +138,7 @@ context."
 
 (ert-deftest elisp/runfiles/repo-mapping ()
   (let ((temp-dir (make-temp-file "elisp-test-" :directory ".runfiles")))
-    (copy-file (elisp/runfiles/rlocation (gethash "test-mapping" @rlocations))
+    (copy-file (elisp/runfiles/rlocation @flag/test-mapping)
                (expand-file-name "_repo_mapping" temp-dir))
     (let ((runfiles (elisp/runfiles/make :manifest "/invalid.manifest"
                                          :directory temp-dir)))
