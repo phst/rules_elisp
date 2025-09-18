@@ -32,6 +32,7 @@ def _pylint_impl(target, ctx):
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
     args.add("--persistent=no")
+    args.add(output_file, format = "--output-format=text,text:%s")
     args.add(pylintrc, format = "--rcfile=%s")
 
     # Set a fake PYTHONPATH so that Pylint can find imports for the main and
@@ -54,8 +55,6 @@ def _pylint_impl(target, ctx):
         uniquify = True,
         expand_directories = False,
     )
-
-    args.add(output_file, format = "--output-format=text,text:%s")
 
     # We’d like to add “--” after the options, but that’s not possible
     # due to https://github.com/PyCQA/pylint/issues/7003.
