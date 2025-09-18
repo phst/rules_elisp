@@ -22,10 +22,7 @@
 
 ;;; Code:
 
-(require 'cl-lib)
-(require 'map)
-(require 'seq)
-(require 'subr-x)
+(eval-when-compile (require 'cl-lib))
 
 (require 'elisp/proto/module)
 
