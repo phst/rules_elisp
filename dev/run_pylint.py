@@ -28,11 +28,9 @@ def main() -> None:
     result = subprocess.run(
         args.args,
         check=False,
-        stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
         encoding='utf-8', errors='backslashreplace')
     if result.returncode:
         print('$', shlex.join(result.args))
-        print(result.stdout)
         sys.exit(result.returncode)
 
 
