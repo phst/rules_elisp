@@ -18,7 +18,6 @@ load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "ga
 load("@phst_license_test//:def.bzl", "license_test")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
-load("@rules_python//python:py_binary.bzl", "py_binary")
 load("@rules_python//python/entry_points:py_console_script_binary.bzl", "py_console_script_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -73,13 +72,6 @@ alias(
         "@platforms//os:macos": "requirements-unix.lock",
         "@platforms//os:windows": "requirements-windows.lock",
     }),
-)
-
-py_binary(
-    name = "run_pylint",
-    srcs = ["run_pylint.py"],
-    python_version = "3.12",
-    visibility = ["//private:__pkg__"],
 )
 
 py_console_script_binary(
