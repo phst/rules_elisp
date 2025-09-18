@@ -26,9 +26,7 @@ def _pylint_impl(target, ctx):
     if "no-pylint" in tags or PyInfo not in target:
         return []
     info = target[PyInfo]
-    stem = "_{}.pylint".format(target.label.name)
-    output_file = ctx.actions.declare_file(stem + ".stamp")
-    pylint = ctx.executable._pylint
+    output_file = ctx.actions.declare_file("_{}.pylint.stamp".format(target.label.name))
     pylintrc = ctx.file._pylintrc
     args = ctx.actions.args()
     args.add("--persistent=no")
@@ -65,7 +63,7 @@ def _pylint_impl(target, ctx):
             direct = [pylintrc],
             transitive = [info.transitive_sources],
         ),
-        executable = pylint,
+        executable = ctx.executable._pylint,
         arguments = [args],
         mnemonic = "Pylint",
         progress_message = "Linting Python target %{label}",
