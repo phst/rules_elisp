@@ -269,7 +269,7 @@ platform(
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:windows",
-        "@rules_cc//cc/private/toolchain:clang-cl",
+        "@rules_cc//cc/compiler:clang-cl",
     ],
     visibility = ["//visibility:private"],
 )
