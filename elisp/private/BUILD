@@ -269,6 +269,8 @@ platform(
     constraint_values = [
         "@platforms//cpu:x86_64",
         "@platforms//os:windows",
+        # FIXME: File bug against rules_cc to move this target into a public
+        # package.
         "@rules_cc//cc/private/toolchain:clang-cl",
     ],
     visibility = ["//visibility:private"],
