@@ -115,7 +115,6 @@ go_test(
         shell.quote("--bin=$(rlocationpath :bin)"),
     ],
     data = ["bin"],
-    rundir = ".",
     deps = ["@rules_go//go/runfiles"],
 )
 
