@@ -45,7 +45,7 @@ func loadDirFromAttr(attr string, pkg bazelPackage) loadDirectory {
 // loadDirForFile returns the load directory that would be needed so that the
 // file can provide the feature and can be found using a one-argument require
 // form.  It returns the empty string if there is no such directory.
-func loadDirForFile(file sourceFile, feat feature) loadDirectory {
+func loadDirForFile(file sourceFile, feat Feature) loadDirectory {
 	stem := "/" + file.stem()
 	suffix := "/" + string(feat)
 	dir := strings.TrimSuffix(stem, suffix)
@@ -77,7 +77,7 @@ type loadPath []loadDirectory
 func loadPathForFile(name sourceFile, content []byte) loadPath {
 	dirs := make(map[loadDirectory]struct{})
 	for _, m := range providePattern.FindAllSubmatch(content, -1) {
-		feat := feature(m[1])
+		feat := Feature(m[1])
 		// Ignore features that couldn’t be used with a simple ‘require’
 		// form.  Only if the file name is of the form “FEATURE” or
 		// “DIR/FEATURE”, we can ‘require’ the feature from this file.

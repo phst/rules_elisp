@@ -49,10 +49,10 @@ elisp_library(
 	rc, cleanup := repo.NewRemoteCache(nil)
 	defer cleanup()
 	testRule := rule.NewRule("elisp_test", "lib_test")
-	imps := imports{Requires: []feature{"lib"}}
+	imports := Imports{Requires: []Feature{"lib"}}
 	lbl := label.New("", "pkg", "lib_test")
 
-	lang.Resolve(cfg, ix, rc, testRule, imps, lbl)
+	lang.Resolve(cfg, ix, rc, testRule, imports, lbl)
 
 	got := testRule.AttrStrings("deps")
 	want := []string{":lib"}

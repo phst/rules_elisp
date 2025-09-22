@@ -31,7 +31,7 @@ import (
 // actually parse the source files.
 func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.ImportSpec {
 	pkg := bazelPackage(f.Pkg)
-	var provides []feature
+	var provides []Feature
 	switch r.Kind() {
 	case libraryKind:
 		provides = libraryProvides(pkg, r)
@@ -50,10 +50,10 @@ func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.Imp
 	return imports
 }
 
-func libraryProvides(pkg bazelPackage, r *rule.Rule) []feature {
+func libraryProvides(pkg bazelPackage, r *rule.Rule) []Feature {
 	srcs := r.AttrStrings("srcs")
 	load := loadPathFromAttr(r.AttrStrings("load_path"), pkg)
-	var provides []feature
+	var provides []Feature
 	for _, src := range srcs {
 		lbl, err := label.Parse(src)
 		if err != nil {
@@ -72,8 +72,8 @@ func libraryProvides(pkg bazelPackage, r *rule.Rule) []feature {
 
 // potentialProvides returns the features that the file might provide, assuming
 // the load path is loadPath.
-func potentialProvides(file sourceFile, loadPath loadPath) []feature {
-	var r []feature
+func potentialProvides(file sourceFile, loadPath loadPath) []Feature {
+	var r []Feature
 	for _, dir := range loadPath {
 		feat := potentialProvide(file, dir)
 		if !feat.valid() {
@@ -88,23 +88,23 @@ func potentialProvides(file sourceFile, loadPath loadPath) []feature {
 // potentialProvide returns the name of the feature that the file might provide,
 // assuming dir is a directory in the load path.  It returns the empty string if
 // there is no such feature.
-func potentialProvide(file sourceFile, dir loadDirectory) feature {
+func potentialProvide(file sourceFile, dir loadDirectory) Feature {
 	stem := file.stem()
 	if dir == "." {
-		return feature(stem)
+		return Feature(stem)
 	}
 	s := pathtools.TrimPrefix(stem, string(dir))
 	if s == stem {
 		return ""
 	}
-	return feature(s)
+	return Feature(s)
 }
 
-func protoProvides(pkg bazelPackage, r *rule.Rule) []feature {
+func protoProvides(pkg bazelPackage, r *rule.Rule) []Feature {
 	stem, ok := strings.CutSuffix(r.Name(), "_elisp_proto")
 	if !ok || stem == "" {
 		return nil
 	}
-	feat := feature(path.Join(string(pkg), stem+".proto"))
-	return []feature{feat}
+	feat := Feature(path.Join(string(pkg), stem+".proto"))
+	return []Feature{feat}
 }

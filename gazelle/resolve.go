@@ -33,12 +33,12 @@ import (
 // mappings for the features in imports.
 func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
-	r *rule.Rule, importsAny any, from label.Label,
+	r *rule.Rule, imports any, from label.Label,
 ) {
 	if r.Kind() == protoLibraryKind {
 		return
 	}
-	imp, ok := importsAny.(imports)
+	imp, ok := imports.(Imports)
 	if !ok {
 		return
 	}
@@ -62,7 +62,7 @@ func (elisp) Resolve(
 	}
 }
 
-func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat feature) label.Label {
+func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) label.Label {
 	spec := feat.importSpec()
 	if lbl, ok := resolve.FindRuleWithOverride(c, spec, languageName); ok && lbl != label.NoLabel {
 		return lbl

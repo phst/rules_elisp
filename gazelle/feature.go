@@ -16,14 +16,14 @@ package gazelle
 
 import "github.com/bazelbuild/bazel-gazelle/resolve"
 
-// feature names an Emacs Lisp feature.  See
+// Feature names an Emacs Lisp feature.  See
 // https://www.gnu.org/software/emacs/manual/html_node/elisp/Named-Features.html.
-// The empty feature is invalid.
-type feature string
+// The empty Feature is invalid.
+type Feature string
 
-func (f feature) valid() bool { return f != "" }
+func (f Feature) valid() bool { return f != "" }
 
-func (f feature) importSpec() resolve.ImportSpec {
+func (f Feature) importSpec() resolve.ImportSpec {
 	return resolve.ImportSpec{
 		Lang: languageName,
 		Imp:  string(f),
