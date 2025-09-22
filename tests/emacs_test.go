@@ -25,7 +25,6 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
-	"runtime"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
@@ -79,17 +78,18 @@ func TestRun(t *testing.T) {
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
-	windows := runtime.GOOS == "windows"
-	outputFile := "/:/tmp/output.dat"
-	if windows {
-		outputFile = `/:C:\Temp\output.dat`
+	var outputFile string
+	if os.PathSeparator == '/' {
+		outputFile = "/tmp/output.dat"
+	} else {
+		outputFile = `C:\Temp\output.dat`
 	}
 	cmd := exec.Command(
 		*launcher,
 		"--option",
 		*binaryCc,
 		" \t\n\r\f äα𝐴🐈'\\\"",
-		outputFile,
+		"/:"+outputFile,
 	)
 	out, err := cmd.Output()
 	if err != nil {
@@ -103,12 +103,6 @@ func TestRunWrapped(t *testing.T) {
 		t.Fatal(err)
 	}
 	runfilesLib := *runfilesElc
-	var wantOutputFile string
-	if os.PathSeparator == '/' {
-		wantOutputFile = "/tmp/output.dat"
-	} else {
-		wantOutputFile = `C:\Temp\output.dat`
-	}
 	gotArgs := got.Args
 	wantArgs := []string{"--quick", "--batch"}
 	// The load path setup depends on whether we use manifest-based or
@@ -128,7 +122,7 @@ func TestRunWrapped(t *testing.T) {
 		"--option",
 		*binaryCc,
 		" \t\n\r\f äα𝐴🐈'\\\"",
-		"/:"+wantOutputFile,
+		"/:"+outputFile,
 	)
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
 		t.Errorf("positional arguments: -got +want:\n%s", diff)
@@ -143,7 +137,7 @@ func TestRunWrapped(t *testing.T) {
 		"tags":        []any{"local", "mytag"},
 		"loadPath":    []any{"phst_rules_elisp"},
 		"inputFiles":  []any{*binaryCc, *binaryH},
-		"outputFiles": []any{wantOutputFile},
+		"outputFiles": []any{outputFile},
 	}
 	if diff := cmp.Diff(
 		gotManifest, wantManifest,
