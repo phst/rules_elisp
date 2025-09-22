@@ -50,7 +50,7 @@ elisp_test(
 go_test(
     name = "proto_x_test",
     size = "medium",
-    srcs = ["module_test.go"],
+    srcs = glob(["*_test.go"]),
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.

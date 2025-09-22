@@ -65,11 +65,10 @@ go_library(
 go_test(
     name = "gazelle_test",
     size = "small",
-    srcs = [
-        "generate_test.go",
-        "imports_test.go",
-        "resolve_test.go",
-    ],
+    srcs = glob(
+        ["*_test.go"],
+        exclude = ["integration_test.go"],
+    ),
     embed = [":gazelle"],
     deps = [
         "@com_github_bazelbuild_buildtools//build",
