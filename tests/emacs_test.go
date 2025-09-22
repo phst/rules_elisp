@@ -135,7 +135,7 @@ func TestRunWrapped(t *testing.T) {
 		"/:"+wantOutputFile,
 	)
 	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
-		t.Fatalf("positional arguments: -got +want:\n%s", diff)
+		t.Errorf("positional arguments: -got +want:\n%s", diff)
 	}
 	jsonData := []byte(got.Manifest)
 	var gotManifest map[string]any
@@ -153,7 +153,7 @@ func TestRunWrapped(t *testing.T) {
 		gotManifest, wantManifest,
 		cmp.FilterPath(isInputFile, cmp.Transformer("", resolveRunfile)),
 	); diff != "" {
-		t.Fatalf("manifest: -got +want:\n%s", diff)
+		t.Errorf("manifest: -got +want:\n%s", diff)
 	}
 }
 
