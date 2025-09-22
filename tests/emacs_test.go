@@ -47,8 +47,7 @@ func TestVersion(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	emacs := *emacs
-	cmd := exec.Command(emacs, "--version")
+	cmd := exec.Command(*emacs, "--version")
 	cmd.Env = append(os.Environ(), rfEnv...)
 	if err := cmd.Run(); err != nil {
 		t.Error(err)
@@ -61,8 +60,7 @@ func TestRun(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	binary := *empty
-	cmd := exec.Command(binary)
+	cmd := exec.Command(*empty)
 	cmd.Env = append(os.Environ(), rfEnv...)
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
@@ -81,17 +79,15 @@ func TestRun(t *testing.T) {
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
-	inputFile := *binaryCc
 	windows := runtime.GOOS == "windows"
-	launcher := *launcher
 	outputFile := "/:/tmp/output.dat"
 	if windows {
 		outputFile = `/:C:\Temp\output.dat`
 	}
 	cmd := exec.Command(
-		launcher,
+		*launcher,
 		"--option",
-		inputFile,
+		*binaryCc,
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		outputFile,
 	)
@@ -130,7 +126,7 @@ func TestRunWrapped(t *testing.T) {
 	}
 	wantArgs = append(wantArgs,
 		"--option",
-		inputFile,
+		*binaryCc,
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		"/:"+wantOutputFile,
 	)
