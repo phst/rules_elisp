@@ -18,6 +18,7 @@ package tests_test
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log"
@@ -51,10 +52,11 @@ func TestRun(t *testing.T) {
 		name             string
 		program          string
 		args             []string
+		wantCode         int
 		wantOut, wantErr string
 	}{
-		{"emacs --version", *emacs, []string{"--version"}, "", ""},
-		{"empty binary", *empty, nil, `^$`, `^$`},
+		{"emacs --version", *emacs, []string{"--version"}, 0, "", ""},
+		{"empty binary", *empty, nil, 0, `^$`, `^$`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cmd := exec.Command(tc.program, tc.args...)
@@ -63,8 +65,9 @@ func TestRun(t *testing.T) {
 			errBuf := new(bytes.Buffer)
 			cmd.Stdout = outBuf
 			cmd.Stderr = errBuf
-			if err := cmd.Run(); err != nil {
-				t.Error(err)
+			err := cmd.Run()
+			if gotCode := exitCode(t, err); gotCode != tc.wantCode {
+				t.Errorf("exit code: got %#x, want %#x", gotCode, tc.wantCode)
 			}
 			gotOut := outBuf.Bytes()
 			wantOut := regexp.MustCompile(tc.wantOut)
@@ -172,6 +175,17 @@ func resolveRunfile(s string) string {
 		log.Fatalf("error resolving runfile for comparison: %s", err)
 	}
 	return r
+}
+
+func exitCode(t *testing.T, err error) int {
+	if err == nil {
+		return 0
+	}
+	var exitErr *exec.ExitError
+	if !errors.As(err, &exitErr) {
+		t.Fatalf("error has unexpected type %T: %s", err, err)
+	}
+	return exitErr.ExitCode()
 }
 
 func runfileFlag(name string) *string {
