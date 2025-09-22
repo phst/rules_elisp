@@ -71,18 +71,8 @@ executable_only(
 
 go_library(
     name = "wrap_lib",
-    testonly = True,
     srcs = ["main.go"],
-    data = [
-        "//elisp/private/tools:binary.cc",
-        "//elisp/private/tools:binary.h",
-        "//elisp/runfiles:runfiles.elc",
-    ],
     importpath = "github.com/phst/rules_elisp/tests/wrap",
-    deps = [
-        "@com_github_google_go_cmp//cmp",
-        "@rules_go//go/runfiles",
-    ],
 )
 
 go_binary(

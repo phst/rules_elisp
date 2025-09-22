@@ -17,21 +17,28 @@ package tests_test
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"reflect"
 	"runtime"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/google/go-cmp/cmp"
 )
 
 var (
-	emacs    = runfileFlag("//emacs")
-	empty    = runfileFlag("//tests:empty")
-	launcher = runfileFlag("//tests/wrap:launcher")
-	binaryCc = runfileFlag("//elisp/private/tools:binary.cc")
+	emacs       = runfileFlag("//emacs")
+	empty       = runfileFlag("//tests:empty")
+	launcher    = runfileFlag("//tests/wrap:launcher")
+	binaryH     = runfileFlag("//elisp/private/tools:binary.h")
+	binaryCc    = runfileFlag("//elisp/private/tools:binary.cc")
+	runfilesElc = runfileFlag("//elisp/runfiles:runfiles.elc")
 )
 
 // Tests that emacs --version works.
@@ -88,11 +95,92 @@ func TestRunWrapped(t *testing.T) {
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		outputFile,
 	)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		t.Error(err)
+	out, err := cmd.Output()
+	if err != nil {
+		t.Fatal(err)
 	}
+	var got struct {
+		Args     []string
+		Manifest string
+	}
+	if err := json.Unmarshal(out, &got); err != nil {
+		t.Fatal(err)
+	}
+	runfilesLib, err := runfiles.Rlocation("phst_rules_elisp/elisp/runfiles/runfiles.elc")
+	if err != nil {
+		t.Fatal(err)
+	}
+	var wantOutputFile string
+	if os.PathSeparator == '/' {
+		wantOutputFile = "/tmp/output.dat"
+	} else {
+		wantOutputFile = `C:\Temp\output.dat`
+	}
+	gotArgs := got.Args
+	wantArgs := []string{"--quick", "--batch"}
+	// The load path setup depends on whether we use manifest-based or
+	// directory-based runfiles.
+	if dir, err := runfiles.Rlocation("phst_rules_elisp"); err == nil {
+		// Directory-based runfiles.
+		wantArgs = append(wantArgs, "--directory="+dir)
+	} else {
+		// Manifest-based runfiles.
+		wantArgs = append(wantArgs,
+			"--load="+runfilesLib,
+			"--funcall=elisp/runfiles/install-handler",
+			"--directory=/bazel-runfile:phst_rules_elisp",
+		)
+	}
+	wantArgs = append(wantArgs,
+		"--option",
+		inputFile,
+		" \t\n\r\f äα𝐴🐈'\\\"",
+		"/:"+wantOutputFile,
+	)
+	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
+		t.Fatalf("positional arguments: -got +want:\n%s", diff)
+	}
+	jsonData := []byte(got.Manifest)
+	var gotManifest map[string]any
+	if err := json.Unmarshal(jsonData, &gotManifest); err != nil {
+		t.Fatalf("can’t decode manifest: %s", err)
+	}
+	wantManifest := map[string]any{
+		"root":        "RUNFILES_ROOT",
+		"tags":        []any{"local", "mytag"},
+		"loadPath":    []any{"phst_rules_elisp"},
+		"inputFiles":  []any{"phst_rules_elisp/elisp/private/tools/binary.cc", "phst_rules_elisp/elisp/private/tools/binary.h"},
+		"outputFiles": []any{wantOutputFile},
+	}
+	if diff := cmp.Diff(
+		gotManifest, wantManifest,
+		cmp.FilterPath(isInputFile, cmp.Transformer("", resolveRunfile)),
+	); diff != "" {
+		t.Fatalf("manifest: -got +want:\n%s", diff)
+	}
+}
+
+func isInputFile(p cmp.Path) bool {
+	if len(p) < 2 {
+		return false
+	}
+	m, ok := p[1].(cmp.MapIndex)
+	if !ok {
+		return false
+	}
+	k := m.Key()
+	return k.Kind() == reflect.String && k.String() == "inputFiles"
+}
+
+func resolveRunfile(s string) string {
+	if filepath.IsAbs(s) {
+		return s
+	}
+	r, err := runfiles.Rlocation(s)
+	if err != nil {
+		log.Fatalf("error resolving runfile for comparison: %s", err)
+	}
+	return r
 }
 
 func runfileFlag(name string) *string {
