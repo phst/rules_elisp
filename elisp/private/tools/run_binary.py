@@ -68,14 +68,12 @@ def main() -> None:
             manifest.write(opts, input_files, output_files, manifest_file)
         args.extend(opts.argv[1:])
         env.update(run_files.environment())
-        try:
-            subprocess.run(args, env=env, check=True)
-        except subprocess.CalledProcessError as ex:
-            if ex.returncode > 0:
-                # Don’t print a stacktrace if Emacs exited with a non-zero exit
-                # code.
-                sys.exit(ex.returncode)
-            raise
+        result = subprocess.run(args, env=env, check=False)
+        if result.returncode > 0:
+            # Don’t print a stacktrace if Emacs exited with a non-zero exit
+            # code.
+            sys.exit(result.returncode)
+        result.check_returncode()
 
 
 def _runfiles_dir(env: Mapping[str, str]) -> Optional[pathlib.Path]:
