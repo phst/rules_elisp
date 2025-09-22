@@ -55,7 +55,7 @@ func TestRun(t *testing.T) {
 		wantCode         int
 		wantOut, wantErr string
 	}{
-		{"emacs --version", *emacs, []string{"--version"}, 0, "", ""},
+		{"emacs --version", *emacs, []string{"--version"}, 0, `^GNU Emacs \d+`, `^$`},
 		{"empty binary", *empty, nil, 0, `^$`, `^$`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
