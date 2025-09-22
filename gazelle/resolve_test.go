@@ -49,7 +49,7 @@ elisp_library(
 	rc, cleanup := repo.NewRemoteCache(nil)
 	defer cleanup()
 	testRule := rule.NewRule("elisp_test", "lib_test")
-	imps := requires{"lib"}
+	imps := imports{"lib"}
 	lbl := label.New("", "pkg", "lib_test")
 
 	lang.Resolve(cfg, ix, rc, testRule, imps, lbl)
