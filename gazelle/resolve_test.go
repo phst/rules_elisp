@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gazelle
+package gazelle_test
 
 import (
 	"testing"
@@ -25,10 +25,12 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/phst/rules_elisp/gazelle"
 )
 
 func TestResolve(t *testing.T) {
-	lang := NewLanguage()
+	lang := gazelle.NewLanguage()
 	cfg := testtools.NewTestConfig(t, []config.Configurer{new(resolve.Configurer)}, []language.Language{lang}, nil)
 	build, err := rule.LoadData("pkg/BUILD", "pkg", []byte(`
 elisp_library(
@@ -49,7 +51,7 @@ elisp_library(
 	rc, cleanup := repo.NewRemoteCache(nil)
 	defer cleanup()
 	testRule := rule.NewRule("elisp_test", "lib_test")
-	imports := Imports{Requires: []Feature{"lib"}}
+	imports := gazelle.Imports{Requires: []gazelle.Feature{"lib"}}
 	lbl := label.New("", "pkg", "lib_test")
 
 	lang.Resolve(cfg, ix, rc, testRule, imports, lbl)

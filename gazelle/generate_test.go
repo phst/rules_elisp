@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package gazelle
+package gazelle_test
 
 import (
 	"path/filepath"
@@ -23,6 +23,8 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/bazelbuild/buildtools/build"
 	"github.com/google/go-cmp/cmp"
+
+	"github.com/phst/rules_elisp/gazelle"
 )
 
 func TestGenerateRules(t *testing.T) {
@@ -71,7 +73,7 @@ func TestGenerateRules(t *testing.T) {
 	})
 	t.Cleanup(cleanup)
 
-	lang := NewLanguage()
+	lang := gazelle.NewLanguage()
 	cfg := testtools.NewTestConfig(t, nil, []language.Language{lang}, nil)
 
 	for _, tc := range []struct {
@@ -91,11 +93,11 @@ func TestGenerateRules(t *testing.T) {
 					newRule("elisp_proto_library", "my_elisp_proto", stringList("deps", ":my_proto")),
 				},
 				Imports: []any{
-					Imports{},
-					Imports{},
-					Imports{Requires: []Feature{"lib-2"}},
-					Imports{Requires: []Feature{"lib-1"}},
-					Imports{},
+					gazelle.Imports{},
+					gazelle.Imports{},
+					gazelle.Imports{Requires: []gazelle.Feature{"lib-2"}},
+					gazelle.Imports{Requires: []gazelle.Feature{"lib-1"}},
+					gazelle.Imports{},
 				},
 			},
 		},
@@ -106,7 +108,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_2", stringList("srcs", "lib-2.el"), stringList("load_path", ".")),
 				},
-				Imports: []any{Imports{}},
+				Imports: []any{gazelle.Imports{}},
 			},
 		},
 		{
@@ -116,7 +118,7 @@ func TestGenerateRules(t *testing.T) {
 				Gen: []*rule.Rule{
 					newRule("elisp_library", "lib_3", stringList("srcs", "lib-3.el"), stringList("load_path", "/a")),
 				},
-				Imports: []any{Imports{}},
+				Imports: []any{gazelle.Imports{}},
 			},
 		},
 	} {
