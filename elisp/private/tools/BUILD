@@ -24,7 +24,6 @@ load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
-load("//elisp/private:executable_only.bzl", "executable_only")
 load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -102,7 +101,7 @@ cc_library(
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [
-        ":run_binary_stripped",
+        ":run_binary",
         "//elisp/runfiles:runfiles.elc",
     ],
     features = FEATURES,
@@ -111,7 +110,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary))*"'),
         shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
     visibility = [
@@ -167,11 +166,6 @@ cc_binary(
     ],
 )
 
-executable_only(
-    name = "run_binary_stripped",
-    src = ":run_binary",
-)
-
 # This is called “tst” and not “test” to keep Gazelle from thinking it’s a test
 # instead of a library.  Same with run-tst.el.
 cc_library(
@@ -180,14 +174,14 @@ cc_library(
     srcs = ["tst.cc"],
     hdrs = ["tst.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_tst_stripped"],
+    data = [":run_tst"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TST=R"*($(rlocationpath :run_tst_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_TST=R"*($(rlocationpath :run_tst))*"'),
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
@@ -248,12 +242,6 @@ cc_binary(
         "@abseil-cpp//absl/time",
         "@abseil-cpp//absl/types:span",
     ],
-)
-
-executable_only(
-    name = "run_tst_stripped",
-    testonly = True,
-    src = ":run_tst",
 )
 
 # keep
