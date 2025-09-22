@@ -60,6 +60,8 @@ elisp_test_suite(name = "elisp_test")
 TEST_DATA = [
     # keep sorted
     "//elisp/private/tools:binary.cc",
+    "//elisp/private/tools:binary.h",
+    "//elisp/runfiles:runfiles.elc",
     "//emacs",
     "//tests:empty",
     "//tests:test",
