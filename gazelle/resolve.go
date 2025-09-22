@@ -43,7 +43,7 @@ func (elisp) Resolve(
 		return
 	}
 	var deps []string
-	for _, feat := range imp {
+	for _, feat := range imp.Requires {
 		lbl := resolveFeature(c, ix, from, feat)
 		if lbl == label.NoLabel {
 			log.Printf("%s: no rule for required feature %s found", from, feat)
