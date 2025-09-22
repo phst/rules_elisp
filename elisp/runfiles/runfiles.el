@@ -238,8 +238,7 @@ arguments to the operation."
                (and (eq inhibit-file-name-operation operation)
                     inhibit-file-name-handlers)))
         (inhibit-file-name-operation operation)
-        (handler-func
-         (intern (format "elisp/runfiles/runfiles--%s" operation))))
+        (handler-func (intern (format "%s%s" '@ operation))))
     (cond
      ((fboundp handler-func)
       ;; A specific handler exists; call it.

@@ -32,7 +32,7 @@
 (while command-line-args-left
   (pcase (pop command-line-args-left)
     ((rx bos (let key (+ (not ?=))) ?= (let value (+ anychar)) eos)
-     (set (intern (concat "tests/runfiles/runfiles-test--flag/" key)) value))
+     (set (intern (format "%s%s" '@flag/ key)) value))
     (other (error "Unknown command-line argument %S" other))))
 
 (ert-deftest elisp/runfiles/rlocation ()
