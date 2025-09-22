@@ -106,10 +106,7 @@ func TestRunWrapped(t *testing.T) {
 	if err := json.Unmarshal(out, &got); err != nil {
 		t.Fatal(err)
 	}
-	runfilesLib, err := runfiles.Rlocation("phst_rules_elisp/elisp/runfiles/runfiles.elc")
-	if err != nil {
-		t.Fatal(err)
-	}
+	runfilesLib := *runfilesElc
 	var wantOutputFile string
 	if os.PathSeparator == '/' {
 		wantOutputFile = "/tmp/output.dat"
@@ -149,7 +146,7 @@ func TestRunWrapped(t *testing.T) {
 		"root":        "RUNFILES_ROOT",
 		"tags":        []any{"local", "mytag"},
 		"loadPath":    []any{"phst_rules_elisp"},
-		"inputFiles":  []any{"phst_rules_elisp/elisp/private/tools/binary.cc", "phst_rules_elisp/elisp/private/tools/binary.h"},
+		"inputFiles":  []any{*binaryCc, *binaryH},
 		"outputFiles": []any{wantOutputFile},
 	}
 	if diff := cmp.Diff(
