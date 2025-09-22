@@ -28,10 +28,12 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/rule"
 )
 
-// NewLanguage returns a Gazelle language object for Emacs Lisp.
+// NewLanguage returns a Gazelle language object for Emacs Lisp.  The name of
+// the language is “elisp”.
 //
 // The returned [language.Language] also implements
-// [language.ModuleAwareLanguage].
+// [language.ModuleAwareLanguage].  The [language.Language.GenerateRules] method
+// populates the [language.GenerateResult.Imports] slice with [Imports] objects.
 func NewLanguage() language.Language {
 	return elisp{}
 }
