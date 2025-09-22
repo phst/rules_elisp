@@ -25,6 +25,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
@@ -40,39 +41,42 @@ var (
 	runfilesElc = runfileFlag("//elisp/runfiles:runfiles.elc")
 )
 
-// Tests that emacs --version works.
-func TestVersion(t *testing.T) {
-	rfEnv, err := runfiles.Env()
-	if err != nil {
-		t.Fatal(err)
-	}
-	cmd := exec.Command(*emacs, "--version")
-	cmd.Env = append(os.Environ(), rfEnv...)
-	if err := cmd.Run(); err != nil {
-		t.Error(err)
-	}
-}
-
-// Tests that the empty binary produces empty output.
 func TestRun(t *testing.T) {
 	rfEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
 	}
-	cmd := exec.Command(*empty)
-	cmd.Env = append(os.Environ(), rfEnv...)
-	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	if err := cmd.Run(); err != nil {
-		t.Error(err)
-	}
-	if stdout.Len() != 0 {
-		t.Errorf("unexpected stdout: %q", stdout.Bytes())
-	}
-	if stderr.Len() != 0 {
-		t.Errorf("unexpected stderr: %q", stderr.Bytes())
+	env := append(os.Environ(), rfEnv...)
+	for _, tc := range []struct {
+		name             string
+		program          string
+		args             []string
+		wantOut, wantErr string
+	}{
+		{"emacs --version", *emacs, []string{"--version"}, "", ""},
+		{"empty binary", *empty, nil, `^$`, `^$`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			cmd := exec.Command(tc.program, tc.args...)
+			cmd.Env = env
+			outBuf := new(bytes.Buffer)
+			errBuf := new(bytes.Buffer)
+			cmd.Stdout = outBuf
+			cmd.Stderr = errBuf
+			if err := cmd.Run(); err != nil {
+				t.Error(err)
+			}
+			gotOut := outBuf.Bytes()
+			wantOut := regexp.MustCompile(tc.wantOut)
+			if !wantOut.Match(gotOut) {
+				t.Errorf("standard output: got:\n%s\nwant something that matches:\n%s", gotOut, wantOut)
+			}
+			gotErr := errBuf.Bytes()
+			wantErr := regexp.MustCompile(tc.wantErr)
+			if !wantErr.Match(gotErr) {
+				t.Errorf("standard error: got:\n%s\nwant something that matches:\n%s", gotErr, wantErr)
+			}
+		})
 	}
 }
 
