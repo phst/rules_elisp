@@ -85,12 +85,6 @@ func TestRun(t *testing.T) {
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
-	var outputFile string
-	if os.PathSeparator == '/' {
-		outputFile = "/tmp/output.dat"
-	} else {
-		outputFile = `C:\Temp\output.dat`
-	}
 	cmd := exec.Command(
 		*launcher,
 		"--option",
