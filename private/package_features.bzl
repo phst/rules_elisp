@@ -31,6 +31,7 @@ visibility([
     "//examples",
     "//gazelle",
     "//gazelle/testdata",
+    "//private/testutil",
     "//tests",
     "//tests/pkg",
     "//tests/proto",

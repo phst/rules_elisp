@@ -35,13 +35,14 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/phst/rules_elisp/private/testutil"
 )
 
 var (
-	test                  = runfileFlag("//tests:test")
-	testEl                = runfileFlag("//tests:test.el")
+	test                  = testutil.RunfileFlag("//tests:test")
+	testEl                = testutil.RunfileFlag("//tests:test.el")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
-	jUnitXsd              = runfileFlag("@junit_xsd//:JUnit.xsd")
+	jUnitXsd              = testutil.RunfileFlag("@junit_xsd//:JUnit.xsd")
 	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
 )
 
