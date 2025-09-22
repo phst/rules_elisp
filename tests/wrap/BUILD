@@ -17,7 +17,6 @@ load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")  # buildifier: disable=bzl-visibility
-load("//elisp/private:executable_only.bzl", "executable_only")  # buildifier: disable=bzl-visibility
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -35,7 +34,7 @@ cc_binary(
     testonly = True,
     srcs = ["//elisp/private/tools:launcher.cc"],
     copts = LAUNCHER_COPTS,
-    data = [":wrap_stripped"],
+    data = [":wrap"],
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
@@ -44,7 +43,7 @@ cc_binary(
         # add additional quoting.
         shell.quote('RULES_ELISP_HEADER="elisp/private/tools/binary.h"'),
         shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap_stripped))*")',
+            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap))*")',
             'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
             'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
             'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
@@ -61,12 +60,6 @@ cc_binary(
 build_test(
     name = "launcher_test",
     targets = [":launcher"],
-)
-
-executable_only(
-    name = "wrap_stripped",
-    testonly = True,
-    src = ":wrap",
 )
 
 go_library(
