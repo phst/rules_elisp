@@ -14,7 +14,7 @@
 
 """Defines the internal `executable_only` rule."""
 
-visibility(["//elisp/private/tools", "//tests/wrap"])
+visibility(["//elisp/private/tools"])
 
 def _executable_only_impl(ctx):
     info = ctx.attr.src[DefaultInfo]
