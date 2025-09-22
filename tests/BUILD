@@ -90,6 +90,7 @@ go_test(
         "version.txt",
     ],
     deps = [
+        "//private/testutil",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@rules_go//go/runfiles",

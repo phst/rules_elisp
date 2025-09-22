@@ -19,8 +19,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"flag"
-	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -31,16 +29,17 @@ import (
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/google/go-cmp/cmp"
+	"github.com/phst/rules_elisp/private/testutil"
 )
 
 var (
-	emacs       = runfileFlag("//emacs")
-	empty       = runfileFlag("//tests:empty")
-	signal      = runfileFlag("//tests:signal")
-	launcher    = runfileFlag("//tests/wrap:launcher")
-	binaryH     = runfileFlag("//elisp/private/tools:binary.h")
-	binaryCc    = runfileFlag("//elisp/private/tools:binary.cc")
-	runfilesElc = runfileFlag("//elisp/runfiles:runfiles.elc")
+	emacs       = testutil.RunfileFlag("//emacs")
+	empty       = testutil.RunfileFlag("//tests:empty")
+	signal      = testutil.RunfileFlag("//tests:signal")
+	launcher    = testutil.RunfileFlag("//tests/wrap:launcher")
+	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
+	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
+	runfilesElc = testutil.RunfileFlag("//elisp/runfiles:runfiles.elc")
 )
 
 func TestRun(t *testing.T) {
@@ -186,25 +185,4 @@ func exitCode(t *testing.T, err error) int {
 		t.Fatalf("error has unexpected type %T: %s", err, err)
 	}
 	return exitErr.ExitCode()
-}
-
-func runfileFlag(name string) *string {
-	r := new(runfileFlagValue)
-	flag.Var(r, name, fmt.Sprintf("location of %s relative to the runfiles root", name))
-	return (*string)(r)
-}
-
-type runfileFlagValue string
-
-func (v runfileFlagValue) String() string {
-	return string(v)
-}
-
-func (v *runfileFlagValue) Set(s string) error {
-	p, err := runfiles.Rlocation(s)
-	if err != nil {
-		return err
-	}
-	*v = runfileFlagValue(p)
-	return nil
 }
