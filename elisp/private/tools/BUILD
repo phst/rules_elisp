@@ -23,7 +23,6 @@ load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
 load("//elisp/private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
-load("//elisp/private:executable_only.bzl", "executable_only")
 load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -90,7 +89,7 @@ cc_library(
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [
-        ":run_binary_stripped",
+        ":run_binary",
         "//elisp/runfiles:runfiles.elc",
     ],
     features = FEATURES,
@@ -99,7 +98,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary))*"'),
         shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
     visibility = [
@@ -128,11 +127,6 @@ py_binary(
     ],
 )
 
-executable_only(
-    name = "run_binary_stripped",
-    src = ":run_binary",
-)
-
 cc_library(
     name = "test",
     testonly = True,
@@ -141,7 +135,7 @@ cc_library(
     hdrs = ["binary.h"],
     copts = COPTS + CXXOPTS,
     data = [
-        ":run_test_stripped",
+        ":run_test",
         "//elisp/private/tools:run-test.elc",
         "//elisp/runfiles:runfiles.elc",
     ],
@@ -151,7 +145,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test))*"'),
         shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
             'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
             'RULES_ELISP_NATIVE_LITERAL(R"*(--run-test-elc=$(rlocationpath //elisp/private/tools:run-test.elc))*")',
@@ -180,12 +174,6 @@ py_binary(
         ":manifest",
         ":runfiles",
     ],
-)
-
-executable_only(
-    name = "run_test_stripped",
-    testonly = True,
-    src = ":run_test",
 )
 
 # keep
