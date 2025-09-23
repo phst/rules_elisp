@@ -1005,7 +1005,7 @@ exact copies as equal."
       (load-buffers ())
       (failure-messages (make-hash-table :test #'eq))
       (start-time (current-time))
-      test-sources skip-tests skip-tags selector tests exit-code)
+      test-sources skip-tests skip-tags selector tests reporter exit-code)
 
   ;; Parse command-line options.
   (cl-flet ((unquote (if (memq system-type '(ms-dos windows-nt cygwin))
@@ -1152,10 +1152,13 @@ exact copies as equal."
      (lambda (&rest args)
        (pcase-exhaustive args
          (`(run-started ,stats)
-          (message "Running %d tests" (ert-stats-total stats)))
+          (let ((total (ert-stats-total stats)))
+            (setq reporter (make-progress-reporter
+                            (format-message "Running %d tests..." total)
+                            0 total))))
          (`(test-started ,_stats ,test)
           (message "Running test %s" (ert-test-name test)))
-         (`(test-ended ,_stats ,test ,result)
+         (`(test-ended ,stats ,test ,result)
           (let* ((name (ert-test-name test))
                  (duration (ert-test-result-duration result))
                  (expected (ert-test-result-expected-p test result))
@@ -1172,6 +1175,7 @@ exact copies as equal."
                 (message "%s" message)
                 ;; @failure-message is potentially slow, cache its results.
                 (puthash test message failure-messages)))
+            (progress-reporter-update reporter (ert-stats-completed stats))
             (and fail-fast (not expected) (cl-return))))
          (`(run-ended ,stats ,_abortedp)
           (let ((completed (ert-stats-completed stats))
@@ -1185,7 +1189,8 @@ exact copies as equal."
             (when verbose-coverage
               (message "Writing coverage report into directory %s"
                        coverage-dir))
-            (@write-coverage-report coverage-dir load-buffers)))))))
+            (@write-coverage-report coverage-dir load-buffers))
+          (progress-reporter-done reporter))))))
 
   ;; Report test status back to the Bazel test runner.
   (kill-emacs exit-code))
