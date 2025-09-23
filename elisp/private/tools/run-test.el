@@ -1057,14 +1057,16 @@ exact copies as equal."
       (error "Coverage requested but COVERAGE_MANIFEST not set"))
     (unless coverage-dir
       (error "Coverage requested but COVERAGE_DIR not set"))
-    (when verbose-coverage
-      (message "Reading coverage manifest %s" coverage-manifest))
     (let ((format-alist nil)
           (after-insert-file-functions nil)
           ;; See
           ;; https://github.com/bazelbuild/bazel/issues/374#issuecomment-2594713891.
           (coding-system-for-read 'utf-8-unix)
-          (instrumented-files ()))
+          (instrumented-files ())
+          (reporter (when verbose-coverage
+                      (make-progress-reporter
+                       (format-message "Reading coverage manifest %s..."
+                                       coverage-manifest)))))
       (with-temp-buffer
         (insert-file-contents coverage-manifest)
         (while (not (eobp))
@@ -1105,7 +1107,8 @@ exact copies as equal."
           (put #'cl-define-compiler-macro 'edebug-form-spec
                '(&define [&name symbolp "@cl-compiler-macro"]
                          cl-macro-list
-                         cl-declarations-or-string def-body))))))
+                         cl-declarations-or-string def-body))))
+      (when reporter (progress-reporter-done reporter))))
 
   ;; Load test source files.  If coverage is enabled, check for a file with a
   ;; well-known extension first.  The Bazel runfiles machinery is expected to
@@ -1187,10 +1190,13 @@ exact copies as equal."
           (when-let ((report-file (@env-file "XML_OUTPUT_FILE")))
             (@write-report report-file start-time tests stats failure-messages))
           (when coverage-enabled
-            (when verbose-coverage
-              (message "Writing coverage report into directory %s"
-                       coverage-dir))
-            (@write-coverage-report coverage-dir load-buffers))
+            (let ((reporter (when verbose-coverage
+                              (make-progress-reporter
+                               (format-message
+                                "Writing coverage report into directory %s..."
+                                coverage-dir)))))
+              (@write-coverage-report coverage-dir load-buffers)
+              (when reporter (progress-reporter-done reporter))))
           (progress-reporter-done reporter))))))
 
   ;; Report test status back to the Bazel test runner.
