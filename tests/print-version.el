@@ -24,9 +24,8 @@
 
 (cl-destructuring-bind (file) command-line-args-left
   (setq command-line-args-left nil)
-  (let ((file-name-handler-alist ()))
-    (setq file (concat "/:" (expand-file-name file))))
-  (let ((coding-system-for-write 'utf-8-unix)
+  (let ((file-name-handler-alist ())
+        (coding-system-for-write 'utf-8-unix)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
     (write-region emacs-version nil file)))

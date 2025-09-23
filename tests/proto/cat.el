@@ -29,11 +29,10 @@
 
 (cl-destructuring-bind (op file) command-line-args-left
   (setq command-line-args-left nil)
-  (let ((file-name-handler-alist ()))
-    (setq file (concat "/:" (expand-file-name file))))
   (with-temp-buffer
     (set-buffer-multibyte nil)
-    (let ((coding-system-for-read 'no-conversion)
+    (let ((file-name-handler-alist ())
+          (coding-system-for-read 'no-conversion)
           (coding-system-for-write 'no-conversion)
           (inhibit-modification-hooks t)
           (write-region-annotate-functions nil)
