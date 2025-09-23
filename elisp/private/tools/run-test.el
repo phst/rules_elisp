@@ -296,7 +296,8 @@ which see.  Return a live buffer containing the file contents."
            (eval-buffer cloned-buffer nil file nil :do-allow-print)
            ;; Yuck!  We have to mess with internal Edebug data here.
            ;; Byte-compile all functions to be a bit more realistic.
-           (dolist (data edebug-form-data)
+           (dolist-with-progress-reporter (data edebug-form-data)
+               "Compiling instrumented forms..."
              (byte-compile (edebug--form-data-name data))))
          (setq-local @source-file file))))
     (progress-reporter-done reporter)
