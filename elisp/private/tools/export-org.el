@@ -33,7 +33,7 @@
   (setq command-line-args-left nil)
   ;; ‘expand-file-name’ doesn’t work with quoted file names, so quote them after
   ;; expanding.
-  (let ((file-name-handler-alist))
+  (let ((file-name-handler-alist ()))
     (cl-flet ((quote-file (file) (concat "/:" (expand-file-name file))))
       (cl-callf quote-file input)
       (cl-callf quote-file output)))
