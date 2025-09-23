@@ -1117,7 +1117,8 @@ exact copies as equal."
   (let ((load-suffixes (if coverage-enabled
                            (cons ".el.instrument" load-suffixes)
                          load-suffixes)))
-    (mapc #'load test-sources))
+    (dolist-with-progress-reporter (file test-sources) "Loading test sources..."
+      (load file)))
 
   ;; The test sources should have processed any remaining command-line
   ;; arguments.
