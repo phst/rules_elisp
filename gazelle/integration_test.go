@@ -15,34 +15,25 @@
 package gazelle_test
 
 import (
-	"flag"
 	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/bazelbuild/bazel-gazelle/testtools"
-	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/phst/rules_elisp/private/testutil"
 )
 
 var (
-	gazelleBinary    = flag.String("gazelle", "", "location of the Gazelle binary")
-	testdataSentinel = flag.String("testdata", "", "runfile path of the //gazelle/testdata:BUILD file")
+	gazelleBinary    = testutil.RunfileFlag("//gazelle:wrapper")
+	testdataSentinel = testutil.RunfileFlag("//gazelle/testdata:BUILD")
 )
 
 func TestGazelleBinary(t *testing.T) {
-	binary, err := runfiles.Rlocation(*gazelleBinary)
-	if err != nil {
-		t.Fatal(err)
-	}
-	sentinel, err := runfiles.Rlocation(*testdataSentinel)
-	if err != nil {
-		t.Fatal(err)
-	}
 	args := &testtools.TestGazelleGenerationArgs{
 		Name:                 "update",
-		TestDataPathAbsolute: filepath.Join(filepath.Dir(sentinel), "update"),
+		TestDataPathAbsolute: filepath.Join(filepath.Dir(*testdataSentinel), "update"),
 		TestDataPathRelative: "gazelle/testdata/update",
-		GazelleBinaryPath:    binary,
+		GazelleBinaryPath:    *gazelleBinary,
 		Timeout:              time.Minute,
 	}
 	// Set GOCOVERDIR to avoid a warning message if coverage is enabled.

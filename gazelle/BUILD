@@ -62,6 +62,12 @@ go_library(
     ],
 )
 
+TEST_DATA = [
+    # keep sorted
+    "//gazelle:wrapper",
+    "//gazelle/testdata:BUILD",
+]
+
 go_test(
     name = "gazelle_test",
     size = "medium",
@@ -70,16 +76,13 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        shell.quote("--gazelle=$(rlocationpath :wrapper)"),
-        shell.quote("--testdata=$(rlocationpath //gazelle/testdata:BUILD)"),
+        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
+        for t in TEST_DATA
     ],
-    data = [
-        ":wrapper",
-        "//gazelle/testdata",
-        "//gazelle/testdata:BUILD",
-    ],
+    data = TEST_DATA + ["//gazelle/testdata"],
     deps = [
         ":gazelle",
+        "//private/testutil",
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
         "@gazelle//config",
@@ -89,7 +92,6 @@ go_test(
         "@gazelle//resolve",
         "@gazelle//rule",
         "@gazelle//testtools",
-        "@rules_go//go/runfiles",
     ],
 )
 

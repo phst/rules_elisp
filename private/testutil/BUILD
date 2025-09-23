@@ -29,6 +29,10 @@ go_library(
     testonly = True,
     srcs = ["runfileflag.go"],
     importpath = "github.com/phst/rules_elisp/private/testutil",
-    visibility = ["//tests:__pkg__"],
+    visibility = [
+        "//gazelle:__pkg__",
+        "//tests:__pkg__",
+        "//tests/proto:__pkg__",
+    ],
     deps = ["@rules_go//go/runfiles"],
 )

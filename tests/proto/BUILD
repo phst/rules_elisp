@@ -47,6 +47,8 @@ elisp_test(
     ],
 )
 
+TEST_DATA = ["//tests/proto:cat"]
+
 go_test(
     name = "proto_x_test",
     size = "medium",
@@ -54,10 +56,11 @@ go_test(
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
-        shell.quote("--cat=$(rlocationpath :cat)"),
+        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
+        for t in TEST_DATA
     ],
-    data = [":cat"],
-    deps = ["@rules_go//go/runfiles"],
+    data = TEST_DATA,
+    deps = ["//private/testutil"],
 )
 
 elisp_binary(

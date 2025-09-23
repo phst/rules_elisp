@@ -20,26 +20,21 @@ package proto_test
 
 import (
 	"bytes"
-	"flag"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/phst/rules_elisp/private/testutil"
 )
 
-var cat = flag.String("cat", "", "location of the //tests/proto:cat target")
+var cat = testutil.RunfileFlag("//tests/proto:cat")
 
 // Integration test for elisp/proto/insert-stdin.
 func TestInsertStdin(t *testing.T) {
-	cat, err := runfiles.Rlocation(*cat)
-	if err != nil {
-		t.Fatal(err)
-	}
 	outfile := filepath.Join(t.TempDir(), "out")
-	cmd := exec.Command(cat, ">", outfile)
+	cmd := exec.Command(*cat, ">", outfile)
 	cmd.Stdin = strings.NewReader("stdin \xFF")
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
@@ -65,15 +60,11 @@ func TestInsertStdin(t *testing.T) {
 
 // Integration test for elisp/proto/write-stdout.
 func TestWriteStdout(t *testing.T) {
-	cat, err := runfiles.Rlocation(*cat)
-	if err != nil {
-		t.Fatal(err)
-	}
 	infile := filepath.Join(t.TempDir(), "in")
 	if err := os.WriteFile(infile, []byte("stdout \xFF"), 0400); err != nil {
 		t.Error(err)
 	}
-	cmd := exec.Command(cat, "<", infile)
+	cmd := exec.Command(*cat, "<", infile)
 	stdout := new(strings.Builder)
 	stderr := new(bytes.Buffer)
 	cmd.Stdout = stdout
