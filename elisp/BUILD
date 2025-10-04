@@ -37,12 +37,6 @@ toolchain(
 )
 
 toolchain(
-    name = "emacs_28.2_toolchain",
-    toolchain = "emacs_28.2",
-    toolchain_type = ":toolchain_type",
-)
-
-toolchain(
     name = "emacs_29.4_toolchain",
     toolchain = "emacs_29.4",
     toolchain_type = ":toolchain_type",
