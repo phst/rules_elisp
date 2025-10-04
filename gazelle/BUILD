@@ -104,7 +104,7 @@ copy_file(
 alias(
     name = "builtin_features",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30.2//:builtin_features",
-        "//conditions:default": "@gnu_emacs_30.2//:builtin_features",
+        "@platforms//os:windows": "@gnu_emacs_windows_30//:builtin_features",
+        "//conditions:default": "@gnu_emacs_30//:builtin_features",
     }),
 )
