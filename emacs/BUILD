@@ -26,33 +26,33 @@ licenses(["notice"])
 # keep
 alias(
     name = "emacs",
-    actual = ":emacs_30.2",
+    actual = ":emacs_30",
     visibility = ["//visibility:public"],
 )
 
 alias(
     name = "module_header",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30.2//:module_header",
-        "//conditions:default": "@gnu_emacs_30.2//:module_header",
+        "@platforms//os:windows": "@gnu_emacs_windows_30//:module_header",
+        "//conditions:default": "@gnu_emacs_30//:module_header",
     }),
     visibility = ["//visibility:public"],
 )
 
 alias(
-    name = "emacs_29.4",
+    name = "emacs_29",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29.4//:emacs",
-        "//conditions:default": "@gnu_emacs_29.4//:emacs",
+        "@platforms//os:windows": "@gnu_emacs_windows_29//:emacs",
+        "//conditions:default": "@gnu_emacs_29//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
 
 alias(
-    name = "emacs_30.2",
+    name = "emacs_30",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30.2//:emacs",
-        "//conditions:default": "@gnu_emacs_30.2//:emacs",
+        "@platforms//os:windows": "@gnu_emacs_windows_30//:emacs",
+        "//conditions:default": "@gnu_emacs_30//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
