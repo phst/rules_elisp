@@ -47,9 +47,9 @@ build:clang-cl --compiler=clang-cl --host_compiler=clang-cl
 build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-clang-cl'
 build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
 
-# Windows is incredibly slow; double all test timeouts.
+# Windows is incredibly slow; quadruple all test timeouts.
 # See https://bazel.build/reference/test-encyclopedia#role-test-runner.
-test:windows --test_timeout=120,600,1800,7200
+test:windows --test_timeout=240,1200,3600,14400
 
 # Since the tests are usually in separate packages from the targets under test,
 # the default heuristic for coverage instrumentation filtering doesn’t work.
