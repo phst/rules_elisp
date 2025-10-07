@@ -29,6 +29,7 @@ py_test(
     name = "manifest_test",
     size = "small",
     srcs = ["manifest_test.py"],
+    python_version = "3.12",
     deps = [
         "//elisp/private/tools:manifest",
         "@abseil-py//absl/testing:absltest",
@@ -39,6 +40,7 @@ py_test(
     name = "load_test",
     size = "small",
     srcs = ["load_test.py"],
+    python_version = "3.12",
     deps = [
         "//elisp/private/tools:load",
         "//elisp/private/tools:runfiles",

@@ -111,6 +111,7 @@ elisp_binary(
 py_binary(
     name = "generate",
     srcs = ["generate.py"],
+    python_version = "3.12",
     tags = [
         # Disable Mypy until
         # https://github.com/bazel-contrib/rules_mypy/pull/117 is merged and

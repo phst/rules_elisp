@@ -38,6 +38,7 @@ licenses(["notice"])
 py_binary(
     name = "build_emacs",
     srcs = ["build_emacs.py"],
+    python_version = "3.12",
     visibility = ["//elisp/toolchains:__pkg__"],
 )
 
@@ -121,6 +122,7 @@ cc_library(
 py_binary(
     name = "run_binary",
     srcs = ["run_binary.py"],
+    python_version = "3.12",
     deps = [
         ":load",
         ":manifest",
@@ -175,6 +177,7 @@ py_binary(
     name = "run_test",
     testonly = True,
     srcs = ["run_test.py"],
+    python_version = "3.12",
     deps = [
         ":load",
         ":manifest",
