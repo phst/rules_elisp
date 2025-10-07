@@ -1137,7 +1137,7 @@ exact copies as equal."
           (shard-index (or (env-int "TEST_SHARD_INDEX") 0)))
       (unless (and (natnump shard-count) (natnump shard-index)
                    (< shard-index shard-count))
-        (error "Invalid SHARD_COUNT (%s) or SHARD_INDEX (%s)"
+        (error "Invalid TEST_TOTAL_SHARDS (%s) or TEST_SHARD_INDEX (%s)"
                shard-count shard-index))
       (when (> shard-count 1)
         (setq tests (cl-loop for test in tests
