@@ -38,7 +38,7 @@ def _elisp_library_impl(ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps", "srcs"],
+            dependency_attributes = ["deps", "srcs", "data"],
         ),
         EmacsLispInfo(
             source_files = ctx.files.srcs,
