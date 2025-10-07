@@ -92,11 +92,9 @@ def _arg_files(argv: Sequence[str], root: Optional[pathlib.Path],
         if i < 0:
             i += argc
         if 0 < i < argc:
-            arg = argv[i]
             # File arguments are often quoted so that Emacs doesn’t interpret
             # them as special filenames.  Unquote them first.
-            if arg.startswith('/:'):
-                arg = arg[2:]
+            arg = argv[i].removeprefix('/:')
             file = pathlib.Path(os.path.abspath(arg))
             # Make filenames relative if possible.
             if root:
