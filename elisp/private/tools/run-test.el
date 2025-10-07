@@ -413,16 +413,13 @@ defined."
          ;; branch frequency vector and attach it to DATA.
          (when-let ((branches (@instrument-branches vector form)))
            (setf (@coverage-data-branches data) branches))))
-      ((pred proper-list-p)
-       ;; Use ‘dolist’ where possible to avoid deep recursion.
-       (dolist (element form)
+      ((or (pred vectorp) (pred proper-list-p))
+       ;; Use ‘seq-doseq’ where possible to avoid deep recursion.
+       (seq-doseq (element form)
          (@instrument-form seen vector element)))
       (`(,car . ,cdr)
        (@instrument-form seen vector car)
        (@instrument-form seen vector cdr))
-      ((pred vectorp)
-       (cl-loop for element across form
-                do (@instrument-form seen vector element)))
       ;; Literals that can’t be instrumented.
       ((or (pred symbolp) (pred numberp) (pred stringp)))
       ;; Everything else is unexpected.
