@@ -105,7 +105,7 @@ def _elisp_cc_module_impl(ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps"],
+            dependency_attributes = ["deps", "data"],
             metadata_files = metadata_files,
         ),
     ]

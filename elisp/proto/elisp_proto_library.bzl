@@ -78,7 +78,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps"],
+            dependency_attributes = ["deps", "data"],
             extensions = ["el"],
         ),
         EmacsLispInfo(

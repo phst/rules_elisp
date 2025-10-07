@@ -89,7 +89,7 @@ def _elisp_test_impl(ctx):
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
-            dependency_attributes = ["deps", "srcs"],
+            dependency_attributes = ["deps", "srcs", "data"],
         ),
     ]
 
