@@ -32,7 +32,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
-from typing import Optional, Union
+from typing import Optional
 
 def main() -> None:
     """Configures and builds Emacs."""
@@ -77,9 +77,7 @@ def main() -> None:
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
 
 
-# Don’t use | due to https://bugs.python.org/issue42233.
-def _build(*, source: Union[pathlib.Path,
-                            tuple[pathlib.Path, pathlib.PurePosixPath]],
+def _build(*, source: pathlib.Path | tuple[pathlib.Path, pathlib.PurePosixPath],
            install: pathlib.Path, bash: pathlib.Path,
            cc: pathlib.Path, cflags: str, ldflags: str,
            builtin_features: bool) -> Optional[Set[str]]:
