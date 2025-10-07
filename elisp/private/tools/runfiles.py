@@ -15,7 +15,6 @@
 """Contains a class to access Bazel runfiles."""
 
 from collections.abc import Mapping
-import os
 import pathlib
 from typing import Optional
 
@@ -44,7 +43,7 @@ class Runfiles:
         result = self._impl.Rlocation(str(name))
         if not result:
             raise FileNotFoundError(f'Runfile “{name}” not found')
-        return pathlib.Path(os.path.abspath(result))
+        return pathlib.Path(result).absolute()
 
     def environment(self) -> Mapping[str, str]:
         """Returns an environment variable map."""

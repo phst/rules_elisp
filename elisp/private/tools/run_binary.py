@@ -80,7 +80,7 @@ def _runfiles_dir(env: Mapping[str, str]) -> Optional[pathlib.Path]:
     for var in ('RUNFILES_DIR', 'TEST_SRCDIR'):
         value = env.get(var)
         if value:
-            return pathlib.Path(os.path.abspath(value))
+            return pathlib.Path(value).absolute()
     return None
 
 
@@ -95,7 +95,7 @@ def _arg_files(argv: Sequence[str], root: Optional[pathlib.Path],
             # File arguments are often quoted so that Emacs doesn’t interpret
             # them as special filenames.  Unquote them first.
             arg = argv[i].removeprefix('/:')
-            file = pathlib.Path(os.path.abspath(arg))
+            file = pathlib.Path(arg).absolute()
             # Make filenames relative if possible.
             if root:
                 try:
