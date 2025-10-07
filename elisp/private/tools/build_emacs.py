@@ -198,9 +198,7 @@ def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
 
 
 def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
-    # Once we require Python 3.12, we can use
-    # dest.exists(resolve_symlink=False).
-    if os.path.lexists(dest):
+    if dest.exists(follow_symlinks=False):
         raise FileExistsError(f'destination file {dest} already exists')
     ret = src.resolve(strict=True).rename(dest)
     src.unlink(missing_ok=True)
@@ -209,9 +207,7 @@ def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
 
 def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
                     prefix: Optional[pathlib.PurePosixPath] = None) -> None:
-    # Once we require Python 3.12, we can use
-    # dest.exists(resolve_symlink=False).
-    if os.path.lexists(dest):
+    if dest.exists(follow_symlinks=False):
         raise FileExistsError(f'destination directory {dest} already exists')
     prefix = prefix or pathlib.PurePosixPath()
     if prefix.is_absolute():
