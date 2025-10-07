@@ -227,7 +227,7 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
 
 def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
     stamp = time.timestamp()
-    for parent, _dirs, files in root.walk():
+    for parent, _dirs, files in root.walk(on_error=_raise):
         path = pathlib.Path(parent)
         for file in files:
             try:
@@ -239,6 +239,10 @@ def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
                 # https://docs.python.org/3/using/windows.html#removing-the-max-path-limitation.
                 # Nothing we can do about it.
                 pass
+
+
+def _raise(ex: OSError) -> None:
+    raise ex
 
 
 if __name__ == '__main__':
