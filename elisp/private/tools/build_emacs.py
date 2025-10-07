@@ -227,7 +227,7 @@ def _unpack_archive(archive: pathlib.Path, dest: pathlib.Path, *,
 
 def _touch(root: pathlib.Path, time: datetime.datetime) -> None:
     stamp = time.timestamp()
-    for parent, _dirs, files in os.walk(root):
+    for parent, _dirs, files in root.walk():
         path = pathlib.Path(parent)
         for file in files:
             try:

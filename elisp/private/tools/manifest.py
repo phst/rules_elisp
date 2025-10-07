@@ -21,8 +21,6 @@ import argparse
 from collections.abc import Generator, Iterable
 import contextlib
 import json
-import os
-import os.path
 import pathlib
 import tempfile
 from typing import IO, Optional
@@ -39,7 +37,7 @@ If a file was created, appropriate arguments are added to args."""
     else:
         with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
             name = pathlib.Path(directory) / 'manifest.json'
-            args += ['--manifest=' + os.path.abspath(name), '--']
+            args += ['--manifest=' + str(name.absolute()), '--']
             with name.open(mode='xt', encoding='utf-8', newline='\n') as file:
                 yield file
 
