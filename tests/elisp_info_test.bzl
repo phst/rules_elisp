@@ -36,13 +36,13 @@ def _elisp_info_unit_test(ctx):
         transitive_compiled_files = depset(outs),
         transitive_load_path = depset([dir]),
     )
-    asserts.equals(env, actual = info.source_files, expected = srcs)
-    asserts.equals(env, actual = info.compiled_files, expected = outs)
-    asserts.equals(env, actual = info.load_path, expected = [dir])
-    asserts.equals(env, actual = info.data_files, expected = data)
-    asserts.equals(env, actual = sorted(info.transitive_source_files.to_list()), expected = sorted(srcs))
-    asserts.equals(env, actual = sorted(info.transitive_compiled_files.to_list()), expected = sorted(outs))
-    asserts.equals(env, actual = info.transitive_load_path.to_list(), expected = [dir])
+    asserts.equals(env, actual = info.source_files, expected = srcs, msg = "incorrect source_files")
+    asserts.equals(env, actual = info.compiled_files, expected = outs, msg = "incorrect compiled_files")
+    asserts.equals(env, actual = info.load_path, expected = [dir], msg = "incorrect load_path")
+    asserts.equals(env, actual = info.data_files, expected = data, msg = "incorrect data_files")
+    asserts.equals(env, actual = sorted(info.transitive_source_files.to_list()), expected = sorted(srcs), msg = "incorrect transitive_source_files")
+    asserts.equals(env, actual = sorted(info.transitive_compiled_files.to_list()), expected = sorted(outs), msg = "incorrect transitive_compiled_files")
+    asserts.equals(env, actual = info.transitive_load_path.to_list(), expected = [dir], msg = "incorrect transitive_load_path")
     return unittest.end(env)
 
 elisp_info_unit_test = unittest.make(_elisp_info_unit_test)
@@ -55,11 +55,13 @@ def _provider_test_impl(ctx):
         env,
         actual = [f.path for f in info.source_files],
         expected = ["tests/provider-test.el"],
+        msg = "incorrect source_files",
     )
     asserts.equals(
         env,
         actual = [(f.root, f.short_path) for f in info.compiled_files],
         expected = [(ctx.bin_dir, "tests/provider-test.elc")],
+        msg = "incorrect compiled_files",
     )
     asserts.equals(
         env,
@@ -68,12 +70,14 @@ def _provider_test_impl(ctx):
             for_actions = ctx.bin_dir.path,
             for_runfiles = ctx.workspace_name,
         )],
+        msg = "incorrect load_path",
     )
-    asserts.equals(env, actual = info.data_files, expected = [])
+    asserts.equals(env, actual = info.data_files, expected = [], msg = "incorrect data_files")
     asserts.equals(
         env,
         actual = [f.path for f in info.transitive_source_files.to_list()],
         expected = ["tests/provider-test.el"],
+        msg = "incorrect transitive_source_files",
     )
     asserts.equals(
         env,
@@ -82,6 +86,7 @@ def _provider_test_impl(ctx):
             for f in info.transitive_compiled_files.to_list()
         ],
         expected = [(ctx.bin_dir, "tests/provider-test.elc")],
+        msg = "incorrect transitive_compiled_files",
     )
     asserts.equals(
         env,
@@ -90,6 +95,7 @@ def _provider_test_impl(ctx):
             for_actions = ctx.bin_dir.path,
             for_runfiles = ctx.workspace_name,
         )],
+        msg = "incorrect transitive_load_path",
     )
     return analysistest.end(env)
 
