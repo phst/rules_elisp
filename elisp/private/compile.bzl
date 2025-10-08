@@ -99,7 +99,7 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
     ]))
     for dir in ["/"] + load_path:
         if not dir:
-            fail("empty directory in load path")
+            fail("empty directory in load path", load_path)
         if paths.is_absolute(dir):
             dir = "." + dir
         else:

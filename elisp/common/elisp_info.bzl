@@ -20,19 +20,19 @@ visibility("public")
 
 def _init_elisp_info(*, source_files, compiled_files, load_path, data_files, transitive_source_files, transitive_compiled_files, transitive_load_path):
     if not types.is_list(source_files):
-        fail("source_files must be a list")
+        fail("source_files must be a list, got", source_files)
     if not types.is_list(compiled_files):
-        fail("compiled_files must be a list")
+        fail("compiled_files must be a list, got", compiled_files)
     if not types.is_list(load_path):
-        fail("load_path must be a list")
+        fail("load_path must be a list, got", load_path)
     if not types.is_list(data_files):
-        fail("data_files must be a list")
+        fail("data_files must be a list, got", data_files)
     if not types.is_depset(transitive_source_files):
-        fail("transitive_source_files must be a depset")
+        fail("transitive_source_files must be a depset, got", transitive_source_files)
     if not types.is_depset(transitive_compiled_files):
-        fail("transitive_compiled_files must be a depset")
+        fail("transitive_compiled_files must be a depset, got", transitive_compiled_files)
     if not types.is_depset(transitive_load_path):
-        fail("transitive_load_path must be a depset")
+        fail("transitive_load_path must be a depset, got", transitive_load_path)
 
     # @unsorted-dict-items
     return {
