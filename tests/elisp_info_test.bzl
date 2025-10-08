@@ -15,7 +15,7 @@
 """Unit tests for //elisp/common:elisp_info.bzl."""
 
 load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts", "unittest")
-load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo", "merge_elisp_infos")
 
 visibility("private")
 
@@ -46,6 +46,114 @@ def _elisp_info_unit_test(ctx):
     return unittest.end(env)
 
 elisp_info_unit_test = unittest.make(_elisp_info_unit_test)
+
+def _merge_elisp_infos_direct_test(ctx):
+    env = unittest.begin(ctx)
+    s1, s2, s3 = _files(ctx.actions, suffix = "el", count = 3)
+    o1, o2, o3 = _files(ctx.actions, suffix = "elc", count = 3)
+    d1, d2 = _files(ctx.actions, suffix = "dat", count = 2)
+    dir = struct(for_actions = ".", for_runfiles = "_main")
+    a = EmacsLispInfo(
+        source_files = [s1, s2],
+        compiled_files = [o1, o2],
+        load_path = [dir],
+        data_files = [d1],
+        transitive_source_files = depset([s1, s2]),
+        transitive_compiled_files = depset([o1, o2]),
+        transitive_load_path = depset([dir]),
+    )
+    b = EmacsLispInfo(
+        source_files = [s3, s1],
+        compiled_files = [o3, o1],
+        load_path = [dir],
+        data_files = [d2],
+        transitive_source_files = depset([s3, s1]),
+        transitive_compiled_files = depset([o3, o1]),
+        transitive_load_path = depset([dir]),
+    )
+    m = merge_elisp_infos(direct = [b, b, a])
+    asserts.equals(env, actual = sorted(m.source_files), expected = [s1, s2, s3], msg = "incorrect source_files")
+    asserts.equals(env, actual = sorted(m.compiled_files), expected = [o1, o2, o3], msg = "incorrect compiled_files")
+    asserts.equals(env, actual = m.load_path, expected = [dir], msg = "incorrect load_path")
+    asserts.equals(env, actual = sorted(m.data_files), expected = [d1, d2], msg = "incorrect data_files")
+    asserts.equals(env, actual = sorted(m.transitive_source_files.to_list()), expected = [s1, s2, s3], msg = "incorrect transitive_source_files")
+    asserts.equals(env, actual = sorted(m.transitive_compiled_files.to_list()), expected = [o1, o2, o3], msg = "incorrect transitive_compiled_files")
+    asserts.equals(env, actual = m.transitive_load_path.to_list(), expected = [dir], msg = "incorrect transitive_load_path")
+    return unittest.end(env)
+
+merge_elisp_infos_direct_test = unittest.make(_merge_elisp_infos_direct_test)
+
+def _merge_elisp_infos_transitive_test(ctx):
+    env = unittest.begin(ctx)
+    s1, s2, s3 = _files(ctx.actions, suffix = "el", count = 3)
+    o1, o2, o3 = _files(ctx.actions, suffix = "elc", count = 3)
+    d1, d2 = _files(ctx.actions, suffix = "dat", count = 2)
+    dir = struct(for_actions = ".", for_runfiles = "_main")
+    a = EmacsLispInfo(
+        source_files = [s1, s2],
+        compiled_files = [o1, o2],
+        load_path = [dir],
+        data_files = [d1],
+        transitive_source_files = depset([s1, s2]),
+        transitive_compiled_files = depset([o1, o2]),
+        transitive_load_path = depset([dir]),
+    )
+    b = EmacsLispInfo(
+        source_files = [s3, s1],
+        compiled_files = [o3, o1],
+        load_path = [dir],
+        data_files = [d2],
+        transitive_source_files = depset([s3, s1]),
+        transitive_compiled_files = depset([o3, o1]),
+        transitive_load_path = depset([dir]),
+    )
+    m = merge_elisp_infos(transitive = [a, b, a])
+    asserts.equals(env, actual = m.source_files, expected = [], msg = "incorrect source_files")
+    asserts.equals(env, actual = m.compiled_files, expected = [], msg = "incorrect compiled_files")
+    asserts.equals(env, actual = m.load_path, expected = [], msg = "incorrect load_path")
+    asserts.equals(env, actual = m.data_files, expected = [], msg = "incorrect data_files")
+    asserts.equals(env, actual = sorted(m.transitive_source_files.to_list()), expected = [s1, s2, s3], msg = "incorrect transitive_source_files")
+    asserts.equals(env, actual = sorted(m.transitive_compiled_files.to_list()), expected = [o1, o2, o3], msg = "incorrect transitive_compiled_files")
+    asserts.equals(env, actual = m.transitive_load_path.to_list(), expected = [dir], msg = "incorrect transitive_load_path")
+    return unittest.end(env)
+
+merge_elisp_infos_transitive_test = unittest.make(_merge_elisp_infos_transitive_test)
+
+def _merge_elisp_infos_mixed_test(ctx):
+    env = unittest.begin(ctx)
+    s1, s2, s3 = _files(ctx.actions, suffix = "el", count = 3)
+    o1, o2, o3 = _files(ctx.actions, suffix = "elc", count = 3)
+    d1, d2 = _files(ctx.actions, suffix = "dat", count = 2)
+    dir = struct(for_actions = ".", for_runfiles = "_main")
+    a = EmacsLispInfo(
+        source_files = [s1, s2],
+        compiled_files = [o1, o2],
+        load_path = [dir],
+        data_files = [d1],
+        transitive_source_files = depset([s1, s2]),
+        transitive_compiled_files = depset([o1, o2]),
+        transitive_load_path = depset([dir]),
+    )
+    b = EmacsLispInfo(
+        source_files = [s3, s1],
+        compiled_files = [o3, o1],
+        load_path = [dir],
+        data_files = [d2],
+        transitive_source_files = depset([s3, s1]),
+        transitive_compiled_files = depset([o3, o1]),
+        transitive_load_path = depset([dir]),
+    )
+    m = merge_elisp_infos(direct = [b], transitive = [a])
+    asserts.equals(env, actual = sorted(m.source_files), expected = [s1, s3], msg = "incorrect source_files")
+    asserts.equals(env, actual = sorted(m.compiled_files), expected = [o1, o3], msg = "incorrect compiled_files")
+    asserts.equals(env, actual = m.load_path, expected = [dir], msg = "incorrect load_path")
+    asserts.equals(env, actual = sorted(m.data_files), expected = [d2], msg = "incorrect data_files")
+    asserts.equals(env, actual = sorted(m.transitive_source_files.to_list()), expected = [s1, s2, s3], msg = "incorrect transitive_source_files")
+    asserts.equals(env, actual = sorted(m.transitive_compiled_files.to_list()), expected = [o1, o2, o3], msg = "incorrect transitive_compiled_files")
+    asserts.equals(env, actual = m.transitive_load_path.to_list(), expected = [dir], msg = "incorrect transitive_load_path")
+    return unittest.end(env)
+
+merge_elisp_infos_mixed_test = unittest.make(_merge_elisp_infos_mixed_test)
 
 def _provider_test_impl(ctx):
     env = analysistest.begin(ctx)

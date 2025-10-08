@@ -35,5 +35,8 @@ bzl_library(
     name = "elisp_info",
     srcs = ["elisp_info.bzl"],
     visibility = ["//visibility:public"],
-    deps = ["@bazel_skylib//lib:types"],
+    deps = [
+        "@bazel_skylib//lib:sets",
+        "@bazel_skylib//lib:types",
+    ],
 )

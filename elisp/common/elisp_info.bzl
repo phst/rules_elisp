@@ -14,6 +14,7 @@
 
 """Defines the `EmacsLispInfo` provider."""
 
+load("@bazel_skylib//lib:sets.bzl", "sets")
 load("@bazel_skylib//lib:types.bzl", "types")
 
 visibility("public")
@@ -80,3 +81,50 @@ described in the provider documentation.""",
     },
     init = _init_elisp_info,
 )
+
+def merge_elisp_infos(*, direct = [], transitive = []):
+    """Merges several `EmacsLispInfo` provider instances.
+
+    Each element of <var>direct</var> and <var>transitive</var> must be an
+    `EmacsLispInfo` provider instance.  The return value is a fresh
+    `EmacsLispInfo` provider instance.  All its “transitive” attributes (those
+    starting with `transitive_`) are constructed by merging the corresponding
+    attributes from both <var>direct</var> and <var>transitive</var>, but its
+    other attributes are constructed only from <var>direct</var>.  Conceptually,
+    the resulting provider represents an `elisp_library` that is the union of
+    all the libraries represented by <var>direct</var>, with
+    <var>transitive</var> as dependent libraries.  Duplicate entries are
+    omitted.
+
+    Args:
+      direct: A list of `EmacsLispInfo` providers representing libraries that
+          should be merged directly into the result.
+      transitive: A list of `EmacsLispInfo` providers representing libraries that
+          should be merged indirectly into the result.
+
+    Returns:
+      A fresh `EmacsLispInfo` provider.
+    """
+    all = direct + transitive
+    return EmacsLispInfo(
+        source_files = _merge_lists([i.source_files for i in direct]),
+        compiled_files = _merge_lists([i.compiled_files for i in direct]),
+        load_path = _merge_lists_stable([i.load_path for i in direct]),
+        data_files = _merge_lists([i.data_files for i in direct]),
+        transitive_source_files = depset(transitive = [i.transitive_source_files for i in all]),
+        transitive_compiled_files = depset(transitive = [i.transitive_compiled_files for i in all]),
+        transitive_load_path = depset(order = "preorder", transitive = [i.transitive_load_path for i in all]),
+    )
+
+def _merge_lists(lists):
+    return sets.to_list(sets.union(*[sets.make(list) for list in lists]))
+
+def _merge_lists_stable(lists):
+    seen = sets.make()
+    ret = []
+    for list in lists:
+        for elem in list:
+            if not sets.contains(seen, elem):
+                ret.append(elem)
+                seen = sets.insert(seen, elem)
+    return ret
