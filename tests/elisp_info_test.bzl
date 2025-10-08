@@ -36,13 +36,13 @@ def _elisp_info_unit_test(ctx):
         transitive_compiled_files = depset(outs),
         transitive_load_path = depset([dir]),
     )
-    asserts.equals(env, info.source_files, srcs)
-    asserts.equals(env, info.compiled_files, outs)
-    asserts.equals(env, info.load_path, [dir])
-    asserts.equals(env, info.data_files, data)
-    asserts.equals(env, sorted(info.transitive_source_files.to_list()), sorted(srcs))
-    asserts.equals(env, sorted(info.transitive_compiled_files.to_list()), sorted(outs))
-    asserts.equals(env, info.transitive_load_path.to_list(), [dir])
+    asserts.equals(env, actual = info.source_files, expected = srcs)
+    asserts.equals(env, actual = info.compiled_files, expected = outs)
+    asserts.equals(env, actual = info.load_path, expected = [dir])
+    asserts.equals(env, actual = info.data_files, expected = data)
+    asserts.equals(env, actual = sorted(info.transitive_source_files.to_list()), expected = sorted(srcs))
+    asserts.equals(env, actual = sorted(info.transitive_compiled_files.to_list()), expected = sorted(outs))
+    asserts.equals(env, actual = info.transitive_load_path.to_list(), expected = [dir])
     return unittest.end(env)
 
 elisp_info_unit_test = unittest.make(_elisp_info_unit_test)
