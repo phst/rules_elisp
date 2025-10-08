@@ -42,6 +42,8 @@ bzl_library(
     deps = [
         ":elisp_info_test",
         "//elisp:elisp_library",
+        "@bazel_skylib//lib:partial",
+        "@bazel_skylib//lib:unittest",
     ],
 )
 
