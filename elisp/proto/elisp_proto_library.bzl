@@ -17,7 +17,7 @@
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@protobuf//bazel/common:proto_common.bzl", "proto_common")
 load("@protobuf//bazel/common:proto_info.bzl", "ProtoInfo")
-load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo", "merge_elisp_infos")
 load("//elisp/private:compile.bzl", "compile")
 load("//elisp/private:filenames.bzl", "check_relative_filename", "repository_relative_filename")
 
@@ -62,17 +62,28 @@ def _elisp_proto_aspect_impl(target, ctx):
         _, _, load_dir = load_dir.partition("/")
     load_dir = "/" + check_relative_filename(load_dir)
     load_path = [load_dir]
+    bundle_load_path = ["/"]
     if ctx.label.package == "src/google/protobuf":
         # See the comment in _elisp_proto_feature why we’re doing this.
         load_path.append(".")
+        bundle_load_path.append(".")
     _default_info, elisp_info = compile(
         ctx = ctx,
-        srcs = srcs + [bundle],
+        srcs = srcs,
         deps = [
             (d[DefaultInfo], d[EmacsLispInfo])
             for d in [ctx.attr._protobuf_lib] + ctx.rule.attr.deps
         ],
         load_path = load_path,
+        data = ctx.rule.files.data,
+        tags = ctx.rule.attr.tags,
+        fatal_warnings = True,
+    )
+    _bundle_default_info, bundle_elisp_info = compile(
+        ctx = ctx,
+        srcs = [bundle],
+        deps = [(DefaultInfo(runfiles = ctx.runfiles(ctx.rule.files.data)), elisp_info)],
+        load_path = bundle_load_path,
         data = ctx.rule.files.data,
         tags = ctx.rule.attr.tags,
         fatal_warnings = True,
@@ -84,11 +95,10 @@ def _elisp_proto_aspect_impl(target, ctx):
             dependency_attributes = ["deps", "data"],
             extensions = ["el"],
         ),
-        elisp_info,
+        merge_elisp_infos(direct = [elisp_info, bundle_elisp_info]),
         _ElispProtoInfo(
-            # FIXME: This relies on the order of the files in result.outs.
-            files = srcs + elisp_info.compiled_files[:-1],
-            bundle_files = [bundle] + elisp_info.compiled_files[-1:],
+            files = srcs + elisp_info.compiled_files,
+            bundle_files = [bundle] + bundle_elisp_info.compiled_files,
         ),
     ]
 
