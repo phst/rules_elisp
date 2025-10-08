@@ -135,7 +135,7 @@ class _Generator:
         if param.default_value:
             suffixes.append(f'default: ~{param.default_value}~')
         suffix = '; '.join(suffixes)
-        self._item(f'{param.name} :: {doc}.  {suffix}.')
+        self._item(f'{param.name} :: {doc}  {suffix}.')
 
     def _provider(self, provider: stardoc_output_pb2.ProviderInfo) -> None:
         name = provider.provider_name
