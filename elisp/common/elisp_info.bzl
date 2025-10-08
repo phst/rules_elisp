@@ -28,11 +28,11 @@ def _init_elisp_info(*, source_files, compiled_files, load_path, data_files, tra
     if not types.is_list(data_files):
         fail("data_files must be a list")
     if not types.is_depset(transitive_source_files):
-        fail("transitive_source_files must be a list")
+        fail("transitive_source_files must be a depset")
     if not types.is_depset(transitive_compiled_files):
-        fail("transitive_compiled_files must be a list")
+        fail("transitive_compiled_files must be a depset")
     if not types.is_depset(transitive_load_path):
-        fail("transitive_load_path must be a list")
+        fail("transitive_load_path must be a depset")
 
     # @unsorted-dict-items
     return {
