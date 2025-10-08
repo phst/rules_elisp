@@ -16,7 +16,6 @@
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
-load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load(":cc_launcher_config.bzl", "LAUNCHER_ATTRS")
 load(":filenames.bzl", "check_relative_filename", "repository_relative_filename")
 load(":load_path.bzl", "resolve_load_path")
@@ -49,7 +48,8 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
       ctx (ctx): rule context
       srcs (list of Files): Emacs Lisp sources files to compile; can also
           include module objects
-      deps (list of targets): Emacs Lisp libraries that the sources depend on
+      deps (list of tuples): Emacs Lisp libraries that the sources depend on,
+          in the form of (DefaultInfo, EmacsLispInfo) pairs
       load_path (list of strings): additional load path directories, relative
           to the current package
       data (list of Files): data files to be made available at runtime
@@ -137,16 +137,16 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         resolved_load_path.append(resolve_load_path(ctx, dir))
 
     indirect_srcs = [
-        dep[EmacsLispInfo].transitive_source_files
-        for dep in deps
+        dep.transitive_source_files
+        for _, dep in deps
     ]
     indirect_outs = [
-        dep[EmacsLispInfo].transitive_compiled_files
-        for dep in deps
+        dep.transitive_compiled_files
+        for _, dep in deps
     ]
     indirect_load_path = [
-        dep[EmacsLispInfo].transitive_load_path
-        for dep in deps
+        dep.transitive_load_path
+        for _, dep in deps
     ]
     transitive_load_path = depset(
         direct = resolved_load_path,
@@ -161,8 +161,8 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
     transitive_data = depset(
         direct = data,
         transitive = [
-            dep[DefaultInfo].default_runfiles.files
-            for dep in deps
+            dep.default_runfiles.files
+            for dep, _ in deps
         ],
     )
 

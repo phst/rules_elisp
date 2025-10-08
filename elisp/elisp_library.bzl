@@ -24,7 +24,7 @@ def _elisp_library_impl(ctx):
     result = compile(
         ctx = ctx,
         srcs = ctx.files.srcs,
-        deps = ctx.attr.deps,
+        deps = [(d[DefaultInfo], d[EmacsLispInfo]) for d in ctx.attr.deps],
         load_path = ctx.attr.load_path,
         data = ctx.files.data,
         tags = ctx.attr.tags,
