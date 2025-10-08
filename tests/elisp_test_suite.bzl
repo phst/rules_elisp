@@ -14,26 +14,24 @@
 
 """Unit tests for our rules and providers."""
 
+load("@bazel_skylib//lib:partial.bzl", "partial")
+load("@bazel_skylib//lib:unittest.bzl", "unittest")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load(":elisp_info_test.bzl", "provider_test")
 
 visibility("private")
 
-def _test_provider():
+def elisp_test_suite(*, name):
     elisp_library(
         name = "provider_test_subject",
         srcs = ["provider-test.el"],
         tags = ["manual"],
     )
-    provider_test(
-        name = "provider_test",
-        target_under_test = ":provider_test_subject",
-        size = "small",
-    )
-
-def elisp_test_suite(*, name):
-    _test_provider()
-    native.test_suite(
-        name = name,
-        tests = [":provider_test"],
+    unittest.suite(
+        name,
+        partial.make(
+            provider_test,
+            target_under_test = ":provider_test_subject",
+            size = "small",
+        ),
     )
