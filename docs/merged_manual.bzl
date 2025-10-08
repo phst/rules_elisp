@@ -44,7 +44,7 @@ def _merged_manual_impl(ctx):
         sets.insert(roots, org.root)
 
     if sets.length(roots) != 1:
-        fail("multiple roots: %s", sets.str(roots))
+        fail("multiple roots:", sets.str(roots))
     (root,) = sets.to_list(roots)
     include_dir = paths.join(root.path, ctx.file.main.owner.package)
 
