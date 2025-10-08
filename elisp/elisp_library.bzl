@@ -21,7 +21,7 @@ visibility("public")
 
 def _elisp_library_impl(ctx):
     """Rule implementation for the “elisp_library” rule."""
-    result = compile(
+    default_info, elisp_info = compile(
         ctx = ctx,
         srcs = ctx.files.srcs,
         deps = ctx.attr.deps,
@@ -31,24 +31,13 @@ def _elisp_library_impl(ctx):
         fatal_warnings = ctx.attr.fatal_warnings,
     )
     return [
-        DefaultInfo(
-            files = depset(direct = result.outs),
-            runfiles = result.runfiles,
-        ),
+        default_info,
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
             dependency_attributes = ["deps", "srcs", "data"],
         ),
-        EmacsLispInfo(
-            source_files = ctx.files.srcs,
-            compiled_files = result.outs,
-            load_path = result.load_path,
-            data_files = ctx.files.data,
-            transitive_source_files = result.transitive_srcs,
-            transitive_compiled_files = result.transitive_outs,
-            transitive_load_path = result.transitive_load_path,
-        ),
+        elisp_info,
     ]
 
 elisp_library = rule(

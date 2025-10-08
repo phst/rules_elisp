@@ -65,7 +65,7 @@ def _elisp_proto_aspect_impl(target, ctx):
     if ctx.label.package == "src/google/protobuf":
         # See the comment in _elisp_proto_feature why we’re doing this.
         load_path.append(".")
-    result = compile(
+    _default_info, elisp_info = compile(
         ctx = ctx,
         srcs = srcs + [bundle],
         deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
@@ -81,19 +81,11 @@ def _elisp_proto_aspect_impl(target, ctx):
             dependency_attributes = ["deps", "data"],
             extensions = ["el"],
         ),
-        EmacsLispInfo(
-            source_files = srcs + [bundle],
-            compiled_files = result.outs,
-            load_path = result.load_path,
-            data_files = ctx.rule.files.data,
-            transitive_source_files = result.transitive_srcs,
-            transitive_compiled_files = result.transitive_outs,
-            transitive_load_path = result.transitive_load_path,
-        ),
+        elisp_info,
         _ElispProtoInfo(
             # FIXME: This relies on the order of the files in result.outs.
-            files = srcs + result.outs[:-1],
-            bundle_files = [bundle] + result.outs[-1:],
+            files = srcs + elisp_info.compiled_files[:-1],
+            bundle_files = [bundle] + elisp_info.compiled_files[-1:],
         ),
     ]
 

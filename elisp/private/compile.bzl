@@ -58,17 +58,8 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
           errors
 
     Returns:
-      A structure with the following fields:
-        outs: a list of File objects containing the byte-compiled files and
-            module objects
-        load_path: the load path required to load the compiled files
-        runfiles: a runfiles object for the set of input files
-        transitive_load_path: the load path required to load the compiled files
-            and all their transitive dependencies
-        transitive_srcs: a depset of source files for this compilation unit
-            and all its transitive dependencies
-        transitive_outs: a depset of compiled files and module objects for this
-            compilation unit and all its transitive dependencies
+      a tuple (default_info, elisp_info) of `DefaultInfo` and `EmacsLispInfo`
+      provider instances
     """
 
     # Only byte-compile Lisp source files.  Use module objects directly as
@@ -235,13 +226,20 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         )
         outs.append(out)
 
-    return struct(
-        outs = outs,
-        load_path = resolved_load_path,
-        runfiles = ctx.runfiles(transitive_files = transitive_data),
-        transitive_load_path = transitive_load_path,
-        transitive_srcs = depset(direct = srcs, transitive = indirect_srcs),
-        transitive_outs = depset(direct = outs, transitive = indirect_outs),
+    return (
+        DefaultInfo(
+            files = depset(direct = outs),
+            runfiles = ctx.runfiles(transitive_files = transitive_data),
+        ),
+        EmacsLispInfo(
+            source_files = srcs,
+            compiled_files = outs,
+            load_path = resolved_load_path,
+            data_files = data,
+            transitive_source_files = depset(direct = srcs, transitive = indirect_srcs),
+            transitive_compiled_files = depset(direct = outs, transitive = indirect_outs),
+            transitive_load_path = transitive_load_path,
+        ),
     )
 
 def _load_directory_for_actions(directory):
