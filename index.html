@@ -1253,6 +1253,41 @@ provider documentation.
 </dl>
 </dd></dl>
 
+<dl class="first-deffn first-defun-alias-first-deffn def-block">
+<dt class="deffn defun-alias-deffn def-line" id="index-merge_005felisp_005finfos"><span class="category-def">Function: </span><span><strong class="def-name">merge_elisp_infos</strong> <var class="def-var-arguments">([direct], [transitive])</var><a class="copiable-link" href="#index-merge_005felisp_005finfos"> &para;</a></span></dt>
+<dd>
+
+<div class="example">
+<pre class="example-preformatted">load(&quot;@phst_rules_elisp//elisp/common:elisp_info.bzl&quot;, &quot;merge_elisp_infos&quot;)
+</pre></div>
+
+<p>Merges several <code class="code">EmacsLispInfo</code> provider instances.
+</p>
+<p>Each element of <var class="var">direct</var> and <var class="var">transitive</var> must be an
+<code class="code">EmacsLispInfo</code> provider instance.  The return value is a fresh
+<code class="code">EmacsLispInfo</code> provider instance.  All its “transitive” attributes (those
+starting with <code class="code">transitive_</code>) are constructed by merging the corresponding
+attributes from both <var class="var">direct</var> and <var class="var">transitive</var>, but its
+other attributes are constructed only from <var class="var">direct</var>.  Conceptually,
+the resulting provider represents an <code class="code">elisp_library</code> that is the union of
+all the libraries represented by <var class="var">direct</var>, with
+<var class="var">transitive</var> as dependent libraries.  Duplicate entries are
+omitted.
+</p>
+<dl class="table">
+<dt>direct</dt>
+<dd><p>A list of <code class="code">EmacsLispInfo</code> providers representing libraries that
+should be merged directly into the result.  Optional; default: <code class="code">[]</code>.
+</p></dd>
+<dt>transitive</dt>
+<dd><p>A list of <code class="code">EmacsLispInfo</code> providers representing libraries that
+should be merged indirectly into the result.  Optional; default: <code class="code">[]</code>.
+</p></dd>
+</dl>
+<p>Returns: 
+A fresh <code class="code">EmacsLispInfo</code> provider.
+</p></dd></dl>
+
 <p>To compile Emacs Lisp source files and runs tests, <code class="code">rules_elisp</code> registers the
 toolchains of type <code class="code">@phst_rules_elisp//elisp:toolchain_type</code>; see
 <a class="uref" href="https://bazel.build/extending/toolchains">Toolchains</a>.  Emacs Lisp toolchains
@@ -1455,6 +1490,8 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
  &nbsp; 
 <a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
  &nbsp; 
+<a class="summary-letter-printindex" href="#Symbol-index_fn_letter-M"><b>M</b></a>
+ &nbsp; 
 </td></tr></table>
 <table class="fn-entries-printindex">
 <tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
@@ -1518,10 +1555,15 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <tr><th id="Symbol-index_fn_letter-H">H</th></tr>
 <tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
 <tr><td colspan="3"><hr></td></tr>
+<tr><th id="Symbol-index_fn_letter-M">M</th></tr>
+<tr><td></td><td class="printindex-index-entry"><a href="#index-merge_005felisp_005finfos"><code>merge_elisp_infos</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
+<tr><td colspan="3"><hr></td></tr>
 </table>
 <table class="fn-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Symbol-index_fn_letter-M"><b>M</b></a>
  &nbsp; 
 </td></tr></table>
 </div>

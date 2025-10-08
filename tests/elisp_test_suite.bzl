@@ -17,7 +17,14 @@
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//lib:unittest.bzl", "unittest")
 load("//elisp:elisp_library.bzl", "elisp_library")
-load(":elisp_info_test.bzl", "elisp_info_unit_test", "provider_test")
+load(
+    ":elisp_info_test.bzl",
+    "elisp_info_unit_test",
+    "merge_elisp_infos_direct_test",
+    "merge_elisp_infos_mixed_test",
+    "merge_elisp_infos_transitive_test",
+    "provider_test",
+)
 
 visibility("private")
 
@@ -31,6 +38,18 @@ def elisp_test_suite(*, name):
         name,
         partial.make(
             elisp_info_unit_test,
+            size = "small",
+        ),
+        partial.make(
+            merge_elisp_infos_direct_test,
+            size = "small",
+        ),
+        partial.make(
+            merge_elisp_infos_transitive_test,
+            size = "small",
+        ),
+        partial.make(
+            merge_elisp_infos_mixed_test,
             size = "small",
         ),
         partial.make(
