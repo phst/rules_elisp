@@ -38,7 +38,7 @@ def binary(ctx, *, srcs, tags, args):
       a pair (executable, runfiles) containing the compiled binary and the
           runfiles it needs.
     """
-    result = compile(
+    default_info, elisp_info = compile(
         ctx = ctx,
         srcs = srcs,
         deps = ctx.attr.deps,
@@ -52,7 +52,7 @@ def binary(ctx, *, srcs, tags, args):
 
     # Only pass in data files when needed.
     data_files_for_manifest = (
-        result.runfiles.files.to_list() if toolchain.wrap else []
+        default_info.default_runfiles.files.to_list() if toolchain.wrap else []
     )
 
     # If we’re supposed to generate coverage information, use source files in
@@ -72,9 +72,9 @@ def binary(ctx, *, srcs, tags, args):
     # and compiled files, always supply both files at runtime.
     transitive_files = (
         depset(transitive = [
-            result.transitive_srcs,
-            result.transitive_outs,
-        ]) if ctx.configuration.coverage_enabled else result.transitive_outs
+            elisp_info.transitive_source_files,
+            elisp_info.transitive_compiled_files,
+        ]) if ctx.configuration.coverage_enabled else elisp_info.transitive_compiled_files
     )
 
     # When collecting coverage information, the ERT test runner needs a way to
@@ -94,7 +94,7 @@ def binary(ctx, *, srcs, tags, args):
     # to use the ‘load-suffixes’ variable for this purpose.
     links = {
         runfile_location(ctx, src) + ".instrument": src
-        for src in result.transitive_srcs.to_list()
+        for src in elisp_info.transitive_source_files.to_list()
     } if ctx.configuration.coverage_enabled else {}
 
     # We use a C++ launcher because the C++ toolchain framework exposes
@@ -114,19 +114,19 @@ def binary(ctx, *, srcs, tags, args):
             for tag in collections.uniq(ctx.attr.tags + tags)
         ] + [
             "--load-directory=" + check_relative_filename(dir.for_runfiles)
-            for dir in result.transitive_load_path.to_list()
+            for dir in elisp_info.transitive_load_path.to_list()
         ] + [
             "--load-file=" + runfile_location(ctx, src)
-            for src in result.outs
+            for src in elisp_info.compiled_files
         ] + [
             "--data-file=" + runfile_location(ctx, file)
             for file in data_files_for_manifest
         ] + args,
     )
     bin_runfiles = ctx.runfiles(
-        files = [emacs.files_to_run.executable] + result.outs,
+        files = [emacs.files_to_run.executable] + elisp_info.compiled_files,
         transitive_files = depset(
-            transitive = [transitive_files, result.runfiles.files],
+            transitive = [transitive_files, default_info.default_runfiles.files],
         ),
         root_symlinks = links,
     )
