@@ -131,7 +131,7 @@ class _Generator:
         if not doc.endswith('.'):
             raise ValueError(
                 f'documentation string {doc!r} should end with a period')
-        suffixes = [self._MANDATORY[param.mandatory]]
+        suffixes = [self._MANDATORY[param.mandatory].capitalize()]
         if param.default_value:
             suffixes.append(f'default: ~{param.default_value}~')
         suffix = '; '.join(suffixes)
