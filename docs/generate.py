@@ -271,6 +271,8 @@ class _Generator:
     def _markdown(self, text: str) -> str:
         """Convert a Markdown snippet to Org-mode."""
         text = text.strip()
+        if not text:
+            raise ValueError('Missing docstring')
         # Bazel before 8.1 (including Stardoc) interpreted all files as Latin-1,
         # cf. https://bazel.build/versions/8.0.0/concepts/build-files.  However,
         # our files all use UTF-8, leading to double encoding.  Reverse that
