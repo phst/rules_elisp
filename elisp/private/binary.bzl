@@ -16,6 +16,7 @@
 rules."""
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load(":cc_launcher.bzl", "cc_launcher")
 load(":compile.bzl", "compile")
 load(":filenames.bzl", "check_relative_filename", "runfile_location")
@@ -41,7 +42,7 @@ def binary(ctx, *, srcs, tags, args):
     default_info, elisp_info = compile(
         ctx = ctx,
         srcs = srcs,
-        deps = ctx.attr.deps,
+        deps = [(d[DefaultInfo], d[EmacsLispInfo]) for d in ctx.attr.deps],
         load_path = [],
         data = ctx.files.data,
         tags = ctx.attr.tags,

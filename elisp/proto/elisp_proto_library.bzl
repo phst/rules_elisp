@@ -68,7 +68,10 @@ def _elisp_proto_aspect_impl(target, ctx):
     _default_info, elisp_info = compile(
         ctx = ctx,
         srcs = srcs + [bundle],
-        deps = [ctx.attr._protobuf_lib] + ctx.rule.attr.deps,
+        deps = [
+            (d[DefaultInfo], d[EmacsLispInfo])
+            for d in [ctx.attr._protobuf_lib] + ctx.rule.attr.deps
+        ],
         load_path = load_path,
         data = [],
         tags = ctx.rule.attr.tags,
