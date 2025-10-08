@@ -50,6 +50,7 @@ bzl_library(
         ":filenames",
         ":load_path",
         ":run_emacs",
+        "//elisp/common:elisp_info",
         "@bazel_skylib//lib:collections",
         "@bazel_skylib//lib:paths",
     ],

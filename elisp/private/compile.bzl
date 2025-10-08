@@ -16,6 +16,7 @@
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("@bazel_skylib//lib:paths.bzl", "paths")
+load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load(":cc_launcher_config.bzl", "LAUNCHER_ATTRS")
 load(":filenames.bzl", "check_relative_filename", "repository_relative_filename")
 load(":load_path.bzl", "resolve_load_path")
