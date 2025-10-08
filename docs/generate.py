@@ -121,7 +121,7 @@ class _Generator:
             self._parameter(param)
         returns = getattr(func, 'return').doc_string
         if returns:
-            self._write(f'Returns: {returns}\n\n')
+            self._write(f'Returns: {self._markdown(returns)}\n\n')
         if func.deprecated.doc_string:
             raise ValueError(f'unsupported deprecated function {name}')
         self._write('#+END_defun\n\n')
