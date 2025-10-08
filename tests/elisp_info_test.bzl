@@ -23,22 +23,26 @@ visibility("private")
 
 def _elisp_info_unit_test(ctx):
     env = unittest.begin(ctx)
+    srcs = _files(ctx.actions, suffix = "el", count = 3)
+    outs = _files(ctx.actions, suffix = "elc", count = 3)
+    data = _files(ctx.actions, suffix = "dat", count = 2)
+    dir = struct(for_actions = ".", for_runfiles = "_main")
     info = EmacsLispInfo(
-        source_files = [],
-        compiled_files = [],
-        load_path = [],
-        data_files = [],
-        transitive_source_files = depset(),
-        transitive_compiled_files = depset(),
-        transitive_load_path = depset(),
+        source_files = srcs,
+        compiled_files = outs,
+        load_path = [dir],
+        data_files = data,
+        transitive_source_files = depset(srcs),
+        transitive_compiled_files = depset(outs),
+        transitive_load_path = depset([dir]),
     )
-    asserts.equals(env, info.source_files, [])
-    asserts.equals(env, info.compiled_files, [])
-    asserts.equals(env, info.load_path, [])
-    asserts.equals(env, info.data_files, [])
-    asserts.equals(env, info.transitive_source_files, depset())
-    asserts.equals(env, info.transitive_compiled_files, depset())
-    asserts.equals(env, info.transitive_load_path, depset())
+    asserts.equals(env, info.source_files, srcs)
+    asserts.equals(env, info.compiled_files, outs)
+    asserts.equals(env, info.load_path, [dir])
+    asserts.equals(env, info.data_files, data)
+    asserts.equals(env, sorted(info.transitive_source_files.to_list()), sorted(srcs))
+    asserts.equals(env, sorted(info.transitive_compiled_files.to_list()), sorted(outs))
+    asserts.equals(env, info.transitive_load_path.to_list(), [dir])
     return unittest.end(env)
 
 elisp_info_unit_test = unittest.make(_elisp_info_unit_test)
@@ -90,3 +94,11 @@ def _provider_test_impl(ctx):
     return analysistest.end(env)
 
 provider_test = analysistest.make(_provider_test_impl)
+
+def _files(actions, *, suffix, count):
+    files = []
+    for i in range(count):
+        file = actions.declare_file("%d.%s" % (i, suffix))
+        actions.write(file, "", is_executable = False)
+        files.append(file)
+    return files
