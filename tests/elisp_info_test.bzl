@@ -14,12 +14,34 @@
 
 """Unit tests for //elisp/common:elisp_info.bzl."""
 
-load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts")
+load("@bazel_skylib//lib:unittest.bzl", "analysistest", "asserts", "unittest")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 
 visibility("private")
 
 # Test for the EmacsLispInfo provider.
+
+def _elisp_info_unit_test(ctx):
+    env = unittest.begin(ctx)
+    info = EmacsLispInfo(
+        source_files = [],
+        compiled_files = [],
+        load_path = [],
+        data_files = [],
+        transitive_source_files = depset(),
+        transitive_compiled_files = depset(),
+        transitive_load_path = depset(),
+    )
+    asserts.equals(env, info.source_files, [])
+    asserts.equals(env, info.compiled_files, [])
+    asserts.equals(env, info.load_path, [])
+    asserts.equals(env, info.data_files, [])
+    asserts.equals(env, info.transitive_source_files, depset())
+    asserts.equals(env, info.transitive_compiled_files, depset())
+    asserts.equals(env, info.transitive_load_path, depset())
+    return unittest.end(env)
+
+elisp_info_unit_test = unittest.make(_elisp_info_unit_test)
 
 def _provider_test_impl(ctx):
     env = analysistest.begin(ctx)

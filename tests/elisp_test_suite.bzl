@@ -17,7 +17,7 @@
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@bazel_skylib//lib:unittest.bzl", "unittest")
 load("//elisp:elisp_library.bzl", "elisp_library")
-load(":elisp_info_test.bzl", "provider_test")
+load(":elisp_info_test.bzl", "elisp_info_unit_test", "provider_test")
 
 visibility("private")
 
@@ -29,6 +29,10 @@ def elisp_test_suite(*, name):
     )
     unittest.suite(
         name,
+        partial.make(
+            elisp_info_unit_test,
+            size = "small",
+        ),
         partial.make(
             provider_test,
             target_under_test = ":provider_test_subject",
