@@ -28,8 +28,14 @@
 
 #ifdef RULES_ELISP_EMACS
 #  include "elisp/private/tools/emacs.h"
-#else
+#endif
+
+#ifdef RULES_ELISP_BINARY
 #  include "elisp/private/tools/binary.h"
+#endif
+
+#ifdef RULES_ELISP_TEST
+#  include "elisp/private/tools/test.h"
 #endif
 
 int
@@ -47,7 +53,28 @@ int
 #ifdef RULES_ELISP_EMACS
       RULES_ELISP_MODE, RULES_ELISP_INSTALL,
 #else
-      {RULES_ELISP_LAUNCHER_ARGS},
+      {
+          RULES_ELISP_WRAPPER,
+          RULES_ELISP_MODE,
+          {RULES_ELISP_TAGS},
+          {RULES_ELISP_LOAD_PATH},
+          {RULES_ELISP_LOAD_FILES},
+          {RULES_ELISP_DATA_FILES},
+      },
+#endif
+#ifdef RULES_ELISP_BINARY
+      {
+          RULES_ELISP_INTERACTIVE,
+          {RULES_ELISP_INPUT_ARGS},
+          {RULES_ELISP_OUTPUT_ARGS},
+      },
+#endif
+#ifdef RULES_ELISP_TEST
+      {
+          {RULES_ELISP_SKIP_TESTS},
+          {RULES_ELISP_SKIP_TAGS},
+          RULES_ELISP_MODULE_ASSERTIONS,
+      },
 #endif
       original_args);
   if (!code.ok()) {

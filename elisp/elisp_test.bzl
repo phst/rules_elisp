@@ -18,6 +18,7 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolch
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
+load("//elisp/private:cc_launcher.bzl", "cpp_strings")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
@@ -27,22 +28,18 @@ def _elisp_test_impl(ctx):
     """Rule implementation for the “elisp_test” rule."""
     toolchain = ctx.toolchains[Label("//elisp:toolchain_type")]
 
-    args = [
-        "--skip-test=" + test
-        for test in ctx.attr.skip_tests
-    ] + [
-        "--skip-tag=" + tag
-        for tag in ctx.attr.skip_tags
-    ]
-    if ctx.var["COMPILATION_MODE"] != "opt":
-        args.append("--module-assertions")
     executable, runfiles = binary(
         ctx,
         srcs = ctx.files.srcs,
         # “local = 1” is equivalent to adding a “local” tag,
         # cf. https://bazel.build/reference/be/common-definitions#test.local.
         tags = ["local"] if ctx.attr.local else [],
-        args = args,
+        defines = [
+            "RULES_ELISP_TEST=1",
+            "RULES_ELISP_SKIP_TESTS=" + cpp_strings(ctx.attr.skip_tests),
+            "RULES_ELISP_SKIP_TAGS=" + cpp_strings(ctx.attr.skip_tags),
+            "RULES_ELISP_MODULE_ASSERTIONS=" + str(ctx.var["COMPILATION_MODE"] != "opt").lower(),
+        ],
     )
 
     # We include the original source files in the runfiles so that error

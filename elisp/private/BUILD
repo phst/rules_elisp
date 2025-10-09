@@ -72,7 +72,10 @@ bzl_library(
 bzl_library(
     name = "cc_launcher",
     srcs = ["cc_launcher.bzl"],
-    visibility = ["//elisp/toolchains:__pkg__"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
+    ],
     deps = [
         ":cc_default_info",
         ":generated",

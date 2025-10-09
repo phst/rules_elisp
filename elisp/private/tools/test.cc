@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/private/tools/binary.h"
-
-#include <initializer_list>
+#include "elisp/private/tools/test.h"
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
@@ -25,11 +23,23 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    const std::initializer_list<NativeStringView> launcher_args,
+    const CommonOptions& common_opts, const TestOptions& test_opts,
     const absl::Span<const NativeStringView> original_args) {
+  std::vector<NativeString> launcher_args;
+  for (const NativeStringView test : test_opts.skip_tests) {
+    launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-test=") +
+                            static_cast<NativeString>(test));
+  }
+  for (const NativeStringView tag : test_opts.skip_tags) {
+    launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-tag=") +
+                            static_cast<NativeString>(tag));
+  }
+  if (test_opts.module_assertions) {
+    launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
+  }
   return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
-                     {RULES_ELISP_TEST_ARGS}, launcher_args, original_args,
-                     ExecutableKind::kTest);
+                     common_opts, {RULES_ELISP_TEST_ARGS}, launcher_args,
+                     original_args, ExecutableKind::kTest);
 }
 
 }  // namespace rules_elisp

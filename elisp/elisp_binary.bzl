@@ -25,20 +25,20 @@ visibility("public")
 
 def _elisp_binary_impl(ctx):
     """Rule implementation for the “elisp_binary” rules."""
-    args = []
-    if ctx.attr.interactive:
-        args.append("--interactive")
     if 0 in ctx.attr.input_args:
         fail("input argument index may not be zero")
     if 0 in ctx.attr.output_args:
         fail("output argument index may not be zero")
-    args += ["--input-arg=" + str(i) for i in ctx.attr.input_args]
-    args += ["--output-arg=" + str(i) for i in ctx.attr.output_args]
     executable, runfiles = binary(
         ctx,
         srcs = ctx.files.src,
         tags = [],
-        args = args,
+        defines = [
+            "RULES_ELISP_BINARY=1",
+            "RULES_ELISP_INTERACTIVE=" + str(ctx.attr.interactive).lower(),
+            "RULES_ELISP_INPUT_ARGS=" + ", ".join([str(i) for i in ctx.attr.input_args]),
+            "RULES_ELISP_OUTPUT_ARGS=" + ", ".join([str(i) for i in ctx.attr.output_args]),
+        ],
     )
     return [
         DefaultInfo(
