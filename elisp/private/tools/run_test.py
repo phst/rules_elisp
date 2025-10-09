@@ -62,24 +62,22 @@ def main() -> None:
     env: dict[str, str] = dict(os.environ)
     run_files = runfiles.Runfiles()
     emacs = run_files.resolve(opts.wrapper)
-    args: list[str] = [str(emacs)]
+    args = ['--quick', '--batch', '--no-build-details']
+    if opts.module_assertions:
+        args.append('--module-assertions')
+    args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
+    run_test_elc = run_files.resolve(opts.run_test_elc)
+    args.append('--load=' + str(run_test_elc))
+    for file in opts.load_file:
+        abs_name = run_files.resolve(file)
+        args.append('--test-source=' + _quote(str(abs_name)))
+    for test in opts.skip_test:
+        args.append('--skip-test=' + _quote(test))
+    for tag in opts.skip_tag:
+        args.append('--skip-tag=' + _quote(tag))
+    args.append('--')
+    args.extend(map(_quote, opts.argv[1:]))
     with manifest.add(opts.mode) as (manifest_file, manifest_args):
-        args += manifest_args
-        args += ['--quick', '--batch', '--no-build-details']
-        if opts.module_assertions:
-            args.append('--module-assertions')
-        args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
-        run_test_elc = run_files.resolve(opts.run_test_elc)
-        args.append('--load=' + str(run_test_elc))
-        for file in opts.load_file:
-            abs_name = run_files.resolve(file)
-            args.append('--test-source=' + _quote(str(abs_name)))
-        for test in opts.skip_test:
-            args.append('--skip-test=' + _quote(test))
-        for tag in opts.skip_tag:
-            args.append('--skip-tag=' + _quote(tag))
-        args.append('--')
-        args.extend(map(_quote, opts.argv[1:]))
         env.update(run_files.environment())
         if manifest_file:
             inputs: list[pathlib.Path] = []
@@ -113,7 +111,8 @@ def main() -> None:
         # We can’t use subprocess.run on Windows because it terminates the
         # subprocess using TerminateProcess on timeout, giving it no chance to
         # clean up after itself.
-        with subprocess.Popen(args, env=env, creationflags=flags) as process:
+        with subprocess.Popen([str(emacs)] + list(manifest_args) + args,
+                              env=env, creationflags=flags) as process:
             try:
                 process.communicate(timeout=timeout_secs)
             except subprocess.TimeoutExpired:

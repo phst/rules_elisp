@@ -52,24 +52,23 @@ def main() -> None:
     env: dict[str, str] = dict(os.environ)
     run_files = runfiles.Runfiles()
     emacs = run_files.resolve(opts.wrapper)
-    args: list[str] = [str(emacs)]
+    args = ['--quick']
+    if not opts.interactive:
+        args.append('--batch')
+    args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
+    for file in opts.load_file:
+        abs_name = run_files.resolve(file)
+        args.append('--load=' + str(abs_name))
+    args += opts.argv[1:]
     with manifest.add(opts.mode) as (manifest_file, manifest_args):
-        args += manifest_args
-        args.append('--quick')
-        if not opts.interactive:
-            args.append('--batch')
-        args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
-        for file in opts.load_file:
-            abs_name = run_files.resolve(file)
-            args.append('--load=' + str(abs_name))
         if manifest_file:
             runfiles_dir = _runfiles_dir(env)
             input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
             output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
             manifest.write(opts, input_files, output_files, manifest_file)
-        args.extend(opts.argv[1:])
         env.update(run_files.environment())
-        result = subprocess.run(args, env=env, check=False)
+        result = subprocess.run([str(emacs)] + list(manifest_args) + args,
+                                env=env, check=False)
         if result.returncode > 0:
             # Don’t print a stacktrace if Emacs exited with a non-zero exit
             # code.
