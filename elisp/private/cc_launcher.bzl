@@ -18,12 +18,11 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(":cc_default_info.bzl", "CcDefaultInfo")
-load(":filenames.bzl", "check_relative_filename")
 load(":generated.bzl", "CHR", "ORD")
 
 visibility(["//elisp/toolchains"])
 
-def cc_launcher(ctx, *, header, args, native = True):
+def cc_launcher(ctx, *, defines):
     """Builds a launcher executable that starts Emacs.
 
     The current rule must provide the following attributes:
@@ -34,10 +33,7 @@ def cc_launcher(ctx, *, header, args, native = True):
 
     Args:
       ctx (ctx): rule context
-      header (string): header file to include, relative to the repository root
-      args (list of strings): additional arguments for the function
-      native (bool): whether the arguments should be wrapped in
-        `RULES_ELISP_NATIVE_LITERAL`
+      defines (list of strings): additional local preprocessor definitions
 
     Returns:
       a pair `(executable, runfiles)` where `executable` is a `File` object
@@ -61,10 +57,7 @@ def cc_launcher(ctx, *, header, args, native = True):
         cc_toolchain = cc_toolchain,
         srcs = ctx.files._launcher_srcs,
         compilation_contexts = [info.compilation_context for info in infos],
-        local_defines = defaults.defines + [
-            'RULES_ELISP_HEADER="' + check_relative_filename(header) + '"',
-            "RULES_ELISP_LAUNCHER_ARGS=" + _cpp_strings(args, native = native),
-        ],
+        local_defines = defaults.defines + defines,
         user_compile_flags = defaults.copts,
     )
     bin = cc_common.link(
@@ -79,7 +72,7 @@ def cc_launcher(ctx, *, header, args, native = True):
     runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])
     return bin.executable, runfiles
 
-def _cpp_strings(strings, *, native):
+def cpp_strings(strings, *, native):
     """Formats the given string list as C++ initializer list.
 
     This function makes an effort to support strings with special characters.
@@ -92,9 +85,9 @@ def _cpp_strings(strings, *, native):
     Returns:
       a string containing C++ code representing the given string list
     """
-    return ", ".join([_cpp_string(s, native = native) for s in strings])
+    return ", ".join([cpp_string(s, native = native) for s in strings])
 
-def _cpp_string(string, *, native):
+def cpp_string(string, *, native):
     """Formats the given string as C++ string literal.
 
     This function makes an effort to support strings with special characters.

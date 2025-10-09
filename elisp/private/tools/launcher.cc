@@ -26,7 +26,11 @@
 
 #include "elisp/private/tools/platform.h"
 
-#include RULES_ELISP_HEADER
+#ifdef RULES_ELISP_EMACS
+#  include "elisp/private/tools/emacs.h"
+#else
+#  include "elisp/private/tools/binary.h"
+#endif
 
 int
 #ifdef _WIN32
@@ -39,8 +43,13 @@ int
   absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
-  const absl::StatusOr<int> code =
-      rules_elisp::Main({RULES_ELISP_LAUNCHER_ARGS}, original_args);
+  const absl::StatusOr<int> code = rules_elisp::Main(
+#ifdef RULES_ELISP_EMACS
+      RULES_ELISP_MODE, RULES_ELISP_INSTALL,
+#else
+      {RULES_ELISP_LAUNCHER_ARGS},
+#endif
+      original_args);
   if (!code.ok()) {
     LOG(ERROR) << code.status();
     return EXIT_FAILURE;

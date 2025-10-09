@@ -17,7 +17,7 @@ rules."""
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
-load(":cc_launcher.bzl", "cc_launcher")
+load(":cc_launcher.bzl", "cc_launcher", "cpp_strings")
 load(":compile.bzl", "compile")
 load(":filenames.bzl", "check_relative_filename", "runfile_location")
 
@@ -106,23 +106,27 @@ def binary(ctx, *, srcs, tags, args):
     # better be sure.
     executable, launcher_runfiles = cc_launcher(
         ctx,
-        header = "elisp/private/tools/binary.h",
-        args = [
-            "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
-            "--mode=" + ("wrap" if toolchain.wrap else "direct"),
-        ] + [
-            "--rule-tag=" + tag
-            for tag in collections.uniq(ctx.attr.tags + tags)
-        ] + [
-            "--load-directory=" + check_relative_filename(dir.for_runfiles)
-            for dir in elisp_info.transitive_load_path.to_list()
-        ] + [
-            "--load-file=" + runfile_location(ctx, src)
-            for src in elisp_info.compiled_files
-        ] + [
-            "--data-file=" + runfile_location(ctx, file)
-            for file in data_files_for_manifest
-        ] + args,
+        defines = [
+            "RULES_ELISP_LAUNCHER_ARGS=" + cpp_strings(
+                [
+                    "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
+                    "--mode=" + ("wrap" if toolchain.wrap else "direct"),
+                ] + [
+                    "--rule-tag=" + tag
+                    for tag in collections.uniq(ctx.attr.tags + tags)
+                ] + [
+                    "--load-directory=" + check_relative_filename(dir.for_runfiles)
+                    for dir in elisp_info.transitive_load_path.to_list()
+                ] + [
+                    "--load-file=" + runfile_location(ctx, src)
+                    for src in elisp_info.compiled_files
+                ] + [
+                    "--data-file=" + runfile_location(ctx, file)
+                    for file in data_files_for_manifest
+                ] + args,
+                native = True,
+            ),
+        ],
     )
     bin_runfiles = ctx.runfiles(
         files = [emacs.files_to_run.executable] + elisp_info.compiled_files,

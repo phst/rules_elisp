@@ -20,7 +20,7 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolch
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
-load("//elisp/private:cc_launcher.bzl", "cc_launcher")
+load("//elisp/private:cc_launcher.bzl", "cc_launcher", "cpp_string")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
 load("//elisp/private:filenames.bzl", "runfile_location")
 
@@ -52,12 +52,11 @@ def _elisp_emacs_binary_impl(ctx):
 
     executable, runfiles = cc_launcher(
         ctx,
-        header = "elisp/private/tools/emacs.h",
-        args = [
-            mode,
-            runfile_location(ctx, install),
+        defines = [
+            "RULES_ELISP_EMACS=1",
+            "RULES_ELISP_MODE=rules_elisp::Mode::k" + mode.capitalize(),
+            "RULES_ELISP_INSTALL=" + cpp_string(runfile_location(ctx, install), native = False),
         ],
-        native = False,
     )
     return [
         DefaultInfo(
