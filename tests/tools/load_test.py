@@ -29,17 +29,16 @@ class AddPathTest(absltest.TestCase):
 
     def test_directory(self) -> None:
         """Unit test for directory-based runfiles."""
-        args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
-            load.add_path(runfiles.Runfiles({'RUNFILES_DIR': directory}), args,
+            args = list(
+                load.path(runfiles.Runfiles({'RUNFILES_DIR': directory}),
                           [pathlib.PurePosixPath('foo'),
                            pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
-                          pathlib.PurePosixPath('unused/runfiles.elc'))
+                          pathlib.PurePosixPath('unused/runfiles.elc')))
         base = pathlib.Path(directory)
         self.assertListEqual(
             args,
-            ['--foo',
-             '--directory=' + str(base / 'foo'),
+            ['--directory=' + str(base / 'foo'),
              '--directory=' + str(base / 'bar \t\n\r\f äα𝐴🐈\'\0\\"')])
 
     def test_manifest(self) -> None:
@@ -47,23 +46,20 @@ class AddPathTest(absltest.TestCase):
         runfiles_dir = pathlib.Path(
             r'C:\Runfiles' if platform.system() == 'Windows' else '/runfiles')
         runfiles_elc = runfiles_dir / 'runfiles.elc'
-        args = ['--foo']
         with tempfile.TemporaryDirectory() as directory:
             manifest = pathlib.Path(directory) / 'manifest'
             # Runfiles manifests contain POSIX-style filenames even on Windows.
             manifest.write_text(
                 'repository/runfiles.elc ' + runfiles_elc.as_posix() + '\n',
                 encoding='ascii', newline='\n')
-            load.add_path(
+            args = list(load.path(
                 runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
-                args,
                 [pathlib.PurePosixPath('foo'),
                  pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
-                pathlib.PurePosixPath('repository/runfiles.elc'))
+                pathlib.PurePosixPath('repository/runfiles.elc')))
         self.assertListEqual(
             args,
-            ['--foo',
-             '--load=' + str(runfiles_elc),
+            ['--load=' + str(runfiles_elc),
              '--funcall=elisp/runfiles/install-handler',
              '--directory=/bazel-runfile:foo',
              '--directory=/bazel-runfile:bar \t\n\r\f äα𝐴🐈\'\0\\"'])

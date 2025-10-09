@@ -68,7 +68,7 @@ def main() -> None:
         args += ['--quick', '--batch', '--no-build-details']
         if opts.module_assertions:
             args.append('--module-assertions')
-        load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
+        args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
         run_test_elc = run_files.resolve(opts.run_test_elc)
         args.append('--load=' + str(run_test_elc))
         for file in opts.load_file:

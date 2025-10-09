@@ -58,7 +58,7 @@ def main() -> None:
         args.append('--quick')
         if not opts.interactive:
             args.append('--batch')
-        load.add_path(run_files, args, opts.load_directory, opts.runfiles_elc)
+        args += load.path(run_files, opts.load_directory, opts.runfiles_elc)
         for file in opts.load_file:
             abs_name = run_files.resolve(file)
             args.append('--load=' + str(abs_name))
