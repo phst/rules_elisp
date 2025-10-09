@@ -124,7 +124,6 @@ def binary(ctx, *, srcs, tags, args):
                     "--data-file=" + runfile_location(ctx, file)
                     for file in data_files_for_manifest
                 ] + args,
-                native = True,
             ),
         ],
     )

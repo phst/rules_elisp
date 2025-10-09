@@ -72,7 +72,7 @@ def cc_launcher(ctx, *, defines):
     runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])
     return bin.executable, runfiles
 
-def cpp_strings(strings, *, native):
+def cpp_strings(strings, *, native = True):
     """Formats the given string list as C++ initializer list.
 
     This function makes an effort to support strings with special characters.
@@ -87,7 +87,7 @@ def cpp_strings(strings, *, native):
     """
     return ", ".join([cpp_string(s, native = native) for s in strings])
 
-def cpp_string(string, *, native):
+def cpp_string(string, *, native = True):
     """Formats the given string as C++ string literal.
 
     This function makes an effort to support strings with special characters.
