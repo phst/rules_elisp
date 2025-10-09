@@ -19,6 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
+#include <initializer_list>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -40,9 +41,20 @@ constexpr inline bool kWindows =
 #endif
 
 using NativeChar = std::conditional_t<kWindows, wchar_t, char>;
+using NativeString = std::basic_string<NativeChar>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
 enum class Mode { kSource, kRelease };
+enum class ToolchainMode { kDirect, kWrap };
+
+struct CommonOptions final {
+  NativeStringView wrapper;
+  ToolchainMode mode;
+  std::initializer_list<NativeStringView> tags;
+  std::initializer_list<NativeStringView> load_path;
+  std::initializer_list<NativeStringView> load_files;
+  std::initializer_list<NativeStringView> data_files;
+};
 
 }  // namespace rules_elisp
 

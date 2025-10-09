@@ -129,8 +129,6 @@ absl::StatusOr<To> CastNumber(const From n) {
   return *ret;
 }
 
-using NativeString = std::basic_string<NativeChar>;
-
 struct CaseInsensitiveHash;
 struct CaseInsensitiveEqual;
 
@@ -746,8 +744,9 @@ static absl::StatusOr<int> Run(std::vector<NativeString>& args,
 
 absl::StatusOr<int> RunLauncher(
     const std::string_view source_repository, const std::string_view binary,
+    const CommonOptions& common_opts,
     const std::initializer_list<NativeStringView> common_args,
-    const std::initializer_list<NativeStringView> launcher_args,
+    const absl::Span<const NativeString> launcher_args,
     const absl::Span<const NativeStringView> original_args,
     const ExecutableKind kind) {
   const absl::StatusOr<RunfilesPtr> runfiles =
@@ -758,6 +757,27 @@ absl::StatusOr<int> RunLauncher(
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), common_args.begin(), common_args.end());
+  final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--wrapper=") +
+                       static_cast<NativeString>(common_opts.wrapper));
+  final_args.push_back(common_opts.mode == rules_elisp::ToolchainMode::kWrap
+                           ? RULES_ELISP_NATIVE_LITERAL("--mode=wrap")
+                           : RULES_ELISP_NATIVE_LITERAL("--mode=direct"));
+  for (const NativeStringView tag : common_opts.tags) {
+    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--rule-tag=") +
+                         static_cast<NativeString>(tag));
+  }
+  for (const NativeStringView dir : common_opts.load_path) {
+    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load-directory=") +
+                         static_cast<NativeString>(dir));
+  }
+  for (const NativeStringView file : common_opts.load_files) {
+    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load-file=") +
+                         static_cast<NativeString>(file));
+  }
+  for (const NativeStringView file : common_opts.data_files) {
+    final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--data-file=") +
+                         static_cast<NativeString>(file));
+  }
   final_args.insert(final_args.end(), launcher_args.begin(),
                     launcher_args.end());
   final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));

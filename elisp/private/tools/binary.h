@@ -28,7 +28,14 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(std::initializer_list<NativeStringView> launcher_args,
+struct BinaryOptions final {
+  bool interactive;
+  std::initializer_list<int> input_args;
+  std::initializer_list<int> output_args;
+};
+
+absl::StatusOr<int> Main(const CommonOptions& common_opts,
+                         const BinaryOptions& binary_opts,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

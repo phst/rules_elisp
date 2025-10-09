@@ -53,11 +53,16 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_HEADER="elisp/private/tools/binary.h"'),
-        shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL("--wrapper=/bin/false")',
-            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-        ])),
+        shell.quote("RULES_ELISP_BINARY=1"),
+        shell.quote('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL("/bin/false")'),
+        shell.quote("RULES_ELISP_MODE=rules_elisp::ToolchainMode::kWrap"),
+        shell.quote("RULES_ELISP_TAGS="),
+        shell.quote("RULES_ELISP_LOAD_PATH="),
+        shell.quote("RULES_ELISP_LOAD_FILES="),
+        shell.quote("RULES_ELISP_DATA_FILES="),
+        shell.quote("RULES_ELISP_INTERACTIVE=false"),
+        shell.quote("RULES_ELISP_INPUT_ARGS="),
+        shell.quote("RULES_ELISP_OUTPUT_ARGS="),
     ],
     visibility = ["//tests/tools:__pkg__"],
     deps = LAUNCHER_DEPS + [":binary"],
@@ -108,14 +113,15 @@ cc_library(
         "//tests/wrap:__pkg__",
     ],
     deps = [
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+        "@bazel_tools//tools/cpp/runfiles",  # keep
+        "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",
-        "@rules_cc//cc/runfiles",
     ],
 )
 
@@ -138,9 +144,10 @@ executable_only(
 cc_library(
     name = "test",
     testonly = True,
-    # keep
-    srcs = ["test.cc"],
-    hdrs = ["binary.h"],
+    srcs = [
+        "test.cc",  # keep
+    ],
+    hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
     data = [
         ":run_test_stripped",
@@ -160,14 +167,13 @@ cc_library(
         ])),
     ],
     visibility = ["//elisp:__pkg__"],
-    # keep
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
+        ":process",  # keep
         ":platform",
-        ":process",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],

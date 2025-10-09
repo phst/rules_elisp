@@ -17,13 +17,13 @@ rules."""
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
-load(":cc_launcher.bzl", "cc_launcher", "cpp_strings")
+load(":cc_launcher.bzl", "cc_launcher", "cpp_string", "cpp_strings")
 load(":compile.bzl", "compile")
 load(":filenames.bzl", "check_relative_filename", "runfile_location")
 
 visibility("//elisp")
 
-def binary(ctx, *, srcs, tags, args):
+def binary(ctx, *, srcs, tags, defines):
     """Shared implementation for the “elisp_binary” and “elisp_test” rules.
 
     The rule should define a “_launcher_srcs” attribute containing the main C++
@@ -33,7 +33,7 @@ def binary(ctx, *, srcs, tags, args):
       ctx: rule context
       srcs: list of File objects denoting the source files to load
       tags: list of strings with additional rule-specific tags
-      args: a list of rule-specific program arguments
+      defines: a list of rule-specific preprocessor definitions
 
     Returns:
       a pair (executable, runfiles) containing the compiled binary and the
@@ -107,25 +107,22 @@ def binary(ctx, *, srcs, tags, args):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         defines = [
-            "RULES_ELISP_LAUNCHER_ARGS=" + cpp_strings(
-                [
-                    "--wrapper=" + runfile_location(ctx, emacs.files_to_run.executable),
-                    "--mode=" + ("wrap" if toolchain.wrap else "direct"),
-                ] + [
-                    "--rule-tag=" + tag
-                    for tag in collections.uniq(ctx.attr.tags + tags)
-                ] + [
-                    "--load-directory=" + check_relative_filename(dir.for_runfiles)
-                    for dir in elisp_info.transitive_load_path.to_list()
-                ] + [
-                    "--load-file=" + runfile_location(ctx, src)
-                    for src in elisp_info.compiled_files
-                ] + [
-                    "--data-file=" + runfile_location(ctx, file)
-                    for file in data_files_for_manifest
-                ] + args,
-            ),
-        ],
+            "RULES_ELISP_WRAPPER=" + cpp_string(runfile_location(ctx, emacs.files_to_run.executable)),
+            "RULES_ELISP_MODE=rules_elisp::ToolchainMode::" + ("kWrap" if toolchain.wrap else "kDirect"),
+            "RULES_ELISP_TAGS=" + cpp_strings(collections.uniq(ctx.attr.tags + tags)),
+            "RULES_ELISP_LOAD_PATH=" + cpp_strings([
+                check_relative_filename(dir.for_runfiles)
+                for dir in elisp_info.transitive_load_path.to_list()
+            ]),
+            "RULES_ELISP_LOAD_FILES=" + cpp_strings([
+                runfile_location(ctx, src)
+                for src in elisp_info.compiled_files
+            ]),
+            "RULES_ELISP_DATA_FILES=" + cpp_strings([
+                "--data-file=" + runfile_location(ctx, file)
+                for file in data_files_for_manifest
+            ]),
+        ] + defines,
     )
     bin_runfiles = ctx.runfiles(
         files = [emacs.files_to_run.executable] + elisp_info.compiled_files,

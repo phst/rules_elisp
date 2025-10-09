@@ -41,17 +41,16 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_HEADER="elisp/private/tools/binary.h"'),
-        shell.quote("RULES_ELISP_LAUNCHER_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--wrapper=$(rlocationpath :wrap))*")',
-            'RULES_ELISP_NATIVE_LITERAL("--mode=wrap")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=local")',
-            'RULES_ELISP_NATIVE_LITERAL("--rule-tag=mytag")',
-            'RULES_ELISP_NATIVE_LITERAL("--load-directory=phst_rules_elisp")',
-            'RULES_ELISP_NATIVE_LITERAL("--data-file=phst_rules_elisp/elisp/private/tools/binary.h")',
-            'RULES_ELISP_NATIVE_LITERAL("--input-arg=2")',
-            'RULES_ELISP_NATIVE_LITERAL("--output-arg=-1")',
-        ])),
+        shell.quote("RULES_ELISP_BINARY=1"),
+        shell.quote('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL(R"*($(rlocationpath :wrap))*")'),
+        shell.quote("RULES_ELISP_MODE=rules_elisp::ToolchainMode::kWrap"),
+        shell.quote('RULES_ELISP_TAGS=RULES_ELISP_NATIVE_LITERAL("local"), RULES_ELISP_NATIVE_LITERAL("mytag")'),
+        shell.quote('RULES_ELISP_LOAD_PATH=RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp")'),
+        shell.quote("RULES_ELISP_LOAD_FILES="),
+        shell.quote('RULES_ELISP_DATA_FILES=RULES_ELISP_NATIVE_LITERAL("phst_rules_elisp/elisp/private/tools/binary.h")'),
+        shell.quote("RULES_ELISP_INPUT_ARGS=2"),
+        shell.quote("RULES_ELISP_OUTPUT_ARGS=-1"),
+        shell.quote("RULES_ELISP_INTERACTIVE=false"),
     ],
     visibility = ["//tests:__pkg__"],
     deps = LAUNCHER_DEPS + ["//elisp/private/tools:binary"],

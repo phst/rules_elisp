@@ -20,7 +20,7 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load(":cc_default_info.bzl", "CcDefaultInfo")
 load(":generated.bzl", "CHR", "ORD")
 
-visibility(["//elisp/toolchains"])
+visibility(["//elisp", "//elisp/toolchains"])
 
 def cc_launcher(ctx, *, defines):
     """Builds a launcher executable that starts Emacs.
