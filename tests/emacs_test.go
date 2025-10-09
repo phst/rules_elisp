@@ -97,6 +97,7 @@ func TestRunWrapped(t *testing.T) {
 		" \t\n\r\f äα𝐴🐈'\\\"",
 		"/:"+outputFile,
 	)
+	cmd.Stderr = t.Output()
 	out, err := cmd.Output()
 	if err != nil {
 		t.Fatal(err)
