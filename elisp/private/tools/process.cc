@@ -776,7 +776,7 @@ absl::StatusOr<int> RunLauncher(
 }
 
 absl::StatusOr<int> RunEmacs(
-    const std::string_view source_repository, const std::string_view mode,
+    const std::string_view source_repository, const Mode mode,
     const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
   const absl::StatusOr<RunfilesPtr> runfiles =
@@ -785,10 +785,10 @@ absl::StatusOr<int> RunEmacs(
   bool release;
   // We currently support pre-built Emacsen only on Windows because there are no
   // official binary release archives for Unix systems.
-  if (kWindows && mode == "release") {
+  if (kWindows && mode == Mode::kRelease) {
     release = true;
   } else {
-    CHECK_EQ(mode, "source") << "invalid mode";
+    CHECK_EQ(mode, Mode::kSource) << "invalid mode";
     release = false;
   }
   NativeString emacs;

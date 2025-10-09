@@ -25,10 +25,9 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    const Params params,
+    const Mode mode, const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
-  return RunEmacs(BAZEL_CURRENT_REPOSITORY, params.mode, params.install,
-                  original_args);
+  return RunEmacs(BAZEL_CURRENT_REPOSITORY, mode, install, original_args);
 }
 
 }  // namespace rules_elisp

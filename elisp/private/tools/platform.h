@@ -42,6 +42,8 @@ constexpr inline bool kWindows =
 using NativeChar = std::conditional_t<kWindows, wchar_t, char>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
+enum class Mode { kSource, kRelease };
+
 }  // namespace rules_elisp
 
 #endif  // ELISP_PLATFORM_H_
