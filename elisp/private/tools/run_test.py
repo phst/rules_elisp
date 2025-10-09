@@ -92,46 +92,45 @@ def main() -> None:
         coverage_dir = env.get('COVERAGE_DIR')
         if coverage_dir:
             outputs.append(pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
-    with manifest.add(opts, inputs, outputs) as manifest_args:
-        timeout_secs = None
-        flags = 0
-        if _WINDOWS:
-            # On Windows, the Bazel test runner doesn’t gracefully kill the test
-            # process, see https://github.com/bazelbuild/bazel/issues/12684.  We
-            # work around this by creating a new process group and sending
-            # CTRL + BREAK slightly before Bazel kills us.
-            timeout_str = env.get('TEST_TIMEOUT') or None
-            if timeout_str:
-                # Lower the timeout to account for infrastructure overhead.
-                timeout_secs = int(timeout_str) - 2
-            flags = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]  # pylint: disable=line-too-long
-        # We can’t use subprocess.run on Windows because it terminates the
-        # subprocess using TerminateProcess on timeout, giving it no chance to
-        # clean up after itself.
-        with subprocess.Popen([str(emacs)] + list(manifest_args) + args,
-                              env=env, creationflags=flags) as process:
-            try:
-                process.communicate(timeout=timeout_secs)
-            except subprocess.TimeoutExpired:
-                # Since we pass a None timeout on Unix systems, we should get
-                # here only on Windows.
-                assert _WINDOWS
-                _logger.warning('test timed out, sending CTRL + BREAK')
-                signum = signal.CTRL_BREAK_EVENT  # type: ignore[attr-defined]  # pylint: disable=no-member,line-too-long
-                process.send_signal(signum)
-                _logger.info('waiting for Bazel to kill this process')
-                # We want timeouts to be reflected as actual timeout results in
-                # Bazel, so we force a Bazel-level timeout by sleeping for a
-                # long time.
-                time.sleep(20)
-                # If Bazel hasn’t killed us, exit anyway.
-                _logger.warning('Bazel failed to kill this process')
-                sys.exit(0xFF)
-            returncode = process.wait()
-        if returncode:
-            # Don’t print a stacktrace if Emacs exited with a non-zero exit
-            # code.
-            sys.exit(returncode)
+    timeout_secs = None
+    flags = 0
+    if _WINDOWS:
+        # On Windows, the Bazel test runner doesn’t gracefully kill the test
+        # process, see https://github.com/bazelbuild/bazel/issues/12684.  We
+        # work around this by creating a new process group and sending
+        # CTRL + BREAK slightly before Bazel kills us.
+        timeout_str = env.get('TEST_TIMEOUT') or None
+        if timeout_str:
+            # Lower the timeout to account for infrastructure overhead.
+            timeout_secs = int(timeout_str) - 2
+        flags = subprocess.CREATE_NEW_PROCESS_GROUP  # type: ignore[attr-defined]  # pylint: disable=line-too-long
+    # We can’t use subprocess.run on Windows because it terminates the
+    # subprocess using TerminateProcess on timeout, giving it no chance to clean
+    # up after itself.
+    with (manifest.add(opts, inputs, outputs) as manifest_args,
+          subprocess.Popen([str(emacs)] + list(manifest_args) + args,
+                           env=env, creationflags=flags) as process):
+        try:
+            process.communicate(timeout=timeout_secs)
+        except subprocess.TimeoutExpired:
+            # Since we pass a None timeout on Unix systems, we should get
+            # here only on Windows.
+            assert _WINDOWS
+            _logger.warning('test timed out, sending CTRL + BREAK')
+            signum = signal.CTRL_BREAK_EVENT  # type: ignore[attr-defined]  # pylint: disable=no-member,line-too-long
+            process.send_signal(signum)
+            _logger.info('waiting for Bazel to kill this process')
+            # We want timeouts to be reflected as actual timeout results in
+            # Bazel, so we force a Bazel-level timeout by sleeping for a long
+            # time.
+            time.sleep(20)
+            # If Bazel hasn’t killed us, exit anyway.
+            _logger.warning('Bazel failed to kill this process')
+            sys.exit(0xFF)
+        returncode = process.wait()
+    if returncode:
+        # Don’t print a stacktrace if Emacs exited with a non-zero exit code.
+        sys.exit(returncode)
 
 
 def _quote(arg: str) -> str:

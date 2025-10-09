@@ -60,18 +60,17 @@ def main() -> None:
         abs_name = run_files.resolve(file)
         args.append('--load=' + str(abs_name))
     args += opts.argv[1:]
+    env.update(run_files.environment())
     runfiles_dir = _runfiles_dir(env)
     input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
     output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
     with manifest.add(opts, input_files, output_files) as manifest_args:
-        env.update(run_files.environment())
         result = subprocess.run([str(emacs)] + list(manifest_args) + args,
                                 env=env, check=False)
-        if result.returncode > 0:
-            # Don’t print a stacktrace if Emacs exited with a non-zero exit
-            # code.
-            sys.exit(result.returncode)
-        result.check_returncode()
+    if result.returncode > 0:
+        # Don’t print a stacktrace if Emacs exited with a non-zero exit code.
+        sys.exit(result.returncode)
+    result.check_returncode()
 
 
 def _runfiles_dir(env: Mapping[str, str]) -> Optional[pathlib.Path]:
