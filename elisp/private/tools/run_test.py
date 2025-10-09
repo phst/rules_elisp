@@ -77,25 +77,22 @@ def main() -> None:
         args.append('--skip-tag=' + _quote(tag))
     args.append('--')
     args.extend(map(_quote, opts.argv[1:]))
-    with manifest.add(opts.mode) as (manifest_file, manifest_args):
-        env.update(run_files.environment())
-        if manifest_file:
-            inputs: list[pathlib.Path] = []
-            outputs: list[pathlib.Path] = []
-            report_file = env.get('XML_OUTPUT_FILE')
-            if report_file:
-                outputs.append(pathlib.Path(report_file))
-            if env.get('COVERAGE') == '1':
-                coverage_manifest = env.get('COVERAGE_MANIFEST')
-                if coverage_manifest:
-                    path = pathlib.Path(coverage_manifest)
-                    _fix_coverage_manifest(path, run_files)
-                    inputs.append(path)
-                coverage_dir = env.get('COVERAGE_DIR')
-                if coverage_dir:
-                    outputs.append(
-                        pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
-            manifest.write(opts, inputs, outputs, manifest_file)
+    env.update(run_files.environment())
+    inputs: list[pathlib.Path] = []
+    outputs: list[pathlib.Path] = []
+    report_file = env.get('XML_OUTPUT_FILE')
+    if report_file:
+        outputs.append(pathlib.Path(report_file))
+    if env.get('COVERAGE') == '1':
+        coverage_manifest = env.get('COVERAGE_MANIFEST')
+        if coverage_manifest:
+            path = pathlib.Path(coverage_manifest)
+            _fix_coverage_manifest(path, run_files)
+            inputs.append(path)
+        coverage_dir = env.get('COVERAGE_DIR')
+        if coverage_dir:
+            outputs.append(pathlib.Path(coverage_dir) / 'emacs-lisp.dat')
+    with manifest.add(opts, inputs, outputs) as manifest_args:
         timeout_secs = None
         flags = 0
         if _WINDOWS:

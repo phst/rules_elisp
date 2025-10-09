@@ -15,7 +15,6 @@
 """Unit tests for elisp.private.tools.manifest."""
 
 import argparse
-import io
 import json
 import pathlib
 
@@ -28,28 +27,22 @@ class ManifestTest(absltest.TestCase):
 
     def test_add(self) -> None:
         """Unit test for manifest.add."""
-        with manifest.add('wrap') as (file, args):
-            self.assertIsNotNone(file)
-            assert file  # for Mypy
-            file.write('test')
-        self.assertEqual(len(args), 2)
-        self.assertRegex(args[0], r'^--manifest=')
-        self.assertEqual(args[1], '--')
-
-    def test_write(self) -> None:
-        """Unit test for manifest.write."""
         opts = argparse.Namespace()
+        opts.mode = 'wrap'
         opts.load_directory = [pathlib.PurePath('load-dir')]
         opts.load_file = [pathlib.PurePath('load-file')]
         opts.data_file = [pathlib.PurePath('data-file')]
         opts.rule_tag = ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"']
-        with io.StringIO() as file:
-            manifest.write(opts,
-                           [pathlib.PurePath('in-1'), pathlib.PurePath('in-2')],
-                           [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')],
-                           file)
+        with manifest.add(
+                opts,
+                [pathlib.PurePath('in-1'), pathlib.PurePath('in-2')],
+                [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')]) as args:
+            self.assertEqual(len(args), 2)
+            self.assertRegex(args[0], r'^--manifest=')
+            self.assertEqual(args[1], '--')
+            file = pathlib.Path(args[0].removeprefix('--manifest='))
             self.assertDictEqual(
-                json.loads(file.getvalue()),
+                json.loads(file.read_bytes()),
                 {
                     'root': 'RUNFILES_ROOT',
                     'loadPath': ['load-dir'],

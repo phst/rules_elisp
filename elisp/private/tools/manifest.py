@@ -23,29 +23,32 @@ import contextlib
 import json
 import pathlib
 import tempfile
-from typing import IO, Optional
+from typing import IO
 
 @contextlib.contextmanager
-def add(mode: str) -> Generator[tuple[Optional[IO[str]], Sequence[str]],
-                                None, None]:
+def add(opts: argparse.Namespace,
+        input_files: Iterable[pathlib.PurePath],
+        output_files: Iterable[pathlib.PurePath]) -> Generator[Sequence[str],
+                                                               None, None]:
     """Create a temporary file for a manifest if needed.
 
-    Yields a pair (file, args) of an open file and command-line arguments that
-    are to be inserted after the program name.
+    Yields a sequence of command-line arguments that are to be inserted
+    after the program name.
     """
-    if mode not in ('direct', 'wrap'):
-        raise ValueError(f'invalid mode {mode}')
-    if mode == 'direct':
-        yield None, ()
+    if opts.mode not in ('direct', 'wrap'):
+        raise ValueError(f'invalid mode {opts.mode}')
+    if opts.mode == 'direct':
+        yield ()
     else:
         with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
             name = pathlib.Path(directory) / 'manifest.json'
             with name.open(mode='xt', encoding='utf-8', newline='\n') as file:
-                yield file, ('--manifest=' + str(name.absolute()), '--')
+                _write(opts, input_files, output_files, file)
+            yield '--manifest=' + str(name.absolute()), '--'
 
 
-def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
-          output_files: Iterable[pathlib.PurePath], file: IO[str]) -> None:
+def _write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],
+           output_files: Iterable[pathlib.PurePath], file: IO[str]) -> None:
     """Write manifest file contents to the given file object."""
     _check_relative(opts.load_directory)
     _check_relative(opts.load_file)

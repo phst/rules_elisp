@@ -60,12 +60,10 @@ def main() -> None:
         abs_name = run_files.resolve(file)
         args.append('--load=' + str(abs_name))
     args += opts.argv[1:]
-    with manifest.add(opts.mode) as (manifest_file, manifest_args):
-        if manifest_file:
-            runfiles_dir = _runfiles_dir(env)
-            input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
-            output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
-            manifest.write(opts, input_files, output_files, manifest_file)
+    runfiles_dir = _runfiles_dir(env)
+    input_files = _arg_files(opts.argv, runfiles_dir, opts.input_arg)
+    output_files = _arg_files(opts.argv, runfiles_dir, opts.output_arg)
+    with manifest.add(opts, input_files, output_files) as manifest_args:
         env.update(run_files.environment())
         result = subprocess.run([str(emacs)] + list(manifest_args) + args,
                                 env=env, check=False)
