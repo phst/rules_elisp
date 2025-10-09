@@ -28,15 +28,13 @@ class ManifestTest(absltest.TestCase):
 
     def test_add(self) -> None:
         """Unit test for manifest.add."""
-        args = ['--foo']
-        with manifest.add('wrap', args) as file:
+        with manifest.add('wrap') as (file, args):
             self.assertIsNotNone(file)
             assert file  # for Mypy
             file.write('test')
-        self.assertEqual(len(args), 3)
-        self.assertEqual(args[0], '--foo')
-        self.assertRegex(args[1], r'^--manifest=')
-        self.assertEqual(args[2], '--')
+        self.assertEqual(len(args), 2)
+        self.assertRegex(args[0], r'^--manifest=')
+        self.assertEqual(args[1], '--')
 
     def test_write(self) -> None:
         """Unit test for manifest.write."""

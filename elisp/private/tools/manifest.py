@@ -18,7 +18,7 @@ This is an internal helper library for the Emacs Lisp Bazel rules.  Don’t rely
 on it in any way outside the rule implementation."""
 
 import argparse
-from collections.abc import Generator, Iterable
+from collections.abc import Generator, Iterable, Sequence
 import contextlib
 import json
 import pathlib
@@ -26,20 +26,22 @@ import tempfile
 from typing import IO, Optional
 
 @contextlib.contextmanager
-def add(mode: str, args: list[str]) -> Generator[Optional[IO[str]], None, None]:
+def add(mode: str) -> Generator[tuple[Optional[IO[str]], Sequence[str]],
+                                None, None]:
     """Create a temporary file for a manifest if needed.
 
-If a file was created, appropriate arguments are added to args."""
+    Yields a pair (file, args) of an open file and command-line arguments that
+    are to be inserted after the program name.
+    """
     if mode not in ('direct', 'wrap'):
         raise ValueError(f'invalid mode {mode}')
     if mode == 'direct':
-        yield None
+        yield None, ()
     else:
         with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
             name = pathlib.Path(directory) / 'manifest.json'
-            args += ['--manifest=' + str(name.absolute()), '--']
             with name.open(mode='xt', encoding='utf-8', newline='\n') as file:
-                yield file
+                yield file, ('--manifest=' + str(name.absolute()), '--')
 
 
 def write(opts: argparse.Namespace, input_files: Iterable[pathlib.PurePath],

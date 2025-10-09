@@ -63,7 +63,8 @@ def main() -> None:
     run_files = runfiles.Runfiles()
     emacs = run_files.resolve(opts.wrapper)
     args: list[str] = [str(emacs)]
-    with manifest.add(opts.mode, args) as manifest_file:
+    with manifest.add(opts.mode) as (manifest_file, manifest_args):
+        args += manifest_args
         args += ['--quick', '--batch', '--no-build-details']
         if opts.module_assertions:
             args.append('--module-assertions')
