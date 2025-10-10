@@ -465,16 +465,60 @@ class EnvironmentBlock final {
   absl_nonnull Pointer ptr_;
 };
 
-using Environment = std::conditional_t<
-    kWindows,
-    absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                        CaseInsensitiveEqual>,
-    absl::flat_hash_map<std::string, std::string>>;
+class Environment final {
+ private:
+  using Map = std::conditional_t<
+      kWindows,
+      absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                          CaseInsensitiveEqual>,
+      absl::flat_hash_map<std::string, std::string>>;
 
-static absl::StatusOr<Environment> CopyEnv() {
+ public:
+  static absl::StatusOr<Environment> Current();
+
+  template <typename I>
+  static absl::StatusOr<Environment> Create(I begin, I end);
+
+  using iterator = Map::iterator;
+  using const_iterator = Map::const_iterator;
+
+  Environment(const Environment&) = default;
+  Environment& operator=(const Environment&) = default;
+  Environment(Environment&&) = default;
+  Environment& operator=(Environment&&) = default;
+
+  [[nodiscard]] bool empty() const { return map_.empty(); }
+  [[nodiscard]] iterator begin() { return map_.begin(); }
+  [[nodiscard]] const_iterator begin() const { return map_.cbegin(); }
+  [[nodiscard]] iterator end() { return map_.end(); }
+  [[nodiscard]] const_iterator end() const { return map_.cend(); }
+
+  template <std::size_t N>
+  void Add(const NativeChar (&key)[N], NativeStringView value) {
+    static_assert(N > 1, "empty environment variable");
+    map_.emplace(key, value);
+  }
+
+  template <std::size_t N>
+  void Remove(const NativeChar (&key)[N]) {
+    static_assert(N > 1, "empty environment variable");
+    map_.erase(key);
+  }
+
+  void Merge(const Environment& other) {
+    map_.insert(other.begin(), other.end());
+  }
+
+ private:
+  explicit Environment(Map map) : map_(std::move(map)) {}
+
+  Map map_;
+};
+
+absl::StatusOr<Environment> Environment::Current() {
   const absl::StatusOr<EnvironmentBlock> block = EnvironmentBlock::Current();
   if (!block.ok()) return block.status();
-  Environment map;
+  Map map;
   // Skip over the first character to properly deal with the magic “per-drive
   // current directory” variables on Windows,
   // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
@@ -497,7 +541,24 @@ static absl::StatusOr<Environment> CopyEnv() {
           absl::StrCat("Duplicate environment variable ", Escape(key)));
     }
   }
-  return map;
+  return Environment(std::move(map));
+}
+
+template <typename I>
+absl::StatusOr<Environment> Environment::Create(I begin, const I end) {
+  Map map;
+  for (; begin != end; ++begin) {
+    const auto& [key, value] = *begin;
+    if (key.empty()) {
+      return absl::InvalidArgumentError("Empty environment variable name");
+    }
+    const auto [it, ok] = map.emplace(key, value);
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrCat("Duplicate environment variable ", Escape(key)));
+    }
+  }
+  return Environment(std::move(map));
 }
 
 class Runfiles final {
@@ -598,19 +659,15 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
 
 absl::StatusOr<Environment> Runfiles::Environ() const {
   CHECK_NE(impl_, nullptr);
-  Environment map;
+  std::vector<std::pair<NativeString, NativeString>> pairs;
   for (const auto& [narrow_key, narrow_value] : impl_->EnvVars()) {
     const absl::StatusOr<NativeString> key = ToNative(narrow_key);
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
     if (!value.ok()) return value.status();
-    const auto [it, ok] = map.emplace(*key, *value);
-    if (!ok) {
-      return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate runfiles environment variable ", narrow_key));
-    }
+    pairs.emplace_back(*key, *value);
   }
-  return map;
+  return Environment::Create(pairs.cbegin(), pairs.cend());
 }
 
 class DosDevice final {
@@ -812,13 +869,13 @@ absl::StatusOr<int> RunLauncher(
                     original_args.end());
   absl::StatusOr<Environment> merged_env = runfiles->Environ();
   if (!merged_env.ok()) return merged_env.status();
-  absl::StatusOr<Environment> orig_env = CopyEnv();
+  absl::StatusOr<Environment> orig_env = Environment::Current();
   if (!orig_env.ok()) return orig_env.status();
   // We don’t want the Python launcher to change the current working directory,
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
-  orig_env->erase(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
-  merged_env->insert(orig_env->begin(), orig_env->end());
+  orig_env->Remove(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
+  merged_env->Merge(*orig_env);
   return Run(final_args, *merged_env);
 }
 
@@ -887,14 +944,14 @@ absl::StatusOr<int> RunEmacs(
     const absl::StatusOr<NativeString> libexec =
         runfiles->Resolve(absl::StrCat(install, "/libexec"));
     if (!libexec.ok()) return libexec.status();
-    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
-    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
-    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
-    env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
   }
-  absl::StatusOr<Environment> orig_env = CopyEnv();
+  absl::StatusOr<Environment> orig_env = Environment::Current();
   if (!orig_env.ok()) return orig_env.status();
-  env->insert(orig_env->begin(), orig_env->end());
+  env->Merge(*orig_env);
   if constexpr (kWindows) {
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.
