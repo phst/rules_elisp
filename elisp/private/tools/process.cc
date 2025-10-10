@@ -42,7 +42,6 @@
 #include <cerrno>     // IWYU pragma: keep
 #include <cstdlib>
 #include <iterator>
-#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -74,6 +73,7 @@
 #  include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
+#include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
 
 // IWYU pragma: no_include <__fwd/string.h>
@@ -93,41 +93,6 @@ static constexpr std::size_t kMaxFilename{
     PATH_MAX
 #endif
 };
-
-template <typename To, typename From>
-[[nodiscard]] constexpr bool Overflow(const From n) {
-  static_assert(std::is_integral_v<To>);
-  static_assert(std::is_integral_v<From>);
-  using ToLimits = std::numeric_limits<To>;
-  using FromLimits = std::numeric_limits<From>;
-  if constexpr (ToLimits::is_signed == FromLimits::is_signed) {
-    return n < ToLimits::min() || n > ToLimits::max();
-  }
-  if constexpr (ToLimits::is_signed && !FromLimits::is_signed) {
-    return n > std::make_unsigned_t<To>{ToLimits::max()};
-  }
-  if constexpr (!ToLimits::is_signed && FromLimits::is_signed) {
-    return n < 0 ||
-           static_cast<std::make_unsigned_t<From>>(n) > ToLimits::max();
-  }
-}
-
-template <typename To, typename From>
-std::optional<To> CastNumberOpt(const From n) {
-  return Overflow<To>(n) ? std::optional<To>() : static_cast<To>(n);
-}
-
-template <typename To, typename From>
-absl::StatusOr<To> CastNumber(const From n) {
-  using Limits = std::numeric_limits<To>;
-  const std::optional<To> ret = CastNumberOpt<To>(n);
-  if (!ret) {
-    return absl::OutOfRangeError(absl::StrCat("Number ", n, " out of range [",
-                                              Limits::min(), ", ",
-                                              Limits::max(), "]"));
-  }
-  return *ret;
-}
 
 struct CaseInsensitiveHash;
 struct CaseInsensitiveEqual;
