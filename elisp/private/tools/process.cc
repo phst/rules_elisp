@@ -497,10 +497,31 @@ static absl::StatusOr<Environment> CopyEnv() {
   return map;
 }
 
-using rules_cc::cc::runfiles::Runfiles;
-using RunfilesPtr = absl_nonnull std::unique_ptr<Runfiles>;
+class Runfiles final {
+ public:
+  static absl::StatusOr<Runfiles> Create(
+      ExecutableKind kind, std::string_view source_repository,
+      absl::Span<const NativeStringView> original_argv);
 
-static absl::StatusOr<RunfilesPtr> CreateRunfiles(
+  Runfiles(const Runfiles&) = delete;
+  Runfiles& operator=(const Runfiles&) = delete;
+
+  Runfiles(Runfiles&&) = default;
+  Runfiles& operator=(Runfiles&&) = default;
+
+  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
+  absl::StatusOr<Environment> Environ() const;
+
+ private:
+  using Impl = rules_cc::cc::runfiles::Runfiles;
+
+  explicit Runfiles(absl_nonnull std::unique_ptr<Impl> impl)
+      : impl_(std::move(ABSL_DIE_IF_NULL(impl))) {}
+
+  absl_nullable std::unique_ptr<Impl> impl_;
+};
+
+absl::StatusOr<Runfiles> Runfiles::Create(
     const ExecutableKind kind, const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv) {
   if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
@@ -510,26 +531,24 @@ static absl::StatusOr<RunfilesPtr> CreateRunfiles(
       original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
   if (!argv0.ok()) return argv0.status();
   std::string error;
-  absl_nullable std::unique_ptr<Runfiles> runfiles;
+  absl_nullable std::unique_ptr<Impl> impl;
   switch (kind) {
     case ExecutableKind::kBinary:
-      runfiles.reset(
-          Runfiles::Create(*argv0, std::string(source_repository), &error));
+      impl.reset(Impl::Create(*argv0, std::string(source_repository), &error));
       break;
     case ExecutableKind::kTest:
-      runfiles.reset(
-          Runfiles::CreateForTest(std::string(source_repository), &error));
+      impl.reset(Impl::CreateForTest(std::string(source_repository), &error));
       break;
     default:
       LOG(FATAL) << "invalid runfiles mode "
                  << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
       break;
   }
-  if (runfiles == nullptr) {
+  if (impl == nullptr) {
     return absl::FailedPreconditionError(
         absl::StrCat("couldn’t create runfiles: ", error));
   }
-  return runfiles;
+  return Runfiles(std::move(impl));
 }
 
 static absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
@@ -560,10 +579,11 @@ static absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
 #endif
 }
 
-static absl::StatusOr<NativeString> ResolveRunfile(
-    const Runfiles& runfiles, const std::string_view name) {
+absl::StatusOr<NativeString> Runfiles::Resolve(
+    const std::string_view name) const {
+  CHECK_NE(impl_, nullptr);
   if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
-  std::string resolved = runfiles.Rlocation(std::string(name));
+  std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
@@ -573,10 +593,10 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   return MakeAbsolute(*native);
 }
 
-static absl::StatusOr<Environment> RunfilesEnvironment(
-    const Runfiles& runfiles) {
+absl::StatusOr<Environment> Runfiles::Environ() const {
+  CHECK_NE(impl_, nullptr);
   Environment map;
-  for (const auto& [narrow_key, narrow_value] : runfiles.EnvVars()) {
+  for (const auto& [narrow_key, narrow_value] : impl_->EnvVars()) {
     const absl::StatusOr<NativeString> key = ToNative(narrow_key);
     if (!key.ok()) return key.status();
     const absl::StatusOr<NativeString> value = ToNative(narrow_value);
@@ -754,11 +774,10 @@ absl::StatusOr<int> RunLauncher(
     const absl::Span<const NativeString> launcher_args,
     const absl::Span<const NativeStringView> original_args,
     const ExecutableKind kind) {
-  const absl::StatusOr<RunfilesPtr> runfiles =
-      CreateRunfiles(kind, source_repository, original_args);
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(kind, source_repository, original_args);
   if (!runfiles.ok()) return runfiles.status();
-  absl::StatusOr<NativeString> resolved_binary =
-      ResolveRunfile(**runfiles, binary);
+  absl::StatusOr<NativeString> resolved_binary = runfiles->Resolve(binary);
   if (!resolved_binary.ok()) return resolved_binary.status();
   std::vector<NativeString> final_args{*resolved_binary};
   final_args.insert(final_args.end(), common_args.begin(), common_args.end());
@@ -788,7 +807,7 @@ absl::StatusOr<int> RunLauncher(
   final_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
   final_args.insert(final_args.end(), original_args.begin(),
                     original_args.end());
-  absl::StatusOr<Environment> merged_env = RunfilesEnvironment(**runfiles);
+  absl::StatusOr<Environment> merged_env = runfiles->Environ();
   if (!merged_env.ok()) return merged_env.status();
   absl::StatusOr<Environment> orig_env = CopyEnv();
   if (!orig_env.ok()) return orig_env.status();
@@ -804,8 +823,8 @@ absl::StatusOr<int> RunEmacs(
     const std::string_view source_repository, const Mode mode,
     const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
-  const absl::StatusOr<RunfilesPtr> runfiles =
-      CreateRunfiles(ExecutableKind::kBinary, source_repository, original_args);
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
+      ExecutableKind::kBinary, source_repository, original_args);
   if (!runfiles.ok()) return runfiles.status();
   bool release;
   // We currently support pre-built Emacsen only on Windows because there are no
@@ -819,8 +838,7 @@ absl::StatusOr<int> RunEmacs(
   NativeString emacs;
   std::optional<DosDevice> dos_device;
   if (kWindows && release) {
-    const absl::StatusOr<NativeString> root =
-        ResolveRunfile(**runfiles, install);
+    const absl::StatusOr<NativeString> root = runfiles->Resolve(install);
     if (!root.ok()) return root.status();
     // The longest filename in the Emacs release archive has 140 characters.
     // Round up to 150 for some buffer and the directory separator.
@@ -837,8 +855,7 @@ absl::StatusOr<int> RunEmacs(
     }
   }
   if (!dos_device.has_value()) {
-    const absl::StatusOr<NativeString> binary = ResolveRunfile(
-        **runfiles,
+    const absl::StatusOr<NativeString> binary = runfiles->Resolve(
         absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
     if (!binary.ok()) return binary.status();
     emacs = *binary;
@@ -847,7 +864,7 @@ absl::StatusOr<int> RunEmacs(
   std::vector<NativeString> args = {emacs};
   if (!release) {
     const absl::StatusOr<NativeString> dump =
-        ResolveRunfile(**runfiles, absl::StrCat(install, "/emacs.pdmp"));
+        runfiles->Resolve(absl::StrCat(install, "/emacs.pdmp"));
     if (!dump.ok()) return dump.status();
     args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump);
   }
@@ -855,17 +872,17 @@ absl::StatusOr<int> RunEmacs(
     args.insert(args.end(), std::next(original_args.begin()),
                 original_args.end());
   }
-  absl::StatusOr<Environment> env = RunfilesEnvironment(**runfiles);
+  absl::StatusOr<Environment> env = runfiles->Environ();
   if (!env.ok()) return env.status();
   if (!release) {
     const absl::StatusOr<NativeString> etc =
-        ResolveRunfile(**runfiles, absl::StrCat(install, "/etc"));
+        runfiles->Resolve(absl::StrCat(install, "/etc"));
     if (!etc.ok()) return etc.status();
     const absl::StatusOr<NativeString> lisp =
-        ResolveRunfile(**runfiles, absl::StrCat(install, "/lisp"));
+        runfiles->Resolve(absl::StrCat(install, "/lisp"));
     if (!lisp.ok()) return lisp.status();
     const absl::StatusOr<NativeString> libexec =
-        ResolveRunfile(**runfiles, absl::StrCat(install, "/libexec"));
+        runfiles->Resolve(absl::StrCat(install, "/libexec"));
     if (!libexec.ok()) return libexec.status();
     env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
     env->emplace(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
