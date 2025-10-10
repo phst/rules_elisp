@@ -275,10 +275,11 @@ absl::Status ErrorStatus(const std::error_code& code,
 #ifdef _WIN32
 template <typename... Ts>
 absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
-  const absl::StatusOr<int> code = CastNumber<int>(::GetLastError());
-  if (!code.ok()) return code.status();
-  return ErrorStatus(std::error_code(*code, std::system_category()), function,
-                     std::forward<Ts>(args)...);
+  const std::optional<int> code = CastNumberOpt<int>(::GetLastError());
+  return ErrorStatus(code.has_value()
+                         ? std::error_code(*code, std::system_category())
+                         : std::make_error_code(std::errc::value_too_large),
+                     function, std::forward<Ts>(args)...);
 }
 #else
 template <typename... Ts>
