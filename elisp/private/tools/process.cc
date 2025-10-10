@@ -532,6 +532,34 @@ static absl::StatusOr<RunfilesPtr> CreateRunfiles(
   return runfiles;
 }
 
+static absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
+  if (file.empty()) return absl::InvalidArgumentError("empty filename");
+#ifdef _WIN32
+  std::wstring string(file);
+  // 0x8000 is the maximum length of a filename on Windows.  See
+  // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
+  constexpr DWORD size{0x8000};
+  std::wstring buffer(size, L'\0');
+  const DWORD result =
+      ::GetFullPathNameW(Pointer(string), size, buffer.data(), nullptr);
+  if (result == 0) {
+    return WindowsStatus("GetFullPathNameW", Escape(file), size, "...",
+                         nullptr);
+  }
+  if (result > size) {
+    return absl::OutOfRangeError(
+        absl::StrCat("Length of absolute file name (", result,
+                     ") overflows buffer of size ", size));
+  }
+  return buffer.substr(0, result);
+#else
+  if (file.front() == '/') return NativeString(file);
+  const absl::StatusOr<std::string> cwd = WorkingDirectory();
+  if (!cwd.ok()) return cwd.status();
+  return absl::StrCat(*cwd, "/", file);
+#endif
+}
+
 static absl::StatusOr<NativeString> ResolveRunfile(
     const Runfiles& runfiles, const std::string_view name) {
   if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
@@ -542,30 +570,7 @@ static absl::StatusOr<NativeString> ResolveRunfile(
   if constexpr (kWindows) absl::c_replace(resolved, '/', '\\');
   absl::StatusOr<NativeString> native = ToNative(resolved);
   if (!native.ok()) return native.status();
-#ifdef _WIN32
-  // 0x8000 is the maximum length of a filename on Windows.  See
-  // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
-  constexpr DWORD size{0x8000};
-  std::wstring buffer(size, L'\0');
-  const DWORD result =
-      ::GetFullPathNameW(Pointer(*native), size, buffer.data(), nullptr);
-  if (result == 0) {
-    return WindowsStatus("GetFullPathNameW", Escape(*native), size, "...",
-                         nullptr);
-  }
-  if (result > size) {
-    return absl::OutOfRangeError(
-        absl::StrCat("Length of absolute file name (", result,
-                     ") overflows buffer of size ", size));
-  }
-  return buffer.substr(0, result);
-#else
-  CHECK(!native->empty());
-  if (native->front() == '/') return native;
-  const absl::StatusOr<std::string> cwd = WorkingDirectory();
-  if (!cwd.ok()) return cwd.status();
-  return absl::StrCat(*cwd, "/", *native);
-#endif
+  return MakeAbsolute(*native);
 }
 
 static absl::StatusOr<Environment> RunfilesEnvironment(
