@@ -46,14 +46,15 @@ class AddPathTest(absltest.TestCase):
         runfiles_dir = pathlib.Path(
             r'C:\Runfiles' if platform.system() == 'Windows' else '/runfiles')
         runfiles_elc = runfiles_dir / 'runfiles.elc'
-        with tempfile.TemporaryDirectory() as directory:
-            manifest = pathlib.Path(directory) / 'manifest'
+        with tempfile.NamedTemporaryFile(
+                delete_on_close=False,
+                mode='xt', encoding='ascii', newline='\n') as file:
             # Runfiles manifests contain POSIX-style filenames even on Windows.
-            manifest.write_text(
-                'repository/runfiles.elc ' + runfiles_elc.as_posix() + '\n',
-                encoding='ascii', newline='\n')
+            file.write(
+                'repository/runfiles.elc ' + runfiles_elc.as_posix() + '\n')
+            file.flush()
             args = list(load.path(
-                runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': str(manifest)}),
+                runfiles.Runfiles({'RUNFILES_MANIFEST_FILE': file.name}),
                 [pathlib.PurePosixPath('foo'),
                  pathlib.PurePosixPath('bar \t\n\r\f äα𝐴🐈\'\0\\"')],
                 pathlib.PurePosixPath('repository/runfiles.elc')))

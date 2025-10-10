@@ -40,10 +40,12 @@ def add(opts: argparse.Namespace,
     if opts.mode == 'direct':
         yield ()
     else:
-        with tempfile.TemporaryDirectory(prefix='elisp-') as directory:
-            name = pathlib.Path(directory) / 'manifest.json'
-            with name.open(mode='xt', encoding='utf-8', newline='\n') as file:
-                _write(opts, input_files, output_files, file)
+        with tempfile.NamedTemporaryFile(
+                prefix='elisp-', suffix='.json', delete_on_close=False,
+                mode='xt', encoding='utf-8', newline='\n') as file:
+            name = pathlib.Path(file.name)
+            _write(opts, input_files, output_files, file)
+            file.flush()
             yield '--manifest=' + str(name.absolute()), '--'
 
 
