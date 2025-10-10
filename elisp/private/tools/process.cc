@@ -238,21 +238,26 @@ absl::Status ErrorStatus(const std::error_code& code,
 }
 
 #ifdef _WIN32
-template <typename... Ts>
-absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
+[[nodiscard]] static std::error_code WindowsError() {
   const DWORD code = ::GetLastError();
   const std::optional<int> i = CastNumberOpt<int>(code);
-  return ErrorStatus(i.has_value()
-                         ? std::error_code(*i, std::system_category())
-                         : std::make_error_code(std::errc::value_too_large),
-                     function, std::forward<Ts>(args)...);
+  return i.has_value() ? std::error_code(*i, std::system_category())
+                       : std::make_error_code(std::errc::value_too_large);
+}
+template <typename... Ts>
+absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
+  const std::error_code code = WindowsError();
+  return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 #else
+[[nodiscard]] static std::error_code ErrnoError() {
+  const int code = errno;
+  return std::error_code(code, std::system_category());
+}
 template <typename... Ts>
 absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
-  const int code = errno;
-  return ErrorStatus(std::error_code(code, std::system_category()), function,
-                     std::forward<Ts>(args)...);
+  const std::error_code code = ErrnoError();
+  return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 #endif
 
