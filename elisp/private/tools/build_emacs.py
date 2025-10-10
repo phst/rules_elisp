@@ -132,6 +132,8 @@ def _build(*, source: pathlib.Path | tuple[pathlib.Path, pathlib.PurePosixPath],
         'CC=' + cc.resolve().as_posix(),
         'CFLAGS=' + cflags,
         'LDFLAGS=' + ldflags)
+    # Work around https://bugs.gnu.org/76441.
+    # FIXME: Remove the workaround once we drop support for Emacs 29.
     run('make', 'install', 'MAKEINFO=:')
 
     features = _builtin_features(build / 'lisp') if builtin_features else None
