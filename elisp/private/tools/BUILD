@@ -253,6 +253,7 @@ cc_library(
         "@rules_cc//cc/runfiles",  # keep
         ":numeric",
         ":platform",
+        ":system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:nullability",
@@ -266,6 +267,22 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "system",
+    srcs = ["system.cc"],
+    hdrs = ["system.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
+        ":numeric",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/strings",
     ],
 )
 
