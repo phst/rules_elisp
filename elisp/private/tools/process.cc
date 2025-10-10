@@ -65,7 +65,6 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"  // IWYU pragma: keep
 #include "absl/strings/str_cat.h"
-#include "absl/strings/str_join.h"
 #include "absl/types/span.h"
 #include "cc/runfiles/runfiles.h"
 
@@ -75,6 +74,7 @@
 
 #include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/system.h"
 
 // IWYU pragma: no_include <__fwd/string.h>
 // IWYU pragma: no_include <__system_error/error_category.h>
@@ -214,50 +214,6 @@ static std::vector<char* absl_nonnull> Pointers(
   }
   ptrs.push_back(nullptr);
   return ptrs;
-}
-#endif
-
-static absl::Status MakeErrorStatus(const std::error_code& code,
-                                    const std::string_view function,
-                                    const std::string_view args) {
-  if (!code) return absl::OkStatus();
-  const std::error_condition condition = code.default_error_condition();
-  const std::string message = absl::StrCat(
-      function, args.empty() ? args : absl::StrCat("(", args, ")"), ": ",
-      code.category().name(), "/", code.value(), ": ", code.message());
-  return condition.category() == std::generic_category()
-             ? absl::ErrnoToStatus(condition.value(), message)
-             : absl::UnknownError(message);
-}
-
-template <typename... Ts>
-absl::Status ErrorStatus(const std::error_code& code,
-                         const std::string_view function, Ts&&... args) {
-  return MakeErrorStatus(code, function,
-                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
-}
-
-#ifdef _WIN32
-[[nodiscard]] static std::error_code WindowsError() {
-  const DWORD code = ::GetLastError();
-  const std::optional<int> i = CastNumberOpt<int>(code);
-  return i.has_value() ? std::error_code(*i, std::system_category())
-                       : std::make_error_code(std::errc::value_too_large);
-}
-template <typename... Ts>
-absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
-  const std::error_code code = WindowsError();
-  return ErrorStatus(code, function, std::forward<Ts>(args)...);
-}
-#else
-[[nodiscard]] static std::error_code ErrnoError() {
-  const int code = errno;
-  return std::error_code(code, std::system_category());
-}
-template <typename... Ts>
-absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
-  const std::error_code code = ErrnoError();
-  return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 #endif
 
