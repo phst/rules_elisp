@@ -251,6 +251,7 @@ cc_library(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
+        ":numeric",
         ":platform",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
@@ -280,6 +281,21 @@ cc_library(
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
         "//tests/wrap:__pkg__",
+    ],
+)
+
+cc_library(
+    name = "numeric",
+    hdrs = ["numeric.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
     ],
 )
 
