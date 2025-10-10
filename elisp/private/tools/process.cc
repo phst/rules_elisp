@@ -54,16 +54,15 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/nullability.h"
 #include "absl/log/check.h"
-#include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"  // IWYU pragma: keep
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
-#include "cc/runfiles/runfiles.h"
 
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/runfiles.h"
 #include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
@@ -84,87 +83,6 @@ static constexpr std::size_t kMaxFilename{
     PATH_MAX
 #endif
 };
-
-class Runfiles final {
- public:
-  static absl::StatusOr<Runfiles> Create(
-      ExecutableKind kind, std::string_view source_repository,
-      absl::Span<const NativeStringView> original_argv);
-
-  Runfiles(const Runfiles&) = delete;
-  Runfiles& operator=(const Runfiles&) = delete;
-
-  Runfiles(Runfiles&&) = default;
-  Runfiles& operator=(Runfiles&&) = default;
-
-  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
-  absl::StatusOr<Environment> Environ() const;
-
- private:
-  using Impl = rules_cc::cc::runfiles::Runfiles;
-
-  explicit Runfiles(absl_nonnull std::unique_ptr<Impl> impl)
-      : impl_(std::move(ABSL_DIE_IF_NULL(impl))) {}
-
-  absl_nullable std::unique_ptr<Impl> impl_;
-};
-
-absl::StatusOr<Runfiles> Runfiles::Create(
-    const ExecutableKind kind, const std::string_view source_repository,
-    const absl::Span<const NativeStringView> original_argv) {
-  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
-    return status;
-  }
-  const absl::StatusOr<std::string> argv0 =
-      original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
-  if (!argv0.ok()) return argv0.status();
-  std::string error;
-  absl_nullable std::unique_ptr<Impl> impl;
-  switch (kind) {
-    case ExecutableKind::kBinary:
-      impl.reset(Impl::Create(*argv0, std::string(source_repository), &error));
-      break;
-    case ExecutableKind::kTest:
-      impl.reset(Impl::CreateForTest(std::string(source_repository), &error));
-      break;
-    default:
-      LOG(FATAL) << "invalid runfiles mode "
-                 << static_cast<std::underlying_type_t<ExecutableKind>>(kind);
-      break;
-  }
-  if (impl == nullptr) {
-    return absl::FailedPreconditionError(
-        absl::StrCat("couldn’t create runfiles: ", error));
-  }
-  return Runfiles(std::move(impl));
-}
-
-absl::StatusOr<NativeString> Runfiles::Resolve(
-    const std::string_view name) const {
-  CHECK_NE(impl_, nullptr);
-  if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
-  std::string resolved = impl_->Rlocation(std::string(name));
-  if (resolved.empty()) {
-    return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
-  }
-  if constexpr (kWindows) absl::c_replace(resolved, '/', '\\');
-  absl::StatusOr<NativeString> native = ToNative(resolved);
-  if (!native.ok()) return native.status();
-  return MakeAbsolute(*native);
-}
-
-absl::StatusOr<Environment> Runfiles::Environ() const {
-  CHECK_NE(impl_, nullptr);
-  std::vector<std::pair<NativeString, NativeString>> pairs;
-  for (const auto& [narrow_key, narrow_value] : impl_->EnvVars()) {
-    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
-    if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
-    if (!value.ok()) return value.status();
-    pairs.emplace_back(*key, *value);
-  }
-  return Environment::Create(pairs.cbegin(), pairs.cend());
-}
 
 }  // namespace
 
