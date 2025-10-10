@@ -26,12 +26,11 @@
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/runfiles.h"
 
 // IWYU pragma: no_include <__fwd/string_view.h>
 
 namespace rules_elisp {
-
-enum class ExecutableKind { kBinary, kTest };
 
 absl::StatusOr<int> RunLauncher(
     std::string_view source_repository, std::string_view binary,

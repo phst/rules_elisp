@@ -247,10 +247,31 @@ cc_library(
     linkstatic = True,
     local_defines = DEFINES,
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@rules_cc//cc/runfiles",  # keep
+        ":platform",
+        ":runfiles_cc",
+        ":strings",
+        ":system",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_library(
+    name = "runfiles_cc",
+    srcs = ["runfiles.cc"],
+    hdrs = ["runfiles.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
         ":platform",
         ":strings",
         ":system",
@@ -263,6 +284,7 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
+        "@rules_cc//cc/runfiles",  # keep
     ],
 )
 
