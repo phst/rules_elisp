@@ -76,19 +76,21 @@ absl::Status MakeErrorStatus(const std::error_code& code,
              : absl::UnknownError(message);
 }
 
-#ifdef _WIN32
 [[nodiscard]] std::error_code WindowsError() {
+#ifdef _WIN32
   const DWORD code = ::GetLastError();
   const std::optional<int> i = CastNumberOpt<int>(code);
   return i.has_value() ? std::error_code(*i, std::system_category())
                        : std::make_error_code(std::errc::value_too_large);
-}
 #else
+  return std::make_error_code(std::errc::operation_not_supported);
+#endif
+}
+
 [[nodiscard]] std::error_code ErrnoError() {
   const int code = errno;
   return std::error_code(code, std::system_category());
 }
-#endif
 
 #ifdef _WIN32
 static wchar_t* absl_nonnull
@@ -300,16 +302,24 @@ static std::wstring ToUpper(const std::wstring_view string) {
                                        length, "...", buffer.size());
   return buffer.substr(0, result);
 }
+#endif
 
 std::size_t Environment::Hash::operator()(
     const std::wstring_view string) const {
+#ifdef _WIN32
   return absl::HashOf(ToUpper(string));
+#else
+  return absl::HashOf(string);
+#endif
 }
 
 bool Environment::Equal::operator()(const std::wstring_view a,
                                     const std::wstring_view b) const {
+#ifdef _WIN32
   return ToUpper(a) == ToUpper(b);
-}
+#else
+  return a == b;
 #endif
+}
 
 }  // namespace rules_elisp

@@ -43,7 +43,6 @@ absl::Status ErrorStatus(const std::error_code& code,
                          absl::StrJoin(std::forward_as_tuple(args...), ", "));
 }
 
-#ifdef _WIN32
 [[nodiscard]] std::error_code WindowsError();
 
 template <typename... Ts>
@@ -51,7 +50,7 @@ absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
   const std::error_code code = WindowsError();
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
-#else
+
 [[nodiscard]] std::error_code ErrnoError();
 
 template <typename... Ts>
@@ -59,16 +58,11 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   const std::error_code code = ErrnoError();
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
-#endif
 
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 
 class Environment final {
  private:
-  struct Hash;
-  struct Equal;
-
-#ifdef _WIN32
   struct Hash {
     std::size_t operator()(std::wstring_view string) const;
   };
@@ -76,7 +70,6 @@ class Environment final {
   struct Equal {
     bool operator()(std::wstring_view a, std::wstring_view b) const;
   };
-#endif
 
   using Map = std::conditional_t<
       kWindows, absl::flat_hash_map<std::wstring, std::wstring, Hash, Equal>,
