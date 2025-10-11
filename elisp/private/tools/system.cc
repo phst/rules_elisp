@@ -312,4 +312,41 @@ bool Environment::Equal::operator()(const std::wstring_view a,
 }
 #endif
 
+absl::StatusOr<DosDevice> DosDevice::Create(
+    [[maybe_unused]] const NativeStringView target) {
+  CHECK(!target.empty());
+#ifdef _WIN32
+  const DWORD drives = ::GetLogicalDrives();
+  if (drives == 0) return WindowsStatus("GetLogicalDrives");
+  for (wchar_t letter = L'Z'; letter >= L'D'; --letter) {
+    const DWORD bit = 1U << (letter - L'A');
+    if ((drives & bit) == 0) {
+      constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
+      const wchar_t name[] = {letter, L':', L'\0'};
+      std::wstring string(target);
+      if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
+        return WindowsStatus("DefineDosDeviceW", flags, Escape(name),
+                             Escape(target));
+      }
+      return DosDevice(name, target);
+    }
+  }
+  return absl::ResourceExhaustedError("no drive letters available");
+#else
+  return absl::UnimplementedError("this system doesn’t support DOS devices");
+#endif
+}
+
+DosDevice::~DosDevice() noexcept {
+#ifdef _WIN32
+  if (name_.empty()) return;
+  constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
+                          DDD_NO_BROADCAST_SYSTEM;
+  if (!::DefineDosDeviceW(flags, Pointer(name_), Pointer(target_))) {
+    LOG(ERROR) << WindowsStatus("DefineDosDeviceW", flags, Escape(name_),
+                                Escape(target_));
+  }
+#endif
+}
+
 }  // namespace rules_elisp

@@ -138,6 +138,54 @@ class Environment final {
   Map map_;
 };
 
+class DosDevice final {
+ public:
+  static absl::StatusOr<DosDevice> Create(NativeStringView target);
+
+  ~DosDevice() noexcept;
+
+  DosDevice(const DosDevice&) = delete;
+  DosDevice& operator=(const DosDevice&) = delete;
+
+#ifdef _WIN32
+  DosDevice(DosDevice&& other)
+      : name_(std::exchange(other.name_, std::wstring())),
+        target_(std::exchange(other.target_, std::wstring())) {}
+
+  DosDevice& operator=(DosDevice&& other) {
+    name_ = std::exchange(other.name_, std::wstring());
+    target_ = std::exchange(other.target_, std::wstring());
+    return *this;
+  }
+#else
+  DosDevice(DosDevice&&) = default;
+  DosDevice& operator=(DosDevice&&) = default;
+#endif
+
+  NativeString name() const {
+#ifdef _WIN32
+    return name_;
+#else
+    return {};
+#endif
+  }
+
+ private:
+#ifdef _WIN32
+  explicit DosDevice(const std::wstring_view name,
+                     const std::wstring_view target)
+      : name_(name), target_(target) {
+    CHECK(!name.empty());
+    CHECK(!target.empty());
+  }
+
+  std::wstring name_;
+  std::wstring target_;
+#else
+  explicit DosDevice() = default;
+#endif
+};
+
 }  // namespace rules_elisp
 
 #endif  // ELISP_PRIVATE_TOOLS_SYSTEM_H_
