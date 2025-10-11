@@ -29,6 +29,7 @@
 #include "absl/strings/str_join.h"
 
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
 
