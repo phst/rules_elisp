@@ -245,13 +245,13 @@ static std::wstring ToUpper(const std::wstring_view string) {
   return buffer.substr(0, result);
 }
 
-std::size_t CaseInsensitiveHash::operator()(
+std::size_t Environment::Hash::operator()(
     const std::wstring_view string) const {
   return absl::HashOf(ToUpper(string));
 }
 
-bool CaseInsensitiveEqual::operator()(const std::wstring_view a,
-                                      const std::wstring_view b) const {
+bool Environment::Equal::operator()(const std::wstring_view a,
+                                    const std::wstring_view b) const {
   return ToUpper(a) == ToUpper(b);
 }
 #endif
