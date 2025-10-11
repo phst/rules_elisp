@@ -20,7 +20,6 @@
 #include <string_view>
 #include <system_error>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -65,16 +64,14 @@ absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 class Environment final {
  private:
   struct Hash {
-    std::size_t operator()(std::wstring_view string) const;
+    std::size_t operator()(NativeStringView string) const;
   };
 
   struct Equal {
-    bool operator()(std::wstring_view a, std::wstring_view b) const;
+    bool operator()(NativeStringView a, NativeStringView b) const;
   };
 
-  using Map = std::conditional_t<
-      kWindows, absl::flat_hash_map<std::wstring, std::wstring, Hash, Equal>,
-      absl::flat_hash_map<std::string, std::string>>;
+  using Map = absl::flat_hash_map<NativeString, NativeString, Hash, Equal>;
 
  public:
   static absl::StatusOr<Environment> Current();
