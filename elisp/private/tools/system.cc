@@ -385,8 +385,7 @@ static std::wstring ToUpper(const std::wstring_view string) {
 }
 #endif
 
-std::size_t Environment::Hash::operator()(
-    const std::wstring_view string) const {
+std::size_t Environment::Hash::operator()(const NativeStringView string) const {
 #ifdef _WIN32
   return absl::HashOf(ToUpper(string));
 #else
@@ -394,8 +393,8 @@ std::size_t Environment::Hash::operator()(
 #endif
 }
 
-bool Environment::Equal::operator()(const std::wstring_view a,
-                                    const std::wstring_view b) const {
+bool Environment::Equal::operator()(const NativeStringView a,
+                                    const NativeStringView b) const {
 #ifdef _WIN32
   return ToUpper(a) == ToUpper(b);
 #else
