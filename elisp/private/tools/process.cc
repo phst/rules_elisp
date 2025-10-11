@@ -52,9 +52,7 @@
 #include <vector>
 
 #include "absl/algorithm/container.h"
-#include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
-#include "absl/cleanup/cleanup.h"  // IWYU pragma: keep
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
@@ -65,7 +63,6 @@
 #include "absl/types/span.h"
 #include "cc/runfiles/runfiles.h"
 
-#include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
@@ -87,91 +84,6 @@ static constexpr std::size_t kMaxFilename{
     PATH_MAX
 #endif
 };
-
-#ifdef _WIN32
-// Build a command line that follows the Windows conventions.  See
-// https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
-// and
-// https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw.
-static std::wstring BuildCommandLine(
-    const absl::Span<const std::wstring> args) {
-  std::wstring result;
-  bool first = true;
-  for (const std::wstring& arg : args) {
-    if (!std::exchange(first, false)) {
-      result.push_back(L' ');
-    }
-    if (!arg.empty() && arg.find_first_of(L" \t\n\v\"") == arg.npos) {
-      // No quoting needed.
-      result.append(arg);
-    } else {
-      result.push_back(L'"');
-      const auto end = arg.end();
-      for (auto it = arg.begin(); it != end; ++it) {
-        const auto begin = it;
-        // Find current run of backslashes.
-        it = std::find_if(it, end, [](wchar_t c) { return c != L'\\'; });
-        // In any case, we need to copy over the same number of backslashes at
-        // least once.
-        result.append(begin, it);
-        if (it == end || *it == L'"') {
-          // The current run of backslashes will be followed by a quotation
-          // mark, either the terminator or a character in the argument.  We
-          // have to double the backslashes in this case (first and second case
-          // in
-          // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
-          result.append(begin, it);
-        }
-        // If we’re at the end, only insert the trailing quotation mark (first
-        // case in
-        // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
-        if (it == end) break;
-        // If we have a quotation mark in the argument, we have to add yet
-        // another backslash (second case in
-        // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw#remarks).
-        if (*it == L'"') result.push_back(L'\\');
-        // Add the argument character itself.  This is correct even if it’s a
-        // quotation mark.
-        result.push_back(*it);
-      }
-      result.push_back(L'"');
-    }
-  }
-  return result;
-}
-// Build an environment block that CreateProcessW can use.  See
-// https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw.
-static std::wstring BuildEnvironmentBlock(
-    const absl::Span<const std::wstring> vars) {
-  std::wstring result;
-  for (const std::wstring& var : vars) {
-    CHECK_EQ(var.find(L'\0'), var.npos)
-        << "Environment variable " << Escape(var)
-        << " contains a null character";
-    result.append(var);
-    result.push_back(L'\0');
-  }
-  result.push_back(L'\0');
-  return result;
-}
-static wchar_t* absl_nonnull
-Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  CHECK_EQ(string.find(L'\0'), string.npos)
-      << Escape(string) << " contains null character";
-  return string.data();
-}
-#else
-static std::vector<char* absl_nonnull> Pointers(
-    std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  std::vector<char* absl_nonnull> ptrs;
-  for (std::string& s : strings) {
-    CHECK_EQ(s.find('\0'), s.npos) << s << " contains null character";
-    ptrs.push_back(s.data());
-  }
-  ptrs.push_back(nullptr);
-  return ptrs;
-}
-#endif
 
 class Runfiles final {
  public:
@@ -252,80 +164,6 @@ absl::StatusOr<Environment> Runfiles::Environ() const {
     pairs.emplace_back(*key, *value);
   }
   return Environment::Create(pairs.cbegin(), pairs.cend());
-}
-
-static absl::StatusOr<int> Run(std::vector<NativeString>& args,
-                               const Environment& env) {
-  CHECK(!args.empty());
-  CHECK(!env.empty());
-  std::vector<NativeString> final_env;
-  for (const auto& [key, value] : env) {
-    final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
-  }
-  // Sort entries for hermeticity.
-  absl::c_sort(final_env);
-#ifdef _WIN32
-  std::wstring command_line = BuildCommandLine(args);
-  std::wstring envp = BuildEnvironmentBlock(final_env);
-  STARTUPINFOW startup_info;
-  startup_info.cb = sizeof startup_info;
-  startup_info.lpReserved = nullptr;
-  startup_info.lpDesktop = nullptr;
-  startup_info.lpTitle = nullptr;
-  startup_info.dwFlags = 0;
-  startup_info.cbReserved2 = 0;
-  startup_info.lpReserved2 = nullptr;
-  PROCESS_INFORMATION process_info;
-  BOOL success =
-      ::CreateProcessW(Pointer(args.front()), Pointer(command_line), nullptr,
-                       nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp.data(),
-                       nullptr, &startup_info, &process_info);
-  if (!success) {
-    return WindowsStatus("CreateProcessW", Escape(args.front()),
-                         Escape(command_line));
-  }
-  ::CloseHandle(process_info.hThread);
-  const auto close_handle = absl::MakeCleanup(
-      [&process_info] { ::CloseHandle(process_info.hProcess); });
-  const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
-  if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
-  DWORD code;
-  success = ::GetExitCodeProcess(process_info.hProcess, &code);
-  if (!success) return WindowsStatus("GetExitCodeProcess");
-  // Emacs returns −1 on error, which the Windows C runtime will translate to
-  // 0xFFFFFFFF.  Undo this cast, assuming that both DWORD and int use two’s
-  // complement representation without padding bits.
-  static_assert(sizeof(int) == sizeof(DWORD));
-  static_assert(std::has_unique_object_representations_v<int>);
-  static_assert(std::has_unique_object_representations_v<DWORD>);
-  using IntLimits = std::numeric_limits<int>;
-  static_assert(IntLimits::radix == 2);
-  static_assert(IntLimits::digits == 31);
-  static_assert(-1 == ~0);  // https://stackoverflow.com/a/16501113
-  using DWORDLimits = std::numeric_limits<DWORD>;
-  static_assert(DWORDLimits::radix == 2);
-  static_assert(DWORDLimits::digits == 32);
-  // This cast is guaranteed to do the right thing in C++20, and in practice
-  // also works on older C++ versions.
-  const int code_int = static_cast<int>(code);
-  // Ensure we don’t accidentally return success on failure.
-  CHECK((code == 0) == (code_int == 0));
-  return code_int;
-#else
-  const std::vector<char* absl_nonnull> argv = Pointers(args);
-  const std::vector<char* absl_nonnull> envp = Pointers(final_env);
-  pid_t pid;
-  const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
-                                argv.data(), envp.data());
-  if (error != 0) {
-    return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", argv.front());
-  }
-  int wstatus;
-  const pid_t status = waitpid(pid, &wstatus, 0);
-  if (status != pid) return ErrnoStatus("waitpid", pid);
-  return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
-#endif
 }
 
 }  // namespace

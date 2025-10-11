@@ -22,6 +22,7 @@
 #include <tuple>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
@@ -130,6 +131,9 @@ class Environment final {
 
   Map map_;
 };
+
+absl::StatusOr<int> Run(std::vector<NativeString>& args,
+                        const Environment& env);
 
 class DosDevice final {
  public:
