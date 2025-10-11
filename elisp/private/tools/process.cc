@@ -74,6 +74,7 @@
 
 #include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
 // IWYU pragma: no_include <__fwd/string.h>
@@ -96,27 +97,6 @@ static constexpr std::size_t kMaxFilename{
 
 struct CaseInsensitiveHash;
 struct CaseInsensitiveEqual;
-
-#ifdef _WIN32
-static std::string Escape(const std::wstring_view string) {
-  std::string result;
-  result.reserve(string.length());
-  for (const wchar_t ch : string) {
-    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
-    if (u && absl::ascii_isprint(*u)) {
-      result.push_back(static_cast<char>(*u));
-    } else {
-      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
-    }
-  }
-  return result;
-}
-#else
-static std::string_view Escape(
-    const std::string_view string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  return string;
-}
-#endif
 
 #ifdef _WIN32
 static std::wstring ToUpper(std::wstring_view string);

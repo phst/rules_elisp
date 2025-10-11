@@ -253,6 +253,7 @@ cc_library(
         "@rules_cc//cc/runfiles",  # keep
         ":numeric",
         ":platform",
+        ":strings",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
@@ -312,6 +313,22 @@ cc_library(
     deps = [
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+    ],
+)
+
+cc_library(
+    name = "strings",
+    srcs = ["strings.cc"],
+    hdrs = ["strings.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
+        ":numeric",
+        ":platform",
         "@abseil-cpp//absl/strings",
     ],
 )
