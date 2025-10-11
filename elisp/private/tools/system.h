@@ -15,15 +15,35 @@
 #ifndef ELISP_PRIVATE_TOOLS_SYSTEM_H_
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
+#include <cstddef>
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <tuple>
+#include <type_traits>
 #include <utility>
 
+#include "absl/container/flat_hash_map.h"
 #include "absl/status/status.h"
+#include "absl/status/statusor.h"
 #include "absl/strings/str_join.h"
 
+#include "elisp/private/tools/platform.h"
+
 namespace rules_elisp {
+
+struct CaseInsensitiveHash;
+struct CaseInsensitiveEqual;
+
+#ifdef _WIN32
+struct CaseInsensitiveHash {
+  std::size_t operator()(std::wstring_view string) const;
+};
+
+struct CaseInsensitiveEqual {
+  bool operator()(std::wstring_view a, std::wstring_view b) const;
+};
+#endif
 
 absl::Status MakeErrorStatus(const std::error_code& code,
                              std::string_view function, std::string_view args);
@@ -52,6 +72,70 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 #endif
+
+class Environment final {
+ private:
+  using Map = std::conditional_t<
+      kWindows,
+      absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
+                          CaseInsensitiveEqual>,
+      absl::flat_hash_map<std::string, std::string>>;
+
+ public:
+  static absl::StatusOr<Environment> Current();
+
+  template <typename I>
+  static absl::StatusOr<Environment> Create(I begin, const I end) {
+    Map map;
+    for (; begin != end; ++begin) {
+      const auto& [key, value] = *begin;
+      if (key.empty()) {
+        return absl::InvalidArgumentError("Empty environment variable name");
+      }
+      const auto [it, ok] = map.emplace(key, value);
+      if (!ok) {
+        return absl::AlreadyExistsError(
+            absl::StrCat("Duplicate environment variable ", Escape(key)));
+      }
+    }
+    return Environment(std::move(map));
+  }
+
+  using iterator = Map::iterator;
+  using const_iterator = Map::const_iterator;
+
+  Environment(const Environment&) = default;
+  Environment& operator=(const Environment&) = default;
+  Environment(Environment&&) = default;
+  Environment& operator=(Environment&&) = default;
+
+  [[nodiscard]] bool empty() const { return map_.empty(); }
+  [[nodiscard]] iterator begin() { return map_.begin(); }
+  [[nodiscard]] const_iterator begin() const { return map_.cbegin(); }
+  [[nodiscard]] iterator end() { return map_.end(); }
+  [[nodiscard]] const_iterator end() const { return map_.cend(); }
+
+  template <std::size_t N>
+  void Add(const NativeChar (&key)[N], NativeStringView value) {
+    static_assert(N > 1, "empty environment variable");
+    map_.emplace(key, value);
+  }
+
+  template <std::size_t N>
+  void Remove(const NativeChar (&key)[N]) {
+    static_assert(N > 1, "empty environment variable");
+    map_.erase(key);
+  }
+
+  void Merge(const Environment& other) {
+    map_.insert(other.begin(), other.end());
+  }
+
+ private:
+  explicit Environment(Map map) : map_(std::move(map)) {}
+
+  Map map_;
+};
 
 }  // namespace rules_elisp
 
