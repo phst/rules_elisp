@@ -378,7 +378,8 @@ absl::StatusOr<Environment> Environment::Current() {
 }
 
 #ifdef _WIN32
-static std::wstring ToUpper(const std::wstring_view string) {
+static std::wstring CanonicalizeEnvironmentVariable(
+    const std::wstring_view string) {
   if (string.empty()) return {};
   constexpr LCID locale = LOCALE_INVARIANT;
   constexpr DWORD flags = LCMAP_UPPERCASE;
@@ -393,25 +394,23 @@ static std::wstring ToUpper(const std::wstring_view string) {
                                        length, "...", buffer.size());
   return buffer.substr(0, result);
 }
+#else
+static std::string_view CanonicalizeEnvironmentVariable(
+    const std::string_view string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  return string;
+}
 #endif
 
 std::size_t Environment::Hash::operator()(const NativeStringView string) const {
   const absl::DefaultHashContainerHash<NativeString> base;
-#ifdef _WIN32
-  return base(ToUpper(string));
-#else
-  return base(string);
-#endif
+  return base(CanonicalizeEnvironmentVariable(string));
 }
 
 bool Environment::Equal::operator()(const NativeStringView a,
                                     const NativeStringView b) const {
   const absl::DefaultHashContainerEq<NativeString> base;
-#ifdef _WIN32
-  return base(ToUpper(a), ToUpper(b));
-#else
-  return base(a, b);
-#endif
+  return base(CanonicalizeEnvironmentVariable(a),
+              CanonicalizeEnvironmentVariable(b));
 }
 
 absl::StatusOr<int> Run(std::vector<NativeString>& args,
