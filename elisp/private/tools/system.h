@@ -32,19 +32,6 @@
 
 namespace rules_elisp {
 
-struct CaseInsensitiveHash;
-struct CaseInsensitiveEqual;
-
-#ifdef _WIN32
-struct CaseInsensitiveHash {
-  std::size_t operator()(std::wstring_view string) const;
-};
-
-struct CaseInsensitiveEqual {
-  bool operator()(std::wstring_view a, std::wstring_view b) const;
-};
-#endif
-
 absl::Status MakeErrorStatus(const std::error_code& code,
                              std::string_view function, std::string_view args);
 
@@ -75,10 +62,21 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 
 class Environment final {
  private:
+  struct Hash;
+  struct Equal;
+
+#ifdef _WIN32
+  struct Hash {
+    std::size_t operator()(std::wstring_view string) const;
+  };
+
+  struct Equal {
+    bool operator()(std::wstring_view a, std::wstring_view b) const;
+  };
+#endif
+
   using Map = std::conditional_t<
-      kWindows,
-      absl::flat_hash_map<std::wstring, std::wstring, CaseInsensitiveHash,
-                          CaseInsensitiveEqual>,
+      kWindows, absl::flat_hash_map<std::wstring, std::wstring, Hash, Equal>,
       absl::flat_hash_map<std::string, std::string>>;
 
  public:
