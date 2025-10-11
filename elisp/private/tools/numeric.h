@@ -25,27 +25,26 @@
 
 namespace rules_elisp {
 
-template <typename To, typename From>
-[[nodiscard]] constexpr bool Overflow(const From n) {
-  static_assert(std::is_integral_v<To>);
-  static_assert(std::is_integral_v<From>);
-  using ToLimits = std::numeric_limits<To>;
-  using FromLimits = std::numeric_limits<From>;
-  if constexpr (ToLimits::is_signed == FromLimits::is_signed) {
-    return n < ToLimits::min() || n > ToLimits::max();
+template <typename R, typename T>
+[[nodiscard]] constexpr bool InRange(const T n) {
+  static_assert(std::is_integral_v<R>);
+  static_assert(std::is_integral_v<T>);
+  using RL = std::numeric_limits<R>;
+  using TL = std::numeric_limits<T>;
+  if constexpr (RL::is_signed == TL::is_signed) {
+    return n >= RL::min() && n <= RL::max();
   }
-  if constexpr (ToLimits::is_signed && !FromLimits::is_signed) {
-    return n > std::make_unsigned_t<To>{ToLimits::max()};
+  if constexpr (RL::is_signed && !TL::is_signed) {
+    return n <= std::make_unsigned_t<R>{RL::max()};
   }
-  if constexpr (!ToLimits::is_signed && FromLimits::is_signed) {
-    return n < 0 ||
-           static_cast<std::make_unsigned_t<From>>(n) > ToLimits::max();
+  if constexpr (!RL::is_signed && TL::is_signed) {
+    return n >= 0 && static_cast<std::make_unsigned_t<T>>(n) <= RL::max();
   }
 }
 
 template <typename To, typename From>
 std::optional<To> CastNumberOpt(const From n) {
-  return Overflow<To>(n) ? std::optional<To>() : static_cast<To>(n);
+  return InRange<To>(n) ? static_cast<To>(n) : std::optional<To>();
 }
 
 template <typename To, typename From>

@@ -289,7 +289,7 @@ absl::StatusOr<ToString> ConvertString(
     const std::basic_string_view<FromChar> string) {
   using ToChar = typename ToString::value_type;
   if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
-  static_assert(!Overflow<ToChar>(kMaxASCII),
+  static_assert(InRange<ToChar>(kMaxASCII),
                 "destination character type too small");
   const absl::Status status = CheckASCII(string);
   if (!status.ok()) return status;
