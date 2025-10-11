@@ -56,7 +56,7 @@
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/hash/hash.h"
+#include "absl/container/hash_container_defaults.h"
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
@@ -396,19 +396,21 @@ static std::wstring ToUpper(const std::wstring_view string) {
 #endif
 
 std::size_t Environment::Hash::operator()(const NativeStringView string) const {
+  const absl::DefaultHashContainerHash<NativeString> base;
 #ifdef _WIN32
-  return absl::HashOf(ToUpper(string));
+  return base(ToUpper(string));
 #else
-  return absl::HashOf(string);
+  return base(string);
 #endif
 }
 
 bool Environment::Equal::operator()(const NativeStringView a,
                                     const NativeStringView b) const {
+  const absl::DefaultHashContainerEq<NativeString> base;
 #ifdef _WIN32
-  return ToUpper(a) == ToUpper(b);
+  return base(ToUpper(a), ToUpper(b));
 #else
-  return a == b;
+  return base(a, b);
 #endif
 }
 
