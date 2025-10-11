@@ -72,4 +72,4 @@ absl::Status MakeErrorStatus(const std::error_code& code,
 }
 #endif
 
-}
+}  // namespace rules_elisp
