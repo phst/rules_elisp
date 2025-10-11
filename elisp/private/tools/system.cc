@@ -41,6 +41,7 @@
 
 #include <cerrno>
 #include <cstddef>
+#include <cstdlib>
 #include <memory>
 #include <optional>
 #include <string>
@@ -88,6 +89,61 @@ absl::Status MakeErrorStatus(const std::error_code& code,
   return std::error_code(code, std::system_category());
 }
 #endif
+
+#ifdef _WIN32
+static wchar_t* absl_nonnull
+Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  CHECK_EQ(string.find(L'\0'), string.npos)
+      << Escape(string) << " contains null character";
+  return string.data();
+}
+#endif
+
+#ifndef _WIN32
+static absl::StatusOr<std::string> WorkingDirectory() {
+  struct Free {
+    void operator()(char* const absl_nonnull p) const { std::free(p); }
+  };
+  // Assume that we always run on an OS that allocates a buffer when passed a
+  // null pointer.
+  const absl_nullable std::unique_ptr<char, Free> ptr(getcwd(nullptr, 0));
+  if (ptr == nullptr) return ErrnoStatus("getcwd", nullptr, 0);
+  // See the Linux man page for getcwd(3) why this can happen.
+  if (*ptr != '/') {
+    return absl::NotFoundError(absl::StrCat("Current working directory ",
+                                            ptr.get(), " is unreachable"));
+  }
+  return ptr.get();
+}
+#endif
+
+absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
+  if (file.empty()) return absl::InvalidArgumentError("empty filename");
+#ifdef _WIN32
+  std::wstring string(file);
+  // 0x8000 is the maximum length of a filename on Windows.  See
+  // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
+  constexpr DWORD size{0x8000};
+  std::wstring buffer(size, L'\0');
+  const DWORD result =
+      ::GetFullPathNameW(Pointer(string), size, buffer.data(), nullptr);
+  if (result == 0) {
+    return WindowsStatus("GetFullPathNameW", Escape(file), size, "...",
+                         nullptr);
+  }
+  if (result > size) {
+    return absl::OutOfRangeError(
+        absl::StrCat("Length of absolute file name (", result,
+                     ") overflows buffer of size ", size));
+  }
+  return buffer.substr(0, result);
+#else
+  if (file.front() == '/') return NativeString(file);
+  const absl::StatusOr<std::string> cwd = WorkingDirectory();
+  if (!cwd.ok()) return cwd.status();
+  return absl::StrCat(*cwd, "/", file);
+#endif
+}
 
 namespace {
 

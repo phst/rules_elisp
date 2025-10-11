@@ -74,6 +74,8 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
 }
 #endif
 
+absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
+
 class Environment final {
  private:
   using Map = std::conditional_t<
