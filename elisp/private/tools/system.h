@@ -144,43 +144,27 @@ class DosDevice final {
   DosDevice(const DosDevice&) = delete;
   DosDevice& operator=(const DosDevice&) = delete;
 
-#ifdef _WIN32
   DosDevice(DosDevice&& other)
-      : name_(std::exchange(other.name_, std::wstring())),
-        target_(std::exchange(other.target_, std::wstring())) {}
+      : name_(std::exchange(other.name_, NativeString())),
+        target_(std::exchange(other.target_, NativeString())) {}
 
   DosDevice& operator=(DosDevice&& other) {
-    name_ = std::exchange(other.name_, std::wstring());
-    target_ = std::exchange(other.target_, std::wstring());
+    name_ = std::exchange(other.name_, NativeString());
+    target_ = std::exchange(other.target_, NativeString());
     return *this;
   }
-#else
-  DosDevice(DosDevice&&) = default;
-  DosDevice& operator=(DosDevice&&) = default;
-#endif
 
-  NativeString name() const {
-#ifdef _WIN32
-    return name_;
-#else
-    return {};
-#endif
-  }
+  NativeString name() const { return name_; }
 
  private:
-#ifdef _WIN32
-  explicit DosDevice(const std::wstring_view name,
-                     const std::wstring_view target)
+  explicit DosDevice(const NativeStringView name, const NativeStringView target)
       : name_(name), target_(target) {
     CHECK(!name.empty());
     CHECK(!target.empty());
   }
 
-  std::wstring name_;
-  std::wstring target_;
-#else
-  explicit DosDevice() = default;
-#endif
+  NativeString name_;
+  NativeString target_;
 };
 
 }  // namespace rules_elisp
