@@ -13,7 +13,6 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
-load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -92,8 +91,8 @@ bzl_library(
         "//elisp/toolchains:__pkg__",
     ],
     deps = [
-        ":cc_config",
         ":cc_default_info",
+        "//private:cc_config",
     ],
 )
 
@@ -162,7 +161,7 @@ cc_defaults(
 cc_defaults(
     name = "emacs_defaults",
     copts = select({
-        ":gcc_or_clang": [
+        "//private:gcc_or_clang": [
             # Compiler output is never piped to a terminal.
             "-fno-diagnostics-color",
         ],
@@ -183,32 +182,6 @@ cc_defaults(
     ],
     linkopts = [],
     visibility = ["//elisp/toolchains:__pkg__"],
-)
-
-selects.config_setting_group(
-    name = "gcc_or_clang",
-    match_any = [
-        "@rules_cc//cc/compiler:gcc",
-        "@rules_cc//cc/compiler:clang",
-    ],
-    visibility = [
-        "//elisp/private/tools:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//tests/wrap:__pkg__",
-    ],
-)
-
-selects.config_setting_group(
-    name = "msvc_or_clang_cl",
-    match_any = [
-        "@rules_cc//cc/compiler:msvc-cl",
-        "@rules_cc//cc/compiler:clang-cl",
-    ],
-    visibility = [
-        "//elisp/private/tools:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//tests/wrap:__pkg__",
-    ],
 )
 
 # keep
@@ -277,11 +250,6 @@ platform(
         "@rules_cc//cc/private/toolchain:clang-cl",
     ],
     visibility = ["//visibility:private"],
-)
-
-bzl_library(
-    name = "cc_config",
-    srcs = ["cc_config.bzl"],
 )
 
 bzl_library(

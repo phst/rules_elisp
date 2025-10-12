@@ -14,7 +14,7 @@
 
 """Exposes constants to configure C++ launchers."""
 
-load(":cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
+load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load(":cc_default_info.bzl", "CcDefaultInfo")
 
 visibility([
@@ -28,8 +28,8 @@ LAUNCHER_FEATURES = FEATURES
 LAUNCHER_COPTS = COPTS + CXXOPTS
 LAUNCHER_DEFINES = DEFINES
 LAUNCHER_LINKOPTS = LINKOPTS + select({
-    Label(":msvc_or_clang_cl"): ["/SUBSYSTEM:CONSOLE"],
-    Label(":gcc_or_clang"): [],
+    Label("//private:msvc_or_clang_cl"): ["/SUBSYSTEM:CONSOLE"],
+    Label("//private:gcc_or_clang"): [],
 })
 
 # @unsorted-dict-items

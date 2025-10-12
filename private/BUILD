@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//lib:selects.bzl", "selects")
 load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load(":package_features.bzl", "PACKAGE_FEATURES")
 
@@ -38,6 +39,41 @@ config_setting(
         "//elisp/proto:__pkg__",
         "//tests/wrap:__pkg__",
     ],
+)
+
+selects.config_setting_group(
+    name = "gcc_or_clang",
+    match_any = [
+        "@rules_cc//cc/compiler:gcc",
+        "@rules_cc//cc/compiler:clang",
+    ],
+    visibility = [
+        "//elisp/private:__pkg__",
+        "//elisp/private/tools:__pkg__",
+        "//elisp/proto:__pkg__",
+        "//tests/wrap:__pkg__",
+    ],
+)
+
+selects.config_setting_group(
+    name = "msvc_or_clang_cl",
+    match_any = [
+        "@rules_cc//cc/compiler:msvc-cl",
+        "@rules_cc//cc/compiler:clang-cl",
+    ],
+    visibility = [
+        "//elisp/private:__pkg__",
+        "//elisp/private/tools:__pkg__",
+        "//elisp/proto:__pkg__",
+        "//tests/wrap:__pkg__",
+    ],
+)
+
+# keep
+bzl_library(
+    name = "cc_config",
+    srcs = ["cc_config.bzl"],
+    visibility = ["//elisp/private:__pkg__"],
 )
 
 bzl_library(

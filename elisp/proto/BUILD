@@ -18,7 +18,7 @@ load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_
 load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("//elisp:elisp_cc_module.bzl", "elisp_cc_module")
 load("//elisp:elisp_library.bzl", "elisp_library")
-load("//elisp/private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
+load("//private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":elisp_proto_library.bzl", "elisp_proto_library")
 
@@ -140,8 +140,8 @@ elisp_cc_module(
     name = "module",
     srcs = ["module.c"],
     copts = COPTS + CONLYOPTS + select({
-        "//elisp/private:gcc_or_clang": ["-fvisibility=hidden"],
-        "//elisp/private:msvc_or_clang_cl": ["/wd4100"],
+        "//private:gcc_or_clang": ["-fvisibility=hidden"],
+        "//private:msvc_or_clang_cl": ["/wd4100"],
     }),
     features = FEATURES + ["-default_link_libs"],
     local_defines = DEFINES,

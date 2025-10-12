@@ -14,7 +14,12 @@
 
 """Defines shared C/C++ configuration constants for this repository."""
 
-visibility(["//elisp/private/tools", "//elisp/proto"])
+visibility([
+    # keep sorted
+    "//elisp/private",
+    "//elisp/private/tools",
+    "//elisp/proto",
+])
 
 FEATURES = select({
     Label("//private:treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
