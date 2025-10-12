@@ -19,6 +19,7 @@ visibility([
     "//elisp/private",
     "//elisp/private/tools",
     "//elisp/proto",
+    "//tests/tools",
 ])
 
 FEATURES = select({

@@ -270,6 +270,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
     deps = [
         ":platform",
         ":strings",
@@ -296,6 +297,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
     deps = [
         ":numeric",  # keep
         ":platform",
@@ -327,6 +329,7 @@ cc_library(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
+        "//tests/tools:__pkg__",
         "//tests/wrap:__pkg__",
     ],
 )
@@ -339,6 +342,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
 )
 
 cc_library(
@@ -350,6 +354,7 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
     deps = [
         ":numeric",
         ":platform",

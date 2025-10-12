@@ -139,6 +139,7 @@ config_setting(
 elisp_binary(
     name = "empty",
     src = "empty.el",
+    visibility = ["//tests/tools:__pkg__"],
 )
 
 run_binary(

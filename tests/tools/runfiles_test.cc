@@ -1,0 +1,70 @@
+// Copyright 2025 Philipp Stephani
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "elisp/private/tools/runfiles.h"
+
+#include <fstream>
+#include <ios>
+
+#include "absl/status/status.h"
+#include "absl/status/statusor.h"
+#include "absl/status/status_matchers.h"
+
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/system.h"
+
+namespace rules_elisp {
+
+using ::testing::Gt;
+using ::testing::SizeIs;
+using absl_testing::IsOk;
+using absl_testing::IsOkAndHolds;
+using absl_testing::StatusIs;
+
+TEST(RunfilesTest, ResolvesRunfile) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> resolved =
+      runfiles->Resolve(RULES_ELISP_PROGRAM);
+  ASSERT_THAT(resolved, IsOkAndHolds(SizeIs(Gt(0))));
+  const std::ifstream file(*resolved, std::ios::in | std::ios::binary);
+  EXPECT_TRUE(file.is_open());
+  EXPECT_TRUE(file.good());
+}
+
+TEST(RunfilesTest, RejectsNonASCII) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  EXPECT_THAT(runfiles->Resolve("Foó"),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(RunfilesTest, AllowsRunningTool) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> program =
+      runfiles->Resolve(RULES_ELISP_PROGRAM);
+  ASSERT_THAT(program, IsOk());
+  const absl::StatusOr<Environment> env = runfiles->Environ();
+  ASSERT_THAT(env, IsOk());
+  EXPECT_THAT(rules_elisp::Run({*program}, *env), IsOkAndHolds(0));
+}
+
+}  // namespace rules_elisp
