@@ -36,6 +36,7 @@ bazel_dep(name = "abseil-py", version = "2.1.0", dev_dependency = True)
 bazel_dep(name = "gazelle", version = "0.45.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.8.2", dev_dependency = True)
 bazel_dep(name = "bazel_features", version = "1.37.0", dev_dependency = True)
+bazel_dep(name = "googletest", version = "1.17.0.bcr.1", dev_dependency = True)
 
 # Bring in the local_config_cc repository.  It’s needed for
 # //emacs:windows_cc_toolchain.
