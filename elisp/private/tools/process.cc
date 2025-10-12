@@ -74,18 +74,6 @@
 
 namespace rules_elisp {
 
-namespace {
-
-static constexpr std::size_t kMaxFilename{
-#ifdef _WIN32
-    MAX_PATH
-#else
-    PATH_MAX
-#endif
-};
-
-}  // namespace
-
 absl::StatusOr<int> RunLauncher(
     const std::string_view source_repository, const std::string_view binary,
     const CommonOptions& common_opts,
@@ -162,9 +150,10 @@ absl::StatusOr<int> RunEmacs(
     // The longest filename in the Emacs release archive has 140 characters.
     // Round up to 150 for some buffer and the directory separator.
     constexpr std::size_t kMaxEntry = 150;
-    static_assert(kMaxFilename > kMaxEntry);
-    constexpr std::size_t kMaxRoot = kMaxFilename - kMaxEntry;
-    if (root->length() > kMaxRoot) {
+    const std::size_t max_filename = MaxFilename();
+    CHECK_GT(max_filename, kMaxEntry);
+    const std::size_t max_root = max_filename - kMaxEntry;
+    if (root->length() > max_root) {
       // The filenames in the released Emacs archive are too long.  Create a
       // drive letter to shorten them.
       absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
