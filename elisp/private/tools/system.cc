@@ -415,7 +415,7 @@ bool Environment::Equal::operator()(const NativeStringView a,
 
 absl::StatusOr<int> Run(std::vector<NativeString>& args,
                         const Environment& env) {
-  CHECK(!args.empty());
+  if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
   CHECK(!env.empty());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
