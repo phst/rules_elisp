@@ -263,6 +263,27 @@ cc_library(
 )
 
 cc_library(
+    name = "load_cc",
+    srcs = ["load.cc"],
+    hdrs = ["load.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
+    deps = [
+        ":platform",
+        ":runfiles_cc",
+        ":strings",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_library(
     name = "runfiles_cc",
     srcs = ["runfiles.cc"],
     hdrs = ["runfiles.h"],
