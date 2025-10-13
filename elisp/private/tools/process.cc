@@ -14,50 +14,18 @@
 
 #include "elisp/private/tools/process.h"
 
-#ifdef _WIN32
-#  ifndef UNICODE
-#    define UNICODE
-#  endif
-#  ifndef _UNICODE
-#    define _UNICODE
-#  endif
-#  ifndef STRICT
-#    define STRICT
-#  endif
-#  ifndef NOMINMAX
-#    define NOMINMAX
-#  endif
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
-#  include <windows.h>
-#else
-#  include <limits.h>
-#  include <spawn.h>
-#  include <sys/wait.h>
-#  include <unistd.h>
-#endif
-
-#include <algorithm>  // IWYU pragma: keep
-#include <cerrno>     // IWYU pragma: keep
 #include <cstdlib>
+#include <initializer_list>
 #include <iterator>
-#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>  // IWYU pragma: keep
-#include <type_traits>
 #include <utility>
 #include <vector>
 
-#include "absl/algorithm/container.h"
-#include "absl/base/nullability.h"
 #include "absl/log/check.h"
-#include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/ascii.h"  // IWYU pragma: keep
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 

@@ -14,11 +14,14 @@
 
 #include "elisp/private/tools/test.h"
 
+#include <vector>
+
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/process.h"
+#include "elisp/private/tools/runfiles.h"
 
 namespace rules_elisp {
 

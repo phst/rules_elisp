@@ -32,6 +32,7 @@
 #  endif
 #  include <windows.h>
 #else
+#  include <limits.h>
 #  include <spawn.h>
 #  include <sys/wait.h>
 #  include <unistd.h>
@@ -50,6 +51,7 @@
 #include <string_view>
 #include <system_error>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
@@ -65,6 +67,7 @@
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/numeric.h"  // IWYU pragma: keep, only on Windows
+#include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
