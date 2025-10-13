@@ -66,12 +66,6 @@
 #include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
-// IWYU pragma: no_include <__fwd/string.h>
-// IWYU pragma: no_include <__system_error/error_category.h>
-// IWYU pragma: no_include <__system_error/error_code.h>
-// IWYU pragma: no_include <__system_error/error_condition.h>
-// IWYU pragma: no_include <sys/errno.h>
-
 namespace rules_elisp {
 
 absl::StatusOr<int> RunLauncher(

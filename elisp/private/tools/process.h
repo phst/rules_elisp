@@ -20,15 +20,13 @@
 #endif
 
 #include <initializer_list>
-#include <string_view>  // IWYU pragma: keep
+#include <string_view>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
-
-// IWYU pragma: no_include <__fwd/string_view.h>
 
 namespace rules_elisp {
 
