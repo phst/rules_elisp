@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_BINARY_H_
-#define ELISP_BINARY_H_
+#ifndef ELISP_PRIVATE_TOOLS_BINARY_H_
+#define ELISP_PRIVATE_TOOLS_BINARY_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -40,4 +40,4 @@ absl::StatusOr<int> Main(const CommonOptions& common_opts,
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_BINARY_H_
+#endif  // ELISP_PRIVATE_TOOLS_BINARY_H_

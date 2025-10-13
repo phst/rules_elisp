@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_EMACS_H_
-#define ELISP_EMACS_H_
+#ifndef ELISP_PRIVATE_TOOLS_EMACS_H_
+#define ELISP_PRIVATE_TOOLS_EMACS_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -33,4 +33,4 @@ absl::StatusOr<int> Main(Mode mode, std::string_view install,
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_EMACS_H_
+#endif  // ELISP_PRIVATE_TOOLS_EMACS_H_

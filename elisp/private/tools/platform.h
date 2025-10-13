@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_PLATFORM_H_
-#define ELISP_PLATFORM_H_
+#ifndef ELISP_PRIVATE_TOOLS_PLATFORM_H_
+#define ELISP_PRIVATE_TOOLS_PLATFORM_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -58,4 +58,4 @@ struct CommonOptions final {
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_PLATFORM_H_
+#endif  // ELISP_PRIVATE_TOOLS_PLATFORM_H_
