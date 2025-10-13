@@ -47,32 +47,38 @@ int
   absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
+#ifndef RULES_ELISP_EMACS
+  rules_elisp::CommonOptions common_opts;
+  common_opts.wrapper = RULES_ELISP_WRAPPER;
+  common_opts.mode = RULES_ELISP_MODE;
+  common_opts.tags = {RULES_ELISP_TAGS};
+  common_opts.load_path = {RULES_ELISP_LOAD_PATH};
+  common_opts.load_files = {RULES_ELISP_LOAD_FILES};
+  common_opts.data_files = {RULES_ELISP_DATA_FILES};
+#endif
+#ifdef RULES_ELISP_BINARY
+  rules_elisp::BinaryOptions binary_opts;
+  binary_opts.interactive = RULES_ELISP_INTERACTIVE;
+  binary_opts.input_args = {RULES_ELISP_INPUT_ARGS};
+  binary_opts.output_args = {RULES_ELISP_OUTPUT_ARGS};
+#endif
+#ifdef RULES_ELISP_TEST
+  rules_elisp::TestOptions test_opts;
+  test_opts.skip_tests = {RULES_ELISP_SKIP_TESTS};
+  test_opts.skip_tags = {RULES_ELISP_SKIP_TAGS};
+  test_opts.module_assertions = RULES_ELISP_MODULE_ASSERTIONS;
+#endif
   const absl::StatusOr<int> code = rules_elisp::Main(
 #ifdef RULES_ELISP_EMACS
       RULES_ELISP_MODE, RULES_ELISP_INSTALL,
 #else
-      {
-          RULES_ELISP_WRAPPER,
-          RULES_ELISP_MODE,
-          {RULES_ELISP_TAGS},
-          {RULES_ELISP_LOAD_PATH},
-          {RULES_ELISP_LOAD_FILES},
-          {RULES_ELISP_DATA_FILES},
-      },
+      common_opts,
 #endif
 #ifdef RULES_ELISP_BINARY
-      {
-          RULES_ELISP_INTERACTIVE,
-          {RULES_ELISP_INPUT_ARGS},
-          {RULES_ELISP_OUTPUT_ARGS},
-      },
+      binary_opts,
 #endif
 #ifdef RULES_ELISP_TEST
-      {
-          {RULES_ELISP_SKIP_TESTS},
-          {RULES_ELISP_SKIP_TAGS},
-          RULES_ELISP_MODULE_ASSERTIONS,
-      },
+      test_opts,
 #endif
       original_args);
   if (!code.ok()) {
