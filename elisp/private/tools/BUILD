@@ -84,8 +84,12 @@ cc_library(
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
         ":platform",
-        ":process",
+        ":runfiles_cc",
+        ":strings",
+        ":system",
+        "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -251,12 +255,9 @@ cc_library(
     deps = [
         ":platform",
         ":runfiles_cc",
-        ":strings",
         ":system",
         "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
     ],
 )
