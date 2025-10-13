@@ -119,6 +119,7 @@ cc_library(
         "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
+        ":runfiles_cc",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
@@ -173,6 +174,7 @@ cc_library(
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
         ":process",  # keep
+        ":runfiles_cc",  # keep
         ":platform",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
@@ -251,9 +253,6 @@ cc_library(
         ":runfiles_cc",
         ":strings",
         ":system",
-        "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
@@ -298,16 +297,16 @@ cc_library(
     linkstatic = True,
     local_defines = DEFINES,
     deps = [
-        ":numeric",
+        ":numeric",  # keep
         ":platform",
         ":strings",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/cleanup",
+        "@abseil-cpp//absl/cleanup",  # keep
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:hash_container_defaults",
-        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log",  # keep
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/log:die_if_null",
         "@abseil-cpp//absl/status",
