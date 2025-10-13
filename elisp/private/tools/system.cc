@@ -417,7 +417,6 @@ bool Environment::Equal::operator()(const NativeStringView a,
 absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                         const Environment& env) {
   if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
-  CHECK(!env.empty());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
