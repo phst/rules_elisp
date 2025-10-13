@@ -18,6 +18,7 @@
 #include <string_view>
 #include <vector>
 
+#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
