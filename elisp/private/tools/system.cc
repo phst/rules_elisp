@@ -94,7 +94,7 @@ absl::Status MakeErrorStatus(const std::error_code& code,
 [[nodiscard]] std::error_code WindowsError() {
 #ifdef _WIN32
   const DWORD code = ::GetLastError();
-  const std::optional<int> i = CastNumberOpt<int>(code);
+  const std::optional<int> i = CastNumber<int>(code);
   return i.has_value() ? std::error_code(*i, std::system_category())
                        : std::make_error_code(std::errc::value_too_large);
 #else
@@ -383,7 +383,7 @@ static std::wstring CanonicalizeEnvironmentVariable(
   if (string.empty()) return {};
   constexpr LCID locale = LOCALE_INVARIANT;
   constexpr DWORD flags = LCMAP_UPPERCASE;
-  const int length = CastNumberOpt<int>(string.length()).value();
+  const int length = CastNumber<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
   CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, flags, "...",
                                        length, nullptr, 0);

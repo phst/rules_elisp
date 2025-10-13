@@ -39,7 +39,7 @@ template <typename R, typename T>
 }
 
 template <typename To, typename From>
-std::optional<To> CastNumberOpt(const From n) {
+std::optional<To> CastNumber(const From n) {
   return InRange<To>(n) ? static_cast<To>(n) : std::optional<To>();
 }
 
