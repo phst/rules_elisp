@@ -14,6 +14,8 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
+load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
@@ -284,6 +286,31 @@ cc_library(
 )
 
 cc_library(
+    name = "manifest_cc",
+    srcs = ["manifest.cc"],
+    hdrs = ["manifest.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    visibility = ["//tests/tools:__pkg__"],
+    deps = [
+        ":manifest_cc_proto",
+        ":platform",
+        ":strings",
+        ":system",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
+        "@protobuf//:protobuf_lite",  # keep
+        "@protobuf//src/google/protobuf/json",
+    ],
+)
+
+cc_library(
     name = "runfiles_cc",
     srcs = ["runfiles.cc"],
     hdrs = ["runfiles.h"],
@@ -457,4 +484,17 @@ exports_files(
         "module.lds",
     ],
     visibility = ["//elisp:__pkg__"],
+)
+
+cc_proto_library(
+    name = "manifest_cc_proto",
+    deps = [":manifest_proto"],
+)
+
+# gazelle:elisp_generate_proto false
+# gazelle:go_generate_proto false
+
+proto_library(
+    name = "manifest_proto",
+    srcs = ["manifest.proto"],
 )

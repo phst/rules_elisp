@@ -19,6 +19,10 @@ IncludeCategories:
   - Regex: '^"elisp/'
     Priority: 100
 
+RawStringFormats:
+  - Language: Json
+    Delimiters: [js]
+
 # Local Variables:
 # mode: yaml
 # End:

@@ -39,6 +39,27 @@ py_test(
     ],
 )
 
+cc_test(
+    name = "manifest_cc_test",
+    size = "small",
+    srcs = ["manifest_test.cc"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
+        "//elisp/private/tools:manifest_cc",
+        "//elisp/private/tools:platform",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/status:status_matchers",
+        "@abseil-cpp//absl/status:statusor",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",  # keep
+    ],
+)
+
 py_test(
     name = "load_test",
     size = "small",
