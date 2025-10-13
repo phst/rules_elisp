@@ -19,10 +19,6 @@
 #include <optional>
 #include <type_traits>
 
-#include "absl/status/status.h"
-#include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
-
 namespace rules_elisp {
 
 template <typename R, typename T>
@@ -45,18 +41,6 @@ template <typename R, typename T>
 template <typename To, typename From>
 std::optional<To> CastNumberOpt(const From n) {
   return InRange<To>(n) ? static_cast<To>(n) : std::optional<To>();
-}
-
-template <typename To, typename From>
-absl::StatusOr<To> CastNumber(const From n) {
-  using Limits = std::numeric_limits<To>;
-  const std::optional<To> ret = CastNumberOpt<To>(n);
-  if (!ret) {
-    return absl::OutOfRangeError(absl::StrCat("Number ", n, " out of range [",
-                                              Limits::min(), ", ",
-                                              Limits::max(), "]"));
-  }
-  return *ret;
 }
 
 }  // namespace rules_elisp
