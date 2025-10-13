@@ -132,14 +132,38 @@ cc_library(
     ],
 )
 
-py_binary(
+cc_binary(
     name = "run_binary",
-    srcs = ["run_binary.py"],
-    python_version = "3.12",
+    srcs = ["run_binary.cc"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
     deps = [
-        ":load",
-        ":manifest",
-        ":runfiles",
+        # FIXME: Remove the next dependency once we drop support for Bazel
+        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+        "@bazel_tools//tools/cpp/runfiles",  # keep
+        "@rules_cc//cc/runfiles",  # keep
+        ":load_cc",
+        ":manifest_cc",
+        ":numeric",
+        ":platform",
+        ":runfiles_cc",
+        ":system",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/base:log_severity",
+        "@abseil-cpp//absl/container:fixed_array",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
     ],
 )
 
