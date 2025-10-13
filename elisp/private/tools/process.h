@@ -37,10 +37,6 @@ absl::StatusOr<int> RunLauncher(
     absl::Span<const NativeString> launcher_args,
     absl::Span<const NativeStringView> original_args, ExecutableKind kind);
 
-absl::StatusOr<int> RunEmacs(std::string_view source_repository, Mode mode,
-                             std::string_view install,
-                             absl::Span<const NativeStringView> original_args);
-
 }  // namespace rules_elisp
 
 #endif  // ELISP_PROCESS_H_
