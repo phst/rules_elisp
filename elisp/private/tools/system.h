@@ -16,7 +16,6 @@
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
 #include <cstddef>
-#include <string>
 #include <string_view>
 #include <system_error>
 #include <tuple>
