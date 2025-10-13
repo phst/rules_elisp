@@ -181,9 +181,9 @@ Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   return string.data();
 }
 #else
-static std::vector<char* absl_nonnull> Pointers(
+static std::vector<char* absl_nullable> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  std::vector<char* absl_nonnull> ptrs;
+  std::vector<char* absl_nullable> ptrs;
   for (std::string& s : strings) {
     CHECK_EQ(s.find('\0'), s.npos) << s << " contains null character";
     ptrs.push_back(s.data());
@@ -473,8 +473,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   return code_int;
 #else
   std::vector<NativeString> args_vec(args.cbegin(), args.cend());
-  const std::vector<char* absl_nonnull> argv = Pointers(args_vec);
-  const std::vector<char* absl_nonnull> envp = Pointers(final_env);
+  const std::vector<char* absl_nullable> argv = Pointers(args_vec);
+  const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
                                 argv.data(), envp.data());
