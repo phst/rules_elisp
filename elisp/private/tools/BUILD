@@ -339,11 +339,6 @@ cc_library(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
-    deps = [
-        "@abseil-cpp//absl/status",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
-    ],
 )
 
 cc_library(
