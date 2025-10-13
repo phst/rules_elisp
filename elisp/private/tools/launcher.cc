@@ -24,6 +24,11 @@
 
 #include "elisp/private/tools/platform.h"
 
+#if (defined RULES_ELISP_EMACS + defined RULES_ELISP_BINARY + \
+     defined RULES_ELISP_TEST) != 1
+#  error Incorrect launcher setup
+#endif
+
 #ifdef RULES_ELISP_EMACS
 #  include "elisp/private/tools/emacs.h"
 #endif
