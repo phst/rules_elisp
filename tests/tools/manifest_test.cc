@@ -45,18 +45,18 @@ NativeString String(const NativeChar (&string)[N]) {
 }
 
 TEST(ManifestFileTest, Create) {
+  CommonOptions opts;
+  opts.wrapper = RULES_ELISP_NATIVE_LITERAL("wrapper");
+  opts.mode = ToolchainMode::kWrap;
+  opts.tags = {
+      RULES_ELISP_NATIVE_LITERAL("tag-1"),
+      String(RULES_ELISP_NATIVE_LITERAL("tag-2 \t\n\r\f äα𝐴🐈'\0\\\"")),
+  };
+  opts.load_path = {RULES_ELISP_NATIVE_LITERAL("load-dir")};
+  opts.load_files = {RULES_ELISP_NATIVE_LITERAL("load-file")};
+  opts.data_files = {RULES_ELISP_NATIVE_LITERAL("data-file")};
   const absl::StatusOr<ManifestFile> file = ManifestFile::Create(
-      {
-          RULES_ELISP_NATIVE_LITERAL("wrapper"),
-          ToolchainMode::kWrap,
-          {
-              RULES_ELISP_NATIVE_LITERAL("tag-1"),
-              String(RULES_ELISP_NATIVE_LITERAL("tag-2 \t\n\r\f äα𝐴🐈'\0\\\"")),
-          },
-          {RULES_ELISP_NATIVE_LITERAL("load-dir")},
-          {RULES_ELISP_NATIVE_LITERAL("load-file")},
-          {RULES_ELISP_NATIVE_LITERAL("data-file")},
-      },
+      opts,
       {
           RULES_ELISP_NATIVE_LITERAL("in-1"),
           RULES_ELISP_NATIVE_LITERAL("in-2"),
