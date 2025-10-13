@@ -108,7 +108,7 @@ absl::Status MakeErrorStatus(const std::error_code& code,
 
 [[nodiscard]] std::error_code ErrnoError() {
   const int code = errno;
-  return std::error_code(code, std::system_category());
+  return std::error_code(code, std::generic_category());
 }
 
 #ifdef _WIN32
