@@ -20,13 +20,13 @@
 #include <system_error>
 #include <tuple>
 #include <utility>
-#include <vector>
 
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_join.h"
+#include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/strings.h"
@@ -131,7 +131,7 @@ class Environment final {
   Map map_;
 };
 
-absl::StatusOr<int> Run(std::vector<NativeString>& args,
+absl::StatusOr<int> Run(absl::Span<const NativeString> args,
                         const Environment& env);
 
 class DosDevice final {

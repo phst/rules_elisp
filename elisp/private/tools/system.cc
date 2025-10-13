@@ -62,6 +62,7 @@
 #include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
+#include "absl/types/span.h"
 
 #include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/strings.h"
@@ -413,7 +414,7 @@ bool Environment::Equal::operator()(const NativeStringView a,
               CanonicalizeEnvironmentVariable(b));
 }
 
-absl::StatusOr<int> Run(std::vector<NativeString>& args,
+absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                         const Environment& env) {
   CHECK(!args.empty());
   CHECK(!env.empty());
@@ -424,6 +425,7 @@ absl::StatusOr<int> Run(std::vector<NativeString>& args,
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
 #ifdef _WIN32
+  std::wstring program = args.front();
   std::wstring command_line = BuildCommandLine(args);
   std::wstring envp = BuildEnvironmentBlock(final_env);
   STARTUPINFOW startup_info;
@@ -436,11 +438,11 @@ absl::StatusOr<int> Run(std::vector<NativeString>& args,
   startup_info.lpReserved2 = nullptr;
   PROCESS_INFORMATION process_info;
   BOOL success =
-      ::CreateProcessW(Pointer(args.front()), Pointer(command_line), nullptr,
+      ::CreateProcessW(Pointer(program), Pointer(command_line), nullptr,
                        nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp.data(),
                        nullptr, &startup_info, &process_info);
   if (!success) {
-    return WindowsStatus("CreateProcessW", Escape(args.front()),
+    return WindowsStatus("CreateProcessW", Escape(program),
                          Escape(command_line));
   }
   ::CloseHandle(process_info.hThread);
@@ -471,7 +473,8 @@ absl::StatusOr<int> Run(std::vector<NativeString>& args,
   CHECK((code == 0) == (code_int == 0));
   return code_int;
 #else
-  const std::vector<char* absl_nonnull> argv = Pointers(args);
+  std::vector<NativeString> args_vec(args.cbegin(), args.cend());
+  const std::vector<char* absl_nonnull> argv = Pointers(args_vec);
   const std::vector<char* absl_nonnull> envp = Pointers(final_env);
   pid_t pid;
   const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
