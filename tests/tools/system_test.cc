@@ -179,6 +179,22 @@ TEST(EnvironmentTest, RemoveIsCaseSensitiveOnlyOnUnix) {
   EXPECT_THAT(*env, SizeIs(pairs.size() - (kWindows ? 1 : 0)));
 }
 
+TEST(TemporaryFileTest, CreateWorks) {
+  absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
+  ASSERT_THAT(file, IsOk());
+  ASSERT_THAT(file->name(), SizeIs(Gt(0)));
+
+  EXPECT_THAT(file->Write("Foo\n"), IsOk());
+
+  std::ifstream stream(file->name(), std::ios::in | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  std::string line;
+  std::getline(stream, line);
+  EXPECT_TRUE(stream.good());
+  EXPECT_EQ(line, "Foo");
+}
+
 [[maybe_unused]] static NativeString GetEnv(const NativeChar* const name) {
   const NativeChar* const absl_nullable value =
 #ifdef _WIN32

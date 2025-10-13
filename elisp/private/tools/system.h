@@ -16,13 +16,17 @@
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
 #include <cstddef>
+#include <cstdio>
 #include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
 
+#include "absl/base/attributes.h"
+#include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
 #include "absl/log/check.h"
+#include "absl/log/die_if_null.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_join.h"
@@ -147,6 +151,42 @@ class Environment final {
   explicit Environment(Map map) : map_(std::move(map)) {}
 
   Map map_;
+};
+
+class TemporaryFile final {
+ public:
+  static absl::StatusOr<TemporaryFile> Create();
+
+  TemporaryFile(const TemporaryFile&) = delete;
+  TemporaryFile& operator=(const TemporaryFile&) = delete;
+
+  TemporaryFile(TemporaryFile&& other)
+      : name_(std::exchange(other.name_, NativeString())),
+        file_(std::exchange(other.file_, nullptr)) {}
+
+  TemporaryFile& operator=(TemporaryFile&& other) {
+    name_ = std::exchange(other.name_, NativeString());
+    file_ = std::exchange(other.file_, nullptr);
+    return *this;
+  }
+
+  ~TemporaryFile() noexcept;
+
+  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    CHECK(!name_.empty());
+    return name_;
+  }
+
+  absl::Status Write(std::string_view contents);
+
+ private:
+  explicit TemporaryFile(NativeString name, std::FILE* const absl_nonnull file)
+      : name_(std::move(name)), file_(ABSL_DIE_IF_NULL(file)) {
+    CHECK(!name_.empty());
+  }
+
+  NativeString name_;
+  std::FILE* absl_nullable file_;
 };
 
 absl::StatusOr<int> Run(absl::Span<const NativeString> args,

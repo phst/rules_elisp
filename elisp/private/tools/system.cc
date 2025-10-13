@@ -34,6 +34,8 @@
 #else
 #  include <limits.h>
 #  include <spawn.h>
+#  include <stdio.h>
+#  include <stdlib.h>
 #  include <sys/wait.h>
 #  include <unistd.h>
 #endif
@@ -44,6 +46,7 @@
 
 #include <cerrno>
 #include <cstddef>
+#include <cstdio>
 #include <cstdlib>
 #include <memory>
 #include <optional>  // IWYU pragma: keep, only on Windows
@@ -178,13 +181,16 @@ static std::wstring BuildEnvironmentBlock(
   result.push_back(L'\0');
   return result;
 }
-static wchar_t* absl_nonnull
-Pointer(std::wstring& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  CHECK_EQ(string.find(L'\0'), string.npos)
+#endif
+
+static NativeChar* absl_nonnull Pointer(
+    NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  CHECK_EQ(string.find(RULES_ELISP_NATIVE_LITERAL('\0')), string.npos)
       << Escape(string) << " contains null character";
   return string.data();
 }
-#else
+
+#ifndef _WIN32
 static std::vector<char* absl_nullable> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<char* absl_nullable> ptrs;
@@ -428,6 +434,79 @@ bool Environment::Equal::operator()(const NativeStringView a,
   const absl::DefaultHashContainerEq<NativeString> base;
   return base(CanonicalizeEnvironmentVariable(a),
               CanonicalizeEnvironmentVariable(b));
+}
+
+static absl::Status Unlink(const NativeStringView file) {
+  NativeString string(file);
+#ifdef _WIN32
+  const BOOL result = ::DeleteFileW(Pointer(string));
+  if (!result) return WindowsStatus("DeleteFileW", Escape(file));
+#else
+  const int result = unlink(Pointer(string));
+  if (result != 0) return ErrnoStatus("unlink", file);
+#endif
+  return absl::OkStatus();
+};
+
+absl::StatusOr<TemporaryFile> TemporaryFile::Create() {
+#ifdef _WIN32
+  absl::Status status;
+  for (int i = 0; i < 10; i++) {
+    wchar_t buffer[L_tmpnam + 1];
+    const wchar_t* absl_nullable name = _wtmpnam(buffer);
+    if (name == nullptr) {
+      return absl::UnavailableError("Cannot create temporary name");
+    }
+    constexpr wchar_t mode[] = L"wxbNT";
+    std::FILE* const absl_nullable file = _wfopen(name, mode);
+    if (file != nullptr) return TemporaryFile(name, file);
+    status = ErrnoStatus("_wfopen", Escape(name), Escape(mode));
+    LOG(ERROR) << status;
+  }
+  CHECK(!status.ok());
+  return status;
+#else
+  const char* const absl_nullable dir = std::getenv("TMPDIR");
+  std::string name = absl::StrCat(dir == nullptr || *dir == '\0' ? "/tmp" : dir,
+                                  "/elisp.XXXXXX");
+  const int fd = mkstemp(Pointer(name));
+  if (fd < 0) return ErrnoStatus("mkstemp", name);
+  constexpr char mode[] = "wxbe";
+  std::FILE* const absl_nullable file = fdopen(fd, mode);
+  if (file == nullptr) {
+    const absl::Status status = ErrnoStatus("fdopen", fd, mode);
+    if (close(fd) != 0) LOG(ERROR) << ErrnoStatus("close", fd);
+    const absl::Status unlink_status = Unlink(name);
+    if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
+    return status;
+  }
+  return TemporaryFile(std::move(name), file);
+#endif
+}
+
+TemporaryFile::~TemporaryFile() noexcept {
+  if (name_.empty()) return;
+  CHECK(file_ != nullptr);
+  if (std::fclose(file_) != 0) LOG(FATAL) << ErrnoStatus("fclose");
+  const absl::Status unlink_status = Unlink(name_);
+  if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
+}
+
+absl::Status TemporaryFile::Write(const std::string_view contents) {
+  if (!contents.empty()) {
+    constexpr std::size_t size = 1;
+    const std::size_t count = contents.length();
+    const std::size_t written =
+        std::fwrite(contents.data(), size, count, file_);
+    if (written != contents.size()) {
+      const absl::Status status = ErrnoStatus("fwrite", "...", size, count);
+      LOG(ERROR) << status << "; only " << written << " bytes of " << count
+                 << " written";
+      return status;
+    }
+  }
+  if (std::fflush(file_) != 0) return ErrnoStatus("fflush");
+  return absl::OkStatus();
 }
 
 absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
