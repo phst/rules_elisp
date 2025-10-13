@@ -36,7 +36,7 @@ std::string Escape(const NativeStringView string) {
   std::string result;
   result.reserve(string.length());
   for (const wchar_t ch : string) {
-    const std::optional<unsigned char> u = CastNumberOpt<unsigned char>(ch);
+    const std::optional<unsigned char> u = CastNumber<unsigned char>(ch);
     if (u && absl::ascii_isprint(*u)) {
       result.push_back(static_cast<char>(*u));
     } else {
@@ -85,7 +85,7 @@ absl::StatusOr<ToString> ConvertString(
   ToString ret;
   ret.reserve(string.length());
   for (FromChar ch : string) {
-    const std::optional<ToChar> to = CastNumberOpt<ToChar>(ch);
+    const std::optional<ToChar> to = CastNumber<ToChar>(ch);
     CHECK(to.has_value()) << "character " << ch << " too large";
     ret.push_back(*to);
   }
