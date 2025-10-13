@@ -119,7 +119,7 @@ def binary(ctx, *, srcs, tags, defines):
                 for src in elisp_info.compiled_files
             ]),
             "RULES_ELISP_DATA_FILES=" + cpp_strings([
-                "--data-file=" + runfile_location(ctx, file)
+                runfile_location(ctx, file)
                 for file in data_files_for_manifest
             ]),
         ] + defines,
