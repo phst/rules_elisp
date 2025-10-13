@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_PROCESS_H_
-#define ELISP_PROCESS_H_
+#ifndef ELISP_PRIVATE_TOOLS_PROCESS_H_
+#define ELISP_PRIVATE_TOOLS_PROCESS_H_
 
 #if !defined __cplusplus || __cplusplus < 201703L
 #  error this file requires at least C++17
@@ -39,4 +39,4 @@ absl::StatusOr<int> RunLauncher(
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_PROCESS_H_
+#endif  // ELISP_PRIVATE_TOOLS_PROCESS_H_

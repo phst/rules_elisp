@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef ELISP_PRIVATE_TOOLS_CAST_H_
-#define ELISP_PRIVATE_TOOLS_CAST_H_
+#ifndef ELISP_PRIVATE_TOOLS_NUMERIC_H_
+#define ELISP_PRIVATE_TOOLS_NUMERIC_H_
 
 #include <limits>
 #include <optional>
@@ -45,4 +45,4 @@ std::optional<To> CastNumber(const From n) {
 
 }  // namespace rules_elisp
 
-#endif  // ELISP_PRIVATE_TOOLS_CAST_H_
+#endif  // ELISP_PRIVATE_TOOLS_NUMERIC_H_
