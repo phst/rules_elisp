@@ -95,19 +95,36 @@ class Environment final {
     return Environment(std::move(map));
   }
 
+  using value_type = Map::value_type;
+  using reference = Map::reference;
+  using const_reference = Map::const_reference;
   using iterator = Map::iterator;
   using const_iterator = Map::const_iterator;
+  using difference_type = Map::difference_type;
+  using size_type = Map::size_type;
 
+  Environment() = default;
   Environment(const Environment&) = default;
   Environment& operator=(const Environment&) = default;
   Environment(Environment&&) = default;
   Environment& operator=(Environment&&) = default;
 
-  [[nodiscard]] bool empty() const { return map_.empty(); }
-  [[nodiscard]] iterator begin() { return map_.begin(); }
-  [[nodiscard]] const_iterator begin() const { return map_.cbegin(); }
-  [[nodiscard]] iterator end() { return map_.end(); }
-  [[nodiscard]] const_iterator end() const { return map_.cend(); }
+  iterator begin() { return map_.begin(); }
+  const_iterator begin() const { return map_.begin(); }
+  iterator end() { return map_.end(); }
+  const_iterator end() const { return map_.end(); }
+  const_iterator cbegin() const { return map_.cbegin(); }
+  const_iterator cend() const { return map_.cend(); }
+  friend bool operator==(const Environment& a, const Environment& b) {
+    return a.map_ == b.map_;
+  }
+  friend bool operator!=(const Environment& a, const Environment& b) {
+    return a.map_ != b.map_;
+  }
+  void swap(Environment& other) { map_.swap(other.map_); }
+  size_type size() const { return map_.size(); }
+  size_type max_size() const { return map_.max_size(); }
+  bool empty() const { return map_.empty(); }
 
   template <std::size_t N>
   void Add(const NativeChar (&key)[N], NativeStringView value) {
