@@ -45,7 +45,7 @@
 #include <cstddef>
 #include <cstdlib>
 #include <memory>
-#include <optional>
+#include <optional>  // IWYU pragma: keep, only on Windows
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -55,16 +55,16 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
-#include "absl/cleanup/cleanup.h"
+#include "absl/cleanup/cleanup.h"  // IWYU pragma: keep, only on Windows
 #include "absl/container/hash_container_defaults.h"
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
-#include "absl/log/log.h"
+#include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 
-#include "elisp/private/tools/numeric.h"
+#include "elisp/private/tools/numeric.h"  // IWYU pragma: keep, only on Windows
 #include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {

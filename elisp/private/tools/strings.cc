@@ -23,7 +23,7 @@
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/ascii.h"
+#include "absl/strings/ascii.h"  // IWYU pragma: keep, only on Windows
 #include "absl/strings/str_cat.h"
 
 #include "elisp/private/tools/numeric.h"
