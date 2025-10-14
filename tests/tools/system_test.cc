@@ -56,6 +56,30 @@ TEST(ErrnoStatusTest, ReturnsMatchingStatus) {
   EXPECT_THAT(ErrnoStatus("foo"), StatusIs(absl::StatusCode::kNotFound));
 }
 
+TEST(IsAbsoluteTest, Works) {
+  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("")));
+  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL(".")));
+  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("foo")));
+  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("foo/bar")));
+  if constexpr (kWindows) {
+    // See
+    // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
+    // for the various kinds of filenames on Windows.
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:\\")));
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:/")));
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:\\Foo")));
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:/Foo")));
+    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:")));
+    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:Foo")));
+    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("\\Foo")));
+    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/Foo")));
+    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("NUL")));
+  } else {
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/")));
+    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/foo")));
+  }
+}
+
 TEST(MakeAbsoluteTest, RejectsEmptyName) {
   EXPECT_THAT(MakeAbsolute(RULES_ELISP_NATIVE_LITERAL("")),
               StatusIs(absl::StatusCode::kInvalidArgument));
