@@ -67,4 +67,20 @@ TEST(RunfilesTest, AllowsRunningTool) {
   EXPECT_THAT(rules_elisp::Run({*program}, *env), IsOkAndHolds(0));
 }
 
+TEST(RunfilesTest, ParsesManifest) {
+  absl::StatusOr<TemporaryFile> manifest = TemporaryFile::Create();
+  ASSERT_THAT(manifest, IsOk());
+  EXPECT_THAT(
+      manifest->Write(kWindows ? "foo C:\\Bar\\Baz\n" : "foo /bar/baz\n"),
+      IsOk());
+
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest->name(), {});
+  ASSERT_THAT(runfiles, IsOk());
+  EXPECT_THAT(runfiles->Resolve("foo"),
+              IsOkAndHolds(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
+                                    : RULES_ELISP_NATIVE_LITERAL("/bar/baz")));
+  EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));
+}
+
 }  // namespace rules_elisp

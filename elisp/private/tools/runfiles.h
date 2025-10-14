@@ -42,6 +42,11 @@ class Runfiles final {
       ExecutableKind kind, std::string_view source_repository,
       absl::Span<const NativeStringView> original_argv);
 
+  static absl::StatusOr<Runfiles> Create(
+      std::string_view source_repository,
+      absl::Span<const NativeStringView> original_argv,
+      NativeStringView manifest, NativeStringView directory);
+
   Runfiles(const Runfiles&) = delete;
   Runfiles& operator=(const Runfiles&) = delete;
 

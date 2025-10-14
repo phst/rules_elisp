@@ -68,6 +68,31 @@ absl::StatusOr<Runfiles> Runfiles::Create(
   return Runfiles(std::move(impl));
 }
 
+absl::StatusOr<Runfiles> Runfiles::Create(
+    const std::string_view source_repository,
+    const absl::Span<const NativeStringView> original_argv,
+    const NativeStringView manifest, const NativeStringView directory) {
+  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
+    return status;
+  }
+  const absl::StatusOr<std::string> argv0 =
+      original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
+  if (!argv0.ok()) return argv0.status();
+  const absl::StatusOr<std::string> narrow_manifest = ToNarrow(manifest);
+  if (!narrow_manifest.ok()) return narrow_manifest.status();
+  const absl::StatusOr<std::string> narrow_directory = ToNarrow(directory);
+  if (!narrow_directory.ok()) return narrow_directory.status();
+  std::string error;
+  absl_nullable std::unique_ptr<Impl> impl(
+      Impl::Create(*argv0, *narrow_manifest, *narrow_directory,
+                   std::string(source_repository), &error));
+  if (impl == nullptr) {
+    return absl::FailedPreconditionError(
+        absl::StrCat("couldn’t create runfiles: ", error));
+  }
+  return Runfiles(std::move(impl));
+}
+
 absl::StatusOr<NativeString> Runfiles::Resolve(
     const std::string_view name) const {
   CHECK_NE(impl_, nullptr);
