@@ -14,6 +14,10 @@
 
 #include "elisp/private/tools/strings.h"
 
+#include <cstddef>
+#include <string_view>
+
+#include "absl/base/attributes.h"
 #include "absl/status/status.h"
 #include "absl/status/status_matchers.h"
 #include "gmock/gmock.h"
@@ -26,6 +30,14 @@ namespace rules_elisp {
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
+
+// Helper function template to create string views from literals with embedded null characters.
+template <typename Char, std::size_t Size>
+std::basic_string_view<Char> View(
+    const Char (&string ABSL_ATTRIBUTE_LIFETIME_BOUND)[Size]) {
+  static_assert(Size > 0);
+  return std::basic_string_view<Char>(string, Size - 1);
+}
 
 TEST(QuoteTest, QuotesStrings) {
   // We can’t use raw string literals here because of
@@ -44,6 +56,20 @@ TEST(CheckAsciiTest, AcceptsAscii) {
 TEST(CheckAsciiTest, RejectsNonAscii) {
   EXPECT_THAT(CheckAscii("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
   EXPECT_THAT(CheckAscii(L"Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(CheckNullTest, AcceptsStringsWithoutEmbeddedNull) {
+  EXPECT_THAT(CheckNull(""), IsOk());
+  EXPECT_THAT(CheckNull(L""), IsOk());
+  EXPECT_THAT(CheckNull("foo"), IsOk());
+  EXPECT_THAT(CheckNull(L"foo"), IsOk());
+}
+
+TEST(CheckNullTest, RejectsStringsWithEmbeddedNull) {
+  EXPECT_THAT(CheckNull(View("\0")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(CheckNull(View(L"\0")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(ToNarrowTest, AcceptsAscii) {

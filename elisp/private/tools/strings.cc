@@ -72,6 +72,15 @@ absl::Status DoCheckAscii(const std::basic_string_view<Char> string) {
   return absl::OkStatus();
 }
 
+template <typename Char>
+absl::Status DoCheckNull(const std::basic_string_view<Char> string) {
+  if (const auto i = string.find(Char{'\0'}); i != string.npos) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("String %s contains embedded null character", string));
+  }
+  return absl::OkStatus();
+}
+
 // Convert strings between std::string and std::wstring.  This is only useful on
 // Windows, where the native string type is std::wstring.  Only pure ASCII
 // strings are supported so that we don’t have to deal with codepages.  All
@@ -104,6 +113,14 @@ absl::Status CheckAscii(const std::string_view string) {
 
 absl::Status CheckAscii(const std::wstring_view string) {
   return DoCheckAscii(string);
+}
+
+absl::Status CheckNull(const std::string_view string) {
+  return DoCheckNull(string);
+}
+
+absl::Status CheckNull(const std::wstring_view string) {
+  return DoCheckNull(string);
 }
 
 absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
