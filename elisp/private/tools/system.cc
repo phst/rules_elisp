@@ -434,6 +434,7 @@ bool Environment::Equal::operator()(const NativeStringView a,
 }
 
 static absl::Status Unlink(const NativeStringView file) {
+  if (file.empty()) return absl::InvalidArgumentError("Empty filename");
   NativeString string(file);
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(Pointer(string));

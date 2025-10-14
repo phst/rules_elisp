@@ -96,6 +96,7 @@ absl::StatusOr<Runfiles> Runfiles::Create(
 absl::StatusOr<NativeString> Runfiles::Resolve(
     const std::string_view name) const {
   CHECK_NE(impl_, nullptr);
+  if (name.empty()) return absl::InvalidArgumentError("Empty runfile name");
   if (const absl::Status status = CheckAscii(name); !status.ok()) return status;
   std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
