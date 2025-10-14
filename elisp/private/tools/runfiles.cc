@@ -29,6 +29,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "absl/types/span.h"
 #include "cc/runfiles/runfiles.h"
 
@@ -41,12 +42,20 @@ namespace rules_elisp {
 absl::StatusOr<Runfiles> Runfiles::Create(
     const ExecutableKind kind, const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv) {
+  if (ContainsNull(source_repository)) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Source repository %s contains null character", source_repository));
+  }
   if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
       original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
   if (!argv0.ok()) return argv0.status();
+  if (ContainsNull(*argv0)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("First argument %s contains null character", *argv0));
+  }
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl;
   switch (kind) {
@@ -72,14 +81,30 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv,
     const NativeStringView manifest, const NativeStringView directory) {
+  if (ContainsNull(source_repository)) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Source repository %s contains null character", source_repository));
+  }
   if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
       original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
   if (!argv0.ok()) return argv0.status();
+  if (ContainsNull(*argv0)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("First argument %s contains null character", *argv0));
+  }
+  if (ContainsNull(manifest)) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Manifest filename %s contains null character", manifest));
+  }
   const absl::StatusOr<std::string> narrow_manifest = ToNarrow(manifest);
   if (!narrow_manifest.ok()) return narrow_manifest.status();
+  if (ContainsNull(directory)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Directory %s contains null character", directory));
+  }
   const absl::StatusOr<std::string> narrow_directory = ToNarrow(directory);
   if (!narrow_directory.ok()) return narrow_directory.status();
   std::string error;
@@ -97,6 +122,10 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
     const std::string_view name) const {
   CHECK_NE(impl_, nullptr);
   if (name.empty()) return absl::InvalidArgumentError("Empty runfile name");
+  if (ContainsNull(name)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Runfile name %s contains null character", name));
+  }
   if (const absl::Status status = CheckAscii(name); !status.ok()) return status;
   std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {

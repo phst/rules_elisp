@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include "elisp/private/tools/system.h"
+#include "elisp/private/tools/strings.h"
 
 #ifdef _WIN32
 #  ifndef UNICODE
@@ -119,11 +120,15 @@ absl::Status MakeErrorStatus(const std::error_code& code,
 // https://docs.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170#parsing-c-command-line-arguments
 // and
 // https://docs.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw.
-static std::wstring BuildCommandLine(
+static absl::StatusOr<std::wstring> BuildCommandLine(
     const absl::Span<const std::wstring> args) {
   std::wstring result;
   bool first = true;
   for (const std::wstring& arg : args) {
+    if (ContainsNull(arg)) {
+      return absl::InvalidArgumentError(
+          absl::StrFormat("Argument %s contains null character", arg));
+    }
     if (!std::exchange(first, false)) {
       result.push_back(L' ');
     }
@@ -167,12 +172,14 @@ static std::wstring BuildCommandLine(
 }
 // Build an environment block that CreateProcessW can use.  See
 // https://docs.microsoft.com/en-us/windows/win32/api/processthreadsapi/nf-processthreadsapi-createprocessw.
-static std::wstring BuildEnvironmentBlock(
+static absl::StatusOr<std::wstring> BuildEnvironmentBlock(
     const absl::Span<const std::wstring> vars) {
   std::wstring result;
   for (const std::wstring& var : vars) {
-    CHECK_EQ(var.find(L'\0'), var.npos) << absl::StrFormat(
-        "Environment variable %s contains a null character", var);
+    if (ContainsNull(var)) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "Environment variable %s contains null character", var));
+    }
     result.append(var);
     result.push_back(L'\0');
   }
@@ -233,6 +240,10 @@ bool IsAbsolute(const NativeStringView file) {
 
 absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   if (file.empty()) return absl::InvalidArgumentError("empty filename");
+  if (ContainsNull(file)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s contains null character", file));
+  }
 #ifdef _WIN32
   std::wstring string(file);
   // 0x8000 is the maximum length of a filename on Windows.  See
@@ -435,6 +446,10 @@ bool Environment::Equal::operator()(const NativeStringView a,
 
 static absl::Status Unlink(const NativeStringView file) {
   if (file.empty()) return absl::InvalidArgumentError("Empty filename");
+  if (ContainsNull(file)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s contains null character", file));
+  }
   NativeString string(file);
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(Pointer(string));
@@ -510,6 +525,12 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
 absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                         const Environment& env) {
   if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
+  for (const NativeString& arg : args) {
+    if (ContainsNull(arg)) {
+      return absl::InvalidArgumentError(
+          absl::StrFormat("Argument %s contains null character", arg));
+    }
+  }
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
@@ -518,8 +539,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   absl::c_sort(final_env);
 #ifdef _WIN32
   std::wstring program = args.front();
-  std::wstring command_line = BuildCommandLine(args);
-  std::wstring envp = BuildEnvironmentBlock(final_env);
+  absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
+  if (!command_line.ok()) return command_line.status();
+  absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
+  if (!envp.ok()) return envp.status();
   STARTUPINFOW startup_info;
   startup_info.cb = sizeof startup_info;
   startup_info.lpReserved = nullptr;
@@ -530,10 +553,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   startup_info.lpReserved2 = nullptr;
   PROCESS_INFORMATION process_info;
   BOOL success =
-      ::CreateProcessW(Pointer(program), Pointer(command_line), nullptr,
-                       nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp.data(),
+      ::CreateProcessW(Pointer(program), Pointer(*command_line), nullptr,
+                       nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp->data(),
                        nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", program, command_line);
+  if (!success) return WindowsStatus("CreateProcessW", program, *command_line);
   ::CloseHandle(process_info.hThread);
   const auto close_handle = absl::MakeCleanup(
       [&process_info] { ::CloseHandle(process_info.hProcess); });
@@ -582,6 +605,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
 absl::StatusOr<DosDevice> DosDevice::Create(
     [[maybe_unused]] const NativeStringView target) {
   CHECK(!target.empty());
+  if (ContainsNull(target)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Target %s contains null character", target));
+  }
 #ifdef _WIN32
   const DWORD drives = ::GetLogicalDrives();
   if (drives == 0) return WindowsStatus("GetLogicalDrives");
