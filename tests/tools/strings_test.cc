@@ -38,6 +38,13 @@ TEST(EscapeTest, EscapesUnicodeOnWindows) {
   }
 }
 
+TEST(QuoteTest, QuotesStrings) {
+  // We can’t use raw string literals here because of
+  // https://developercommunity.visualstudio.com/t/c2017-illegal-escape-sequence-when-using-in-a-raw/919371.
+  EXPECT_EQ(Quote("Foó \"\\"), "\"Foó \\\"\\\\\"");
+  EXPECT_EQ(Quote(L"Foó \"\\"), "L\"Foó \\\"\\\\\"");
+}
+
 TEST(CheckAsciiTest, AcceptsAscii) {
   EXPECT_THAT(CheckAscii(""), IsOk());
   EXPECT_THAT(CheckAscii(L""), IsOk());
