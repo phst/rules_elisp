@@ -72,7 +72,6 @@
 
 #include "elisp/private/tools/numeric.h"  // IWYU pragma: keep, only on Windows
 #include "elisp/private/tools/platform.h"
-#include "elisp/private/tools/strings.h"  // IWYU pragma: keep, only on Windows
 
 namespace rules_elisp {
 
@@ -243,8 +242,7 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   const DWORD result =
       ::GetFullPathNameW(Pointer(string), size, buffer.data(), nullptr);
   if (result == 0) {
-    return WindowsStatus("GetFullPathNameW", Escape(file), size, "...",
-                         nullptr);
+    return WindowsStatus("GetFullPathNameW", file, size, "...", nullptr);
   }
   if (result > size) {
     return absl::OutOfRangeError(
@@ -439,7 +437,7 @@ static absl::Status Unlink(const NativeStringView file) {
   NativeString string(file);
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(Pointer(string));
-  if (!result) return WindowsStatus("DeleteFileW", Escape(file));
+  if (!result) return WindowsStatus("DeleteFileW", file);
 #else
   const int result = unlink(Pointer(string));
   if (result != 0) return ErrnoStatus("unlink", file);
@@ -459,7 +457,7 @@ absl::StatusOr<TemporaryFile> TemporaryFile::Create() {
     constexpr wchar_t mode[] = L"wxbNT";
     std::FILE* const absl_nullable file = _wfopen(name, mode);
     if (file != nullptr) return TemporaryFile(name, file);
-    status = ErrnoStatus("_wfopen", Escape(name), Escape(mode));
+    status = ErrnoStatus("_wfopen", name, mode);
     LOG(ERROR) << status;
   }
   CHECK(!status.ok());
@@ -534,10 +532,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       ::CreateProcessW(Pointer(program), Pointer(command_line), nullptr,
                        nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp.data(),
                        nullptr, &startup_info, &process_info);
-  if (!success) {
-    return WindowsStatus("CreateProcessW", Escape(program),
-                         Escape(command_line));
-  }
+  if (!success) return WindowsStatus("CreateProcessW", program, command_line);
   ::CloseHandle(process_info.hThread);
   const auto close_handle = absl::MakeCleanup(
       [&process_info] { ::CloseHandle(process_info.hProcess); });
@@ -596,8 +591,7 @@ absl::StatusOr<DosDevice> DosDevice::Create(
       const wchar_t name[] = {letter, L':', L'\0'};
       std::wstring string(target);
       if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
-        return WindowsStatus("DefineDosDeviceW", flags, Escape(name),
-                             Escape(target));
+        return WindowsStatus("DefineDosDeviceW", flags, name, target);
       }
       return DosDevice(name, target);
     }
@@ -614,8 +608,7 @@ DosDevice::~DosDevice() noexcept {
   constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
                           DDD_NO_BROADCAST_SYSTEM;
   if (!::DefineDosDeviceW(flags, Pointer(name_), Pointer(target_))) {
-    LOG(ERROR) << WindowsStatus("DefineDosDeviceW", flags, Escape(name_),
-                                Escape(target_));
+    LOG(ERROR) << WindowsStatus("DefineDosDeviceW", flags, name_, target_);
   }
 #endif
 }
