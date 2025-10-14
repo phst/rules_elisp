@@ -40,13 +40,10 @@
 
 namespace rules_elisp {
 
-using ::testing::AllOf;
-using ::testing::AnyOf;
 using ::testing::Contains;
 using ::testing::EndsWith;
 using ::testing::Ge;
 using ::testing::Gt;
-using ::testing::Le;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
