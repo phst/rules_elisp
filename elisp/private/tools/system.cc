@@ -190,7 +190,7 @@ static absl::StatusOr<std::wstring> BuildEnvironmentBlock(
 
 static NativeChar* absl_nonnull Pointer(
     NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  CHECK_EQ(string.find(RULES_ELISP_NATIVE_LITERAL('\0')), string.npos)
+  CHECK(!ContainsNull(string))
       << absl::StrFormat("%s contains null character", string);
   return string.data();
 }
@@ -200,7 +200,7 @@ static std::vector<char* absl_nullable> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   std::vector<char* absl_nullable> ptrs;
   for (std::string& s : strings) {
-    CHECK_EQ(s.find('\0'), s.npos) << s << " contains null character";
+    CHECK(!ContainsNull(s)) << s << " contains null character";
     ptrs.push_back(s.data());
   }
   ptrs.push_back(nullptr);
