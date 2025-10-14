@@ -37,6 +37,11 @@ namespace rules_elisp {
 template <typename Range>
 absl::Status CheckRelative(const Range& range) {
   for (const auto& file : range) {
+    if (file.empty()) return absl::InvalidArgumentError("Empty filename");
+    if (ContainsNull(file)) {
+      return absl::InvalidArgumentError(
+          absl::StrFormat("Filename %s contains null character", file));
+    }
     if (IsAbsolute(file)) {
       return absl::InvalidArgumentError(
           absl::StrFormat("Filename %s is absolute", file));
