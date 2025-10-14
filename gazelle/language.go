@@ -16,11 +16,19 @@
 // maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
 // rules from the phst_rules_elisp repository.  See https://phst.eu/rules_elisp
 // and https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
+//
+// To suppress generation of elisp_proto_library rules, add a Gazelle directive
+//
+//	# gazelle:elisp_generate_proto false
+//
+// to your BUILD file.
 package gazelle
 
 import (
 	"cmp"
 	"flag"
+	"log"
+	"strconv"
 
 	"github.com/bazelbuild/bazel-gazelle/config"
 	"github.com/bazelbuild/bazel-gazelle/label"
@@ -40,6 +48,8 @@ func NewLanguage() language.Language {
 
 const languageName = "elisp"
 
+const generateProtoDirective = "elisp_generate_proto"
+
 var _ language.ModuleAwareLanguage = elisp{}
 
 type elisp struct{}
@@ -50,13 +60,27 @@ func (elisp) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {
 
 func (elisp) CheckFlags(fs *flag.FlagSet, c *config.Config) error { return nil }
 
-func (elisp) KnownDirectives() []string { return nil }
+func (elisp) KnownDirectives() []string { return []string{"elisp_generate_proto"} }
 
 func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 	// We always rely on the imports index to write deps attributes.
 	c.IndexLibraries = true
 
-	initExtension(c)
+	ext := initExtension(c)
+
+	if f != nil {
+		for _, d := range f.Directives {
+			switch d.Key {
+			case generateProtoDirective:
+				b, err := strconv.ParseBool(d.Value)
+				if err != nil {
+					log.Printf("%s: invalid value for %s directive: %s", f.Path, d.Key, err)
+					break
+				}
+				ext.generateProto = b
+			}
+		}
+	}
 }
 
 func (elisp) Name() string { return languageName }

@@ -35,12 +35,13 @@ import (
 func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 	fsys := os.DirFS(args.Dir)
 	pkg := bazelPackage(args.Rel)
+	ext := getExtension(args.Config)
 	var res language.GenerateResult
 	for _, file := range args.RegularFiles {
 		// We generate exactly one rule per file.  This should work fine
 		// unless there are dependency cycles which cannot be resolved
 		// at compile time.
-		r, i := generateRule(fsys, pkg, file)
+		r, i := generateRule(fsys, pkg, file, ext)
 		if r == nil {
 			continue
 		}
@@ -57,13 +58,13 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 // string for the root package), and file names the source file within the
 // package.  Return nil if file doesn’t name an Emacs Lisp or protocol buffer
 // definition file or on any error.
-func generateRule(fsys fs.FS, pkg bazelPackage, file string) (*rule.Rule, Imports) {
+func generateRule(fsys fs.FS, pkg bazelPackage, file string, ext *extension) (*rule.Rule, Imports) {
 	if file == ".dir-locals.el" {
 		// Never generate a rule for .dir-locals.el, as it can’t be
 		// compiled.
 		return nil, Imports{}
 	}
-	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" {
+	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" && ext.generateProto {
 		r := rule.NewRule(protoLibraryKind, stem+"_elisp_proto")
 		r.SetAttr("deps", []string{":" + stem + "_proto"})
 		return r, Imports{}

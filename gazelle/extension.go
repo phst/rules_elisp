@@ -20,12 +20,16 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/config"
 )
 
-type extension struct{}
+type extension struct {
+	generateProto bool
+}
 
 func initExtension(c *config.Config) *extension {
 	ext := getExtension(c)
 	if ext == nil {
-		ext = new(extension)
+		ext = &extension{
+			generateProto: true,
+		}
 	}
 	ext = ext.clone()
 	c.Exts[languageName] = ext
@@ -45,5 +49,6 @@ func getExtension(c *config.Config) *extension {
 }
 
 func (e *extension) clone() *extension {
-	return &extension{}
+	r := *e
+	return &r
 }
