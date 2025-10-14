@@ -111,15 +111,15 @@ static absl::StatusOr<int> RunEmacs(
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.
     for (const NativeString& arg : args) {
-      if (const absl::Status status = CheckASCII(arg); !status.ok()) {
+      if (const absl::Status status = CheckAscii(arg); !status.ok()) {
         return status;
       }
     }
     for (const auto& [name, value] : *env) {
-      if (const absl::Status status = CheckASCII(name); !status.ok()) {
+      if (const absl::Status status = CheckAscii(name); !status.ok()) {
         return status;
       }
-      if (const absl::Status status = CheckASCII(value); !status.ok()) {
+      if (const absl::Status status = CheckAscii(value); !status.ok()) {
         return status;
       }
     }

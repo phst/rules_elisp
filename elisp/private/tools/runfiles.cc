@@ -41,7 +41,7 @@ namespace rules_elisp {
 absl::StatusOr<Runfiles> Runfiles::Create(
     const ExecutableKind kind, const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv) {
-  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
+  if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
@@ -71,7 +71,7 @@ absl::StatusOr<Runfiles> Runfiles::Create(
 absl::StatusOr<NativeString> Runfiles::Resolve(
     const std::string_view name) const {
   CHECK_NE(impl_, nullptr);
-  if (const absl::Status status = CheckASCII(name); !status.ok()) return status;
+  if (const absl::Status status = CheckAscii(name); !status.ok()) return status;
   std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
