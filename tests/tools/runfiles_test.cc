@@ -47,7 +47,7 @@ TEST(RunfilesTest, ResolvesRunfile) {
   EXPECT_TRUE(file.good());
 }
 
-TEST(RunfilesTest, RejectsNonASCII) {
+TEST(RunfilesTest, RejectsNonAscii) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());

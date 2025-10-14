@@ -259,7 +259,7 @@ TEST(DosDeviceTest, CreatesDevice) {
     ASSERT_THAT(dev, IsOk());
     const NativeString name = dev->name();
     ASSERT_THAT(name, SizeIs(2));
-    ASSERT_THAT(CheckASCII(name), IsOk());
+    ASSERT_THAT(CheckAscii(name), IsOk());
     const std::optional<unsigned char> drive =
         CastNumber<unsigned char>(name.at(0));
     ASSERT_NE(drive, std::nullopt);

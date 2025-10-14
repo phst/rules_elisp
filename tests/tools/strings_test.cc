@@ -27,7 +27,7 @@ using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 
-TEST(EscapeTest, LeavesASCIIAlone) {
+TEST(EscapeTest, LeavesAsciiAlone) {
   EXPECT_EQ(Escape(RULES_ELISP_NATIVE_LITERAL("")), "");
   EXPECT_EQ(Escape(RULES_ELISP_NATIVE_LITERAL("Foo")), "Foo");
 }
@@ -38,36 +38,36 @@ TEST(EscapeTest, EscapesUnicodeOnWindows) {
   }
 }
 
-TEST(CheckASCIITest, AcceptsASCII) {
-  EXPECT_THAT(CheckASCII(""), IsOk());
-  EXPECT_THAT(CheckASCII(L""), IsOk());
-  EXPECT_THAT(CheckASCII("Foo"), IsOk());
-  EXPECT_THAT(CheckASCII(L"Foo"), IsOk());
+TEST(CheckAsciiTest, AcceptsAscii) {
+  EXPECT_THAT(CheckAscii(""), IsOk());
+  EXPECT_THAT(CheckAscii(L""), IsOk());
+  EXPECT_THAT(CheckAscii("Foo"), IsOk());
+  EXPECT_THAT(CheckAscii(L"Foo"), IsOk());
 }
 
-TEST(CheckASCIITest, RejectsNonASCII) {
-  EXPECT_THAT(CheckASCII("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(CheckASCII(L"Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
+TEST(CheckAsciiTest, RejectsNonAscii) {
+  EXPECT_THAT(CheckAscii("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(CheckAscii(L"Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(ToNarrowTest, AcceptsASCII) {
+TEST(ToNarrowTest, AcceptsAscii) {
   EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("")), IsOkAndHolds(""));
   EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foo")), IsOkAndHolds("Foo"));
 }
 
-TEST(ToNarrowTest, RejectsNonASCII) {
+TEST(ToNarrowTest, RejectsNonAscii) {
   if constexpr (kWindows) {
     EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foó")),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
-TEST(ToNativeTest, AcceptsASCII) {
+TEST(ToNativeTest, AcceptsAscii) {
   EXPECT_THAT(ToNative(""), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("")));
   EXPECT_THAT(ToNative("Foo"), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foo")));
 }
 
-TEST(ToNativeTest, RejectsNonASCII) {
+TEST(ToNativeTest, RejectsNonAscii) {
   if constexpr (kWindows) {
     EXPECT_THAT(ToNative("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
   }

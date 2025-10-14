@@ -51,13 +51,13 @@ std::string Escape(const NativeStringView string) {
 
 namespace {
 
-inline constexpr unsigned int kMaxASCII{0x7F};
+inline constexpr unsigned int kMaxAscii{0x7F};
 
 template <typename Char>
-absl::Status DoCheckASCII(const std::basic_string_view<Char> string) {
+absl::Status DoCheckAscii(const std::basic_string_view<Char> string) {
   using Traits = typename std::basic_string_view<Char>::traits_type;
   const auto it = absl::c_find_if(string, [](const Char ch) {
-    return Traits::lt(ch, Char{0}) || Traits::lt(Char{kMaxASCII}, ch);
+    return Traits::lt(ch, Char{0}) || Traits::lt(Char{kMaxAscii}, ch);
   });
   if (it != string.end()) {
     const auto val = static_cast<std::make_unsigned_t<Char>>(*it);
@@ -78,9 +78,9 @@ absl::StatusOr<ToString> ConvertString(
     const std::basic_string_view<FromChar> string) {
   using ToChar = typename ToString::value_type;
   if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
-  static_assert(InRange<ToChar>(kMaxASCII),
+  static_assert(InRange<ToChar>(kMaxAscii),
                 "destination character type too small");
-  const absl::Status status = CheckASCII(string);
+  const absl::Status status = CheckAscii(string);
   if (!status.ok()) return status;
   ToString ret;
   ret.reserve(string.length());
@@ -94,12 +94,12 @@ absl::StatusOr<ToString> ConvertString(
 
 }  // namespace
 
-absl::Status CheckASCII(const std::string_view string) {
-  return DoCheckASCII(string);
+absl::Status CheckAscii(const std::string_view string) {
+  return DoCheckAscii(string);
 }
 
-absl::Status CheckASCII(const std::wstring_view string) {
-  return DoCheckASCII(string);
+absl::Status CheckAscii(const std::wstring_view string) {
+  return DoCheckAscii(string);
 }
 
 absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
