@@ -66,7 +66,6 @@
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
-#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 
