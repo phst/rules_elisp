@@ -137,6 +137,15 @@ class Environment final {
       if (key.empty()) {
         return absl::InvalidArgumentError("Empty environment variable name");
       }
+      if (ContainsNull(key)) {
+        return absl::InvalidArgumentError(absl::StrFormat(
+            "Environment variable name %s contains null character", key));
+      }
+      if (ContainsNull(value)) {
+        return absl::InvalidArgumentError(absl::StrFormat(
+            "Value %s for environment variable %s contains null character",
+            value, key));
+      }
       const auto [it, ok] = map.emplace(key, value);
       if (!ok) {
         return absl::AlreadyExistsError(
