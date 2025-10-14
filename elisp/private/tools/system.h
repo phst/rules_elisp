@@ -33,7 +33,6 @@
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
-#include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
 
@@ -94,7 +93,7 @@ class Environment final {
       const auto [it, ok] = map.emplace(key, value);
       if (!ok) {
         return absl::AlreadyExistsError(
-            absl::StrCat("Duplicate environment variable ", Escape(key)));
+            absl::StrFormat("Duplicate environment variable %s", key));
       }
     }
     return Environment(std::move(map));

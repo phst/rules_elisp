@@ -66,12 +66,13 @@
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/numeric.h"  // IWYU pragma: keep, only on Windows
 #include "elisp/private/tools/platform.h"
-#include "elisp/private/tools/strings.h"
+#include "elisp/private/tools/strings.h"  // IWYU pragma: keep, only on Windows
 
 namespace rules_elisp {
 
@@ -171,9 +172,8 @@ static std::wstring BuildEnvironmentBlock(
     const absl::Span<const std::wstring> vars) {
   std::wstring result;
   for (const std::wstring& var : vars) {
-    CHECK_EQ(var.find(L'\0'), var.npos)
-        << "Environment variable " << Escape(var)
-        << " contains a null character";
+    CHECK_EQ(var.find(L'\0'), var.npos) << absl::StrFormat(
+        "Environment variable %s contains a null character", var);
     result.append(var);
     result.push_back(L'\0');
   }
@@ -185,7 +185,7 @@ static std::wstring BuildEnvironmentBlock(
 static NativeChar* absl_nonnull Pointer(
     NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   CHECK_EQ(string.find(RULES_ELISP_NATIVE_LITERAL('\0')), string.npos)
-      << Escape(string) << " contains null character";
+      << absl::StrFormat("%s contains null character", string);
   return string.data();
 }
 
@@ -382,18 +382,18 @@ absl::StatusOr<Environment> Environment::Current() {
   for (const NativeStringView var : *block) {
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", Escape(var)));
+          absl::StrFormat("Invalid environment block entry %s", var));
     }
     const std::size_t i = var.find(RULES_ELISP_NATIVE_LITERAL('='), skip);
     if (i == 0 || i == var.npos) {
       return absl::FailedPreconditionError(
-          absl::StrCat("Invalid environment block entry ", Escape(var)));
+          absl::StrFormat("Invalid environment block entry %s", var));
     }
     const NativeStringView key = var.substr(0, i);
     const auto [it, ok] = map.emplace(key, var.substr(i + 1));
     if (!ok) {
       return absl::AlreadyExistsError(
-          absl::StrCat("Duplicate environment variable ", Escape(key)));
+          absl::StrFormat("Duplicate environment variable %s", key));
     }
   }
   return Environment(std::move(map));
