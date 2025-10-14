@@ -22,6 +22,7 @@
 #include <ios>
 #include <optional>
 #include <string>
+#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -40,16 +41,24 @@
 
 namespace rules_elisp {
 
+using ::testing::_;
 using ::testing::Contains;
 using ::testing::EndsWith;
 using ::testing::Ge;
 using ::testing::Gt;
+using ::testing::HasSubstr;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
+
+TEST(ErrorStatusTest, FormatsArguments) {
+  EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
+                          "bár", L"báz", 42, nullptr),
+              StatusIs(_, HasSubstr("fóo(\"bár\", L\"báz\", 42, nullptr)")));
+}
 
 TEST(ErrnoStatusTest, ReturnsMatchingStatus) {
   errno = ENOENT;

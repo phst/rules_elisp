@@ -17,6 +17,7 @@
 
 #include <cstddef>
 #include <cstdio>
+#include <string>
 #include <string_view>
 #include <system_error>
 #include <tuple>
@@ -29,10 +30,12 @@
 #include "absl/log/die_if_null.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
 
@@ -41,11 +44,55 @@ std::size_t MaxFilename();
 absl::Status MakeErrorStatus(const std::error_code& code,
                              std::string_view function, std::string_view args);
 
+struct ArgFormatter final {
+  void operator()(std::string* const absl_nonnull out,
+                  const absl::AlphaNum& value) const {
+    const auto base = absl::AlphaNumFormatter();
+    base(out, value);
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::string& string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::wstring& string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::string_view string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::wstring_view string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const char* const absl_nullable string) const {
+    out->append(string == nullptr ? "nullptr" : Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const wchar_t* const absl_nullable string) const {
+    out->append(string == nullptr ? "nullptr" : Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out, std::nullptr_t) const {
+    out->append("nullptr");
+  }
+};
+
 template <typename... Ts>
 absl::Status ErrorStatus(const std::error_code& code,
                          const std::string_view function, Ts&&... args) {
-  return MakeErrorStatus(code, function,
-                         absl::StrJoin(std::forward_as_tuple(args...), ", "));
+  const ArgFormatter formatter;
+  return MakeErrorStatus(
+      code, function,
+      absl::StrJoin(std::forward_as_tuple(args...), ", ", formatter));
 }
 
 [[nodiscard]] std::error_code WindowsError();
