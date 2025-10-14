@@ -604,7 +604,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
 
 absl::StatusOr<DosDevice> DosDevice::Create(
     [[maybe_unused]] const NativeStringView target) {
-  CHECK(!target.empty());
+  if (target.empty()) return absl::InvalidArgumentError("Empty target");
   if (ContainsNull(target)) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Target %s contains null character", target));
