@@ -26,6 +26,8 @@
 namespace rules_elisp {
 
 std::string Escape(NativeStringView string);
+std::string Quote(std::string_view string);
+std::string Quote(std::wstring_view string);
 
 absl::Status CheckAscii(const std::string_view string);
 absl::Status CheckAscii(const std::wstring_view string);

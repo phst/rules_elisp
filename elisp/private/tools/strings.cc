@@ -14,7 +14,11 @@
 
 #include "elisp/private/tools/strings.h"
 
+#include <iomanip>
+#include <ios>
+#include <locale>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -47,6 +51,25 @@ std::string Escape(const NativeStringView string) {
 #else
   return std::string(string);
 #endif
+}
+
+namespace {
+
+template <typename Char>
+std::string DoQuote(const std::basic_string_view<Char> string) {
+  std::basic_ostringstream<Char> stream;
+  stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
+  stream.imbue(std::locale::classic());
+  stream << std::quoted(string);
+  return absl::StrFormat("%s", stream.str());
+}
+
+}  // namespace
+
+std::string Quote(const std::string_view string) { return DoQuote(string); }
+
+std::string Quote(const std::wstring_view string) {
+  return absl::StrCat("L", DoQuote(string));
 }
 
 namespace {
