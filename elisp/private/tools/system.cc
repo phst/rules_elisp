@@ -63,6 +63,7 @@
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
 
@@ -213,6 +214,18 @@ static absl::StatusOr<std::string> WorkingDirectory() {
   return ptr.get();
 }
 #endif
+
+bool IsAbsolute(const NativeStringView file) {
+  if (file.empty()) return false;
+  if constexpr (kWindows) {
+    if (file.length() < 3) return false;
+    return file.length() > 2 && file[1] == RULES_ELISP_NATIVE_LITERAL(':') &&
+           (file[2] == RULES_ELISP_NATIVE_LITERAL('\\') ||
+            file[2] == RULES_ELISP_NATIVE_LITERAL('/'));
+  } else {
+    return file.front() == RULES_ELISP_NATIVE_LITERAL('/');
+  }
+}
 
 absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   if (file.empty()) return absl::InvalidArgumentError("empty filename");

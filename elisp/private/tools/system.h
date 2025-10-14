@@ -61,6 +61,7 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 
+bool IsAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 
 class Environment final {
