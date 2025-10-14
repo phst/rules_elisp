@@ -72,7 +72,7 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv,
     const NativeStringView manifest, const NativeStringView directory) {
-  if (const absl::Status status = CheckASCII(source_repository); !status.ok()) {
+  if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
