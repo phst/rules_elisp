@@ -27,31 +27,12 @@
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/ascii.h"  // IWYU pragma: keep, only on Windows
 #include "absl/strings/str_cat.h"
 
 #include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
-
-std::string Escape(const NativeStringView string) {
-#ifdef _WIN32
-  std::string result;
-  result.reserve(string.length());
-  for (const wchar_t ch : string) {
-    const std::optional<unsigned char> u = CastNumber<unsigned char>(ch);
-    if (u && absl::ascii_isprint(*u)) {
-      result.push_back(static_cast<char>(*u));
-    } else {
-      absl::StrAppend(&result, "\\u", absl::Hex(ch, absl::kZeroPad4));
-    }
-  }
-  return result;
-#else
-  return std::string(string);
-#endif
-}
 
 namespace {
 

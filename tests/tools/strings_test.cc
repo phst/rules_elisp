@@ -27,17 +27,6 @@ using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 
-TEST(EscapeTest, LeavesAsciiAlone) {
-  EXPECT_EQ(Escape(RULES_ELISP_NATIVE_LITERAL("")), "");
-  EXPECT_EQ(Escape(RULES_ELISP_NATIVE_LITERAL("Foo")), "Foo");
-}
-
-TEST(EscapeTest, EscapesUnicodeOnWindows) {
-  if constexpr (kWindows) {
-    EXPECT_EQ(Escape(RULES_ELISP_NATIVE_LITERAL("Foó")), "Fo\\u00f3");
-  }
-}
-
 TEST(QuoteTest, QuotesStrings) {
   // We can’t use raw string literals here because of
   // https://developercommunity.visualstudio.com/t/c2017-illegal-escape-sequence-when-using-in-a-raw/919371.
