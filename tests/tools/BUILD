@@ -79,6 +79,7 @@ cc_test(
     deps = [
         "//elisp/private/tools:platform",
         "//elisp/private/tools:strings",
+        "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@googletest//:gtest",
