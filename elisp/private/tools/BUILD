@@ -300,16 +300,16 @@ cc_library(
     local_defines = DEFINES,
     visibility = ["//tests/tools:__pkg__"],
     deps = [
-        ":numeric",  # keep
+        ":numeric",
         ":platform",
         ":strings",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/base:nullability",
-        "@abseil-cpp//absl/cleanup",  # keep
+        "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/container:flat_hash_map",
         "@abseil-cpp//absl/container:hash_container_defaults",
-        "@abseil-cpp//absl/log",  # keep
+        "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/log:die_if_null",
         "@abseil-cpp//absl/status",
