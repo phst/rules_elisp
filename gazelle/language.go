@@ -44,7 +44,9 @@ var _ language.ModuleAwareLanguage = elisp{}
 
 type elisp struct{}
 
-func (elisp) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {}
+func (elisp) RegisterFlags(fs *flag.FlagSet, cmd string, c *config.Config) {
+	initExtension(c)
+}
 
 func (elisp) CheckFlags(fs *flag.FlagSet, c *config.Config) error { return nil }
 
