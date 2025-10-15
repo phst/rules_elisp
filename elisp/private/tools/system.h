@@ -32,6 +32,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_join.h"
+#include "absl/time/time.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
@@ -255,7 +256,8 @@ class TemporaryFile final {
 };
 
 absl::StatusOr<int> Run(absl::Span<const NativeString> args,
-                        const Environment& env);
+                        const Environment& env,
+                        absl::Time deadline = absl::InfiniteFuture());
 
 class DosDevice final {
  public:
