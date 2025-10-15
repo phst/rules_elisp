@@ -19,7 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
-#include <initializer_list>
+#include <vector>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
@@ -29,9 +29,9 @@
 namespace rules_elisp {
 
 struct BinaryOptions final {
-  bool interactive;
-  std::initializer_list<int> input_args;
-  std::initializer_list<int> output_args;
+  bool interactive = false;
+  std::vector<int> input_args;
+  std::vector<int> output_args;
 };
 
 absl::StatusOr<int> Main(const CommonOptions& common_opts,

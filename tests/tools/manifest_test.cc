@@ -24,7 +24,6 @@
 #include <vector>
 
 #include "absl/algorithm/container.h"
-#include "absl/base/attributes.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "gmock/gmock.h"
@@ -38,12 +37,11 @@ using absl_testing::IsOk;
 using ::testing::ElementsAre;
 using ::testing::StartsWith;
 
-// Create a string view that can contain embedded null characters.
+// Create a string from a literal that can contain embedded null characters.
 template <std::size_t N>
-NativeStringView View(
-    const NativeChar (&string ABSL_ATTRIBUTE_LIFETIME_BOUND)[N]) {
+NativeString String(const NativeChar (&string)[N]) {
   static_assert(N > 0);
-  return NativeStringView(string, N - 1);
+  return NativeString(string, N - 1);
 }
 
 TEST(ManifestFileTest, Create) {
@@ -53,7 +51,7 @@ TEST(ManifestFileTest, Create) {
           ToolchainMode::kWrap,
           {
               RULES_ELISP_NATIVE_LITERAL("tag-1"),
-              View(RULES_ELISP_NATIVE_LITERAL("tag-2 \t\n\r\f äα𝐴🐈'\0\\\"")),
+              String(RULES_ELISP_NATIVE_LITERAL("tag-2 \t\n\r\f äα𝐴🐈'\0\\\"")),
           },
           {RULES_ELISP_NATIVE_LITERAL("load-dir")},
           {RULES_ELISP_NATIVE_LITERAL("load-file")},

@@ -52,7 +52,6 @@ cc_test(
         "//elisp/private/tools:manifest_cc",
         "//elisp/private/tools:platform",
         "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@googletest//:gtest",

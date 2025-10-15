@@ -19,10 +19,10 @@
 #  error this file requires at least C++17
 #endif
 
-#include <initializer_list>
 #include <string>
 #include <string_view>
 #include <type_traits>
+#include <vector>
 
 namespace rules_elisp {
 
@@ -48,12 +48,12 @@ enum class Mode { kSource, kRelease };
 enum class ToolchainMode { kDirect, kWrap };
 
 struct CommonOptions final {
-  NativeStringView wrapper;
-  ToolchainMode mode;
-  std::initializer_list<NativeStringView> tags;
-  std::initializer_list<NativeStringView> load_path;
-  std::initializer_list<NativeStringView> load_files;
-  std::initializer_list<NativeStringView> data_files;
+  NativeString wrapper;
+  ToolchainMode mode = ToolchainMode::kDirect;
+  std::vector<NativeString> tags;
+  std::vector<NativeString> load_path;
+  std::vector<NativeString> load_files;
+  std::vector<NativeString> data_files;
 };
 
 }  // namespace rules_elisp
