@@ -36,6 +36,7 @@
 #  include <spawn.h>
 #  include <stdio.h>
 #  include <stdlib.h>
+#  include <sys/stat.h>
 #  include <sys/wait.h>
 #  include <unistd.h>
 #endif
@@ -317,6 +318,17 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
         absl::StrFormat("File %s is not within %s", file_str, base_str));
   }
   return NativeString(rel);
+}
+
+[[nodiscard]] bool FileExists(const NativeStringView file) {
+  if (file.empty() || ContainsNull(file)) return false;
+  NativeString string(file);
+#ifdef _WIN32
+  return ::GetFileAttributesW(Pointer(string)) != INVALID_FILE_ATTRIBUTES;
+#else
+  struct stat st;
+  return lstat(Pointer(string), &st) == 0;
+#endif
 }
 
 namespace {

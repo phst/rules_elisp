@@ -171,6 +171,14 @@ TEST(MakeRelativeTest, Relativizes) {
   }
 }
 
+TEST(FileExistsTest, TestsThatFileExists) {
+  const absl::StatusOr<NativeString> dir = ToNative(::testing::TempDir());
+  ASSERT_THAT(dir, IsOkAndHolds(SizeIs(Gt(0))));
+  EXPECT_TRUE(FileExists(*dir));
+  EXPECT_FALSE(FileExists(*dir + RULES_ELISP_NATIVE_LITERAL("/nonexistent")));
+  EXPECT_FALSE(FileExists(RULES_ELISP_NATIVE_LITERAL("")));
+}
+
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
   EXPECT_THAT(Environment::Current(),
               IsOkAndHolds(Contains(Pair(
