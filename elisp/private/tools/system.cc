@@ -269,6 +269,54 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
 #endif
 }
 
+[[nodiscard]] static bool ConsumePrefix(NativeStringView& string,
+                                        const NativeStringView prefix) {
+  const NativeStringView::size_type n = prefix.length();
+  if (string.substr(0, n) != prefix) return false;
+  string.remove_prefix(n);
+  return true;
+}
+
+absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
+                                          const NativeStringView base) {
+  if (file.empty()) return absl::InvalidArgumentError("Empty filename");
+  if (ContainsNull(file)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s contains null character", file));
+  }
+  if (base.empty()) return absl::InvalidArgumentError("Empty base directory");
+  if (ContainsNull(base)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Base directory %s contains null character", file));
+  }
+  constexpr NativeChar kSeparator = kWindows ? RULES_ELISP_NATIVE_LITERAL('\\')
+                                             : RULES_ELISP_NATIVE_LITERAL('/');
+  NativeString file_str(file);
+  NativeString base_str(base);
+  if constexpr (kWindows) {
+    absl::c_replace(file_str, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+    absl::c_replace(base_str, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+  }
+  if (base_str.back() != kSeparator) base_str.push_back(kSeparator);
+  constexpr NativeStringView kTwoSeparators =
+      kWindows ? RULES_ELISP_NATIVE_LITERAL("\\\\")
+               : RULES_ELISP_NATIVE_LITERAL("//");
+  if (file_str.find(kTwoSeparators) != file_str.npos) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s isn’t canonical", file_str));
+  }
+  if (base_str.find(kTwoSeparators) != base_str.npos) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s isn’t canonical", file_str));
+  }
+  NativeStringView rel = file_str;
+  if (!ConsumePrefix(rel, base_str) || rel.empty()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("File %s is not within %s", file_str, base_str));
+  }
+  return NativeString(rel);
+}
+
 namespace {
 
 class EnvironmentBlock final {
