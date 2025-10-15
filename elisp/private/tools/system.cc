@@ -13,7 +13,6 @@
 // limitations under the License.
 
 #include "elisp/private/tools/system.h"
-#include "elisp/private/tools/strings.h"
 
 #ifdef _WIN32
 #  ifndef UNICODE
@@ -45,8 +44,10 @@
 #  include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
+#include <algorithm>  // IWYU pragma: keep, only on Windows
 #include <cerrno>
 #include <cstddef>
+#include <cstdint>  // IWYU pragma: keep, only on Windows
 #include <cstdio>
 #include <cstdlib>
 #include <memory>
@@ -67,12 +68,15 @@
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
-#include "absl/strings/str_format.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
+#include "absl/time/clock.h"  // IWYU pragma: keep, only on Windows
+#include "absl/time/time.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/numeric.h"  // IWYU pragma: keep, only on Windows
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
 
@@ -571,7 +575,7 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
 }
 
 absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
-                        const Environment& env) {
+                        const Environment& env, const absl::Time deadline) {
   if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
@@ -585,10 +589,14 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
+  const bool has_deadline = deadline < absl::InfiniteFuture();
 #ifdef _WIN32
   std::wstring program = args.front();
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
   if (!command_line.ok()) return command_line.status();
+  constexpr BOOL kInheritHandles = FALSE;
+  const DWORD flags = CREATE_UNICODE_ENVIRONMENT |
+                      (has_deadline ? CREATE_NEW_PROCESS_GROUP : 0);
   absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
   if (!envp.ok()) return envp.status();
   STARTUPINFOW startup_info;
@@ -602,17 +610,40 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   PROCESS_INFORMATION process_info;
   BOOL success =
       ::CreateProcessW(Pointer(program), Pointer(*command_line), nullptr,
-                       nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp->data(),
-                       nullptr, &startup_info, &process_info);
-  if (!success) return WindowsStatus("CreateProcessW", program, *command_line);
+                       nullptr, kInheritHandles, flags, envp->data(), nullptr,
+                       &startup_info, &process_info);
+  if (!success) {
+    return WindowsStatus("CreateProcessW", program, *command_line, nullptr,
+                         nullptr, kInheritHandles, flags);
+  }
   success = ::CloseHandle(process_info.hThread);
   if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
   const auto close_handle = absl::MakeCleanup([&process_info] {
     const BOOL success = ::CloseHandle(process_info.hProcess);
     if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
   });
-  const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
-  if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
+  const DWORD timeout_ms =
+      has_deadline ? static_cast<DWORD>(std::clamp(
+                         absl::ToInt64Milliseconds(absl::Now() - deadline),
+                         std::int64_t{0}, std::int64_t{MAXDWORD}))
+                   : INFINITE;
+  switch (::WaitForSingleObject(process_info.hProcess, timeout_ms)) {
+    case WAIT_OBJECT_0:
+      break;
+    case WAIT_TIMEOUT:
+      LOG(WARNING) << "Process timed out, sending CTRL + BREAK";
+      success = ::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
+                                           process_info.dwProcessId);
+      if (!success) {
+        LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent",
+                                    CTRL_BREAK_EVENT);
+      }
+      return absl::DeadlineExceededError(absl::StrFormat(
+          "Deadline %v exceeded waiting for process (timeout %v)", deadline,
+          absl::Milliseconds(timeout_ms)));
+    default:
+      return WindowsStatus("WaitForSingleObject", "...", timeout_ms);
+  }
   DWORD code;
   success = ::GetExitCodeProcess(process_info.hProcess, &code);
   if (!success) return WindowsStatus("GetExitCodeProcess");
@@ -636,6 +667,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   CHECK((code == 0) == (code_int == 0));
   return code_int;
 #else
+  if (has_deadline) {
+    return absl::UnimplementedError(
+        absl::StrFormat("Finite deadline %v unsupported", deadline));
+  }
   std::vector<NativeString> args_vec(args.cbegin(), args.cend());
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);

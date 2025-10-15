@@ -31,6 +31,8 @@
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
+#include "absl/time/clock.h"
+#include "absl/time/time.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -310,6 +312,25 @@ TEST(RunTest, ReturnsExitCode) {
     EXPECT_THAT(
         rules_elisp::Run({RULES_ELISP_NATIVE_LITERAL("/usr/bin/false")}, {}),
         IsOkAndHolds(1));
+  }
+}
+
+TEST(RunTest, SupportsDeadlineOnWindows) {
+  if constexpr (kWindows) {
+    const absl::Time deadline = absl::Now() + absl::Seconds(1);
+    const NativeString cmd = GetEnv(RULES_ELISP_NATIVE_LITERAL("ComSpec"));
+    EXPECT_THAT(cmd, SizeIs(Gt(3)));
+    EXPECT_THAT(rules_elisp::Run(
+                    {
+                        cmd,
+                        RULES_ELISP_NATIVE_LITERAL("/U"),
+                        RULES_ELISP_NATIVE_LITERAL("/D"),
+                        RULES_ELISP_NATIVE_LITERAL("/S"),
+                        RULES_ELISP_NATIVE_LITERAL("/C"),
+                        RULES_ELISP_NATIVE_LITERAL("PAUSE"),
+                    },
+                    {}, deadline),
+                StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }
 
