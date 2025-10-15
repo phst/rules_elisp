@@ -19,7 +19,7 @@
 #  error this file requires at least C++17
 #endif
 
-#include <initializer_list>
+#include <vector>
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
@@ -29,9 +29,9 @@
 namespace rules_elisp {
 
 struct TestOptions final {
-  std::initializer_list<NativeStringView> skip_tests;
-  std::initializer_list<NativeStringView> skip_tags;
-  bool module_assertions;
+  std::vector<NativeString> skip_tests;
+  std::vector<NativeString> skip_tags;
+  bool module_assertions = false;
 };
 
 absl::StatusOr<int> Main(const CommonOptions& common_opts,
