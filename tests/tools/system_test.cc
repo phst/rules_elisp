@@ -121,10 +121,9 @@ TEST(MakeAbsoluteTest, MakesRelativeNameAbsolute) {
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
-  const absl::StatusOr<Environment> env = Environment::Current();
-  ASSERT_THAT(
-      env, IsOkAndHolds(Contains(Pair(RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR"),
-                                      SizeIs(Gt(0))))));
+  EXPECT_THAT(Environment::Current(),
+              IsOkAndHolds(Contains(Pair(
+                  RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR"), SizeIs(Gt(0))))));
 }
 
 TEST(EnvironmentTest, CreateRejectsEmpty) {
