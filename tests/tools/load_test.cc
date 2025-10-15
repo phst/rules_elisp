@@ -45,10 +45,6 @@ static absl::StatusOr<NativeString> TempDir() {
   return ToNative(dir);
 }
 
-static constexpr NativeChar kSeparator = kWindows
-                                             ? RULES_ELISP_NATIVE_LITERAL('\\')
-                                             : RULES_ELISP_NATIVE_LITERAL('/');
-
 TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
   const absl::StatusOr<NativeString> dir = TempDir();
   ASSERT_THAT(dir, IsOk());

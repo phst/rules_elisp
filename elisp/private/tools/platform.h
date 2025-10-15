@@ -44,6 +44,10 @@ using NativeChar = std::conditional_t<kWindows, wchar_t, char>;
 using NativeString = std::basic_string<NativeChar>;
 using NativeStringView = std::basic_string_view<NativeChar>;
 
+inline constexpr NativeChar kSeparator = kWindows
+                                             ? RULES_ELISP_NATIVE_LITERAL('\\')
+                                             : RULES_ELISP_NATIVE_LITERAL('/');
+
 enum class Mode { kSource, kRelease };
 enum class ToolchainMode { kDirect, kWrap };
 

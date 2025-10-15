@@ -293,8 +293,6 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
     return absl::InvalidArgumentError(
         absl::StrFormat("Base directory %s contains null character", file));
   }
-  constexpr NativeChar kSeparator = kWindows ? RULES_ELISP_NATIVE_LITERAL('\\')
-                                             : RULES_ELISP_NATIVE_LITERAL('/');
   NativeString file_str(file);
   NativeString base_str(base);
   if constexpr (kWindows) {
