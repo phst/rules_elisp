@@ -29,8 +29,7 @@
 namespace rules_elisp {
 
 absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
-    const Runfiles& runfiles,
-    const absl::Span<const NativeStringView> load_path,
+    const Runfiles& runfiles, const absl::Span<const NativeString> load_path,
     const std::string_view runfiles_elc) {
   std::vector<NativeString> args;
   bool runfiles_handler_installed = false;

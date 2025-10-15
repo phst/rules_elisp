@@ -26,7 +26,7 @@
 namespace rules_elisp {
 
 absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
-    const Runfiles& runfiles, absl::Span<const NativeStringView> load_path,
+    const Runfiles& runfiles, absl::Span<const NativeString> load_path,
     const std::string_view runfiles_elc);
 
 }  // namespace
