@@ -36,7 +36,7 @@ class ManifestTest(absltest.TestCase):
         with manifest.add(
                 opts,
                 [pathlib.PurePath('in-1'), pathlib.PurePath('in-2')],
-                [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\0\\"')]) as args:
+                [pathlib.PurePath('out \t\n\r\f äα𝐴🐈\'\\"')]) as args:
             self.assertEqual(len(args), 2)
             self.assertRegex(args[0], r'^--manifest=')
             self.assertEqual(args[1], '--')
@@ -47,7 +47,7 @@ class ManifestTest(absltest.TestCase):
                     'root': 'RUNFILES_ROOT',
                     'loadPath': ['load-dir'],
                     'inputFiles': ['in-1', 'in-2', 'load-file', 'data-file'],
-                    'outputFiles': ['out \t\n\r\f äα𝐴🐈\'\0\\"'],
+                    'outputFiles': ['out \t\n\r\f äα𝐴🐈\'\\"'],
                     'tags': ['tag-1', 'tag-2 \t\n\r\f äα𝐴🐈\'\0\\"'],
                 })
 
