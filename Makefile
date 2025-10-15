@@ -20,6 +20,10 @@ SHELL = /bin/sh
 BAZEL = bazel
 BAZELFLAGS =
 GIT = git
+EMACS = emacs
+EMACSFLAGS =
+HYPERFINE = hyperfine
+HYPERFINEFLAGS =
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -67,6 +71,16 @@ check-extra:
         # Find BUILD files without correct features.
 	! $(GIT) grep -I -r -F -L -e 'features = PACKAGE_FEATURES' \
 	  -- '*/BUILD' '*/BUILD.bazel' ':^/examples/ext/'
+
+BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
+
+benchmark:
+	$(HYPERFINE) $(HYPERFINEFLAGS) --shell=none --warmup=5 \
+	  --setup='$(BAZEL) build $(BENCHMARK_BAZELFLAGS) -- //tests:empty' \
+	  -- \
+	  '$(BAZEL) run $(BENCHMARK_BAZELFLAGS) -- //tests:empty' \
+	  './bazel-bin/tests/empty' \
+	  '$(EMACS) --quick --batch $(EMACSFLAGS) --load=./tests/empty.el'
 
 clean:
 	$(BAZEL) clean
