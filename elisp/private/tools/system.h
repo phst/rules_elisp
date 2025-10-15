@@ -115,6 +115,7 @@ bool IsAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
                                           NativeStringView base);
+[[nodiscard]] bool FileExists(NativeStringView file);
 
 class Environment final {
  private:
