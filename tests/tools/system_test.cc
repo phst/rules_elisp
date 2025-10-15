@@ -120,6 +120,55 @@ TEST(MakeAbsoluteTest, MakesRelativeNameAbsolute) {
   }
 }
 
+TEST(MakeRelativeTest, RejectsEmptyName) {
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL(""),
+                           RULES_ELISP_NATIVE_LITERAL("")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
+                           RULES_ELISP_NATIVE_LITERAL("")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL(""),
+                           RULES_ELISP_NATIVE_LITERAL("bar")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(MakeRelativeTest, RejectsNotWithin) {
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
+                           RULES_ELISP_NATIVE_LITERAL("foo")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
+                           RULES_ELISP_NATIVE_LITERAL("bar")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("fooooo"),
+                           RULES_ELISP_NATIVE_LITERAL("foo")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+  if constexpr (!kWindows) {
+    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
+                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
+                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  }
+}
+
+TEST(MakeRelativeTest, Relativizes) {
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo/bar"),
+                           RULES_ELISP_NATIVE_LITERAL("foo")),
+              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("bar")));
+  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo/bar"),
+                           RULES_ELISP_NATIVE_LITERAL("foo/")),
+              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("bar")));
+  if constexpr (kWindows) {
+    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
+                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+                IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
+    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
+                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+                IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
+  }
+}
+
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
   const absl::StatusOr<Environment> env = Environment::Current();
   ASSERT_THAT(
