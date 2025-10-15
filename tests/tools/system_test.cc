@@ -165,6 +165,20 @@ TEST(EnvironmentTest, CreateIsCaseSensitiveOnlyOnUnix) {
   }
 }
 
+TEST(EnvironmentTest, GetIsCaseSensitiveOnlyOnUnix) {
+  const std::vector<std::pair<NativeString, NativeString>> pairs = {
+      {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
+  };
+  absl::StatusOr<Environment> env =
+      Environment::Create(pairs.cbegin(), pairs.cend());
+  ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
+  EXPECT_EQ(env->Get(RULES_ELISP_NATIVE_LITERAL("foo")),
+            RULES_ELISP_NATIVE_LITERAL("bar"));
+  EXPECT_EQ(env->Get(RULES_ELISP_NATIVE_LITERAL("Foo")),
+            kWindows ? RULES_ELISP_NATIVE_LITERAL("bar")
+                     : RULES_ELISP_NATIVE_LITERAL(""));
+}
+
 TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
   const std::vector<std::pair<NativeString, NativeString>> pairs = {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},

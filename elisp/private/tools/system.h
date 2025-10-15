@@ -187,6 +187,14 @@ class Environment final {
   bool empty() const { return map_.empty(); }
 
   template <std::size_t N>
+  NativeStringView Get(const NativeChar (&key)[N]) const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    static_assert(N > 1, "empty environment variable");
+    const auto it = map_.find(key);
+    return it == map_.end() ? NativeStringView() : it->second;
+  }
+
+  template <std::size_t N>
   void Add(const NativeChar (&key)[N], NativeStringView value) {
     static_assert(N > 1, "empty environment variable");
     map_.emplace(key, value);
