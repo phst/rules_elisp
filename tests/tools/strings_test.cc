@@ -58,18 +58,16 @@ TEST(CheckAsciiTest, RejectsNonAscii) {
   EXPECT_THAT(CheckAscii(L"Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
-TEST(CheckNullTest, AcceptsStringsWithoutEmbeddedNull) {
-  EXPECT_THAT(CheckNull(""), IsOk());
-  EXPECT_THAT(CheckNull(L""), IsOk());
-  EXPECT_THAT(CheckNull("foo"), IsOk());
-  EXPECT_THAT(CheckNull(L"foo"), IsOk());
+TEST(ContainsNullTest, AcceptsStringsWithoutEmbeddedNull) {
+  EXPECT_FALSE(ContainsNull(""));
+  EXPECT_FALSE(ContainsNull(L""));
+  EXPECT_FALSE(ContainsNull("foo"));
+  EXPECT_FALSE(ContainsNull(L"foo"));
 }
 
-TEST(CheckNullTest, RejectsStringsWithEmbeddedNull) {
-  EXPECT_THAT(CheckNull(View("\0")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(CheckNull(View(L"\0")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+TEST(ContainsNullTest, RejectsStringsWithEmbeddedNull) {
+  EXPECT_TRUE(ContainsNull(View("\0")));
+  EXPECT_TRUE(ContainsNull(View(L"\0")));
 }
 
 TEST(ToNarrowTest, AcceptsAscii) {
