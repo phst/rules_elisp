@@ -605,9 +605,12 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                        nullptr, FALSE, CREATE_UNICODE_ENVIRONMENT, envp->data(),
                        nullptr, &startup_info, &process_info);
   if (!success) return WindowsStatus("CreateProcessW", program, *command_line);
-  ::CloseHandle(process_info.hThread);
-  const auto close_handle = absl::MakeCleanup(
-      [&process_info] { ::CloseHandle(process_info.hProcess); });
+  success = ::CloseHandle(process_info.hThread);
+  if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
+  const auto close_handle = absl::MakeCleanup([&process_info] {
+    const BOOL success = ::CloseHandle(process_info.hProcess);
+    if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
+  });
   const DWORD status = ::WaitForSingleObject(process_info.hProcess, INFINITE);
   if (status != WAIT_OBJECT_0) return WindowsStatus("WaitForSingleObject");
   DWORD code;
