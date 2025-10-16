@@ -43,6 +43,22 @@ std::optional<To> CastNumber(const From n) {
   return InRange<To>(n) ? static_cast<To>(n) : std::optional<To>();
 }
 
+template <typename T, typename A, typename B>
+constexpr std::optional<T> Multiply(const A a, const B b) {
+  static_assert(std::is_integral_v<T>);
+  static_assert(std::is_unsigned_v<T>);
+  static_assert(std::is_integral_v<A>);
+  static_assert(std::is_unsigned_v<A>);
+  static_assert(std::is_integral_v<B>);
+  static_assert(std::is_unsigned_v<B>);
+  if (a == 0 || b == 0) return T{0};
+  using R = std::common_type_t<A, B>;
+  static_assert(std::is_integral_v<R>);
+  static_assert(std::is_unsigned_v<R>);
+  const R r = a * b;
+  return r / b == a ? CastNumber<T>(r) : std::nullopt;
+}
+
 }  // namespace rules_elisp
 
 #endif  // ELISP_PRIVATE_TOOLS_NUMERIC_H_
