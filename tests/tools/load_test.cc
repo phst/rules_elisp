@@ -41,7 +41,7 @@ static absl::StatusOr<NativeString> TempDir() {
   }
   if (dir.back() == '/' || (kWindows && dir.back() == '\\')) dir.pop_back();
   if constexpr (kWindows) absl::c_replace(dir, '/', '\\');
-  return ToNative(dir);
+  return ToNative(dir, Encoding::kAscii);
 }
 
 TEST(LoadPathArgsTest, DirectoryAsciiOnly) {

@@ -50,7 +50,8 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
-      original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
+      original_argv.empty() ? std::string()
+                            : ToNarrow(original_argv.front(), Encoding::kAscii);
   if (!argv0.ok()) return argv0.status();
   if (ContainsNull(*argv0)) {
     return absl::InvalidArgumentError(
@@ -89,7 +90,8 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return status;
   }
   const absl::StatusOr<std::string> argv0 =
-      original_argv.empty() ? std::string() : ToNarrow(original_argv.front());
+      original_argv.empty() ? std::string()
+                            : ToNarrow(original_argv.front(), Encoding::kAscii);
   if (!argv0.ok()) return argv0.status();
   if (ContainsNull(*argv0)) {
     return absl::InvalidArgumentError(
@@ -99,13 +101,15 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return absl::InvalidArgumentError(absl::StrFormat(
         "Manifest filename %s contains null character", manifest));
   }
-  const absl::StatusOr<std::string> narrow_manifest = ToNarrow(manifest);
+  const absl::StatusOr<std::string> narrow_manifest =
+      ToNarrow(manifest, Encoding::kAscii);
   if (!narrow_manifest.ok()) return narrow_manifest.status();
   if (ContainsNull(directory)) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Directory %s contains null character", directory));
   }
-  const absl::StatusOr<std::string> narrow_directory = ToNarrow(directory);
+  const absl::StatusOr<std::string> narrow_directory =
+      ToNarrow(directory, Encoding::kAscii);
   if (!narrow_directory.ok()) return narrow_directory.status();
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl(
@@ -132,7 +136,7 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
   if constexpr (kWindows) absl::c_replace(resolved, '/', '\\');
-  absl::StatusOr<NativeString> native = ToNative(resolved);
+  absl::StatusOr<NativeString> native = ToNative(resolved, Encoding::kAscii);
   if (!native.ok()) return native.status();
   return MakeAbsolute(*native);
 }
@@ -141,9 +145,11 @@ absl::StatusOr<Environment> Runfiles::Environ() const {
   CHECK_NE(impl_, nullptr);
   std::vector<std::pair<NativeString, NativeString>> pairs;
   for (const auto& [narrow_key, narrow_value] : impl_->EnvVars()) {
-    const absl::StatusOr<NativeString> key = ToNative(narrow_key);
+    const absl::StatusOr<NativeString> key =
+        ToNative(narrow_key, Encoding::kAscii);
     if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value = ToNative(narrow_value);
+    const absl::StatusOr<NativeString> value =
+        ToNative(narrow_value, Encoding::kAscii);
     if (!value.ok()) return value.status();
     pairs.emplace_back(*key, *value);
   }

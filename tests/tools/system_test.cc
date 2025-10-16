@@ -53,6 +53,7 @@ using ::testing::Ge;
 using ::testing::Gt;
 using ::testing::HasSubstr;
 using ::testing::IsEmpty;
+using ::testing::Not;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
@@ -69,25 +70,56 @@ TEST(ErrnoStatusTest, ReturnsMatchingStatus) {
 }
 
 TEST(ToNarrowTest, AcceptsAscii) {
-  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("")), IsOkAndHolds(""));
-  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foo")), IsOkAndHolds("Foo"));
+  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL(""), Encoding::kAscii),
+              IsOkAndHolds(""));
+  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foo"), Encoding::kAscii),
+              IsOkAndHolds("Foo"));
 }
 
 TEST(ToNarrowTest, RejectsNonAscii) {
   if constexpr (kWindows) {
-    EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foó")),
+    EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foó"), Encoding::kAscii),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
+TEST(ToNarrowTest, AcceptsUtf8) {
+  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foó"), Encoding::kUtf8),
+              IsOkAndHolds("Foó"));
+}
+
+TEST(ToNarrowTest, RejectsInvalidUtf16OnWindows) {
+#ifdef _WIN32
+  EXPECT_THAT(ToNarrow(std::wstring{L'F', L'o', L'ó', 0xD800}, Encoding::kUtf8),
+              Not(IsOk()));
+#endif
+}
+
 TEST(ToNativeTest, AcceptsAscii) {
-  EXPECT_THAT(ToNative(""), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("")));
-  EXPECT_THAT(ToNative("Foo"), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foo")));
+  EXPECT_THAT(ToNative("", Encoding::kAscii),
+              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("")));
+  EXPECT_THAT(ToNative("Foo", Encoding::kAscii),
+              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foo")));
 }
 
 TEST(ToNativeTest, RejectsNonAscii) {
   if constexpr (kWindows) {
-    EXPECT_THAT(ToNative("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
+    EXPECT_THAT(ToNative("Foó", Encoding::kAscii),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  }
+}
+
+TEST(ToNativeTest, AcceptsUtf8) {
+  EXPECT_THAT(ToNative("Foó", Encoding::kUtf8),
+              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foó")));
+}
+
+TEST(ToNativeTest, RejectsInvalidUtf8OnWindows) {
+  if constexpr (kWindows) {
+    EXPECT_THAT(ToNative("Foó\xFF", Encoding::kUtf8), Not(IsOk()));
+  } else {
+    EXPECT_THAT(ToNative("Foó\xFF", Encoding::kUtf8),
+                IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foó\xFF")));
   }
 }
 
@@ -196,7 +228,8 @@ TEST(MakeRelativeTest, Relativizes) {
 }
 
 TEST(FileExistsTest, TestsThatFileExists) {
-  const absl::StatusOr<NativeString> dir = ToNative(::testing::TempDir());
+  const absl::StatusOr<NativeString> dir =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(dir, IsOkAndHolds(Not(IsEmpty())));
   EXPECT_TRUE(FileExists(*dir));
   EXPECT_FALSE(FileExists(*dir + RULES_ELISP_NATIVE_LITERAL("/nonexistent")));
