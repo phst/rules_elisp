@@ -709,7 +709,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   });
   const DWORD timeout_ms =
       has_deadline ? static_cast<DWORD>(std::clamp(
-                         absl::ToInt64Milliseconds(absl::Now() - deadline),
+                         absl::ToInt64Milliseconds(deadline - absl::Now()),
                          std::int64_t{0}, std::int64_t{MAXDWORD}))
                    : INFINITE;
   switch (::WaitForSingleObject(process_info.hProcess, timeout_ms)) {
