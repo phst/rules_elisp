@@ -54,17 +54,9 @@ template <typename Range>
 absl::Status Assign(google::protobuf::RepeatedPtrField<std::string>& field,
                     const Range& range) {
   for (const auto& elt : range) {
-    if constexpr (kWindows) {
-      // StrFormat converts wide strings to UTF-8 and returns an empty string on
-      // error, cf. https://abseil.io/docs/cpp/guides/format#basic-usage.
-      std::string utf8 = absl::StrFormat("%s", elt);
-      if (utf8.empty() && !elt.empty()) {
-        return absl::InvalidArgumentError("Invalid Unicode string");
-      }
-      field.Add(std::move(utf8));
-    } else {
-      *field.Add() = elt;
-    }
+    absl::StatusOr<std::string> utf8 = ToNarrow(elt, Encoding::kUtf8);
+    if (!utf8.ok()) return utf8.status();
+    field.Add(std::move(*utf8));
   }
   return absl::OkStatus();
 }
