@@ -408,6 +408,7 @@ cc_library(
     local_defines = DEFINES,
     visibility = ["//tests/tools:__pkg__"],
     deps = [
+        ":numeric",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
