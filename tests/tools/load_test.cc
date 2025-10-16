@@ -26,7 +26,6 @@
 #include "gtest/gtest.h"
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
-#include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {

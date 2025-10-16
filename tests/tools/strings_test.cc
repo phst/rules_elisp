@@ -70,27 +70,4 @@ TEST(ContainsNullTest, RejectsStringsWithEmbeddedNull) {
   EXPECT_TRUE(ContainsNull(View(L"\0")));
 }
 
-TEST(ToNarrowTest, AcceptsAscii) {
-  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("")), IsOkAndHolds(""));
-  EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foo")), IsOkAndHolds("Foo"));
-}
-
-TEST(ToNarrowTest, RejectsNonAscii) {
-  if constexpr (kWindows) {
-    EXPECT_THAT(ToNarrow(RULES_ELISP_NATIVE_LITERAL("Foó")),
-                StatusIs(absl::StatusCode::kInvalidArgument));
-  }
-}
-
-TEST(ToNativeTest, AcceptsAscii) {
-  EXPECT_THAT(ToNative(""), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("")));
-  EXPECT_THAT(ToNative("Foo"), IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Foo")));
-}
-
-TEST(ToNativeTest, RejectsNonAscii) {
-  if constexpr (kWindows) {
-    EXPECT_THAT(ToNative("Foó"), StatusIs(absl::StatusCode::kInvalidArgument));
-  }
-}
-
 }  // namespace rules_elisp

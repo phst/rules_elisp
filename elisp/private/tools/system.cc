@@ -213,6 +213,44 @@ static std::vector<char* absl_nullable> Pointers(
 }
 #endif
 
+namespace {
+
+static constexpr unsigned int kMaxAscii{0x7F};
+
+// Convert strings between std::string and std::wstring.  This is only useful on
+// Windows, where the native string type is std::wstring.  Only pure ASCII
+// strings are supported so that we don’t have to deal with codepages.  All
+// Windows codepages should be ASCII-compatible;
+// cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
+template <typename ToString, typename FromChar>
+absl::StatusOr<ToString> ConvertString(
+    const std::basic_string_view<FromChar> string) {
+  using ToChar = typename ToString::value_type;
+  if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
+  static_assert(InRange<ToChar>(kMaxAscii),
+                "destination character type too small");
+  const absl::Status status = CheckAscii(string);
+  if (!status.ok()) return status;
+  ToString ret;
+  ret.reserve(string.length());
+  for (FromChar ch : string) {
+    const std::optional<ToChar> to = CastNumber<ToChar>(ch);
+    CHECK(to.has_value()) << "character " << ch << " too large";
+    ret.push_back(*to);
+  }
+  return ret;
+}
+
+}  // namespace
+
+absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
+  return ConvertString<std::string>(string);
+}
+
+absl::StatusOr<NativeString> ToNative(const std::string_view string) {
+  return ConvertString<NativeString>(string);
+}
+
 #ifndef _WIN32
 static absl::StatusOr<std::string> WorkingDirectory() {
   struct Free {

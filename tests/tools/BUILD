@@ -88,7 +88,6 @@ cc_test(
         "//elisp/private/tools:load_cc",
         "//elisp/private/tools:platform",
         "//elisp/private/tools:runfiles_cc",
-        "//elisp/private/tools:strings",
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/status",
