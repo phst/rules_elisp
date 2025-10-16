@@ -71,4 +71,16 @@ TEST(CastNumberTest, ReturnsNulloptIfOutOfRange) {
   EXPECT_EQ(CastNumber<unsigned int>(-1), std::nullopt);
 }
 
+TEST(MultiplyTest, WorksIfExact) {
+  EXPECT_THAT(Multiply<unsigned int>(0u, 0u), Optional(0u));
+  EXPECT_THAT(Multiply<unsigned int>(1000u, 0u), Optional(0u));
+  EXPECT_THAT(Multiply<unsigned int>(0u, 1000u), Optional(0u));
+  EXPECT_THAT(Multiply<unsigned int>(2u, 2u), Optional(4u));
+}
+
+TEST(MultiplyTest, ReturnsNullOnOverflow) {
+  EXPECT_EQ(Multiply<std::uint8_t>(1000u, 1u), std::nullopt);
+  EXPECT_EQ(Multiply<std::uint8_t>(50u, 30u), std::nullopt);
+}
+
 }  // namespace rules_elisp
