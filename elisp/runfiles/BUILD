@@ -37,6 +37,6 @@ select_file(
     subpath = "/" + package_name() + "/runfiles.elc",
     visibility = [
         "//elisp/private/tools:__pkg__",
-        "//tests:__pkg__",
+        "//tests/integration:__pkg__",
     ],
 )

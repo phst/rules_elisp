@@ -31,7 +31,7 @@ go_library(
     importpath = "github.com/phst/rules_elisp/private/testutil",
     visibility = [
         "//gazelle:__pkg__",
-        "//tests:__pkg__",
+        "//tests/integration:__pkg__",
         "//tests/proto:__pkg__",
     ],
     deps = ["@rules_go//go/runfiles"],

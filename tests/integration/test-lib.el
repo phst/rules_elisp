@@ -1,6 +1,6 @@
 ;;; test-lib.el --- test to check the test runner -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2023 Google LLC
+;; Copyright 2020, 2021, 2023, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@
 (require 'cl-lib)
 (require 'subr-x)
 
-(defun tests/test-function (arg)
+(defun tests/integration/test-function (arg)
   ;; The condition and the two branches should be on separate lines, for line
   ;; coverage testing.
   (if
@@ -60,5 +60,5 @@
   (ignore-errors
     (error "Boo")))
 
-(provide 'tests/test-lib)
+(provide 'tests/integration/test-lib)
 ;;; test-lib.el ends here

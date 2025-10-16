@@ -27,7 +27,7 @@ WORKSPACE.bzlmod                text eol=lf
 /docs/*.org                     text eol=lf
 
 # Don’t mess with coverage test data.
-/tests/coverage.dat             text eol=lf
+/tests/integration/coverage.dat text eol=lf
 
 # The hashes of the requirements files are recorded in MODULE.bazel.lock.  Make
 # sure that they stay intact across operating systems.

@@ -1,6 +1,6 @@
 ;;; test.el --- test to check the test runner        -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2025 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@
 
 ;;; Code:
 
-(require 'tests/test-lib)
+(require 'tests/integration/test-lib)
 
 (require 'ert)
 
 (ert-deftest test ()
-  (tests/test-function nil))
+  (tests/integration/test-function nil))
 
 ;;; test.el ends here

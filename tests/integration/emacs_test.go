@@ -13,7 +13,7 @@
 // limitations under the License.
 
 // Integration tests that run Emacs binaries.
-package tests_test
+package integration_test
 
 import (
 	"bytes"
@@ -35,8 +35,8 @@ import (
 var (
 	emacs       = testutil.RunfileFlag("//emacs")
 	empty       = testutil.RunfileFlag("//tests:empty")
-	signal      = testutil.RunfileFlag("//tests:signal")
-	launcher    = testutil.RunfileFlag("//tests/wrap:launcher")
+	signal      = testutil.RunfileFlag("//tests/integration:signal")
+	launcher    = testutil.RunfileFlag("//tests/integration/wrap:launcher")
 	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
 	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
 	runfilesElc = testutil.RunfileFlag("//elisp/runfiles:runfiles.elc")
