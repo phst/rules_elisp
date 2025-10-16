@@ -213,42 +213,79 @@ static std::vector<char* absl_nullable> Pointers(
 }
 #endif
 
-namespace {
-
-static constexpr unsigned int kMaxAscii{0x7F};
-
-// Convert strings between std::string and std::wstring.  This is only useful on
-// Windows, where the native string type is std::wstring.  Only pure ASCII
-// strings are supported so that we don’t have to deal with codepages.  All
-// Windows codepages should be ASCII-compatible;
-// cf. https://docs.microsoft.com/en-us/windows/win32/intl/code-pages.
-template <typename ToString, typename FromChar>
-absl::StatusOr<ToString> ConvertString(
-    const std::basic_string_view<FromChar> string) {
-  using ToChar = typename ToString::value_type;
-  if constexpr (std::is_same_v<FromChar, ToChar>) return ToString(string);
-  static_assert(InRange<ToChar>(kMaxAscii),
-                "destination character type too small");
-  const absl::Status status = CheckAscii(string);
-  if (!status.ok()) return status;
-  ToString ret;
-  ret.reserve(string.length());
-  for (FromChar ch : string) {
-    const std::optional<ToChar> to = CastNumber<ToChar>(ch);
-    CHECK(to.has_value()) << "character " << ch << " too large";
-    ret.push_back(*to);
+absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
+                                     [[maybe_unused]] const Encoding encoding) {
+  if (string.empty()) return std::string();
+#ifdef _WIN32
+  if (encoding == Encoding::kAscii) {
+    // Windows doesn’t support the ASCII codepage with WC_ERR_INVALID_CHARS.  So
+    // we check for non-ASCII first and use UTF-8 (as superset of ASCII) in all
+    // cases.
+    const absl::Status status = CheckAscii(string);
+    if (!status.ok()) return status;
   }
-  return ret;
+  constexpr UINT codepage = CP_UTF8;
+  constexpr unsigned int max_bytes_per_wchar = 3;
+  constexpr DWORD flags = WC_ERR_INVALID_CHARS;
+  const std::optional<std::string::size_type> buffer_size =
+      Multiply<std::string::size_type>(string.length(), max_bytes_per_wchar);
+  if (!buffer_size.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("String too long (%d code units)", string.length()));
+  }
+  const std::optional<int> wide_length = CastNumber<int>(string.length());
+  if (!wide_length.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("String too long (%d code units)", string.length()));
+  }
+  const std::optional<int> narrow_length = CastNumber<int>(*buffer_size);
+  if (!narrow_length.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("String too long (%d code units)", string.length()));
+  }
+  std::string buffer(*buffer_size, '\0');
+  const int result =
+      ::WideCharToMultiByte(codepage, flags, string.data(), *wide_length,
+                            buffer.data(), *narrow_length, nullptr, nullptr);
+  if (result == 0) {
+    return WindowsStatus("WideCharToMultiByte", codepage, flags, "...",
+                         *wide_length, "...", *narrow_length, nullptr, nullptr);
+  }
+  return buffer.substr(0, CastNumber<std::string::size_type>(result).value());
+#else
+  return std::string(string);
+#endif
 }
 
-}  // namespace
-
-absl::StatusOr<std::string> ToNarrow(const NativeStringView string) {
-  return ConvertString<std::string>(string);
-}
-
-absl::StatusOr<NativeString> ToNative(const std::string_view string) {
-  return ConvertString<NativeString>(string);
+absl::StatusOr<NativeString> ToNative(
+    const std::string_view string, [[maybe_unused]] const Encoding encoding) {
+  if (string.empty()) return NativeString();
+#ifdef _WIN32
+  if (encoding == Encoding::kAscii) {
+    // Windows doesn’t support the ASCII codepage with MB_ERR_INVALID_CHARS.  So
+    // we check for non-ASCII first and use UTF-8 (as superset of ASCII) in all
+    // cases.
+    const absl::Status status = CheckAscii(string);
+    if (!status.ok()) return status;
+  }
+  constexpr UINT codepage = CP_UTF8;
+  constexpr DWORD flags = MB_ERR_INVALID_CHARS;
+  const std::optional<int> length = CastNumber<int>(string.length());
+  if (!length.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("String too long (%d bytes)", string.length()));
+  }
+  NativeString buffer(string.length(), L'\0');
+  const int result = ::MultiByteToWideChar(codepage, flags, string.data(),
+                                           *length, buffer.data(), *length);
+  if (result == 0) {
+    return WindowsStatus("MultiByteToWideChar", codepage, flags, "...", *length,
+                         "...", *length);
+  }
+  return buffer.substr(0, CastNumber<NativeString::size_type>(result).value());
+#else
+  return NativeString(string);
+#endif
 }
 
 #ifndef _WIN32

@@ -39,7 +39,7 @@ absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
       return absl::InvalidArgumentError(
           absl::StrFormat("Load directory %s contains null character", dir));
     }
-    const absl::StatusOr<std::string> narrow = ToNarrow(dir);
+    const absl::StatusOr<std::string> narrow = ToNarrow(dir, Encoding::kAscii);
     const absl::StatusOr<NativeString> resolved =
         narrow.ok() ? runfiles.Resolve(*narrow) : narrow.status();
     if (resolved.ok()) {
