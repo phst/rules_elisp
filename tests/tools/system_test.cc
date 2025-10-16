@@ -391,7 +391,7 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
                         RULES_ELISP_NATIVE_LITERAL("/U"),
                         RULES_ELISP_NATIVE_LITERAL("/D"),
                         RULES_ELISP_NATIVE_LITERAL("/S"),
-                        RULES_ELISP_NATIVE_LITERAL("/C"),
+                        RULES_ELISP_NATIVE_LITERAL("/K"),
                         RULES_ELISP_NATIVE_LITERAL("PAUSE"),
                     },
                     {}, deadline),
