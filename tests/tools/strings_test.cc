@@ -23,8 +23,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "elisp/private/tools/platform.h"
-
 namespace rules_elisp {
 
 using absl_testing::IsOk;

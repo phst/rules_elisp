@@ -124,7 +124,6 @@ cc_test(
     linkstatic = True,
     local_defines = DEFINES,
     deps = [
-        "//elisp/private/tools:platform",
         "//elisp/private/tools:strings",
         "@abseil-cpp//absl/base:core_headers",
         "@abseil-cpp//absl/status",
