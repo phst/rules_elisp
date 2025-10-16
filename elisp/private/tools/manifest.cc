@@ -14,7 +14,6 @@
 
 #include "elisp/private/tools/manifest.h"
 
-#include <initializer_list>
 #include <string>
 #include <utility>
 #include <vector>
