@@ -43,7 +43,6 @@ repos:
   - id: forbid-submodules
   - id: mixed-line-ending
   - id: name-tests-test
-    exclude: '^tests/wrap/wrap\.py$'
   - id: pretty-format-json
   - id: requirements-txt-fixer
   - id: trailing-whitespace
