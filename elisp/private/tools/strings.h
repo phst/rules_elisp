@@ -19,9 +19,6 @@
 #include <string_view>
 
 #include "absl/status/status.h"
-#include "absl/status/statusor.h"
-
-#include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
 
@@ -38,9 +35,6 @@ absl::Status CheckAscii(const std::wstring_view string);
 [[nodiscard]] inline bool ContainsNull(const std::wstring_view string) {
   return string.find(L'\0') != string.npos;
 }
-
-absl::StatusOr<std::string> ToNarrow(NativeStringView string);
-absl::StatusOr<NativeString> ToNative(std::string_view string);
 
 }  // namespace rules_elisp
 

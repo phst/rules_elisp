@@ -112,6 +112,9 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 
+absl::StatusOr<std::string> ToNarrow(NativeStringView string);
+absl::StatusOr<NativeString> ToNative(std::string_view string);
+
 bool IsAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
