@@ -28,7 +28,6 @@
 namespace rules_elisp {
 
 using absl_testing::IsOk;
-using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 
 // Helper function template to create string views from literals with embedded null characters.
