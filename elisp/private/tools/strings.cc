@@ -14,6 +14,7 @@
 
 #include "elisp/private/tools/strings.h"
 
+#include <cstdint>
 #include <iomanip>
 #include <ios>
 #include <locale>
@@ -24,7 +25,10 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/status/status.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
+
+#include "elisp/private/tools/numeric.h"
 
 namespace rules_elisp {
 
@@ -74,6 +78,27 @@ absl::Status CheckAscii(const std::string_view string) {
 
 absl::Status CheckAscii(const std::wstring_view string) {
   return DoCheckAscii(string);
+}
+
+std::string PercentEncode(std::string_view string) {
+  std::string result;
+  while (!string.empty()) {
+    const std::string_view::const_iterator it =
+        absl::c_find_if_not(string, [](const char ch) {
+          if (ch <= 0 || ch == '%') return false;
+          const unsigned char u = static_cast<unsigned char>(ch);
+          return u <= kMaxAscii && absl::ascii_isprint(u);
+        });
+    result.append(string.cbegin(), it);
+    string.remove_prefix(
+        CastNumber<std::string_view::size_type>(it - string.cbegin()).value());
+    if (!string.empty()) {
+      const std::uint8_t ch{static_cast<unsigned char>(string.front())};
+      absl::StrAppend(&result, "%", absl::Hex(ch, absl::kZeroPad2));
+      string.remove_prefix(1);
+    }
+  }
+  return result;
 }
 
 }  // namespace rules_elisp

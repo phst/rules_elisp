@@ -36,6 +36,8 @@ absl::Status CheckAscii(const std::wstring_view string);
   return string.find(L'\0') != string.npos;
 }
 
+std::string PercentEncode(std::string_view string);
+
 }  // namespace rules_elisp
 
 #endif  // ELISP_PRIVATE_TOOLS_STRINGS_H_
