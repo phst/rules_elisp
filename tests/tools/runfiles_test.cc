@@ -29,11 +29,10 @@
 
 namespace rules_elisp {
 
-using ::testing::Gt;
-using ::testing::SizeIs;
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
+using ::testing::IsEmpty;
 
 TEST(RunfilesTest, ResolvesRunfile) {
   const absl::StatusOr<Runfiles> runfiles =
@@ -41,7 +40,7 @@ TEST(RunfilesTest, ResolvesRunfile) {
   ASSERT_THAT(runfiles, IsOk());
   const absl::StatusOr<NativeString> resolved =
       runfiles->Resolve(RULES_ELISP_PROGRAM);
-  ASSERT_THAT(resolved, IsOkAndHolds(SizeIs(Gt(0))));
+  ASSERT_THAT(resolved, IsOkAndHolds(Not(IsEmpty())));
   const std::ifstream file(*resolved, std::ios::in | std::ios::binary);
   EXPECT_TRUE(file.is_open());
   EXPECT_TRUE(file.good());

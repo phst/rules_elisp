@@ -43,18 +43,19 @@
 
 namespace rules_elisp {
 
+using absl_testing::IsOk;
+using absl_testing::IsOkAndHolds;
+using absl_testing::StatusIs;
 using ::testing::_;
 using ::testing::Contains;
 using ::testing::EndsWith;
 using ::testing::Ge;
 using ::testing::Gt;
 using ::testing::HasSubstr;
+using ::testing::IsEmpty;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
-using absl_testing::IsOk;
-using absl_testing::IsOkAndHolds;
-using absl_testing::StatusIs;
 
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
@@ -196,7 +197,7 @@ TEST(MakeRelativeTest, Relativizes) {
 
 TEST(FileExistsTest, TestsThatFileExists) {
   const absl::StatusOr<NativeString> dir = ToNative(::testing::TempDir());
-  ASSERT_THAT(dir, IsOkAndHolds(SizeIs(Gt(0))));
+  ASSERT_THAT(dir, IsOkAndHolds(Not(IsEmpty())));
   EXPECT_TRUE(FileExists(*dir));
   EXPECT_FALSE(FileExists(*dir + RULES_ELISP_NATIVE_LITERAL("/nonexistent")));
   EXPECT_FALSE(FileExists(RULES_ELISP_NATIVE_LITERAL("")));
@@ -205,7 +206,7 @@ TEST(FileExistsTest, TestsThatFileExists) {
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
   EXPECT_THAT(Environment::Current(),
               IsOkAndHolds(Contains(Pair(
-                  RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR"), SizeIs(Gt(0))))));
+                  RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR"), Not(IsEmpty())))));
 }
 
 TEST(EnvironmentTest, CreateRejectsEmpty) {
@@ -286,7 +287,7 @@ TEST(EnvironmentTest, RemoveIsCaseSensitiveOnlyOnUnix) {
 TEST(TemporaryFileTest, CreateWorks) {
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
   ASSERT_THAT(file, IsOk());
-  ASSERT_THAT(file->name(), SizeIs(Gt(0)));
+  ASSERT_THAT(file->name(), Not(IsEmpty()));
 
   EXPECT_THAT(file->Write("Foo\n"), IsOk());
 
