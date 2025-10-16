@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Tests for Emacs Lisp Bazel rules.  These tests are outside the ‘elisp’ package
-# so that they can use external repositories loaded as development-only
-# dependencies in our MODULE.bazel file, e.g. the Go rules.
+# Integration tests for Emacs Lisp Bazel rules.  These tests are outside the
+# ‘elisp’ package so that they can use external repositories loaded as
+# development-only dependencies in our MODULE.bazel file, e.g. the Go rules.
 
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
@@ -34,7 +34,7 @@ licenses(["notice"])
 # keep
 elisp_library(
     name = "lib",
-    srcs = ["//tests:test-lib.el"],
+    srcs = ["//tests/integration:test-lib.el"],
 )
 
 elisp_test(

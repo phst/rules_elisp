@@ -52,7 +52,7 @@ cc_binary(
         shell.quote("RULES_ELISP_OUTPUT_ARGS=-1"),
         shell.quote("RULES_ELISP_INTERACTIVE=false"),
     ],
-    visibility = ["//tests:__pkg__"],
+    visibility = ["//tests/integration:__pkg__"],
     deps = LAUNCHER_DEPS + ["//elisp/private/tools:binary"],
 )
 
@@ -64,7 +64,7 @@ build_test(
 go_library(
     name = "wrap_lib",
     srcs = ["main.go"],
-    importpath = "github.com/phst/rules_elisp/tests/wrap",
+    importpath = "github.com/phst/rules_elisp/tests/integration/wrap",
 )
 
 go_binary(

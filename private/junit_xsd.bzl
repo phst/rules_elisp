@@ -30,7 +30,7 @@ def _junit_xsd_impl(ctx):
         "BUILD.bazel",
         Label("//private:junit_xsd.BUILD.template"),
         {
-            '"[tests_pkg]"': repr(str(Label("//tests:__pkg__"))),
+            '"[tests_pkg]"': repr(str(Label("//tests/integration:__pkg__"))),
         },
         executable = False,
     )

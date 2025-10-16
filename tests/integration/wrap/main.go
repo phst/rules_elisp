@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Binary wrap is a test helper program for //elisp:binary_test, which see.
+// Binary wrap is a test helper program for
+// //tests/integration:integration_test, which see.
 package main
 
 import (

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package tests_test
+package integration_test
 
 import (
 	"bufio"
@@ -39,11 +39,11 @@ import (
 )
 
 var (
-	test                  = testutil.RunfileFlag("//tests:test")
-	testEl                = testutil.RunfileFlag("//tests:test.el")
+	test                  = testutil.RunfileFlag("//tests/integration:test")
+	testEl                = testutil.RunfileFlag("//tests/integration:test.el")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
 	jUnitXsd              = testutil.RunfileFlag("@junit_xsd//:JUnit.xsd")
-	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests:coverage.dat")
+	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests/integration:coverage.dat")
 )
 
 func TestExitCode(t *testing.T) {
@@ -51,7 +51,7 @@ func TestExitCode(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	err := runTest(t,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 	)
 	switch err := err.(type) {
 	case nil:
@@ -75,7 +75,7 @@ func TestReportValid(t *testing.T) {
 		// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 	)
 
 	schema := *jUnitXsd
@@ -95,7 +95,7 @@ func TestReportContent(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 	)
 
 	got := parseReport(t, file)
@@ -114,7 +114,7 @@ func TestReportSharded(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 		"TEST_SHARD_STATUS_FILE="+statusFile,
 		"TEST_TOTAL_SHARDS=5",
 		"TEST_SHARD_INDEX=2",
@@ -152,7 +152,7 @@ func TestReportSkipTag(t *testing.T) {
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 	)
 
 	got := parseReport(t, file)
@@ -173,7 +173,7 @@ func TestReportFailFast(t *testing.T) {
 	runTest(t,
 		"XML_OUTPUT_FILE="+file,
 		"TESTBRIDGE_TEST_RUNNER_FAIL_FAST=1",
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 	)
 
 	got := parseReport(t, file)
@@ -429,7 +429,7 @@ func TestCoverage(t *testing.T) {
 	tempDir := t.TempDir()
 	manifest := filepath.Join(tempDir, "coverage-manifest.txt")
 	t.Logf("writing coverage manifest %s", manifest)
-	if err := os.WriteFile(manifest, []byte("tests/test-lib.el\nunrelated.el\n"), 0400); err != nil {
+	if err := os.WriteFile(manifest, []byte("tests/integration/test-lib.el\nunrelated.el\n"), 0400); err != nil {
 		t.Error(err)
 	}
 	coverageDir := t.TempDir()
@@ -438,7 +438,7 @@ func TestCoverage(t *testing.T) {
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	runTest(t,
 		"TESTBRIDGE_TEST_ONLY=(not (tag skip))",
-		"TEST_TARGET=//tests:test_test",
+		"TEST_TARGET=//tests/integration:test_test",
 		"COVERAGE=1",
 		"COVERAGE_MANIFEST="+manifest,
 		"COVERAGE_DIR="+coverageDir,
@@ -460,7 +460,7 @@ func TestCoverage(t *testing.T) {
 	// See geninfo(1) for the coverage file format.  Depending on the exact
 	// runfiles layout, the test runner might have printed different
 	// representations of test filenames.
-	got = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]test-lib\.el)$`).ReplaceAllString(got, "$1$2")
+	got = regexp.MustCompile(`(?m)^(SF:).+[/\\](tests[/\\]integration[/\\]test-lib\.el)$`).ReplaceAllString(got, "$1$2")
 	if diff := cmp.Diff(got, wantCoverage); diff != "" {
 		t.Error("-got +want:\n", diff)
 	}
@@ -468,7 +468,7 @@ func TestCoverage(t *testing.T) {
 	if *regenerateCoverageDat {
 		workspace := os.Getenv("BUILD_WORKSPACE_DIRECTORY")
 		if workspace == "" {
-			t.Fatal("to regenerate //tests:coverage.dat, run “bazel run -- //tests:go_default_test --regenerate-coverage-dat”")
+			t.Fatal("to regenerate //tests/integration:coverage.dat, run “bazel run -- //tests/integration:integration_test --regenerate-coverage-dat”")
 		}
 		if err := os.WriteFile(filepath.Join(workspace, "tests", "coverage.dat"), []byte(got), 0644); err != nil {
 			t.Fatal(err)
@@ -491,7 +491,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	source := *testEl
 	// Use the ancestor of the source file as repository directory so that
 	// filenames in the coverage report are correct.
-	workspace := filepath.Dir(filepath.Dir(source))
+	workspace := filepath.Dir(filepath.Dir(filepath.Dir(source)))
 	t.Logf("running test in workspace directory %s", workspace)
 	bin := *test
 	t.Logf("using test binary %s", bin)

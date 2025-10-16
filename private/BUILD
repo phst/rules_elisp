@@ -37,8 +37,8 @@ config_setting(
         "//elisp/private:__pkg__",
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/integration/wrap:__pkg__",
         "//tests/tools:__pkg__",
-        "//tests/wrap:__pkg__",
     ],
 )
 
@@ -52,8 +52,8 @@ selects.config_setting_group(
         "//elisp/private:__pkg__",
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/integration/wrap:__pkg__",
         "//tests/tools:__pkg__",
-        "//tests/wrap:__pkg__",
     ],
 )
 
@@ -67,8 +67,8 @@ selects.config_setting_group(
         "//elisp/private:__pkg__",
         "//elisp/private/tools:__pkg__",
         "//elisp/proto:__pkg__",
+        "//tests/integration/wrap:__pkg__",
         "//tests/tools:__pkg__",
-        "//tests/wrap:__pkg__",
     ],
 )
 

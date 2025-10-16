@@ -116,7 +116,7 @@ cc_library(
     ],
     visibility = [
         "//elisp:__pkg__",
-        "//tests/wrap:__pkg__",
+        "//tests/integration/wrap:__pkg__",
     ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
@@ -381,8 +381,8 @@ cc_library(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
+        "//tests/integration/wrap:__pkg__",
         "//tests/tools:__pkg__",
-        "//tests/wrap:__pkg__",
     ],
 )
 
@@ -459,7 +459,7 @@ exports_files(
     visibility = [
         "//elisp:__pkg__",
         "//elisp/toolchains:__pkg__",
-        "//tests/wrap:__pkg__",
+        "//tests/integration/wrap:__pkg__",
     ],
 )
 
@@ -470,8 +470,8 @@ exports_files(
         "binary.h",
     ],
     visibility = [
-        "//tests:__pkg__",
-        "//tests/wrap:__pkg__",
+        "//tests/integration:__pkg__",
+        "//tests/integration/wrap:__pkg__",
     ],
 )
 

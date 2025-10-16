@@ -22,7 +22,7 @@
 
 (require 'cl-lib)
 (require 'ert)
-(require 'tests/test-lib)
+(require 'tests/integration/test-lib)
 
 ;; Ensure that command-line arguments are passed on correctly.
 (cl-assert (equal command-line-args-left '("arg 1" "arg\n2 äα𝐴🐈'")) :show-args)
@@ -74,7 +74,7 @@
                       "<![CDATA[ ]]> & < > \" ' <!-- -->")))
 
 (ert-deftest coverage ()
-  (tests/test-function nil))
+  (tests/integration/test-function nil))
 
 (ert-deftest command-line ()
   (should (equal remaining-args '("arg 1" "arg\n2 äα𝐴🐈'"))))

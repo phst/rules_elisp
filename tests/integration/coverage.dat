@@ -1,9 +1,9 @@
-TN://tests:test_test
-SF:tests/test-lib.el
-FN:29,tests/test-function
+TN://tests/integration:test_test
+SF:tests/integration/test-lib.el
+FN:29,tests/integration/test-function
 FN:41,foo@cl-flet@0
 FN:43,foo@cl-flet@1
-FNDA:1,tests/test-function
+FNDA:1,tests/integration/test-function
 FNDA:0,foo@cl-flet@0
 FNDA:0,foo@cl-flet@1
 FNF:3

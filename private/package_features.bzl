@@ -33,11 +33,12 @@ visibility([
     "//gazelle/testdata",
     "//private/testutil",
     "//tests",
-    "//tests/pkg",
+    "//tests/integration",
+    "//tests/integration/pkg",
+    "//tests/integration/wrap",
     "//tests/proto",
     "//tests/runfiles",
     "//tests/tools",
-    "//tests/wrap",
 ])
 
 # Features for all packages.  These may not contain select expressions.
