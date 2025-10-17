@@ -25,6 +25,7 @@
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
 #include "elisp/private/tools/strings.h"
+#include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
 
@@ -42,7 +43,14 @@ absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
     const absl::StatusOr<std::string> narrow = ToNarrow(dir, Encoding::kAscii);
     const absl::StatusOr<NativeString> resolved =
         narrow.ok() ? runfiles.Resolve(*narrow) : narrow.status();
-    if (resolved.ok()) {
+    // Even with manifest-based runfiles (e.g. on Windows), Bazel creates a
+    // runfiles directory with an empty “_main” subdirectory.  The C++ runfiles
+    // library incorrectly detects this directory as a valid runfiles tree.
+    // Work around this by rejecting empty directories; they couldn’t possibly
+    // contain Emacs Lisp files to be loaded.
+    // TODO: Arguably this is a bug in the C++ runfiles library.  It should
+    // ignore empty runfiles trees.
+    if (resolved.ok() && IsNonEmptyDirectory(*resolved)) {
       args.push_back(RULES_ELISP_NATIVE_LITERAL("--directory=") + *resolved);
     } else {
       if (!runfiles_handler_installed) {

@@ -278,6 +278,7 @@ cc_library(
         ":platform",
         ":runfiles_cc",
         ":strings",
+        ":system",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
