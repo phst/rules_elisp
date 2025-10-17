@@ -32,6 +32,7 @@
 #  endif
 #  include <windows.h>
 #else
+#  include <dirent.h>
 #  include <limits.h>
 #  include <spawn.h>
 #  include <stdio.h>
@@ -404,6 +405,36 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
   struct stat st;
   return lstat(Pointer(string), &st) == 0;
 #endif
+}
+
+[[nodiscard]] bool IsNonEmptyDirectory(const NativeStringView directory) {
+  if (directory.empty() || ContainsNull(directory)) return false;
+#ifdef _WIN32
+  std::wstring pattern = NativeString(directory) + L"\\*";
+  WIN32_FIND_DATAW data;
+  const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
+  if (handle == INVALID_HANDLE_VALUE) return false;
+  const auto cleanup = absl::MakeCleanup([handle]() {
+    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
+  });
+  do {
+    const std::wstring_view name = data.cFileName;
+    if (name != L"." && name != L"..") return true;
+  } while (::FindNextFileW(handle, &data));
+#else
+  std::string string(directory);
+  DIR* const absl_nullable dir = opendir(Pointer(string));
+  if (dir == nullptr) return false;
+  const auto cleanup = absl::MakeCleanup([dir]() {
+    if (closedir(dir) != 0) LOG(ERROR) << ErrnoStatus("closedir");
+  });
+  const struct dirent* absl_nullable entry;
+  while ((entry = readdir(dir)) != nullptr) {
+    const std::string_view name = entry->d_name;
+    if (name != "." && name != "..") return true;
+  }
+#endif
+  return false;
 }
 
 namespace {

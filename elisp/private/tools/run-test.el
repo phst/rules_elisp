@@ -1107,6 +1107,13 @@ exact copies as equal."
                          cl-declarations-or-string def-body))))
       (when reporter (progress-reporter-done reporter))))
 
+  ;; DEBUG WINDOWS
+  (dolist (dir load-path)
+    (message "LOAD-DIR %S" dir)
+    (when (string-suffix-p "_main" dir)
+      (dolist (file (directory-files-recursively dir (rx (or ".el" ".elc") eos)))
+        (message "LISP-FILE %S" file))))
+
   ;; Load test source files.  If coverage is enabled, check for a file with a
   ;; well-known extension first.  The Bazel runfiles machinery is expected to
   ;; generate these files for source files that should be instrumented.  See the
