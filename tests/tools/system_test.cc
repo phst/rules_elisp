@@ -14,14 +14,6 @@
 
 #include "elisp/private/tools/system.h"
 
-#include <stdlib.h>
-
-#ifdef _WIN32
-#  include <direct.h>
-#else
-#  include <sys/stat.h>
-#endif
-
 #include <cerrno>
 #include <cstdlib>
 #include <fstream>
@@ -64,17 +56,6 @@ using ::testing::Not;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
-
-static absl::Status CreateDirectory(const NativeString& name) {
-  CHECK(!name.empty());
-  CHECK(!ContainsNull(name));
-#ifdef _WIN32
-  const int status = _wmkdir(name.c_str());
-#else
-  const int status = mkdir(name.c_str(), S_IRWXU);
-#endif
-  return status == 0 ? absl::OkStatus() : ErrnoStatus("mkdir", name);
-}
 
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
@@ -324,6 +305,31 @@ TEST(UnlinkTest, RemovesFile) {
   EXPECT_FALSE(FileExists(file));
   EXPECT_THAT(Unlink(file), StatusIs(absl::StatusCode::kNotFound));
   EXPECT_FALSE(FileExists(file));
+}
+
+TEST(CreateRemoveDirectoryTest, CreatesAndRemovesDirectories) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("dir");
+  EXPECT_THAT(CreateDirectory(dir), IsOk());
+
+  const NativeString file =
+      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+  std::ofstream stream(file,
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  EXPECT_TRUE(stream.flush());
+  EXPECT_TRUE(stream.good());
+  stream.close();
+
+  EXPECT_THAT(RemoveDirectory(dir),
+              StatusIs(absl::StatusCode::kFailedPrecondition));
+  EXPECT_THAT(Unlink(file), IsOk());
+  EXPECT_THAT(RemoveDirectory(dir), IsOk());
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {

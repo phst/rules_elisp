@@ -38,6 +38,7 @@
 #  include <stdio.h>
 #  include <stdlib.h>
 #  include <sys/stat.h>
+#  include <sys/types.h>
 #  include <sys/wait.h>
 #  include <unistd.h>
 #endif
@@ -435,6 +436,45 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
   }
 #endif
   return false;
+}
+
+#undef CreateDirectory
+
+absl::Status CreateDirectory(const NativeStringView name) {
+  if (name.empty()) return absl::InvalidArgumentError("Empty directory name");
+  if (ContainsNull(name)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Directory name %s contains null character", name));
+  }
+  NativeString string(name);
+#ifdef _WIN32
+  const BOOL ok = ::CreateDirectoryW(Pointer(string), nullptr);
+  if (!ok) return WindowsStatus("CreateDirectoryW", name);
+#else
+  constexpr mode_t mode = S_IRWXU;
+  const int result = mkdir(Pointer(string), mode);
+  if (result != 0) return ErrnoStatus("mkdir", name, mode);
+#endif
+  return absl::OkStatus();
+}
+
+#undef RemoveDirectory
+
+absl::Status RemoveDirectory(const NativeStringView name) {
+  if (name.empty()) return absl::InvalidArgumentError("Empty directory name");
+  if (ContainsNull(name)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Directory name %s contains null character", name));
+  }
+  NativeString string(name);
+#ifdef _WIN32
+  const BOOL ok = ::RemoveDirectoryW(Pointer(string));
+  if (!ok) return WindowsStatus("RemoveDirectoryW", name);
+#else
+  const int result = rmdir(Pointer(string));
+  if (result != 0) return ErrnoStatus("rmdir", name);
+#endif
+  return absl::OkStatus();
 }
 
 namespace {
