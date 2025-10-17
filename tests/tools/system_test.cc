@@ -16,6 +16,12 @@
 
 #include <stdlib.h>
 
+#ifdef _WIN32
+#  include <direct.h>
+#else
+#  include <sys/stat.h>
+#endif
+
 #include <cerrno>
 #include <cstdlib>
 #include <fstream>
@@ -27,6 +33,7 @@
 #include <vector>
 
 #include "absl/base/nullability.h"
+#include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
@@ -57,6 +64,17 @@ using ::testing::Not;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
+
+static absl::Status CreateDirectory(const NativeString& name) {
+  CHECK(!name.empty());
+  CHECK(!ContainsNull(name));
+#ifdef _WIN32
+  const int status = _wmkdir(name.c_str());
+#else
+  const int status = mkdir(name.c_str(), S_IRWXU);
+#endif
+  return status == 0 ? absl::OkStatus() : ErrnoStatus("mkdir", name);
+}
 
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
@@ -234,6 +252,52 @@ TEST(FileExistsTest, TestsThatFileExists) {
   EXPECT_TRUE(FileExists(*dir));
   EXPECT_FALSE(FileExists(*dir + RULES_ELISP_NATIVE_LITERAL("/nonexistent")));
   EXPECT_FALSE(FileExists(RULES_ELISP_NATIVE_LITERAL("")));
+}
+
+TEST(IsNonEmptyDirectoryTest, ReturnsFalseForFile) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> file = runfiles->Resolve(RULES_ELISP_DATA);
+  ASSERT_THAT(file, IsOk());
+
+  EXPECT_FALSE(IsNonEmptyDirectory(*file));
+}
+
+TEST(IsNonEmptyDirectoryTest, ReturnsTrueForEmptyDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("nonempty-dir");
+  EXPECT_THAT(CreateDirectory(dir), IsOk());
+
+  EXPECT_TRUE(IsNonEmptyDirectory(*temp));
+  EXPECT_FALSE(IsNonEmptyDirectory(dir));
+}
+
+TEST(IsNonEmptyDirectoryTest, ReturnsFalseForNonEmptyDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("empty-dir");
+  EXPECT_THAT(CreateDirectory(dir), IsOk());
+
+  EXPECT_TRUE(IsNonEmptyDirectory(*temp));
+  EXPECT_FALSE(IsNonEmptyDirectory(dir));
+
+  const NativeString file =
+      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file.txt");
+  std::ofstream stream(file,
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  stream.close();
+
+  EXPECT_TRUE(IsNonEmptyDirectory(dir));
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
