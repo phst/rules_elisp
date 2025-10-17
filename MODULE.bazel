@@ -122,7 +122,7 @@ bazel_dep(name = "gazelle_cc", version = "0.1.0", dev_dependency = True)
 register_toolchains("@local_config_cc_toolchains//:all")
 
 # Python-specific dependencies
-python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
     configure_coverage_tool = True,
     python_version = "3.12",
