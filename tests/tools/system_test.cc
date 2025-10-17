@@ -345,57 +345,35 @@ TEST(TemporaryFileTest, CreateWorks) {
 }
 
 TEST(RunTest, ReturnsExitCode) {
-  if constexpr (kWindows) {
-    const NativeString cmd = GetEnv(RULES_ELISP_NATIVE_LITERAL("ComSpec"));
-    EXPECT_THAT(cmd, SizeIs(Gt(3)));
-    EXPECT_THAT(rules_elisp::Run(
-                    {
-                        cmd,
-                        RULES_ELISP_NATIVE_LITERAL("/U"),
-                        RULES_ELISP_NATIVE_LITERAL("/D"),
-                        RULES_ELISP_NATIVE_LITERAL("/S"),
-                        RULES_ELISP_NATIVE_LITERAL("/C"),
-                        RULES_ELISP_NATIVE_LITERAL("EXIT 0"),
-                    },
-                    {}),
-                IsOkAndHolds(0));
-    EXPECT_THAT(rules_elisp::Run(
-                    {
-                        cmd,
-                        RULES_ELISP_NATIVE_LITERAL("/U"),
-                        RULES_ELISP_NATIVE_LITERAL("/D"),
-                        RULES_ELISP_NATIVE_LITERAL("/S"),
-                        RULES_ELISP_NATIVE_LITERAL("/C"),
-                        RULES_ELISP_NATIVE_LITERAL("EXIT 23"),
-                    },
-                    {}),
-                IsOkAndHolds(23));
-  } else {
-    EXPECT_THAT(
-        rules_elisp::Run({RULES_ELISP_NATIVE_LITERAL("/usr/bin/true")}, {}),
-        IsOkAndHolds(0));
-    EXPECT_THAT(
-        rules_elisp::Run({RULES_ELISP_NATIVE_LITERAL("/usr/bin/false")}, {}),
-        IsOkAndHolds(1));
-  }
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> helper =
+      runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+
+  EXPECT_THAT(
+      rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
+      IsOkAndHolds(0));
+  EXPECT_THAT(
+      rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
+      IsOkAndHolds(23));
 }
 
 TEST(RunTest, SupportsDeadlineOnWindows) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> helper =
+      runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+
   if constexpr (kWindows) {
     const absl::Time deadline = absl::Now() + absl::Seconds(1);
-    const NativeString cmd = GetEnv(RULES_ELISP_NATIVE_LITERAL("ComSpec"));
-    EXPECT_THAT(cmd, SizeIs(Gt(3)));
-    EXPECT_THAT(rules_elisp::Run(
-                    {
-                        cmd,
-                        RULES_ELISP_NATIVE_LITERAL("/U"),
-                        RULES_ELISP_NATIVE_LITERAL("/D"),
-                        RULES_ELISP_NATIVE_LITERAL("/S"),
-                        RULES_ELISP_NATIVE_LITERAL("/K"),
-                        RULES_ELISP_NATIVE_LITERAL("PAUSE"),
-                    },
-                    {}, deadline),
-                StatusIs(absl::StatusCode::kDeadlineExceeded));
+    EXPECT_THAT(
+        rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
+                         {}, deadline),
+        StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }
 
