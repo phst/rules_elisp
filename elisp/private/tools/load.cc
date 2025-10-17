@@ -42,7 +42,7 @@ absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
     const absl::StatusOr<std::string> narrow = ToNarrow(dir, Encoding::kAscii);
     const absl::StatusOr<NativeString> resolved =
         narrow.ok() ? runfiles.Resolve(*narrow) : narrow.status();
-    if (resolved.ok()) {
+    if (resolved.ok() && IsNonEmptyDirectory(*resolved)) {
       args.push_back(RULES_ELISP_NATIVE_LITERAL("--directory=") + *resolved);
     } else {
       if (!runfiles_handler_installed) {
