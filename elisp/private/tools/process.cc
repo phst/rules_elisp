@@ -79,6 +79,11 @@ absl::StatusOr<int> RunLauncher(
   // otherwise relative filenames will be all messed up.  See
   // https://github.com/bazelbuild/bazel/issues/7190.
   orig_env->Remove(RULES_ELISP_NATIVE_LITERAL("RUN_UNDER_RUNFILES"));
+  if (orig_env->Get(RULES_ELISP_NATIVE_LITERAL("RUNFILES_MANIFEST_ONLY")) ==
+      RULES_ELISP_NATIVE_LITERAL("1")) {
+    merged_env->Remove(RULES_ELISP_NATIVE_LITERAL("RUNFILES_DIR"));
+    merged_env->Remove(RULES_ELISP_NATIVE_LITERAL("JAVA_RUNFILES"));
+  }
   merged_env->Merge(*orig_env);
   return Run(final_args, *merged_env);
 }
