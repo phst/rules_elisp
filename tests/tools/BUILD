@@ -170,7 +170,10 @@ cc_test(
     timeout = "short",
     srcs = ["system_test.cc"],
     copts = COPTS + CXXOPTS,
-    data = ["BUILD"],
+    data = [
+        "BUILD",
+        "//tests/tools/helper",
+    ],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -178,6 +181,7 @@ cc_test(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_DATA=R"*($(rlocationpath :BUILD))*"'),
+        shell.quote('RULES_ELISP_HELPER=R"*($(rlocationpath //tests/tools/helper))*"'),
     ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
