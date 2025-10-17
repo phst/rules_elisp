@@ -131,6 +131,7 @@ absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
                                           NativeStringView base);
 [[nodiscard]] bool FileExists(NativeStringView file);
+[[nodiscard]] bool IsNonEmptyDirectory(NativeStringView directory);
 
 class Environment final {
  private:
