@@ -32,7 +32,7 @@ go_library(
     visibility = [
         "//gazelle:__pkg__",
         "//tests/integration:__pkg__",
-        "//tests/proto:__pkg__",
+        "//tests/proto/integration:__pkg__",
     ],
     deps = ["@rules_go//go/runfiles"],
 )

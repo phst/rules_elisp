@@ -16,7 +16,7 @@
 //
 // Most tests are in //tests/proto:proto-test.el; this file contains tests that
 // require a fresh Emacs process.
-package proto_test
+package integration_test
 
 import (
 	"bytes"
@@ -29,7 +29,7 @@ import (
 	"github.com/phst/rules_elisp/private/testutil"
 )
 
-var cat = testutil.RunfileFlag("//tests/proto:cat")
+var cat = testutil.RunfileFlag("//tests/proto/integration:cat")
 
 // Integration test for elisp/proto/insert-stdin.
 func TestInsertStdin(t *testing.T) {
