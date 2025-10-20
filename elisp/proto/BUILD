@@ -214,7 +214,3 @@ exports_files(
     ["elisp_proto_library.bzl"],
     visibility = ["//docs:__pkg__"],
 )
-
-# gazelle:resolve elisp elisp/proto/module :module
-# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ :${1}_elisp_proto
-# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ :${1}_${2}_elisp_proto

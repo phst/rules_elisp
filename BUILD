@@ -48,3 +48,7 @@ exports_files(
 # gazelle:default_visibility //visibility:private
 # gazelle:exclude README.org
 # gazelle:cc_group unit
+
+# gazelle:resolve elisp elisp/proto/module //elisp/proto:module
+# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ //elisp/proto:${1}_elisp_proto
+# gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ //elisp/proto:${1}_${2}_elisp_proto
