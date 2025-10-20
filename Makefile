@@ -50,13 +50,13 @@ coverage:
 	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
 
 check-extra:
-        # We don’t want any Go rules in the public packages, as our users would
-        # have to depend on the Go rules then as well.
-	! $(GIT) grep -I -r -F -n -e '@rules_go' -- elisp emacs
+        # We don’t want any Python or Go rules in the public packages, as our
+        # users would have to depend on the Python or Go rules then as well.
+	! $(GIT) grep -I -r -E -n -e '@rules_(python|go)' -- elisp emacs
         # Restrict loaded Starlark files in public packages to well-known
         # official repositories to avoid dependency creep.
 	! $(GIT) grep -I -r -E -n -e '^load\("@' \
-	  --and --not -e '@(bazel_skylib|protobuf|rules_cc|rules_python)//' \
+	  --and --not -e '@(bazel_skylib|protobuf|rules_cc)//' \
 	  -- elisp emacs
         # Find BUILD files without default visibility.  See
         # https://opensource.google/documentation/reference/thirdparty/new_license_rules#new_requirements.
