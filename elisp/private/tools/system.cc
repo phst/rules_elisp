@@ -414,9 +414,9 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
   if (handle == INVALID_HANDLE_VALUE) return false;
-  const auto cleanup = absl::MakeCleanup([handle]() {
+  const absl::Cleanup cleanup = [handle]() {
     if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
-  });
+  };
   do {
     const std::wstring_view name = data.cFileName;
     if (name != L"." && name != L"..") return true;
@@ -425,9 +425,9 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
   std::string string(directory);
   DIR* const absl_nullable dir = opendir(Pointer(string));
   if (dir == nullptr) return false;
-  const auto cleanup = absl::MakeCleanup([dir]() {
+  const absl::Cleanup cleanup = [dir]() {
     if (closedir(dir) != 0) LOG(ERROR) << ErrnoStatus("closedir");
-  });
+  };
   const struct dirent* absl_nullable entry;
   while ((entry = readdir(dir)) != nullptr) {
     const std::string_view name = entry->d_name;
@@ -734,10 +734,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   success = ::CloseHandle(process_info.hThread);
   if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
-  const auto close_handle = absl::MakeCleanup([&process_info] {
+  const absl::Cleanup close_handle = [&process_info] {
     const BOOL success = ::CloseHandle(process_info.hProcess);
     if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
-  });
+  };
   const DWORD timeout_ms =
       has_deadline ? static_cast<DWORD>(std::clamp(
                          absl::ToInt64Milliseconds(deadline - absl::Now()),
