@@ -300,6 +300,32 @@ TEST(IsNonEmptyDirectoryTest, ReturnsFalseForNonEmptyDirectory) {
   EXPECT_TRUE(IsNonEmptyDirectory(dir));
 }
 
+TEST(UnlinkTest, RemovesFile) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString file =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("unlink-test");
+
+  EXPECT_FALSE(FileExists(file));
+  EXPECT_THAT(Unlink(file), StatusIs(absl::StatusCode::kNotFound));
+
+  std::ofstream stream(file,
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  EXPECT_TRUE(stream.flush());
+  EXPECT_TRUE(stream.good());
+  stream.close();
+
+  EXPECT_TRUE(FileExists(file));
+  EXPECT_THAT(Unlink(file), IsOk());
+  EXPECT_FALSE(FileExists(file));
+  EXPECT_THAT(Unlink(file), StatusIs(absl::StatusCode::kNotFound));
+  EXPECT_FALSE(FileExists(file));
+}
+
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
   EXPECT_THAT(Environment::Current(),
               IsOkAndHolds(Contains(Pair(
