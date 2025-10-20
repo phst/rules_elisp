@@ -33,7 +33,6 @@ elisp_test(
     name = "proto_test",
     size = "small",
     srcs = ["proto-test.el"],
-    flaky = True,  # https://debbugs.gnu.org/46722
     deps = [
         ":test_elisp_proto",
         "//elisp/proto",
