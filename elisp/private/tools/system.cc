@@ -64,7 +64,7 @@
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
-#include "absl/cleanup/cleanup.h"  // IWYU pragma: keep, only on Windows
+#include "absl/cleanup/cleanup.h"
 #include "absl/container/hash_container_defaults.h"
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
