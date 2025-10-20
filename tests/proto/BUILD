@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
-load("@rules_go//go:def.bzl", "go_test")
-load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -44,30 +41,6 @@ elisp_test(
         "//elisp/proto:type_elisp_proto",  # keep
         "//elisp/proto:wrappers_elisp_proto",
     ],
-)
-
-TEST_DATA = ["//tests/proto:cat"]
-
-go_test(
-    name = "proto_x_test",
-    size = "medium",
-    srcs = glob(["*_test.go"]),
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
-        for t in TEST_DATA
-    ],
-    data = TEST_DATA,
-    deps = ["//private/testutil"],
-)
-
-elisp_binary(
-    name = "cat",
-    src = "cat.el",
-    input_args = [2],
-    output_args = [2],
-    deps = ["//elisp/proto:module"],
 )
 
 proto_library(

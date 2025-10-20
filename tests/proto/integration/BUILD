@@ -1,0 +1,51 @@
+# Copyright 2020-2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@bazel_skylib//lib:shell.bzl", "shell")
+load("@rules_go//go:def.bzl", "go_test")
+load("//elisp:elisp_binary.bzl", "elisp_binary")
+load("//private:package_features.bzl", "PACKAGE_FEATURES")
+
+package(
+    default_applicable_licenses = ["//:license"],
+    default_testonly = True,
+    default_visibility = ["//visibility:private"],
+    features = PACKAGE_FEATURES,
+)
+
+licenses(["notice"])
+
+TEST_DATA = ["//tests/proto/integration:cat"]
+
+go_test(
+    name = "integration_test",
+    size = "medium",
+    srcs = glob(["*_test.go"]),
+    args = [
+        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
+        # add additional quoting.
+        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
+        for t in TEST_DATA
+    ],
+    data = TEST_DATA,
+    deps = ["//private/testutil"],
+)
+
+elisp_binary(
+    name = "cat",
+    src = "cat.el",
+    input_args = [2],
+    output_args = [2],
+    deps = ["//elisp/proto:module"],
+)

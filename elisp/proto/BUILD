@@ -145,7 +145,7 @@ elisp_cc_module(
     }),
     features = FEATURES + ["-default_link_libs"],
     local_defines = DEFINES,
-    visibility = ["//tests/proto:__pkg__"],
+    visibility = ["//tests/proto/integration:__pkg__"],
     deps = [
         ":any_upb_c_proto",
         ":any_upb_proto_reflection",

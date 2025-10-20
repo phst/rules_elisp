@@ -37,6 +37,7 @@ visibility([
     "//tests/integration/pkg",
     "//tests/integration/wrap",
     "//tests/proto",
+    "//tests/proto/integration",
     "//tests/runfiles",
     "//tests/tools",
     "//tests/tools/helper",
