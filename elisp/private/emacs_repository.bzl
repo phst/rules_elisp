@@ -17,11 +17,10 @@
 visibility("private")
 
 def _emacs_repository_impl(ctx):
-    output = ctx.attr.output
-    ctx.download(
+    ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
         url = ctx.attr.urls or fail("archive URLs missing"),
-        output = output,
+        stripPrefix = ctx.attr.strip_prefix,
     )
     ctx.template(
         "BUILD.bazel",
@@ -32,8 +31,6 @@ def _emacs_repository_impl(ctx):
             '"[cc_library.bzl]"': repr(str(Label("@rules_cc//cc:cc_library.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
             '"[gazelle_pkg]"': repr(str(Label("//gazelle:__pkg__"))),
-            '"[src]"': repr(output),
-            '"[strip_prefix]"': repr(ctx.attr.strip_prefix),
             '"[mode]"': repr(ctx.attr.mode),
             "[[compatible_with]]": repr([str(label) for label in ctx.attr.target_compatible_with]),
         },
@@ -45,7 +42,6 @@ emacs_repository = repository_rule(
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
         "integrity": attr.string(mandatory = True),
-        "output": attr.string(mandatory = True),
         "strip_prefix": attr.string(),
         "mode": attr.string(mandatory = True, values = ["source", "release"]),
         "target_compatible_with": attr.label_list(),
