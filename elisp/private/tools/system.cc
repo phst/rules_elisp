@@ -612,7 +612,7 @@ bool Environment::Equal::operator()(const NativeStringView a,
               CanonicalizeEnvironmentVariable(b));
 }
 
-static absl::Status Unlink(const NativeStringView file) {
+absl::Status Unlink(const NativeStringView file) {
   if (file.empty()) return absl::InvalidArgumentError("Empty filename");
   if (ContainsNull(file)) {
     return absl::InvalidArgumentError(
