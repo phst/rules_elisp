@@ -162,17 +162,19 @@ def _build(*, source: pathlib.Path | tuple[pathlib.Path, pathlib.PurePosixPath],
 def _unpack(*, source: tuple[pathlib.Path, pathlib.PurePosixPath],
             install: pathlib.Path,
             builtin_features: bool) -> Optional[Set[str]]:
-    if not isinstance(source, tuple):
-        raise NotImplementedError(
-            'in release mode only archive sources are supported')
-    archive, prefix = source
     try:
         # Bazel sometimes creates the output directory; remove it so that
         # _unpack_archive works correctly.
         install.rmdir()
     except FileNotFoundError:
         pass
-    _unpack_archive(archive, install, prefix=prefix)
+
+    if isinstance(source, tuple):
+        archive, prefix = source
+        _unpack_archive(archive, install, prefix=prefix)
+    else:
+        shutil.copytree(source, install)
+
     lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
     features = _builtin_features(lisp) if builtin_features else None
     return features
