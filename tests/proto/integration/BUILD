@@ -31,7 +31,7 @@ TEST_DATA = ["//tests/proto/integration:cat"]
 go_test(
     name = "integration_test",
     size = "medium",
-    srcs = glob(["*_test.go"]),
+    srcs = ["module_test.go"],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.

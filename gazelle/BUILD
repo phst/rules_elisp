@@ -73,7 +73,12 @@ go_test(
     name = "gazelle_test",
     size = "medium",
     timeout = "short",
-    srcs = glob(["*_test.go"]),
+    srcs = [
+        "generate_test.go",
+        "imports_test.go",
+        "integration_test.go",
+        "resolve_test.go",
+    ],
     args = [
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
