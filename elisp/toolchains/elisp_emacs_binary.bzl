@@ -44,9 +44,7 @@ def _elisp_emacs_binary_impl(ctx):
         emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
         install = _install(ctx, shell_toolchain, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
     elif mode == "release":
-        if not archive:
-            fail("release mode requires a source archive")
-        install = _unpack(ctx, archive, strip_prefix = ctx.attr.strip_prefix)
+        install = _unpack(ctx, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
     else:
         fail("invalid build mode {}".format(mode))
 
@@ -252,13 +250,18 @@ def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readm
     )
     return install
 
-def _unpack(ctx, archive, *, strip_prefix = ""):
+def _unpack(ctx, *, archive, strip_prefix, readme):
     """Unpacks Emacs from a release archive.
 
     Args:
       ctx (ctx): rule context
       archive (File): location of the Emacs release archive to unpack
-      strip_prefix (str): prefix to strip from the files in the archive
+      strip_prefix (str): prefix to strip from the files in the archive, or
+          `None` if building from an unpacked release tree
+      strip_prefix (str): prefix to strip from the files in `archive`; ignored
+          if building from an unpacked release tree
+      readme (File): location of the README file in the Emacs release tree; only
+          used if `archive` is `None`
 
     Returns:
       a File representing the Emacs installation directory
@@ -266,8 +269,11 @@ def _unpack(ctx, archive, *, strip_prefix = ""):
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add("--release")
-    args.add(archive, format = "--archive=%s")
-    args.add(strip_prefix, format = "--strip-prefix=%s")
+    if archive:
+        args.add(archive, format = "--archive=%s")
+        args.add(strip_prefix, format = "--strip-prefix=%s")
+    if readme:
+        args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
     secondary_outs = []
     if ctx.outputs.module_header:
