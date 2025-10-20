@@ -81,5 +81,9 @@ elisp_proto_library(
     deps = [":test_proto"],
 )
 
+# TODO: Remove the next pragma once
+# https://github.com/EngFlow/gazelle_cc/pull/83 is released.
 # gazelle:lang go,proto,starlark,elisp
+
+# gazelle:cc_generate_proto false
 # gazelle:go_generate_proto false
