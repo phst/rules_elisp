@@ -43,7 +43,15 @@
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   absl::InitializeLog();
-  absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
+  absl::SetStderrThreshold(
+#ifdef RULES_ELISP_TEST
+      // Be a bit more verbose for tests, since Bazel will only show output on
+      // explicit request.
+      absl::LogSeverityAtLeast::kInfo
+#else
+      absl::LogSeverityAtLeast::kWarning
+#endif
+  );
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
 #ifndef RULES_ELISP_EMACS
