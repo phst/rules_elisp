@@ -135,11 +135,11 @@ cc_library(
 cc_binary(
     name = "run_binary",
     srcs = ["run_binary.cc"],
-    copts = COPTS + CXXOPTS,
-    features = FEATURES,
-    linkopts = LINKOPTS,
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = LAUNCHER_DEFINES,
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
