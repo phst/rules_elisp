@@ -25,6 +25,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"slices"
 	"testing"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
@@ -111,27 +112,42 @@ func TestRunWrapped(t *testing.T) {
 	}
 	runfilesLib := *runfilesElc
 	gotArgs := got.Args
-	wantArgs := []string{"--quick", "--batch"}
+	dir, err := runfiles.Rlocation("phst_rules_elisp")
+	if err != nil {
+		dir = "ERROR \u0000" // this can never match
+	}
 	// The load path setup depends on whether we use manifest-based or
 	// directory-based runfiles.
-	if dir, err := runfiles.Rlocation("phst_rules_elisp"); err == nil {
+	wantArgs := [][]string{
 		// Directory-based runfiles.
-		wantArgs = append(wantArgs, "--directory="+dir)
-	} else {
+		{
+			"--quick",
+			"--batch",
+			"--directory=" + dir,
+			"--option",
+			*binaryCc,
+			" \t\n\r\f äα𝐴🐈'\\\"",
+			"/:" + outputFile,
+		},
 		// Manifest-based runfiles.
-		wantArgs = append(wantArgs,
-			"--load="+runfilesLib,
+		{
+			"--quick",
+			"--batch",
+			"--load=" + runfilesLib,
 			"--funcall=elisp/runfiles/install-handler",
 			"--directory=/bazel-runfile:phst_rules_elisp",
-		)
+			"--option",
+			*binaryCc,
+			" \t\n\r\f äα𝐴🐈'\\\"",
+			"/:" + outputFile,
+		},
 	}
-	wantArgs = append(wantArgs,
-		"--option",
-		*binaryCc,
-		" \t\n\r\f äα𝐴🐈'\\\"",
-		"/:"+outputFile,
-	)
-	if diff := cmp.Diff(gotArgs, wantArgs); diff != "" {
+	var diffs []string
+	for _, want := range wantArgs {
+		diffs = append(diffs, cmp.Diff(gotArgs, want))
+	}
+	// Pick the smaller difference for reporting.
+	if diff := slices.MinFunc(diffs, func(a, b string) int { return len(a) - len(b) }); diff != "" {
 		t.Errorf("positional arguments: -got +want:\n%s", diff)
 	}
 	jsonData := []byte(got.Manifest)
