@@ -212,8 +212,8 @@ build_test(
 )
 
 build_test(
-    name = "run_test_el_test",
-    targets = ["//elisp/private/tools:run_test_el"],
+    name = "run_tst_el_test",
+    targets = ["//elisp/private/tools:run_tst_el"],
 )
 
 build_test(

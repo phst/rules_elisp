@@ -38,7 +38,7 @@
 #endif
 
 #ifdef RULES_ELISP_TEST
-#  include "elisp/private/tools/test.h"
+#  include "elisp/private/tools/tst.h"
 #endif
 
 int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {

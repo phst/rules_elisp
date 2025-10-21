@@ -1,4 +1,4 @@
-;;; run-test.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
+;;; run-tst.el --- run ERT tests with Bazel      -*- lexical-binding: t; -*-
 
 ;; Copyright 2020-2025 Google LLC
 ;;
@@ -1201,7 +1201,7 @@ exact copies as equal."
   (kill-emacs exit-code))
 
 ;; Local Variables:
-;; read-symbol-shorthands: (("@" . "elisp/private/tools/run-test--"))
+;; read-symbol-shorthands: (("@" . "elisp/private/tools/run-tst--"))
 ;; End:
 
-;;; run-test.el ends here
+;;; run-tst.el ends here

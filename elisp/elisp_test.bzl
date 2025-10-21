@@ -106,7 +106,7 @@ elisp_test = rule(
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:test")],
+            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:tst")],
             providers = [CcInfo],
         ),
         # Magic coverage attributes,

@@ -195,10 +195,10 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   emacs_args.insert(emacs_args.end(), load_path_args->cbegin(),
                     load_path_args->cend());
 
-  const absl::StatusOr<NativeString> run_test_elc =
-      runfiles->Resolve(RULES_ELISP_RUN_TEST_ELC);
-  if (!run_test_elc.ok()) return run_test_elc.status();
-  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *run_test_elc);
+  const absl::StatusOr<NativeString> run_tst_elc =
+      runfiles->Resolve(RULES_ELISP_RUN_TST_ELC);
+  if (!run_tst_elc.ok()) return run_tst_elc.status();
+  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *run_tst_elc);
 
   for (const NativeString& file : opts.load_files) {
     const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
