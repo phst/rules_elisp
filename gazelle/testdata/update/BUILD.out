@@ -11,6 +11,13 @@ proto_library(
 some_rule(name = "module")
 # gazelle:resolve elisp module :module
 
+# existing rule
+elisp_library(
+    name = "lib_3",
+    testonly = True,
+    srcs = ["lib-3.el"],
+)
+
 elisp_manual(
     name = "doc",
     src = "doc.org",
