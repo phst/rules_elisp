@@ -22,6 +22,7 @@
 #include <system_error>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
@@ -135,6 +136,7 @@ absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
 absl::Status Unlink(NativeStringView file);
 absl::Status CreateDirectory(NativeStringView name);
 absl::Status RemoveDirectory(NativeStringView name);
+absl::StatusOr<std::vector<NativeString>> ListDirectory(NativeStringView dir);
 
 class Environment final {
  private:

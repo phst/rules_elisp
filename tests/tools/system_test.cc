@@ -47,6 +47,7 @@ using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 using ::testing::_;
 using ::testing::Contains;
+using ::testing::ElementsAre;
 using ::testing::EndsWith;
 using ::testing::Ge;
 using ::testing::Gt;
@@ -330,6 +331,37 @@ TEST(CreateRemoveDirectoryTest, CreatesAndRemovesDirectories) {
               StatusIs(absl::StatusCode::kFailedPrecondition));
   EXPECT_THAT(Unlink(file), IsOk());
   EXPECT_THAT(RemoveDirectory(dir), IsOk());
+}
+
+TEST(ListDirectoryTests, ListsDirectory) {
+    const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("dir äα𝐴🐈'");
+  EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
+  EXPECT_THAT(CreateDirectory(dir), IsOk());
+  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
+
+  const NativeString file =
+      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'");
+  std::ofstream stream(file,
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  EXPECT_TRUE(stream.flush());
+  EXPECT_TRUE(stream.good());
+  stream.close();
+
+  EXPECT_THAT(
+      ListDirectory(dir),
+      IsOkAndHolds(ElementsAre(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'"))));
+
+  EXPECT_THAT(Unlink(file), IsOk());
+  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
+  EXPECT_THAT(RemoveDirectory(dir), IsOk());
+  EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
