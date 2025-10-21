@@ -38,5 +38,6 @@ select_file(
     visibility = [
         "//elisp/private/tools:__pkg__",
         "//tests/integration:__pkg__",
+        "//tests/tools:__pkg__",
     ],
 )

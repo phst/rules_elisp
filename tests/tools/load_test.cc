@@ -89,8 +89,7 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
                            {
                                RULES_ELISP_NATIVE_LITERAL("foo"),
                                RULES_ELISP_NATIVE_LITERAL("bar '"),
-                           },
-                           "unused/runfiles.elc"),
+                           }),
               IsOkAndHolds(ElementsAre(
                   RULES_ELISP_NATIVE_LITERAL("--directory=") + foo,
                   RULES_ELISP_NATIVE_LITERAL("--directory=") + bar)));
@@ -103,6 +102,11 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, *temp);
   ASSERT_THAT(runfiles, IsOk());
+
+  absl::StatusOr<NativeString> runfiles_elc =
+      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
+  ASSERT_THAT(runfiles_elc, IsOk());
+  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
 
   const NativeString foo =
       *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("foo");
@@ -124,20 +128,19 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
     }
   };
 
-  EXPECT_THAT(LoadPathArgs(*runfiles,
-                           {
-                               RULES_ELISP_NATIVE_LITERAL("foo"),
-                               RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"),
-                           },
-                           "runfiles.elc"),
-              IsOkAndHolds(ElementsAre(
-                  RULES_ELISP_NATIVE_LITERAL("--directory=") + foo,
-                  RULES_ELISP_NATIVE_LITERAL("--load=") + *temp + kSeparator +
-                      RULES_ELISP_NATIVE_LITERAL("runfiles.elc"),
-                  RULES_ELISP_NATIVE_LITERAL(
-                      "--funcall=elisp/runfiles/install-handler"),
-                  RULES_ELISP_NATIVE_LITERAL(
-                      "--directory=/bazel-runfile:bar äα𝐴🐈'"))));
+  EXPECT_THAT(
+      LoadPathArgs(*runfiles,
+                   {
+                       RULES_ELISP_NATIVE_LITERAL("foo"),
+                       RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"),
+                   }),
+      IsOkAndHolds(ElementsAre(RULES_ELISP_NATIVE_LITERAL("--directory=") + foo,
+                               RULES_ELISP_NATIVE_LITERAL("--load=") + *temp +
+                                   kSeparator + *runfiles_elc,
+                               RULES_ELISP_NATIVE_LITERAL(
+                                   "--funcall=elisp/runfiles/install-handler"),
+                               RULES_ELISP_NATIVE_LITERAL(
+                                   "--directory=/bazel-runfile:bar äα𝐴🐈'"))));
 }
 
 TEST(LoadPathArgsTest, EmptyDirectory) {
@@ -147,6 +150,11 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, *temp);
   ASSERT_THAT(runfiles, IsOk());
+
+  absl::StatusOr<NativeString> runfiles_elc =
+      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
+  ASSERT_THAT(runfiles_elc, IsOk());
+  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
 
   const NativeString foo =
       *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("foo");
@@ -170,12 +178,11 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
                    {
                        RULES_ELISP_NATIVE_LITERAL("foo"),
                        RULES_ELISP_NATIVE_LITERAL("bar '"),
-                   },
-                   "runfiles.elc"),
+                   }),
       IsOkAndHolds(ElementsAre(
           RULES_ELISP_NATIVE_LITERAL("--directory=") + foo,
           RULES_ELISP_NATIVE_LITERAL("--load=") + *temp + kSeparator +
-              RULES_ELISP_NATIVE_LITERAL("runfiles.elc"),
+              *runfiles_elc,
           RULES_ELISP_NATIVE_LITERAL(
               "--funcall=elisp/runfiles/install-handler"),
           RULES_ELISP_NATIVE_LITERAL("--directory=/bazel-runfile:bar '"))));
@@ -191,7 +198,7 @@ TEST(LoadPathArgsTest, Manifest) {
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
   ASSERT_THAT(file, IsOk());
   std::string line =
-      absl::StrFormat("repository/runfiles.elc %s\n", runfiles_elc);
+      absl::StrFormat("%s %s\n", RULES_ELISP_RUNFILES_ELC, runfiles_elc);
   // Runfiles manifests contain POSIX-style filenames even on Windows.
   if constexpr (kWindows) absl::c_replace(line, '\\', '/');
   EXPECT_THAT(file->Write(line), IsOk());
@@ -204,8 +211,7 @@ TEST(LoadPathArgsTest, Manifest) {
                            {
                                RULES_ELISP_NATIVE_LITERAL("foo"),
                                RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"),
-                           },
-                           "repository/runfiles.elc"),
+                           }),
               IsOkAndHolds(ElementsAre(
                   RULES_ELISP_NATIVE_LITERAL("--load=") + runfiles_elc,
                   RULES_ELISP_NATIVE_LITERAL(

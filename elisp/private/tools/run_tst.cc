@@ -190,7 +190,7 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   }
 
   const absl::StatusOr<std::vector<NativeString>> load_path_args =
-      LoadPathArgs(*runfiles, opts.load_path, RULES_ELISP_RUNFILES_ELC);
+      LoadPathArgs(*runfiles, opts.load_path);
   if (!load_path_args.ok()) return load_path_args.status();
   emacs_args.insert(emacs_args.end(), load_path_args->cbegin(),
                     load_path_args->cend());

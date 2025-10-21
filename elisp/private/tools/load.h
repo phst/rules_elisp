@@ -15,7 +15,6 @@
 #ifndef ELISP_PRIVATE_TOOLS_LOAD_H_
 #define ELISP_PRIVATE_TOOLS_LOAD_H_
 
-#include <string_view>
 #include <vector>
 
 #include "absl/status/statusor.h"
@@ -26,8 +25,7 @@
 namespace rules_elisp {
 
 absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
-    const Runfiles& runfiles, absl::Span<const NativeString> load_path,
-    const std::string_view runfiles_elc);
+    const Runfiles& runfiles, absl::Span<const NativeString> load_path);
 
 }  // namespace
 
