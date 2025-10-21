@@ -137,43 +137,16 @@ cc_library(
     srcs = ["tst.cc"],
     hdrs = ["tst.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_tst"],
+    data = [":run-tst.elc"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TST=R"*($(rlocationpath :run_tst))*"'),
+        shell.quote('RULES_ELISP_RUN_TST_ELC=R"*($(rlocationpath :run-tst.elc))*"'),
     ],
     visibility = ["//elisp:__pkg__"],
-    deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@rules_cc//cc/runfiles",  # keep
-        ":platform",
-        ":process",
-        ":runfiles",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:span",
-    ],
-)
-
-cc_binary(
-    name = "run_tst",
-    testonly = True,
-    srcs = ["run_tst.cc"],
-    copts = LAUNCHER_COPTS,
-    data = ["//elisp/private/tools:run-tst.elc"],
-    features = LAUNCHER_FEATURES,
-    linkopts = LAUNCHER_LINKOPTS,
-    linkstatic = True,
-    local_defines = LAUNCHER_DEFINES + [
-        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
-        # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TST_ELC=R"*($(rlocationpath //elisp/private/tools:run-tst.elc))*"'),
-    ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
@@ -186,14 +159,7 @@ cc_binary(
         ":runfiles",
         ":strings",
         ":system",
-        "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/base:log_severity",
-        "@abseil-cpp//absl/container:fixed_array",
         "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/log:globals",
-        "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
@@ -470,6 +436,13 @@ cc_proto_library(
 
 # gazelle:elisp_generate_proto false
 # gazelle:go_generate_proto false
+
+# keep
+elisp_library(
+    name = "run_tst",
+    testonly = True,
+    srcs = ["run-tst.el"],
+)
 
 proto_library(
     name = "manifest_proto",
