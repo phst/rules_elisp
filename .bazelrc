@@ -51,9 +51,6 @@ build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
 # See https://bazel.build/reference/test-encyclopedia#role-test-runner.
 test:windows --test_timeout=240,1200,3600,14400
 
-# Make sure that //tests/tools:binary_test can read %ComSpec%.
-test:windows --test_env='ComSpec'
-
 # Since the tests are usually in separate packages from the targets under test,
 # the default heuristic for coverage instrumentation filtering doesn’t work.
 coverage --instrumentation_filter='^//'
