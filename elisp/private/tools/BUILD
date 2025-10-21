@@ -156,11 +156,7 @@ cc_library(
     ],
     hdrs = ["test.h"],
     copts = COPTS + CXXOPTS,
-    data = [
-        ":run_test_stripped",
-        "//elisp/private/tools:run-test.elc",
-        "//elisp/runfiles:runfiles.elc",
-    ],
+    data = [":run_test_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -168,10 +164,6 @@ cc_library(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
-        shell.quote("RULES_ELISP_TEST_ARGS=" + ", ".join([
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")',
-            'RULES_ELISP_NATIVE_LITERAL(R"*(--run-test-elc=$(rlocationpath //elisp/private/tools:run-test.elc))*")',
-        ])),
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
@@ -196,10 +188,19 @@ cc_binary(
         "@rules_cc//cc/compiler:msvc-cl": ["/wd4702"],
         "//conditions:default": [],
     }),
+    data = [
+        "//elisp/private/tools:run-test.elc",
+        "//elisp/runfiles:runfiles.elc",
+    ],
     features = LAUNCHER_FEATURES,
     linkopts = LAUNCHER_LINKOPTS,
     linkstatic = True,
-    local_defines = LAUNCHER_DEFINES,
+    local_defines = LAUNCHER_DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
+        shell.quote('RULES_ELISP_RUN_TEST_ELC=R"*($(rlocationpath //elisp/private/tools:run-test.elc))*"'),
+    ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.

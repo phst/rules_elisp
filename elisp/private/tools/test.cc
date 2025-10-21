@@ -41,8 +41,8 @@ absl::StatusOr<int> Main(
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
   }
   return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
-                     common_opts, {RULES_ELISP_TEST_ARGS}, launcher_args,
-                     original_args, ExecutableKind::kTest);
+                     common_opts, {}, launcher_args, original_args,
+                     ExecutableKind::kTest);
 }
 
 }  // namespace rules_elisp
