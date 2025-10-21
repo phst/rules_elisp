@@ -15,7 +15,6 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("@rules_python//python:py_test.bzl", "py_test")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -27,17 +26,6 @@ package(
 )
 
 licenses(["notice"])
-
-py_test(
-    name = "manifest_test",
-    size = "small",
-    srcs = ["manifest_test.py"],
-    python_version = "3.12",
-    deps = [
-        "//elisp/private/tools:manifest",
-        "@abseil-py//absl/testing:absltest",
-    ],
-)
 
 cc_test(
     name = "manifest_cc_test",
@@ -56,18 +44,6 @@ cc_test(
         "@abseil-cpp//absl/status:statusor",
         "@googletest//:gtest",
         "@googletest//:gtest_main",  # keep
-    ],
-)
-
-py_test(
-    name = "load_test",
-    size = "small",
-    srcs = ["load_test.py"],
-    python_version = "3.12",
-    deps = [
-        "//elisp/private/tools:load",
-        "//elisp/private/tools:runfiles",
-        "@abseil-py//absl/testing:absltest",
     ],
 )
 

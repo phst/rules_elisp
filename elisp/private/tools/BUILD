@@ -19,7 +19,6 @@ load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
 load("@rules_python//python:py_binary.bzl", "py_binary")
-load("@rules_python//python:py_library.bzl", "py_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
@@ -269,31 +268,6 @@ select_file(
     testonly = True,
     srcs = ":run_tst_el",
     subpath = "/" + package_name() + "/run-tst.elc",
-)
-
-py_library(
-    name = "manifest",
-    srcs = ["manifest.py"],
-    visibility = ["//tests/tools:__pkg__"],
-)
-
-py_library(
-    name = "load",
-    srcs = ["load.py"],
-    visibility = ["//tests/tools:__pkg__"],
-    deps = [":runfiles"],
-)
-
-py_library(
-    name = "runfiles",
-    srcs = ["runfiles.py"],
-    visibility = [
-        "//dev:__pkg__",
-        "//elisp/proto:__pkg__",
-        "//emacs:__pkg__",
-        "//tests/tools:__pkg__",
-    ],
-    deps = ["@rules_python//python/runfiles"],
 )
 
 cc_library(
