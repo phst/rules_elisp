@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "elisp/private/tools/test.h"
+#include "elisp/private/tools/tst.h"
 
 #include <vector>
 
@@ -40,9 +40,8 @@ absl::StatusOr<int> Main(
   if (test_opts.module_assertions) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
   }
-  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TEST,
-                     common_opts, {}, launcher_args, original_args,
-                     ExecutableKind::kTest);
+  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TST, common_opts,
+                     {}, launcher_args, original_args, ExecutableKind::kTest);
 }
 
 }  // namespace rules_elisp

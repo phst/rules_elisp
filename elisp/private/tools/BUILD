@@ -148,22 +148,22 @@ executable_only(
     src = ":run_binary",
 )
 
+# This is called “tst” and not “test” to keep Gazelle from thinking it’s a test
+# instead of a library.  Same with run-tst.el.
 cc_library(
-    name = "test",
+    name = "tst",
     testonly = True,
-    srcs = [
-        "test.cc",  # keep
-    ],
-    hdrs = ["test.h"],
+    srcs = ["tst.cc"],
+    hdrs = ["tst.h"],
     copts = COPTS + CXXOPTS,
-    data = [":run_test_stripped"],
+    data = [":run_tst_stripped"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TEST=R"*($(rlocationpath :run_test_stripped))*"'),
+        shell.quote('RULES_ELISP_RUN_TST=R"*($(rlocationpath :run_tst_stripped))*"'),
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
@@ -171,21 +171,21 @@ cc_library(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
-        ":process",  # keep
-        ":runfiles_cc",  # keep
         ":platform",
+        ":process",
+        ":runfiles_cc",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
 )
 
 cc_binary(
-    name = "run_test",
+    name = "run_tst",
     testonly = True,
-    srcs = ["run_test.cc"],
+    srcs = ["run_tst.cc"],
     copts = LAUNCHER_COPTS,
     data = [
-        "//elisp/private/tools:run-test.elc",
+        "//elisp/private/tools:run-tst.elc",
         "//elisp/runfiles:runfiles.elc",
     ],
     features = LAUNCHER_FEATURES,
@@ -195,7 +195,7 @@ cc_binary(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
-        shell.quote('RULES_ELISP_RUN_TEST_ELC=R"*($(rlocationpath //elisp/private/tools:run-test.elc))*"'),
+        shell.quote('RULES_ELISP_RUN_TST_ELC=R"*($(rlocationpath //elisp/private/tools:run-tst.elc))*"'),
     ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
@@ -227,24 +227,24 @@ cc_binary(
 )
 
 executable_only(
-    name = "run_test_stripped",
+    name = "run_tst_stripped",
     testonly = True,
-    src = ":run_test",
+    src = ":run_tst",
 )
 
 # keep
 elisp_library(
-    name = "run_test_el",
+    name = "run_tst_el",
     testonly = True,
-    srcs = ["run-test.el"],
+    srcs = ["run-tst.el"],
     visibility = ["//tests/tools:__pkg__"],
 )
 
 select_file(
-    name = "run-test.elc",
+    name = "run-tst.elc",
     testonly = True,
-    srcs = ":run_test_el",
-    subpath = "/" + package_name() + "/run-test.elc",
+    srcs = ":run_tst_el",
+    subpath = "/" + package_name() + "/run-tst.elc",
 )
 
 py_library(
