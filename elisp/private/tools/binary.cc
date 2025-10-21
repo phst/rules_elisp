@@ -38,23 +38,23 @@ static std::string ToNativeString(const int i) {
 #endif
 
 absl::StatusOr<int> Main(
-    const CommonOptions& common_opts, const BinaryOptions& binary_opts,
+    const Options& opts,
     const absl::Span<const NativeStringView> original_args) {
   std::vector<NativeString> launcher_args;
-  if (binary_opts.interactive) {
+  if (opts.interactive) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--interactive"));
   }
-  for (const int i : binary_opts.input_args) {
+  for (const int i : opts.input_args) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--input-arg=") +
                             ToNativeString(i));
   }
-  for (const int i : binary_opts.output_args) {
+  for (const int i : opts.output_args) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--output-arg=") +
                             ToNativeString(i));
   }
-  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY,
-                     common_opts, {RULES_ELISP_BINARY_ARGS}, launcher_args,
-                     original_args, ExecutableKind::kBinary);
+  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_BINARY, opts,
+                     {RULES_ELISP_BINARY_ARGS}, launcher_args, original_args,
+                     ExecutableKind::kBinary);
 }
 
 }  // namespace rules_elisp

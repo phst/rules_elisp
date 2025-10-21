@@ -138,7 +138,7 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   if (args.empty()) return absl::InvalidArgumentError("Empty argument vector");
   args.remove_prefix(1);
 
-  CommonOptions opts;
+  Options opts;
   std::vector<NativeString> skip_tests;
   std::vector<NativeString> skip_tags;
   bool module_assertions = false;

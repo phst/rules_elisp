@@ -32,8 +32,7 @@ namespace rules_elisp {
 
 absl::StatusOr<int> RunLauncher(
     std::string_view source_repository, std::string_view binary,
-    const CommonOptions& common_opts,
-    std::initializer_list<NativeStringView> common_args,
+    const Options& opts, std::initializer_list<NativeStringView> common_args,
     absl::Span<const NativeString> launcher_args,
     absl::Span<const NativeStringView> original_args, ExecutableKind kind);
 

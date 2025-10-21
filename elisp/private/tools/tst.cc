@@ -26,22 +26,22 @@
 namespace rules_elisp {
 
 absl::StatusOr<int> Main(
-    const CommonOptions& common_opts, const TestOptions& test_opts,
+    const Options& opts,
     const absl::Span<const NativeStringView> original_args) {
   std::vector<NativeString> launcher_args;
-  for (const NativeStringView test : test_opts.skip_tests) {
+  for (const NativeStringView test : opts.skip_tests) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-test=") +
                             static_cast<NativeString>(test));
   }
-  for (const NativeStringView tag : test_opts.skip_tags) {
+  for (const NativeStringView tag : opts.skip_tags) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-tag=") +
                             static_cast<NativeString>(tag));
   }
-  if (test_opts.module_assertions) {
+  if (opts.module_assertions) {
     launcher_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
   }
-  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TST, common_opts,
-                     {}, launcher_args, original_args, ExecutableKind::kTest);
+  return RunLauncher(BAZEL_CURRENT_REPOSITORY, RULES_ELISP_RUN_TST, opts, {},
+                     launcher_args, original_args, ExecutableKind::kTest);
 }
 
 }  // namespace rules_elisp

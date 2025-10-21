@@ -28,14 +28,7 @@
 
 namespace rules_elisp {
 
-struct TestOptions final {
-  std::vector<NativeString> skip_tests;
-  std::vector<NativeString> skip_tags;
-  bool module_assertions = false;
-};
-
-absl::StatusOr<int> Main(const CommonOptions& common_opts,
-                         const TestOptions& test_opts,
+absl::StatusOr<int> Main(const Options& opts,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

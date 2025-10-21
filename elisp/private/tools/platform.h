@@ -53,13 +53,24 @@ inline constexpr NativeChar kSeparator = kWindows
 enum class Mode { kSource, kRelease };
 enum class ToolchainMode { kDirect, kWrap };
 
-struct CommonOptions final {
+struct Options final {
+  // Options for both binaries and tests.
   NativeString wrapper;
   ToolchainMode mode = ToolchainMode::kDirect;
   std::vector<NativeString> tags;
   std::vector<NativeString> load_path;
   std::vector<NativeString> load_files;
   std::vector<NativeString> data_files;
+
+  // Options only relevant for binaries.
+  bool interactive = false;
+  std::vector<int> input_args;
+  std::vector<int> output_args;
+
+  // Options only relevant for tests.
+  std::vector<NativeString> skip_tests;
+  std::vector<NativeString> skip_tags;
+  bool module_assertions = false;
 };
 
 }  // namespace rules_elisp

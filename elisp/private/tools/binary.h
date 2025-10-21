@@ -28,14 +28,7 @@
 
 namespace rules_elisp {
 
-struct BinaryOptions final {
-  bool interactive = false;
-  std::vector<int> input_args;
-  std::vector<int> output_args;
-};
-
-absl::StatusOr<int> Main(const CommonOptions& common_opts,
-                         const BinaryOptions& binary_opts,
+absl::StatusOr<int> Main(const Options& opts,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

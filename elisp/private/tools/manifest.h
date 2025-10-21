@@ -30,7 +30,7 @@ namespace rules_elisp {
 class ManifestFile final {
  public:
   static absl::StatusOr<ManifestFile> Create(
-      const CommonOptions& opts, absl::Span<const NativeString> input_files,
+      const Options& opts, absl::Span<const NativeString> input_files,
       absl::Span<const NativeString> output_files);
 
   ManifestFile(const ManifestFile&) = delete;

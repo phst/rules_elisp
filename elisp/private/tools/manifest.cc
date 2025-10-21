@@ -60,7 +60,7 @@ absl::Status Assign(google::protobuf::RepeatedPtrField<std::string>& field,
   return absl::OkStatus();
 }
 
-static absl::Status Write(const CommonOptions& opts,
+static absl::Status Write(const Options& opts,
                           const absl::Span<const NativeString> input_files,
                           const absl::Span<const NativeString> output_files,
                           TemporaryFile& file) {
@@ -120,7 +120,7 @@ static absl::Status Write(const CommonOptions& opts,
 }
 
 absl::StatusOr<ManifestFile> ManifestFile::Create(
-    const CommonOptions& opts, const absl::Span<const NativeString> input_files,
+    const Options& opts, const absl::Span<const NativeString> input_files,
     const absl::Span<const NativeString> output_files) {
   if (opts.mode == ToolchainMode::kDirect) return ManifestFile();
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
