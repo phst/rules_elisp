@@ -18,7 +18,6 @@ load("@protobuf//bazel:cc_proto_library.bzl", "cc_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_cc//cc:cc_library.bzl", "cc_library")
-load("@rules_python//python:py_binary.bzl", "py_binary")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
@@ -35,11 +34,29 @@ package(
 
 licenses(["notice"])
 
-py_binary(
+cc_binary(
     name = "build_emacs",
-    srcs = ["build_emacs.py"],
-    python_version = "3.12",
+    srcs = ["build_emacs.cc"],
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    linkstatic = True,
+    local_defines = LAUNCHER_DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
+    deps = [
+        ":platform",
+        ":system",
+        "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/base:log_severity",
+        "@abseil-cpp//absl/container:fixed_array",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+        "@abseil-cpp//absl/types:span",
+    ],
 )
 
 cc_binary(
