@@ -28,23 +28,16 @@ visibility("public")
 
 def _elisp_emacs_binary_impl(ctx):
     """Rule implementation of the “elisp_emacs_binary” rule."""
-    srcs = ctx.files.srcs
-    if len(srcs) == 1:
-        (archive,) = srcs
-        readme = None
-    else:
-        # It’s not possible to refer to a directory as a label, so we refer to a
-        # known file (README in the source root) instead.
-        archive = None
-        readme = ctx.file.readme
 
+    # It’s not possible to refer to a directory as a label, so we refer to a
+    # known file (README in the source root) instead.
     mode = ctx.attr.mode
     if mode == "source":
         shell_toolchain = ctx.toolchains[Label("@rules_shell//shell:toolchain_type")]
         emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
-        install = _install(ctx, shell_toolchain, emacs_cc_toolchain, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
+        install = _install(ctx, shell_toolchain, emacs_cc_toolchain, ctx.file.readme)
     elif mode == "release":
-        install = _unpack(ctx, archive = archive, strip_prefix = ctx.attr.strip_prefix, readme = readme)
+        install = _unpack(ctx, ctx.file.readme)
     else:
         fail("invalid build mode {}".format(mode))
 
@@ -84,19 +77,13 @@ elisp_emacs_binary = rule(
             allow_files = True,
             allow_empty = False,
             mandatory = True,
-            doc = """Either a single Emacs source archive, or all Emacs source
-files from an already-unpacked archive.""",
-        ),
-        "strip_prefix": attr.string(
-            doc = """Prefix to strip from the source archive.
-Ignored if `srcs` doesn’t refer to an archive.""",
+            doc = "All Emacs source files.",
         ),
         "readme": attr.label(
             allow_single_file = True,
+            mandatory = True,
             doc = """The README file in the root of the Emacs repository.
-This is necessary to determine the source root directory if `srcs` refers
-to unpacked Emacs sources.  If `srcs` refers to a source archive,
-`readme` is ignored.""",
+This is necessary to determine the source root directory.""",
         ),
         "module_header": attr.output(
             doc = """Label for a file target that will receive the
@@ -139,7 +126,7 @@ The resulting executable can be used to run the compiled Emacs.""",
     implementation = _elisp_emacs_binary_impl,
 )
 
-def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readme):
+def _install(ctx, shell_toolchain, cc_toolchain, readme):
     """Builds and install Emacs.
 
     Args:
@@ -147,12 +134,7 @@ def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readm
       shell_toolchain (Provider): the shell toolchain to use on Windows; must
           be an MSYS2 toolchain
       cc_toolchain (Provider): the C toolchain to use to compile Emacs
-      archive (File): Emacs source archive to build from, or `None` if building
-          from an unpacked source tree
-      strip_prefix (str): prefix to strip from the files in `archive`; ignored
-          if building from an unpacked source tree
-      readme (File): location of the README file in the Emacs source tree; only
-          used if `archive` is `None`
+      readme (File): location of the README file in the Emacs source tree
 
     Returns:
       a File representing the Emacs installation directory
@@ -205,11 +187,7 @@ def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readm
         )
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
-    if archive:
-        args.add(archive, format = "--archive=%s")
-        args.add(strip_prefix, format = "--strip-prefix=%s")
-    if readme:
-        args.add(readme, format = "--readme=%s")
+    args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
     args.add(shell_toolchain.path, format = "--bash=%s")
     args.add(cc, format = "--cc=%s")
@@ -250,18 +228,12 @@ def _install(ctx, shell_toolchain, cc_toolchain, *, archive, strip_prefix, readm
     )
     return install
 
-def _unpack(ctx, *, archive, strip_prefix, readme):
+def _unpack(ctx, readme):
     """Unpacks Emacs from a release archive.
 
     Args:
       ctx (ctx): rule context
-      archive (File): location of the Emacs release archive to unpack
-      strip_prefix (str): prefix to strip from the files in the archive, or
-          `None` if building from an unpacked release tree
-      strip_prefix (str): prefix to strip from the files in `archive`; ignored
-          if building from an unpacked release tree
-      readme (File): location of the README file in the Emacs release tree; only
-          used if `archive` is `None`
+      readme (File): location of the README file in the Emacs release tree
 
     Returns:
       a File representing the Emacs installation directory
@@ -269,11 +241,7 @@ def _unpack(ctx, *, archive, strip_prefix, readme):
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add("--release")
-    if archive:
-        args.add(archive, format = "--archive=%s")
-        args.add(strip_prefix, format = "--strip-prefix=%s")
-    if readme:
-        args.add(readme, format = "--readme=%s")
+    args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
     secondary_outs = []
     if ctx.outputs.module_header:

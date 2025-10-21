@@ -1368,7 +1368,7 @@ optional; default: <code class="code">False</code>.
 </dl>
 </dd></dl>
 <dl class="first-deffn def-block">
-<dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, [strip_prefix], [readme], [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
+<dt class="deffn def-line" id="index-elisp_005femacs_005fbinary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_emacs_binary</strong> <var class="def-var-arguments">(name, [mode], srcs, readme, [module_header], [builtin_features], [dump_mode])</var><a class="copiable-link" href="#index-elisp_005femacs_005fbinary"> &para;</a></span></dt>
 <dd>
 
 <div class="example">
@@ -1394,18 +1394,11 @@ operating system and architecture.   Currently this only works on Windows.
 String; optional; default: <code class="code">&quot;source&quot;</code>.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
-<dd><p>Either a single Emacs source archive, or all Emacs source files from
-an already-unpacked archive.  List of labels; mandatory.
-</p></dd>
-<dt><code class="code">strip_prefix</code></dt>
-<dd><p>Prefix to strip from the source archive.  Ignored if <code class="code">srcs</code>
-doesn’t refer to an archive.  String; optional; default: <code class="code">&quot;&quot;</code>.
+<dd><p>All Emacs source files.  List of labels; mandatory.
 </p></dd>
 <dt><code class="code">readme</code></dt>
 <dd><p>The README file in the root of the Emacs repository.  This is
-necessary to determine the source root directory if <code class="code">srcs</code> refers to unpacked
-Emacs sources.  If <code class="code">srcs</code> refers to a source archive, <code class="code">readme</code> is ignored.
-Label; optional; default: <code class="code">None</code>.
+necessary to determine the source root directory.  Label; mandatory.
 </p></dd>
 <dt><code class="code">module_header</code></dt>
 <dd><p>Label for a file target that will receive the
