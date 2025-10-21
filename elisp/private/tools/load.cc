@@ -15,7 +15,6 @@
 #include "elisp/private/tools/load.h"
 
 #include <string>
-#include <string_view>
 #include <vector>
 
 #include "absl/status/status.h"
@@ -30,8 +29,7 @@
 namespace rules_elisp {
 
 absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
-    const Runfiles& runfiles, const absl::Span<const NativeString> load_path,
-    const std::string_view runfiles_elc) {
+    const Runfiles& runfiles, const absl::Span<const NativeString> load_path) {
   std::vector<NativeString> args;
   bool runfiles_handler_installed = false;
   for (const NativeStringView dir : load_path) {
@@ -55,7 +53,7 @@ absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
     } else {
       if (!runfiles_handler_installed) {
         const absl::StatusOr<NativeString> file =
-            runfiles.Resolve(runfiles_elc);
+            runfiles.Resolve(RULES_ELISP_RUNFILES_ELC);
         if (!file.ok()) return file.status();
         args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *file);
         args.push_back(RULES_ELISP_NATIVE_LITERAL(

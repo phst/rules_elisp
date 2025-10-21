@@ -52,10 +52,15 @@ cc_test(
     size = "small",
     srcs = ["load_test.cc"],
     copts = COPTS + CXXOPTS,
+    data = ["//elisp/runfiles:runfiles.elc"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
+    ],
     deps = [
         # FIXME: Remove the next dependency once we drop support for Bazel
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.

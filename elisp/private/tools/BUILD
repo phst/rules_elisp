@@ -110,7 +110,6 @@ cc_library(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote('RULES_ELISP_RUN_BINARY=R"*($(rlocationpath :run_binary))*"'),
-        shell.quote('RULES_ELISP_BINARY_ARGS=RULES_ELISP_NATIVE_LITERAL(R"*(--runfiles-elc=$(rlocationpath //elisp/runfiles:runfiles.elc))*")'),
     ],
     visibility = [
         "//elisp:__pkg__",
@@ -211,7 +210,6 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
         shell.quote('RULES_ELISP_RUN_TST_ELC=R"*($(rlocationpath //elisp/private/tools:run-tst.elc))*"'),
     ],
     deps = [
@@ -282,10 +280,15 @@ cc_library(
     srcs = ["load.cc"],
     hdrs = ["load.h"],
     copts = COPTS + CXXOPTS,
+    data = ["//elisp/runfiles:runfiles.elc"],
     features = FEATURES,
     linkopts = LINKOPTS,
     linkstatic = True,
-    local_defines = DEFINES,
+    local_defines = DEFINES + [
+        # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
+        # add additional quoting.
+        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
+    ],
     visibility = ["//tests/tools:__pkg__"],
     deps = [
         ":platform",
