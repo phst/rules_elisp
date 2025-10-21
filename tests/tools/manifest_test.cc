@@ -45,7 +45,7 @@ NativeString String(const NativeChar (&string)[N]) {
 }
 
 TEST(ManifestFileTest, Create) {
-  CommonOptions opts;
+  Options opts;
   opts.wrapper = RULES_ELISP_NATIVE_LITERAL("wrapper");
   opts.mode = ToolchainMode::kWrap;
   opts.tags = {

@@ -129,7 +129,7 @@ static absl::StatusOr<int> RunBinary(absl::Span<const NativeStringView> argv) {
   if (argv.empty()) return absl::InvalidArgumentError("Empty argument vector");
   argv.remove_prefix(1);
 
-  CommonOptions opts;
+  Options opts;
   NativeStringView runfiles_elc;
   bool interactive = false;
   std::vector<int> input_args;
