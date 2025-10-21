@@ -183,11 +183,7 @@ cc_binary(
     name = "run_test",
     testonly = True,
     srcs = ["run_test.cc"],
-    copts = LAUNCHER_COPTS + select({
-        # FIXME: This shouldn’t be needed
-        "@rules_cc//cc/compiler:msvc-cl": ["/wd4702"],
-        "//conditions:default": [],
-    }),
+    copts = LAUNCHER_COPTS,
     data = [
         "//elisp/private/tools:run-test.elc",
         "//elisp/runfiles:runfiles.elc",

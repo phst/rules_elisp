@@ -136,7 +136,7 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   if (!runfiles.ok()) return runfiles.status();
 
   if (args.empty()) return absl::InvalidArgumentError("Empty argument vector");
-  args = args.subspan(1);
+  args.remove_prefix(1);
 
   CommonOptions opts;
   std::vector<NativeString> skip_tests;
@@ -145,7 +145,7 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   while (!args.empty()) {
     NativeStringView arg = args.front();
     if (arg.empty() || arg.front() != RULES_ELISP_NATIVE_LITERAL('-')) break;
-    args = args.subspan(1);
+    args.remove_prefix(1);
     if (arg == RULES_ELISP_NATIVE_LITERAL("--")) break;
     if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--wrapper="))) {
       opts.wrapper = arg;
@@ -224,7 +224,8 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
 
   if (!args.empty()) {
-    for (const NativeStringView arg : args.subspan(1)) {
+    args.remove_prefix(1);
+    for (const NativeStringView arg : args) {
       const absl::StatusOr<NativeString> quoted = QuoteArg(arg);
       if (!quoted.ok()) return quoted.status();
       emacs_args.push_back(*quoted);
