@@ -139,8 +139,6 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
   args = args.subspan(1);
 
   CommonOptions opts;
-  NativeStringView runfiles_elc;
-  NativeStringView run_test_elc;
   std::vector<NativeString> skip_tests;
   std::vector<NativeString> skip_tags;
   bool module_assertions = false;
@@ -155,12 +153,6 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
       opts.mode = ToolchainMode::kDirect;
     } else if (arg == RULES_ELISP_NATIVE_LITERAL("--mode=wrap")) {
       opts.mode = ToolchainMode::kWrap;
-    } else if (ConsumePrefix(arg,
-                             RULES_ELISP_NATIVE_LITERAL("--runfiles-elc="))) {
-      runfiles_elc = arg;
-    } else if (ConsumePrefix(arg,
-                             RULES_ELISP_NATIVE_LITERAL("--run-test-elc="))) {
-      run_test_elc = arg;
     } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--rule-tag="))) {
       opts.tags.emplace_back(arg);
     } else if (ConsumePrefix(arg,
@@ -197,23 +189,16 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
     emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
   }
 
-  const absl::StatusOr<std::string> narrow_runfiles_elc =
-      ToNarrow(runfiles_elc, Encoding::kAscii);
-  if (!narrow_runfiles_elc.ok()) return narrow_runfiles_elc.status();
   const absl::StatusOr<std::vector<NativeString>> load_path_args =
-      LoadPathArgs(*runfiles, opts.load_path, *narrow_runfiles_elc);
+      LoadPathArgs(*runfiles, opts.load_path, RULES_ELISP_RUNFILES_ELC);
   if (!load_path_args.ok()) return load_path_args.status();
   emacs_args.insert(emacs_args.end(), load_path_args->cbegin(),
                     load_path_args->cend());
 
-  const absl::StatusOr<std::string> narrow_run_test_elc =
-      ToNarrow(run_test_elc, Encoding::kAscii);
-  if (!narrow_run_test_elc.ok()) return narrow_run_test_elc.status();
-  const absl::StatusOr<NativeString> resolved_run_test_elc =
-      runfiles->Resolve(*narrow_run_test_elc);
-  if (!resolved_run_test_elc.ok()) return resolved_run_test_elc.status();
-  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") +
-                       *resolved_run_test_elc);
+  const absl::StatusOr<NativeString> run_test_elc =
+      runfiles->Resolve(RULES_ELISP_RUN_TEST_ELC);
+  if (!run_test_elc.ok()) return run_test_elc.status();
+  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *run_test_elc);
 
   for (const NativeString& file : opts.load_files) {
     const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
