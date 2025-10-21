@@ -29,7 +29,10 @@ package(
 
 elisp_emacs_binary(
     name = "emacs",
-    srcs = glob(["**"]),
+    srcs = glob(
+        ["**"],
+        allow_empty = False,
+    ),
     builtin_features = "builtin_features.json",
     mode = "[mode]",
     module_header = "emacs-module.h",
