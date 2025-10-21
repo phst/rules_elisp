@@ -24,6 +24,7 @@ import (
 )
 
 func main() {
+	log.SetFlags(log.LstdFlags | log.Lmicroseconds | log.Llongfile)
 	log.Println("Args:", os.Args)
 	log.Println("Environment:", os.Environ())
 	var manifestFile string
