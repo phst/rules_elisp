@@ -314,13 +314,7 @@ static absl::StatusOr<int> RunTest(absl::Span<const NativeStringView> args) {
 
 }  // namespace rules_elisp
 
-int
-#ifdef _WIN32
-    wmain
-#else
-    main
-#endif
-(int argc, rules_elisp::NativeChar** argv) {
+int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   absl::InitializeLog();
   // Be a bit more verbose for tests, since Bazel will only show output on
   // explicit request.

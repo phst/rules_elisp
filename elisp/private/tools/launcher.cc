@@ -41,13 +41,7 @@
 #  include "elisp/private/tools/test.h"
 #endif
 
-int
-#ifdef _WIN32
-    wmain
-#else
-    main
-#endif
-(int argc, rules_elisp::NativeChar** argv) {
+int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   absl::InitializeLog();
   absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(

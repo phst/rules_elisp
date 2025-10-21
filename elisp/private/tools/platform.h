@@ -36,8 +36,10 @@ constexpr inline bool kWindows =
 
 #ifdef _WIN32
 #  define RULES_ELISP_NATIVE_LITERAL(literal) L##literal
+#  define RULES_ELISP_MAIN wmain
 #else
 #  define RULES_ELISP_NATIVE_LITERAL(literal) literal
+#  define RULES_ELISP_MAIN main
 #endif
 
 using NativeChar = std::conditional_t<kWindows, wchar_t, char>;
