@@ -171,7 +171,7 @@ cc_library(
 
 # keep
 elisp_library(
-    name = "run_tst_el",
+    name = "run_tst",
     testonly = True,
     srcs = ["run-tst.el"],
     visibility = ["//tests/tools:__pkg__"],
@@ -180,7 +180,7 @@ elisp_library(
 select_file(
     name = "run-tst.elc",
     testonly = True,
-    srcs = ":run_tst_el",
+    srcs = ":run_tst",
     subpath = "/" + package_name() + "/run-tst.elc",
 )
 
@@ -417,13 +417,6 @@ cc_proto_library(
 
 # gazelle:elisp_generate_proto false
 # gazelle:go_generate_proto false
-
-# keep
-elisp_library(
-    name = "run_tst",
-    testonly = True,
-    srcs = ["run-tst.el"],
-)
 
 proto_library(
     name = "manifest_proto",
