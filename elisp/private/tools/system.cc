@@ -203,6 +203,13 @@ static NativeChar* absl_nonnull Pointer(
   return string.data();
 }
 
+static const NativeChar* absl_nonnull Pointer(
+    const NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+  CHECK(!ContainsNull(string))
+      << absl::StrFormat("%s contains null character", string);
+  return string.data();
+}
+
 #ifndef _WIN32
 static std::vector<char* absl_nullable> Pointers(
     std::vector<std::string>& strings ABSL_ATTRIBUTE_LIFETIME_BOUND) {
@@ -328,7 +335,7 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
         absl::StrFormat("Filename %s contains null character", file));
   }
 #ifdef _WIN32
-  std::wstring string(file);
+  const std::wstring string(file);
   // 0x8000 is the maximum length of a filename on Windows.  See
   // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
   constexpr DWORD size{0x8000};
@@ -400,7 +407,7 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
 
 [[nodiscard]] bool FileExists(const NativeStringView file) {
   if (file.empty() || ContainsNull(file)) return false;
-  NativeString string(file);
+  const NativeString string(file);
 #ifdef _WIN32
   return ::GetFileAttributesW(Pointer(string)) != INVALID_FILE_ATTRIBUTES;
 #else
@@ -418,7 +425,7 @@ static absl::Status IterateDirectory(
         absl::StrFormat("Directory name %s contains null character", dir));
   }
 #ifdef _WIN32
-  std::wstring pattern = std::wstring(dir) + L"\\*";
+  const std::wstring pattern = std::wstring(dir) + L"\\*";
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
   if (handle == INVALID_HANDLE_VALUE) {
@@ -439,7 +446,7 @@ static absl::Status IterateDirectory(
     return WindowsStatus("FindNextFileW");
   }
 #else
-  std::string string(dir);
+  const std::string string(dir);
   DIR* const absl_nullable handle = opendir(Pointer(string));
   if (handle == nullptr) return ErrnoStatus("opendir", dir);
   const absl::Cleanup cleanup = [handle]() {
@@ -478,7 +485,7 @@ absl::Status CreateDirectory(const NativeStringView name) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Directory name %s contains null character", name));
   }
-  NativeString string(name);
+  const NativeString string(name);
 #ifdef _WIN32
   const BOOL ok = ::CreateDirectoryW(Pointer(string), nullptr);
   if (!ok) return WindowsStatus("CreateDirectoryW", name);
@@ -498,7 +505,7 @@ absl::Status RemoveDirectory(const NativeStringView name) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Directory name %s contains null character", name));
   }
-  NativeString string(name);
+  const NativeString string(name);
 #ifdef _WIN32
   const BOOL ok = ::RemoveDirectoryW(Pointer(string));
   if (!ok) return WindowsStatus("RemoveDirectoryW", name);
@@ -702,7 +709,7 @@ absl::Status Unlink(const NativeStringView file) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Filename %s contains null character", file));
   }
-  NativeString string(file);
+  const NativeString string(file);
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(Pointer(string));
   if (!result) return WindowsStatus("DeleteFileW", file);
@@ -791,7 +798,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   absl::c_sort(final_env);
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
-  std::wstring program = args.front();
+  const std::wstring program = args.front();
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
   if (!command_line.ok()) return command_line.status();
   constexpr BOOL kInheritHandles = FALSE;
@@ -904,7 +911,7 @@ absl::StatusOr<DosDevice> DosDevice::Create(
     if ((drives & bit) == 0) {
       constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
       const wchar_t name[] = {letter, L':', L'\0'};
-      std::wstring string(target);
+      const std::wstring string(target);
       if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
         return WindowsStatus("DefineDosDeviceW", flags, name, target);
       }
