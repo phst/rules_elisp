@@ -216,7 +216,7 @@ absl::StatusOr<int> Main(const Options& opts,
     }
   }
 
-  absl::Time deadline = absl::InfiniteFuture();
+  RunOptions run_opts;
   if constexpr (kWindows) {
     // On Windows, the Bazel test runner doesn’t gracefully kill the test
     // process, see https://github.com/bazelbuild/bazel/issues/12684.  We work
@@ -235,7 +235,7 @@ absl::StatusOr<int> Main(const Options& opts,
       }
       // Lower the timeout to account for infrastructure overhead.
       const absl::Duration timeout = absl::Seconds(seconds) - absl::Seconds(2);
-      deadline = absl::Now() + timeout;
+      run_opts.deadline = absl::Now() + timeout;
     }
   }
 
@@ -247,7 +247,7 @@ absl::StatusOr<int> Main(const Options& opts,
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), emacs_args.cbegin(), emacs_args.cend());
 
-  const absl::StatusOr<int> result = Run(final_args, *env, deadline);
+  const absl::StatusOr<int> result = Run(final_args, *env, run_opts);
 
   if (absl::IsDeadlineExceeded(result.status())) {
     LOG(INFO) << "waiting for Bazel to kill this process";

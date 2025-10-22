@@ -497,10 +497,11 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
   ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
 
   if constexpr (kWindows) {
-    const absl::Time deadline = absl::Now() + absl::Seconds(1);
+    RunOptions options;
+    options.deadline = absl::Now() + absl::Seconds(1);
     EXPECT_THAT(
         rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
-                         {}, deadline),
+                         {}, options),
         StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }

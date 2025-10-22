@@ -276,9 +276,12 @@ class TemporaryFile final {
   std::FILE* absl_nullable file_;
 };
 
+struct RunOptions final {
+  absl::Time deadline = absl::InfiniteFuture();
+};
+
 absl::StatusOr<int> Run(absl::Span<const NativeString> args,
-                        const Environment& env,
-                        absl::Time deadline = absl::InfiniteFuture());
+                        const Environment& env, const RunOptions& options = {});
 
 class DosDevice final {
  public:
