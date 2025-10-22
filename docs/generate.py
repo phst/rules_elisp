@@ -295,7 +295,7 @@ def _fill(text: str, *,
 class _OrgRenderer(commonmark.render.renderer.Renderer):
 
     _LANGUAGE = {
-        'bash': 'sh',
+        'sh': 'sh',
         'c': 'c',
     }
 

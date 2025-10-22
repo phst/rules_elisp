@@ -69,7 +69,7 @@ Toolchains can use this to sandbox Emacs, if desired.
 
 If `wrap` is `True`, the format of the command line is as follows:
 
-```bash
+```sh
 emacs --manifest=MANIFEST -- ARGS…
 ```
 
