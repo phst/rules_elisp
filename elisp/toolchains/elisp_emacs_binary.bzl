@@ -15,6 +15,7 @@
 """Defines the rule `elisp_emacs_binary`, which compiles Emacs for use in
 Bazel."""
 
+load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
 load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
@@ -22,7 +23,7 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher", "cpp_string")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
-load("//elisp/private:filenames.bzl", "runfile_location")
+load("//elisp/private:filenames.bzl", "repository_relative_filename", "runfile_location")
 
 visibility("public")
 
@@ -49,6 +50,15 @@ def _elisp_emacs_binary_impl(ctx):
             "RULES_ELISP_INSTALL=" + cpp_string(runfile_location(ctx, install), native = False),
         ],
     )
+
+    if ctx.outputs.builtin_features:
+        _builtin_features(
+            ctx.actions,
+            ctx.executable._builtin_features,
+            [f for f in ctx.files.srcs if _is_lisp_source(f, mode)],
+            ctx.outputs.builtin_features,
+        )
+
     return [
         DefaultInfo(
             executable = executable,
@@ -101,6 +111,11 @@ This is used by Gazelle.""",
         ),
         "_build": attr.label(
             default = Label("//elisp/private/tools:build_emacs"),
+            executable = True,
+            cfg = "exec",
+        ),
+        "_builtin_features": attr.label(
+            default = Label("//elisp/private/tools:builtin_features"),
             executable = True,
             cfg = "exec",
         ),
@@ -210,9 +225,6 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
     if ctx.outputs.module_header:
         args.add(ctx.outputs.module_header, format = "--module-header=%s")
         secondary_outs.append(ctx.outputs.module_header)
-    if ctx.outputs.builtin_features:
-        args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
-        secondary_outs.append(ctx.outputs.builtin_features)
     ctx.actions.run(
         outputs = [install] + secondary_outs,
         inputs = depset(
@@ -247,9 +259,6 @@ def _unpack(ctx, readme):
     if ctx.outputs.module_header:
         args.add(ctx.outputs.module_header, format = "--module-header=%s")
         secondary_outs.append(ctx.outputs.module_header)
-    if ctx.outputs.builtin_features:
-        args.add(ctx.outputs.builtin_features, format = "--builtin-features=%s")
-        secondary_outs.append(ctx.outputs.builtin_features)
     ctx.actions.run(
         outputs = [install] + secondary_outs,
         inputs = ctx.files.srcs,
@@ -261,6 +270,33 @@ def _unpack(ctx, readme):
     )
     return install
 
+def _builtin_features(actions, extract, srcs, out):
+    if not srcs:
+        fail("No Lisp files found")
+    args = actions.args()
+    args.use_param_file("%s", use_always = True)
+    args.set_param_file_format("multiline")
+    args.add(out)
+    args.add_all(srcs, uniquify = True)
+    actions.run(
+        outputs = [out],
+        inputs = srcs,
+        executable = extract,
+        arguments = [args],
+        mnemonic = "FindBuiltinFeatures",
+        progress_message = "Extracting builtin features to %{output}",
+    )
+
 def _munge_msvc_flag(s):
     # Crude way to work around specifying Visual C++ options in .bazelrc.
     return None if s.startswith("/external:") else s.replace("/std:c", "-std=gnu")
+
+def _is_lisp_source(file, mode):
+    if file.extension != "el":
+        return False
+    rel = repository_relative_filename(file)
+    if mode == "source":
+        return paths.starts_with(rel, "lisp")
+    elif mode == "release":
+        return "/lisp/" in rel and paths.starts_with(rel, "share/emacs")
+    fail("Invalid mode", mode)

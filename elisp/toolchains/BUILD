@@ -41,6 +41,7 @@ bzl_library(
         "//elisp/private:cc_launcher",
         "//elisp/private:cc_launcher_config",
         "//elisp/private:filenames",
+        "@bazel_skylib//lib:paths",
         "@rules_cc//cc:action_names_bzl",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
