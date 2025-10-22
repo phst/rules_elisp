@@ -18,7 +18,10 @@
 #include <cstdlib>
 #include <fstream>
 #include <ios>
+#include <iterator>
+#include <locale>
 #include <optional>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <utility>
@@ -522,6 +525,53 @@ TEST(RunTest, AllowsChangingDirectory) {
   options.directory = *temp;
 
   EXPECT_THAT(rules_elisp::Run({*helper}, {}, options), IsOkAndHolds(0));
+}
+
+TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+
+  const absl::StatusOr<NativeString> helper =
+      runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOk());
+
+  absl::StatusOr<NativeString> dir =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(dir, IsOkAndHolds(Not(IsEmpty())));
+  if constexpr (kWindows) {
+    absl::c_replace(*dir, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+  }
+  if (dir->back() == kSeparator) dir->pop_back();
+
+  const std::pair<NativeString, NativeString> env_vars[] = {
+      // Avoid misleading warning about unset GOCOVERDIR.
+      {RULES_ELISP_NATIVE_LITERAL("GOCOVERDIR"), *dir},
+  };
+  const absl::StatusOr<Environment> env =
+      Environment::Create(std::cbegin(env_vars), std::cend(env_vars));
+  ASSERT_THAT(env, IsOk());
+  RunOptions options;
+  options.directory = *dir;
+  options.output_file =
+      *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("output.log");
+  EXPECT_THAT(rules_elisp::Run({*helper}, *env, options), IsOkAndHolds(0));
+
+  std::ifstream stream(options.output_file, std::ios::in | std::ios::binary);
+  EXPECT_TRUE(stream.is_open());
+  EXPECT_TRUE(stream.good());
+  stream.imbue(std::locale::classic());
+  std::ostringstream buffer;
+  EXPECT_TRUE(buffer.good());
+  buffer.imbue(std::locale::classic());
+  EXPECT_TRUE(buffer << stream.rdbuf());
+  EXPECT_TRUE(stream.good());
+  stream.close();
+  EXPECT_TRUE(buffer.good());
+  EXPECT_TRUE(buffer.flush());
+  const absl::StatusOr<std::string> narrow = ToNarrow(*dir, Encoding::kUtf8);
+  ASSERT_THAT(narrow, IsOk());
+  EXPECT_EQ(buffer.str(), *narrow);
 }
 
 TEST(DosDeviceTest, CreatesDevice) {

@@ -280,6 +280,9 @@ struct RunOptions final {
   // If non-empty, change to this directory in the subprocess.
   NativeString directory;
 
+  // If non-empty, redirect standard output and error to this file.
+  NativeString output_file;
+
   absl::Time deadline = absl::InfiniteFuture();
 };
 
