@@ -20,7 +20,6 @@ use it outside the rules or depend on its behavior.
 
 import argparse
 from collections.abc import Set
-import datetime
 import glob
 import json
 import os
@@ -157,7 +156,7 @@ def _unpack(*, source: pathlib.Path, install: pathlib.Path,
     except FileNotFoundError:
         pass
 
-    shutil.copytree(source, install, copy_function=_copy)
+    shutil.copytree(source, install)
 
     lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
     features = _builtin_features(lisp) if builtin_features else None
@@ -191,18 +190,6 @@ def _rename(src: pathlib.Path, dest: pathlib.Path) -> pathlib.Path:
     ret = src.resolve(strict=True).rename(dest)
     src.unlink(missing_ok=True)
     return ret
-
-
-def _copy(src: str, dest: str) -> None:
-    src_path = pathlib.Path(src)
-    dest_path = pathlib.Path(dest)
-    shutil.copy(src_path, dest_path, follow_symlinks=False)
-    # Ensure that .elc files are newer than .el files to suppress annoying
-    # warnings.
-    time = datetime.datetime(2000, 1, 2 if src_path.suffix == '.elc' else 1,
-                             tzinfo=datetime.timezone.utc)
-    stamp = time.timestamp()
-    os.utime(dest_path, (stamp, stamp))
 
 
 if __name__ == '__main__':
