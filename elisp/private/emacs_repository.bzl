@@ -22,6 +22,7 @@ def _emacs_repository_impl(ctx):
         url = ctx.attr.urls or fail("archive URLs missing"),
         stripPrefix = ctx.attr.strip_prefix,
     )
+    ctx.delete("test")
     ctx.template(
         "BUILD.bazel",
         Label("//elisp/private/tools:emacs.BUILD.template"),
