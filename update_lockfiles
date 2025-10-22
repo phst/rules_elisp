@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copyright 2024, 2025 Philipp Stephani
 #
@@ -20,7 +20,7 @@ workflow=update-lockfiles.yaml
 stamp=lock.stamp
 run=lock.run
 
-if [[ -f "${stamp:?}" ]]; then
+if [ -f "${stamp:?}" ]; then
   read -r branch time < "${stamp:?}"
 else
   branch="$(git branch --show-current)"
@@ -40,10 +40,10 @@ fetch_run_id() {
     --jq='.[].databaseId'
 }
 
-if [[ -f "${run:?}" ]]; then
+if [ -f "${run:?}" ]; then
   read -r id < "${run:?}"
 else
-  while id="$(fetch_run_id)" && [[ -z "${id}" ]]; do
+  while id="$(fetch_run_id)" && [ -z "${id}" ]; do
     sleep 1
   done
   echo "${id:?}" > "${run:?}"

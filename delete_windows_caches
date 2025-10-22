@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Copyright 2024, 2025 Philipp Stephani
 #
@@ -22,4 +22,4 @@ set -eux
 
 gh cache list --limit=100 --json=key \
   --jq='.[].key | select(contains("win32"))' \
-  | xargs --verbose --no-run-if-empty --max-args=1 -- gh cache delete --
+  | xargs -t -r -n 1 -- gh cache delete --
