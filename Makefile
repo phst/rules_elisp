@@ -22,6 +22,8 @@ BAZELFLAGS =
 GIT = git
 EMACS = emacs
 EMACSFLAGS =
+SHELLCHECK = shellcheck
+SHELLCHECKFLAGS =
 HYPERFINE = hyperfine
 HYPERFINEFLAGS =
 
@@ -71,6 +73,8 @@ check-extra:
         # Find BUILD files without correct features.
 	! $(GIT) grep -I -r -F -L -e 'features = PACKAGE_FEATURES' \
 	  -- '*/BUILD' '*/BUILD.bazel' ':^/examples/ext/'
+	$(GIT) grep -I -r -E -l -z -e '^#!/' -- ':^*.ps1' | \
+	  xargs -t -r -0 -- $(SHELLCHECK) $(SHELLCHECKFLAGS) --
 
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 
