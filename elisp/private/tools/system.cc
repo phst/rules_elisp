@@ -53,6 +53,7 @@
 #include <cstdint>  // IWYU pragma: keep, only on Windows
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <memory>
 #include <optional>  // IWYU pragma: keep, only on Windows
 #include <string>
@@ -408,34 +409,65 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
 #endif
 }
 
-[[nodiscard]] bool IsNonEmptyDirectory(const NativeStringView directory) {
-  if (directory.empty() || ContainsNull(directory)) return false;
+static absl::Status IterateDirectory(
+    const NativeStringView dir,
+    const std::function<bool(NativeStringView)>& function) {
+  if (dir.empty()) return absl::InvalidArgumentError("Empty directory name");
+  if (ContainsNull(dir)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Directory name %s contains null character", dir));
+  }
 #ifdef _WIN32
-  std::wstring pattern = NativeString(directory) + L"\\*";
+  std::wstring pattern = std::wstring(dir) + L"\\*";
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
-  if (handle == INVALID_HANDLE_VALUE) return false;
+  if (handle == INVALID_HANDLE_VALUE) {
+    if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
+      return WindowsStatus("FindFirstFileW", pattern);
+    }
+    return absl::OkStatus();
+  }
   const absl::Cleanup cleanup = [handle]() {
     if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
   };
   do {
     const std::wstring_view name = data.cFileName;
-    if (name != L"." && name != L"..") return true;
+    if (name == L"." || name == L"..") continue;
+    if (!function(name)) return absl::OkStatus();
   } while (::FindNextFileW(handle, &data));
+  if (::GetLastError() != ERROR_NO_MORE_FILES) {
+    return WindowsStatus("FindNextFileW");
+  }
 #else
-  std::string string(directory);
-  DIR* const absl_nullable dir = opendir(Pointer(string));
-  if (dir == nullptr) return false;
-  const absl::Cleanup cleanup = [dir]() {
-    if (closedir(dir) != 0) LOG(ERROR) << ErrnoStatus("closedir");
+  std::string string(dir);
+  DIR* const absl_nullable handle = opendir(Pointer(string));
+  if (handle == nullptr) return ErrnoStatus("opendir", dir);
+  const absl::Cleanup cleanup = [handle]() {
+    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
   };
-  const struct dirent* absl_nullable entry;
-  while ((entry = readdir(dir)) != nullptr) {
+  while (true) {
+    errno = 0;
+    const struct dirent* const absl_nullable entry = readdir(handle);
+    if (entry == nullptr) {
+      if (errno != 0) return ErrnoStatus("readdir");
+      break;
+    }
     const std::string_view name = entry->d_name;
-    if (name != "." && name != "..") return true;
+    if (name == "." || name == "..") continue;
+    if (!function(name)) break;
   }
 #endif
-  return false;
+  return absl::OkStatus();
+}
+
+[[nodiscard]] bool IsNonEmptyDirectory(const NativeStringView directory) {
+  bool empty = true;
+  const absl::Status status =
+      IterateDirectory(directory, [&empty](NativeStringView) {
+        empty = false;
+        return false;
+      });
+  return status.ok() && !empty;
 }
 
 #undef CreateDirectory
@@ -479,50 +511,13 @@ absl::Status RemoveDirectory(const NativeStringView name) {
 
 absl::StatusOr<std::vector<NativeString>> ListDirectory(
     const NativeStringView dir) {
-  if (dir.empty()) return absl::InvalidArgumentError("Empty directory name");
-  if (ContainsNull(dir)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Directory name %s contains null character", dir));
-  }
   std::vector<NativeString> result;
-#ifdef _WIN32
-  std::wstring pattern = std::wstring(dir) + L"\\*";
-  WIN32_FIND_DATAW data;
-  const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
-  if (handle == INVALID_HANDLE_VALUE) {
-    if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
-      return WindowsStatus("FindFirstFileW", pattern);
-    }
-    return result;
-  }
-  const absl::Cleanup cleanup = [handle]() {
-    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
-  };
-  do {
-    const std::wstring_view name = data.cFileName;
-    if (name != L"." && name != L"..") result.emplace_back(name);
-  } while (::FindNextFileW(handle, &data));
-  if (::GetLastError() != ERROR_NO_MORE_FILES) {
-    return WindowsStatus("FindNextFileW");
-  }
-#else
-  std::string string(dir);
-  DIR* const absl_nullable handle = opendir(Pointer(string));
-  if (handle == nullptr) return ErrnoStatus("opendir", dir);
-  const absl::Cleanup cleanup = [handle]() {
-    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
-  };
-  while (true) {
-    errno = 0;
-    const struct dirent* const absl_nullable entry = readdir(handle);
-    if (entry == nullptr) {
-      if (errno != 0) return ErrnoStatus("readdir");
-      break;
-    }
-    const std::string_view name = entry->d_name;
-    if (name != "." && name != "..") result.emplace_back(name);
-  }
-#endif
+  const absl::Status status =
+      IterateDirectory(dir, [&result](const NativeStringView file) {
+        result.emplace_back(file);
+        return true;
+      });
+  if (!status.ok()) return status;
   return result;
 }
 
