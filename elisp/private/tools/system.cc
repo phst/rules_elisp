@@ -33,6 +33,7 @@
 #  include <windows.h>
 #else
 #  include <dirent.h>
+#  include <fcntl.h>
 #  include <limits.h>
 #  include <spawn.h>
 #  include <stdio.h>
@@ -809,11 +810,15 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     return absl::InvalidArgumentError(absl::StrFormat(
         "Working directory %s contains null character", options.directory));
   }
+  if (ContainsNull(options.output_file)) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Output filename %s contains null character", options.output_file));
+  }
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
   if (!command_line.ok()) return command_line.status();
-  constexpr BOOL kInheritHandles = FALSE;
+  const BOOL inherit_handles = options.output_file.empty() ? FALSE : TRUE;
   const DWORD flags = CREATE_UNICODE_ENVIRONMENT |
                       (has_deadline ? CREATE_NEW_PROCESS_GROUP : 0);
   absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
@@ -825,16 +830,45 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   startup_info.lpReserved = nullptr;
   startup_info.lpDesktop = nullptr;
   startup_info.lpTitle = nullptr;
-  startup_info.dwFlags = 0;
+  startup_info.dwFlags = options.output_file.empty() ? 0 : STARTF_USESTDHANDLES;
   startup_info.cbReserved2 = 0;
   startup_info.lpReserved2 = nullptr;
+  if (!options.output_file.empty()) {
+    startup_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+    if (startup_info.hStdInput == INVALID_HANDLE_VALUE) {
+      return WindowsStatus("GetStdHandle", STD_INPUT_HANDLE);
+    }
+    constexpr DWORD access = GENERIC_WRITE;
+    constexpr DWORD share = FILE_SHARE_READ;
+    SECURITY_ATTRIBUTES security;
+    security.nLength = sizeof security;
+    security.lpSecurityDescriptor = nullptr;
+    security.bInheritHandle = TRUE;
+    constexpr DWORD disposition = CREATE_NEW;
+    constexpr DWORD attributes = FILE_ATTRIBUTE_NORMAL;
+    startup_info.hStdOutput =
+        ::CreateFileW(Pointer(options.output_file), access, share, &security,
+                      disposition, attributes, nullptr);
+    if (startup_info.hStdOutput == INVALID_HANDLE_VALUE) {
+      return WindowsStatus("CreateFileW", options.output_file, access, share,
+                           "...", disposition, attributes, nullptr);
+    }
+    startup_info.hStdError = startup_info.hStdOutput;
+  }
+  const absl::Cleanup close_output = [&startup_info] {
+    if (startup_info.dwFlags & STARTF_USESTDHANDLES) {
+      if (!::CloseHandle(startup_info.hStdOutput)) {
+        LOG(ERROR) << WindowsStatus("CloseHandle");
+      }
+    }
+  };
   PROCESS_INFORMATION process_info;
   BOOL success = ::CreateProcessW(
       Pointer(*abs_program), Pointer(*command_line), nullptr, nullptr,
-      kInheritHandles, flags, envp->data(), dirp, &startup_info, &process_info);
+      inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
     return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
-                         nullptr, kInheritHandles, flags, "...", dirp);
+                         nullptr, inherit_handles, flags, "...", dirp);
   }
   success = ::CloseHandle(process_info.hThread);
   if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
@@ -901,6 +935,21 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       LOG(ERROR) << ErrnoStatus("posix_spawn_file_actions_destroy");
     }
   };
+  if (!options.output_file.empty()) {
+    constexpr int oflag = O_WRONLY | O_CREAT | O_TRUNC | O_NOCTTY;
+    constexpr mode_t mode = S_IRUSR | S_IWUSR;
+    if (posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO,
+                                         Pointer(options.output_file), oflag,
+                                         mode) != 0) {
+      return ErrnoStatus("posix_spawn_file_actions_addopen", "...",
+                         STDOUT_FILENO, options.output_file, oflag, mode);
+    }
+    if (posix_spawn_file_actions_adddup2(&actions, STDOUT_FILENO,
+                                         STDERR_FILENO) != 0) {
+      return ErrnoStatus("posix_spawn_file_actions_adddup2", "...",
+                         STDOUT_FILENO, STDERR_FILENO);
+    }
+  }
   if (!options.directory.empty()) {
     // TODO: Switch to posix_spawn_file_actions_addchdir once that’s widely
     // available.

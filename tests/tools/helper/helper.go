@@ -16,6 +16,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"time"
 )
@@ -27,5 +28,7 @@ func main() {
 	flag.DurationVar(&sleep, "sleep", 0, "how long to sleep")
 	flag.Parse()
 	time.Sleep(sleep)
+	dir, _ := os.Getwd()
+	fmt.Print(dir)
 	os.Exit(exit)
 }
