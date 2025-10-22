@@ -277,6 +277,9 @@ class TemporaryFile final {
 };
 
 struct RunOptions final {
+  // If non-empty, change to this directory in the subprocess.
+  NativeString directory;
+
   absl::Time deadline = absl::InfiniteFuture();
 };
 
