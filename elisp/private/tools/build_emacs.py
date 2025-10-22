@@ -59,8 +59,9 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
            cc: pathlib.Path, cflags: str, ldflags: str) -> None:
     windows = platform.system() == 'Windows'
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
+    configure = source / 'configure'
     build = temp / 'build'
-    shutil.copytree(source, build)
+    build.mkdir()
 
     def run(*command: str) -> None:
         env = None
@@ -93,7 +94,7 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
             print('temporary build directory is ', temp)
             raise
 
-    run('./configure', '--prefix=' + install.as_posix(),
+    run(str(configure.as_posix()), '--prefix=' + install.as_posix(),
         '--without-all', '--without-ns', '--without-x', '--with-x-toolkit=no',
         '--without-libgmp',
         # Enable toolkit scrollbars to work around
