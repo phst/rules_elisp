@@ -19,19 +19,15 @@ use it outside the rules or depend on its behavior.
 """
 
 import argparse
-from collections.abc import Set
 import glob
-import json
 import os
 import os.path
 import pathlib
 import platform
-import re
 import shlex
 import shutil
 import subprocess
 import tempfile
-from typing import Optional
 
 def main() -> None:
     """Configures and builds Emacs."""
@@ -44,27 +40,15 @@ def main() -> None:
     parser.add_argument('--cflags')
     parser.add_argument('--ldflags')
     parser.add_argument('--module-header', type=pathlib.Path)
-    parser.add_argument('--builtin-features', type=pathlib.Path)
     args = parser.parse_args()
     source = args.readme.resolve().parent
     install = args.install.resolve()
 
     if args.release:
-        features = _unpack(source=source, install=install,
-                           builtin_features=bool(args.builtin_features))
+        _unpack(source=source, install=install)
     else:
-        features = _build(source=source, install=install, bash=args.bash,
-                          cc=args.cc, cflags=args.cflags, ldflags=args.ldflags,
-                          builtin_features=bool(args.builtin_features))
-
-    if args.builtin_features:
-        # We know that ‘features’ isn’t None, but the type system can’t express
-        # that, so help static type checkers.
-        assert features
-        data = {'builtinFeatures': sorted(features)}
-        with args.builtin_features.open('wt', encoding='utf-8',
-                                        newline='\n') as file:
-            json.dump(data, file)
+        _build(source=source, install=install, bash=args.bash,
+               cc=args.cc, cflags=args.cflags, ldflags=args.ldflags)
 
     if args.module_header:
         # Copy emacs-module.h to the desired location.
@@ -72,8 +56,7 @@ def main() -> None:
 
 
 def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
-           cc: pathlib.Path, cflags: str, ldflags: str,
-           builtin_features: bool) -> Optional[Set[str]]:
+           cc: pathlib.Path, cflags: str, ldflags: str) -> None:
     windows = platform.system() == 'Windows'
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
@@ -124,8 +107,6 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
     # We can remove the workaround once we drop support for Emacs 29.
     run('make', 'install', 'MAKEINFO=:')
 
-    features = _builtin_features(build / 'lisp') if builtin_features else None
-
     # Build directory no longer needed, delete it.
     shutil.rmtree(temp, ignore_errors=True)
     # Move files into hard-coded subdirectories so that run_emacs.py has less
@@ -144,11 +125,8 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
     for compiled in lisp.rglob('*.elc'):
         compiled.with_suffix('.el').unlink()
 
-    return features
 
-
-def _unpack(*, source: pathlib.Path, install: pathlib.Path,
-            builtin_features: bool) -> Optional[Set[str]]:
+def _unpack(*, source: pathlib.Path, install: pathlib.Path) -> None:
     try:
         # Bazel sometimes creates the output directory; remove it so that
         # _unpack_archive works correctly.
@@ -157,21 +135,6 @@ def _unpack(*, source: pathlib.Path, install: pathlib.Path,
         pass
 
     shutil.copytree(source, install)
-
-    lisp = _glob_unique(install / 'share' / 'emacs' / '[0-9]*' / 'lisp')
-    features = _builtin_features(lisp) if builtin_features else None
-    return features
-
-
-def _builtin_features(lisp: pathlib.Path) -> Set[str]:
-    features = set()
-    for source in lisp.rglob('*.el'):
-        with source.open('rt', encoding='ascii', errors='replace') as file:
-            for line in file:
-                match = re.match(r"\(provide '([-/\w]+)\)", line, re.ASCII)
-                if match:
-                    features.add(match.group(1))
-    return frozenset(features)
 
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
