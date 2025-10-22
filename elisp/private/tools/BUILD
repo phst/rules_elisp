@@ -185,25 +185,6 @@ select_file(
 )
 
 cc_library(
-    name = "process",
-    srcs = ["process.cc"],
-    hdrs = ["process.h"],
-    copts = COPTS + CXXOPTS,
-    features = FEATURES,
-    linkopts = LINKOPTS,
-    linkstatic = True,
-    local_defines = DEFINES,
-    deps = [
-        ":platform",
-        ":runfiles",
-        ":system",
-        "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/types:span",
-    ],
-)
-
-cc_library(
     name = "load",
     srcs = ["load.cc"],
     hdrs = ["load.h"],
