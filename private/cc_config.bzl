@@ -65,6 +65,11 @@ COPTS = select({
         "-Wno-error=unknown-pragmas",
     ],
     Label("//conditions:default"): [],
+}) + select({
+    Label("@rules_cc//cc/compiler:msvc-cl"): [
+        "/wd4702",  # lots of false positives in external templates
+    ],
+    Label("//conditions:default"): [],
 })
 
 CXXOPTS = select({
