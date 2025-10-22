@@ -796,6 +796,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
+  if (ContainsNull(options.directory)) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Working directory %s contains null character", options.directory));
+  }
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
   const std::wstring program = args.front();
@@ -806,6 +810,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                       (has_deadline ? CREATE_NEW_PROCESS_GROUP : 0);
   absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
   if (!envp.ok()) return envp.status();
+  const absl_nullable LPCWSTR dirp =
+      options.directory.empty() ? nullptr : Pointer(options.directory);
   STARTUPINFOW startup_info;
   startup_info.cb = sizeof startup_info;
   startup_info.lpReserved = nullptr;
@@ -815,13 +821,12 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   startup_info.cbReserved2 = 0;
   startup_info.lpReserved2 = nullptr;
   PROCESS_INFORMATION process_info;
-  BOOL success =
-      ::CreateProcessW(Pointer(program), Pointer(*command_line), nullptr,
-                       nullptr, kInheritHandles, flags, envp->data(), nullptr,
-                       &startup_info, &process_info);
+  BOOL success = ::CreateProcessW(
+      Pointer(program), Pointer(*command_line), nullptr, nullptr,
+      kInheritHandles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
     return WindowsStatus("CreateProcessW", program, *command_line, nullptr,
-                         nullptr, kInheritHandles, flags);
+                         nullptr, kInheritHandles, flags, "...", dirp);
   }
   success = ::CloseHandle(process_info.hThread);
   if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
@@ -879,11 +884,30 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     return absl::UnimplementedError(
         absl::StrFormat("Finite deadline %v unsupported", options.deadline));
   }
+  posix_spawn_file_actions_t actions;
+  if (posix_spawn_file_actions_init(&actions) != 0) {
+    return ErrnoStatus("posix_spawn_file_actions_init");
+  }
+  const absl::Cleanup cleanup = [&actions] {
+    if (posix_spawn_file_actions_destroy(&actions) != 0) {
+      LOG(ERROR) << ErrnoStatus("posix_spawn_file_actions_destroy");
+    }
+  };
+  if (!options.directory.empty()) {
+    // TODO: Switch to posix_spawn_file_actions_addchdir once that’s widely
+    // available.
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+    const int result = posix_spawn_file_actions_addchdir_np(
+        &actions, Pointer(options.directory));
+#  pragma GCC diagnostic pop
+    if (result != 0) return ErrnoStatus("posix_spawn_file_actions_addchdir_np");
+  }
   std::vector<NativeString> args_vec(args.cbegin(), args.cend());
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, argv.front(), nullptr, nullptr,
+  const int error = posix_spawn(&pid, argv.front(), &actions, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),

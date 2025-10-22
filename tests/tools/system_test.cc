@@ -506,6 +506,24 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
   }
 }
 
+TEST(RunTest, AllowsChangingDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
+  ASSERT_THAT(runfiles, IsOk());
+  const absl::StatusOr<NativeString> helper =
+      runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+
+  RunOptions options;
+  options.directory = *temp;
+
+  EXPECT_THAT(rules_elisp::Run({*helper}, {}, options), IsOkAndHolds(0));
+}
+
 TEST(DosDeviceTest, CreatesDevice) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
