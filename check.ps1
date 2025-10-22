@@ -39,7 +39,7 @@ function Run-Bazel {
     if ($free -lt 5GB) {
         Write-Warning "Only $($free / 1GB) GiB available on drive ${drive}"
         # Try to free up some disk space.
-        & $bazel clean
+        & $bazel clean --expunge
     }
     & $bazel @args
 }
