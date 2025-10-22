@@ -32,7 +32,15 @@ if (! $candidates) {
 $bazel = $candidates[0].Path
 
 function Run-Bazel {
-    Write-Verbose -Message "cd $(Get-Location) && ${bazel} ${args}"
+    $workspace = (Get-Location)
+    Write-Verbose -Message "cd ${workspace} && ${bazel} ${args}"
+    $drive = $workspace.Drive
+    $free = $drive.Free
+    if ($free -lt 5GB) {
+        Write-Warning "Only $($free / 1GB) GiB available on drive ${drive}"
+        # Try to free up some disk space.
+        & $bazel clean
+    }
     & $bazel @args
 }
 
