@@ -84,7 +84,7 @@ cc_library(
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
         ":platform",
-        ":runfiles_cc",
+        ":runfiles",
         ":strings",
         ":system",
         "@abseil-cpp//absl/log:check",
@@ -123,7 +123,7 @@ cc_library(
         "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
-        ":runfiles_cc",
+        ":runfiles",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
@@ -143,11 +143,11 @@ cc_binary(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
-        ":load_cc",
-        ":manifest_cc",
+        ":load",
+        ":manifest",
         ":numeric",
         ":platform",
-        ":runfiles_cc",
+        ":runfiles",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
@@ -190,7 +190,7 @@ cc_library(
         "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":process",
-        ":runfiles_cc",
+        ":runfiles",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
@@ -219,11 +219,11 @@ cc_binary(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@rules_cc//cc/runfiles",  # keep
-        ":load_cc",
-        ":manifest_cc",
+        ":load",
+        ":manifest",
         ":numeric",
         ":platform",
-        ":runfiles_cc",
+        ":runfiles",
         ":strings",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
@@ -269,7 +269,7 @@ cc_library(
     local_defines = DEFINES,
     deps = [
         ":platform",
-        ":runfiles_cc",
+        ":runfiles",
         ":system",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status:statusor",
@@ -278,7 +278,7 @@ cc_library(
 )
 
 cc_library(
-    name = "load_cc",
+    name = "load",
     srcs = ["load.cc"],
     hdrs = ["load.h"],
     copts = COPTS + CXXOPTS,
@@ -289,7 +289,7 @@ cc_library(
     visibility = ["//tests/tools:__pkg__"],
     deps = [
         ":platform",
-        ":runfiles_cc",
+        ":runfiles",
         ":strings",
         ":system",
         "@abseil-cpp//absl/status",
@@ -300,7 +300,7 @@ cc_library(
 )
 
 cc_library(
-    name = "manifest_cc",
+    name = "manifest",
     srcs = ["manifest.cc"],
     hdrs = ["manifest.h"],
     copts = COPTS + CXXOPTS,
@@ -325,7 +325,7 @@ cc_library(
 )
 
 cc_library(
-    name = "runfiles_cc",
+    name = "runfiles",
     srcs = ["runfiles.cc"],
     hdrs = ["runfiles.h"],
     copts = COPTS + CXXOPTS,

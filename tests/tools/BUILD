@@ -28,7 +28,7 @@ package(
 licenses(["notice"])
 
 cc_test(
-    name = "manifest_cc_test",
+    name = "manifest_test",
     size = "small",
     srcs = ["manifest_test.cc"],
     copts = COPTS + CXXOPTS,
@@ -37,7 +37,7 @@ cc_test(
     linkstatic = True,
     local_defines = DEFINES,
     deps = [
-        "//elisp/private/tools:manifest_cc",
+        "//elisp/private/tools:manifest",
         "//elisp/private/tools:platform",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/status:status_matchers",
@@ -48,7 +48,7 @@ cc_test(
 )
 
 cc_test(
-    name = "load_cc_test",
+    name = "load_test",
     size = "small",
     srcs = ["load_test.cc"],
     copts = COPTS + CXXOPTS,
@@ -61,9 +61,9 @@ cc_test(
         # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
         "@bazel_tools//tools/cpp/runfiles",  # keep
         "@googletest//:gtest_main",  # keep
-        "//elisp/private/tools:load_cc",
+        "//elisp/private/tools:load",
         "//elisp/private/tools:platform",
-        "//elisp/private/tools:runfiles_cc",
+        "//elisp/private/tools:runfiles",
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/cleanup",
@@ -111,7 +111,7 @@ cc_test(
 )
 
 cc_test(
-    name = "runfiles_cc_test",
+    name = "runfiles_test",
     size = "medium",
     timeout = "short",
     srcs = ["runfiles_test.cc"],
@@ -132,7 +132,7 @@ cc_test(
         "@googletest//:gtest_main",  # keep
         "@rules_cc//cc/runfiles",  # keep
         "//elisp/private/tools:platform",
-        "//elisp/private/tools:runfiles_cc",
+        "//elisp/private/tools:runfiles",
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
@@ -168,7 +168,7 @@ cc_test(
         "@rules_cc//cc/runfiles",  # keep
         "//elisp/private/tools:numeric",
         "//elisp/private/tools:platform",
-        "//elisp/private/tools:runfiles_cc",
+        "//elisp/private/tools:runfiles",
         "//elisp/private/tools:strings",
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/base:nullability",
