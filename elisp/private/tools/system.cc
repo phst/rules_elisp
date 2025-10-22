@@ -775,7 +775,7 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
 }
 
 absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
-                        const Environment& env, const absl::Time deadline) {
+                        const Environment& env, const RunOptions& options) {
   if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
@@ -789,7 +789,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
-  const bool has_deadline = deadline < absl::InfiniteFuture();
+  const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
   std::wstring program = args.front();
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
@@ -823,10 +823,11 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
   };
   const DWORD timeout_ms =
-      has_deadline ? static_cast<DWORD>(std::clamp(
-                         absl::ToInt64Milliseconds(deadline - absl::Now()),
-                         std::int64_t{0}, std::int64_t{MAXDWORD}))
-                   : INFINITE;
+      has_deadline
+          ? static_cast<DWORD>(std::clamp(
+                absl::ToInt64Milliseconds(options.deadline - absl::Now()),
+                std::int64_t{0}, std::int64_t{MAXDWORD}))
+          : INFINITE;
   switch (::WaitForSingleObject(process_info.hProcess, timeout_ms)) {
     case WAIT_OBJECT_0:
       break;
@@ -839,8 +840,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                                     CTRL_BREAK_EVENT);
       }
       return absl::DeadlineExceededError(absl::StrFormat(
-          "Deadline %v exceeded waiting for process (timeout %v)", deadline,
-          absl::Milliseconds(timeout_ms)));
+          "Deadline %v exceeded waiting for process (timeout %v)",
+          options.deadline, absl::Milliseconds(timeout_ms)));
     default:
       return WindowsStatus("WaitForSingleObject", "...", timeout_ms);
   }
@@ -869,7 +870,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
 #else
   if (has_deadline) {
     return absl::UnimplementedError(
-        absl::StrFormat("Finite deadline %v unsupported", deadline));
+        absl::StrFormat("Finite deadline %v unsupported", options.deadline));
   }
   std::vector<NativeString> args_vec(args.cbegin(), args.cend());
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
