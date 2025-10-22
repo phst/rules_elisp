@@ -118,12 +118,7 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
     _rename(
         _glob_unique(install / 'libexec' / 'emacs' / '*' / '*' / 'emacs*.pdmp'),
         install / 'emacs.pdmp')
-    lisp = _rename(shared / 'lisp', install / 'lisp')
-    # Delete source files that have a corresponding compiled file, as these
-    # files don’t work well with Coverage (see
-    # e.g. https://debbugs.gnu.org/40766).
-    for compiled in lisp.rglob('*.elc'):
-        compiled.with_suffix('.el').unlink()
+    _rename(shared / 'lisp', install / 'lisp')
 
 
 def _unpack(*, source: pathlib.Path, install: pathlib.Path) -> None:
