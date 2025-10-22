@@ -76,7 +76,7 @@ check-extra:
 	$(GIT) grep -I -r -E -l -z -e '^#!/' -- ':^*.ps1' | \
 	  xargs -t -r -0 -- $(SHELLCHECK) $(SHELLCHECKFLAGS) --
 
-BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
+BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
 
 benchmark:
 	$(HYPERFINE) $(HYPERFINEFLAGS) --shell=none --warmup=5 \
