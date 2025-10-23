@@ -434,7 +434,7 @@ static absl::Status IterateDirectory(
     }
     return absl::OkStatus();
   }
-  const absl::Cleanup cleanup = [handle]() {
+  const absl::Cleanup cleanup = [handle] {
     if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
   };
   do {
@@ -449,7 +449,7 @@ static absl::Status IterateDirectory(
   const std::string string(dir);
   DIR* const absl_nullable handle = opendir(Pointer(string));
   if (handle == nullptr) return ErrnoStatus("opendir", dir);
-  const absl::Cleanup cleanup = [handle]() {
+  const absl::Cleanup cleanup = [handle] {
     if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
   };
   while (true) {
