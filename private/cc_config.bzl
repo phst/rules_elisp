@@ -94,7 +94,11 @@ DEFINES = [
     "_XOPEN_SOURCE=800",
 ] + select({
     Label("@platforms//os:linux"): [],
-    Label("@platforms//os:macos"): [],
+    Label("@platforms//os:macos"): [
+        # The macOS headers lack some POSIX functionality even if
+        # _POSIX_C_SOURCE is defined.  We need to define _DARWIN_C_SOURCE, too.
+        "_DARWIN_C_SOURCE",
+    ],
     Label("@platforms//os:windows"): [
         "_UNICODE",
         "UNICODE",
