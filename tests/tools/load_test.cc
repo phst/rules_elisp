@@ -77,7 +77,7 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
         IsOk());
   }
 
-  const absl::Cleanup cleanup = [&foo, &bar]() {
+  const absl::Cleanup cleanup = [&foo, &bar] {
     for (const NativeString& dir : {foo, bar}) {
       EXPECT_THAT(Unlink(dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
                   IsOk());
@@ -120,7 +120,7 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
         IsOk());
   }
 
-  const absl::Cleanup cleanup = [&foo, &bar]() {
+  const absl::Cleanup cleanup = [&foo, &bar] {
     for (const NativeString& dir : {foo, bar}) {
       EXPECT_THAT(Unlink(dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
                   IsOk());
@@ -166,7 +166,7 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
               IsOk());
   EXPECT_THAT(CreateDirectory(bar), IsOk());
 
-  const absl::Cleanup cleanup = [&foo, &bar]() {
+  const absl::Cleanup cleanup = [&foo, &bar] {
     EXPECT_THAT(Unlink(foo + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
                 IsOk());
     EXPECT_THAT(RemoveDirectory(foo), IsOk());
