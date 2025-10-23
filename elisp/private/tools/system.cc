@@ -790,6 +790,9 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
           absl::StrFormat("Argument %s contains null character", arg));
     }
   }
+  const NativeString& program = args.front();
+  const absl::StatusOr<NativeString> abs_program = MakeAbsolute(program);
+  if (!abs_program.ok()) return abs_program.status();
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
@@ -802,7 +805,6 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
-  const std::wstring program = args.front();
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
   if (!command_line.ok()) return command_line.status();
   constexpr BOOL kInheritHandles = FALSE;
@@ -822,10 +824,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   startup_info.lpReserved2 = nullptr;
   PROCESS_INFORMATION process_info;
   BOOL success = ::CreateProcessW(
-      Pointer(program), Pointer(*command_line), nullptr, nullptr,
+      Pointer(*abs_program), Pointer(*command_line), nullptr, nullptr,
       kInheritHandles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
-    return WindowsStatus("CreateProcessW", program, *command_line, nullptr,
+    return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
                          nullptr, kInheritHandles, flags, "...", dirp);
   }
   success = ::CloseHandle(process_info.hThread);
@@ -910,11 +912,11 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, argv.front(), &actions, nullptr,
+  const int error = posix_spawn(&pid, Pointer(*abs_program), &actions, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", argv.front());
+                       "posix_spawn", *abs_program);
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);
