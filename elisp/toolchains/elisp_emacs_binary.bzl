@@ -255,12 +255,8 @@ def _unpack(ctx, readme):
     args.add("--release")
     args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
-    secondary_outs = []
-    if ctx.outputs.module_header:
-        args.add(ctx.outputs.module_header, format = "--module-header=%s")
-        secondary_outs.append(ctx.outputs.module_header)
     ctx.actions.run(
-        outputs = [install] + secondary_outs,
+        outputs = [install],
         inputs = ctx.files.srcs,
         executable = ctx.executable._build,
         arguments = [args],
@@ -268,6 +264,20 @@ def _unpack(ctx, readme):
         progress_message = "Unpacking Emacs into %{output}",
         toolchain = None,
     )
+
+    if ctx.outputs.module_header:
+        headers = [f for f in ctx.files.srcs if repository_relative_filename(f) == "include/emacs-module.h"]
+        if not headers:
+            fail("emacs-module.h not found in release archive")
+        if len(headers) > 1:
+            fail("Multiple copies of emacs-module.h found in release archive")
+        (header,) = headers
+        ctx.actions.symlink(
+            output = ctx.outputs.module_header,
+            target_file = header,
+            progress_message = "Installing %{output}",
+        )
+
     return install
 
 def _builtin_features(actions, extract, srcs, out):
