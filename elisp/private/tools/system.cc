@@ -901,7 +901,10 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     const int result = posix_spawn_file_actions_addchdir_np(
         &actions, Pointer(options.directory));
 #  pragma GCC diagnostic pop
-    if (result != 0) return ErrnoStatus("posix_spawn_file_actions_addchdir_np");
+    if (result != 0) {
+      return ErrnoStatus("posix_spawn_file_actions_addchdir_np", "...",
+                         options.directory);
+    }
   }
   std::vector<NativeString> args_vec(args.cbegin(), args.cend());
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
