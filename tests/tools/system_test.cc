@@ -23,6 +23,7 @@
 #include <optional>
 #include <sstream>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <utility>
 #include <vector>
@@ -33,6 +34,7 @@
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
+#include "absl/strings/str_format.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
@@ -49,6 +51,7 @@ using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 using ::testing::_;
+using ::testing::AnyOf;
 using ::testing::Contains;
 using ::testing::ElementsAre;
 using ::testing::EndsWith;
@@ -60,6 +63,48 @@ using ::testing::Not;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
+
+static absl::StatusOr<std::string> ReadFile(const NativeStringView name) {
+  std::ifstream stream(NativeString(name), std::ios::in | std::ios::binary);
+  if (!stream.is_open() || !stream.good()) {
+    return absl::UnknownError(
+        absl::StrFormat("Cannot open file %s for reading", name));
+  }
+  stream.imbue(std::locale::classic());
+
+  std::ostringstream buffer;
+  buffer.imbue(std::locale::classic());
+  buffer << stream.rdbuf();
+  buffer.flush();
+  if (!buffer.good() || !stream.good()) {
+    return absl::UnknownError(absl::StrFormat("Cannot read file %s", name));
+  }
+  return buffer.str();
+}
+
+static absl::Status WriteFile(const NativeStringView name,
+                              const std::string_view contents) {
+  std::ofstream stream(NativeString(name),
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  if (!stream.is_open() || !stream.good()) {
+    return absl::UnknownError(
+        absl::StrFormat("Cannot open file %s for writing", name));
+  }
+  stream.imbue(std::locale::classic());
+  const std::optional<std::streamsize> count =
+      CastNumber<std::streamsize>(contents.size());
+  if (!count.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Content too big (%d bytes)", contents.size()));
+  }
+  stream.write(contents.data(), *count);
+  stream.flush();
+  if (!stream.good()) {
+    return absl::DataLossError(
+        absl::StrFormat("Cannot write %d bytes to file %s", *count, name));
+  }
+  return absl::OkStatus();
+}
 
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
@@ -365,6 +410,115 @@ TEST(ListDirectoryTests, ListsDirectory) {
   EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
   EXPECT_THAT(RemoveDirectory(dir), IsOk());
   EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST(CopyTreeTest, RejectsSelfCopy) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  EXPECT_THAT(CopyTree(*temp, *temp),
+              StatusIs(AnyOf(absl::StatusCode::kAlreadyExists,
+                             absl::StatusCode::kNotFound)));
+}
+
+TEST(CopyTreeTest, RejectsCopyFromRootDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+
+  EXPECT_THAT(CopyTree(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                : RULES_ELISP_NATIVE_LITERAL("/"),
+                       to),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+
+  EXPECT_THAT(RemoveDirectory(to), StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST(CopyTreeTest, RejectsCopyToRootDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  EXPECT_THAT(CopyTree(*temp, kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                       : RULES_ELISP_NATIVE_LITERAL("/")),
+              StatusIs(absl::StatusCode::kAlreadyExists));
+}
+
+TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString from =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
+  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+  EXPECT_THAT(CreateDirectory(from), IsOk());
+  EXPECT_THAT(CreateDirectory(to), IsOk());
+  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
+                        "contents"),
+              IsOk());
+
+  EXPECT_THAT(CopyTree(from, to), StatusIs(absl::StatusCode::kAlreadyExists));
+
+  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOk());
+  EXPECT_THAT(RemoveDirectory(from), IsOk());
+  EXPECT_THAT(RemoveDirectory(to), IsOk());
+}
+
+TEST(CopyTreeTest, CopiesToNewDirectory) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString from =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
+  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+  EXPECT_THAT(CreateDirectory(from), IsOk());
+  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
+                        "contents"),
+              IsOk());
+
+  EXPECT_THAT(CopyTree(from, to), IsOk());
+
+  EXPECT_THAT(ReadFile(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOkAndHolds("contents"));
+
+  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOk());
+  EXPECT_THAT(RemoveDirectory(from), IsOk());
+  EXPECT_THAT(Unlink(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOk());
+  EXPECT_THAT(RemoveDirectory(to), IsOk());
+}
+
+TEST(CopyTreeTest, IgnoresTrailingSlash) {
+  const absl::StatusOr<NativeString> temp =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
+
+  const NativeString from =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from") + kSeparator;
+  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+  EXPECT_THAT(CreateDirectory(from), IsOk());
+  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
+                        "contents"),
+              IsOk());
+
+  EXPECT_THAT(CopyTree(from, to), IsOk());
+
+  EXPECT_THAT(ReadFile(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOkAndHolds("contents"));
+
+  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOk());
+  EXPECT_THAT(RemoveDirectory(from), IsOk());
+  EXPECT_THAT(Unlink(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
+              IsOk());
+  EXPECT_THAT(RemoveDirectory(to), IsOk());
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {

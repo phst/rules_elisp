@@ -137,6 +137,7 @@ absl::Status Unlink(NativeStringView file);
 absl::Status CreateDirectory(NativeStringView name);
 absl::Status RemoveDirectory(NativeStringView name);
 absl::StatusOr<std::vector<NativeString>> ListDirectory(NativeStringView dir);
+absl::Status CopyTree(NativeStringView from, NativeStringView to);
 
 class Environment final {
  private:
