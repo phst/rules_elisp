@@ -791,6 +791,12 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     }
   }
   const NativeString& program = args.front();
+  if (program.find_first_of({kSeparator, RULES_ELISP_NATIVE_LITERAL('/')}) ==
+      program.npos) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Program name %s doesn’t contain a directory separator character",
+        program));
+  }
   const absl::StatusOr<NativeString> abs_program = MakeAbsolute(program);
   if (!abs_program.ok()) return abs_program.status();
   std::vector<NativeString> final_env;
