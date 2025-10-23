@@ -84,7 +84,7 @@ benchmark:
 	  -- \
 	  '$(BAZEL) run $(BENCHMARK_BAZELFLAGS) -- //tests:empty' \
 	  './bazel-bin/tests/empty' \
-	  '$(EMACS) --quick --batch $(EMACSFLAGS) --load=./tests/empty.el'
+	  '$(EMACS) --quick --batch $(EMACSFLAGS) --load=bazel-bin/tests/empty.elc'
 
 clean:
 	$(BAZEL) clean
