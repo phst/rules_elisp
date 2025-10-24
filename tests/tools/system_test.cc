@@ -35,6 +35,7 @@
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_cat.h"
 #include "absl/time/clock.h"
 #include "absl/time/time.h"
 #include "gmock/gmock.h"
@@ -107,9 +108,10 @@ static absl::Status WriteFile(const NativeStringView name,
 }
 
 TEST(ErrorStatusTest, FormatsArguments) {
-  EXPECT_THAT(ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo",
-                          "bár", L"báz", 42, nullptr),
-              StatusIs(_, HasSubstr("fóo(\"bár\", L\"báz\", 42, nullptr)")));
+  EXPECT_THAT(
+      ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
+                  L"báz", 42, absl::Hex(0x42), Oct(042), nullptr),
+      StatusIs(_, HasSubstr("fóo(\"bár\", L\"báz\", 42, 0x42, 0042, nullptr)")));
 }
 
 TEST(ErrnoStatusTest, ReturnsMatchingStatus) {
