@@ -863,15 +863,16 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     }
   };
   PROCESS_INFORMATION process_info;
-  BOOL success = ::CreateProcessW(
+  const BOOL success = ::CreateProcessW(
       Pointer(*abs_program), Pointer(*command_line), nullptr, nullptr,
       inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
     return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
                          nullptr, inherit_handles, flags, "...", dirp);
   }
-  success = ::CloseHandle(process_info.hThread);
-  if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
+  if (!::CloseHandle(process_info.hThread)) {
+    LOG(ERROR) << WindowsStatus("CloseHandle");
+  }
   const absl::Cleanup close_handle = [&process_info] {
     const BOOL success = ::CloseHandle(process_info.hProcess);
     if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
@@ -887,9 +888,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       break;
     case WAIT_TIMEOUT:
       LOG(WARNING) << "Process timed out, sending CTRL + BREAK";
-      success = ::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
-                                           process_info.dwProcessId);
-      if (!success) {
+      if (!::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
+                                      process_info.dwProcessId)) {
         LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent",
                                     CTRL_BREAK_EVENT);
       }
@@ -900,8 +900,9 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       return WindowsStatus("WaitForSingleObject", "...", timeout_ms);
   }
   DWORD code;
-  success = ::GetExitCodeProcess(process_info.hProcess, &code);
-  if (!success) return WindowsStatus("GetExitCodeProcess");
+  if (!::GetExitCodeProcess(process_info.hProcess, &code)) {
+    return WindowsStatus("GetExitCodeProcess");
+  }
   // Emacs returns −1 on error, which the Windows C runtime will translate to
   // 0xFFFFFFFF.  Undo this cast, assuming that both DWORD and int use two’s
   // complement representation without padding bits.
