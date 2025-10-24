@@ -776,8 +776,7 @@ absl::Status CopyTree(NativeStringView from, NativeStringView to) {
   // The behavior of copyfile changes if the destination directory already
   // exists, see the man page copyfile(3).
   struct stat buffer;
-  const int result = lstat(Pointer(to_str), &buffer);
-  if (result == 0) {
+  if (lstat(Pointer(to_str), &buffer) == 0) {
     return absl::AlreadyExistsError(
         absl::StrFormat("Destination directory %s already exists", to_str));
   }
