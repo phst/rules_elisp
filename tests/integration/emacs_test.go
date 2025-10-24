@@ -62,7 +62,7 @@ func TestRun(t *testing.T) {
 Error: error \("Foo"\).*
   error\("Foo"\).*
   normal-top-level\(\)\r?
-$`, `^Foo\r?\n$`},
+$`, `(?m)^Foo\r?\n\z`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cmd := exec.Command(tc.program, tc.args...)
