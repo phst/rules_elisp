@@ -16,6 +16,7 @@
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdio>
 #include <string>
 #include <string_view>
@@ -32,6 +33,7 @@
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_format.h"
 #include "absl/strings/str_join.h"
 #include "absl/time/time.h"
 #include "absl/types/span.h"
@@ -46,11 +48,23 @@ std::size_t MaxFilename();
 absl::Status MakeErrorStatus(const std::error_code& code,
                              std::string_view function, std::string_view args);
 
+struct Ellipsis final {};
+inline constexpr Ellipsis kEllipsis;
+
+struct Oct final {
+  std::uint64_t value;
+  explicit constexpr Oct(const std::uint64_t v) : value(v) {}
+};
+
 struct ArgFormatter final {
   void operator()(std::string* const absl_nonnull out,
                   const absl::AlphaNum& value) const {
     const auto base = absl::AlphaNumFormatter();
     base(out, value);
+  }
+
+  void operator()(std::string* const absl_nonnull out, Ellipsis) const {
+    out->append("...");
   }
 
   void operator()(std::string* const absl_nonnull out,
@@ -85,6 +99,17 @@ struct ArgFormatter final {
 
   void operator()(std::string* const absl_nonnull out, std::nullptr_t) const {
     out->append("nullptr");
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const absl::Hex& number) const {
+    const auto base = absl::AlphaNumFormatter();
+    out->append("0x");
+    base(out, number);
+  }
+
+  void operator()(std::string* const absl_nonnull out, const Oct number) const {
+    absl::StrAppendFormat(out, "%04o", number.value);
   }
 };
 

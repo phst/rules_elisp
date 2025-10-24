@@ -261,8 +261,9 @@ absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
       ::WideCharToMultiByte(codepage, flags, string.data(), *wide_length,
                             buffer.data(), *narrow_length, nullptr, nullptr);
   if (result == 0) {
-    return WindowsStatus("WideCharToMultiByte", codepage, flags, "...",
-                         *wide_length, "...", *narrow_length, nullptr, nullptr);
+    return WindowsStatus("WideCharToMultiByte", codepage, flags, kEllipsis,
+                         *wide_length, kEllipsis, *narrow_length, nullptr,
+                         nullptr);
   }
   return buffer.substr(0, CastNumber<std::string::size_type>(result).value());
 #else
@@ -292,8 +293,8 @@ absl::StatusOr<NativeString> ToNative(
   const int result = ::MultiByteToWideChar(codepage, flags, string.data(),
                                            *length, buffer.data(), *length);
   if (result == 0) {
-    return WindowsStatus("MultiByteToWideChar", codepage, flags, "...", *length,
-                         "...", *length);
+    return WindowsStatus("MultiByteToWideChar", codepage, flags, kEllipsis,
+                         *length, kEllipsis, *length);
   }
   return buffer.substr(0, CastNumber<NativeString::size_type>(result).value());
 #else
@@ -346,7 +347,8 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   const DWORD result =
       ::GetFullPathNameW(Pointer(string), size, buffer.data(), nullptr);
   if (result == 0) {
-    return WindowsStatus("GetFullPathNameW", file, size, "...", nullptr);
+    return WindowsStatus("GetFullPathNameW", file, absl::Hex(size), kEllipsis,
+                         nullptr);
   }
   if (result > size) {
     return absl::OutOfRangeError(
@@ -491,11 +493,11 @@ absl::Status CreateDirectory(const NativeStringView name) {
   const NativeString string(name);
 #ifdef _WIN32
   const BOOL ok = ::CreateDirectoryW(Pointer(string), nullptr);
-  if (!ok) return WindowsStatus("CreateDirectoryW", name);
+  if (!ok) return WindowsStatus("CreateDirectoryW", string, nullptr);
 #else
   constexpr mode_t mode = S_IRWXU;
   const int result = mkdir(Pointer(string), mode);
-  if (result != 0) return ErrnoStatus("mkdir", name, mode);
+  if (result != 0) return ErrnoStatus("mkdir", string, Oct(mode));
 #endif
   return absl::OkStatus();
 }
@@ -511,10 +513,10 @@ absl::Status RemoveDirectory(const NativeStringView name) {
   const NativeString string(name);
 #ifdef _WIN32
   const BOOL ok = ::RemoveDirectoryW(Pointer(string));
-  if (!ok) return WindowsStatus("RemoveDirectoryW", name);
+  if (!ok) return WindowsStatus("RemoveDirectoryW", string);
 #else
   const int result = rmdir(Pointer(string));
-  if (result != 0) return ErrnoStatus("rmdir", name);
+  if (result != 0) return ErrnoStatus("rmdir", string);
 #endif
   return absl::OkStatus();
 }
@@ -565,7 +567,7 @@ static absl::Status CopyTreeWindows(const std::wstring& from,
       if (!::CopyFileExW(Pointer(from_entry), Pointer(to_entry), nullptr,
                          nullptr, nullptr, flags)) {
         return WindowsStatus("CopyFileExW", from_entry, to_entry, nullptr,
-                             nullptr, nullptr, flags);
+                             nullptr, nullptr, absl::Hex(flags));
       }
     }
   } while (::FindNextFileW(handle, &data));
@@ -588,7 +590,9 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
 
   constexpr int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_NOFOLLOW;
   const int from_fd = openat(from_parent, Pointer(name), from_flags);
-  if (from_fd < 0) return ErrnoStatus("openat", from_parent, name, from_flags);
+  if (from_fd < 0) {
+    return ErrnoStatus("openat", from_parent, name, absl::Hex(from_flags));
+  }
   const absl::Cleanup close_from = [from_fd] {
     if (close(from_fd) != 0) LOG(ERROR) << ErrnoStatus("close", from_fd);
   };
@@ -597,7 +601,9 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
   constexpr int to_flags =
       O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOCTTY | O_NOFOLLOW;
   const int to_fd = openat(to_parent, Pointer(name), to_flags, mode);
-  if (to_fd < 0) return ErrnoStatus("openat", to_parent, name, to_flags, mode);
+  if (to_fd < 0) {
+    return ErrnoStatus("openat", to_parent, name, to_flags, Oct(mode));
+  }
   const absl::Cleanup close_to = [to_fd] {
     if (close(to_fd) != 0) LOG(ERROR) << ErrnoStatus("close", to_fd);
   };
@@ -606,14 +612,16 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
     constexpr std::size_t buffer_size = 0x1000;
     char buffer[buffer_size];
     const ssize_t result = read(from_fd, buffer, buffer_size);
-    if (result < 0) return ErrnoStatus("read", from_fd, "...", buffer_size);
+    if (result < 0) {
+      return ErrnoStatus("read", from_fd, kEllipsis, absl::Hex(buffer_size));
+    }
     if (result == 0) break;
     std::string_view remaining(
         buffer, CastNumber<std::string_view::size_type>(result).value());
     while (!remaining.empty()) {
       const ssize_t written = write(to_fd, remaining.data(), remaining.size());
       if (written < 0) {
-        return ErrnoStatus("write", to_fd, "...", remaining.size());
+        return ErrnoStatus("write", to_fd, kEllipsis, remaining.size());
       }
       if (written == 0) {
         // Prevent infinite loop.
@@ -655,7 +663,7 @@ static absl::Status CopyTreePosix(const int from_parent,
       O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
   const int from_fd = openat(from_parent, Pointer(from_name), from_flags);
   if (from_fd < 0) {
-    return ErrnoStatus("openat", from_parent, from_name, from_flags);
+    return ErrnoStatus("openat", from_parent, from_name, absl::Hex(from_flags));
   }
   bool owns_from_fd = true;
   const absl::Cleanup close_from_fd = [from_fd, &owns_from_fd] {
@@ -684,12 +692,14 @@ static absl::Status CopyTreePosix(const int from_parent,
 
   const mode_t mode = from_stat->st_mode | S_IWUSR;
   const int result = mkdirat(to_parent, Pointer(to_name), mode);
-  if (result != 0) return ErrnoStatus("mkdirat", to_parent, to_name, mode);
+  if (result != 0) return ErrnoStatus("mkdirat", to_parent, to_name, Oct(mode));
 
   constexpr int to_flags =
       O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
   const int to_fd = openat(to_parent, Pointer(to_name), to_flags);
-  if (to_fd < 0) return ErrnoStatus("openat", to_parent, to_name, to_flags);
+  if (to_fd < 0) {
+    return ErrnoStatus("openat", to_parent, to_name, absl::Hex(to_flags));
+  }
   const absl::Cleanup close_to = [to_fd] {
     if (close(to_fd) != 0) LOG(ERROR) << ErrnoStatus("close");
   };
@@ -707,7 +717,8 @@ static absl::Status CopyTreePosix(const int from_parent,
     struct stat buffer;
     constexpr int stat_flags = AT_SYMLINK_NOFOLLOW;
     if (fstatat(from_fd, entry->d_name, &buffer, stat_flags) != 0) {
-      return ErrnoStatus("fstatat", "...", name, "...", stat_flags);
+      return ErrnoStatus("fstatat", from_fd, name, kEllipsis,
+                         absl::Hex(stat_flags));
     }
     const mode_t mode = buffer.st_mode;
     if (S_ISDIR(mode)) {
@@ -785,7 +796,7 @@ absl::Status CopyTree(NativeStringView from, NativeStringView to) {
                                      COPYFILE_EXCL | COPYFILE_NOFOLLOW |
                                      COPYFILE_CLONE | COPYFILE_DATA_SPARSE;
   if (copyfile(Pointer(from_str), Pointer(to_str), nullptr, flags) != 0) {
-    return ErrnoStatus("copyfile", from_str, to_str, nullptr, flags);
+    return ErrnoStatus("copyfile", from_str, to_str, nullptr, absl::Hex(flags));
   }
   return absl::OkStatus();
 #elif defined RULES_ELISP_COPY_TREE_POSIX
@@ -951,13 +962,14 @@ static std::wstring CanonicalizeEnvironmentVariable(
   constexpr DWORD flags = LCMAP_UPPERCASE;
   const int length = CastNumber<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
-  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, flags, "...",
-                                       length, nullptr, 0);
+  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, absl::Hex(flags),
+                                       kEllipsis, length, nullptr, 0);
   std::wstring buffer(result, L'\0');
   result = ::LCMapStringW(locale, flags, string.data(), length, buffer.data(),
                           result);
-  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, flags, "...",
-                                       length, "...", buffer.size());
+  CHECK_GT(result, 0) << WindowsStatus("LCMapStringW", locale, absl::Hex(flags),
+                                       kEllipsis, length, kEllipsis,
+                                       buffer.size());
   return buffer.substr(0, result);
 }
 #else
@@ -988,10 +1000,10 @@ absl::Status Unlink(const NativeStringView file) {
   const NativeString string(file);
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(Pointer(string));
-  if (!result) return WindowsStatus("DeleteFileW", file);
+  if (!result) return WindowsStatus("DeleteFileW", string);
 #else
   const int result = unlink(Pointer(string));
-  if (result != 0) return ErrnoStatus("unlink", file);
+  if (result != 0) return ErrnoStatus("unlink", string);
 #endif
   return absl::OkStatus();
 };
@@ -1047,7 +1059,7 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
     const std::size_t written =
         std::fwrite(contents.data(), size, count, file_);
     if (written != contents.size()) {
-      const absl::Status status = ErrnoStatus("fwrite", "...", size, count);
+      const absl::Status status = ErrnoStatus("fwrite", kEllipsis, size, count);
       LOG(ERROR) << status << "; only " << written << " bytes of " << count
                  << " written";
       return status;
@@ -1126,7 +1138,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                       disposition, attributes, nullptr);
     if (startup_info.hStdOutput == INVALID_HANDLE_VALUE) {
       return WindowsStatus("CreateFileW", options.output_file, access, share,
-                           "...", disposition, attributes, nullptr);
+                           kEllipsis, disposition, absl::Hex(attributes),
+                           nullptr);
     }
     startup_info.hStdError = startup_info.hStdOutput;
   }
@@ -1143,7 +1156,8 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
     return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
-                         nullptr, inherit_handles, flags, "...", dirp);
+                         nullptr, inherit_handles, absl::Hex(flags), kEllipsis,
+                         dirp);
   }
   if (!::CloseHandle(process_info.hThread)) {
     LOG(ERROR) << WindowsStatus("CloseHandle");
@@ -1166,13 +1180,13 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
       if (!::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
                                       process_info.dwProcessId)) {
         LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent",
-                                    CTRL_BREAK_EVENT);
+                                    CTRL_BREAK_EVENT, process_info.dwProcessId);
       }
       return absl::DeadlineExceededError(absl::StrFormat(
           "Deadline %v exceeded waiting for process (timeout %v)",
           options.deadline, absl::Milliseconds(timeout_ms)));
     default:
-      return WindowsStatus("WaitForSingleObject", "...", timeout_ms);
+      return WindowsStatus("WaitForSingleObject", kEllipsis, timeout_ms);
   }
   DWORD code;
   if (!::GetExitCodeProcess(process_info.hProcess, &code)) {
@@ -1217,12 +1231,12 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
     if (posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO,
                                          Pointer(options.output_file), oflag,
                                          mode) != 0) {
-      return ErrnoStatus("posix_spawn_file_actions_addopen", "...",
-                         STDOUT_FILENO, options.output_file, oflag, mode);
+      return ErrnoStatus("posix_spawn_file_actions_addopen", kEllipsis,
+                         STDOUT_FILENO, options.output_file, oflag, Oct(mode));
     }
     if (posix_spawn_file_actions_adddup2(&actions, STDOUT_FILENO,
                                          STDERR_FILENO) != 0) {
-      return ErrnoStatus("posix_spawn_file_actions_adddup2", "...",
+      return ErrnoStatus("posix_spawn_file_actions_adddup2", kEllipsis,
                          STDOUT_FILENO, STDERR_FILENO);
     }
   }
@@ -1235,7 +1249,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
         &actions, Pointer(options.directory));
 #  pragma GCC diagnostic pop
     if (result != 0) {
-      return ErrnoStatus("posix_spawn_file_actions_addchdir_np", "...",
+      return ErrnoStatus("posix_spawn_file_actions_addchdir_np", kEllipsis,
                          options.directory);
     }
   }
@@ -1247,11 +1261,11 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", *abs_program);
+                       "posix_spawn", kEllipsis, *abs_program);
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);
-  if (status != pid) return ErrnoStatus("waitpid", pid);
+  if (status != pid) return ErrnoStatus("waitpid", pid, kEllipsis, 0);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 #endif
 }
@@ -1273,7 +1287,8 @@ absl::StatusOr<DosDevice> DosDevice::Create(
       const wchar_t name[] = {letter, L':', L'\0'};
       const std::wstring string(target);
       if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
-        return WindowsStatus("DefineDosDeviceW", flags, name, target);
+        return WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name,
+                             string);
       }
       return DosDevice(name, target);
     }
@@ -1290,7 +1305,8 @@ DosDevice::~DosDevice() noexcept {
   constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
                           DDD_NO_BROADCAST_SYSTEM;
   if (!::DefineDosDeviceW(flags, Pointer(name_), Pointer(target_))) {
-    LOG(ERROR) << WindowsStatus("DefineDosDeviceW", flags, name_, target_);
+    LOG(ERROR) << WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name_,
+                                target_);
   }
 #endif
 }
