@@ -43,6 +43,29 @@ py_binary(
 )
 
 cc_binary(
+    name = "copy_tree",
+    srcs = ["copy_tree.cc"],
+    copts = LAUNCHER_COPTS,
+    features = LAUNCHER_FEATURES,
+    linkopts = LAUNCHER_LINKOPTS,
+    linkstatic = True,
+    local_defines = LAUNCHER_DEFINES,
+    visibility = ["//elisp/toolchains:__pkg__"],
+    deps = [
+        ":platform",
+        ":system",
+        "@abseil-cpp//absl/base:log_severity",
+        "@abseil-cpp//absl/log",
+        "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/log:globals",
+        "@abseil-cpp//absl/log:initialize",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
+    ],
+)
+
+cc_binary(
     name = "builtin_features",
     srcs = ["builtin_features.cc"],
     copts = LAUNCHER_COPTS,

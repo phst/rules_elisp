@@ -114,6 +114,11 @@ This is used by Gazelle.""",
             executable = True,
             cfg = "exec",
         ),
+        "_copy_tree": attr.label(
+            default = Label("//elisp/private/tools:copy_tree"),
+            executable = True,
+            cfg = "exec",
+        ),
         "_builtin_features": attr.label(
             default = Label("//elisp/private/tools:builtin_features"),
             executable = True,
@@ -256,17 +261,16 @@ def _unpack(ctx, readme):
     """
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
-    args.add("--release")
-    args.add(readme, format = "--readme=%s")
-    args.add(install.path, format = "--install=%s")
+    args.add(readme)
+    args.add(install.path)
     srcs = ctx.actions.args()
-    srcs.use_param_file("--srcs=%s", use_always = True)
+    srcs.use_param_file("%s", use_always = True)
     srcs.set_param_file_format("multiline")
     srcs.add_all(ctx.files.srcs, uniquify = True)
     ctx.actions.run(
         outputs = [install],
         inputs = ctx.files.srcs,
-        executable = ctx.executable._build,
+        executable = ctx.executable._copy_tree,
         arguments = [args, srcs],
         mnemonic = "EmacsInstall",
         progress_message = "Unpacking Emacs into %{output}",
