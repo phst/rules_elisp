@@ -42,7 +42,7 @@ jobs:
           --execution_log_binary_file='${{runner.temp}}/execution-log.binpb'
           -- //emacs
       - name: Upload binary execution log
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: binary execution log, ${{runner.os}}
           path: ${{runner.temp}}/execution-log.binpb
