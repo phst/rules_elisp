@@ -33,25 +33,21 @@ import tempfile
 def main() -> None:
     """Configures and builds Emacs."""
     parser = argparse.ArgumentParser(allow_abbrev=False)
-    parser.add_argument('--release', action='store_true')
     parser.add_argument('--readme', type=pathlib.Path, required=True)
     parser.add_argument('--install', type=pathlib.Path, required=True)
     parser.add_argument(
         '--srcs', type=argparse.FileType('rt', encoding='utf-8'), required=True)
-    parser.add_argument('--bash', type=pathlib.Path)
-    parser.add_argument('--cc', type=pathlib.Path)
-    parser.add_argument('--cflags')
-    parser.add_argument('--ldflags')
+    parser.add_argument('--bash', type=pathlib.Path, required=True)
+    parser.add_argument('--cc', type=pathlib.Path, required=True)
+    parser.add_argument('--cflags', required=True)
+    parser.add_argument('--ldflags', required=True)
     parser.add_argument('--module-header', type=pathlib.Path)
     args = parser.parse_args()
     source = args.readme.parent
     install = args.install.resolve()
 
-    if args.release:
-        _unpack(source=source, install=install, lines=args.srcs)
-    else:
-        _build(source=source, install=install, lines=args.srcs, bash=args.bash,
-               cc=args.cc, cflags=args.cflags, ldflags=args.ldflags)
+    _build(source=source, install=install, lines=args.srcs, bash=args.bash,
+           cc=args.cc, cflags=args.cflags, ldflags=args.ldflags)
 
     if args.module_header:
         # Copy emacs-module.h to the desired location.
