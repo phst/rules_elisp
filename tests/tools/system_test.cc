@@ -701,7 +701,8 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   if (dir->back() == kSeparator) dir->pop_back();
 
   const std::pair<NativeString, NativeString> env_vars[] = {
-      // Avoid misleading warning about unset GOCOVERDIR.
+      // Avoid misleading warnings about unset COVERAGE_DIR and GOCOVERDIR.
+      {RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"), *dir},
       {RULES_ELISP_NATIVE_LITERAL("GOCOVERDIR"), *dir},
   };
   const absl::StatusOr<Environment> env =
