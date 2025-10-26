@@ -178,6 +178,11 @@ INSTANTIATE_TEST_SUITE_P(
         RULES_ELISP_NATIVE_LITERAL("\\??\\X:"),
         RULES_ELISP_NATIVE_LITERAL("\\??\\X:/ABC/DEF")));
 
+TEST(FileNameTest, CanCreateFromLiteral) {
+  EXPECT_EQ(FileName::FromLiteralOrDie("foo").string(),
+            RULES_ELISP_NATIVE_LITERAL("foo"));
+}
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
