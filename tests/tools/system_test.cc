@@ -183,6 +183,12 @@ TEST(FileNameTest, CanCreateFromLiteral) {
             RULES_ELISP_NATIVE_LITERAL("foo"));
 }
 
+TEST(FileNameTest, CanCreateFromNativeLiteral) {
+  const FileName name = FileName::FromNativeLiteralOrDie(
+      RULES_ELISP_NATIVE_LITERAL("foo äα𝐴🐈'"));
+  EXPECT_EQ(name.string(), RULES_ELISP_NATIVE_LITERAL("foo äα𝐴🐈'"));
+}
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
