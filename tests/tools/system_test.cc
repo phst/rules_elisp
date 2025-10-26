@@ -109,6 +109,25 @@ static absl::Status WriteFile(const NativeStringView name,
   return absl::OkStatus();
 }
 
+TEST(FileNameTest, RejectsEmpty) {
+  EXPECT_THAT(FileName::FromString(RULES_ELISP_NATIVE_LITERAL("")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, RejectsNull) {
+  static constexpr NativeChar chars[] =
+      RULES_ELISP_NATIVE_LITERAL("foo \x00 bar");
+  constexpr std::size_t size = std::size(chars);
+  static_assert(size > 0);
+  constexpr std::size_t length = size - 1;
+  static_assert(chars[length] == RULES_ELISP_NATIVE_LITERAL('\0'));
+  constexpr NativeStringView name(chars, length);
+  static_assert(name.find(RULES_ELISP_NATIVE_LITERAL('\0')) != name.npos);
+
+  EXPECT_THAT(FileName::FromString(name),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",

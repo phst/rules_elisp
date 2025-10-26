@@ -87,6 +87,15 @@
 
 namespace rules_elisp {
 
+absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
+  if (string.empty()) return absl::InvalidArgumentError("Empty filename");
+  if (ContainsNull(string)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Filename %s contains null character", string));
+  }
+  return FileName(NativeString(string));
+}
+
 static constexpr std::size_t kMaxFilename{
 #ifdef _WIN32
     MAX_PATH
