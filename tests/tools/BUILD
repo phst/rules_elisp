@@ -177,6 +177,7 @@ cc_test(
         "//elisp/private/tools:strings",
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/base:nullability",
+        "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",

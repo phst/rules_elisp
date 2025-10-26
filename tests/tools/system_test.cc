@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "absl/base/nullability.h"
+#include "absl/cleanup/cleanup.h"
 #include "absl/log/check.h"
 #include "absl/status/status.h"
 #include "absl/status/status_matchers.h"
@@ -557,16 +558,18 @@ TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
   const NativeString to_file =
       from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
+  const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir] {
+    EXPECT_THAT(Unlink(from_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+    EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
+  };
+
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(CreateDirectory(to_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
   EXPECT_THAT(CopyTree(from_dir, to_dir),
               StatusIs(absl::StatusCode::kAlreadyExists));
-
-  EXPECT_THAT(Unlink(from_file), IsOk());
-  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
-  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(CopyTreeTest, CopiesToNewDirectory) {
@@ -586,17 +589,19 @@ TEST(CopyTreeTest, CopiesToNewDirectory) {
   const NativeString to_file =
       to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
+  const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir, &to_file] {
+    EXPECT_THAT(Unlink(from_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+    EXPECT_THAT(Unlink(to_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
+  };
+
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
   EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
 
   EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
-
-  EXPECT_THAT(Unlink(from_file), IsOk());
-  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
-  EXPECT_THAT(Unlink(to_file), IsOk());
-  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(CopyTreeTest, IgnoresTrailingSlash) {
@@ -617,17 +622,19 @@ TEST(CopyTreeTest, IgnoresTrailingSlash) {
   const NativeString to_file =
       to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
+  const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir, &to_file] {
+    EXPECT_THAT(Unlink(from_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+    EXPECT_THAT(Unlink(to_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
+  };
+
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
   EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
 
   EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
-
-  EXPECT_THAT(Unlink(from_file), IsOk());
-  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
-  EXPECT_THAT(Unlink(to_file), IsOk());
-  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
