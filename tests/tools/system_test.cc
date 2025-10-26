@@ -128,6 +128,55 @@ TEST(FileNameTest, RejectsNull) {
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+class FileNameTest : public TestWithParam<NativeStringView> {};
+
+TEST_P(FileNameTest, RejectsExoticNamesOnWindows) {
+  if constexpr (kWindows) {
+    // See
+    // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
+    // for an exhaustive description of Windows filenames.  We want to reject
+    // all of them except relative and MS-DOS-style drive absolute ones.
+    EXPECT_THAT(FileName::FromString(this->GetParam()),
+                StatusIs(absl::StatusCode::kInvalidArgument));
+  }
+}
+
+INSTANTIATE_TEST_SUITE_P(
+    ExoticFileNames, FileNameTest,
+    Values(
+        // Drive Relative
+        RULES_ELISP_NATIVE_LITERAL("X:DEF\\GHI"),
+        RULES_ELISP_NATIVE_LITERAL("X:"),
+        RULES_ELISP_NATIVE_LITERAL("X:DEF. ."),
+        RULES_ELISP_NATIVE_LITERAL("X:ABC\\..\\..\\.."),
+        // Rooted
+        RULES_ELISP_NATIVE_LITERAL("\\ABC\\DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\"),
+        RULES_ELISP_NATIVE_LITERAL("\\ABC\\DEF. ."),
+        RULES_ELISP_NATIVE_LITERAL("/ABC/DEF"),
+        // UNC Absolute
+        RULES_ELISP_NATIVE_LITERAL("\\ABC\\..\\..\\.."),
+        RULES_ELISP_NATIVE_LITERAL("\\\\server\\share\\ABC\\DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\server"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\server\\share"),
+        RULES_ELISP_NATIVE_LITERAL("//server/share/ABC/DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\;LanmanRedirector\\evil.com\\xyz"),
+        // Local Device
+        RULES_ELISP_NATIVE_LITERAL("\\\\.\\COM20"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\.\\pipe\\mypipe"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\.\\X:\\ABC\\DEF. ."),
+        RULES_ELISP_NATIVE_LITERAL("\\\\.\\X:/ABC/DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\.\\X:\\ABC\\..\\..\\C:\\"),
+        // Root Local Device
+        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:/ABC/DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\..\\..\\.."),
+        RULES_ELISP_NATIVE_LITERAL("\\??\\X:\\ABC\\DEF"),
+        RULES_ELISP_NATIVE_LITERAL("\\??\\X:"),
+        RULES_ELISP_NATIVE_LITERAL("\\??\\X:/ABC/DEF")));
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
