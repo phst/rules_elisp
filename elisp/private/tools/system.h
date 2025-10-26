@@ -135,7 +135,7 @@ class FileName final {
   // https://abseil.io/docs/cpp/guides/abslstringify#basic-usage
   template <typename Sink>
   friend void AbslStringify(Sink& sink, const FileName& name) {
-    sink.Append(name.string_);
+    absl::Format(&sink, "%s", name.string_);
   }
 
  private:

@@ -189,6 +189,16 @@ TEST(FileNameTest, CanCreateFromNativeLiteral) {
   EXPECT_EQ(name.string(), RULES_ELISP_NATIVE_LITERAL("foo äα𝐴🐈'"));
 }
 
+TEST(FileNameTest, IsFormattable) {
+  const FileName foo = FileName::FromLiteralOrDie("foo");
+  const FileName bar = FileName::FromNativeLiteralOrDie(
+      RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"));
+  EXPECT_EQ(absl::StrCat("bar ", foo, " baz"), "bar foo baz");
+  EXPECT_EQ(absl::StrFormat("bar %v baz", foo), "bar foo baz");
+  EXPECT_EQ(absl::StrCat("foo ", bar, " baz"), "foo bar äα𝐴🐈' baz");
+  EXPECT_EQ(absl::StrFormat("foo %v baz", bar), "foo bar äα𝐴🐈' baz");
+}
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
