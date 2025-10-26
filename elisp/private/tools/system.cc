@@ -123,6 +123,43 @@ absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   return FileName(std::move(name));
 }
 
+absl::StatusOr<FileName> FileName::Child(const FileName& child) const {
+  const NativeString& string = child.string_;
+  if (string == RULES_ELISP_NATIVE_LITERAL(".") ||
+      string == RULES_ELISP_NATIVE_LITERAL("..") ||
+      string.find(kSeparator) != string.npos) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("File %v is not a child of %v", child, *this));
+  }
+  NativeString result = string_;
+  if (result.back() != kSeparator) result.push_back(kSeparator);
+  result += string;
+  return FileName::FromString(std::move(result));
+}
+
+absl::StatusOr<FileName> FileName::Child(const NativeStringView child) const {
+  const absl::StatusOr<FileName> name = FileName::FromString(child);
+  if (!name.ok()) return name.status();
+  return this->Child(*name);
+}
+
+absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
+  if (IsAbsolute(descendant.string_)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("File name %v is absolute", descendant));
+  }
+  NativeString result = string_;
+  if (result.back() != kSeparator) result.push_back(kSeparator);
+  result += descendant.string_;
+  return FileName::FromString(std::move(result));
+}
+
+absl::StatusOr<FileName> FileName::Join(const NativeStringView descendant) const {
+  const absl::StatusOr<FileName> name = FileName::FromString(descendant);
+  if (!name.ok()) return name.status();
+  return this->Join(*name);
+}
+
 static constexpr std::size_t kMaxFilename{
 #ifdef _WIN32
     MAX_PATH

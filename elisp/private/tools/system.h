@@ -108,6 +108,11 @@ class FileName final {
     return string_.data();
   }
 
+  absl::StatusOr<FileName> Child(const FileName& child) const;
+  absl::StatusOr<FileName> Child(NativeStringView child) const;
+  absl::StatusOr<FileName> Join(const FileName& descendant) const;
+  absl::StatusOr<FileName> Join(NativeStringView descendant) const;
+
   friend bool operator==(const FileName& a, const FileName& b) {
     return a.string_ == b.string_;
   }
