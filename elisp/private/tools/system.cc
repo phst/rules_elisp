@@ -1069,24 +1069,30 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
   return absl::OkStatus();
 }
 
-absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
+absl::StatusOr<int> Run(const NativeStringView program,
+                        const absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options) {
-  if (args.empty()) return absl::InvalidArgumentError("Empty argument array");
+  if (program.empty()) return absl::InvalidArgumentError("Empty program name");
+  if (ContainsNull(program)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Program name %s contains null character", program));
+  }
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
       return absl::InvalidArgumentError(
           absl::StrFormat("Argument %s contains null character", arg));
     }
   }
-  const NativeString& program = args.front();
-  if (program.find_first_of({kSeparator, RULES_ELISP_NATIVE_LITERAL('/')}) ==
-      program.npos) {
+  if (program.find(kSeparator) == program.npos &&
+      program.find(RULES_ELISP_NATIVE_LITERAL('/')) == program.npos) {
     return absl::InvalidArgumentError(absl::StrFormat(
         "Program name %s doesn’t contain a directory separator character",
         program));
   }
   const absl::StatusOr<NativeString> abs_program = MakeAbsolute(program);
   if (!abs_program.ok()) return abs_program.status();
+  std::vector<NativeString> args_vec = {NativeString(program)};
+  args_vec.insert(args_vec.end(), args.cbegin(), args.cend());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
     final_env.push_back(key + RULES_ELISP_NATIVE_LITERAL('=') + value);
@@ -1103,7 +1109,7 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
   }
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
-  absl::StatusOr<std::wstring> command_line = BuildCommandLine(args);
+  absl::StatusOr<std::wstring> command_line = BuildCommandLine(args_vec);
   if (!command_line.ok()) return command_line.status();
   const BOOL inherit_handles = options.output_file.empty() ? FALSE : TRUE;
   const DWORD flags = CREATE_UNICODE_ENVIRONMENT |
@@ -1253,7 +1259,6 @@ absl::StatusOr<int> Run(const absl::Span<const NativeString> args,
                          options.directory);
     }
   }
-  std::vector<NativeString> args_vec(args.cbegin(), args.cend());
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;

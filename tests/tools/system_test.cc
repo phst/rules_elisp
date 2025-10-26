@@ -658,10 +658,10 @@ TEST(RunTest, ReturnsExitCode) {
   ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
 
   EXPECT_THAT(
-      rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
+      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
       IsOkAndHolds(0));
   EXPECT_THAT(
-      rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
+      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
       IsOkAndHolds(23));
 }
 
@@ -677,7 +677,7 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
     RunOptions options;
     options.deadline = absl::Now() + absl::Seconds(1);
     EXPECT_THAT(
-        rules_elisp::Run({*helper, RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
+        rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
                          {}, options),
         StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
@@ -698,7 +698,7 @@ TEST(RunTest, AllowsChangingDirectory) {
   RunOptions options;
   options.directory = *temp;
 
-  EXPECT_THAT(rules_elisp::Run({*helper}, {}, options), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(*helper, {}, {}, options), IsOkAndHolds(0));
 }
 
 TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
@@ -730,7 +730,7 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   options.directory = *dir;
   options.output_file =
       *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("output.log");
-  EXPECT_THAT(rules_elisp::Run({*helper}, *env, options), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
 
   std::ifstream stream(options.output_file, std::ios::in | std::ios::binary);
   EXPECT_TRUE(stream.is_open());

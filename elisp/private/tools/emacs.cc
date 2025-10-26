@@ -76,7 +76,7 @@ static absl::StatusOr<int> RunEmacs(
     emacs = *binary;
   }
   CHECK(!emacs.empty());
-  std::vector<NativeString> args = {emacs};
+  std::vector<NativeString> args;
   if (!release) {
     const absl::StatusOr<NativeString> dump =
         runfiles->Resolve(absl::StrCat(install, "/emacs.pdmp"));
@@ -124,7 +124,7 @@ static absl::StatusOr<int> RunEmacs(
       }
     }
   }
-  return Run(args, *env);
+  return Run(emacs, args, *env);
 }
 
 absl::StatusOr<int> Main(
