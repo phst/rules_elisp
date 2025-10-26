@@ -38,143 +38,50 @@ using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using ::testing::ElementsAre;
 
-static absl::StatusOr<NativeString> TempDir() {
-  std::string dir = ::testing::TempDir();
-  if (dir.empty()) {
-    return absl::FailedPreconditionError("Empty temporary directory");
-  }
-  if (dir.back() == '/' || (kWindows && dir.back() == '\\')) dir.pop_back();
-  if constexpr (kWindows) absl::c_replace(dir, '/', '\\');
-  return ToNative(dir, Encoding::kAscii);
+static absl::StatusOr<FileName> TempDir() {
+  absl::StatusOr<NativeString> native =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  if (!native.ok()) return native.status();
+  while (native->back() == kSeparator) native->pop_back();
+  return FileName::FromString(*native);
 }
 
-static absl::Status CreateFile(const NativeString& name) {
-  std::ofstream stream(name,
+static absl::Status CreateFile(const FileName& name) {
+  std::ofstream stream(name.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   return stream.is_open() && stream.good() && stream.flush() && stream.good()
              ? absl::OkStatus()
              : absl::UnknownError(
-                   absl::StrFormat("Cannot create file %s", name));
+                   absl::StrFormat("Cannot create file %v", name));
 }
 
 TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
-  const absl::StatusOr<NativeString> temp = TempDir();
+  const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
 
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, *temp);
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
   ASSERT_THAT(runfiles, IsOk());
 
-  const NativeString foo_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("foo");
-  const NativeString foo_file =
-      foo_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-  const NativeString bar_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("bar '");
-  const NativeString bar_file =
-      bar_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+  const FileName foo_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName foo_file =
+      foo_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName bar_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("bar '")).value();
+  const FileName bar_file =
+      bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
-  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
+  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
   EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
   EXPECT_THAT(CreateFile(bar_file), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
-    EXPECT_THAT(Unlink(bar_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
-  };
-
-  EXPECT_THAT(LoadPathArgs(*runfiles,
-                           {
-                               RULES_ELISP_NATIVE_LITERAL("foo"),
-                               RULES_ELISP_NATIVE_LITERAL("bar '"),
-                           }),
-              IsOkAndHolds(ElementsAre(
-                  RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir,
-                  RULES_ELISP_NATIVE_LITERAL("--directory=") + bar_dir)));
-}
-
-TEST(LoadPathArgsTest, DirectoryNonAscii) {
-  const absl::StatusOr<NativeString> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, *temp);
-  ASSERT_THAT(runfiles, IsOk());
-
-  absl::StatusOr<NativeString> runfiles_elc =
-      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
-  ASSERT_THAT(runfiles_elc, IsOk());
-  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
-
-  const NativeString foo_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("foo");
-  const NativeString foo_file =
-      foo_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-  const NativeString bar_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'");
-  const NativeString bar_file =
-      bar_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-
-  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
-  EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
-  EXPECT_THAT(CreateFile(bar_file), IsOk());
-
-  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
-    EXPECT_THAT(Unlink(bar_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
-  };
-
-  EXPECT_THAT(LoadPathArgs(*runfiles,
-                           {
-                               RULES_ELISP_NATIVE_LITERAL("foo"),
-                               RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"),
-                           }),
-              IsOkAndHolds(ElementsAre(
-                  RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir,
-                  RULES_ELISP_NATIVE_LITERAL("--load=") + *temp + kSeparator +
-                      *runfiles_elc,
-                  RULES_ELISP_NATIVE_LITERAL(
-                      "--funcall=elisp/runfiles/install-handler"),
-                  RULES_ELISP_NATIVE_LITERAL(
-                      "--directory=/bazel-runfile:bar äα𝐴🐈'"))));
-}
-
-TEST(LoadPathArgsTest, EmptyDirectory) {
-  const absl::StatusOr<NativeString> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, *temp);
-  ASSERT_THAT(runfiles, IsOk());
-
-  absl::StatusOr<NativeString> runfiles_elc =
-      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
-  ASSERT_THAT(runfiles_elc, IsOk());
-  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
-
-  const NativeString foo_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("foo");
-  const NativeString foo_file =
-      foo_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-  const NativeString bar_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("bar '");
-  const NativeString bar_file =
-      bar_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-
-  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
-  EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
-
-  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir] {
-    EXPECT_THAT(Unlink(foo_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
+    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
+    EXPECT_THAT(Unlink(bar_file.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
   };
 
   EXPECT_THAT(
@@ -184,8 +91,100 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
                        RULES_ELISP_NATIVE_LITERAL("bar '"),
                    }),
       IsOkAndHolds(ElementsAre(
-          RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir,
-          RULES_ELISP_NATIVE_LITERAL("--load=") + *temp + kSeparator +
+          RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir.string(),
+          RULES_ELISP_NATIVE_LITERAL("--directory=") + bar_dir.string())));
+}
+
+TEST(LoadPathArgsTest, DirectoryNonAscii) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
+  ASSERT_THAT(runfiles, IsOk());
+
+  absl::StatusOr<NativeString> runfiles_elc =
+      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
+  ASSERT_THAT(runfiles_elc, IsOk());
+  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+
+  const FileName foo_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName foo_file =
+      foo_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName bar_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'")).value();
+  const FileName bar_file =
+      bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+
+  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
+  EXPECT_THAT(CreateFile(foo_file), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
+  EXPECT_THAT(CreateFile(bar_file), IsOk());
+
+  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
+    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
+    EXPECT_THAT(Unlink(bar_file.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
+  };
+
+  EXPECT_THAT(LoadPathArgs(*runfiles,
+                           {
+                               RULES_ELISP_NATIVE_LITERAL("foo"),
+                               RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"),
+                           }),
+              IsOkAndHolds(ElementsAre(
+                  RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir.string(),
+                  RULES_ELISP_NATIVE_LITERAL("--load=") + temp->string() +
+                      kSeparator + *runfiles_elc,
+                  RULES_ELISP_NATIVE_LITERAL(
+                      "--funcall=elisp/runfiles/install-handler"),
+                  RULES_ELISP_NATIVE_LITERAL(
+                      "--directory=/bazel-runfile:bar äα𝐴🐈'"))));
+}
+
+TEST(LoadPathArgsTest, EmptyDirectory) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
+  ASSERT_THAT(runfiles, IsOk());
+
+  absl::StatusOr<NativeString> runfiles_elc =
+      ToNative(RULES_ELISP_RUNFILES_ELC, Encoding::kAscii);
+  ASSERT_THAT(runfiles_elc, IsOk());
+  absl::c_replace(*runfiles_elc, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+
+  const FileName foo_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName foo_file =
+      foo_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName bar_dir =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("bar '")).value();
+  const FileName bar_file =
+      bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+
+  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
+  EXPECT_THAT(CreateFile(foo_file), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
+
+  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir] {
+    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
+  };
+
+  EXPECT_THAT(
+      LoadPathArgs(*runfiles,
+                   {
+                       RULES_ELISP_NATIVE_LITERAL("foo"),
+                       RULES_ELISP_NATIVE_LITERAL("bar '"),
+                   }),
+      IsOkAndHolds(ElementsAre(
+          RULES_ELISP_NATIVE_LITERAL("--directory=") + foo_dir.string(),
+          RULES_ELISP_NATIVE_LITERAL("--load=") + temp->string() + kSeparator +
               *runfiles_elc,
           RULES_ELISP_NATIVE_LITERAL(
               "--funcall=elisp/runfiles/install-handler"),
