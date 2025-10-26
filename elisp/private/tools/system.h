@@ -43,6 +43,70 @@
 
 namespace rules_elisp {
 
+class FileName final {
+ public:
+  static absl::StatusOr<FileName> FromString(NativeStringView string);
+
+  FileName(const FileName&) = default;
+  FileName& operator=(const FileName&) = default;
+  FileName(FileName&&) = default;
+  FileName& operator=(FileName&&) = default;
+
+  const NativeString& string() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    CHECK(!string_.empty());
+    return string_;
+  }
+
+  NativeChar* absl_nonnull pointer() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    CHECK(!string_.empty());
+    CHECK(!ContainsNull(string_));
+    return string_.data();
+  }
+
+  const NativeChar* absl_nonnull pointer() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    CHECK(!string_.empty());
+    CHECK(!ContainsNull(string_));
+    return string_.data();
+  }
+
+  friend bool operator==(const FileName& a, const FileName& b) {
+    return a.string_ == b.string_;
+  }
+
+  friend bool operator!=(const FileName& a, const FileName& b) {
+    return a.string_ != b.string_;
+  }
+
+  friend bool operator<(const FileName& a, const FileName& b) {
+    return a.string_ < b.string_;
+  }
+
+  friend bool operator>(const FileName& a, const FileName& b) {
+    return a.string_ > b.string_;
+  }
+
+  friend bool operator<=(const FileName& a, const FileName& b) {
+    return a.string_ <= b.string_;
+  }
+
+  friend bool operator>=(const FileName& a, const FileName& b) {
+    return a.string_ >= b.string_;
+  }
+
+  // https://abseil.io/docs/cpp/guides/abslstringify#basic-usage
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const FileName& name) {
+    sink.Append(name.string_);
+  }
+
+ private:
+  explicit FileName(NativeString string) : string_(std::move(string)) {
+    CHECK(!string_.empty());
+  }
+
+  NativeString string_;
+};
+
 std::size_t MaxFilename();
 
 absl::Status MakeErrorStatus(const std::error_code& code,
@@ -95,6 +159,11 @@ struct ArgFormatter final {
   void operator()(std::string* const absl_nonnull out,
                   const wchar_t* const absl_nullable string) const {
     out->append(string == nullptr ? "nullptr" : Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const FileName& file) const {
+    out->append(Quote(file.string()));
   }
 
   void operator()(std::string* const absl_nonnull out, std::nullptr_t) const {
