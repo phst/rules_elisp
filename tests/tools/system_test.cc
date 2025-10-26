@@ -259,38 +259,40 @@ TEST(MakeRelativeTest, RejectsEmptyName) {
 }
 
 TEST(MakeRelativeTest, RejectsNotWithin) {
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
-                           RULES_ELISP_NATIVE_LITERAL("foo")),
+  const NativeString foo = RULES_ELISP_NATIVE_LITERAL("foo");
+  const NativeString fooooo = RULES_ELISP_NATIVE_LITERAL("fooooo");
+  const NativeString bar = RULES_ELISP_NATIVE_LITERAL("bar");
+
+  EXPECT_THAT(MakeRelative(foo, foo),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
-                           RULES_ELISP_NATIVE_LITERAL("bar")),
+  EXPECT_THAT(MakeRelative(foo, bar),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("fooooo"),
-                           RULES_ELISP_NATIVE_LITERAL("foo")),
+  EXPECT_THAT(MakeRelative(fooooo, foo),
               StatusIs(absl::StatusCode::kInvalidArgument));
   if constexpr (!kWindows) {
-    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
-                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+    const NativeString c_foo = RULES_ELISP_NATIVE_LITERAL("C:\\Foo");
+    const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
+    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 StatusIs(absl::StatusCode::kInvalidArgument));
-    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
-                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
 TEST(MakeRelativeTest, Relativizes) {
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo/bar"),
-                           RULES_ELISP_NATIVE_LITERAL("foo")),
-              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("bar")));
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo/bar"),
-                           RULES_ELISP_NATIVE_LITERAL("foo/")),
-              IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("bar")));
+  const NativeString foo = RULES_ELISP_NATIVE_LITERAL("foo");
+  const NativeString foo_slash = RULES_ELISP_NATIVE_LITERAL("foo/");
+  const NativeString bar = RULES_ELISP_NATIVE_LITERAL("bar");
+  const NativeString foo_bar = RULES_ELISP_NATIVE_LITERAL("foo/bar");
+
+  EXPECT_THAT(MakeRelative(foo_bar, foo), IsOkAndHolds(bar));
+  EXPECT_THAT(MakeRelative(foo_bar, foo_slash), IsOkAndHolds(bar));
   if constexpr (kWindows) {
-    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
-                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+    const NativeString c_foo = RULES_ELISP_NATIVE_LITERAL("C:\\Foo");
+    const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
+    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
-    EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"),
-                             RULES_ELISP_NATIVE_LITERAL("C:\\Foo")),
+    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
   }
 }
@@ -300,8 +302,10 @@ TEST(FileExistsTest, TestsThatFileExists) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(dir, IsOkAndHolds(Not(IsEmpty())));
   EXPECT_TRUE(FileExists(*dir));
-  EXPECT_FALSE(FileExists(*dir + RULES_ELISP_NATIVE_LITERAL("/nonexistent")));
-  EXPECT_FALSE(FileExists(RULES_ELISP_NATIVE_LITERAL("")));
+
+  const NativeString child =
+      *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("nonexistent");
+  EXPECT_FALSE(FileExists(child));
 }
 
 TEST(IsNonEmptyDirectoryTest, ReturnsFalseForFile) {
@@ -408,6 +412,9 @@ TEST(ListDirectoryTests, ListsDirectory) {
 
   const NativeString dir =
       *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("dir äα𝐴🐈'");
+
+  const NativeString element = RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'");
+
   EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(CreateDirectory(dir), IsOk());
   EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
@@ -422,9 +429,7 @@ TEST(ListDirectoryTests, ListsDirectory) {
   EXPECT_TRUE(stream.good());
   stream.close();
 
-  EXPECT_THAT(
-      ListDirectory(dir),
-      IsOkAndHolds(ElementsAre(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'"))));
+  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(ElementsAre(element)));
 
   EXPECT_THAT(Unlink(file), IsOk());
   EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
@@ -472,21 +477,28 @@ TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from =
+  const NativeString from_dir =
       *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
-  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-  EXPECT_THAT(CreateDirectory(from), IsOk());
-  EXPECT_THAT(CreateDirectory(to), IsOk());
-  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
-                        "contents"),
-              IsOk());
 
-  EXPECT_THAT(CopyTree(from, to), StatusIs(absl::StatusCode::kAlreadyExists));
+  const NativeString from_file =
+      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
-  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOk());
-  EXPECT_THAT(RemoveDirectory(from), IsOk());
-  EXPECT_THAT(RemoveDirectory(to), IsOk());
+  const NativeString to_dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+
+  const NativeString to_file =
+      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+
+  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
+  EXPECT_THAT(CreateDirectory(to_dir), IsOk());
+  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+
+  EXPECT_THAT(CopyTree(from_dir, to_dir),
+              StatusIs(absl::StatusCode::kAlreadyExists));
+
+  EXPECT_THAT(Unlink(from_file), IsOk());
+  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(CopyTreeTest, CopiesToNewDirectory) {
@@ -494,25 +506,29 @@ TEST(CopyTreeTest, CopiesToNewDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from =
+  const NativeString from_dir =
       *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
-  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-  EXPECT_THAT(CreateDirectory(from), IsOk());
-  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
-                        "contents"),
-              IsOk());
 
-  EXPECT_THAT(CopyTree(from, to), IsOk());
+  const NativeString from_file =
+      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
-  EXPECT_THAT(ReadFile(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOkAndHolds("contents"));
+  const NativeString to_dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
 
-  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOk());
-  EXPECT_THAT(RemoveDirectory(from), IsOk());
-  EXPECT_THAT(Unlink(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOk());
-  EXPECT_THAT(RemoveDirectory(to), IsOk());
+  const NativeString to_file =
+      to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+
+  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
+  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+
+  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
+
+  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
+
+  EXPECT_THAT(Unlink(from_file), IsOk());
+  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+  EXPECT_THAT(Unlink(to_file), IsOk());
+  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(CopyTreeTest, IgnoresTrailingSlash) {
@@ -520,25 +536,30 @@ TEST(CopyTreeTest, IgnoresTrailingSlash) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from") + kSeparator;
-  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-  EXPECT_THAT(CreateDirectory(from), IsOk());
-  EXPECT_THAT(WriteFile(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file"),
-                        "contents"),
-              IsOk());
+  const NativeString from_dir =
+      *temp + kSeparator + NativeString(RULES_ELISP_NATIVE_LITERAL("from")) +
+      kSeparator;
 
-  EXPECT_THAT(CopyTree(from, to), IsOk());
+  const NativeString from_file =
+      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
 
-  EXPECT_THAT(ReadFile(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOkAndHolds("contents"));
+  const NativeString to_dir =
+      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
 
-  EXPECT_THAT(Unlink(from + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOk());
-  EXPECT_THAT(RemoveDirectory(from), IsOk());
-  EXPECT_THAT(Unlink(to + kSeparator + RULES_ELISP_NATIVE_LITERAL("file")),
-              IsOk());
-  EXPECT_THAT(RemoveDirectory(to), IsOk());
+  const NativeString to_file =
+      to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+
+  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
+  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+
+  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
+
+  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
+
+  EXPECT_THAT(Unlink(from_file), IsOk());
+  EXPECT_THAT(RemoveDirectory(from_dir), IsOk());
+  EXPECT_THAT(Unlink(to_file), IsOk());
+  EXPECT_THAT(RemoveDirectory(to_dir), IsOk());
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
@@ -718,6 +739,9 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   }
   if (dir->back() == kSeparator) dir->pop_back();
 
+  const NativeString output_file =
+      *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("output.log");
+
   const std::pair<NativeString, NativeString> env_vars[] = {
       // Avoid misleading warnings about unset COVERAGE_DIR and GOCOVERDIR.
       {RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"), *dir},
@@ -728,11 +752,10 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   ASSERT_THAT(env, IsOk());
   RunOptions options;
   options.directory = *dir;
-  options.output_file =
-      *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("output.log");
+  options.output_file = output_file;
   EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
 
-  std::ifstream stream(options.output_file, std::ios::in | std::ios::binary);
+  std::ifstream stream(output_file, std::ios::in | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
   stream.imbue(std::locale::classic());

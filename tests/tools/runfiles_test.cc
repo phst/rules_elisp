@@ -73,12 +73,14 @@ TEST(RunfilesTest, ParsesManifest) {
       manifest->Write(kWindows ? "foo C:\\Bar\\Baz\n" : "foo /bar/baz\n"),
       IsOk());
 
+  const NativeString file = kWindows
+                                ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
+                                : RULES_ELISP_NATIVE_LITERAL("/bar/baz");
+
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest->name(), {});
   ASSERT_THAT(runfiles, IsOk());
-  EXPECT_THAT(runfiles->Resolve("foo"),
-              IsOkAndHolds(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
-                                    : RULES_ELISP_NATIVE_LITERAL("/bar/baz")));
+  EXPECT_THAT(runfiles->Resolve("foo"), IsOkAndHolds(file));
   EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));
 }
 
