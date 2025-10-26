@@ -199,6 +199,43 @@ TEST(FileNameTest, IsFormattable) {
   EXPECT_EQ(absl::StrFormat("foo %v baz", bar), "foo bar äα𝐴🐈' baz");
 }
 
+TEST(FileNameTest, ChildRejectsDescendant) {
+  const FileName parent = FileName::FromLiteralOrDie("foo");
+  EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("bar/baz")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, ChildRejectsAbsolute) {
+  const FileName parent = FileName::FromLiteralOrDie("foo");
+  EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("/bar")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, ChildCoalescesSlashes) {
+  const FileName parent = FileName::FromLiteralOrDie("foo/");
+  const absl::StatusOr<FileName> child =
+      parent.Child(RULES_ELISP_NATIVE_LITERAL("bar"));
+  ASSERT_THAT(child, IsOk());
+  EXPECT_EQ(child->string(), kWindows ? RULES_ELISP_NATIVE_LITERAL("foo\\bar")
+                                      : RULES_ELISP_NATIVE_LITERAL("foo/bar"));
+}
+
+TEST(FileNameTest, JoinRejectsAbsolute) {
+  const FileName parent = FileName::FromLiteralOrDie("foo");
+  EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("/bar/baz")),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, JoinCoalescesSlashes) {
+  const FileName parent = FileName::FromLiteralOrDie("foo/");
+  const absl::StatusOr<FileName> descendant =
+      parent.Join(RULES_ELISP_NATIVE_LITERAL("bar/baz"));
+  ASSERT_THAT(descendant, IsOk());
+  EXPECT_EQ(descendant->string(),
+            kWindows ? RULES_ELISP_NATIVE_LITERAL("foo\\bar\\baz")
+                     : RULES_ELISP_NATIVE_LITERAL("foo/bar/baz"));
+}
+
 TEST(ErrorStatusTest, FormatsArguments) {
   EXPECT_THAT(
       ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
