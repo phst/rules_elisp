@@ -43,6 +43,20 @@
 
 namespace rules_elisp {
 
+enum class Encoding { kAscii, kUtf8 };
+
+// Convert a native string to a std::string.  On Windows, interpret the string
+// as UTF-16, and convert it to a byte string using the specified encoding.  On
+// POSIX systems, ignore the encoding and return the string unchanged.
+absl::StatusOr<std::string> ToNarrow(NativeStringView string,
+                                     Encoding encoding);
+
+// Convert a narrow string to a native string.  On Windows, interpret the string
+// using the given encoding, and convert to UTF-16.  On POSIX systems, ignore
+// the encoding and return the string unchanged.
+absl::StatusOr<NativeString> ToNative(std::string_view string,
+                                      Encoding encoding);
+
 class FileName final {
  public:
   static absl::StatusOr<FileName> FromString(NativeStringView string);
@@ -206,20 +220,6 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   const std::error_code code = ErrnoError();
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
-
-enum class Encoding { kAscii, kUtf8 };
-
-// Convert a native string to a std::string.  On Windows, interpret the string
-// as UTF-16, and convert it to a byte string using the specified encoding.  On
-// POSIX systems, ignore the encoding and return the string unchanged.
-absl::StatusOr<std::string> ToNarrow(NativeStringView string,
-                                     Encoding encoding);
-
-// Convert a narrow string to a native string.  On Windows, interpret the string
-// using the given encoding, and convert to UTF-16.  On POSIX systems, ignore
-// the encoding and return the string unchanged.
-absl::StatusOr<NativeString> ToNative(std::string_view string,
-                                      Encoding encoding);
 
 bool IsAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
