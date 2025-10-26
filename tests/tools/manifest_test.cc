@@ -55,13 +55,12 @@ TEST(ManifestFileTest, Create) {
   opts.load_path = {RULES_ELISP_NATIVE_LITERAL("load-dir")};
   opts.load_files = {RULES_ELISP_NATIVE_LITERAL("load-file")};
   opts.data_files = {RULES_ELISP_NATIVE_LITERAL("data-file")};
-  const absl::StatusOr<ManifestFile> file = ManifestFile::Create(
-      opts,
-      {
-          RULES_ELISP_NATIVE_LITERAL("in-1"),
-          RULES_ELISP_NATIVE_LITERAL("in-2"),
-      },
-      {RULES_ELISP_NATIVE_LITERAL("out \t\n\r\f äα𝐴🐈'\\\"")});
+  const NativeString in_1 = RULES_ELISP_NATIVE_LITERAL("in-1");
+  const NativeString in_2 = RULES_ELISP_NATIVE_LITERAL("in-2");
+  const NativeString out =
+      RULES_ELISP_NATIVE_LITERAL("out \t\n\r\f äα𝐴🐈'\\\"");
+  const absl::StatusOr<ManifestFile> file =
+      ManifestFile::Create(opts, {in_1, in_2}, {out});
   ASSERT_THAT(file, IsOk());
 
   std::vector<NativeString> args;
