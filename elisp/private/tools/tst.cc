@@ -243,11 +243,11 @@ absl::StatusOr<int> Main(const Options& opts,
       ManifestFile::Create(opts, inputs, outputs);
   if (!manifest.ok()) return manifest.status();
 
-  std::vector<NativeString> final_args = {*emacs};
+  std::vector<NativeString> final_args;
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), emacs_args.cbegin(), emacs_args.cend());
 
-  const absl::StatusOr<int> result = Run(final_args, *env, run_opts);
+  const absl::StatusOr<int> result = Run(*emacs, final_args, *env, run_opts);
 
   if (absl::IsDeadlineExceeded(result.status())) {
     LOG(INFO) << "waiting for Bazel to kill this process";

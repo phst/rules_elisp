@@ -153,11 +153,11 @@ absl::StatusOr<int> Main(
       ManifestFile::Create(opts, *input_files, *output_files);
   if (!manifest.ok()) return manifest.status();
 
-  std::vector<NativeString> final_args = {*emacs};
+  std::vector<NativeString> final_args;
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), args.cbegin(), args.cend());
 
-  return Run(final_args, *env);
+  return Run(*emacs, final_args, *env);
 }
 
 }  // namespace rules_elisp

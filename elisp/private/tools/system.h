@@ -312,7 +312,8 @@ struct RunOptions final {
   absl::Time deadline = absl::InfiniteFuture();
 };
 
-absl::StatusOr<int> Run(absl::Span<const NativeString> args,
+absl::StatusOr<int> Run(NativeStringView program,
+                        absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options = {});
 
 class DosDevice final {
