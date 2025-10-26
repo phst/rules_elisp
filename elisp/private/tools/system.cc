@@ -75,6 +75,7 @@
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
+#include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/time/clock.h"  // IWYU pragma: keep, only on Windows
@@ -93,7 +94,33 @@ absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Filename %s contains null character", string));
   }
-  return FileName(NativeString(string));
+  NativeString name(string);
+  if constexpr (kWindows) {
+    absl::c_replace(name, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+    // Reject most of the “exotic” names from
+    // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html.
+    if (name.front() == kSeparator) {
+      return absl::InvalidArgumentError(
+          absl::StrFormat("Invalid filename %s", name));
+    }
+    const NativeString::size_type i =
+        name.find(RULES_ELISP_NATIVE_LITERAL(':'));
+    if (i != name.npos) {
+      // Reject alternate data streams or drive-relative names.
+      if (i != 1 || name.length() < 3 || name.at(2) != kSeparator) {
+        return absl::InvalidArgumentError(
+            absl::StrFormat("Invalid filename %s", name));
+      }
+      // Reject non-alphabetic drive letters.
+      const std::optional<unsigned char> drive =
+          CastNumber<unsigned char>(name.front());
+      if (!drive.has_value() || !absl::ascii_isalpha(*drive)) {
+        return absl::InvalidArgumentError(
+            absl::StrFormat("Invalid filename %s", name));
+      }
+    }
+  }
+  return FileName(std::move(name));
 }
 
 static constexpr std::size_t kMaxFilename{
