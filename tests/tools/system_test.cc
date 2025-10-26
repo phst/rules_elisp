@@ -64,6 +64,8 @@ using ::testing::Not;
 using ::testing::Pair;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
+using ::testing::TestWithParam;
+using ::testing::Values;
 
 static absl::StatusOr<std::string> ReadFile(const NativeStringView name) {
   std::ifstream stream(NativeString(name), std::ios::in | std::ios::binary);
@@ -173,29 +175,45 @@ TEST(ToNativeTest, RejectsInvalidUtf8OnWindows) {
   }
 }
 
-TEST(IsAbsoluteTest, Works) {
-  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("")));
-  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL(".")));
-  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("foo")));
-  EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("foo/bar")));
-  if constexpr (kWindows) {
-    // See
-    // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
-    // for the various kinds of filenames on Windows.
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:\\")));
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:/")));
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:\\Foo")));
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:/Foo")));
-    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:")));
-    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("C:Foo")));
-    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("\\Foo")));
-    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/Foo")));
-    EXPECT_FALSE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("NUL")));
-  } else {
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/")));
-    EXPECT_TRUE(IsAbsolute(RULES_ELISP_NATIVE_LITERAL("/foo")));
+struct IsAbsoluteParam final {
+  NativeStringView name;
+  bool absolute;
+
+  template <typename Sink>
+  friend void AbslStringify(Sink& sink, const IsAbsoluteParam& param) {
+    absl::Format(sink, "Filename %s should be %s", param.name,
+                 param.absolute ? "absolute" : "relative");
   }
+};
+
+class IsAbsoluteTest : public TestWithParam<IsAbsoluteParam> {};
+
+TEST_P(IsAbsoluteTest, Works) {
+  const IsAbsoluteParam& param = this->GetParam();
+  EXPECT_EQ(IsAbsolute(param.name), param.absolute);
 }
+
+INSTANTIATE_TEST_SUITE_P(
+    VariousFilenames, IsAbsoluteTest,
+    Values(
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL(""), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("."), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo/bar"), false},
+        // See
+        // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
+        // for the various kinds of filenames on Windows.
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\"), kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/"), kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\Foo"), kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/Foo"), kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:Foo"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\Foo"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/Foo"), !kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("NUL"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/"), !kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/foo"), !kWindows}));
 
 TEST(MakeAbsoluteTest, RejectsEmptyName) {
   EXPECT_THAT(MakeAbsolute(RULES_ELISP_NATIVE_LITERAL("")),
