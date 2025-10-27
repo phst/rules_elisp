@@ -208,8 +208,7 @@ TEST(LoadPathArgsTest, Manifest) {
   EXPECT_THAT(file->Write(line), IsOk());
 
   const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      BAZEL_CURRENT_REPOSITORY, {}, FileName::FromString(file->name()).value(),
-      std::nullopt);
+      BAZEL_CURRENT_REPOSITORY, {}, file->name(), std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
 
   EXPECT_THAT(LoadPathArgs(*runfiles,

@@ -144,7 +144,8 @@ absl::StatusOr<ManifestFile> ManifestFile::Create(
 
 void ManifestFile::AppendArgs(std::vector<NativeString>& args) const {
   if (!file_.has_value()) return;
-  args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") + file_->name());
+  args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") +
+                 file_->name().string());
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
 }
 

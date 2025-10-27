@@ -793,11 +793,10 @@ TEST(EnvironmentTest, RemoveIsCaseSensitiveOnlyOnUnix) {
 TEST(TemporaryFileTest, CreateWorks) {
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
   ASSERT_THAT(file, IsOk());
-  ASSERT_THAT(file->name(), Not(IsEmpty()));
 
   EXPECT_THAT(file->Write("Foo\n"), IsOk());
 
-  std::ifstream stream(file->name(), std::ios::in | std::ios::binary);
+  std::ifstream stream(file->name().string(), std::ios::in | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
   std::string line;

@@ -80,8 +80,7 @@ TEST(RunfilesTest, ParsesManifest) {
           .value();
 
   const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      BAZEL_CURRENT_REPOSITORY, {},
-      FileName::FromString(manifest->name()).value(), std::nullopt);
+      BAZEL_CURRENT_REPOSITORY, {}, manifest->name(), std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
   EXPECT_THAT(runfiles->Resolve("foo"), IsOkAndHolds(file));
   EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));

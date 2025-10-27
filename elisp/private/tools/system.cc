@@ -1071,9 +1071,11 @@ absl::StatusOr<TemporaryFile> TemporaryFile::Create() {
     if (name == nullptr) {
       return absl::UnavailableError("Cannot create temporary name");
     }
+    absl::StatusOr<FileName> filename = FileName::FromString(buffer);
+    if (!filename.ok()) return filename.status();
     constexpr wchar_t mode[] = L"wxbNT";
     std::FILE* const absl_nullable file = _wfopen(name, mode);
-    if (file != nullptr) return TemporaryFile(name, file);
+    if (file != nullptr) return TemporaryFile(*std::move(filename), file);
     status = ErrnoStatus("_wfopen", name, mode);
     LOG(ERROR) << status;
   }
@@ -1085,28 +1087,30 @@ absl::StatusOr<TemporaryFile> TemporaryFile::Create() {
                                   "/elisp.XXXXXX");
   const int fd = mkstemp(Pointer(name));
   if (fd < 0) return ErrnoStatus("mkstemp", name);
+  const absl::StatusOr<FileName> filename = FileName::FromString(name);
+  if (!filename.ok()) {
+    if (unlink(Pointer(name)) != 0) LOG(ERROR) << ErrnoStatus("unlink", name);
+    if (close(fd) != 0) LOG(ERROR) << ErrnoStatus("close", fd);
+    return filename.status();
+  }
   constexpr char mode[] = "wxbe";
   std::FILE* const absl_nullable file = fdopen(fd, mode);
   if (file == nullptr) {
     const absl::Status status = ErrnoStatus("fdopen", fd, mode);
     if (close(fd) != 0) LOG(ERROR) << ErrnoStatus("close", fd);
-    const absl::StatusOr<FileName> filename = FileName::FromString(name);
-    const absl::Status unlink_status =
-        filename.ok() ? Unlink(*filename) : filename.status();
+    const absl::Status unlink_status = Unlink(*filename);
     if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
     return status;
   }
-  return TemporaryFile(std::move(name), file);
+  return TemporaryFile(*std::move(filename), file);
 #endif
 }
 
 TemporaryFile::~TemporaryFile() noexcept {
-  if (name_.empty()) return;
+  if (!name_.has_value()) return;
   CHECK(file_ != nullptr);
   if (std::fclose(file_) != 0) LOG(FATAL) << ErrnoStatus("fclose");
-  const absl::StatusOr<FileName> filename = FileName::FromString(name_);
-  const absl::Status unlink_status =
-      filename.ok() ? Unlink(*filename) : filename.status();
+  const absl::Status unlink_status = Unlink(*name_);
   if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
 }
 
