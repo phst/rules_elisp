@@ -103,7 +103,13 @@ elisp_binary(
         name = "{}/{}".format(pkg, name),
         src = "//{}:{}.bzl".format(pkg, name),
         render_main_repo_name = True,
-        deps = ["//{}:{}".format(pkg, name)],
+        deps = [
+            "//{}:{}".format(pkg, name),
+            # FIXME: Remove the following dependency once
+            # https://github.com/bazelbuild/stardoc/issues/300 and
+            # https://github.com/bazelbuild/rules_cc/issues/279 are fixed.
+            "@rules_cc//cc:core_rules",
+        ],
     )
     for pkg, name in DOCS
 ]
