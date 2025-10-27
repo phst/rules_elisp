@@ -409,7 +409,10 @@ class DosDevice final {
     return *this;
   }
 
-  NativeString name() const { return name_; }
+  NativeString name() const {
+    CHECK(!name_.empty());
+    return name_;
+  }
 
  private:
   explicit DosDevice(const NativeStringView name, const NativeStringView target)
