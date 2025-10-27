@@ -200,11 +200,15 @@ absl::StatusOr<int> Main(const Options& opts,
   env->Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
            RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
-  std::vector<NativeString> inputs;
-  std::vector<NativeString> outputs;
+  std::vector<FileName> inputs;
+  std::vector<FileName> outputs;
   const NativeStringView report_file =
       env->Get(RULES_ELISP_NATIVE_LITERAL("XML_OUTPUT_FILE"));
-  if (!report_file.empty()) outputs.emplace_back(report_file);
+  if (!report_file.empty()) {
+    absl::StatusOr<FileName> file = FileName::FromString(report_file);
+    if (!file.ok()) return file.status();
+    outputs.push_back(std::move(*file));
+  }
   if (env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE")) ==
       RULES_ELISP_NATIVE_LITERAL("1")) {
     const NativeStringView coverage_manifest =
@@ -213,13 +217,18 @@ absl::StatusOr<int> Main(const Options& opts,
       const absl::Status status =
           FixCoverageManifest(coverage_manifest, *runfiles);
       if (!status.ok()) return status;
-      inputs.emplace_back(coverage_manifest);
+      absl::StatusOr<FileName> file = FileName::FromString(coverage_manifest);
+      if (!file.ok()) return file.status();
+      inputs.push_back(std::move(*file));
     }
     const NativeStringView coverage_dir =
         env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
     if (!coverage_dir.empty()) {
-      outputs.push_back(NativeString(coverage_dir) + kSeparator +
-                        RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
+      absl::StatusOr<FileName> file =
+          FileName::FromString(NativeString(coverage_dir) + kSeparator +
+                               RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
+      if (!file.ok()) return file.status();
+      outputs.push_back(std::move(*file));
     }
   }
 

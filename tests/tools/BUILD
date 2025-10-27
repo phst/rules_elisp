@@ -39,6 +39,7 @@ cc_test(
     deps = [
         "//elisp/private/tools:manifest",
         "//elisp/private/tools:platform",
+        "//elisp/private/tools:system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",

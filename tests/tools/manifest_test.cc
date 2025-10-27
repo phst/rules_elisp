@@ -30,6 +30,7 @@
 #include "gtest/gtest.h"
 
 #include "elisp/private/tools/platform.h"
+#include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
 
@@ -55,9 +56,12 @@ TEST(ManifestFileTest, Create) {
   opts.load_path = {RULES_ELISP_NATIVE_LITERAL("load-dir")};
   opts.load_files = {RULES_ELISP_NATIVE_LITERAL("load-file")};
   opts.data_files = {RULES_ELISP_NATIVE_LITERAL("data-file")};
-  const NativeString in_1 = RULES_ELISP_NATIVE_LITERAL("in-1");
-  const NativeString in_2 = RULES_ELISP_NATIVE_LITERAL("in-2");
-  const NativeString out = RULES_ELISP_NATIVE_LITERAL("out äα𝐴🐈'");
+  const FileName in_1 =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("in-1")).value();
+  const FileName in_2 =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("in-2")).value();
+  const FileName out =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("out äα𝐴🐈'")).value();
   const absl::StatusOr<ManifestFile> file =
       ManifestFile::Create(opts, {in_1, in_2}, {out});
   ASSERT_THAT(file, IsOk());
