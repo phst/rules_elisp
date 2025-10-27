@@ -59,6 +59,7 @@
 #include <fstream>
 #include <functional>
 #include <ios>
+#include <iostream>
 #include <locale>
 #include <memory>
 #include <optional>  // IWYU pragma: keep, only on Windows
@@ -1158,6 +1159,14 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
   return absl::OkStatus();
 }
 
+static void FlushEverything() {
+  std::cout.flush();
+  std::wcout.flush();
+  std::cerr.flush();
+  std::wcerr.flush();
+  if (std::fflush(nullptr) != 0) LOG(ERROR) << ErrnoStatus("fflush", nullptr);
+}
+
 absl::StatusOr<int> Run(const FileName& program,
                         const absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options) {
@@ -1184,6 +1193,8 @@ absl::StatusOr<int> Run(const FileName& program,
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
+  FlushEverything();
+  const absl::Cleanup flush = FlushEverything;
 #ifdef _WIN32
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args_vec);
   if (!command_line.ok()) return command_line.status();
