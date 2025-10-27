@@ -221,6 +221,10 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
         omit_if_empty = False,
         expand_directories = False,
     )
+    srcs = ctx.actions.args()
+    srcs.use_param_file("--srcs=%s", use_always = True)
+    srcs.set_param_file_format("multiline")
+    srcs.add_all(ctx.files.srcs, uniquify = True)
     secondary_outs = []
     if ctx.outputs.module_header:
         args.add(ctx.outputs.module_header, format = "--module-header=%s")
@@ -232,7 +236,7 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
             transitive = [cc_toolchain.all_files],
         ),
         executable = ctx.executable._build,
-        arguments = [args],
+        arguments = [args, srcs],
         mnemonic = "EmacsInstall",
         progress_message = "Installing Emacs into %{output}",
         env = env,
@@ -255,11 +259,15 @@ def _unpack(ctx, readme):
     args.add("--release")
     args.add(readme, format = "--readme=%s")
     args.add(install.path, format = "--install=%s")
+    srcs = ctx.actions.args()
+    srcs.use_param_file("--srcs=%s", use_always = True)
+    srcs.set_param_file_format("multiline")
+    srcs.add_all(ctx.files.srcs, uniquify = True)
     ctx.actions.run(
         outputs = [install],
         inputs = ctx.files.srcs,
         executable = ctx.executable._build,
-        arguments = [args],
+        arguments = [args, srcs],
         mnemonic = "EmacsInstall",
         progress_message = "Unpacking Emacs into %{output}",
         toolchain = None,

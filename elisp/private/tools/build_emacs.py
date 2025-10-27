@@ -19,6 +19,7 @@ use it outside the rules or depend on its behavior.
 """
 
 import argparse
+from collections.abc import Iterable
 import glob
 import os
 import os.path
@@ -35,19 +36,21 @@ def main() -> None:
     parser.add_argument('--release', action='store_true')
     parser.add_argument('--readme', type=pathlib.Path, required=True)
     parser.add_argument('--install', type=pathlib.Path, required=True)
+    parser.add_argument(
+        '--srcs', type=argparse.FileType('rt', encoding='utf-8'), required=True)
     parser.add_argument('--bash', type=pathlib.Path)
     parser.add_argument('--cc', type=pathlib.Path)
     parser.add_argument('--cflags')
     parser.add_argument('--ldflags')
     parser.add_argument('--module-header', type=pathlib.Path)
     args = parser.parse_args()
-    source = args.readme.resolve().parent
+    source = args.readme.parent
     install = args.install.resolve()
 
     if args.release:
-        _unpack(source=source, install=install)
+        _unpack(source=source, install=install, lines=args.srcs)
     else:
-        _build(source=source, install=install, bash=args.bash,
+        _build(source=source, install=install, lines=args.srcs, bash=args.bash,
                cc=args.cc, cflags=args.cflags, ldflags=args.ldflags)
 
     if args.module_header:
@@ -55,12 +58,13 @@ def main() -> None:
         shutil.copy(install / 'include' / 'emacs-module.h', args.module_header)
 
 
-def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
+def _build(*, source: pathlib.Path, install: pathlib.Path,
+           lines: Iterable[str], bash: pathlib.Path,
            cc: pathlib.Path, cflags: str, ldflags: str) -> None:
     windows = platform.system() == 'Windows'
     temp = pathlib.Path(tempfile.mkdtemp(prefix='emacs-build-'))
     build = temp / 'build'
-    shutil.copytree(source, build)
+    _unpack(source=source, install=build, lines=lines)
 
     def run(*command: str) -> None:
         env = None
@@ -121,15 +125,14 @@ def _build(*, source: pathlib.Path, install: pathlib.Path, bash: pathlib.Path,
     _rename(shared / 'lisp', install / 'lisp')
 
 
-def _unpack(*, source: pathlib.Path, install: pathlib.Path) -> None:
-    try:
-        # Bazel sometimes creates the output directory; remove it so that
-        # _unpack_archive works correctly.
-        install.rmdir()
-    except FileNotFoundError:
-        pass
-
-    shutil.copytree(source, install)
+def _unpack(*, source: pathlib.Path, install: pathlib.Path,
+            lines: Iterable[str]) -> None:
+    for line in lines:
+        src = pathlib.Path(line.rstrip('\n'))
+        rel = src.relative_to(source)
+        dest = install / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(src, dest)
 
 
 def _glob_unique(pattern: pathlib.PurePath) -> pathlib.Path:
