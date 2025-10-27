@@ -1323,12 +1323,7 @@ absl::StatusOr<int> Run(const FileName& program,
 }
 
 absl::StatusOr<DosDevice> DosDevice::Create(
-    [[maybe_unused]] const NativeStringView target) {
-  if (target.empty()) return absl::InvalidArgumentError("Empty target");
-  if (ContainsNull(target)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Target %s contains null character", target));
-  }
+    [[maybe_unused]] const FileName& target) {
 #ifdef _WIN32
   const DWORD drives = ::GetLogicalDrives();
   if (drives == 0) return WindowsStatus("GetLogicalDrives");
@@ -1337,10 +1332,9 @@ absl::StatusOr<DosDevice> DosDevice::Create(
     if ((drives & bit) == 0) {
       constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
       const wchar_t name[] = {letter, L':', L'\0'};
-      const std::wstring string(target);
-      if (!::DefineDosDeviceW(flags, name, Pointer(string))) {
+      if (!::DefineDosDeviceW(flags, name, target.pointer())) {
         return WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name,
-                             string);
+                             target);
       }
       return DosDevice(name, target);
     }
@@ -1354,11 +1348,12 @@ absl::StatusOr<DosDevice> DosDevice::Create(
 DosDevice::~DosDevice() noexcept {
 #ifdef _WIN32
   if (name_.empty()) return;
+  CHECK(target_.has_value());
   constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
                           DDD_NO_BROADCAST_SYSTEM;
-  if (!::DefineDosDeviceW(flags, Pointer(name_), Pointer(target_))) {
+  if (!::DefineDosDeviceW(flags, Pointer(name_), target_->pointer())) {
     LOG(ERROR) << WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name_,
-                                target_);
+                                *target_);
   }
 #endif
 }
