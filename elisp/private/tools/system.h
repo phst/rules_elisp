@@ -393,7 +393,7 @@ absl::StatusOr<int> Run(const FileName& program,
 
 class DosDevice final {
  public:
-  static absl::StatusOr<DosDevice> Create(NativeStringView target);
+  static absl::StatusOr<DosDevice> Create(const FileName& target);
 
   ~DosDevice() noexcept;
 
@@ -402,11 +402,11 @@ class DosDevice final {
 
   DosDevice(DosDevice&& other)
       : name_(std::exchange(other.name_, NativeString())),
-        target_(std::exchange(other.target_, NativeString())) {}
+        target_(std::exchange(other.target_, std::nullopt)) {}
 
   DosDevice& operator=(DosDevice&& other) {
     name_ = std::exchange(other.name_, NativeString());
-    target_ = std::exchange(other.target_, NativeString());
+    target_ = std::exchange(other.target_, std::nullopt);
     return *this;
   }
 
@@ -416,14 +416,13 @@ class DosDevice final {
   }
 
  private:
-  explicit DosDevice(NativeString name, const NativeStringView target)
-      : name_(std::move(name)), target_(target) {
+  explicit DosDevice(NativeString name, FileName target)
+      : name_(std::move(name)), target_(std::move(target)) {
     CHECK(!name_.empty());
-    CHECK(!target.empty());
   }
 
   NativeString name_;
-  NativeString target_;
+  std::optional<FileName> target_;
 };
 
 }  // namespace rules_elisp

@@ -926,10 +926,12 @@ TEST(DosDeviceTest, CreatesDevice) {
       string.rfind(kWindows ? RULES_ELISP_NATIVE_LITERAL('\\')
                             : RULES_ELISP_NATIVE_LITERAL('/'));
   ASSERT_NE(i, string.npos);
-  const NativeString dir = string.substr(0, i + 1);
-  absl::StatusOr<DosDevice> dev = DosDevice::Create(dir);
+  const absl::StatusOr<FileName> dir =
+      FileName::FromString(string.substr(0, i + 1));
+  ASSERT_THAT(dir, IsOk());
+  absl::StatusOr<DosDevice> dev = DosDevice::Create(*dir);
   if constexpr (kWindows) {
-    EXPECT_THAT(dir, SizeIs(Ge(3)));
+    EXPECT_THAT(dir->string(), SizeIs(Ge(3)));
     ASSERT_THAT(dev, IsOk());
     const NativeString name = dev->name();
     ASSERT_THAT(name, SizeIs(2));
