@@ -202,7 +202,7 @@ struct ArgFormatter final {
   }
 
   void operator()(std::string* const absl_nonnull out, const Oct number) const {
-    absl::StrAppendFormat(out, "%04o", number.value);
+    absl::StrAppendFormat(out, "0%03o", number.value);
   }
 };
 

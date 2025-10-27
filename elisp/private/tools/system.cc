@@ -819,7 +819,7 @@ static absl::Status CopyTreePosix(const int from_parent,
       if (!status.ok()) return status;
     } else {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "File %s with mode %04o cannot be copied", name, mode));
+          "File %s with mode 0%03o cannot be copied", name, mode));
     }
   }
 
