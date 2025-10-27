@@ -826,7 +826,7 @@ absl::Status CopyTree(NativeStringView from, NativeStringView to) {
         absl::StrFormat("Cannot copy drive %s", *from_abs));
   }
   const absl::StatusOr<std::wstring> to_abs = MakeAbsolute(to);
-  if (!to_abs.ok()) return from_abs.status();
+  if (!to_abs.ok()) return to_abs.status();
   if (to_abs->length() < 4) {
     return absl::AlreadyExistsError(
         absl::StrFormat("Cannot copy over drive %s", *from_abs));
