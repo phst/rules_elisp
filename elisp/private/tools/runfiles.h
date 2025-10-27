@@ -20,6 +20,7 @@
 #endif
 
 #include <memory>
+#include <optional>
 #include <string_view>
 #include <utility>
 
@@ -45,7 +46,8 @@ class Runfiles final {
   static absl::StatusOr<Runfiles> Create(
       std::string_view source_repository,
       absl::Span<const NativeStringView> original_argv,
-      NativeStringView manifest, NativeStringView directory);
+      const std::optional<FileName>& manifest,
+      const std::optional<FileName>& directory);
 
   Runfiles(const Runfiles&) = delete;
   Runfiles& operator=(const Runfiles&) = delete;
@@ -53,7 +55,7 @@ class Runfiles final {
   Runfiles(Runfiles&&) = default;
   Runfiles& operator=(Runfiles&&) = default;
 
-  absl::StatusOr<NativeString> Resolve(std::string_view name) const;
+  absl::StatusOr<FileName> Resolve(std::string_view name) const;
   absl::StatusOr<Environment> Environ() const;
 
  private:

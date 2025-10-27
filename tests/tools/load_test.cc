@@ -17,6 +17,7 @@
 #include <cstddef>
 #include <fstream>
 #include <ios>
+#include <optional>
 #include <string>
 
 #include "absl/algorithm/container.h"
@@ -60,7 +61,7 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
   ASSERT_THAT(temp, IsOk());
 
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, std::nullopt, *temp);
   ASSERT_THAT(runfiles, IsOk());
 
   const FileName foo_dir =
@@ -100,7 +101,7 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
   ASSERT_THAT(temp, IsOk());
 
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, std::nullopt, *temp);
   ASSERT_THAT(runfiles, IsOk());
 
   absl::StatusOr<NativeString> runfiles_elc =
@@ -149,7 +150,7 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
   ASSERT_THAT(temp, IsOk());
 
   const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, {}, temp->string());
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, std::nullopt, *temp);
   ASSERT_THAT(runfiles, IsOk());
 
   absl::StatusOr<NativeString> runfiles_elc =
@@ -206,8 +207,9 @@ TEST(LoadPathArgsTest, Manifest) {
   if constexpr (kWindows) absl::c_replace(line, '\\', '/');
   EXPECT_THAT(file->Write(line), IsOk());
 
-  const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, file->name(), {});
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
+      BAZEL_CURRENT_REPOSITORY, {}, FileName::FromString(file->name()).value(),
+      std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
 
   EXPECT_THAT(LoadPathArgs(*runfiles,

@@ -87,12 +87,10 @@ static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
         FileExists(*native_name)) {
       continue;
     }
-    const absl::StatusOr<NativeString> resolved = runfiles.Resolve(file);
-    const absl::StatusOr<FileName> resolved_name =
-        resolved.ok() ? FileName::FromString(*resolved) : resolved.status();
-    if (!resolved_name.ok() || !FileExists(*resolved_name)) continue;
+    const absl::StatusOr<FileName> resolved = runfiles.Resolve(file);
+    if (!resolved.ok() || !FileExists(*resolved)) continue;
     const absl::StatusOr<std::string> narrow =
-        ToNarrow(resolved_name->string(), Encoding::kUtf8);
+        ToNarrow(resolved->string(), Encoding::kUtf8);
     if (!narrow.ok()) continue;
     file = *std::move(narrow);
     edited = true;
@@ -133,7 +131,7 @@ absl::StatusOr<int> Main(const Options& opts,
   const absl::StatusOr<std::string> wrapper =
       ToNarrow(opts.wrapper, Encoding::kAscii);
   if (!wrapper.ok()) return wrapper.status();
-  const absl::StatusOr<NativeString> emacs = runfiles->Resolve(*wrapper);
+  const absl::StatusOr<FileName> emacs = runfiles->Resolve(*wrapper);
   if (!emacs.ok()) return emacs.status();
 
   std::vector<NativeString> emacs_args = {
@@ -151,17 +149,18 @@ absl::StatusOr<int> Main(const Options& opts,
   emacs_args.insert(emacs_args.end(), load_path_args->cbegin(),
                     load_path_args->cend());
 
-  const absl::StatusOr<NativeString> run_tst_elc =
+  const absl::StatusOr<FileName> run_tst_elc =
       runfiles->Resolve(RULES_ELISP_RUN_TST_ELC);
   if (!run_tst_elc.ok()) return run_tst_elc.status();
-  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *run_tst_elc);
+  emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") +
+                       run_tst_elc->string());
 
   for (const NativeString& file : opts.load_files) {
     const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
     if (!narrow.ok()) return narrow.status();
-    const absl::StatusOr<NativeString> abs_name = runfiles->Resolve(*narrow);
+    const absl::StatusOr<FileName> abs_name = runfiles->Resolve(*narrow);
     if (!abs_name.ok()) return abs_name.status();
-    const absl::StatusOr<NativeString> quoted = QuoteArg(*abs_name);
+    const absl::StatusOr<NativeString> quoted = QuoteArg(abs_name->string());
     if (!quoted.ok()) return quoted.status();
     emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--test-source=") +
                          *quoted);
@@ -263,7 +262,8 @@ absl::StatusOr<int> Main(const Options& opts,
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), emacs_args.cbegin(), emacs_args.cend());
 
-  const absl::StatusOr<int> result = Run(*emacs, final_args, *env, run_opts);
+  const absl::StatusOr<int> result =
+      Run(emacs->string(), final_args, *env, run_opts);
 
   if (absl::IsDeadlineExceeded(result.status())) {
     LOG(INFO) << "waiting for Bazel to kill this process";

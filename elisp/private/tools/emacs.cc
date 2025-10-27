@@ -52,7 +52,7 @@ static absl::StatusOr<int> RunEmacs(
   NativeString emacs;
   std::optional<DosDevice> dos_device;
   if (kWindows && release) {
-    const absl::StatusOr<NativeString> root = runfiles->Resolve(install);
+    const absl::StatusOr<FileName> root = runfiles->Resolve(install);
     if (!root.ok()) return root.status();
     // The longest filename in the Emacs release archive has 140 characters.
     // Round up to 150 for some buffer and the directory separator.
@@ -60,28 +60,28 @@ static absl::StatusOr<int> RunEmacs(
     const std::size_t max_filename = MaxFilename();
     CHECK_GT(max_filename, kMaxEntry);
     const std::size_t max_root = max_filename - kMaxEntry;
-    if (root->length() > max_root) {
+    if (root->string().length() > max_root) {
       // The filenames in the released Emacs archive are too long.  Create a
       // drive letter to shorten them.
-      absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
+      absl::StatusOr<DosDevice> device = DosDevice::Create(root->string());
       if (!device.ok()) return device.status();
       emacs = device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe");
       dos_device = *std::move(device);
     }
   }
   if (!dos_device.has_value()) {
-    const absl::StatusOr<NativeString> binary = runfiles->Resolve(
+    const absl::StatusOr<FileName> binary = runfiles->Resolve(
         absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
     if (!binary.ok()) return binary.status();
-    emacs = *binary;
+    emacs = binary->string();
   }
   CHECK(!emacs.empty());
   std::vector<NativeString> args;
   if (!release) {
-    const absl::StatusOr<NativeString> dump =
+    const absl::StatusOr<FileName> dump =
         runfiles->Resolve(absl::StrCat(install, "/emacs.pdmp"));
     if (!dump.ok()) return dump.status();
-    args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + *dump);
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + dump->string());
   }
   if (!original_args.empty()) {
     args.insert(args.end(), std::next(original_args.begin()),
@@ -90,19 +90,19 @@ static absl::StatusOr<int> RunEmacs(
   absl::StatusOr<Environment> env = runfiles->Environ();
   if (!env.ok()) return env.status();
   if (!release) {
-    const absl::StatusOr<NativeString> etc =
+    const absl::StatusOr<FileName> etc =
         runfiles->Resolve(absl::StrCat(install, "/etc"));
     if (!etc.ok()) return etc.status();
-    const absl::StatusOr<NativeString> lisp =
+    const absl::StatusOr<FileName> lisp =
         runfiles->Resolve(absl::StrCat(install, "/lisp"));
     if (!lisp.ok()) return lisp.status();
-    const absl::StatusOr<NativeString> libexec =
+    const absl::StatusOr<FileName> libexec =
         runfiles->Resolve(absl::StrCat(install, "/libexec"));
     if (!libexec.ok()) return libexec.status();
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), *etc);
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), *etc);
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), *lisp);
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), *libexec);
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), etc->string());
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), etc->string());
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), lisp->string());
+    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec->string());
   }
   absl::StatusOr<Environment> orig_env = Environment::Current();
   if (!orig_env.ok()) return orig_env.status();

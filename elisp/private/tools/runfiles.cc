@@ -81,7 +81,8 @@ absl::StatusOr<Runfiles> Runfiles::Create(
 absl::StatusOr<Runfiles> Runfiles::Create(
     const std::string_view source_repository,
     const absl::Span<const NativeStringView> original_argv,
-    const NativeStringView manifest, const NativeStringView directory) {
+    const std::optional<FileName>& manifest,
+    const std::optional<FileName>& directory) {
   if (ContainsNull(source_repository)) {
     return absl::InvalidArgumentError(absl::StrFormat(
         "Source repository %s contains null character", source_repository));
@@ -97,23 +98,23 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return absl::InvalidArgumentError(
         absl::StrFormat("First argument %s contains null character", *argv0));
   }
-  if (ContainsNull(manifest)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Manifest filename %s contains null character", manifest));
+  std::string narrow_manifest;
+  if (manifest.has_value()) {
+    absl::StatusOr<std::string> narrow =
+        ToNarrow(manifest->string(), Encoding::kAscii);
+    if (!narrow.ok()) return narrow.status();
+    narrow_manifest = std::move(*narrow);
   }
-  const absl::StatusOr<std::string> narrow_manifest =
-      ToNarrow(manifest, Encoding::kAscii);
-  if (!narrow_manifest.ok()) return narrow_manifest.status();
-  if (ContainsNull(directory)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Directory %s contains null character", directory));
+  std::string narrow_directory;
+  if (directory.has_value()) {
+    absl::StatusOr<std::string> narrow =
+        ToNarrow(directory->string(), Encoding::kAscii);
+    if (!narrow.ok()) return narrow.status();
+    narrow_directory = std::move(*narrow);
   }
-  const absl::StatusOr<std::string> narrow_directory =
-      ToNarrow(directory, Encoding::kAscii);
-  if (!narrow_directory.ok()) return narrow_directory.status();
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl(
-      Impl::Create(*argv0, *narrow_manifest, *narrow_directory,
+      Impl::Create(*argv0, narrow_manifest, narrow_directory,
                    std::string(source_repository), &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
@@ -122,8 +123,7 @@ absl::StatusOr<Runfiles> Runfiles::Create(
   return Runfiles(std::move(impl));
 }
 
-absl::StatusOr<NativeString> Runfiles::Resolve(
-    const std::string_view name) const {
+absl::StatusOr<FileName> Runfiles::Resolve(const std::string_view name) const {
   CHECK_NE(impl_, nullptr);
   if (name.empty()) return absl::InvalidArgumentError("Empty runfile name");
   if (ContainsNull(name)) {
@@ -131,14 +131,18 @@ absl::StatusOr<NativeString> Runfiles::Resolve(
         absl::StrFormat("Runfile name %s contains null character", name));
   }
   if (const absl::Status status = CheckAscii(name); !status.ok()) return status;
-  std::string resolved = impl_->Rlocation(std::string(name));
+  const std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-  if constexpr (kWindows) absl::c_replace(resolved, '/', '\\');
-  absl::StatusOr<NativeString> native = ToNative(resolved, Encoding::kAscii);
+  const absl::StatusOr<NativeString> native =
+      ToNative(resolved, Encoding::kAscii);
   if (!native.ok()) return native.status();
-  return MakeAbsolute(*native);
+  const absl::StatusOr<FileName> result = FileName::FromString(*native);
+  if (!result.ok()) return result.status();
+  const absl::StatusOr<NativeString> abs = MakeAbsolute(result->string());
+  if (!abs.ok()) return abs.status();
+  return FileName::FromString(*abs);
 }
 
 absl::StatusOr<Environment> Runfiles::Environ() const {
