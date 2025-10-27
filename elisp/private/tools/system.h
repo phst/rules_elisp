@@ -349,31 +349,28 @@ class TemporaryFile final {
   TemporaryFile& operator=(const TemporaryFile&) = delete;
 
   TemporaryFile(TemporaryFile&& other)
-      : name_(std::exchange(other.name_, NativeString())),
+      : name_(std::exchange(other.name_, std::nullopt)),
         file_(std::exchange(other.file_, nullptr)) {}
 
   TemporaryFile& operator=(TemporaryFile&& other) {
-    name_ = std::exchange(other.name_, NativeString());
+    name_ = std::exchange(other.name_, std::nullopt);
     file_ = std::exchange(other.file_, nullptr);
     return *this;
   }
 
   ~TemporaryFile() noexcept;
 
-  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    CHECK(!name_.empty());
-    return name_;
+  const FileName& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return name_.value();
   }
 
   absl::Status Write(std::string_view contents);
 
  private:
-  explicit TemporaryFile(NativeString name, std::FILE* const absl_nonnull file)
-      : name_(std::move(name)), file_(ABSL_DIE_IF_NULL(file)) {
-    CHECK(!name_.empty());
-  }
+  explicit TemporaryFile(FileName name, std::FILE* const absl_nonnull file)
+      : name_(std::move(name)), file_(ABSL_DIE_IF_NULL(file)) {}
 
-  NativeString name_;
+  std::optional<FileName> name_;
   std::FILE* absl_nullable file_;
 };
 
