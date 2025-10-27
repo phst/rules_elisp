@@ -251,7 +251,6 @@ cc_library(
     deps = [
         ":manifest_cc_proto",
         ":platform",
-        ":strings",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/status",

@@ -17,6 +17,7 @@
 #include <iterator>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
@@ -44,7 +45,7 @@ namespace rules_elisp {
                                                              : string;
 }
 
-static absl::StatusOr<std::vector<NativeString>> ArgFiles(
+static absl::StatusOr<std::vector<FileName>> ArgFiles(
     const absl::Span<const NativeStringView> argv, const NativeStringView root,
     std::vector<int> indices) {
   const std::optional<int> opt_argc = CastNumber<int>(argv.size());
@@ -54,7 +55,7 @@ static absl::StatusOr<std::vector<NativeString>> ArgFiles(
   }
   const int argc = *opt_argc;
   CHECK_GE(argc, 0);
-  std::vector<NativeString> result;
+  std::vector<FileName> result;
   absl::c_sort(indices);
   for (int i : indices) {
     if (i < 0) i += argc;
@@ -80,7 +81,9 @@ static absl::StatusOr<std::vector<NativeString>> ArgFiles(
           LOG(INFO) << rel.status();
         }
       }
-      result.push_back(*file);
+      absl::StatusOr<FileName> name = FileName::FromString(*file);
+      if (!name.ok()) return name.status();
+      result.push_back(std::move(*name));
     }
   }
   return result;
@@ -142,10 +145,10 @@ absl::StatusOr<int> Main(
            RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
   const NativeStringView runfiles_dir = RunfilesDirectory(*env);
-  const absl::StatusOr<std::vector<NativeString>> input_files =
+  const absl::StatusOr<std::vector<FileName>> input_files =
       ArgFiles(original_args, runfiles_dir, opts.input_args);
   if (!input_files.ok()) return input_files.status();
-  const absl::StatusOr<std::vector<NativeString>> output_files =
+  const absl::StatusOr<std::vector<FileName>> output_files =
       ArgFiles(original_args, runfiles_dir, opts.output_args);
   if (!output_files.ok()) return output_files.status();
 

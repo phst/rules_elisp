@@ -30,8 +30,8 @@ namespace rules_elisp {
 class ManifestFile final {
  public:
   static absl::StatusOr<ManifestFile> Create(
-      const Options& opts, absl::Span<const NativeString> input_files,
-      absl::Span<const NativeString> output_files);
+      const Options& opts, absl::Span<const FileName> input_files,
+      absl::Span<const FileName> output_files);
 
   ManifestFile(const ManifestFile&) = delete;
   ManifestFile& operator=(const ManifestFile&) = delete;

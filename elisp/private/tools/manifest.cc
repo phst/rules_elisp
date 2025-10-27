@@ -28,31 +28,29 @@
 
 #include "elisp/private/tools/manifest.pb.h"
 #include "elisp/private/tools/platform.h"
-#include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
 
-template <typename Range>
-absl::Status CheckRelative(const Range& range) {
-  for (const auto& file : range) {
-    if (file.empty()) return absl::InvalidArgumentError("Empty filename");
-    if (ContainsNull(file)) {
+static absl::StatusOr<std::vector<FileName>> ConvertNames(
+    const absl::Span<const NativeString> range) {
+  std::vector<FileName> result;
+  for (const NativeString& file : range) {
+    absl::StatusOr<FileName> name = FileName::FromString(file);
+    if (!name.ok()) return name.status();
+    if (IsAbsolute(name->string())) {
       return absl::InvalidArgumentError(
-          absl::StrFormat("Filename %s contains null character", file));
+          absl::StrFormat("Filename %v is absolute", file));
     }
-    if (IsAbsolute(file)) {
-      return absl::InvalidArgumentError(
-          absl::StrFormat("Filename %s is absolute", file));
-    }
+   result.push_back(std::move(*name));
   }
-  return absl::OkStatus();
+  return result;
 }
 
-template <typename Range>
-absl::Status Assign(google::protobuf::RepeatedPtrField<std::string>& field,
-                    const Range& range) {
-  for (const auto& elt : range) {
+static absl::Status Assign(
+    google::protobuf::RepeatedPtrField<std::string>& field,
+    const absl::Span<const NativeStringView> range) {
+  for (const NativeStringView& elt : range) {
     absl::StatusOr<std::string> utf8 = ToNarrow(elt, Encoding::kUtf8);
     if (!utf8.ok()) return utf8.status();
     field.Add(std::move(*utf8));
@@ -60,39 +58,53 @@ absl::Status Assign(google::protobuf::RepeatedPtrField<std::string>& field,
   return absl::OkStatus();
 }
 
+static absl::Status Assign(
+    google::protobuf::RepeatedPtrField<std::string>& field,
+    const absl::Span<const FileName> range) {
+  for (const FileName& elt : range) {
+    NativeString string = elt.string();
+    if (kWindows && !IsAbsolute(string)) {
+      // Runfile names are slash-separated on all systems.
+      absl::c_replace(string, kSeparator, RULES_ELISP_NATIVE_LITERAL('/'));
+    }
+    absl::StatusOr<std::string> utf8 = ToNarrow(string, Encoding::kUtf8);
+    if (!utf8.ok()) return utf8.status();
+    field.Add(std::move(*utf8));
+  }
+  return absl::OkStatus();
+}
+
 static absl::Status Write(const Options& opts,
-                          const absl::Span<const NativeString> input_files,
-                          const absl::Span<const NativeString> output_files,
+                          const absl::Span<const FileName> input_files,
+                          const absl::Span<const FileName> output_files,
                           TemporaryFile& file) {
-  if (const absl::Status status = CheckRelative(opts.load_path); !status.ok()) {
-    return status;
-  }
-  if (const absl::Status status = CheckRelative(opts.load_files);
-      !status.ok()) {
-    return status;
-  }
+  const absl::StatusOr<std::vector<FileName>> load_path =
+      ConvertNames(opts.load_path);
+  if (!load_path.ok()) return load_path.status();
 
-  std::vector<NativeStringView> data_files(opts.data_files.begin(),
-                                           opts.data_files.end());
-  absl::c_sort(data_files);
-  if (const absl::Status status = CheckRelative(data_files); !status.ok()) {
-    return status;
-  }
+  const absl::StatusOr<std::vector<FileName>> load_files =
+      ConvertNames(opts.load_files);
+  if (!load_files.ok()) return load_files.status();
 
-  std::vector<NativeStringView> all_input_files(input_files.cbegin(),
-                                                input_files.cend());
-  all_input_files.insert(all_input_files.end(), opts.load_files.begin(),
-                         opts.load_files.end());
-  all_input_files.insert(all_input_files.end(), data_files.begin(),
-                         data_files.end());
+  absl::StatusOr<std::vector<FileName>> data_files =
+      ConvertNames(opts.data_files);
+  if (!data_files.ok()) return data_files.status();
+  absl::c_sort(*data_files);
 
-  std::vector<NativeStringView> tags(opts.tags.begin(), opts.tags.end());
+  std::vector<FileName> all_input_files(input_files.cbegin(),
+                                        input_files.cend());
+  all_input_files.insert(all_input_files.end(), load_files->cbegin(),
+                         load_files->cend());
+  all_input_files.insert(all_input_files.end(), data_files->cbegin(),
+                         data_files->cend());
+
+  std::vector<NativeStringView> tags(opts.tags.cbegin(), opts.tags.cend());
   absl::c_sort(tags);
 
   Manifest manifest;
   manifest.set_root(Manifest::RUNFILES_ROOT);
   if (const absl::Status status =
-          Assign(*manifest.mutable_load_path(), opts.load_path);
+          Assign(*manifest.mutable_load_path(), *load_path);
       !status.ok()) {
     return status;
   }
@@ -120,8 +132,8 @@ static absl::Status Write(const Options& opts,
 }
 
 absl::StatusOr<ManifestFile> ManifestFile::Create(
-    const Options& opts, const absl::Span<const NativeString> input_files,
-    const absl::Span<const NativeString> output_files) {
+    const Options& opts, const absl::Span<const FileName> input_files,
+    const absl::Span<const FileName> output_files) {
   if (opts.mode == ToolchainMode::kDirect) return ManifestFile();
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
   if (!file.ok()) return file.status();
