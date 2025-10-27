@@ -415,9 +415,9 @@ class DosDevice final {
   }
 
  private:
-  explicit DosDevice(const NativeStringView name, const NativeStringView target)
-      : name_(name), target_(target) {
-    CHECK(!name.empty());
+  explicit DosDevice(NativeString name, const NativeStringView target)
+      : name_(std::move(name)), target_(target) {
+    CHECK(!name_.empty());
     CHECK(!target.empty());
   }
 
