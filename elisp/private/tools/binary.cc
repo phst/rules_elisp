@@ -46,8 +46,8 @@ namespace rules_elisp {
 }
 
 static absl::StatusOr<std::vector<FileName>> ArgFiles(
-    const absl::Span<const NativeStringView> argv, const NativeStringView root,
-    std::vector<int> indices) {
+    const absl::Span<const NativeStringView> argv,
+    const std::optional<FileName>& root, std::vector<int> indices) {
   const std::optional<int> opt_argc = CastNumber<int>(argv.size());
   if (!opt_argc.has_value()) {
     return absl::InvalidArgumentError(
@@ -70,30 +70,39 @@ static absl::StatusOr<std::vector<FileName>> ArgFiles(
       // them as special filenames.  Unquote them first.
       const NativeStringView arg =
           RemovePrefix(argv[*j], RULES_ELISP_NATIVE_LITERAL("/:"));
-      absl::StatusOr<NativeString> file = MakeAbsolute(arg);
+      absl::StatusOr<FileName> file = FileName::FromString(arg);
+      if (!file.ok()) return file.status();
+      file = FileName::FromString(MakeAbsolute(file->string()).value());
       if (!file.ok()) return file.status();
       // Make filenames relative if possible.
-      if (!root.empty()) {
-        const absl::StatusOr<NativeString> rel = MakeRelative(*file, root);
+      if (root.has_value()) {
+        const absl::StatusOr<NativeString> name =
+            MakeRelative(file->string(), root->string());
+        const absl::StatusOr<FileName> rel =
+            name.ok() ? FileName::FromString(*name) : name.status();
         if (rel.ok()) {
           file = rel;
         } else {
           LOG(INFO) << rel.status();
         }
       }
-      absl::StatusOr<FileName> name = FileName::FromString(*file);
-      if (!name.ok()) return name.status();
-      result.push_back(*std::move(name));
+      result.push_back(std::move(file).value());
     }
   }
   return result;
 }
 
-static NativeStringView RunfilesDirectory(
+static std::optional<FileName> RunfilesDirectory(
     const Environment& env ABSL_ATTRIBUTE_LIFETIME_BOUND) {
-  const NativeStringView dir =
-      env.Get(RULES_ELISP_NATIVE_LITERAL("RUNFILES_DIR"));
-  return dir.empty() ? env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR")) : dir;
+  if (absl::StatusOr<FileName> value = FileName::FromString(
+          env.Get(RULES_ELISP_NATIVE_LITERAL("RUNFILES_DIR")));
+      value.ok())
+    return std::move(*value);
+  if (absl::StatusOr<FileName> value = FileName::FromString(
+          env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR")));
+      value.ok())
+    return std::move(*value);
+  return std::nullopt;
 }
 
 absl::StatusOr<int> Main(
@@ -144,7 +153,7 @@ absl::StatusOr<int> Main(
   env->Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
            RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
-  const NativeStringView runfiles_dir = RunfilesDirectory(*env);
+  const std::optional<FileName> runfiles_dir = RunfilesDirectory(*env);
   const absl::StatusOr<std::vector<FileName>> input_files =
       ArgFiles(original_args, runfiles_dir, opts.input_args);
   if (!input_files.ok()) return input_files.status();

@@ -53,40 +53,30 @@ static absl::StatusOr<NativeString> QuoteArg(const NativeStringView arg) {
 //
 // We do this here so that the Emacs Lisp code doesn’t have to depend on the
 // runfiles library.
-static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
+static absl::Status FixCoverageManifest(const FileName& manifest_file,
                                         const Runfiles& runfiles) {
-  if (manifest_file.empty()) {
-    return absl::InvalidArgumentError("Empty manifest filename");
-  }
-  if (ContainsNull(manifest_file)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Manifest file %s contains null character", manifest_file));
-  }
   std::vector<std::string> files;
   {
-    std::ifstream stream(NativeString(manifest_file),
+    std::ifstream stream(manifest_file.string(),
                          std::ios::in | std::ios::binary);
     stream.imbue(std::locale::classic());
     if (!stream.is_open() || !stream.good()) {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "Cannot open coverage manifest %s for reading", manifest_file));
+          "Cannot open coverage manifest %v for reading", manifest_file));
     }
     std::string line;
     while (std::getline(stream, line)) files.push_back(std::move(line));
     if (stream.bad()) {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "Reading coverage manifest %s failed", manifest_file));
+          "Reading coverage manifest %v failed", manifest_file));
     }
   }
   bool edited = false;
   for (std::string& file : files) {
     const absl::StatusOr<NativeString> native = ToNative(file, Encoding::kUtf8);
-    const absl::StatusOr<FileName> native_name =
-        native.ok() ? FileName::FromString(*native) : native.status();
-    if (!native_name.ok() || IsAbsolute(native_name->string()) ||
-        FileExists(*native_name)) {
-      continue;
-    }
+    if (!native.ok()) continue;
+    const absl::StatusOr<FileName> name = FileName::FromString(*native);
+    if (!name.ok() || IsAbsolute(name->string()) || FileExists(*name)) continue;
     const absl::StatusOr<FileName> resolved = runfiles.Resolve(file);
     if (!resolved.ok() || !FileExists(*resolved)) continue;
     const absl::StatusOr<std::string> narrow =
@@ -97,12 +87,12 @@ static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
   }
   if (!edited) return absl::OkStatus();
 
-  std::ofstream stream(NativeString(manifest_file),
+  std::ofstream stream(manifest_file.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   stream.imbue(std::locale::classic());
   if (!stream.is_open() || !stream.good()) {
     return absl::FailedPreconditionError(absl::StrFormat(
-        "Cannot open coverage manifest %s for writing", manifest_file));
+        "Cannot open coverage manifest %v for writing", manifest_file));
   }
   for (const std::string& file : files) {
     const std::optional<std::streamsize> length =
@@ -117,7 +107,7 @@ static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
   stream.flush();
   if (!stream.good()) {
     return absl::DataLossError(
-        absl::StrFormat("Writing coverage manifest %s failed", manifest_file));
+        absl::StrFormat("Writing coverage manifest %v failed", manifest_file));
   }
   return absl::OkStatus();
 }
@@ -213,19 +203,19 @@ absl::StatusOr<int> Main(const Options& opts,
     const NativeStringView coverage_manifest =
         env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_MANIFEST"));
     if (!coverage_manifest.empty()) {
-      const absl::Status status =
-          FixCoverageManifest(coverage_manifest, *runfiles);
-      if (!status.ok()) return status;
       absl::StatusOr<FileName> file = FileName::FromString(coverage_manifest);
       if (!file.ok()) return file.status();
+      const absl::Status status = FixCoverageManifest(*file, *runfiles);
+      if (!status.ok()) return status;
       inputs.push_back(*std::move(file));
     }
     const NativeStringView coverage_dir =
         env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
     if (!coverage_dir.empty()) {
+      const absl::StatusOr<FileName> dir = FileName::FromString(coverage_dir);
+      if (!dir.ok()) return dir.status();
       absl::StatusOr<FileName> file =
-          FileName::FromString(NativeString(coverage_dir) + kSeparator +
-                               RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
+          dir->Child(RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
       if (!file.ok()) return file.status();
       outputs.push_back(*std::move(file));
     }
