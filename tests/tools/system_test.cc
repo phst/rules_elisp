@@ -75,48 +75,6 @@ static absl::StatusOr<FileName> TempDir() {
   return FileName::FromString(*native);
 }
 
-static absl::StatusOr<std::string> ReadFile(const FileName& name) {
-  std::ifstream stream(name.string(), std::ios::in | std::ios::binary);
-  if (!stream.is_open() || !stream.good()) {
-    return absl::UnknownError(
-        absl::StrFormat("Cannot open file %v for reading", name));
-  }
-  stream.imbue(std::locale::classic());
-
-  std::ostringstream buffer;
-  buffer.imbue(std::locale::classic());
-  buffer << stream.rdbuf();
-  buffer.flush();
-  if (!buffer.good() || !stream.good()) {
-    return absl::UnknownError(absl::StrFormat("Cannot read file %v", name));
-  }
-  return buffer.str();
-}
-
-static absl::Status WriteFile(const FileName& name,
-                              const std::string_view contents) {
-  std::ofstream stream(name.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  if (!stream.is_open() || !stream.good()) {
-    return absl::UnknownError(
-        absl::StrFormat("Cannot open file %v for writing", name));
-  }
-  stream.imbue(std::locale::classic());
-  const std::optional<std::streamsize> count =
-      CastNumber<std::streamsize>(contents.size());
-  if (!count.has_value()) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Content too big (%d bytes)", contents.size()));
-  }
-  stream.write(contents.data(), *count);
-  stream.flush();
-  if (!stream.good()) {
-    return absl::DataLossError(
-        absl::StrFormat("Cannot write %d bytes to file %v", *count, name));
-  }
-  return absl::OkStatus();
-}
-
 TEST(FileNameTest, RejectsEmpty) {
   EXPECT_THAT(FileName::FromString(RULES_ELISP_NATIVE_LITERAL("")),
               StatusIs(absl::StatusCode::kInvalidArgument));
@@ -443,6 +401,22 @@ TEST(FileExistsTest, TestsThatFileExists) {
   const FileName child =
       dir->Child(RULES_ELISP_NATIVE_LITERAL("nonexistent")).value();
   EXPECT_FALSE(FileExists(child));
+}
+
+TEST(ReadWriteFileTest, Works) {
+  const absl::StatusOr<FileName> dir = TempDir();
+  ASSERT_THAT(dir, IsOk());
+
+  const FileName file = dir->Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  EXPECT_FALSE(FileExists(file));
+
+  EXPECT_THAT(WriteFile(file, "contents"), IsOk());
+
+  EXPECT_TRUE(FileExists(file));
+
+  const absl::Cleanup cleanup = [&file] { EXPECT_THAT(Unlink(file), IsOk()); };
+
+  EXPECT_THAT(ReadFile(file), IsOkAndHolds("contents"));
 }
 
 TEST(IsNonEmptyDirectoryTest, ReturnsFalseForFile) {

@@ -15,14 +15,11 @@
 #include "elisp/private/tools/load.h"
 
 #include <cstddef>
-#include <fstream>
-#include <ios>
 #include <optional>
 #include <string>
 
 #include "absl/algorithm/container.h"
 #include "absl/cleanup/cleanup.h"
-#include "absl/status/status.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
@@ -47,15 +44,6 @@ static absl::StatusOr<FileName> TempDir() {
   return FileName::FromString(*native);
 }
 
-static absl::Status CreateFile(const FileName& name) {
-  std::ofstream stream(name.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  return stream.is_open() && stream.good() && stream.flush() && stream.good()
-             ? absl::OkStatus()
-             : absl::UnknownError(
-                   absl::StrFormat("Cannot create file %v", name));
-}
-
 TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
@@ -74,9 +62,9 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
-  EXPECT_THAT(CreateFile(foo_file), IsOk());
+  EXPECT_THAT(WriteFile(foo_file, ""), IsOk());
   EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
-  EXPECT_THAT(CreateFile(bar_file), IsOk());
+  EXPECT_THAT(WriteFile(bar_file, ""), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
     EXPECT_THAT(Unlink(foo_file), IsOk());
@@ -119,9 +107,9 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
-  EXPECT_THAT(CreateFile(foo_file), IsOk());
+  EXPECT_THAT(WriteFile(foo_file, ""), IsOk());
   EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
-  EXPECT_THAT(CreateFile(bar_file), IsOk());
+  EXPECT_THAT(WriteFile(bar_file, ""), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
     EXPECT_THAT(Unlink(foo_file), IsOk());
@@ -168,7 +156,7 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
-  EXPECT_THAT(CreateFile(foo_file), IsOk());
+  EXPECT_THAT(WriteFile(foo_file, ""), IsOk());
   EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir] {

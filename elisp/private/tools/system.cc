@@ -56,9 +56,13 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <fstream>
 #include <functional>
+#include <ios>
+#include <locale>
 #include <memory>
 #include <optional>  // IWYU pragma: keep, only on Windows
+#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -464,6 +468,47 @@ absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
         absl::StrFormat("File %s is not within %s", file_str, base_str));
   }
   return FileName::FromString(rel);
+}
+
+absl::StatusOr<std::string> ReadFile(const FileName& file) {
+  std::ifstream stream(file.string(), std::ios::in | std::ios::binary);
+  if (!stream.is_open() || !stream.good()) {
+    return absl::UnknownError(
+        absl::StrFormat("Cannot open file %v for reading", file));
+  }
+  stream.imbue(std::locale::classic());
+
+  std::ostringstream buffer;
+  buffer.imbue(std::locale::classic());
+  buffer << stream.rdbuf();
+  buffer.flush();
+  if (!buffer.good() || !stream.good()) {
+    return absl::UnknownError(absl::StrFormat("Cannot read file %v", file));
+  }
+  return buffer.str();
+}
+
+absl::Status WriteFile(const FileName& file, const std::string_view contents) {
+  std::ofstream stream(file.string(),
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+  if (!stream.is_open() || !stream.good()) {
+    return absl::UnknownError(
+        absl::StrFormat("Cannot open file %v for writing", file));
+  }
+  stream.imbue(std::locale::classic());
+  const std::optional<std::streamsize> count =
+      CastNumber<std::streamsize>(contents.size());
+  if (!count.has_value()) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Content too big (%d bytes)", contents.size()));
+  }
+  stream.write(contents.data(), *count);
+  stream.flush();
+  if (!stream.good()) {
+    return absl::DataLossError(
+        absl::StrFormat("Cannot write %d bytes to file %v", *count, file));
+  }
+  return absl::OkStatus();
 }
 
 [[nodiscard]] bool FileExists(const FileName& file) {

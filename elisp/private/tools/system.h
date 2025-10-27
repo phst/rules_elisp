@@ -231,6 +231,8 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 
+absl::StatusOr<std::string> ReadFile(const FileName& file);
+absl::Status WriteFile(const FileName& file, std::string_view contents);
 [[nodiscard]] bool FileExists(const FileName& file);
 [[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory);
 absl::Status Unlink(const FileName& file);
