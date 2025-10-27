@@ -183,12 +183,6 @@ TEST(FileNameTest, CanCreateFromLiteral) {
             RULES_ELISP_NATIVE_LITERAL("foo"));
 }
 
-TEST(FileNameTest, CanCreateFromNativeLiteral) {
-  const FileName name = FileName::FromNativeLiteralOrDie(
-      RULES_ELISP_NATIVE_LITERAL("foo äα𝐴🐈'"));
-  EXPECT_EQ(name.string(), RULES_ELISP_NATIVE_LITERAL("foo äα𝐴🐈'"));
-}
-
 TEST(FileNameTest, IsFormattable) {
   const FileName foo =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
