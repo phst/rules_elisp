@@ -519,7 +519,7 @@ TEST(CopyTreeTest, RejectsSelfCopy) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
 
-  EXPECT_THAT(CopyTree(temp->string(), temp->string()),
+  EXPECT_THAT(CopyTree(*temp, *temp),
               StatusIs(AnyOf(absl::StatusCode::kAlreadyExists,
                              absl::StatusCode::kNotFound)));
 }
@@ -528,12 +528,13 @@ TEST(CopyTreeTest, RejectsCopyFromRootDirectory) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
 
+  const FileName from =
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                    : RULES_ELISP_NATIVE_LITERAL("/"))
+          .value();
   const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
 
-  EXPECT_THAT(CopyTree(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
-                                : RULES_ELISP_NATIVE_LITERAL("/"),
-                       to.string()),
-              StatusIs(absl::StatusCode::kInvalidArgument));
+  EXPECT_THAT(CopyTree(from, to), StatusIs(absl::StatusCode::kInvalidArgument));
 
   EXPECT_THAT(RemoveDirectory(to), StatusIs(absl::StatusCode::kNotFound));
 }
@@ -542,10 +543,12 @@ TEST(CopyTreeTest, RejectsCopyToRootDirectory) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
 
-  EXPECT_THAT(
-      CopyTree(temp->string(), kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
-                                        : RULES_ELISP_NATIVE_LITERAL("/")),
-      StatusIs(absl::StatusCode::kAlreadyExists));
+  const FileName to =
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                    : RULES_ELISP_NATIVE_LITERAL("/"))
+          .value();
+
+  EXPECT_THAT(CopyTree(*temp, to), StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
 TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
@@ -570,7 +573,7 @@ TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
   EXPECT_THAT(CreateDirectory(to_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()),
+  EXPECT_THAT(CopyTree(from_dir, to_dir),
               StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
@@ -596,7 +599,7 @@ TEST(CopyTreeTest, CopiesToNewDirectory) {
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()), IsOk());
+  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
 
   EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
 }
@@ -624,7 +627,7 @@ TEST(CopyTreeTest, IgnoresTrailingSlash) {
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()), IsOk());
+  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
 
   EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
 }
