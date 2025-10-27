@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdio>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -377,16 +378,16 @@ class TemporaryFile final {
 };
 
 struct RunOptions final {
-  // If non-empty, change to this directory in the subprocess.
-  NativeString directory;
+  // If set, change to this directory in the subprocess.
+  std::optional<FileName> directory;
 
-  // If non-empty, redirect standard output and error to this file.
-  NativeString output_file;
+  // If set, redirect standard output and error to this file.
+  std::optional<FileName> output_file;
 
   absl::Time deadline = absl::InfiniteFuture();
 };
 
-absl::StatusOr<int> Run(NativeStringView program,
+absl::StatusOr<int> Run(const FileName& program,
                         absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options = {});
 

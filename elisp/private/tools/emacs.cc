@@ -49,7 +49,7 @@ static absl::StatusOr<int> RunEmacs(
     CHECK_EQ(mode, Mode::kSource) << "invalid mode";
     release = false;
   }
-  NativeString emacs;
+  std::optional<FileName> emacs;
   std::optional<DosDevice> dos_device;
   if (kWindows && release) {
     const absl::StatusOr<FileName> root = runfiles->Resolve(install);
@@ -65,17 +65,20 @@ static absl::StatusOr<int> RunEmacs(
       // drive letter to shorten them.
       absl::StatusOr<DosDevice> device = DosDevice::Create(root->string());
       if (!device.ok()) return device.status();
-      emacs = device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe");
+      absl::StatusOr<FileName> program = FileName::FromString(
+          device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
+      if (!program.ok()) return program.status();
+      emacs = *std::move(program);
       dos_device = *std::move(device);
     }
   }
   if (!dos_device.has_value()) {
-    const absl::StatusOr<FileName> binary = runfiles->Resolve(
+    absl::StatusOr<FileName> binary = runfiles->Resolve(
         absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
     if (!binary.ok()) return binary.status();
-    emacs = binary->string();
+    emacs = *std::move(binary);
   }
-  CHECK(!emacs.empty());
+  CHECK(emacs.has_value());
   std::vector<NativeString> args;
   if (!release) {
     const absl::StatusOr<FileName> dump =
@@ -124,7 +127,7 @@ static absl::StatusOr<int> RunEmacs(
       }
     }
   }
-  return Run(emacs, args, *env);
+  return Run(*emacs, args, *env);
 }
 
 absl::StatusOr<int> Main(

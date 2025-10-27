@@ -1127,29 +1127,25 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
   return absl::OkStatus();
 }
 
-absl::StatusOr<int> Run(const NativeStringView program,
+absl::StatusOr<int> Run(const FileName& program,
                         const absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options) {
-  if (program.empty()) return absl::InvalidArgumentError("Empty program name");
-  if (ContainsNull(program)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Program name %s contains null character", program));
-  }
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
       return absl::InvalidArgumentError(
           absl::StrFormat("Argument %s contains null character", arg));
     }
   }
-  if (program.find(kSeparator) == program.npos &&
-      program.find(RULES_ELISP_NATIVE_LITERAL('/')) == program.npos) {
+  const NativeString& string = program.string();
+  if (string.find(kSeparator) == string.npos) {
     return absl::InvalidArgumentError(absl::StrFormat(
-        "Program name %s doesn’t contain a directory separator character",
+        "Program name %v doesn’t contain a directory separator character",
         program));
   }
-  const absl::StatusOr<NativeString> abs_program = MakeAbsolute(program);
+  const absl::StatusOr<NativeString> abs_program =
+      MakeAbsolute(program.string());
   if (!abs_program.ok()) return abs_program.status();
-  std::vector<NativeString> args_vec = {NativeString(program)};
+  std::vector<NativeString> args_vec = {program.string()};
   args_vec.insert(args_vec.end(), args.cbegin(), args.cend());
   std::vector<NativeString> final_env;
   for (const auto& [key, value] : env) {
@@ -1157,34 +1153,27 @@ absl::StatusOr<int> Run(const NativeStringView program,
   }
   // Sort entries for hermeticity.
   absl::c_sort(final_env);
-  if (ContainsNull(options.directory)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Working directory %s contains null character", options.directory));
-  }
-  if (ContainsNull(options.output_file)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Output filename %s contains null character", options.output_file));
-  }
   const bool has_deadline = options.deadline < absl::InfiniteFuture();
 #ifdef _WIN32
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args_vec);
   if (!command_line.ok()) return command_line.status();
-  const BOOL inherit_handles = options.output_file.empty() ? FALSE : TRUE;
+  const BOOL inherit_handles = options.output_file.has_value() ? TRUE : FALSE;
   const DWORD flags = CREATE_UNICODE_ENVIRONMENT |
                       (has_deadline ? CREATE_NEW_PROCESS_GROUP : 0);
   absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
   if (!envp.ok()) return envp.status();
   const absl_nullable LPCWSTR dirp =
-      options.directory.empty() ? nullptr : Pointer(options.directory);
+      options.directory.has_value() ? options.directory->pointer() : nullptr;
   STARTUPINFOW startup_info;
   startup_info.cb = sizeof startup_info;
   startup_info.lpReserved = nullptr;
   startup_info.lpDesktop = nullptr;
   startup_info.lpTitle = nullptr;
-  startup_info.dwFlags = options.output_file.empty() ? 0 : STARTF_USESTDHANDLES;
+  startup_info.dwFlags =
+      options.output_file.has_value() ? STARTF_USESTDHANDLES : 0;
   startup_info.cbReserved2 = 0;
   startup_info.lpReserved2 = nullptr;
-  if (!options.output_file.empty()) {
+  if (options.output_file.has_value()) {
     startup_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     if (startup_info.hStdInput == INVALID_HANDLE_VALUE) {
       return WindowsStatus("GetStdHandle", STD_INPUT_HANDLE);
@@ -1198,10 +1187,10 @@ absl::StatusOr<int> Run(const NativeStringView program,
     constexpr DWORD disposition = CREATE_NEW;
     constexpr DWORD attributes = FILE_ATTRIBUTE_NORMAL;
     startup_info.hStdOutput =
-        ::CreateFileW(Pointer(options.output_file), access, share, &security,
+        ::CreateFileW(options.output_file->pointer(), access, share, &security,
                       disposition, attributes, nullptr);
     if (startup_info.hStdOutput == INVALID_HANDLE_VALUE) {
-      return WindowsStatus("CreateFileW", options.output_file, access, share,
+      return WindowsStatus("CreateFileW", *options.output_file, access, share,
                            kEllipsis, disposition, absl::Hex(attributes),
                            nullptr);
     }
@@ -1289,14 +1278,14 @@ absl::StatusOr<int> Run(const NativeStringView program,
       LOG(ERROR) << ErrnoStatus("posix_spawn_file_actions_destroy");
     }
   };
-  if (!options.output_file.empty()) {
+  if (options.output_file.has_value()) {
     constexpr int oflag = O_WRONLY | O_CREAT | O_TRUNC | O_NOCTTY;
     constexpr mode_t mode = S_IRUSR | S_IWUSR;
     if (posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO,
-                                         Pointer(options.output_file), oflag,
+                                         options.output_file->pointer(), oflag,
                                          mode) != 0) {
       return ErrnoStatus("posix_spawn_file_actions_addopen", kEllipsis,
-                         STDOUT_FILENO, options.output_file, oflag, Oct(mode));
+                         STDOUT_FILENO, *options.output_file, oflag, Oct(mode));
     }
     if (posix_spawn_file_actions_adddup2(&actions, STDOUT_FILENO,
                                          STDERR_FILENO) != 0) {
@@ -1304,17 +1293,17 @@ absl::StatusOr<int> Run(const NativeStringView program,
                          STDOUT_FILENO, STDERR_FILENO);
     }
   }
-  if (!options.directory.empty()) {
+  if (options.directory.has_value()) {
     // TODO: Switch to posix_spawn_file_actions_addchdir once that’s widely
     // available.
 #  pragma GCC diagnostic push
 #  pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     const int result = posix_spawn_file_actions_addchdir_np(
-        &actions, Pointer(options.directory));
+        &actions, options.directory->pointer());
 #  pragma GCC diagnostic pop
     if (result != 0) {
       return ErrnoStatus("posix_spawn_file_actions_addchdir_np", kEllipsis,
-                         options.directory);
+                         *options.directory);
     }
   }
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
