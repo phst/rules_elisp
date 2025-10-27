@@ -62,7 +62,7 @@
 #include <iostream>
 #include <locale>
 #include <memory>
-#include <optional>  // IWYU pragma: keep, only on Windows
+#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
