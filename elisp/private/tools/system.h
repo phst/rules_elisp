@@ -239,7 +239,7 @@ absl::Status Unlink(const FileName& file);
 absl::Status CreateDirectory(const FileName& name);
 absl::Status RemoveDirectory(const FileName& name);
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
-absl::Status CopyTree(NativeStringView from, NativeStringView to);
+absl::Status CopyTree(const FileName& from, const FileName& to);
 
 class Environment final {
  private:

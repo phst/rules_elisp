@@ -284,12 +284,14 @@ static NativeChar* absl_nonnull Pointer(
   return string.data();
 }
 
+#ifdef _WIN32
 static const NativeChar* absl_nonnull Pointer(
     const NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   CHECK(!ContainsNull(string))
       << absl::StrFormat("%s contains null character", string);
   return string.data();
 }
+#endif
 
 #ifndef _WIN32
 static std::vector<char* absl_nullable> Pointers(
@@ -622,12 +624,11 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
 #endif
 
 #ifdef _WIN32
-static absl::Status CopyTreeWindows(const std::wstring& from,
-                                    const std::wstring& to) {
-  if (!::CreateDirectoryExW(Pointer(from), Pointer(to), nullptr)) {
+static absl::Status CopyTreeWindows(const FileName& from, const FileName& to) {
+  if (!::CreateDirectoryExW(from.pointer(), to.pointer(), nullptr)) {
     return WindowsStatus("CreateDirectoryExW", from, to, nullptr);
   }
-  const std::wstring pattern = from + L"\\*";
+  const std::wstring pattern = from.string() + L"\\*";
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
   if (handle == INVALID_HANDLE_VALUE) {
@@ -639,18 +640,20 @@ static absl::Status CopyTreeWindows(const std::wstring& from,
     if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
   };
   do {
-    const std::wstring name = data.cFileName;
+    const std::wstring_view name = data.cFileName;
     if (name == L"." || name == L"..") continue;
-    const std::wstring from_entry = from + L'\\' + name;
-    const std::wstring to_entry = to + L'\\' + name;
+    const absl::StatusOr<FileName> from_entry = from.Child(name);
+    if (!from_entry.ok()) return from_entry.status();
+    const absl::StatusOr<FileName> to_entry = to.Child(name);
+    if (!to_entry.ok()) return to_entry.status();
     if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-      const absl::Status status = CopyTreeWindows(from_entry, to_entry);
+      const absl::Status status = CopyTreeWindows(*from_entry, *to_entry);
       if (!status.ok()) return status;
     } else {
       constexpr DWORD flags = COPY_FILE_FAIL_IF_EXISTS | COPY_FILE_COPY_SYMLINK;
-      if (!::CopyFileExW(Pointer(from_entry), Pointer(to_entry), nullptr,
+      if (!::CopyFileExW(from_entry->pointer(), to_entry->pointer(), nullptr,
                          nullptr, nullptr, flags)) {
-        return WindowsStatus("CopyFileExW", from_entry, to_entry, nullptr,
+        return WindowsStatus("CopyFileExW", *from_entry, *to_entry, nullptr,
                              nullptr, nullptr, absl::Hex(flags));
       }
     }
@@ -664,16 +667,16 @@ static absl::Status CopyTreeWindows(const std::wstring& from,
 
 #ifdef RULES_ELISP_COPY_TREE_POSIX
 static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
-                                  const std::string& name,
+                                  const FileName& name,
                                   const struct stat& from_stat) {
-  CHECK(!name.empty());
-  CHECK_NE(name, ".");
-  CHECK_NE(name, "..");
-  CHECK_EQ(name.find('/'), name.npos) << "invalid name " << name;
+  CHECK_NE(name.string(), ".");
+  CHECK_NE(name.string(), "..");
+  CHECK_EQ(name.string().find('/'), name.string().npos)
+      << "invalid name " << name;
   CHECK(S_ISREG(from_stat.st_mode)) << "file " << name << " is not regular";
 
   constexpr int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY | O_NOFOLLOW;
-  const int from_fd = openat(from_parent, Pointer(name), from_flags);
+  const int from_fd = openat(from_parent, name.pointer(), from_flags);
   if (from_fd < 0) {
     return ErrnoStatus("openat", from_parent, name, absl::Hex(from_flags));
   }
@@ -684,7 +687,7 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
   const mode_t mode = from_stat.st_mode;
   constexpr int to_flags =
       O_WRONLY | O_CREAT | O_EXCL | O_CLOEXEC | O_NOCTTY | O_NOFOLLOW;
-  const int to_fd = openat(to_parent, Pointer(name), to_flags, mode);
+  const int to_fd = openat(to_parent, name.pointer(), to_flags, mode);
   if (to_fd < 0) {
     return ErrnoStatus("openat", to_parent, name, to_flags, Oct(mode));
   }
@@ -710,7 +713,7 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
       if (written == 0) {
         // Prevent infinite loop.
         return absl::DataLossError(absl::StrFormat(
-            "Cannot write %d bytes to %s", remaining.size(), name));
+            "Cannot write %d bytes to %v", remaining.size(), name));
       }
       remaining.remove_prefix(
           CastNumber<std::string_view::size_type>(written).value());
@@ -727,25 +730,25 @@ static absl::Status CopyFilePosix(const int from_parent, const int to_parent,
 }
 
 static absl::Status CopyTreePosix(const int from_parent,
-                                  const std::string& from_name,
+                                  const FileName& from_name,
                                   std::optional<struct stat> from_stat,
                                   const int to_parent,
-                                  const std::string& to_name) {
-  CHECK(!from_name.empty());
-  CHECK_NE(from_name, ".");
-  CHECK_NE(from_name, "..");
-  CHECK(from_parent == AT_FDCWD || from_name.find('/') == from_name.npos)
+                                  const FileName& to_name) {
+  CHECK_NE(from_name.string(), ".");
+  CHECK_NE(from_name.string(), "..");
+  CHECK(from_parent == AT_FDCWD ||
+        from_name.string().find('/') == from_name.string().npos)
       << "invalid source name " << from_name;
 
-  CHECK(!to_name.empty());
-  CHECK_NE(to_name, ".");
-  CHECK_NE(to_name, "..");
-  CHECK(to_parent == AT_FDCWD || to_name.find('/') == to_name.npos)
+  CHECK_NE(to_name.string(), ".");
+  CHECK_NE(to_name.string(), "..");
+  CHECK(to_parent == AT_FDCWD ||
+        to_name.string().find('/') == to_name.string().npos)
       << "invalid target name " << to_name;
 
   const int from_flags =
       O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
-  const int from_fd = openat(from_parent, Pointer(from_name), from_flags);
+  const int from_fd = openat(from_parent, from_name.pointer(), from_flags);
   if (from_fd < 0) {
     return ErrnoStatus("openat", from_parent, from_name, absl::Hex(from_flags));
   }
@@ -760,7 +763,7 @@ static absl::Status CopyTreePosix(const int from_parent,
     if (fstat(from_fd, &buffer) != 0) return ErrnoStatus("fstat", from_fd);
     if (!S_ISDIR(buffer.st_mode)) {
       return absl::FailedPreconditionError(
-          absl::StrFormat("Source %s is not a directory", from_name));
+          absl::StrFormat("Source %v is not a directory", from_name));
     }
     from_stat = buffer;
   }
@@ -775,12 +778,12 @@ static absl::Status CopyTreePosix(const int from_parent,
   };
 
   const mode_t mode = from_stat->st_mode | S_IWUSR;
-  const int result = mkdirat(to_parent, Pointer(to_name), mode);
+  const int result = mkdirat(to_parent, to_name.pointer(), mode);
   if (result != 0) return ErrnoStatus("mkdirat", to_parent, to_name, Oct(mode));
 
   constexpr int to_flags =
       O_RDONLY | O_DIRECTORY | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
-  const int to_fd = openat(to_parent, Pointer(to_name), to_flags);
+  const int to_fd = openat(to_parent, to_name.pointer(), to_flags);
   if (to_fd < 0) {
     return ErrnoStatus("openat", to_parent, to_name, absl::Hex(to_flags));
   }
@@ -795,8 +798,10 @@ static absl::Status CopyTreePosix(const int from_parent,
       if (errno != 0) return ErrnoStatus("readdir");
       break;
     }
-    const std::string name = entry->d_name;
+    const std::string_view name = entry->d_name;
     if (name == "." || name == "..") continue;
+    const absl::StatusOr<FileName> file = FileName::FromString(name);
+    if (!file.ok()) return file.status();
 
     struct stat buffer;
     constexpr int stat_flags = AT_SYMLINK_NOFOLLOW;
@@ -807,10 +812,10 @@ static absl::Status CopyTreePosix(const int from_parent,
     const mode_t mode = buffer.st_mode;
     if (S_ISDIR(mode)) {
       const absl::Status status =
-          CopyTreePosix(from_fd, name, buffer, to_fd, name);
+          CopyTreePosix(from_fd, *file, buffer, to_fd, *file);
       if (!status.ok()) return status;
     } else if (S_ISREG(mode)) {
-      const absl::Status status = CopyFilePosix(from_fd, to_fd, name, buffer);
+      const absl::Status status = CopyFilePosix(from_fd, to_fd, *file, buffer);
       if (!status.ok()) return status;
     } else {
       return absl::FailedPreconditionError(absl::StrFormat(
@@ -826,78 +831,56 @@ static absl::Status CopyTreePosix(const int from_parent,
 }
 #endif
 
-absl::Status CopyTree(NativeStringView from, NativeStringView to) {
-  if (from.empty()) {
-    return absl::InvalidArgumentError("Empty source directory name");
-  }
-  if (ContainsNull(from)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Source directory name %s contains null character", from));
-  }
-  if (to.empty()) {
-    return absl::InvalidArgumentError("Empty destination directory name");
-  }
-  if (ContainsNull(to)) {
-    return absl::InvalidArgumentError(absl::StrFormat(
-        "Destination directory name %s contains null character", from));
-  }
-
+absl::Status CopyTree(const FileName& from, const FileName& to) {
 #if defined _WIN32
-  const absl::StatusOr<FileName> from_name = FileName::FromString(from);
-  if (!from_name.ok()) return from_name.status();
-  const absl::StatusOr<FileName> from_abs = from_name->MakeAbsolute();
+  const absl::StatusOr<FileName> from_abs = from.MakeAbsolute();
   if (!from_abs.ok()) return from_abs.status();
   if (from_abs->string().length() < 4) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Cannot copy drive %v", *from_abs));
   }
-  const absl::StatusOr<FileName> to_name = FileName::FromString(to);
-  if (!to_name.ok()) return to_name.status();
-  const absl::StatusOr<FileName> to_abs = to_name->MakeAbsolute();
+  const absl::StatusOr<FileName> to_abs = to.MakeAbsolute();
   if (!to_abs.ok()) return to_abs.status();
   if (to_abs->string().length() < 4) {
     return absl::AlreadyExistsError(
         absl::StrFormat("Cannot copy over drive %v", *from_abs));
   }
-  return CopyTreeWindows(from_abs->string(), to_abs->string());
+  return CopyTreeWindows(*from_abs, *to_abs);
 #elif defined __APPLE__
+  std::string from_str = from.string();
   // The behavior of copyfile changes if the source directory name ends in a
   // slash, see the man page copyfile(3).  We need to remove trailing slashes to
   // get the expected behavior.
-  const std::string_view::size_type i = from.find_last_not_of('/');
-  from.remove_suffix(from.size() - (i == from.npos ? 0 : i + 1));
-  if (from.empty()) {
+  while (from_str.back() == '/') from_str.pop_back();
+  if (from_str.empty()) {
     // If the source directory name is empty, it has consisted only of slashes.
     return absl::InvalidArgumentError("Cannot copy from root directory");
   }
-  const std::string from_str(from);
-  const std::string to_str(to);
   // The behavior of copyfile changes if the destination directory already
   // exists, see the man page copyfile(3).
   struct stat buffer;
-  if (lstat(Pointer(to_str), &buffer) == 0) {
+  if (lstat(to.pointer(), &buffer) == 0) {
     return absl::AlreadyExistsError(
-        absl::StrFormat("Destination directory %s already exists", to_str));
+        absl::StrFormat("Destination directory %v already exists", to));
   }
-  if (errno != ENOENT) return ErrnoStatus("lstat", to_str);
+  if (errno != ENOENT) return ErrnoStatus("lstat", to);
   constexpr copyfile_flags_t flags = COPYFILE_ALL | COPYFILE_RECURSIVE |
                                      COPYFILE_EXCL | COPYFILE_NOFOLLOW |
                                      COPYFILE_CLONE | COPYFILE_DATA_SPARSE;
-  if (copyfile(Pointer(from_str), Pointer(to_str), nullptr, flags) != 0) {
-    return ErrnoStatus("copyfile", from_str, to_str, nullptr, absl::Hex(flags));
+  if (copyfile(Pointer(from_str), to.pointer(), nullptr, flags) != 0) {
+    return ErrnoStatus("copyfile", from_str, to, nullptr, absl::Hex(flags));
   }
   return absl::OkStatus();
 #elif defined RULES_ELISP_COPY_TREE_POSIX
-  if (from.find_first_not_of('/') == from.npos) {
+  if (from.string().find_first_not_of('/') == from.string().npos) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("Cannot copy from root directory %s", from));
+        absl::StrFormat("Cannot copy from root directory %v", from));
   }
-  if (to.find_first_not_of('/') == to.npos) {
+  if (to.string().find_first_not_of('/') == to.string().npos) {
     return absl::AlreadyExistsError(
-        absl::StrFormat("Cannot overwrite root directory %s", to));
+        absl::StrFormat("Cannot overwrite root directory %v", to));
   }
-  return CopyTreePosix(AT_FDCWD, std::string(from), std::nullopt, AT_FDCWD,
-                       std::string(to));
+  return CopyTreePosix(AT_FDCWD, from, std::nullopt, AT_FDCWD, to);
 #else
 #  error CopyTree not implemented on this system
 #endif
