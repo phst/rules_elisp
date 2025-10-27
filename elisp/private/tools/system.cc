@@ -476,15 +476,9 @@ absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
 }
 
 static absl::Status IterateDirectory(
-    const NativeStringView dir,
-    const std::function<bool(NativeStringView)>& function) {
-  if (dir.empty()) return absl::InvalidArgumentError("Empty directory name");
-  if (ContainsNull(dir)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Directory name %s contains null character", dir));
-  }
+    const FileName& dir, const std::function<bool(const FileName&)>& function) {
 #ifdef _WIN32
-  const std::wstring pattern = std::wstring(dir) + L"\\*";
+  const std::wstring pattern = dir.string() + L"\\*";
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
   if (handle == INVALID_HANDLE_VALUE) {
@@ -499,14 +493,15 @@ static absl::Status IterateDirectory(
   do {
     const std::wstring_view name = data.cFileName;
     if (name == L"." || name == L"..") continue;
-    if (!function(name)) return absl::OkStatus();
+    const absl::StatusOr<FileName> file = FileName::FromString(name);
+    if (!file.ok()) return file.status();
+    if (!function(*file)) return absl::OkStatus();
   } while (::FindNextFileW(handle, &data));
   if (::GetLastError() != ERROR_NO_MORE_FILES) {
     return WindowsStatus("FindNextFileW");
   }
 #else
-  const std::string string(dir);
-  DIR* const absl_nullable handle = opendir(Pointer(string));
+  DIR* const absl_nullable handle = opendir(dir.pointer());
   if (handle == nullptr) return ErrnoStatus("opendir", dir);
   const absl::Cleanup cleanup = [handle] {
     if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
@@ -520,7 +515,9 @@ static absl::Status IterateDirectory(
     }
     const std::string_view name = entry->d_name;
     if (name == "." || name == "..") continue;
-    if (!function(name)) break;
+    const absl::StatusOr<FileName> file = FileName::FromString(name);
+    if (!file.ok()) return file.status();
+    if (!function(*file)) break;
   }
 #endif
   return absl::OkStatus();
@@ -529,7 +526,7 @@ static absl::Status IterateDirectory(
 [[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory) {
   bool empty = true;
   const absl::Status status =
-      IterateDirectory(directory.string(), [&empty](NativeStringView) {
+      IterateDirectory(directory, [&empty](const FileName&) {
         empty = false;
         return false;
       });
@@ -566,10 +563,8 @@ absl::Status RemoveDirectory(const FileName& name) {
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
   std::vector<FileName> result;
   const absl::Status status =
-      IterateDirectory(dir.string(), [&result](const NativeStringView file) {
-        absl::StatusOr<FileName> name = FileName::FromString(file);
-        if (!name.ok()) return false;
-        result.push_back(*std::move(name));
+      IterateDirectory(dir, [&result](const FileName& file) {
+        result.push_back(file);
         return true;
       });
   if (!status.ok()) return status;
