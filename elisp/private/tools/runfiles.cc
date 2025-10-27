@@ -103,14 +103,14 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     absl::StatusOr<std::string> narrow =
         ToNarrow(manifest->string(), Encoding::kAscii);
     if (!narrow.ok()) return narrow.status();
-    narrow_manifest = std::move(*narrow);
+    narrow_manifest = *std::move(narrow);
   }
   std::string narrow_directory;
   if (directory.has_value()) {
     absl::StatusOr<std::string> narrow =
         ToNarrow(directory->string(), Encoding::kAscii);
     if (!narrow.ok()) return narrow.status();
-    narrow_directory = std::move(*narrow);
+    narrow_directory = *std::move(narrow);
   }
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl(
