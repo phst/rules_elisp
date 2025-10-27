@@ -76,7 +76,7 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
     const absl::StatusOr<NativeString> native = ToNative(file, Encoding::kUtf8);
     if (!native.ok()) continue;
     const absl::StatusOr<FileName> name = FileName::FromString(*native);
-    if (!name.ok() || IsAbsolute(name->string()) || FileExists(*name)) continue;
+    if (!name.ok() || name->IsAbsolute() || FileExists(*name)) continue;
     const absl::StatusOr<FileName> resolved = runfiles.Resolve(file);
     if (!resolved.ok() || !FileExists(*resolved)) continue;
     const absl::StatusOr<std::string> narrow =

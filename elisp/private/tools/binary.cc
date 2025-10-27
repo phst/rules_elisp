@@ -72,16 +72,13 @@ static absl::StatusOr<std::vector<FileName>> ArgFiles(
           RemovePrefix(argv[*j], RULES_ELISP_NATIVE_LITERAL("/:"));
       absl::StatusOr<FileName> file = FileName::FromString(arg);
       if (!file.ok()) return file.status();
-      file = FileName::FromString(MakeAbsolute(file->string()).value());
+      file = file->MakeAbsolute();
       if (!file.ok()) return file.status();
       // Make filenames relative if possible.
       if (root.has_value()) {
-        const absl::StatusOr<NativeString> name =
-            MakeRelative(file->string(), root->string());
-        const absl::StatusOr<FileName> rel =
-            name.ok() ? FileName::FromString(*name) : name.status();
+        absl::StatusOr<FileName> rel = file->MakeRelative(*root);
         if (rel.ok()) {
-          file = rel;
+          file = std::move(rel);
         } else {
           LOG(INFO) << rel.status();
         }

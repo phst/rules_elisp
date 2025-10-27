@@ -140,9 +140,7 @@ absl::StatusOr<FileName> Runfiles::Resolve(const std::string_view name) const {
   if (!native.ok()) return native.status();
   const absl::StatusOr<FileName> result = FileName::FromString(*native);
   if (!result.ok()) return result.status();
-  const absl::StatusOr<NativeString> abs = MakeAbsolute(result->string());
-  if (!abs.ok()) return abs.status();
-  return FileName::FromString(*abs);
+  return result->MakeAbsolute();
 }
 
 absl::StatusOr<Environment> Runfiles::Environ() const {

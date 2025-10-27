@@ -144,7 +144,7 @@ absl::StatusOr<FileName> FileName::Child(const NativeStringView child) const {
 }
 
 absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
-  if (IsAbsolute(descendant.string_)) {
+  if (descendant.IsAbsolute()) {
     return absl::InvalidArgumentError(
         absl::StrFormat("File name %v is absolute", descendant));
   }
@@ -393,34 +393,28 @@ static absl::StatusOr<FileName> WorkingDirectory() {
 }
 #endif
 
-bool IsAbsolute(const NativeStringView file) {
-  if (file.empty()) return false;
+bool FileName::IsAbsolute() const {
   if constexpr (kWindows) {
-    if (file.length() < 3) return false;
-    return file.length() > 2 && file[1] == RULES_ELISP_NATIVE_LITERAL(':') &&
-           (file[2] == RULES_ELISP_NATIVE_LITERAL('\\') ||
-            file[2] == RULES_ELISP_NATIVE_LITERAL('/'));
+    if (string_.length() < 3) return false;
+    return string_.length() > 2 &&
+           string_[1] == RULES_ELISP_NATIVE_LITERAL(':') &&
+           (string_[2] == RULES_ELISP_NATIVE_LITERAL('\\') ||
+            string_[2] == RULES_ELISP_NATIVE_LITERAL('/'));
   } else {
-    return file.front() == RULES_ELISP_NATIVE_LITERAL('/');
+    return string_.front() == RULES_ELISP_NATIVE_LITERAL('/');
   }
 }
 
-absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
-  if (file.empty()) return absl::InvalidArgumentError("empty filename");
-  if (ContainsNull(file)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Filename %s contains null character", file));
-  }
+absl::StatusOr<FileName> FileName::MakeAbsolute() const {
 #ifdef _WIN32
-  const std::wstring string(file);
   // 0x8000 is the maximum length of a filename on Windows.  See
   // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
   constexpr DWORD size{0x8000};
-  std::wstring buffer(size, L'\0');
+  wchar_t buffer[size];
   const DWORD result =
-      ::GetFullPathNameW(Pointer(string), size, buffer.data(), nullptr);
+      ::GetFullPathNameW(this->pointer(), size, buffer, nullptr);
   if (result == 0) {
-    return WindowsStatus("GetFullPathNameW", file, absl::Hex(size), kEllipsis,
+    return WindowsStatus("GetFullPathNameW", *this, absl::Hex(size), kEllipsis,
                          nullptr);
   }
   if (result > size) {
@@ -428,12 +422,12 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
         absl::StrCat("Length of absolute file name (", result,
                      ") overflows buffer of size ", size));
   }
-  return buffer.substr(0, result);
+  return FileName::FromString(std::wstring_view(buffer, result));
 #else
-  if (file.front() == '/') return NativeString(file);
+  if (string_.front() == '/') return *this;
   const absl::StatusOr<FileName> cwd = WorkingDirectory();
   if (!cwd.ok()) return cwd.status();
-  return absl::StrCat(cwd->string(), "/", file);
+  return cwd->Join(*this);
 #endif
 }
 
@@ -445,20 +439,9 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   return true;
 }
 
-absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
-                                          const NativeStringView base) {
-  if (file.empty()) return absl::InvalidArgumentError("Empty filename");
-  if (ContainsNull(file)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Filename %s contains null character", file));
-  }
-  if (base.empty()) return absl::InvalidArgumentError("Empty base directory");
-  if (ContainsNull(base)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Base directory %s contains null character", file));
-  }
-  NativeString file_str(file);
-  NativeString base_str(base);
+absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
+  NativeString file_str = string_;
+  NativeString base_str = base.string();
   if constexpr (kWindows) {
     absl::c_replace(file_str, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
     absl::c_replace(base_str, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
@@ -480,7 +463,7 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
     return absl::InvalidArgumentError(
         absl::StrFormat("File %s is not within %s", file_str, base_str));
   }
-  return NativeString(rel);
+  return FileName::FromString(rel);
 }
 
 [[nodiscard]] bool FileExists(const FileName& file) {
@@ -819,19 +802,23 @@ absl::Status CopyTree(NativeStringView from, NativeStringView to) {
   }
 
 #if defined _WIN32
-  const absl::StatusOr<std::wstring> from_abs = MakeAbsolute(from);
+  const absl::StatusOr<FileName> from_name = FileName::FromString(from);
+  if (!from_name.ok()) return from_name.status();
+  const absl::StatusOr<FileName> from_abs = from_name->MakeAbsolute();
   if (!from_abs.ok()) return from_abs.status();
-  if (from_abs->length() < 4) {
+  if (from_abs->string().length() < 4) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("Cannot copy drive %s", *from_abs));
+        absl::StrFormat("Cannot copy drive %v", *from_abs));
   }
-  const absl::StatusOr<std::wstring> to_abs = MakeAbsolute(to);
+  const absl::StatusOr<FileName> to_name = FileName::FromString(to);
+  if (!to_name.ok()) return to_name.status();
+  const absl::StatusOr<FileName> to_abs = to_name->MakeAbsolute();
   if (!to_abs.ok()) return to_abs.status();
-  if (to_abs->length() < 4) {
+  if (to_abs->string().length() < 4) {
     return absl::AlreadyExistsError(
-        absl::StrFormat("Cannot copy over drive %s", *from_abs));
+        absl::StrFormat("Cannot copy over drive %v", *from_abs));
   }
-  return CopyTreeWindows(*from_abs, *to_abs);
+  return CopyTreeWindows(from_abs->string(), to_abs->string());
 #elif defined __APPLE__
   // The behavior of copyfile changes if the source directory name ends in a
   // slash, see the man page copyfile(3).  We need to remove trailing slashes to
@@ -1146,8 +1133,7 @@ absl::StatusOr<int> Run(const FileName& program,
         "Program name %v doesn’t contain a directory separator character",
         program));
   }
-  const absl::StatusOr<NativeString> abs_program =
-      MakeAbsolute(program.string());
+  const absl::StatusOr<FileName> abs_program = program.MakeAbsolute();
   if (!abs_program.ok()) return abs_program.status();
   std::vector<NativeString> args_vec = {program.string()};
   args_vec.insert(args_vec.end(), args.cbegin(), args.cend());
@@ -1209,7 +1195,7 @@ absl::StatusOr<int> Run(const FileName& program,
   };
   PROCESS_INFORMATION process_info;
   const BOOL success = ::CreateProcessW(
-      Pointer(*abs_program), Pointer(*command_line), nullptr, nullptr,
+      abs_program->pointer(), Pointer(*command_line), nullptr, nullptr,
       inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
     return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
@@ -1313,7 +1299,7 @@ absl::StatusOr<int> Run(const FileName& program,
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, Pointer(*abs_program), &actions, nullptr,
+  const int error = posix_spawn(&pid, abs_program->pointer(), &actions, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),

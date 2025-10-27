@@ -38,7 +38,7 @@ static absl::StatusOr<std::vector<FileName>> ConvertNames(
   for (const NativeString& file : range) {
     absl::StatusOr<FileName> name = FileName::FromString(file);
     if (!name.ok()) return name.status();
-    if (IsAbsolute(name->string())) {
+    if (name->IsAbsolute()) {
       return absl::InvalidArgumentError(
           absl::StrFormat("Filename %v is absolute", name));
     }
@@ -63,7 +63,7 @@ static absl::Status Assign(
     const absl::Span<const FileName> range) {
   for (const FileName& elt : range) {
     NativeString string = elt.string();
-    if (kWindows && !IsAbsolute(string)) {
+    if (kWindows && !elt.IsAbsolute()) {
       // Runfile names are slash-separated on all systems.
       absl::c_replace(string, kSeparator, RULES_ELISP_NATIVE_LITERAL('/'));
     }

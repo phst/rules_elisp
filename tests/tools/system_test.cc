@@ -307,12 +307,14 @@ TEST(ToNativeTest, RejectsInvalidUtf8OnWindows) {
 
 struct IsAbsoluteParam final {
   NativeStringView name;
+  bool valid;
   bool absolute;
 
   template <typename Sink>
   friend void AbslStringify(Sink& sink, const IsAbsoluteParam& param) {
-    absl::Format(sink, "Filename %s should be %s", param.name,
-                 param.absolute ? "absolute" : "relative");
+    absl::Format(
+        sink, "Filename %s should be %s", param.name,
+        param.valid ? (param.absolute ? "absolute" : "relative") : "invalid");
   }
 };
 
@@ -320,106 +322,115 @@ class IsAbsoluteTest : public TestWithParam<IsAbsoluteParam> {};
 
 TEST_P(IsAbsoluteTest, Works) {
   const IsAbsoluteParam& param = this->GetParam();
-  EXPECT_EQ(IsAbsolute(param.name), param.absolute);
+  const absl::StatusOr<FileName> filename = FileName::FromString(param.name);
+  if (param.valid) {
+    ASSERT_THAT(filename, IsOk());
+    EXPECT_EQ(filename->IsAbsolute(), param.absolute);
+  } else {
+    EXPECT_THAT(filename, StatusIs(absl::StatusCode::kInvalidArgument));
+  }
 }
 
 INSTANTIATE_TEST_SUITE_P(
     VariousFilenames, IsAbsoluteTest,
     Values(
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL(""), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("."), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo"), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo/bar"), false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL(""), false, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("."), true, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo"), true, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("foo/bar"), true, false},
         // See
         // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
         // for the various kinds of filenames on Windows.
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\"), kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/"), kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\Foo"), kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/Foo"), kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:"), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:Foo"), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\Foo"), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/Foo"), !kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("NUL"), false},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/"), !kWindows},
-        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/foo"), !kWindows}));
-
-TEST(MakeAbsoluteTest, RejectsEmptyName) {
-  EXPECT_THAT(MakeAbsolute(RULES_ELISP_NATIVE_LITERAL("")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-}
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\"), true, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/"), true, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:\\Foo"), true, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:/Foo"), true, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:"), !kWindows, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("C:Foo"), !kWindows, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\Foo"), !kWindows, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/Foo"), !kWindows,
+                        !kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("NUL"), true, false},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/"), !kWindows, !kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/foo"), !kWindows,
+                        !kWindows}));
 
 TEST(MakeAbsoluteTest, KeepsAbsoluteName) {
-  constexpr NativeStringView file =
+  const absl::StatusOr<FileName> file = FileName::FromString(
       kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar.txt")
-               : RULES_ELISP_NATIVE_LITERAL("/foo/bar.txt");
-  EXPECT_THAT(MakeAbsolute(file), IsOkAndHolds(file));
+               : RULES_ELISP_NATIVE_LITERAL("/foo/bar.txt"));
+  ASSERT_THAT(file, IsOk());
+  EXPECT_THAT(file->MakeAbsolute(), IsOkAndHolds(*file));
 }
 
 TEST(MakeAbsoluteTest, MakesRelativeNameAbsolute) {
-  const absl::StatusOr<NativeString> file =
-      MakeAbsolute(RULES_ELISP_NATIVE_LITERAL("foo.txt"));
+  const absl::StatusOr<FileName> relative =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo.txt"));
+  ASSERT_THAT(relative, IsOk());
+  const absl::StatusOr<FileName> file = relative->MakeAbsolute();
   ASSERT_THAT(file, IsOk());
+  const NativeString& string = file->string();
   if constexpr (kWindows) {
-    ASSERT_THAT(*file, SizeIs(Gt(3)));
+    ASSERT_THAT(string, SizeIs(Gt(3)));
     const std::optional<unsigned char> drive =
-        CastNumber<unsigned char>(file->at(0));
+        CastNumber<unsigned char>(string.at(0));
     ASSERT_NE(drive, std::nullopt);
     EXPECT_TRUE(absl::ascii_isalpha(*drive));
-    EXPECT_EQ(file->at(1), RULES_ELISP_NATIVE_LITERAL(':'));
-    EXPECT_EQ(file->at(2), RULES_ELISP_NATIVE_LITERAL('\\'));
-    EXPECT_THAT(*file, EndsWith(RULES_ELISP_NATIVE_LITERAL("\\foo.txt")));
+    EXPECT_EQ(string.at(1), RULES_ELISP_NATIVE_LITERAL(':'));
+    EXPECT_EQ(string.at(2), RULES_ELISP_NATIVE_LITERAL('\\'));
+    EXPECT_THAT(string, EndsWith(RULES_ELISP_NATIVE_LITERAL("\\foo.txt")));
   } else {
-    EXPECT_THAT(*file, StartsWith(RULES_ELISP_NATIVE_LITERAL("/")));
-    EXPECT_THAT(*file, EndsWith(RULES_ELISP_NATIVE_LITERAL("/foo.txt")));
+    EXPECT_THAT(string, StartsWith(RULES_ELISP_NATIVE_LITERAL("/")));
+    EXPECT_THAT(string, EndsWith(RULES_ELISP_NATIVE_LITERAL("/foo.txt")));
   }
 }
 
-TEST(MakeRelativeTest, RejectsEmptyName) {
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL(""),
-                           RULES_ELISP_NATIVE_LITERAL("")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL("foo"),
-                           RULES_ELISP_NATIVE_LITERAL("")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(RULES_ELISP_NATIVE_LITERAL(""),
-                           RULES_ELISP_NATIVE_LITERAL("bar")),
-              StatusIs(absl::StatusCode::kInvalidArgument));
-}
-
 TEST(MakeRelativeTest, RejectsNotWithin) {
-  const NativeString foo = RULES_ELISP_NATIVE_LITERAL("foo");
-  const NativeString fooooo = RULES_ELISP_NATIVE_LITERAL("fooooo");
-  const NativeString bar = RULES_ELISP_NATIVE_LITERAL("bar");
+  const FileName foo =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName fooooo =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("fooooo")).value();
+  const FileName bar =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar")).value();
 
-  EXPECT_THAT(MakeRelative(foo, foo),
+  EXPECT_THAT(foo.MakeRelative(foo),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(foo, bar),
+  EXPECT_THAT(foo.MakeRelative(bar),
               StatusIs(absl::StatusCode::kInvalidArgument));
-  EXPECT_THAT(MakeRelative(fooooo, foo),
+  EXPECT_THAT(fooooo.MakeRelative(foo),
               StatusIs(absl::StatusCode::kInvalidArgument));
   if constexpr (!kWindows) {
-    const NativeString c_foo = RULES_ELISP_NATIVE_LITERAL("C:\\Foo");
-    const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
-    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
+    const FileName c_foo =
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("C:\\Foo")).value();
+    const FileName c_foo_bar =
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"))
+            .value();
+    EXPECT_THAT(c_foo_bar.MakeRelative(c_foo),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
 TEST(MakeRelativeTest, Relativizes) {
-  const NativeString foo = RULES_ELISP_NATIVE_LITERAL("foo");
-  const NativeString foo_slash = RULES_ELISP_NATIVE_LITERAL("foo/");
-  const NativeString bar = RULES_ELISP_NATIVE_LITERAL("bar");
-  const NativeString foo_bar = RULES_ELISP_NATIVE_LITERAL("foo/bar");
+  const FileName foo =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName foo_slash =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/")).value();
+  const FileName bar =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar")).value();
+  const FileName foo_bar =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/bar")).value();
 
-  EXPECT_THAT(MakeRelative(foo_bar, foo), IsOkAndHolds(bar));
-  EXPECT_THAT(MakeRelative(foo_bar, foo_slash), IsOkAndHolds(bar));
+  EXPECT_THAT(foo_bar.MakeRelative(foo), IsOkAndHolds(bar));
+  EXPECT_THAT(foo_bar.MakeRelative(foo_slash), IsOkAndHolds(bar));
   if constexpr (kWindows) {
-    const NativeString c_foo = RULES_ELISP_NATIVE_LITERAL("C:\\Foo");
-    const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
-    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
-                IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
+    const FileName c_foo =
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("C:\\Foo")).value();
+    const FileName c_foo_bar =
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"))
+            .value();
+    const FileName c_bar =
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("Bar")).value();
+    EXPECT_THAT(c_foo_bar.MakeRelative(c_foo), IsOkAndHolds(c_bar));
   }
 }
 
