@@ -230,12 +230,12 @@ bool IsAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
 absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
                                           NativeStringView base);
-[[nodiscard]] bool FileExists(NativeStringView file);
-[[nodiscard]] bool IsNonEmptyDirectory(NativeStringView directory);
-absl::Status Unlink(NativeStringView file);
-absl::Status CreateDirectory(NativeStringView name);
-absl::Status RemoveDirectory(NativeStringView name);
-absl::StatusOr<std::vector<NativeString>> ListDirectory(NativeStringView dir);
+[[nodiscard]] bool FileExists(const FileName& file);
+[[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory);
+absl::Status Unlink(const FileName& file);
+absl::Status CreateDirectory(const FileName& name);
+absl::Status RemoveDirectory(const FileName& name);
+absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
 absl::Status CopyTree(NativeStringView from, NativeStringView to);
 
 class Environment final {

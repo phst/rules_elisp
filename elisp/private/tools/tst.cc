@@ -81,11 +81,18 @@ static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
   bool edited = false;
   for (std::string& file : files) {
     const absl::StatusOr<NativeString> native = ToNative(file, Encoding::kUtf8);
-    if (!native.ok() || IsAbsolute(*native) || FileExists(*native)) continue;
+    const absl::StatusOr<FileName> native_name =
+        native.ok() ? FileName::FromString(*native) : native.status();
+    if (!native_name.ok() || IsAbsolute(native_name->string()) ||
+        FileExists(*native_name)) {
+      continue;
+    }
     const absl::StatusOr<NativeString> resolved = runfiles.Resolve(file);
-    if (!resolved.ok() || !FileExists(*resolved)) continue;
+    const absl::StatusOr<FileName> resolved_name =
+        resolved.ok() ? FileName::FromString(*resolved) : resolved.status();
+    if (!resolved_name.ok() || !FileExists(*resolved_name)) continue;
     const absl::StatusOr<std::string> narrow =
-        ToNarrow(*resolved, Encoding::kUtf8);
+        ToNarrow(resolved_name->string(), Encoding::kUtf8);
     if (!narrow.ok()) continue;
     file = std::move(*narrow);
     edited = true;

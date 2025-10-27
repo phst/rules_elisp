@@ -376,7 +376,7 @@ absl::StatusOr<NativeString> ToNative(
 }
 
 #ifndef _WIN32
-static absl::StatusOr<std::string> WorkingDirectory() {
+static absl::StatusOr<FileName> WorkingDirectory() {
   struct Free {
     void operator()(char* const absl_nonnull p) const { std::free(p); }
   };
@@ -389,7 +389,7 @@ static absl::StatusOr<std::string> WorkingDirectory() {
     return absl::NotFoundError(absl::StrCat("Current working directory ",
                                             ptr.get(), " is unreachable"));
   }
-  return ptr.get();
+  return FileName::FromString(ptr.get());
 }
 #endif
 
@@ -431,9 +431,9 @@ absl::StatusOr<NativeString> MakeAbsolute(const NativeStringView file) {
   return buffer.substr(0, result);
 #else
   if (file.front() == '/') return NativeString(file);
-  const absl::StatusOr<std::string> cwd = WorkingDirectory();
+  const absl::StatusOr<FileName> cwd = WorkingDirectory();
   if (!cwd.ok()) return cwd.status();
-  return absl::StrCat(*cwd, "/", file);
+  return absl::StrCat(cwd->string(), "/", file);
 #endif
 }
 
@@ -483,14 +483,12 @@ absl::StatusOr<NativeString> MakeRelative(const NativeStringView file,
   return NativeString(rel);
 }
 
-[[nodiscard]] bool FileExists(const NativeStringView file) {
-  if (file.empty() || ContainsNull(file)) return false;
-  const NativeString string(file);
+[[nodiscard]] bool FileExists(const FileName& file) {
 #ifdef _WIN32
-  return ::GetFileAttributesW(Pointer(string)) != INVALID_FILE_ATTRIBUTES;
+  return ::GetFileAttributesW(file.pointer()) != INVALID_FILE_ATTRIBUTES;
 #else
   struct stat st;
-  return lstat(Pointer(string), &st) == 0;
+  return lstat(file.pointer(), &st) == 0;
 #endif
 }
 
@@ -545,10 +543,10 @@ static absl::Status IterateDirectory(
   return absl::OkStatus();
 }
 
-[[nodiscard]] bool IsNonEmptyDirectory(const NativeStringView directory) {
+[[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory) {
   bool empty = true;
   const absl::Status status =
-      IterateDirectory(directory, [&empty](NativeStringView) {
+      IterateDirectory(directory.string(), [&empty](NativeStringView) {
         empty = false;
         return false;
       });
@@ -557,49 +555,38 @@ static absl::Status IterateDirectory(
 
 #undef CreateDirectory
 
-absl::Status CreateDirectory(const NativeStringView name) {
-  if (name.empty()) return absl::InvalidArgumentError("Empty directory name");
-  if (ContainsNull(name)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Directory name %s contains null character", name));
-  }
-  const NativeString string(name);
+absl::Status CreateDirectory(const FileName& name) {
 #ifdef _WIN32
-  const BOOL ok = ::CreateDirectoryW(Pointer(string), nullptr);
-  if (!ok) return WindowsStatus("CreateDirectoryW", string, nullptr);
+  const BOOL ok = ::CreateDirectoryW(name.pointer(), nullptr);
+  if (!ok) return WindowsStatus("CreateDirectoryW", name, nullptr);
 #else
   constexpr mode_t mode = S_IRWXU;
-  const int result = mkdir(Pointer(string), mode);
-  if (result != 0) return ErrnoStatus("mkdir", string, Oct(mode));
+  const int result = mkdir(name.pointer(), mode);
+  if (result != 0) return ErrnoStatus("mkdir", name, Oct(mode));
 #endif
   return absl::OkStatus();
 }
 
 #undef RemoveDirectory
 
-absl::Status RemoveDirectory(const NativeStringView name) {
-  if (name.empty()) return absl::InvalidArgumentError("Empty directory name");
-  if (ContainsNull(name)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Directory name %s contains null character", name));
-  }
-  const NativeString string(name);
+absl::Status RemoveDirectory(const FileName& name) {
 #ifdef _WIN32
-  const BOOL ok = ::RemoveDirectoryW(Pointer(string));
-  if (!ok) return WindowsStatus("RemoveDirectoryW", string);
+  const BOOL ok = ::RemoveDirectoryW(name.pointer());
+  if (!ok) return WindowsStatus("RemoveDirectoryW", name);
 #else
-  const int result = rmdir(Pointer(string));
-  if (result != 0) return ErrnoStatus("rmdir", string);
+  const int result = rmdir(name.pointer());
+  if (result != 0) return ErrnoStatus("rmdir", name);
 #endif
   return absl::OkStatus();
 }
 
-absl::StatusOr<std::vector<NativeString>> ListDirectory(
-    const NativeStringView dir) {
-  std::vector<NativeString> result;
+absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
+  std::vector<FileName> result;
   const absl::Status status =
-      IterateDirectory(dir, [&result](const NativeStringView file) {
-        result.emplace_back(file);
+      IterateDirectory(dir.string(), [&result](const NativeStringView file) {
+        absl::StatusOr<FileName> name = FileName::FromString(file);
+        if (!name.ok()) return false;
+        result.push_back(*std::move(name));
         return true;
       });
   if (!status.ok()) return status;
@@ -1064,19 +1051,13 @@ bool Environment::Equal::operator()(const NativeStringView a,
               CanonicalizeEnvironmentVariable(b));
 }
 
-absl::Status Unlink(const NativeStringView file) {
-  if (file.empty()) return absl::InvalidArgumentError("Empty filename");
-  if (ContainsNull(file)) {
-    return absl::InvalidArgumentError(
-        absl::StrFormat("Filename %s contains null character", file));
-  }
-  const NativeString string(file);
+absl::Status Unlink(const FileName& file) {
 #ifdef _WIN32
-  const BOOL result = ::DeleteFileW(Pointer(string));
-  if (!result) return WindowsStatus("DeleteFileW", string);
+  const BOOL result = ::DeleteFileW(file.pointer());
+  if (!result) return WindowsStatus("DeleteFileW", file);
 #else
-  const int result = unlink(Pointer(string));
-  if (result != 0) return ErrnoStatus("unlink", string);
+  const int result = unlink(file.pointer());
+  if (result != 0) return ErrnoStatus("unlink", file);
 #endif
   return absl::OkStatus();
 };
@@ -1109,7 +1090,9 @@ absl::StatusOr<TemporaryFile> TemporaryFile::Create() {
   if (file == nullptr) {
     const absl::Status status = ErrnoStatus("fdopen", fd, mode);
     if (close(fd) != 0) LOG(ERROR) << ErrnoStatus("close", fd);
-    const absl::Status unlink_status = Unlink(name);
+    const absl::StatusOr<FileName> filename = FileName::FromString(name);
+    const absl::Status unlink_status =
+        filename.ok() ? Unlink(*filename) : filename.status();
     if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
     return status;
   }
@@ -1121,7 +1104,9 @@ TemporaryFile::~TemporaryFile() noexcept {
   if (name_.empty()) return;
   CHECK(file_ != nullptr);
   if (std::fclose(file_) != 0) LOG(FATAL) << ErrnoStatus("fclose");
-  const absl::Status unlink_status = Unlink(name_);
+  const absl::StatusOr<FileName> filename = FileName::FromString(name_);
+  const absl::Status unlink_status =
+      filename.ok() ? Unlink(*filename) : filename.status();
   if (!unlink_status.ok()) LOG(ERROR) << unlink_status;
 }
 
