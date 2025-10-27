@@ -66,7 +66,7 @@ static absl::StatusOr<int> RunEmacs(
       absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
       if (!device.ok()) return device.status();
       emacs = device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe");
-      dos_device = std::move(*device);
+      dos_device = *std::move(device);
     }
   }
   if (!dos_device.has_value()) {

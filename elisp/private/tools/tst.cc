@@ -94,7 +94,7 @@ static absl::Status FixCoverageManifest(const NativeStringView manifest_file,
     const absl::StatusOr<std::string> narrow =
         ToNarrow(resolved_name->string(), Encoding::kUtf8);
     if (!narrow.ok()) continue;
-    file = std::move(*narrow);
+    file = *std::move(narrow);
     edited = true;
   }
   if (!edited) return absl::OkStatus();
@@ -207,7 +207,7 @@ absl::StatusOr<int> Main(const Options& opts,
   if (!report_file.empty()) {
     absl::StatusOr<FileName> file = FileName::FromString(report_file);
     if (!file.ok()) return file.status();
-    outputs.push_back(std::move(*file));
+    outputs.push_back(*std::move(file));
   }
   if (env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE")) ==
       RULES_ELISP_NATIVE_LITERAL("1")) {
@@ -219,7 +219,7 @@ absl::StatusOr<int> Main(const Options& opts,
       if (!status.ok()) return status;
       absl::StatusOr<FileName> file = FileName::FromString(coverage_manifest);
       if (!file.ok()) return file.status();
-      inputs.push_back(std::move(*file));
+      inputs.push_back(*std::move(file));
     }
     const NativeStringView coverage_dir =
         env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
@@ -228,7 +228,7 @@ absl::StatusOr<int> Main(const Options& opts,
           FileName::FromString(NativeString(coverage_dir) + kSeparator +
                                RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
       if (!file.ok()) return file.status();
-      outputs.push_back(std::move(*file));
+      outputs.push_back(*std::move(file));
     }
   }
 

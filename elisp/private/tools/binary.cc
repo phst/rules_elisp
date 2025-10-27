@@ -83,7 +83,7 @@ static absl::StatusOr<std::vector<FileName>> ArgFiles(
       }
       absl::StatusOr<FileName> name = FileName::FromString(*file);
       if (!name.ok()) return name.status();
-      result.push_back(std::move(*name));
+      result.push_back(*std::move(name));
     }
   }
   return result;

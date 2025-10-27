@@ -42,7 +42,7 @@ static absl::StatusOr<std::vector<FileName>> ConvertNames(
       return absl::InvalidArgumentError(
           absl::StrFormat("Filename %v is absolute", name));
     }
-   result.push_back(std::move(*name));
+   result.push_back(*std::move(name));
   }
   return result;
 }
@@ -53,7 +53,7 @@ static absl::Status Assign(
   for (const NativeStringView& elt : range) {
     absl::StatusOr<std::string> utf8 = ToNarrow(elt, Encoding::kUtf8);
     if (!utf8.ok()) return utf8.status();
-    field.Add(std::move(*utf8));
+    field.Add(*std::move(utf8));
   }
   return absl::OkStatus();
 }
@@ -69,7 +69,7 @@ static absl::Status Assign(
     }
     absl::StatusOr<std::string> utf8 = ToNarrow(string, Encoding::kUtf8);
     if (!utf8.ok()) return utf8.status();
-    field.Add(std::move(*utf8));
+    field.Add(*std::move(utf8));
   }
   return absl::OkStatus();
 }
@@ -139,7 +139,7 @@ absl::StatusOr<ManifestFile> ManifestFile::Create(
   if (!file.ok()) return file.status();
   const absl::Status status = Write(opts, input_files, output_files, *file);
   if (!status.ok()) return status;
-  return ManifestFile(std::move(*file));
+  return ManifestFile(*std::move(file));
 }
 
 void ManifestFile::AppendArgs(std::vector<NativeString>& args) const {
