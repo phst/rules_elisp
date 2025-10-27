@@ -239,6 +239,7 @@ absl::Status Unlink(const FileName& file);
 absl::Status CreateDirectory(const FileName& name);
 absl::Status RemoveDirectory(const FileName& name);
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
+absl::Status CopyFile(const FileName& from, const FileName& to);
 absl::Status CopyTree(const FileName& from, const FileName& to);
 
 class Environment final {
