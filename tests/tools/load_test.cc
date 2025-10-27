@@ -72,16 +72,16 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
   const FileName bar_file =
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
-  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
   EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
   EXPECT_THAT(CreateFile(bar_file), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
-    EXPECT_THAT(Unlink(bar_file.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
+    EXPECT_THAT(Unlink(foo_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
+    EXPECT_THAT(Unlink(bar_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
   };
 
   EXPECT_THAT(
@@ -117,16 +117,16 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
   const FileName bar_file =
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
-  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
   EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
   EXPECT_THAT(CreateFile(bar_file), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
-    EXPECT_THAT(Unlink(bar_file.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
+    EXPECT_THAT(Unlink(foo_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
+    EXPECT_THAT(Unlink(bar_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
   };
 
   EXPECT_THAT(LoadPathArgs(*runfiles,
@@ -166,14 +166,14 @@ TEST(LoadPathArgsTest, EmptyDirectory) {
   const FileName bar_file =
       bar_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
-  EXPECT_THAT(CreateDirectory(foo_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(foo_dir), IsOk());
   EXPECT_THAT(CreateFile(foo_file), IsOk());
-  EXPECT_THAT(CreateDirectory(bar_dir.string()), IsOk());
+  EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
 
   const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir] {
-    EXPECT_THAT(Unlink(foo_file.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir.string()), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir.string()), IsOk());
+    EXPECT_THAT(Unlink(foo_file), IsOk());
+    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
+    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
   };
 
   EXPECT_THAT(

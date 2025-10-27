@@ -424,10 +424,14 @@ TEST(FileExistsTest, TestsThatFileExists) {
   const absl::StatusOr<NativeString> dir =
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(dir, IsOkAndHolds(Not(IsEmpty())));
-  EXPECT_TRUE(FileExists(*dir));
 
-  const NativeString child =
-      *dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("nonexistent");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*dir);
+  ASSERT_THAT(filename, IsOk());
+
+  EXPECT_TRUE(FileExists(*filename));
+
+  const FileName child =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("nonexistent")).value();
   EXPECT_FALSE(FileExists(child));
 }
 
@@ -438,7 +442,10 @@ TEST(IsNonEmptyDirectoryTest, ReturnsFalseForFile) {
   const absl::StatusOr<NativeString> file = runfiles->Resolve(RULES_ELISP_DATA);
   ASSERT_THAT(file, IsOk());
 
-  EXPECT_FALSE(IsNonEmptyDirectory(*file));
+  const absl::StatusOr<FileName> filename = FileName::FromString(*file);
+  ASSERT_THAT(filename, IsOk());
+
+  EXPECT_FALSE(IsNonEmptyDirectory(*filename));
 }
 
 TEST(IsNonEmptyDirectoryTest, ReturnsTrueForEmptyDirectory) {
@@ -446,11 +453,14 @@ TEST(IsNonEmptyDirectoryTest, ReturnsTrueForEmptyDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("nonempty-dir");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
+
+  const FileName dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("nonempty-dir")).value();
   EXPECT_THAT(CreateDirectory(dir), IsOk());
 
-  EXPECT_TRUE(IsNonEmptyDirectory(*temp));
+  EXPECT_TRUE(IsNonEmptyDirectory(*filename));
   EXPECT_FALSE(IsNonEmptyDirectory(dir));
 }
 
@@ -459,16 +469,19 @@ TEST(IsNonEmptyDirectoryTest, ReturnsFalseForNonEmptyDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("empty-dir");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
+
+  const FileName dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("empty-dir")).value();
   EXPECT_THAT(CreateDirectory(dir), IsOk());
 
-  EXPECT_TRUE(IsNonEmptyDirectory(*temp));
+  EXPECT_TRUE(IsNonEmptyDirectory(*filename));
   EXPECT_FALSE(IsNonEmptyDirectory(dir));
 
-  const NativeString file =
-      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file.txt");
-  std::ofstream stream(file,
+  const FileName file =
+      dir.Child(RULES_ELISP_NATIVE_LITERAL("file.txt")).value();
+  std::ofstream stream(file.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
@@ -482,13 +495,16 @@ TEST(UnlinkTest, RemovesFile) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString file =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("unlink-test");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
+
+  const FileName file =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("unlink-test")).value();
 
   EXPECT_FALSE(FileExists(file));
   EXPECT_THAT(Unlink(file), StatusIs(absl::StatusCode::kNotFound));
 
-  std::ofstream stream(file,
+  std::ofstream stream(file.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
@@ -508,13 +524,15 @@ TEST(CreateRemoveDirectoryTest, CreatesAndRemovesDirectories) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("dir");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
+
+  const FileName dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("dir")).value();
   EXPECT_THAT(CreateDirectory(dir), IsOk());
 
-  const NativeString file =
-      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-  std::ofstream stream(file,
+  const FileName file = dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  std::ofstream stream(file.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
@@ -533,18 +551,21 @@ TEST(ListDirectoryTests, ListsDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("dir äα𝐴🐈'");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
 
-  const NativeString element = RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'");
+  const FileName dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("dir äα𝐴🐈'")).value();
+  const FileName element =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
 
   EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(CreateDirectory(dir), IsOk());
   EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
 
-  const NativeString file =
-      dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'");
-  std::ofstream stream(file,
+  const FileName file =
+      dir.Child(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
+  std::ofstream stream(file.string(),
                        std::ios::out | std::ios::trunc | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
   EXPECT_TRUE(stream.good());
@@ -575,11 +596,14 @@ TEST(CopyTreeTest, RejectsCopyFromRootDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString to = *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
+
+  const FileName to = filename->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
 
   EXPECT_THAT(CopyTree(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
                                 : RULES_ELISP_NATIVE_LITERAL("/"),
-                       to),
+                       to.string()),
               StatusIs(absl::StatusCode::kInvalidArgument));
 
   EXPECT_THAT(RemoveDirectory(to), StatusIs(absl::StatusCode::kNotFound));
@@ -600,17 +624,17 @@ TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
 
-  const NativeString from_file =
-      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-
-  const NativeString to_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-
-  const NativeString to_file =
-      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+  const FileName from_dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName from_file =
+      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName to_dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+  const FileName to_file =
+      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir] {
     EXPECT_THAT(Unlink(from_file), IsOk());
@@ -620,9 +644,9 @@ TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
 
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
   EXPECT_THAT(CreateDirectory(to_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+  EXPECT_THAT(WriteFile(from_file.string(), "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir, to_dir),
+  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()),
               StatusIs(absl::StatusCode::kAlreadyExists));
 }
 
@@ -631,17 +655,17 @@ TEST(CopyTreeTest, CopiesToNewDirectory) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("from");
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
 
-  const NativeString from_file =
-      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-
-  const NativeString to_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-
-  const NativeString to_file =
-      to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+  const FileName from_dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName from_file =
+      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName to_dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+  const FileName to_file =
+      to_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir, &to_file] {
     EXPECT_THAT(Unlink(from_file), IsOk());
@@ -651,11 +675,11 @@ TEST(CopyTreeTest, CopiesToNewDirectory) {
   };
 
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+  EXPECT_THAT(WriteFile(from_file.string(), "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
+  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()), IsOk());
 
-  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
+  EXPECT_THAT(ReadFile(to_file.string()), IsOkAndHolds("contents"));
 }
 
 TEST(CopyTreeTest, IgnoresTrailingSlash) {
@@ -663,18 +687,19 @@ TEST(CopyTreeTest, IgnoresTrailingSlash) {
       ToNative(::testing::TempDir(), Encoding::kAscii);
   ASSERT_THAT(temp, IsOkAndHolds(Not(IsEmpty())));
 
-  const NativeString from_dir =
-      *temp + kSeparator + NativeString(RULES_ELISP_NATIVE_LITERAL("from")) +
-      kSeparator;
+  const absl::StatusOr<FileName> filename = FileName::FromString(*temp);
+  ASSERT_THAT(filename, IsOk());
 
-  const NativeString from_file =
-      from_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
-
-  const NativeString to_dir =
-      *temp + kSeparator + RULES_ELISP_NATIVE_LITERAL("to");
-
-  const NativeString to_file =
-      to_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("file");
+  const FileName from_dir =
+      filename
+          ->Join(NativeString(RULES_ELISP_NATIVE_LITERAL("from")) + kSeparator)
+          .value();
+  const FileName from_file =
+      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  const FileName to_dir =
+      filename->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+  const FileName to_file =
+      to_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
 
   const absl::Cleanup cleanup = [&from_dir, &from_file, &to_dir, &to_file] {
     EXPECT_THAT(Unlink(from_file), IsOk());
@@ -684,11 +709,11 @@ TEST(CopyTreeTest, IgnoresTrailingSlash) {
   };
 
   EXPECT_THAT(CreateDirectory(from_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
+  EXPECT_THAT(WriteFile(from_file.string(), "contents"), IsOk());
 
-  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
+  EXPECT_THAT(CopyTree(from_dir.string(), to_dir.string()), IsOk());
 
-  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
+  EXPECT_THAT(ReadFile(to_file.string()), IsOkAndHolds("contents"));
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {
