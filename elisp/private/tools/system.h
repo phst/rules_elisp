@@ -89,6 +89,10 @@ class FileName final {
   absl::StatusOr<FileName> Join(const FileName& descendant) const;
   absl::StatusOr<FileName> Join(NativeStringView descendant) const;
 
+  bool IsAbsolute() const;
+  absl::StatusOr<FileName> MakeAbsolute() const;
+  absl::StatusOr<FileName> MakeRelative(const FileName& base) const;
+
   friend bool operator==(const FileName& a, const FileName& b) {
     return a.string_ == b.string_;
   }
@@ -227,10 +231,6 @@ absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 
-bool IsAbsolute(NativeStringView file);
-absl::StatusOr<NativeString> MakeAbsolute(NativeStringView file);
-absl::StatusOr<NativeString> MakeRelative(NativeStringView file,
-                                          NativeStringView base);
 [[nodiscard]] bool FileExists(const FileName& file);
 [[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory);
 absl::Status Unlink(const FileName& file);
