@@ -824,12 +824,12 @@ TEST(RunTest, ReturnsExitCode) {
   const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
   ASSERT_THAT(helper, IsOk());
 
-  EXPECT_THAT(rules_elisp::Run(helper->string(),
-                               {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
-              IsOkAndHolds(0));
-  EXPECT_THAT(rules_elisp::Run(helper->string(),
-                               {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
-              IsOkAndHolds(23));
+  EXPECT_THAT(
+      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
+      IsOkAndHolds(0));
+  EXPECT_THAT(
+      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
+      IsOkAndHolds(23));
 }
 
 TEST(RunTest, SupportsDeadlineOnWindows) {
@@ -842,10 +842,10 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
   if constexpr (kWindows) {
     RunOptions options;
     options.deadline = absl::Now() + absl::Seconds(1);
-    EXPECT_THAT(rules_elisp::Run(helper->string(),
-                                 {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")}, {},
-                                 options),
-                StatusIs(absl::StatusCode::kDeadlineExceeded));
+    EXPECT_THAT(
+        rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
+                         {}, options),
+        StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }
 
@@ -861,10 +861,9 @@ TEST(RunTest, AllowsChangingDirectory) {
   ASSERT_THAT(helper, IsOk());
 
   RunOptions options;
-  options.directory = *temp;
+  options.directory = FileName::FromString(*temp).value();
 
-  EXPECT_THAT(rules_elisp::Run(helper->string(), {}, {}, options),
-              IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(*helper, {}, {}, options), IsOkAndHolds(0));
 }
 
 TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
@@ -895,10 +894,9 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
       Environment::Create(std::cbegin(env_vars), std::cend(env_vars));
   ASSERT_THAT(env, IsOk());
   RunOptions options;
-  options.directory = *dir;
-  options.output_file = output_file;
-  EXPECT_THAT(rules_elisp::Run(helper->string(), {}, *env, options),
-              IsOkAndHolds(0));
+  options.directory = FileName::FromString(*dir).value();
+  options.output_file = FileName::FromString(output_file).value();
+  EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
 
   std::ifstream stream(output_file, std::ios::in | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
