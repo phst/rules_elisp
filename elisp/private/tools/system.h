@@ -61,20 +61,6 @@ class FileName final {
  public:
   static absl::StatusOr<FileName> FromString(NativeStringView string);
 
-  template <std::size_t N>
-  static FileName FromLiteralOrDie(const char (&string)[N]) {
-    static_assert(N > 1);
-    std::string_view view(string, N);
-    CHECK_EQ(view.back(), '\0');
-    view.remove_suffix(1);
-    const absl::StatusOr<NativeString> native =
-        ToNative(view, Encoding::kAscii);
-    CHECK(native.ok());
-    absl::StatusOr<FileName> result = FileName::FromString(*native);
-    CHECK(result.ok());
-    return *result;
-  }
-
   FileName(const FileName&) = default;
   FileName& operator=(const FileName&) = default;
   FileName(FileName&&) = default;
