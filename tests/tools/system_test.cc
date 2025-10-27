@@ -397,8 +397,6 @@ TEST(MakeRelativeTest, RejectsNotWithin) {
     const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
     EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 StatusIs(absl::StatusCode::kInvalidArgument));
-    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
-                StatusIs(absl::StatusCode::kInvalidArgument));
   }
 }
 
@@ -413,8 +411,6 @@ TEST(MakeRelativeTest, Relativizes) {
   if constexpr (kWindows) {
     const NativeString c_foo = RULES_ELISP_NATIVE_LITERAL("C:\\Foo");
     const NativeString c_foo_bar = RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar");
-    EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
-                IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
     EXPECT_THAT(MakeRelative(c_foo_bar, c_foo),
                 IsOkAndHolds(RULES_ELISP_NATIVE_LITERAL("Bar")));
   }
