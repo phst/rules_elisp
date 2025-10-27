@@ -128,6 +128,25 @@ absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   return FileName(std::move(name));
 }
 
+absl::StatusOr<FileName> FileName::Parent() const {
+  NativeStringView string = string_;
+  while (string.back() == kSeparator) string.remove_suffix(1);
+  NativeStringView::size_type i = string.rfind(kSeparator);
+  if (i == string.npos || (kWindows && i == 0)) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("File %v has no parent", *this));
+  }
+  const NativeStringView element = string.substr(i + 1);
+  if (element == RULES_ELISP_NATIVE_LITERAL(".") ||
+      element == RULES_ELISP_NATIVE_LITERAL("..")) {
+    return absl::InvalidArgumentError(absl::StrFormat(
+        "Removing trailing component %s would be ambiguous", element));
+  }
+  // Root directories need to end in a separator character.
+  if (i == (kWindows ? 2 : 0)) i++;
+  return FileName::FromString(string.substr(0, i));
+}
+
 absl::StatusOr<FileName> FileName::Child(const FileName& child) const {
   const NativeString& string = child.string_;
   if (string == RULES_ELISP_NATIVE_LITERAL(".") ||

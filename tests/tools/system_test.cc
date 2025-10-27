@@ -150,6 +150,67 @@ TEST(FileNameTest, IsFormattable) {
   EXPECT_EQ(absl::StrFormat("foo %v baz", bar), "foo bar äα𝐴🐈' baz");
 }
 
+TEST(FileNameTest, ParentRejectsRoot) {
+  EXPECT_THAT(FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                            : RULES_ELISP_NATIVE_LITERAL("/"))
+                  .value()
+                  .Parent(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, ParentRejectsDot) {
+  EXPECT_THAT(FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/."))
+                  .value()
+                  .Parent(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, ParentRejectsDotDot) {
+  EXPECT_THAT(FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/.."))
+                  .value()
+                  .Parent(),
+              StatusIs(absl::StatusCode::kInvalidArgument));
+}
+
+TEST(FileNameTest, ParentWorksForRelativeName) {
+  EXPECT_THAT(
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/bar"))
+          .value()
+          .Parent(),
+      IsOkAndHolds(
+          FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value()));
+}
+
+TEST(FileNameTest, ParentWorksForAbsoluteName) {
+  EXPECT_THAT(
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Foo")
+                                    : RULES_ELISP_NATIVE_LITERAL("/foo"))
+          .value()
+          .Parent(),
+      IsOkAndHolds(FileName::FromString(kWindows
+                                            ? RULES_ELISP_NATIVE_LITERAL("C:\\")
+                                            : RULES_ELISP_NATIVE_LITERAL("/"))
+                       .value()));
+  EXPECT_THAT(
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar")
+                                    : RULES_ELISP_NATIVE_LITERAL("/foo/bar"))
+          .value()
+          .Parent(),
+      IsOkAndHolds(
+          FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Foo")
+                                        : RULES_ELISP_NATIVE_LITERAL("/foo"))
+              .value()));
+}
+
+TEST(FileNameTest, ParentIgnoresTrailingSlashes) {
+  EXPECT_THAT(
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/bar//"))
+          .value()
+          .Parent(),
+      IsOkAndHolds(
+          FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value()));
+}
+
 TEST(FileNameTest, ChildRejectsDescendant) {
   const FileName parent =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();

@@ -84,6 +84,7 @@ class FileName final {
     return string_.data();
   }
 
+  absl::StatusOr<FileName> Parent() const;
   absl::StatusOr<FileName> Child(const FileName& child) const;
   absl::StatusOr<FileName> Child(NativeStringView child) const;
   absl::StatusOr<FileName> Join(const FileName& descendant) const;
