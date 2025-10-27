@@ -576,6 +576,61 @@ TEST(ListDirectoryTests, ListsDirectory) {
   EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
 }
 
+TEST(CopyFileTest, RejectsDirectory) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName from = temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+
+  EXPECT_THAT(CreateDirectory(from), IsOk());
+  const absl::Cleanup cleanup = [&from] {
+    EXPECT_THAT(RemoveDirectory(from), IsOk());
+  };
+
+  EXPECT_THAT(CopyFile(from, to),
+              StatusIs(AnyOf(absl::StatusCode::kFailedPrecondition,
+                             absl::StatusCode::kPermissionDenied)));
+}
+
+TEST(CopyFileTest, RejectsNonExisting) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName from = temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+
+  EXPECT_THAT(CopyFile(from, to), StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST(CopyFileTest, RejectsSelfCopy) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName from = temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  EXPECT_THAT(WriteFile(from, "contents"), IsOk());
+  const absl::Cleanup cleanup = [&from] { EXPECT_THAT(Unlink(from), IsOk()); };
+
+  EXPECT_THAT(CopyFile(from, from), StatusIs(absl::StatusCode::kAlreadyExists));
+}
+
+TEST(CopyFileTest, CopiesFile) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName from = temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+  EXPECT_THAT(WriteFile(from, "contents"), IsOk());
+
+  const absl::Cleanup cleanup = [&from, &to] {
+    EXPECT_THAT(Unlink(from), IsOk());
+    EXPECT_THAT(Unlink(to), IsOk());
+  };
+
+  EXPECT_THAT(CopyFile(from, to), IsOk());
+  EXPECT_THAT(ReadFile(to), IsOkAndHolds("contents"));
+}
+
 TEST(CopyTreeTest, RejectsSelfCopy) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());

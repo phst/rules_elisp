@@ -50,6 +50,7 @@
 #endif
 
 #include <algorithm>  // IWYU pragma: keep, only on Windows
+#include <array>
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep, only on Windows
@@ -63,6 +64,7 @@
 #include <locale>
 #include <memory>
 #include <optional>
+#include <ostream>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -636,6 +638,76 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
       });
   if (!status.ok()) return status;
   return result;
+}
+
+#undef CopyFile
+
+absl::Status CopyFile(const FileName& from, const FileName& to) {
+#ifdef _WIN32
+  if (!::CopyFileW(from.pointer(), to.pointer(), TRUE)) {
+    return WindowsStatus("CopyFileW", from, to, TRUE);
+  }
+#else
+  const int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
+  const int from_fd = open(from.pointer(), from_flags);
+  if (from_fd < 0) return ErrnoStatus("open", from, absl::Hex(from_flags));
+  const absl::Cleanup close_from = [from_fd] {
+    if (close(from_fd) != 0) LOG(ERROR) << ErrnoStatus("close", from_fd);
+  };
+
+  // Don’t allow copying directories and other irregular files.
+  struct stat from_stat;
+  if (fstat(from_fd, &from_stat) != 0) return ErrnoStatus("fstat", from_fd);
+  if (!S_ISREG(from_stat.st_mode)) {
+    return absl::FailedPreconditionError(absl::StrFormat(
+        "Source file %v is irregular (mode 0%03o)", from, from_stat.st_mode));
+  }
+
+  const int to_flags =
+      O_WRONLY | O_CREAT | O_EXCL | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
+  const mode_t to_mode = from_stat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
+  const int to_fd = open(to.pointer(), to_flags, to_mode);
+  if (to_fd < 0) {
+    return ErrnoStatus("open", to, absl::Hex(to_flags), Oct(to_mode));
+  }
+  const absl::Cleanup close_to = [to_fd] {
+    if (close(to_fd) != 0) LOG(ERROR) << ErrnoStatus("close", to_fd);
+  };
+#  ifdef __APPLE__
+  constexpr copyfile_flags_t copy_flags =
+      COPYFILE_ALL | COPYFILE_CLONE | COPYFILE_DATA_SPARSE;
+  if (fcopyfile(from_fd, to_fd, nullptr, copy_flags) != 0) {
+    return ErrnoStatus("fcopyfile", from_fd, to_fd, nullptr,
+                       absl::Hex(copy_flags));
+  }
+#  else
+  while (true) {
+    std::array<char, 0x1000> buffer;
+    const ssize_t r = read(from_fd, buffer.data(), buffer.size());
+    if (r < 0) {
+      return ErrnoStatus("read", from_fd, kEllipsis, absl::Hex(buffer.size()));
+    }
+    if (r == 0) break;
+    std::string_view view(buffer.data(),
+                          static_cast<std::make_unsigned_t<ssize_t>>(r));
+    while (!view.empty()) {
+      const ssize_t w = write(to_fd, view.data(), view.size());
+      if (w < 0) return ErrnoStatus("write", to_fd, kEllipsis, view.size());
+      if (w == 0) {
+        // Avoid infinite loop.
+        return absl::DataLossError(absl::StrFormat(
+            "Cannot write %d bytes to file %v", view.size(), to));
+      }
+      view.remove_prefix(static_cast<std::make_unsigned_t<ssize_t>>(w));
+    }
+  }
+  const struct timespec times[2] = {{from_stat.st_atime, 0},
+                                    {from_stat.st_mtime, 0}};
+  if (futimens(to_fd, times) != 0) return ErrnoStatus("futimens", to_fd);
+#  endif
+  if (fsync(to_fd) != 0) return ErrnoStatus("fsync", to_fd);
+#endif
+  return absl::OkStatus();
 }
 
 #if !defined _WIN32 && !defined __APPLE__
