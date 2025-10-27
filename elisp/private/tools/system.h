@@ -409,7 +409,7 @@ class DosDevice final {
     return *this;
   }
 
-  NativeString name() const {
+  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
     CHECK(!name_.empty());
     return name_;
   }
