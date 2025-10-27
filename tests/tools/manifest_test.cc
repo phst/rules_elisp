@@ -16,10 +16,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <fstream>
-#include <ios>
-#include <locale>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -35,6 +31,7 @@
 namespace rules_elisp {
 
 using absl_testing::IsOk;
+using absl_testing::IsOkAndHolds;
 using ::testing::ElementsAre;
 using ::testing::StartsWith;
 
@@ -72,20 +69,6 @@ TEST(ManifestFileTest, Create) {
   ASSERT_THAT(
       args, ElementsAre(StartsWith(prefix), RULES_ELISP_NATIVE_LITERAL("--")));
 
-  // Read entire manifest file into a buffer.
-  NativeStringView name = args.at(0);
-  name.remove_prefix(prefix.length());
-  std::ifstream stream(NativeString(name), std::ios::in | std::ios::binary);
-  stream.imbue(std::locale::classic());
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  std::ostringstream buffer;
-  buffer.imbue(std::locale::classic());
-  EXPECT_TRUE(buffer.good());
-  buffer << stream.rdbuf();
-  EXPECT_TRUE(stream.good());
-  EXPECT_TRUE(buffer.good());
-
   std::string want = R"js({
                             "root": "RUNFILES_ROOT",
                             "loadPath": [
@@ -111,7 +94,12 @@ TEST(ManifestFileTest, Create) {
   want.erase(std::remove(want.begin(), want.end(), '\n'), want.end());
   absl::c_replace(want, '~', ' ');
 
-  EXPECT_EQ(buffer.str(), want);
+  // Read entire manifest file into a buffer.
+  NativeStringView name = args.at(0);
+  name.remove_prefix(prefix.length());
+  const absl::StatusOr<FileName> filename = FileName::FromString(name);
+  ASSERT_THAT(filename, IsOk());
+  EXPECT_THAT(ReadFile(*filename), IsOkAndHolds(want));
 }
 
 }  // namespace rules_elisp

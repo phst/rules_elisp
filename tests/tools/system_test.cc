@@ -16,12 +16,8 @@
 
 #include <cerrno>
 #include <cstdlib>
-#include <fstream>
-#include <ios>
 #include <iterator>
-#include <locale>
 #include <optional>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <system_error>
@@ -454,11 +450,7 @@ TEST(IsNonEmptyDirectoryTest, ReturnsFalseForNonEmptyDirectory) {
 
   const FileName file =
       dir.Child(RULES_ELISP_NATIVE_LITERAL("file.txt")).value();
-  std::ofstream stream(file.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  stream.close();
+  EXPECT_THAT(WriteFile(file, ""), IsOk());
 
   EXPECT_TRUE(IsNonEmptyDirectory(dir));
 }
@@ -473,13 +465,7 @@ TEST(UnlinkTest, RemovesFile) {
   EXPECT_FALSE(FileExists(file));
   EXPECT_THAT(Unlink(file), StatusIs(absl::StatusCode::kNotFound));
 
-  std::ofstream stream(file.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  EXPECT_TRUE(stream.flush());
-  EXPECT_TRUE(stream.good());
-  stream.close();
+  EXPECT_THAT(WriteFile(file, ""), IsOk());
 
   EXPECT_TRUE(FileExists(file));
   EXPECT_THAT(Unlink(file), IsOk());
@@ -496,13 +482,7 @@ TEST(CreateRemoveDirectoryTest, CreatesAndRemovesDirectories) {
   EXPECT_THAT(CreateDirectory(dir), IsOk());
 
   const FileName file = dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-  std::ofstream stream(file.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  EXPECT_TRUE(stream.flush());
-  EXPECT_TRUE(stream.good());
-  stream.close();
+  EXPECT_THAT(WriteFile(file, ""), IsOk());
 
   EXPECT_THAT(RemoveDirectory(dir),
               StatusIs(absl::StatusCode::kFailedPrecondition));
@@ -525,13 +505,7 @@ TEST(ListDirectoryTests, ListsDirectory) {
 
   const FileName file =
       dir.Child(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
-  std::ofstream stream(file.string(),
-                       std::ios::out | std::ios::trunc | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  EXPECT_TRUE(stream.flush());
-  EXPECT_TRUE(stream.good());
-  stream.close();
+  EXPECT_THAT(WriteFile(file, ""), IsOk());
 
   EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(ElementsAre(element)));
 
@@ -742,13 +716,7 @@ TEST(TemporaryFileTest, CreateWorks) {
 
   EXPECT_THAT(file->Write("Foo\n"), IsOk());
 
-  std::ifstream stream(file->name().string(), std::ios::in | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  std::string line;
-  std::getline(stream, line);
-  EXPECT_TRUE(stream.good());
-  EXPECT_EQ(line, "Foo");
+  EXPECT_THAT(ReadFile(file->name()), IsOkAndHolds("Foo\n"));
 }
 
 [[maybe_unused]] static NativeString GetEnv(const NativeChar* const name) {
@@ -837,22 +805,10 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   options.output_file = output_file;
   EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
 
-  std::ifstream stream(output_file.string(), std::ios::in | std::ios::binary);
-  EXPECT_TRUE(stream.is_open());
-  EXPECT_TRUE(stream.good());
-  stream.imbue(std::locale::classic());
-  std::ostringstream buffer;
-  EXPECT_TRUE(buffer.good());
-  buffer.imbue(std::locale::classic());
-  EXPECT_TRUE(buffer << stream.rdbuf());
-  EXPECT_TRUE(stream.good());
-  stream.close();
-  EXPECT_TRUE(buffer.good());
-  EXPECT_TRUE(buffer.flush());
   absl::StatusOr<std::string> narrow = ToNarrow(dir->string(), Encoding::kUtf8);
   ASSERT_THAT(narrow, IsOk());
   while (narrow->back() == kSeparator) narrow->pop_back();
-  EXPECT_EQ(buffer.str(), *narrow);
+  EXPECT_THAT(ReadFile(output_file), IsOkAndHolds(*narrow));
 }
 
 TEST(DosDeviceTest, CreatesDevice) {
@@ -881,10 +837,10 @@ TEST(DosDeviceTest, CreatesDevice) {
     ASSERT_NE(drive, std::nullopt);
     EXPECT_TRUE(absl::ascii_isalpha(*drive));
     EXPECT_EQ(name.at(1), RULES_ELISP_NATIVE_LITERAL(':'));
-    const std::ifstream stream(name + string.substr(i),
-                               std::ios::in | std::ios::binary);
-    EXPECT_TRUE(stream.is_open());
-    EXPECT_TRUE(stream.good());
+    const absl::StatusOr<FileName> abbrev =
+        FileName::FromString(name + string.substr(i));
+    ASSERT_THAT(abbrev, IsOk());
+    EXPECT_THAT(ReadFile(*abbrev), IsOk());
   }
 }
 

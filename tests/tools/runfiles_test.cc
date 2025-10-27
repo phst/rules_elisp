@@ -14,8 +14,6 @@
 
 #include "elisp/private/tools/runfiles.h"
 
-#include <fstream>
-#include <ios>
 #include <optional>
 
 #include "absl/status/status.h"
@@ -42,9 +40,7 @@ TEST(RunfilesTest, ResolvesRunfile) {
   const absl::StatusOr<FileName> resolved =
       runfiles->Resolve(RULES_ELISP_PROGRAM);
   ASSERT_THAT(resolved, IsOk());
-  const std::ifstream file(resolved->string(), std::ios::in | std::ios::binary);
-  EXPECT_TRUE(file.is_open());
-  EXPECT_TRUE(file.good());
+  EXPECT_THAT(ReadFile(*resolved), IsOk());
 }
 
 TEST(RunfilesTest, RejectsNonAscii) {
