@@ -190,9 +190,10 @@ TEST(FileNameTest, CanCreateFromNativeLiteral) {
 }
 
 TEST(FileNameTest, IsFormattable) {
-  const FileName foo = FileName::FromLiteralOrDie("foo");
-  const FileName bar = FileName::FromNativeLiteralOrDie(
-      RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"));
+  const FileName foo =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
+  const FileName bar =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'")).value();
   EXPECT_EQ(absl::StrCat("bar ", foo, " baz"), "bar foo baz");
   EXPECT_EQ(absl::StrFormat("bar %v baz", foo), "bar foo baz");
   EXPECT_EQ(absl::StrCat("foo ", bar, " baz"), "foo bar äα𝐴🐈' baz");
@@ -200,19 +201,22 @@ TEST(FileNameTest, IsFormattable) {
 }
 
 TEST(FileNameTest, ChildRejectsDescendant) {
-  const FileName parent = FileName::FromLiteralOrDie("foo");
+  const FileName parent =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
   EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("bar/baz")),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(FileNameTest, ChildRejectsAbsolute) {
-  const FileName parent = FileName::FromLiteralOrDie("foo");
+  const FileName parent =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
   EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("/bar")),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(FileNameTest, ChildCoalescesSlashes) {
-  const FileName parent = FileName::FromLiteralOrDie("foo/");
+  const FileName parent =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/")).value();
   const absl::StatusOr<FileName> child =
       parent.Child(RULES_ELISP_NATIVE_LITERAL("bar"));
   ASSERT_THAT(child, IsOk());
@@ -221,13 +225,15 @@ TEST(FileNameTest, ChildCoalescesSlashes) {
 }
 
 TEST(FileNameTest, JoinRejectsAbsolute) {
-  const FileName parent = FileName::FromLiteralOrDie("foo");
+  const FileName parent =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
   EXPECT_THAT(parent.Child(RULES_ELISP_NATIVE_LITERAL("/bar/baz")),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
 TEST(FileNameTest, JoinCoalescesSlashes) {
-  const FileName parent = FileName::FromLiteralOrDie("foo/");
+  const FileName parent =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/")).value();
   const absl::StatusOr<FileName> descendant =
       parent.Join(RULES_ELISP_NATIVE_LITERAL("bar/baz"));
   ASSERT_THAT(descendant, IsOk());
