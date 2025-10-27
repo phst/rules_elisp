@@ -439,13 +439,10 @@ TEST(IsNonEmptyDirectoryTest, ReturnsFalseForFile) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> file = runfiles->Resolve(RULES_ELISP_DATA);
+  const absl::StatusOr<FileName> file = runfiles->Resolve(RULES_ELISP_DATA);
   ASSERT_THAT(file, IsOk());
 
-  const absl::StatusOr<FileName> filename = FileName::FromString(*file);
-  ASSERT_THAT(filename, IsOk());
-
-  EXPECT_FALSE(IsNonEmptyDirectory(*filename));
+  EXPECT_FALSE(IsNonEmptyDirectory(*file));
 }
 
 TEST(IsNonEmptyDirectoryTest, ReturnsTrueForEmptyDirectory) {
@@ -828,33 +825,31 @@ TEST(RunTest, ReturnsExitCode) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> helper =
-      runfiles->Resolve(RULES_ELISP_HELPER);
-  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+  const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOk());
 
-  EXPECT_THAT(
-      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
-      IsOkAndHolds(0));
-  EXPECT_THAT(
-      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
-      IsOkAndHolds(23));
+  EXPECT_THAT(rules_elisp::Run(helper->string(),
+                               {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
+              IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(helper->string(),
+                               {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
+              IsOkAndHolds(23));
 }
 
 TEST(RunTest, SupportsDeadlineOnWindows) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> helper =
-      runfiles->Resolve(RULES_ELISP_HELPER);
-  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+  const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOk());
 
   if constexpr (kWindows) {
     RunOptions options;
     options.deadline = absl::Now() + absl::Seconds(1);
-    EXPECT_THAT(
-        rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
-                         {}, options),
-        StatusIs(absl::StatusCode::kDeadlineExceeded));
+    EXPECT_THAT(rules_elisp::Run(helper->string(),
+                                 {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")}, {},
+                                 options),
+                StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }
 
@@ -866,14 +861,14 @@ TEST(RunTest, AllowsChangingDirectory) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> helper =
-      runfiles->Resolve(RULES_ELISP_HELPER);
-  ASSERT_THAT(helper, IsOkAndHolds(Not(IsEmpty())));
+  const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
+  ASSERT_THAT(helper, IsOk());
 
   RunOptions options;
   options.directory = *temp;
 
-  EXPECT_THAT(rules_elisp::Run(*helper, {}, {}, options), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(helper->string(), {}, {}, options),
+              IsOkAndHolds(0));
 }
 
 TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
@@ -881,8 +876,7 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
 
-  const absl::StatusOr<NativeString> helper =
-      runfiles->Resolve(RULES_ELISP_HELPER);
+  const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
   ASSERT_THAT(helper, IsOk());
 
   absl::StatusOr<NativeString> dir =
@@ -907,7 +901,8 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   RunOptions options;
   options.directory = *dir;
   options.output_file = output_file;
-  EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(helper->string(), {}, *env, options),
+              IsOkAndHolds(0));
 
   std::ifstream stream(output_file, std::ios::in | std::ios::binary);
   EXPECT_TRUE(stream.is_open());
@@ -930,13 +925,14 @@ TEST(DosDeviceTest, CreatesDevice) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> file = runfiles->Resolve(RULES_ELISP_DATA);
+  const absl::StatusOr<FileName> file = runfiles->Resolve(RULES_ELISP_DATA);
   ASSERT_THAT(file, IsOk());
+  const NativeString& string = file->string();
   const NativeString::size_type i =
-      file->rfind(kWindows ? RULES_ELISP_NATIVE_LITERAL('\\')
-                           : RULES_ELISP_NATIVE_LITERAL('/'));
-  ASSERT_NE(i, file->npos);
-  const NativeString dir = file->substr(0, i + 1);
+      string.rfind(kWindows ? RULES_ELISP_NATIVE_LITERAL('\\')
+                            : RULES_ELISP_NATIVE_LITERAL('/'));
+  ASSERT_NE(i, string.npos);
+  const NativeString dir = string.substr(0, i + 1);
   absl::StatusOr<DosDevice> dev = DosDevice::Create(dir);
   if constexpr (kWindows) {
     EXPECT_THAT(dir, SizeIs(Ge(3)));
@@ -949,7 +945,7 @@ TEST(DosDeviceTest, CreatesDevice) {
     ASSERT_NE(drive, std::nullopt);
     EXPECT_TRUE(absl::ascii_isalpha(*drive));
     EXPECT_EQ(name.at(1), RULES_ELISP_NATIVE_LITERAL(':'));
-    const std::ifstream stream(name + file->substr(i),
+    const std::ifstream stream(name + string.substr(i),
                                std::ios::in | std::ios::binary);
     EXPECT_TRUE(stream.is_open());
     EXPECT_TRUE(stream.good());

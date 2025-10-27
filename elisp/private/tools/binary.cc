@@ -103,7 +103,7 @@ absl::StatusOr<int> Main(
   const absl::StatusOr<std::string> wrapper =
       ToNarrow(opts.wrapper, Encoding::kAscii);
   if (!wrapper.ok()) return wrapper.status();
-  const absl::StatusOr<NativeString> emacs = runfiles->Resolve(*wrapper);
+  const absl::StatusOr<FileName> emacs = runfiles->Resolve(*wrapper);
   if (!emacs.ok()) return emacs.status();
 
   std::vector<NativeString> args = {RULES_ELISP_NATIVE_LITERAL("--quick")};
@@ -119,9 +119,9 @@ absl::StatusOr<int> Main(
   for (const NativeString& file : opts.load_files) {
     const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
     if (!narrow.ok()) return narrow.status();
-    const absl::StatusOr<NativeString> abs_name = runfiles->Resolve(*narrow);
+    const absl::StatusOr<FileName> abs_name = runfiles->Resolve(*narrow);
     if (!abs_name.ok()) return abs_name.status();
-    args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + *abs_name);
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + abs_name->string());
   }
 
   if (!original_args.empty()) {
@@ -157,7 +157,7 @@ absl::StatusOr<int> Main(
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), args.cbegin(), args.cend());
 
-  return Run(*emacs, final_args, *env);
+  return Run(emacs->string(), final_args, *env);
 }
 
 }  // namespace rules_elisp

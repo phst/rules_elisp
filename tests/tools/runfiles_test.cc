@@ -16,6 +16,7 @@
 
 #include <fstream>
 #include <ios>
+#include <optional>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -38,10 +39,10 @@ TEST(RunfilesTest, ResolvesRunfile) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> resolved =
+  const absl::StatusOr<FileName> resolved =
       runfiles->Resolve(RULES_ELISP_PROGRAM);
-  ASSERT_THAT(resolved, IsOkAndHolds(Not(IsEmpty())));
-  const std::ifstream file(*resolved, std::ios::in | std::ios::binary);
+  ASSERT_THAT(resolved, IsOk());
+  const std::ifstream file(resolved->string(), std::ios::in | std::ios::binary);
   EXPECT_TRUE(file.is_open());
   EXPECT_TRUE(file.good());
 }
@@ -58,12 +59,12 @@ TEST(RunfilesTest, AllowsRunningTool) {
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(ExecutableKind::kTest, BAZEL_CURRENT_REPOSITORY, {});
   ASSERT_THAT(runfiles, IsOk());
-  const absl::StatusOr<NativeString> program =
+  const absl::StatusOr<FileName> program =
       runfiles->Resolve(RULES_ELISP_PROGRAM);
   ASSERT_THAT(program, IsOk());
   const absl::StatusOr<Environment> env = runfiles->Environ();
   ASSERT_THAT(env, IsOk());
-  EXPECT_THAT(rules_elisp::Run(*program, {}, *env), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::Run(program->string(), {}, *env), IsOkAndHolds(0));
 }
 
 TEST(RunfilesTest, ParsesManifest) {
@@ -73,12 +74,14 @@ TEST(RunfilesTest, ParsesManifest) {
       manifest->Write(kWindows ? "foo C:\\Bar\\Baz\n" : "foo /bar/baz\n"),
       IsOk());
 
-  const NativeString file = kWindows
-                                ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
-                                : RULES_ELISP_NATIVE_LITERAL("/bar/baz");
+  const FileName file =
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
+                                    : RULES_ELISP_NATIVE_LITERAL("/bar/baz"))
+          .value();
 
-  const absl::StatusOr<Runfiles> runfiles =
-      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest->name(), {});
+  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
+      BAZEL_CURRENT_REPOSITORY, {},
+      FileName::FromString(manifest->name()).value(), std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
   EXPECT_THAT(runfiles->Resolve("foo"), IsOkAndHolds(file));
   EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));
