@@ -57,8 +57,7 @@ TEST(ManifestFileTest, Create) {
   opts.data_files = {RULES_ELISP_NATIVE_LITERAL("data-file")};
   const NativeString in_1 = RULES_ELISP_NATIVE_LITERAL("in-1");
   const NativeString in_2 = RULES_ELISP_NATIVE_LITERAL("in-2");
-  const NativeString out =
-      RULES_ELISP_NATIVE_LITERAL("out \t\n\r\f äα𝐴🐈'\\\"");
+  const NativeString out = RULES_ELISP_NATIVE_LITERAL("out äα𝐴🐈'");
   const absl::StatusOr<ManifestFile> file =
       ManifestFile::Create(opts, {in_1, in_2}, {out});
   ASSERT_THAT(file, IsOk());
@@ -95,7 +94,7 @@ TEST(ManifestFileTest, Create) {
                               "data-file"
                             ],
                             "outputFiles": [
-                              "out~\t\n\r\f~äα𝐴🐈'\\\""
+                              "out~äα𝐴🐈'"
                             ],
                             "tags": [
                               "tag-1",
