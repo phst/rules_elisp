@@ -378,6 +378,8 @@ class TemporaryFile final {
   std::FILE* absl_nullable file_;
 };
 
+absl::StatusOr<FileName> CreateTemporaryDirectory();
+
 struct RunOptions final {
   // If set, change to this directory in the subprocess.
   std::optional<FileName> directory;

@@ -871,6 +871,19 @@ TEST(TemporaryFileTest, CreateWorks) {
   EXPECT_THAT(ReadFile(file->name()), IsOkAndHolds("Foo\n"));
 }
 
+TEST(CreateTemporaryDirectoryTest, Works) {
+  absl::StatusOr<FileName> dir = CreateTemporaryDirectory();
+  ASSERT_THAT(dir, IsOk());
+
+  const absl::Cleanup cleanup = [&dir] {
+    EXPECT_THAT(RemoveTree(*dir), IsOk());
+  };
+
+  FileName file = dir->Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  EXPECT_THAT(WriteFile(file, "contents"), IsOk());
+  EXPECT_THAT(ReadFile(file), IsOkAndHolds("contents"));
+}
+
 [[maybe_unused]] static NativeString GetEnv(const NativeChar* const name) {
   const NativeChar* const absl_nullable value =
 #ifdef _WIN32

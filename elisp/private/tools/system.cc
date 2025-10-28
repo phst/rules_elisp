@@ -1300,6 +1300,38 @@ absl::Status TemporaryFile::Write(const std::string_view contents) {
   return absl::OkStatus();
 }
 
+absl::StatusOr<FileName> CreateTemporaryDirectory() {
+#ifdef _WIN32
+  absl::Status status;
+  for (int i = 0; i < 10; i++) {
+    std::array<wchar_t, L_tmpnam + 1> buffer;
+    const wchar_t* absl_nullable name = _wtmpnam(buffer.data());
+    if (name == nullptr) {
+      return absl::UnavailableError("Cannot create temporary name");
+    }
+    absl::StatusOr<FileName> result = FileName::FromString(name);
+    if (!result.ok()) return result.status();
+    status = CreateDirectory(*result);
+    if (status.ok()) return *std::move(result);
+    LOG(ERROR) << status;
+  }
+  CHECK(!status.ok());
+  return status;
+#else
+  const char* const absl_nullable dir = std::getenv("TMPDIR");
+  std::string buffer = absl::StrCat(
+      dir == nullptr || *dir == '\0' ? "/tmp" : dir, "/elisp.XXXXXX");
+  char* const absl_nullable name = mkdtemp(Pointer(buffer));
+  if (name == nullptr) return ErrnoStatus("mkdtemp", buffer);
+  const absl::StatusOr<FileName> result = FileName::FromString(name);
+  if (!result.ok()) {
+    if (rmdir(name) != 0) LOG(ERROR) << ErrnoStatus("rmdir", name);
+    return result.status();
+  }
+  return *std::move(result);
+#endif
+}
+
 static void FlushEverything() {
   std::cout.flush();
   std::wcout.flush();
