@@ -332,7 +332,7 @@ struct IsAbsoluteParam final {
   template <typename Sink>
   friend void AbslStringify(Sink& sink, const IsAbsoluteParam& param) {
     absl::Format(
-        sink, "Filename %s should be %s", param.name,
+        &sink, "Filename %s should be %s", param.name,
         param.valid ? (param.absolute ? "absolute" : "relative") : "invalid");
   }
 };
