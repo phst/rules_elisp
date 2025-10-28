@@ -662,6 +662,19 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
   return result;
 }
 
+absl::Status Rename(const FileName& from, const FileName& to) {
+#ifdef _WIN32
+  if (!::MoveFileW(from.pointer(), to.pointer())) {
+    return WindowsStatus("MoveFileW", from, to);
+  }
+#else
+  if (std::rename(from.pointer(), to.pointer()) != 0) {
+    return ErrnoStatus("rename", from, to);
+  }
+#endif
+  return absl::OkStatus();
+}
+
 #ifndef _WIN32
 static int Remove(const char* const absl_nonnull name, const struct stat*,
                   const int type, struct FTW* const absl_nonnull ftw) {
