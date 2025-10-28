@@ -87,6 +87,7 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_split.h"
 #include "absl/time/clock.h"  // IWYU pragma: keep, only on Windows
 #include "absl/time/time.h"
 #include "absl/types/span.h"
@@ -1388,6 +1389,44 @@ absl::StatusOr<FileName> CreateTemporaryDirectory() {
     return result.status();
   }
   return *std::move(result);
+#endif
+}
+
+#undef SearchPath
+
+absl::StatusOr<FileName> SearchPath(const FileName& program) {
+#ifdef _WIN32
+  constexpr LPCWSTR extension = L".exe";
+  std::array<wchar_t, 0x8000> buffer;
+  const DWORD length =
+      ::SearchPathW(nullptr, program.pointer(), extension, DWORD{buffer.size()},
+                    buffer.data(), nullptr);
+  if (length == 0){
+    return WindowsStatus("SearchPathW", nullptr, program, extension,
+                         absl::Hex(buffer.size()), kEllipsis, nullptr);
+  }
+  if (length >= buffer.size()) {
+    return absl::FailedPreconditionError(
+        absl::StrFormat("Program filename too long (%d characters)", length));
+  }
+  return FileName::FromString(std::wstring_view(buffer.data(), length));
+#else
+  // See the description of PATH at
+  // https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap08.html#tag_08_03.
+  const std::string& string = program.string();
+  if (string.find('/') != string.npos) return program;
+  const char* const absl_nullable path = std::getenv("PATH");
+  if (path == nullptr) {
+    return absl::NotFoundError("PATH environment variable not set");
+  }
+  for (const std::string_view dir : absl::StrSplit(path, ':')) {
+    std::string file(dir.empty() ? "." : dir);
+    if (file.back() != '/') file += '/';
+    file += string;
+    if (access(Pointer(file), X_OK) == 0) return FileName::FromString(file);
+  }
+  return absl::NotFoundError(
+      absl::StrFormat("Program %v not found in PATH %s", program, path));
 #endif
 }
 

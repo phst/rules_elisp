@@ -392,6 +392,8 @@ struct RunOptions final {
   absl::Time deadline = absl::InfiniteFuture();
 };
 
+absl::StatusOr<FileName> SearchPath(const FileName& program);
+
 absl::StatusOr<int> Run(const FileName& program,
                         absl::Span<const NativeString> args,
                         const Environment& env, const RunOptions& options = {});

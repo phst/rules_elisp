@@ -940,6 +940,14 @@ TEST(CreateTemporaryDirectoryTest, Works) {
   EXPECT_THAT(ReadFile(file), IsOkAndHolds("contents"));
 }
 
+TEST(SearchPathTest, FindsProgram) {
+  const FileName name =
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("cmd")
+                                    : RULES_ELISP_NATIVE_LITERAL("true"))
+          .value();
+  EXPECT_THAT(SearchPath(name), IsOk());
+}
+
 [[maybe_unused]] static NativeString GetEnv(const NativeChar* const name) {
   const NativeChar* const absl_nullable value =
 #ifdef _WIN32
