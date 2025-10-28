@@ -31,9 +31,11 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
+#  include <shellapi.h>
 #else
 #  include <dirent.h>
 #  include <fcntl.h>
+#  include <ftw.h>
 #  include <limits.h>
 #  include <spawn.h>
 #  include <stdio.h>
@@ -658,6 +660,51 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
       });
   if (!status.ok()) return status;
   return result;
+}
+
+#ifndef _WIN32
+static int Remove(const char* const absl_nonnull name, const struct stat*,
+                  const int type, struct FTW* const absl_nonnull ftw) {
+  switch (type) {
+    case FTW_DP:
+      return rmdir(name);
+    case FTW_F:
+    case FTW_SL:
+      return unlink(name);
+    default:
+      LOG(ERROR) << "File " << name << " encountered at level " << ftw->level
+                 << " has unsupported type " << type;
+      errno = ENOTSUP;
+      return -1;
+  }
+}
+#endif
+
+absl::Status RemoveTree(const FileName& directory) {
+  const absl::StatusOr<FileName> abs = directory.MakeAbsolute();
+  if (!abs.ok()) return abs.status();
+#ifdef _WIN32
+  SHFILEOPSTRUCTW op;
+  op.hwnd = nullptr;
+  op.wFunc = FO_DELETE;
+  const std::wstring from = abs->string() + L'\0';
+  op.pFrom = from.c_str();
+  op.pTo = nullptr;
+  op.fFlags = FOF_NO_UI;
+  const int result = ::SHFileOperationW(&op);
+  if (result != 0 || op.fAnyOperationsAborted) {
+    return absl::AbortedError(
+        absl::StrFormat("Removal of directory tree %v was aborted", *abs));
+  }
+#else
+  constexpr int fd_limit = 100;
+  constexpr int flags = FTW_DEPTH | FTW_MOUNT | FTW_PHYS;
+  const int result = nftw(abs->pointer(), Remove, fd_limit, flags);
+  if (result != 0) {
+    return ErrnoStatus("nftw", *abs, kEllipsis, fd_limit, absl::Hex(flags));
+  }
+#endif
+  return absl::OkStatus();
 }
 
 #undef CopyFile
