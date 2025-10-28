@@ -616,6 +616,36 @@ absl::Status CreateDirectory(const FileName& name) {
   return absl::OkStatus();
 }
 
+[[nodiscard]] static bool IsDirectory(const FileName& name) {
+#ifdef _WIN32
+  const DWORD attr = ::GetFileAttributesW(name.pointer());
+  return attr != INVALID_FILE_ATTRIBUTES && (attr & FILE_ATTRIBUTE_DIRECTORY);
+#else
+  struct stat buffer;
+  return lstat(name.pointer(), &buffer) == 0 && S_ISDIR(buffer.st_mode);
+#endif
+}
+
+static absl::Status DoCreateDirectories(const FileName& name, const int depth) {
+  if (depth > 100) {
+    return absl::FailedPreconditionError(absl::StrFormat(
+        "Potential filesystem loop when creating directory %v", name));
+  }
+  CHECK(name.IsAbsolute());
+  if (IsDirectory(name)) return absl::OkStatus();
+  const absl::StatusOr<FileName> parent = name.Parent();
+  if (!parent.ok()) return parent.status();
+  const absl::Status status = DoCreateDirectories(*parent, depth + 1);
+  if (!status.ok()) return status;
+  return CreateDirectory(name);
+}
+
+absl::Status CreateDirectories(const FileName& name) {
+  const absl::StatusOr<FileName> abs = name.MakeAbsolute();
+  if (!abs.ok()) return abs.status();
+  return DoCreateDirectories(*abs, 0);
+}
+
 #undef RemoveDirectory
 
 absl::Status RemoveDirectory(const FileName& name) {

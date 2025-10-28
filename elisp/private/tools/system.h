@@ -238,6 +238,7 @@ absl::Status WriteFile(const FileName& file, std::string_view contents);
 [[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory);
 absl::Status Unlink(const FileName& file);
 absl::Status CreateDirectory(const FileName& name);
+absl::Status CreateDirectories(const FileName& name);
 absl::Status RemoveDirectory(const FileName& name);
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
 absl::Status CopyFile(const FileName& from, const FileName& to);
