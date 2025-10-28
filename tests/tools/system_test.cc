@@ -983,6 +983,23 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
   }
 }
 
+TEST(RunTest, SupportsPathSearchOnPosix) {
+  if constexpr (!kWindows) {
+    RunOptions options;
+    options.search_path = true;
+    EXPECT_THAT(
+        rules_elisp::Run(
+            FileName::FromString(RULES_ELISP_NATIVE_LITERAL("true")).value(),
+            {}, {}, options),
+        IsOkAndHolds(0));
+    EXPECT_THAT(
+        rules_elisp::Run(
+            FileName::FromString(RULES_ELISP_NATIVE_LITERAL("false")).value(),
+            {}, {}, options),
+        IsOkAndHolds(1));
+  }
+}
+
 TEST(RunTest, AllowsChangingDirectory) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());

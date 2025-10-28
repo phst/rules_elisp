@@ -383,6 +383,8 @@ class TemporaryFile final {
 absl::StatusOr<FileName> CreateTemporaryDirectory();
 
 struct RunOptions final {
+  bool search_path = false;
+
   // If set, change to this directory in the subprocess.
   std::optional<FileName> directory;
 

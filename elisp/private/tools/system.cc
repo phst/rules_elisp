@@ -1409,13 +1409,18 @@ absl::StatusOr<int> Run(const FileName& program,
     }
   }
   const NativeString& string = program.string();
-  if (string.find(kSeparator) == string.npos) {
+  const bool contains_sep = string.find(kSeparator) != string.npos;
+  if (contains_sep == options.search_path) {
     return absl::InvalidArgumentError(absl::StrFormat(
-        "Program name %v doesn’t contain a directory separator character",
-        program));
+        "Program name %v %s a directory separator character",
+        program, contains_sep ? "contains" : "doesn’t contain"));
   }
-  const absl::StatusOr<FileName> abs_program = program.MakeAbsolute();
-  if (!abs_program.ok()) return abs_program.status();
+  FileName prog = program;
+  if (!options.search_path) {
+    const absl::StatusOr<FileName> abs_program = program.MakeAbsolute();
+    if (!abs_program.ok()) return abs_program.status();
+    prog = *std::move(abs_program);
+  }
   std::vector<NativeString> args_vec = {program.string()};
   args_vec.insert(args_vec.end(), args.cbegin(), args.cend());
   std::vector<NativeString> final_env;
@@ -1428,6 +1433,10 @@ absl::StatusOr<int> Run(const FileName& program,
   FlushEverything();
   const absl::Cleanup flush = FlushEverything;
 #ifdef _WIN32
+  if (options.search_path) {
+    return absl::UnimplementedError(
+        "Patch searching isn’t implemented on Windows");
+  }
   absl::StatusOr<std::wstring> command_line = BuildCommandLine(args_vec);
   if (!command_line.ok()) return command_line.status();
   const BOOL inherit_handles = options.output_file.has_value() ? TRUE : FALSE;
@@ -1478,10 +1487,10 @@ absl::StatusOr<int> Run(const FileName& program,
   };
   PROCESS_INFORMATION process_info;
   const BOOL success = ::CreateProcessW(
-      abs_program->pointer(), Pointer(*command_line), nullptr, nullptr,
-      inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
+      prog.pointer(), Pointer(*command_line), nullptr, nullptr, inherit_handles,
+      flags, envp->data(), dirp, &startup_info, &process_info);
   if (!success) {
-    return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
+    return WindowsStatus("CreateProcessW", prog, *command_line, nullptr,
                          nullptr, inherit_handles, absl::Hex(flags), kEllipsis,
                          dirp);
   }
@@ -1582,11 +1591,15 @@ absl::StatusOr<int> Run(const FileName& program,
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, abs_program->pointer(), &actions, nullptr,
-                                argv.data(), envp.data());
+  const int error = options.search_path
+                        ? posix_spawnp(&pid, prog.pointer(), &actions, nullptr,
+                                       argv.data(), envp.data())
+                        : posix_spawn(&pid, prog.pointer(), &actions, nullptr,
+                                      argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn", kEllipsis, *abs_program);
+                       options.search_path ? "posix_spawnp" : "posix_spawn",
+                       kEllipsis, prog);
   }
   int wstatus;
   const pid_t status = waitpid(pid, &wstatus, 0);
