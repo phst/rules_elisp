@@ -614,6 +614,23 @@ TEST(ListDirectoryTests, ListsDirectory) {
   EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
 }
 
+TEST(RenameTest, RenamesFile) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName from = temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
+  const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
+
+  EXPECT_THAT(WriteFile(from, "contents"), IsOk());
+
+  EXPECT_THAT(Rename(from, to), IsOk());
+
+  EXPECT_FALSE(FileExists(from));
+  EXPECT_THAT(ReadFile(to), IsOkAndHolds("contents"));
+
+  EXPECT_THAT(Unlink(to), IsOk());
+}
+
 TEST(CopyFileTest, RejectsDirectory) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
