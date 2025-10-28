@@ -62,6 +62,12 @@ def _build(*, source: pathlib.Path, install: pathlib.Path,
     build = temp / 'build'
     _unpack(source=source, install=build, lines=lines)
 
+    # On Windows, let Bash search the MinGW path for Make.  On POSIX, do the
+    # search ourselves.
+    make = 'make' if windows else shutil.which('make')
+    if not make:
+        raise FileNotFoundError('make program not found')
+
     def run(*command: str) -> None:
         env = None
         if windows:
@@ -100,12 +106,13 @@ def _build(*, source: pathlib.Path, install: pathlib.Path,
         # https://debbugs.gnu.org/37042.
         '--with-modules', '--with-toolkit-scroll-bars',
         '--disable-build-details',
+        'MAKE=' + make,
         'CC=' + cc.resolve().as_posix(),
         'CFLAGS=' + cflags,
         'LDFLAGS=' + ldflags)
     # Work around https://bugs.gnu.org/76441.
     # We can remove the workaround once we drop support for Emacs 29.
-    run('make', 'install', 'MAKEINFO=:')
+    run(make, 'install', 'MAKEINFO=:')
 
     # Build directory no longer needed, delete it.
     shutil.rmtree(temp, ignore_errors=True)
