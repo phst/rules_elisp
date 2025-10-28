@@ -132,8 +132,6 @@ class FileName final {
   NativeString string_;
 };
 
-std::size_t MaxFilename();
-
 absl::Status MakeErrorStatus(const std::error_code& code,
                              std::string_view function, std::string_view args);
 
