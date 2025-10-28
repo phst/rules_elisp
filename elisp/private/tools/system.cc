@@ -486,6 +486,52 @@ absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
   return FileName::FromString(rel);
 }
 
+absl::StatusOr<FileName> FileName::Resolve() const {
+#ifdef _WIN32
+  constexpr DWORD access = 0;
+  constexpr DWORD share = 0;
+  constexpr DWORD disposition = OPEN_EXISTING;
+  constexpr DWORD open_flags = FILE_FLAG_BACKUP_SEMANTICS;
+  const HANDLE handle = ::CreateFileW(this->pointer(), access, share, nullptr,
+                                      disposition, open_flags, nullptr);
+  if (handle == INVALID_HANDLE_VALUE) {
+    return WindowsStatus("CreateFileW", absl::Hex(access), absl::Hex(share),
+                         nullptr, disposition, absl::Hex(open_flags), nullptr);
+  }
+  const absl::Cleanup cleanup = [handle] {
+    if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus("CloseHandle");
+  };
+  std::array<wchar_t, 0x8000> buffer;
+  constexpr DWORD name_flags = FILE_NAME_NORMALIZED | VOLUME_NAME_DOS;
+  const DWORD length = ::GetFinalPathNameByHandleW(
+      handle, buffer.data(), DWORD{buffer.size()}, name_flags);
+  if (length == 0) {
+    return WindowsStatus("GetFinalPathNameByHandleW", kEllipsis, kEllipsis,
+                         absl::Hex(buffer.size()), absl::Hex(name_flags));
+  }
+  if (length >= buffer.size()) {
+    return absl::FailedPreconditionError(absl::StrFormat(
+        "Resolved filename is too long (%d characters)", length));
+  }
+  std::wstring_view result(buffer.data(), length);
+  // The resolved name always starts with the \\?\ prefix,
+  // cf. https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfinalpathnamebyhandlew#remarks.
+  // FileName doesn’t accept that, so we strip it.
+  constexpr std::wstring_view prefix = L"\\\\?\\";
+  if (result.substr(0, prefix.length()) != prefix) {
+    return absl::FailedPreconditionError(absl::StrFormat(
+        "Resolved filename %s doesn’t start with %s prefix", result, prefix));
+  }
+  result.remove_prefix(prefix.length());
+  return FileName::FromString(result);
+#else
+  char* const absl_nullable result = realpath(this->pointer(), nullptr);
+  if (result == nullptr) return ErrnoStatus("realpath", *this, nullptr);
+  const absl::Cleanup cleanup = [result] { std::free(result); };
+  return FileName::FromString(result);
+#endif
+}
+
 absl::StatusOr<std::string> ReadFile(const FileName& file) {
   std::ifstream stream(file.string(), std::ios::in | std::ios::binary);
   if (!stream.is_open() || !stream.good()) {
