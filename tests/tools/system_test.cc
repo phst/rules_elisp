@@ -551,6 +551,28 @@ TEST(CreateRemoveDirectoryTest, CreatesAndRemovesDirectories) {
   EXPECT_THAT(RemoveDirectory(dir), IsOk());
 }
 
+TEST(CreateDirectoriesTest, LeavesExistingDirectoryAlone) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  EXPECT_THAT(CreateDirectories(*temp), IsOk());
+}
+
+TEST(CreateDirectoriesTest, CreatesHierarchy) {
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName child =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("child")).value();
+  const FileName grandchild =
+      child.Child(RULES_ELISP_NATIVE_LITERAL("grandchild")).value();
+
+  EXPECT_THAT(CreateDirectories(grandchild), IsOk());
+
+  EXPECT_THAT(RemoveDirectory(grandchild), IsOk());
+  EXPECT_THAT(RemoveDirectory(child), IsOk());
+}
+
 TEST(ListDirectoryTests, ListsDirectory) {
   const absl::StatusOr<FileName> temp = TempDir();
   ASSERT_THAT(temp, IsOk());
