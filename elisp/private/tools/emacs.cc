@@ -54,25 +54,16 @@ static absl::StatusOr<int> RunEmacs(
   if (kWindows && release) {
     const absl::StatusOr<FileName> root = runfiles->Resolve(install);
     if (!root.ok()) return root.status();
-    // The longest filename in the Emacs release archive has 140 characters.
-    // Round up to 150 for some buffer and the directory separator.
-    constexpr std::size_t kMaxEntry = 150;
-    const std::size_t max_filename = MaxFilename();
-    CHECK_GT(max_filename, kMaxEntry);
-    const std::size_t max_root = max_filename - kMaxEntry;
-    if (root->string().length() > max_root) {
-      // The filenames in the released Emacs archive are too long.  Create a
-      // drive letter to shorten them.
-      absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
-      if (!device.ok()) return device.status();
-      absl::StatusOr<FileName> program = FileName::FromString(
-          device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
-      if (!program.ok()) return program.status();
-      emacs = *std::move(program);
-      dos_device = *std::move(device);
-    }
-  }
-  if (!dos_device.has_value()) {
+    // The filenames in the released Emacs archive are too long.  Create a
+    // drive letter to shorten them.
+    absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
+    if (!device.ok()) return device.status();
+    absl::StatusOr<FileName> program = FileName::FromString(
+        device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
+    if (!program.ok()) return program.status();
+    emacs = *std::move(program);
+    dos_device = *std::move(device);
+  } else {
     absl::StatusOr<FileName> binary = runfiles->Resolve(
         absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
     if (!binary.ok()) return binary.status();

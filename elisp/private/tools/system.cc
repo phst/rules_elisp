@@ -186,16 +186,6 @@ absl::StatusOr<FileName> FileName::Join(const NativeStringView descendant) const
   return this->Join(*name);
 }
 
-static constexpr std::size_t kMaxFilename{
-#ifdef _WIN32
-    MAX_PATH
-#else
-    PATH_MAX
-#endif
-};
-
-std::size_t MaxFilename() { return kMaxFilename; }
-
 absl::Status MakeErrorStatus(const std::error_code& code,
                              const std::string_view function,
                              const std::string_view args) {
