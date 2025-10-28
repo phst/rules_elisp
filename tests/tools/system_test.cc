@@ -140,10 +140,14 @@ INSTANTIATE_TEST_SUITE_P(
         RULES_ELISP_NATIVE_LITERAL("\\??\\X:/ABC/DEF")));
 
 TEST(FileNameTest, IsFormattable) {
-  const FileName foo =
-      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo")).value();
-  const FileName bar =
-      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'")).value();
+  const absl::StatusOr<FileName> foo =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo"));
+  const absl::StatusOr<FileName> bar =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"));
+  EXPECT_EQ(absl::StrCat("bar ", foo.value(), " baz"), "bar foo baz");
+  EXPECT_EQ(absl::StrFormat("bar %v baz", foo.value()), "bar foo baz");
+  EXPECT_EQ(absl::StrCat("foo ", bar.value(), " baz"), "foo bar äα𝐴🐈' baz");
+  EXPECT_EQ(absl::StrFormat("foo %v baz", bar.value()), "foo bar äα𝐴🐈' baz");
   EXPECT_EQ(absl::StrCat("bar ", foo, " baz"), "bar foo baz");
   EXPECT_EQ(absl::StrFormat("bar %v baz", foo), "bar foo baz");
   EXPECT_EQ(absl::StrCat("foo ", bar, " baz"), "foo bar äα𝐴🐈' baz");
