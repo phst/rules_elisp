@@ -458,6 +458,36 @@ TEST(MakeRelativeTest, Relativizes) {
   }
 }
 
+TEST(FileNameTest, ResolveRejectsNonExisting) {
+  const absl::StatusOr<FileName> dir = TempDir();
+  ASSERT_THAT(dir, IsOk());
+
+  const FileName file =
+      dir->Child(RULES_ELISP_NATIVE_LITERAL("nonexisting")).value();
+
+  EXPECT_THAT(file.Resolve(), StatusIs(absl::StatusCode::kNotFound));
+}
+
+TEST(FileNameTest, ResolvesRegularFile) {
+  const absl::StatusOr<FileName> dir = TempDir();
+  ASSERT_THAT(dir, IsOk());
+
+  const FileName file = dir->Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
+  EXPECT_THAT(WriteFile(file, "contents"), IsOk());
+  const absl::Cleanup cleanup = [&file] { EXPECT_THAT(Unlink(file), IsOk()); };
+
+  const absl::StatusOr<FileName> resolved = file.Resolve();
+  ASSERT_THAT(resolved, IsOk());
+  EXPECT_THAT(ReadFile(*resolved), IsOkAndHolds("contents"));
+}
+
+TEST(FileNameTest, ResolvesDirectory) {
+  const absl::StatusOr<FileName> dir = TempDir();
+  ASSERT_THAT(dir, IsOk());
+
+  EXPECT_THAT(dir->Resolve(), IsOk());
+}
+
 TEST(FileExistsTest, TestsThatFileExists) {
   const absl::StatusOr<FileName> dir = TempDir();
   ASSERT_THAT(dir, IsOk());

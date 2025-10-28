@@ -92,6 +92,7 @@ class FileName final {
 
   bool IsAbsolute() const;
   absl::StatusOr<FileName> MakeAbsolute() const;
+  absl::StatusOr<FileName> Resolve() const;
   absl::StatusOr<FileName> MakeRelative(const FileName& base) const;
 
   friend bool operator==(const FileName& a, const FileName& b) {
