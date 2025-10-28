@@ -59,6 +59,7 @@ using ::testing::HasSubstr;
 using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::Pair;
+using ::testing::PrintToString;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
 using ::testing::TestWithParam;
@@ -152,6 +153,10 @@ TEST(FileNameTest, IsFormattable) {
   EXPECT_EQ(absl::StrFormat("bar %v baz", foo), "bar foo baz");
   EXPECT_EQ(absl::StrCat("foo ", bar, " baz"), "foo bar äα𝐴🐈' baz");
   EXPECT_EQ(absl::StrFormat("foo %v baz", bar), "foo bar äα𝐴🐈' baz");
+  EXPECT_EQ(PrintToString(foo.value()), "foo");
+  EXPECT_EQ(PrintToString(bar.value()), "bar äα𝐴🐈'");
+  EXPECT_EQ(PrintToString(foo), "foo");
+  EXPECT_EQ(PrintToString(bar), "bar äα𝐴🐈'");
 }
 
 TEST(FileNameTest, ParentRejectsRoot) {
