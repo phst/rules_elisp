@@ -33,6 +33,10 @@ build --aspects='//dev:pylint.bzl%pylint'
 build --aspects='//dev:mypy.bzl%mypy'
 build --output_groups='+mypy'
 
+# Make Googletest use Abseil to support AbslStringify.
+# See https://github.com/google/googletest/issues/4383.
+build --define=absl=1
+
 # Suppress unactionable warnings about duplicate libraries.
 # TODO: File bug against rules_cc about this.
 build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'
