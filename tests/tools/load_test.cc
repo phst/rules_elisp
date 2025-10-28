@@ -66,11 +66,9 @@ TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
   EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
   EXPECT_THAT(WriteFile(bar_file, ""), IsOk());
 
-  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
-    EXPECT_THAT(Unlink(bar_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
+  const absl::Cleanup cleanup = [&foo_dir, &bar_dir] {
+    EXPECT_THAT(RemoveTree(foo_dir), IsOk());
+    EXPECT_THAT(RemoveTree(bar_dir), IsOk());
   };
 
   EXPECT_THAT(
@@ -111,11 +109,9 @@ TEST(LoadPathArgsTest, DirectoryNonAscii) {
   EXPECT_THAT(CreateDirectory(bar_dir), IsOk());
   EXPECT_THAT(WriteFile(bar_file, ""), IsOk());
 
-  const absl::Cleanup cleanup = [&foo_dir, &foo_file, &bar_dir, &bar_file] {
-    EXPECT_THAT(Unlink(foo_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(foo_dir), IsOk());
-    EXPECT_THAT(Unlink(bar_file), IsOk());
-    EXPECT_THAT(RemoveDirectory(bar_dir), IsOk());
+  const absl::Cleanup cleanup = [&foo_dir, &bar_dir] {
+    EXPECT_THAT(RemoveTree(foo_dir), IsOk());
+    EXPECT_THAT(RemoveTree(bar_dir), IsOk());
   };
 
   EXPECT_THAT(LoadPathArgs(*runfiles,
