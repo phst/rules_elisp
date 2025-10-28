@@ -238,6 +238,7 @@ absl::Status Unlink(const FileName& file);
 absl::Status CreateDirectory(const FileName& name);
 absl::Status CreateDirectories(const FileName& name);
 absl::Status RemoveDirectory(const FileName& name);
+absl::Status RemoveTree(const FileName& directory);
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
 absl::Status CopyFile(const FileName& from, const FileName& to);
 absl::Status CopyTree(const FileName& from, const FileName& to);

@@ -319,7 +319,10 @@ cc_library(
     hdrs = ["system.h"],
     copts = COPTS + CXXOPTS,
     features = FEATURES,
-    linkopts = LINKOPTS,
+    linkopts = LINKOPTS + select({
+        "//private:msvc_or_clang_cl": ["/DEFAULTLIB:Shell32.lib"],
+        "//conditions:default": [],
+    }),
     linkstatic = True,
     local_defines = DEFINES,
     visibility = ["//tests/tools:__pkg__"],
