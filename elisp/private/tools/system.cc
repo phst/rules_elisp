@@ -86,6 +86,7 @@
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
+#include "absl/strings/str_join.h"
 #include "absl/strings/str_split.h"
 #include "absl/time/clock.h"  // IWYU pragma: keep, only on Windows
 #include "absl/time/time.h"
@@ -189,9 +190,83 @@ absl::StatusOr<FileName> FileName::Join(
   return this->Join(*name);
 }
 
-absl::Status MakeErrorStatus(const std::error_code& code,
-                             const std::string_view function,
-                             const std::string_view args) {
+namespace {
+
+struct Ellipsis final {};
+static constexpr Ellipsis kEllipsis;
+
+struct Oct final {
+  std::uint64_t value;
+  explicit constexpr Oct(const std::uint64_t v) : value(v) {}
+};
+
+struct ArgFormatter final {
+  void operator()(std::string* const absl_nonnull out,
+                  const absl::AlphaNum& value) const {
+    const auto base = absl::AlphaNumFormatter();
+    base(out, value);
+  }
+
+  void operator()(std::string* const absl_nonnull out, Ellipsis) const {
+    out->append("...");
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::string& string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::wstring& string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::string_view string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const std::wstring_view string) const {
+    out->append(Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const char* const absl_nullable string) const {
+    out->append(string == nullptr ? "nullptr" : Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const wchar_t* const absl_nullable string) const {
+    out->append(string == nullptr ? "nullptr" : Quote(string));
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const FileName& file) const {
+    out->append(Quote(file.string()));
+  }
+
+  void operator()(std::string* const absl_nonnull out, std::nullptr_t) const {
+    out->append("nullptr");
+  }
+
+  void operator()(std::string* const absl_nonnull out,
+                  const absl::Hex& number) const {
+    const auto base = absl::AlphaNumFormatter();
+    out->append("0x");
+    base(out, number);
+  }
+
+  void operator()(std::string* const absl_nonnull out, const Oct number) const {
+    absl::StrAppendFormat(out, "0%03o", number.value);
+  }
+};
+
+}  // namespace
+
+static absl::Status MakeErrorStatus(const std::error_code& code,
+                                    const std::string_view function,
+                                    const std::string_view args) {
   if (!code) return absl::OkStatus();
   const std::error_condition condition = code.default_error_condition();
   const std::string message = absl::StrCat(
@@ -202,20 +277,40 @@ absl::Status MakeErrorStatus(const std::error_code& code,
              : absl::UnknownError(message);
 }
 
-[[nodiscard]] std::error_code WindowsError() {
+template <typename... Ts>
+static absl::Status ErrorStatus(const std::error_code& code,
+                                const std::string_view function, Ts&&... args) {
+  const ArgFormatter formatter;
+  return MakeErrorStatus(
+      code, function,
+      absl::StrJoin(std::forward_as_tuple(args...), ", ", formatter));
+}
+
 #ifdef _WIN32
+[[nodiscard]] static std::error_code WindowsError() {
   const DWORD code = ::GetLastError();
   const std::optional<int> i = CastNumber<int>(code);
   return i.has_value() ? std::error_code(*i, std::system_category())
                        : std::make_error_code(std::errc::value_too_large);
-#else
-  return std::make_error_code(std::errc::operation_not_supported);
-#endif
 }
 
-[[nodiscard]] std::error_code ErrnoError() {
+template <typename... Ts>
+static absl::Status WindowsStatus(const std::string_view function,
+                                  Ts&&... args) {
+  const std::error_code code = WindowsError();
+  return ErrorStatus(code, function, std::forward<Ts>(args)...);
+}
+#endif
+
+[[nodiscard]] static std::error_code ErrnoError() {
   const int code = errno;
   return std::error_code(code, std::generic_category());
+}
+
+template <typename... Ts>
+static absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
+  const std::error_code code = ErrnoError();
+  return ErrorStatus(code, function, std::forward<Ts>(args)...);
 }
 
 #ifdef _WIN32

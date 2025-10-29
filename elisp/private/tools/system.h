@@ -16,13 +16,10 @@
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
 #include <cstddef>
-#include <cstdint>
 #include <cstdio>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <system_error>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -33,9 +30,6 @@
 #include "absl/log/die_if_null.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
-#include "absl/strings/str_cat.h"
-#include "absl/strings/str_format.h"
-#include "absl/strings/str_join.h"
 #include "absl/time/time.h"
 #include "absl/types/span.h"
 
@@ -132,104 +126,6 @@ class FileName final {
 
   NativeString string_;
 };
-
-absl::Status MakeErrorStatus(const std::error_code& code,
-                             std::string_view function, std::string_view args);
-
-struct Ellipsis final {};
-inline constexpr Ellipsis kEllipsis;
-
-struct Oct final {
-  std::uint64_t value;
-  explicit constexpr Oct(const std::uint64_t v) : value(v) {}
-};
-
-struct ArgFormatter final {
-  void operator()(std::string* const absl_nonnull out,
-                  const absl::AlphaNum& value) const {
-    const auto base = absl::AlphaNumFormatter();
-    base(out, value);
-  }
-
-  void operator()(std::string* const absl_nonnull out, Ellipsis) const {
-    out->append("...");
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const std::string& string) const {
-    out->append(Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const std::wstring& string) const {
-    out->append(Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const std::string_view string) const {
-    out->append(Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const std::wstring_view string) const {
-    out->append(Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const char* const absl_nullable string) const {
-    out->append(string == nullptr ? "nullptr" : Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const wchar_t* const absl_nullable string) const {
-    out->append(string == nullptr ? "nullptr" : Quote(string));
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const FileName& file) const {
-    out->append(Quote(file.string()));
-  }
-
-  void operator()(std::string* const absl_nonnull out, std::nullptr_t) const {
-    out->append("nullptr");
-  }
-
-  void operator()(std::string* const absl_nonnull out,
-                  const absl::Hex& number) const {
-    const auto base = absl::AlphaNumFormatter();
-    out->append("0x");
-    base(out, number);
-  }
-
-  void operator()(std::string* const absl_nonnull out, const Oct number) const {
-    absl::StrAppendFormat(out, "0%03o", number.value);
-  }
-};
-
-template <typename... Ts>
-absl::Status ErrorStatus(const std::error_code& code,
-                         const std::string_view function, Ts&&... args) {
-  const ArgFormatter formatter;
-  return MakeErrorStatus(
-      code, function,
-      absl::StrJoin(std::forward_as_tuple(args...), ", ", formatter));
-}
-
-[[nodiscard]] std::error_code WindowsError();
-
-template <typename... Ts>
-absl::Status WindowsStatus(const std::string_view function, Ts&&... args) {
-  const std::error_code code = WindowsError();
-  return ErrorStatus(code, function, std::forward<Ts>(args)...);
-}
-
-[[nodiscard]] std::error_code ErrnoError();
-
-template <typename... Ts>
-absl::Status ErrnoStatus(const std::string_view function, Ts&&... args) {
-  const std::error_code code = ErrnoError();
-  return ErrorStatus(code, function, std::forward<Ts>(args)...);
-}
 
 absl::StatusOr<std::string> ReadFile(const FileName& file);
 absl::Status WriteFile(const FileName& file, std::string_view contents);
