@@ -18,6 +18,16 @@ IndentPPDirectives: AfterHash
 IncludeCategories:
   - Regex: '^"elisp/'
     Priority: 100
+  - Regex: '^<windows\.h>$'
+    Priority: 10
+    SortPriority: 10
+  - Regex: '^<.+\.h>$'
+    Priority: 10
+    SortPriority: 11
+  - Regex: '^<'
+    Priority: 30
+  - Regex: '^"'
+    Priority: 40
 
 RawStringFormats:
   - Language: Json
