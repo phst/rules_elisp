@@ -1255,10 +1255,9 @@ absl::StatusOr<int> Run(const FileName& program,
     }
   };
   PROCESS_INFORMATION process_info;
-  const BOOL success = ::CreateProcessW(
-      abs_program->pointer(), Pointer(*command_line), nullptr, nullptr,
-      inherit_handles, flags, envp->data(), dirp, &startup_info, &process_info);
-  if (!success) {
+  if (!::CreateProcessW(abs_program->pointer(), Pointer(*command_line), nullptr,
+                        nullptr, inherit_handles, flags, envp->data(), dirp,
+                        &startup_info, &process_info)) {
     return WindowsStatus("CreateProcessW", *abs_program, *command_line, nullptr,
                          nullptr, inherit_handles, absl::Hex(flags), kEllipsis,
                          dirp);
@@ -1267,8 +1266,9 @@ absl::StatusOr<int> Run(const FileName& program,
     LOG(ERROR) << WindowsStatus("CloseHandle");
   }
   const absl::Cleanup close_handle = [&process_info] {
-    const BOOL success = ::CloseHandle(process_info.hProcess);
-    if (!success) LOG(ERROR) << WindowsStatus("CloseHandle");
+    if (!::CloseHandle(process_info.hProcess)) {
+      LOG(ERROR) << WindowsStatus("CloseHandle");
+    }
   };
   const DWORD timeout_ms =
       has_deadline
