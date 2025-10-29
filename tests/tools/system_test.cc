@@ -19,7 +19,6 @@
 #include <iterator>
 #include <optional>
 #include <string>
-#include <string_view>
 #include <system_error>
 #include <utility>
 #include <vector>
@@ -723,118 +722,6 @@ TEST(CopyFileTest, CopiesFile) {
 
   EXPECT_THAT(CopyFile(from, to), IsOk());
   EXPECT_THAT(ReadFile(to), IsOkAndHolds("contents"));
-}
-
-TEST(CopyTreeTest, RejectsSelfCopy) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  EXPECT_THAT(CopyTree(*temp, *temp),
-              StatusIs(AnyOf(absl::StatusCode::kAlreadyExists,
-                             absl::StatusCode::kNotFound)));
-}
-
-TEST(CopyTreeTest, RejectsCopyFromRootDirectory) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const FileName from =
-      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
-                                    : RULES_ELISP_NATIVE_LITERAL("/"))
-          .value();
-  const FileName to = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
-
-  EXPECT_THAT(CopyTree(from, to), StatusIs(absl::StatusCode::kInvalidArgument));
-
-  EXPECT_THAT(RemoveDirectory(to), StatusIs(absl::StatusCode::kNotFound));
-}
-
-TEST(CopyTreeTest, RejectsCopyToRootDirectory) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const FileName to =
-      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\")
-                                    : RULES_ELISP_NATIVE_LITERAL("/"))
-          .value();
-
-  EXPECT_THAT(CopyTree(*temp, to), StatusIs(absl::StatusCode::kAlreadyExists));
-}
-
-TEST(CopyTreeTest, RejectsCopyToExistingDirectory) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const FileName from_dir =
-      temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
-  const FileName from_file =
-      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-  const FileName to_dir = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
-  const FileName to_file =
-      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-
-  const absl::Cleanup cleanup = [&from_dir, &to_dir] {
-    EXPECT_THAT(RemoveTree(from_dir), IsOk());
-    EXPECT_THAT(RemoveTree(to_dir), IsOk());
-  };
-
-  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
-  EXPECT_THAT(CreateDirectory(to_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
-
-  EXPECT_THAT(CopyTree(from_dir, to_dir),
-              StatusIs(absl::StatusCode::kAlreadyExists));
-}
-
-TEST(CopyTreeTest, CopiesToNewDirectory) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const FileName from_dir =
-      temp->Child(RULES_ELISP_NATIVE_LITERAL("from")).value();
-  const FileName from_file =
-      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-  const FileName to_dir = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
-  const FileName to_file =
-      to_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-
-  const absl::Cleanup cleanup = [&from_dir, &to_dir] {
-    EXPECT_THAT(RemoveTree(from_dir), IsOk());
-    EXPECT_THAT(RemoveTree(to_dir), IsOk());
-  };
-
-  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
-
-  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
-
-  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
-}
-
-TEST(CopyTreeTest, IgnoresTrailingSlash) {
-  const absl::StatusOr<FileName> temp = TempDir();
-  ASSERT_THAT(temp, IsOk());
-
-  const FileName from_dir =
-      temp->Join(NativeString(RULES_ELISP_NATIVE_LITERAL("from")) + kSeparator)
-          .value();
-  const FileName from_file =
-      from_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-  const FileName to_dir = temp->Child(RULES_ELISP_NATIVE_LITERAL("to")).value();
-  const FileName to_file =
-      to_dir.Child(RULES_ELISP_NATIVE_LITERAL("file")).value();
-
-  const absl::Cleanup cleanup = [&from_dir, &to_dir] {
-    EXPECT_THAT(RemoveTree(from_dir), IsOk());
-    EXPECT_THAT(RemoveTree(to_dir), IsOk());
-  };
-
-  EXPECT_THAT(CreateDirectory(from_dir), IsOk());
-  EXPECT_THAT(WriteFile(from_file, "contents"), IsOk());
-
-  EXPECT_THAT(CopyTree(from_dir, to_dir), IsOk());
-
-  EXPECT_THAT(ReadFile(to_file), IsOkAndHolds("contents"));
 }
 
 TEST(EnvironmentTest, CurrentReturnsValidEnv) {

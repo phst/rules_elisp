@@ -243,7 +243,6 @@ absl::Status RemoveTree(const FileName& directory);
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
 absl::Status Rename(const FileName& from, const FileName& to);
 absl::Status CopyFile(const FileName& from, const FileName& to);
-absl::Status CopyTree(const FileName& from, const FileName& to);
 
 class Environment final {
  private:
