@@ -31,7 +31,9 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
+#  include <pathcch.h>
 #  include <shellapi.h>
+#  include <shlwapi.h>
 #else
 #  include <dirent.h>
 #  include <fcntl.h>
@@ -50,6 +52,8 @@
 #  include <copyfile.h>     // for copyfile
 #  include <crt_externs.h>  // for _NSGetEnviron
 #endif
+
+#undef StrCat
 
 #include <algorithm>  // IWYU pragma: keep, only on Windows
 #include <array>      // IWYU pragma: keep, only on Windows
@@ -76,6 +80,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/attributes.h"
+#include "absl/base/no_destructor.h"  // IWYU pragma: keep, only on Windows
 #include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"
 #include "absl/container/hash_container_defaults.h"
@@ -97,6 +102,19 @@
 #include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
+
+namespace {
+
+struct Ellipsis final {};
+static constexpr Ellipsis kEllipsis;
+
+}  // namespace
+
+#ifdef _WIN32
+template <typename... Ts>
+static absl::Status HResultStatus(HRESULT hr, std::string_view function,
+                                  Ts&&... args);
+#endif
 
 absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   if (string.empty()) return absl::InvalidArgumentError("Empty filename");
@@ -133,23 +151,62 @@ absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   return FileName(std::move(name));
 }
 
+#ifdef _WIN32
+static const NativeChar* absl_nonnull Pointer(
+    const NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND);
+#endif
+
 absl::StatusOr<FileName> FileName::Parent() const {
-  NativeStringView string = string_;
-  while (string.back() == kSeparator) string.remove_suffix(1);
-  NativeStringView::size_type i = string.rfind(kSeparator);
+  NativeString string = string_;
+  while (string.back() == kSeparator) string.pop_back();
+  NativeString::size_type i = string.rfind(kSeparator);
   if (i == string.npos || (kWindows && i == 0)) {
     return absl::InvalidArgumentError(
         absl::StrFormat("File %v has no parent", *this));
   }
-  const NativeStringView element = string.substr(i + 1);
+  const NativeStringView view = string;
+  const NativeStringView element = view.substr(i + 1);
   if (element == RULES_ELISP_NATIVE_LITERAL(".") ||
       element == RULES_ELISP_NATIVE_LITERAL("..")) {
     return absl::InvalidArgumentError(absl::StrFormat(
         "Removing trailing component %s would be ambiguous", element));
   }
+#ifdef _WIN32
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
+  {
+    constexpr ULONG flags = PATHCCH_NONE;
+    const HRESULT hr = PathCchCanonicalizeEx(buffer.data(), buffer.size(),
+                                             Pointer(string), flags);
+    if (FAILED(hr)) {
+      return HResultStatus(hr, "PathCchCanonializeEx", kEllipsis,
+                           absl::Hex(buffer.size()), *this, absl::Hex(flags));
+    }
+  }
+  {
+    PWSTR end;
+    const HRESULT hr =
+        PathCchRemoveBackslashEx(buffer.data(), buffer.size(), &end, nullptr);
+    if (FAILED(hr)) {
+      return HResultStatus(hr, "PathCchRemoveBackslashEx", buffer.data(),
+                           absl::Hex(buffer.size()));
+    }
+    if (*end != L'\0') {
+      return absl::FailedPreconditionError(absl::StrFormat(
+          "Cannot remove trailing backslash from %s", buffer.data()));
+    }
+  }
+  {
+    const HRESULT hr = PathCchRemoveFileSpec(buffer.data(), buffer.size());
+    if (FAILED(hr)) {
+      return HResultStatus(hr, "PathCchRemoveFileSpec", buffer.data(),
+                           absl::Hex(buffer.size()));
+    }
+  }
+  return FileName::FromString(buffer.data());
+#else
   // Root directories need to end in a separator character.
-  if (i == (kWindows ? 2 : 0)) i++;
-  return FileName::FromString(string.substr(0, i));
+  return FileName::FromString(string.substr(0, i == 0 ? 1 : i));
+#endif
 }
 
 absl::StatusOr<FileName> FileName::Child(const FileName& child) const {
@@ -160,10 +217,7 @@ absl::StatusOr<FileName> FileName::Child(const FileName& child) const {
     return absl::InvalidArgumentError(
         absl::StrFormat("File %v is not a child of %v", child, *this));
   }
-  NativeString result = string_;
-  if (result.back() != kSeparator) result.push_back(kSeparator);
-  result += string;
-  return FileName::FromString(std::move(result));
+  return this->Join(child);
 }
 
 absl::StatusOr<FileName> FileName::Child(const NativeStringView child) const {
@@ -177,10 +231,21 @@ absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
     return absl::InvalidArgumentError(
         absl::StrFormat("File name %v is absolute", descendant));
   }
-  NativeString result = string_;
-  if (result.back() != kSeparator) result.push_back(kSeparator);
-  result += descendant.string_;
-  return FileName::FromString(std::move(result));
+#ifdef _WIN32
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
+  constexpr ULONG flags = PATHCCH_NONE;
+  const HRESULT hr =
+      ::PathCchCombineEx(buffer.data(), buffer.size(), this->pointer(),
+                         descendant.pointer(), flags);
+  if (FAILED(hr)) {
+    return HResultStatus(hr, "::PathCchCombineEx", kEllipsis,
+                         absl::Hex(buffer.size()), *this, descendant, flags);
+  }
+  return FileName::FromString(buffer.data());
+#else
+  return FileName::FromString(absl::StrCat(
+      string_, string_.back() == '/' ? "" : "/", descendant.string_));
+#endif
 }
 
 absl::StatusOr<FileName> FileName::Join(
@@ -191,9 +256,6 @@ absl::StatusOr<FileName> FileName::Join(
 }
 
 namespace {
-
-struct Ellipsis final {};
-static constexpr Ellipsis kEllipsis;
 
 struct Oct final {
   std::uint64_t value;
@@ -299,6 +361,71 @@ static absl::Status WindowsStatus(const std::string_view function,
                                   Ts&&... args) {
   const std::error_code code = WindowsError();
   return ErrorStatus(code, function, std::forward<Ts>(args)...);
+}
+
+namespace {
+
+class HResultCategory final : public std::error_category {
+ public:
+  static const HResultCategory& Get() {
+    static const absl::NoDestructor<HResultCategory> instance;
+    return *instance;
+  }
+
+  const char* absl_nonnull name() const noexcept final {
+    return "rules_elisp::HResultCategory";
+  }
+
+  std::string message(int val) const final {
+    const HRESULT hr{val};
+    std::string result = absl::StrFormat(
+        "HRESULT %#010x (severity %d, facility %#06x, code %#06x)", hr,
+        HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr));
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    if (win32.has_value()) absl::StrAppend(&result, "; ", win32->message());
+    return result;
+  };
+
+  std::error_condition default_error_condition(int val) const noexcept final {
+    const HRESULT hr{val};
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    return win32.has_value()
+               ? win32->default_error_condition()
+               : this->std::error_category::default_error_condition(val);
+  }
+
+  bool equivalent(const std::error_code& code, int val) const noexcept final {
+    if (this->std::error_category::equivalent(code, val)) return true;
+    const HRESULT hr{val};
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    return win32.has_value() && code == *win32;
+  }
+
+ private:
+  static std::optional<std::error_code> ToWin32(const HRESULT hr) {
+    if (hr == S_OK) return std::error_code();
+    if (HRESULT_SEVERITY(hr) == SEVERITY_ERROR &&
+        HRESULT_FACILITY(hr) == FACILITY_WIN32) {
+      const int code{HRESULT_CODE(hr)};
+      if (HRESULT_FROM_WIN32(code) == hr) {
+        return std::error_code(code, std::system_category());
+      }
+    }
+    return std::nullopt;
+  }
+};
+
+}  // namespace
+
+[[nodiscard]] static std::error_code HResultError(const HRESULT hr) {
+  return std::error_code(hr, HResultCategory::Get());
+}
+
+template <typename... Ts>
+static absl::Status HResultStatus(const HRESULT hr,
+                                  const std::string_view function,
+                                  Ts&&... args) {
+  return ErrorStatus(HResultError(hr), function, std::forward<Ts>(args)...);
 }
 #endif
 
@@ -579,7 +706,18 @@ absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
     return absl::InvalidArgumentError(
         absl::StrFormat("File %s is not within %s", file_str, base_str));
   }
+#ifdef _WIN32
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
+  if (!::PathRelativePathToW(buffer.data(), Pointer(base_str),
+                             FILE_ATTRIBUTE_DIRECTORY, Pointer(file_str),
+                             FILE_ATTRIBUTE_NORMAL)) {
+    return absl::FailedPreconditionError(
+        absl::StrFormat("Cannot make %s relative to %s", file_str, base_str));
+  }
+  return FileName::FromString(buffer.data());
+#else
   return FileName::FromString(rel);
+#endif
 }
 
 absl::StatusOr<FileName> FileName::Resolve() const {
@@ -597,7 +735,7 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   const absl::Cleanup cleanup = [handle] {
     if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus("CloseHandle");
   };
-  std::array<wchar_t, 0x8000> buffer;
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
   constexpr DWORD name_flags = FILE_NAME_NORMALIZED | VOLUME_NAME_DOS;
   const DWORD length = ::GetFinalPathNameByHandleW(
       handle, buffer.data(), DWORD{buffer.size()}, name_flags);
@@ -671,7 +809,7 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
 
 [[nodiscard]] bool FileExists(const FileName& file) {
 #ifdef _WIN32
-  return ::GetFileAttributesW(file.pointer()) != INVALID_FILE_ATTRIBUTES;
+  return ::PathFileExistsW(file.pointer()) == TRUE;
 #else
   struct stat st;
   return lstat(file.pointer(), &st) == 0;
