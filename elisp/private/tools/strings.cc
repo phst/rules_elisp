@@ -40,7 +40,7 @@ std::string DoQuote(const std::basic_string_view<Char> string) {
   std::basic_ostringstream<Char> stream;
   stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
   stream.imbue(std::locale::classic());
-  stream << std::quoted(string);
+  stream << std::quoted(string) << std::flush;
   return absl::StrFormat("%s", stream.str());
 }
 
