@@ -355,7 +355,12 @@ cc_library(
     copts = COPTS + CXXOPTS,
     features = FEATURES,
     linkopts = LINKOPTS + select({
-        "//private:msvc_or_clang_cl": ["/DEFAULTLIB:Shell32.lib"],
+        "//private:msvc_or_clang_cl": [
+            # keep sorted
+            "/DEFAULTLIB:Pathcch.lib",
+            "/DEFAULTLIB:Shell32.lib",
+            "/DEFAULTLIB:Shlwapi.lib",
+        ],
         "//conditions:default": [],
     }),
     linkstatic = True,
@@ -367,6 +372,7 @@ cc_library(
         ":strings",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:core_headers",
+        "@abseil-cpp//absl/base:no_destructor",
         "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/container:flat_hash_map",

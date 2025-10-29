@@ -423,7 +423,9 @@ TEST(MakeRelativeTest, Relativizes) {
   const FileName foo_slash =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/")).value();
   const FileName bar =
-      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar")).value();
+      FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL(".\\bar")
+                                    : RULES_ELISP_NATIVE_LITERAL("bar"))
+          .value();
   const FileName foo_bar =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo/bar")).value();
 
@@ -436,7 +438,7 @@ TEST(MakeRelativeTest, Relativizes) {
         FileName::FromString(RULES_ELISP_NATIVE_LITERAL("C:\\Foo\\Bar"))
             .value();
     const FileName c_bar =
-        FileName::FromString(RULES_ELISP_NATIVE_LITERAL("Bar")).value();
+        FileName::FromString(RULES_ELISP_NATIVE_LITERAL(".\\Bar")).value();
     EXPECT_THAT(c_foo_bar.MakeRelative(c_foo), IsOkAndHolds(c_bar));
   }
 }
