@@ -27,7 +27,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/log_severity.h"
-#include "absl/container/fixed_array.h"
+#include "absl/log/check.h"
 #include "absl/log/globals.h"
 #include "absl/log/initialize.h"
 #include "absl/log/log.h"
@@ -353,57 +353,13 @@ static absl::Status Build(const FileName& source, const FileName& install,
   return absl::OkStatus();
 }
 
-[[nodiscard]] static bool ConsumePrefix(NativeStringView& string,
-                                        const NativeStringView prefix) {
-  const NativeStringView::size_type n = prefix.length();
-  if (string.substr(0, n) == prefix) {
-    string.remove_prefix(n);
-    return true;
-  }
-  return false;
-}
-
-static absl::Status Main(absl::Span<const NativeStringView> args) {
-  if (args.empty()) {
-    return absl::InvalidArgumentError("Missing command-line arguments");
-  }
-  args.remove_prefix(1);
-  NativeStringView readme;
-  NativeStringView install;
-  NativeStringView srcs;
-  NativeStringView bash;
-  NativeStringView cc;
-  NativeStringView cflags;
-  NativeStringView ldflags;
-  NativeStringView module_header;
-  while (!args.empty()) {
-    NativeStringView arg = args.front();
-    if (arg.empty() || arg.front() != RULES_ELISP_NATIVE_LITERAL('-')) break;
-    args.remove_prefix(1);
-    if (arg == RULES_ELISP_NATIVE_LITERAL("--")) break;
-    if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--readme="))) {
-      readme = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--install="))) {
-      install = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--srcs="))) {
-      srcs = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--bash="))) {
-      bash = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--cc="))) {
-      cc = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--cflags="))) {
-      cflags = arg;
-    } else if (ConsumePrefix(arg, RULES_ELISP_NATIVE_LITERAL("--ldflags="))) {
-      ldflags = arg;
-    } else if (ConsumePrefix(arg,
-                             RULES_ELISP_NATIVE_LITERAL("--module-header="))) {
-      module_header = arg;
-    } else {
-      return absl::InvalidArgumentError(
-          absl::StrFormat("Unknown command-line option %s", arg));
-    }
-  }
-
+static absl::Status Main(const NativeStringView readme,
+                         const NativeStringView install,
+                         const NativeStringView bash, const NativeStringView cc,
+                         const NativeStringView cflags,
+                         const NativeStringView ldflags,
+                         const NativeStringView module_header,
+                         const NativeStringView srcs) {
   const absl::StatusOr<FileName> readme_file = FileName::FromString(readme);
   if (!readme_file.ok()) return readme_file.status();
 
@@ -451,8 +407,9 @@ static absl::Status Main(absl::Span<const NativeStringView> args) {
 int RULES_ELISP_MAIN(const int argc, rules_elisp::NativeChar** const argv) {
   absl::InitializeLog();
   absl::SetStderrThreshold(absl::LogSeverityAtLeast::kWarning);
-  const absl::FixedArray<rules_elisp::NativeStringView> args(argv, argv + argc);
-  const absl::Status status = rules_elisp::Main(args);
+  QCHECK_EQ(argc, 9);
+  const absl::Status status = rules_elisp::Main(
+      argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8]);
   if (!status.ok()) {
     LOG(ERROR) << status;
     return EXIT_FAILURE;

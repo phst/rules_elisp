@@ -207,33 +207,33 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
         )
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
-    args.add(readme, format = "--readme=%s")
-    args.add(install.path, format = "--install=%s")
-    args.add(shell_toolchain.path, format = "--bash=%s")
-    args.add(cc, format = "--cc=%s")
+    args.add(readme)
+    args.add(install.path)
+    args.add(shell_toolchain.path)
+    args.add(cc)
     args.add_joined(
         cflags,
         join_with = " ",
         map_each = _munge_msvc_flag,
-        format_joined = "--cflags=%s",
         omit_if_empty = False,
         expand_directories = False,
     )
     args.add_joined(
         ldflags,
         join_with = " ",
-        format_joined = "--ldflags=%s",
         omit_if_empty = False,
         expand_directories = False,
     )
     srcs = ctx.actions.args()
-    srcs.use_param_file("--srcs=%s", use_always = True)
+    srcs.use_param_file("%s", use_always = True)
     srcs.set_param_file_format("multiline")
     srcs.add_all(ctx.files.srcs, uniquify = True)
     secondary_outs = []
     if ctx.outputs.module_header:
-        args.add(ctx.outputs.module_header, format = "--module-header=%s")
+        args.add(ctx.outputs.module_header)
         secondary_outs.append(ctx.outputs.module_header)
+    else:
+        args.add("")
     ctx.actions.run(
         outputs = [install] + secondary_outs,
         inputs = depset(
