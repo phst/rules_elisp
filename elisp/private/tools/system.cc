@@ -30,8 +30,8 @@
 #  ifndef WIN32_LEAN_AND_MEAN
 #    define WIN32_LEAN_AND_MEAN
 #  endif
-#  include <windows.h>
 #  include <shellapi.h>
+#  include <windows.h>
 #else
 #  include <dirent.h>
 #  include <fcntl.h>
@@ -47,12 +47,12 @@
 #endif
 
 #ifdef __APPLE__
-#  include <copyfile.h>  // for copyfile
+#  include <copyfile.h>     // for copyfile
 #  include <crt_externs.h>  // for _NSGetEnviron
 #endif
 
 #include <algorithm>  // IWYU pragma: keep, only on Windows
-#include <array>  // IWYU pragma: keep, only on Windows
+#include <array>      // IWYU pragma: keep, only on Windows
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep, only on Windows
@@ -182,7 +182,8 @@ absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
   return FileName::FromString(std::move(result));
 }
 
-absl::StatusOr<FileName> FileName::Join(const NativeStringView descendant) const {
+absl::StatusOr<FileName> FileName::Join(
+    const NativeStringView descendant) const {
   const absl::StatusOr<FileName> name = FileName::FromString(descendant);
   if (!name.ok()) return name.status();
   return this->Join(*name);
@@ -919,9 +920,7 @@ class EnvironmentBlock final {
       return *this;
     }
 
-    bool operator!=(Sentinel) const {
-      return !AtEnd();
-    }
+    bool operator!=(Sentinel) const { return !AtEnd(); }
 
    private:
     std::conditional_t<kWindows, std::wstring_view, Environ> cur_;
@@ -1141,7 +1140,7 @@ absl::StatusOr<FileName> SearchPath(const FileName& program) {
   const DWORD length =
       ::SearchPathW(nullptr, program.pointer(), extension, DWORD{buffer.size()},
                     buffer.data(), nullptr);
-  if (length == 0){
+  if (length == 0) {
     return WindowsStatus("SearchPathW", nullptr, program, extension,
                          absl::Hex(buffer.size()), kEllipsis, nullptr);
   }
