@@ -29,7 +29,7 @@
 #include "absl/base/attributes.h"
 #include "absl/base/nullability.h"
 #include "absl/container/flat_hash_map.h"
-#include "absl/log/check.h"
+#include "absl/log/absl_check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -68,19 +68,19 @@ class FileName final {
   FileName& operator=(FileName&&) = default;
 
   const NativeString& string() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    CHECK(!string_.empty());
+    ABSL_CHECK(!string_.empty());
     return string_;
   }
 
   NativeChar* absl_nonnull pointer() ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    CHECK(!string_.empty());
-    CHECK(!ContainsNull(string_));
+    ABSL_CHECK(!string_.empty());
+    ABSL_CHECK(!ContainsNull(string_));
     return string_.data();
   }
 
   const NativeChar* absl_nonnull pointer() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    CHECK(!string_.empty());
-    CHECK(!ContainsNull(string_));
+    ABSL_CHECK(!string_.empty());
+    ABSL_CHECK(!ContainsNull(string_));
     return string_.data();
   }
 
@@ -127,7 +127,7 @@ class FileName final {
 
  private:
   explicit FileName(NativeString string) : string_(std::move(string)) {
-    CHECK(!string_.empty());
+    ABSL_CHECK(!string_.empty());
   }
 
   NativeString string_;
@@ -417,14 +417,14 @@ class DosDevice final {
   }
 
   const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    CHECK(!name_.empty());
+    ABSL_CHECK(!name_.empty());
     return name_;
   }
 
  private:
   explicit DosDevice(NativeString name, FileName target)
       : name_(std::move(name)), target_(std::move(target)) {
-    CHECK(!name_.empty());
+    ABSL_CHECK(!name_.empty());
   }
 
   NativeString name_;
