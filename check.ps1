@@ -67,10 +67,6 @@ foreach ($version in $versions) {
 
 Run-Bazel 'mod' 'graph' > $null
 
-# FIXME: Right now coverage for the external repository fails.  Remove the line
-# below once it's fixed.
-$Coverage = $false
-
 Join-Path -Path examples -ChildPath ext | Set-Location
 Run-Tests
 Run-Bazel 'mod' 'graph' > $null
