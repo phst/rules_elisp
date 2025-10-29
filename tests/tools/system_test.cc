@@ -19,7 +19,6 @@
 #include <iterator>
 #include <optional>
 #include <string>
-#include <system_error>
 #include <utility>
 #include <vector>
 
@@ -47,14 +46,12 @@ namespace rules_elisp {
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
-using ::testing::_;
 using ::testing::AnyOf;
 using ::testing::Contains;
 using ::testing::ElementsAre;
 using ::testing::EndsWith;
 using ::testing::Ge;
 using ::testing::Gt;
-using ::testing::HasSubstr;
 using ::testing::IsEmpty;
 using ::testing::Not;
 using ::testing::Pair;
@@ -259,19 +256,6 @@ TEST(FileNameTest, JoinCoalescesSlashes) {
   EXPECT_EQ(descendant->string(),
             kWindows ? RULES_ELISP_NATIVE_LITERAL("foo\\bar\\baz")
                      : RULES_ELISP_NATIVE_LITERAL("foo/bar/baz"));
-}
-
-TEST(ErrorStatusTest, FormatsArguments) {
-  EXPECT_THAT(
-      ErrorStatus(std::make_error_code(std::errc::interrupted), "fóo", "bár",
-                  L"báz", 42, absl::Hex(0x42), Oct(042), nullptr),
-      StatusIs(_,
-               HasSubstr("fóo(\"bár\", L\"báz\", 42, 0x42, 0042, nullptr)")));
-}
-
-TEST(ErrnoStatusTest, ReturnsMatchingStatus) {
-  errno = ENOENT;
-  EXPECT_THAT(ErrnoStatus("foo"), StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST(ToNarrowTest, AcceptsAscii) {
