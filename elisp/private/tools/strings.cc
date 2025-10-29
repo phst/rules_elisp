@@ -47,10 +47,7 @@ std::string DoQuote(const std::basic_string_view<Char> string) {
 }  // namespace
 
 std::string Quote(const std::string_view string) { return DoQuote(string); }
-
-std::string Quote(const std::wstring_view string) {
-  return absl::StrCat("L", DoQuote(string));
-}
+std::string Quote(const std::wstring_view string) { return DoQuote(string); }
 
 namespace {
 
