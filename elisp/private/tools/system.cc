@@ -52,7 +52,7 @@
 #endif
 
 #include <algorithm>  // IWYU pragma: keep, only on Windows
-#include <array>
+#include <array>  // IWYU pragma: keep, only on Windows
 #include <cerrno>
 #include <cstddef>
 #include <cstdint>  // IWYU pragma: keep, only on Windows
