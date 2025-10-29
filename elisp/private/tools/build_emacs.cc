@@ -118,7 +118,7 @@ static absl::Status Run(const FileName& temp, const FileName& build,
     }
   }
   std::cerr << std::endl
-            << absl::StreamFormat("temporary build directory is %v", temp)
+            << absl::StreamFormat("temporary build directory is %s", temp)
             << std::endl;
   return absl::UnavailableError(absl::StrFormat(
       "Command %s failed with code %d", QuoteForBash(program, args), *code));
@@ -152,11 +152,11 @@ static absl::StatusOr<FileName> GlobUnique(
                    entries->end());
     if (entries->empty()) {
       return absl::NotFoundError(absl::StrFormat(
-          "No entry matching %s in directory %v found", pattern, result));
+          "No entry matching %s in directory %s found", pattern, result));
     }
     if (const auto n = entries->size(); n > 1) {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "Found %d entries matching %s in directory %v", n, pattern, result));
+          "Found %d entries matching %s in directory %s", n, pattern, result));
     }
     absl::StatusOr<FileName> child = result.Child(entries->front());
     if (!child.ok()) return child.status();
@@ -168,7 +168,7 @@ static absl::StatusOr<FileName> GlobUnique(
 static absl::Status RenameResolved(const FileName& src, const FileName& dest) {
   if (FileExists(dest)) {
     return absl::AlreadyExistsError(
-        absl::StrFormat("destination file %v already exists", dest));
+        absl::StrFormat("destination file %s already exists", dest));
   }
   const absl::StatusOr<FileName> resolved = src.Resolve();
   if (!resolved.ok()) return resolved.status();

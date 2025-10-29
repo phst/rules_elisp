@@ -62,13 +62,13 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
     stream.imbue(std::locale::classic());
     if (!stream.is_open() || !stream.good()) {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "Cannot open coverage manifest %v for reading", manifest_file));
+          "Cannot open coverage manifest %s for reading", manifest_file));
     }
     std::string line;
     while (std::getline(stream, line)) files.push_back(std::move(line));
     if (stream.bad()) {
       return absl::FailedPreconditionError(absl::StrFormat(
-          "Reading coverage manifest %v failed", manifest_file));
+          "Reading coverage manifest %s failed", manifest_file));
     }
   }
   bool edited = false;
@@ -92,7 +92,7 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
   stream.imbue(std::locale::classic());
   if (!stream.is_open() || !stream.good()) {
     return absl::FailedPreconditionError(absl::StrFormat(
-        "Cannot open coverage manifest %v for writing", manifest_file));
+        "Cannot open coverage manifest %s for writing", manifest_file));
   }
   for (const std::string& file : files) {
     const std::optional<std::streamsize> length =
@@ -107,7 +107,7 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
   stream.flush();
   if (!stream.good()) {
     return absl::DataLossError(
-        absl::StrFormat("Writing coverage manifest %v failed", manifest_file));
+        absl::StrFormat("Writing coverage manifest %s failed", manifest_file));
   }
   return absl::OkStatus();
 }

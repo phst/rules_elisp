@@ -48,7 +48,7 @@ absl::Status CopyFiles(const FileName& from, const FileName& to,
   std::ifstream stream(list.string(), std::ios::in | std::ios::binary);
   if (!stream.is_open() || !stream.good()) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Cannot open parameter file %v for reading", list));
+        absl::StrFormat("Cannot open parameter file %s for reading", list));
   }
   stream.imbue(std::locale::classic());
 
@@ -75,7 +75,7 @@ absl::Status CopyFiles(const FileName& from, const FileName& to,
 
   if (stream.bad() || !stream.eof()) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Cannot read parameter file %v", list));
+        absl::StrFormat("Cannot read parameter file %s", list));
   }
 
   return absl::OkStatus();
