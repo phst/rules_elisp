@@ -60,7 +60,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
-#include <functional>
 #include <ios>
 #include <iostream>
 #include <locale>
@@ -583,62 +582,33 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
 #endif
 }
 
-static absl::Status IterateDirectory(
-    const FileName& dir, const std::function<bool(const FileName&)>& function) {
+[[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory) {
 #ifdef _WIN32
-  const std::wstring pattern = dir.string() + L"\\*";
+  const std::wstring pattern = directory.string() + L"\\*";
   WIN32_FIND_DATAW data;
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
-  if (handle == INVALID_HANDLE_VALUE) {
-    if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
-      return WindowsStatus("FindFirstFileW", pattern);
-    }
-    return absl::OkStatus();
-  }
+  if (handle == INVALID_HANDLE_VALUE) return false;
   const absl::Cleanup cleanup = [handle] {
     if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
   };
   do {
     const std::wstring_view name = data.cFileName;
-    if (name == L"." || name == L"..") continue;
-    const absl::StatusOr<FileName> file = FileName::FromString(name);
-    if (!file.ok()) return file.status();
-    if (!function(*file)) return absl::OkStatus();
+    if (name != L"." && name != L"..") return true;
   } while (::FindNextFileW(handle, &data));
-  if (::GetLastError() != ERROR_NO_MORE_FILES) {
-    return WindowsStatus("FindNextFileW");
-  }
 #else
-  DIR* const absl_nullable handle = opendir(dir.pointer());
-  if (handle == nullptr) return ErrnoStatus("opendir", dir);
+  DIR* const absl_nullable handle = opendir(directory.pointer());
+  if (handle == nullptr) return false;
   const absl::Cleanup cleanup = [handle] {
     if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
   };
   while (true) {
-    errno = 0;
     const struct dirent* const absl_nullable entry = readdir(handle);
-    if (entry == nullptr) {
-      if (errno != 0) return ErrnoStatus("readdir");
-      break;
-    }
+    if (entry == nullptr) break;
     const std::string_view name = entry->d_name;
-    if (name == "." || name == "..") continue;
-    const absl::StatusOr<FileName> file = FileName::FromString(name);
-    if (!file.ok()) return file.status();
-    if (!function(*file)) break;
+    if (name != "." && name != "..") return true;
   }
 #endif
-  return absl::OkStatus();
-}
-
-[[nodiscard]] bool IsNonEmptyDirectory(const FileName& directory) {
-  bool empty = true;
-  const absl::Status status =
-      IterateDirectory(directory, [&empty](const FileName&) {
-        empty = false;
-        return false;
-      });
-  return status.ok() && !empty;
+  return false;
 }
 
 #undef CreateDirectory
@@ -700,12 +670,49 @@ absl::Status RemoveDirectory(const FileName& name) {
 
 absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
   std::vector<FileName> result;
-  const absl::Status status =
-      IterateDirectory(dir, [&result](const FileName& file) {
-        result.push_back(file);
-        return true;
-      });
-  if (!status.ok()) return status;
+#ifdef _WIN32
+  std::wstring pattern = dir.string() + L"\\*";
+  WIN32_FIND_DATAW data;
+  const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
+  if (handle == INVALID_HANDLE_VALUE) {
+    if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
+      return WindowsStatus("FindFirstFileW", pattern);
+    }
+    return result;
+  }
+  const absl::Cleanup cleanup = [handle] {
+    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
+  };
+  do {
+    const std::wstring_view name = data.cFileName;
+    if (name == L"." || name == L"..") continue;
+    absl::StatusOr<FileName> file = FileName::FromString(name);
+    if (!file.ok()) return file.status();
+    result.push_back(*std::move(file));
+  } while (::FindNextFileW(handle, &data));
+  if (::GetLastError() != ERROR_NO_MORE_FILES) {
+    return WindowsStatus("FindNextFileW");
+  }
+#else
+  DIR* const absl_nullable handle = opendir(dir.pointer());
+  if (handle == nullptr) return ErrnoStatus("opendir", dir);
+  const absl::Cleanup cleanup = [handle] {
+    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
+  };
+  while (true) {
+    errno = 0;
+    const struct dirent* const absl_nullable entry = readdir(handle);
+    if (entry == nullptr) {
+      if (errno != 0) return ErrnoStatus("readdir");
+      break;
+    }
+    const std::string_view name = entry->d_name;
+    if (name == "." || name == "..") continue;
+    absl::StatusOr<FileName> file = FileName::FromString(name);
+    if (!file.ok()) return file.status();
+    result.push_back(*std::move(file));
+  }
+#endif
   return result;
 }
 
