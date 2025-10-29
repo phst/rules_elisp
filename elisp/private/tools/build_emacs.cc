@@ -17,7 +17,6 @@
 #include <fstream>
 #include <ios>
 #include <iostream>
-#include <locale>
 #include <optional>
 #include <ostream>
 #include <regex>
@@ -36,58 +35,11 @@
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
 
+#include "elisp/private/tools/copy.h"
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
-
-static absl::Status Unpack(const FileName& source, FileName install,
-                           const FileName& srcs) {
-  std::optional<DosDevice> dos_device;
-  if constexpr (kWindows) {
-    absl::StatusOr<DosDevice> dev = DosDevice::Create(install);
-    if (!dev.ok()) return dev.status();
-    absl::StatusOr<FileName> root =
-        FileName::FromString(dev->name() + RULES_ELISP_NATIVE_LITERAL("\\"));
-    if (!root.ok()) return root.status();
-    install = *std::move(root);
-    dos_device = *std::move(dev);
-  }
-
-  std::ifstream stream(srcs.string(), std::ios::in | std::ios::binary);
-  if (!stream.is_open() || !stream.good()) {
-    return absl::FailedPreconditionError(
-        absl::StrFormat("Cannot open parameter file %v for reading", srcs));
-  }
-  stream.imbue(std::locale::classic());
-
-  std::string line;
-  while (std::getline(stream, line)) {
-    const absl::StatusOr<NativeString> native = ToNative(line, Encoding::kUtf8);
-    if (!native.ok()) return native.status();
-    const absl::StatusOr<FileName> from = FileName::FromString(*native);
-    if (!from.ok()) return from.status();
-    const absl::StatusOr<FileName> relative = from->MakeRelative(source);
-    if (!relative.ok()) return relative.status();
-    const absl::StatusOr<FileName> to = install.Join(*relative);
-    if (!to.ok()) return to.status();
-    const absl::StatusOr<FileName> parent = to->Parent();
-    if (!parent.ok()) return parent.status();
-    if (const absl::Status status = CreateDirectories(*parent); !status.ok()) {
-      return status;
-    }
-    if (const absl::Status status = CopyFile(*from, *to); !status.ok()) {
-      return status;
-    }
-  }
-
-  if (stream.bad() || !stream.eof()) {
-    return absl::FailedPreconditionError(
-        absl::StrFormat("Cannot read parameter file %v", srcs));
-  }
-
-  return absl::OkStatus();
-}
 
 static void AppendQuoted(NativeString& out, NativeStringView arg) {
   out += RULES_ELISP_NATIVE_LITERAL('\'');
@@ -240,7 +192,8 @@ static absl::Status Build(const FileName& source, const FileName& install,
   const FileName build =
       temp->Child(RULES_ELISP_NATIVE_LITERAL("build")).value();
 
-  if (const absl::Status status = Unpack(source, build, srcs); !status.ok()) {
+  if (const absl::Status status = CopyFiles(source, build, srcs);
+      !status.ok()) {
     return status;
   }
 

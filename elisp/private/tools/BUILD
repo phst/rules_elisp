@@ -44,6 +44,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
+        ":copy",
         ":platform",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
@@ -69,6 +70,7 @@ cc_binary(
     local_defines = LAUNCHER_DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
+        ":copy",
         ":platform",
         ":system",
         "@abseil-cpp//absl/base:log_severity",
@@ -78,7 +80,6 @@ cc_binary(
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings:str_format",
     ],
 )
 
@@ -299,6 +300,24 @@ cc_library(
         "@abseil-cpp//absl/types:span",
         "@protobuf//:protobuf_lite",  # keep
         "@protobuf//src/google/protobuf/json",
+    ],
+)
+
+cc_library(
+    name = "copy",
+    srcs = ["copy.cc"],
+    hdrs = ["copy.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    deps = [
+        ":platform",
+        ":system",
+        "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/strings:str_format",
     ],
 )
 
