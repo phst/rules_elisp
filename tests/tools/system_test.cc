@@ -141,18 +141,16 @@ TEST(FileNameTest, IsFormattable) {
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("foo"));
   const absl::StatusOr<FileName> bar =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("bar äα𝐴🐈'"));
-  EXPECT_EQ(absl::StrCat("bar ", foo.value(), " baz"), "bar foo baz");
-  EXPECT_EQ(absl::StrFormat("bar %v baz", foo.value()), "bar foo baz");
-  EXPECT_EQ(absl::StrCat("foo ", bar.value(), " baz"), "foo bar äα𝐴🐈' baz");
-  EXPECT_EQ(absl::StrFormat("foo %v baz", bar.value()), "foo bar äα𝐴🐈' baz");
-  EXPECT_EQ(absl::StrCat("bar ", foo, " baz"), "bar foo baz");
-  EXPECT_EQ(absl::StrFormat("bar %v baz", foo), "bar foo baz");
-  EXPECT_EQ(absl::StrCat("foo ", bar, " baz"), "foo bar äα𝐴🐈' baz");
-  EXPECT_EQ(absl::StrFormat("foo %v baz", bar), "foo bar äα𝐴🐈' baz");
+  EXPECT_EQ(absl::StrFormat("bar %s baz", foo.value()), "bar foo baz");
+  EXPECT_EQ(absl::StrFormat("foo %s baz", bar.value()), "foo bar äα𝐴🐈' baz");
+  EXPECT_EQ(absl::StrFormat("%s", bar.value()), "bar äα𝐴🐈'");
+  EXPECT_EQ(absl::StrFormat("%#s", bar.value()), R"*("bar äα𝐴🐈'")*");
   EXPECT_EQ(PrintToString(foo.value()), "foo");
   EXPECT_EQ(PrintToString(bar.value()), "bar äα𝐴🐈'");
-  EXPECT_EQ(PrintToString(foo), "foo");
-  EXPECT_EQ(PrintToString(bar), "bar äα𝐴🐈'");
+  // The following should work, but doesn’t due to
+  // https://github.com/abseil/abseil-cpp/issues/1966.
+  // EXPECT_EQ(PrintToString(foo), "foo");
+  // EXPECT_EQ(PrintToString(bar), "bar äα𝐴🐈'");
 }
 
 TEST(FileNameTest, ParentRejectsRoot) {

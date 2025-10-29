@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdio>
 #include <optional>
+#include <ostream>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -30,6 +31,7 @@
 #include "absl/log/die_if_null.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/str_format.h"
 #include "absl/time/time.h"
 #include "absl/types/span.h"
 
@@ -113,11 +115,23 @@ class FileName final {
     return a.string_ >= b.string_;
   }
 
-  // https://abseil.io/docs/cpp/guides/abslstringify#basic-usage
-  template <typename Sink>
-  friend void AbslStringify(Sink& sink, const FileName& name) {
-    absl::Format(&sink, "%s", name.string_);
-  }
+  // We’d like to define AbslStringify, but can’t due to
+  // https://github.com/abseil/abseil-cpp/issues/1966.
+  // template <typename Sink>
+  // friend void AbslStringify(Sink& sink, const FileName& file);
+
+  // https://abseil.io/docs/cpp/guides/format#abslformatconvert
+  friend absl::FormatConvertResult<absl::FormatConversionCharSet::s>
+  AbslFormatConvert(const FileName& file,
+                    const absl::FormatConversionSpec& spec,
+                    absl::FormatSink* absl_nonnull sink);
+
+  // We would also like to define AbslStringify for GoogleTest
+  // (cf. https://google.github.io/googletest/advanced.html#teaching-googletest-how-to-print-your-values),
+  // but that leads to ambiguity
+  // (https://github.com/abseil/abseil-cpp/issues/1966).  So we define PrintTo
+  // instead.
+  friend void PrintTo(const FileName& file, std::ostream* absl_nonnull stream);
 
  private:
   explicit FileName(NativeString string) : string_(std::move(string)) {
