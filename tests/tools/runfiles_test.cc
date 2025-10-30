@@ -60,7 +60,7 @@ TEST(RunfilesTest, AllowsRunningTool) {
   ASSERT_THAT(program, IsOk());
   const absl::StatusOr<Environment> env = runfiles->Environ();
   ASSERT_THAT(env, IsOk());
-  EXPECT_THAT(rules_elisp::Run(*program, {}, *env), IsOkAndHolds(0));
+  EXPECT_THAT(rules_elisp::RunProcess(*program, {}, *env), IsOkAndHolds(0));
 }
 
 TEST(RunfilesTest, ParsesManifest) {

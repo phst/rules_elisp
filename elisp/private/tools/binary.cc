@@ -166,7 +166,7 @@ absl::StatusOr<int> Main(
   manifest->AppendArgs(final_args);
   final_args.insert(final_args.end(), args.cbegin(), args.cend());
 
-  return Run(*emacs, final_args, *env);
+  return RunProcess(*emacs, final_args, *env);
 }
 
 }  // namespace rules_elisp

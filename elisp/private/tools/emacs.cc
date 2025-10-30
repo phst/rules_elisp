@@ -118,7 +118,7 @@ static absl::StatusOr<int> RunEmacs(
       }
     }
   }
-  return Run(*emacs, args, *env);
+  return RunProcess(*emacs, args, *env);
 }
 
 absl::StatusOr<int> Main(

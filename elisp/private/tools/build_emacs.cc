@@ -93,10 +93,10 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   }
   const FileName output =
       temp.Child(RULES_ELISP_NATIVE_LITERAL("output.log")).value();
-  RunOptions options;
+  ProcessOptions options;
   options.directory = build;
   options.output_file = output;
-  const absl::StatusOr<int> code = Run(program, args, *env, options);
+  const absl::StatusOr<int> code = RunProcess(program, args, *env, options);
   if (!code.ok()) return code.status();
   if (*code == 0) return absl::OkStatus();
   absl::PrintF("command %s failed, output follows:\n",

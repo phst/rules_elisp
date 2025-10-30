@@ -277,7 +277,7 @@ class TemporaryFile final {
 
 absl::StatusOr<FileName> CreateTemporaryDirectory();
 
-struct RunOptions final {
+struct ProcessOptions final {
   // If set, change to this directory in the subprocess.
   std::optional<FileName> directory;
 
@@ -289,9 +289,10 @@ struct RunOptions final {
 
 absl::StatusOr<FileName> SearchPath(const FileName& program);
 
-absl::StatusOr<int> Run(const FileName& program,
-                        absl::Span<const NativeString> args,
-                        const Environment& env, const RunOptions& options = {});
+absl::StatusOr<int> RunProcess(const FileName& program,
+                               absl::Span<const NativeString> args,
+                               const Environment& env,
+                               const ProcessOptions& options = {});
 
 class DosDevice final {
  public:

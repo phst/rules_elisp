@@ -837,11 +837,10 @@ TEST(RunTest, ReturnsExitCode) {
   const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
   ASSERT_THAT(helper, IsOk());
 
+  EXPECT_THAT(RunProcess(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
+              IsOkAndHolds(0));
   EXPECT_THAT(
-      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
-      IsOkAndHolds(0));
-  EXPECT_THAT(
-      rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
+      RunProcess(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
       IsOkAndHolds(23));
 }
 
@@ -853,12 +852,11 @@ TEST(RunTest, SupportsDeadlineOnWindows) {
   ASSERT_THAT(helper, IsOk());
 
   if constexpr (kWindows) {
-    RunOptions options;
+    ProcessOptions options;
     options.deadline = absl::Now() + absl::Seconds(1);
-    EXPECT_THAT(
-        rules_elisp::Run(*helper, {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
-                         {}, options),
-        StatusIs(absl::StatusCode::kDeadlineExceeded));
+    EXPECT_THAT(RunProcess(*helper, {RULES_ELISP_NATIVE_LITERAL("--sleep=1m")},
+                           {}, options),
+                StatusIs(absl::StatusCode::kDeadlineExceeded));
   }
 }
 
@@ -872,10 +870,10 @@ TEST(RunTest, AllowsChangingDirectory) {
   const absl::StatusOr<FileName> helper = runfiles->Resolve(RULES_ELISP_HELPER);
   ASSERT_THAT(helper, IsOk());
 
-  RunOptions options;
+  ProcessOptions options;
   options.directory = *temp;
 
-  EXPECT_THAT(rules_elisp::Run(*helper, {}, {}, options), IsOkAndHolds(0));
+  EXPECT_THAT(RunProcess(*helper, {}, {}, options), IsOkAndHolds(0));
 }
 
 TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
@@ -900,10 +898,10 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   const absl::StatusOr<Environment> env =
       Environment::Create(std::cbegin(env_vars), std::cend(env_vars));
   ASSERT_THAT(env, IsOk());
-  RunOptions options;
+  ProcessOptions options;
   options.directory = *dir;
   options.output_file = output_file;
-  EXPECT_THAT(rules_elisp::Run(*helper, {}, *env, options), IsOkAndHolds(0));
+  EXPECT_THAT(RunProcess(*helper, {}, *env, options), IsOkAndHolds(0));
 
   absl::StatusOr<std::string> narrow = ToNarrow(dir->string(), Encoding::kUtf8);
   ASSERT_THAT(narrow, IsOk());

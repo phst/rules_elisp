@@ -1272,9 +1272,10 @@ static void FlushEverything() {
   if (std::fflush(nullptr) != 0) LOG(ERROR) << ErrnoStatus("fflush", nullptr);
 }
 
-absl::StatusOr<int> Run(const FileName& program,
-                        const absl::Span<const NativeString> args,
-                        const Environment& env, const RunOptions& options) {
+absl::StatusOr<int> RunProcess(const FileName& program,
+                               const absl::Span<const NativeString> args,
+                               const Environment& env,
+                               const ProcessOptions& options) {
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
       return absl::InvalidArgumentError(
