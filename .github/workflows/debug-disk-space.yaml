@@ -1,0 +1,39 @@
+# Copyright 2021-2025 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Debug runner disk space
+on: workflow_dispatch
+
+permissions:
+  contents: none
+
+jobs:
+  debug:
+    name: Debug disk space
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+      fail-fast: false
+    runs-on: ${{matrix.os}}
+    steps:
+      - name: Show disk space
+        shell: bash
+        run: df -k
+      - name: Show directory usage
+        shell: bash
+        run: du -k -- /usr/share /usr/local/share
+      - name: Show largest Debian packages
+        shell: bash
+        run: dpigs -n 50
+        if: runner.is == 'Linux'
