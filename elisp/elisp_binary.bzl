@@ -19,6 +19,7 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
+load("//elisp/private:cc_literals.bzl", "cc_bool", "cc_ints")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
 visibility("public")
@@ -35,9 +36,9 @@ def _elisp_binary_impl(ctx):
         tags = [],
         defines = [
             "RULES_ELISP_BINARY=1",
-            "RULES_ELISP_INTERACTIVE=" + str(ctx.attr.interactive).lower(),
-            "RULES_ELISP_INPUT_ARGS=" + ", ".join([str(i) for i in ctx.attr.input_args]),
-            "RULES_ELISP_OUTPUT_ARGS=" + ", ".join([str(i) for i in ctx.attr.output_args]),
+            "RULES_ELISP_INTERACTIVE=" + cc_bool(ctx.attr.interactive),
+            "RULES_ELISP_INPUT_ARGS=" + cc_ints(ctx.attr.input_args),
+            "RULES_ELISP_OUTPUT_ARGS=" + cc_ints(ctx.attr.output_args),
         ],
     )
     return [

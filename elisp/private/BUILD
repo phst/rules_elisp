@@ -252,6 +252,13 @@ platform(
     visibility = ["//visibility:private"],
 )
 
+# keep
+bzl_library(
+    name = "cc_literals",
+    srcs = ["cc_literals.bzl"],
+    visibility = ["//elisp:__pkg__"],
+)
+
 bzl_library(
     name = "emacs_repository",
     srcs = ["emacs_repository.bzl"],
