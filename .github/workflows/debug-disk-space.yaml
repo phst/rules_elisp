@@ -36,4 +36,4 @@ jobs:
       - name: Show largest Debian packages
         shell: bash
         run: dpigs -n 50
-        if: runner.is == 'Linux'
+        if: runner.os == 'Linux'
