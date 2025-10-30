@@ -22,7 +22,7 @@ def cc_bool(value):
     return "true" if value else "false"
 
 def cc_int(value):
-    return str(value)
+    return "%d" % value
 
 def cc_ints(list):
     return ", ".join([cc_int(i) for i in list])
