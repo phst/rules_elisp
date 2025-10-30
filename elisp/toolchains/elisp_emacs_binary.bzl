@@ -23,7 +23,7 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
-load("//elisp/private:cc_literals.bzl", "cpp_string")
+load("//elisp/private:cc_literals.bzl", "cc_string")
 load("//elisp/private:filenames.bzl", "repository_relative_filename", "runfile_location")
 
 visibility("public")
@@ -48,7 +48,7 @@ def _elisp_emacs_binary_impl(ctx):
         defines = [
             "RULES_ELISP_EMACS=1",
             "RULES_ELISP_TYPE=rules_elisp::RepositoryType::k" + type.capitalize(),
-            "RULES_ELISP_INSTALL=" + cpp_string(runfile_location(ctx, install), native = False),
+            "RULES_ELISP_INSTALL=" + cc_string(runfile_location(ctx, install), native = False),
         ],
     )
 

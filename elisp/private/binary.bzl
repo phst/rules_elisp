@@ -18,7 +18,7 @@ rules."""
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load(":cc_launcher.bzl", "cc_launcher")
-load(":cc_literals.bzl", "cpp_string", "cpp_strings")
+load(":cc_literals.bzl", "cc_string", "cc_strings")
 load(":compile.bzl", "compile")
 load(":filenames.bzl", "check_relative_filename", "runfile_location")
 
@@ -108,18 +108,18 @@ def binary(ctx, *, srcs, tags, defines):
     executable, launcher_runfiles = cc_launcher(
         ctx,
         defines = [
-            "RULES_ELISP_WRAPPER=" + cpp_string(runfile_location(ctx, emacs.files_to_run.executable)),
+            "RULES_ELISP_WRAPPER=" + cc_string(runfile_location(ctx, emacs.files_to_run.executable)),
             "RULES_ELISP_MODE=rules_elisp::ToolchainMode::" + ("kWrap" if toolchain.wrap else "kDirect"),
-            "RULES_ELISP_TAGS=" + cpp_strings(collections.uniq(ctx.attr.tags + tags)),
-            "RULES_ELISP_LOAD_PATH=" + cpp_strings([
+            "RULES_ELISP_TAGS=" + cc_strings(collections.uniq(ctx.attr.tags + tags)),
+            "RULES_ELISP_LOAD_PATH=" + cc_strings([
                 check_relative_filename(dir.for_runfiles)
                 for dir in elisp_info.transitive_load_path.to_list()
             ]),
-            "RULES_ELISP_LOAD_FILES=" + cpp_strings([
+            "RULES_ELISP_LOAD_FILES=" + cc_strings([
                 runfile_location(ctx, src)
                 for src in elisp_info.compiled_files
             ]),
-            "RULES_ELISP_DATA_FILES=" + cpp_strings([
+            "RULES_ELISP_DATA_FILES=" + cc_strings([
                 runfile_location(ctx, file)
                 for file in data_files_for_manifest
             ]),

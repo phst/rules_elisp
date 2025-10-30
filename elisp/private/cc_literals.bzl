@@ -27,7 +27,7 @@ def cc_int(value):
 def cc_ints(list):
     return ", ".join([cc_int(i) for i in list])
 
-def cpp_strings(strings, *, native = True):
+def cc_strings(strings, *, native = True):
     """Formats the given string list as C++ initializer list.
 
     This function makes an effort to support strings with special characters.
@@ -40,9 +40,9 @@ def cpp_strings(strings, *, native = True):
     Returns:
       a string containing C++ code representing the given string list
     """
-    return ", ".join([cpp_string(s, native = native) for s in strings])
+    return ", ".join([cc_string(s, native = native) for s in strings])
 
-def cpp_string(string, *, native = True):
+def cc_string(string, *, native = True):
     """Formats the given string as C++ string literal.
 
     This function makes an effort to support strings with special characters.
@@ -62,13 +62,13 @@ def cpp_string(string, *, native = True):
     # cf. https://bazel.build/concepts/build-files#file_encoding.  Due to the
     # implementation of Starlark strings, the string will actually be a sequence
     # of UTF-8 code units (and not code points), so we have to decode it first.
-    string = "".join([_cpp_char(c) for c in _decode_utf8(string)])
+    string = "".join([_char(c) for c in _decode_utf8(string)])
     string = '"' + string + '"'
     if native:
         string = "RULES_ELISP_NATIVE_LITERAL(" + string + ")"
     return string
 
-def _cpp_char(point):
+def _char(point):
     """Returns a C++ representation of a Unicode code point.
 
     The return value can be used in character and string literals.
@@ -83,7 +83,7 @@ def _cpp_char(point):
         fail("can’t have embedded null characters in C++ literals")
 
     # See https://en.cppreference.com/w/cpp/language/escape.
-    esc = _CPP_ESCAPES.get(point)
+    esc = _ESCAPES.get(point)
     if esc != None:  # special treatment
         return esc
     if 0x20 <= point and point <= 0x7F:  # ASCII, no need to escape
@@ -94,7 +94,7 @@ def _cpp_char(point):
         return "\\U" + _hex(point, pad = 8)
     fail("invalid code point U+%X" % point)
 
-_CPP_ESCAPES = {
+_ESCAPES = {
     ORD["\\"]: "\\\\",
     ORD["\n"]: "\\n",
     ORD["\r"]: "\\r",

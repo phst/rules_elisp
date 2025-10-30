@@ -19,7 +19,7 @@ load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
-load("//elisp/private:cc_literals.bzl", "cc_bool", "cpp_strings")
+load("//elisp/private:cc_literals.bzl", "cc_bool", "cc_strings")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
 visibility("public")
@@ -36,8 +36,8 @@ def _elisp_test_impl(ctx):
         tags = ["local"] if ctx.attr.local else [],
         defines = [
             "RULES_ELISP_TEST=1",
-            "RULES_ELISP_SKIP_TESTS=" + cpp_strings(ctx.attr.skip_tests),
-            "RULES_ELISP_SKIP_TAGS=" + cpp_strings(ctx.attr.skip_tags),
+            "RULES_ELISP_SKIP_TESTS=" + cc_strings(ctx.attr.skip_tests),
+            "RULES_ELISP_SKIP_TAGS=" + cc_strings(ctx.attr.skip_tags),
             "RULES_ELISP_MODULE_ASSERTIONS=" + cc_bool(ctx.var["COMPILATION_MODE"] != "opt"),
         ],
     )
