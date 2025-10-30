@@ -32,7 +32,8 @@ jobs:
         run: df -k
       - name: Show directory usage
         shell: bash
-        run: du -s -k -- /usr/share/* /usr/local/share/* | sort -n
+        run: |
+          du -s -k -- /usr/share/* /usr/local/share/* | sort -n -r | head -n 50
       - name: Install packages
         shell: bash
         run: sudo apt-get update && sudo apt-get install debian-goodies
