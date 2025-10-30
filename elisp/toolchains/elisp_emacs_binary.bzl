@@ -21,8 +21,9 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolch
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
-load("//elisp/private:cc_launcher.bzl", "cc_launcher", "cpp_string")
+load("//elisp/private:cc_launcher.bzl", "cc_launcher")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
+load("//elisp/private:cc_literals.bzl", "cpp_string")
 load("//elisp/private:filenames.bzl", "repository_relative_filename", "runfile_location")
 
 visibility("public")

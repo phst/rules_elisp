@@ -18,9 +18,8 @@ load("@rules_cc//cc:find_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolch
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
-load("//elisp/private:cc_launcher.bzl", "cpp_strings")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
-load("//elisp/private:cc_literals.bzl", "cc_bool")
+load("//elisp/private:cc_literals.bzl", "cc_bool", "cpp_strings")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
 visibility("public")

@@ -139,7 +139,6 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
-        "//elisp/private:cc_launcher",
         "//elisp/private:cc_launcher_config",
         "//elisp/private:cc_literals",
         "//elisp/private:compile",

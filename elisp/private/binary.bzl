@@ -17,7 +17,8 @@ rules."""
 
 load("@bazel_skylib//lib:collections.bzl", "collections")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
-load(":cc_launcher.bzl", "cc_launcher", "cpp_string", "cpp_strings")
+load(":cc_launcher.bzl", "cc_launcher")
+load(":cc_literals.bzl", "cpp_string", "cpp_strings")
 load(":compile.bzl", "compile")
 load(":filenames.bzl", "check_relative_filename", "runfile_location")
 

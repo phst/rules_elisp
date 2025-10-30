@@ -61,6 +61,7 @@ bzl_library(
     visibility = ["//elisp:__pkg__"],
     deps = [
         ":cc_launcher",
+        ":cc_literals",
         ":compile",
         ":filenames",
         "//elisp/common:elisp_info",
@@ -77,7 +78,6 @@ bzl_library(
     ],
     deps = [
         ":cc_default_info",
-        ":generated",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
@@ -252,11 +252,14 @@ platform(
     visibility = ["//visibility:private"],
 )
 
-# keep
 bzl_library(
     name = "cc_literals",
     srcs = ["cc_literals.bzl"],
-    visibility = ["//elisp:__pkg__"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
+    ],
+    deps = [":generated"],
 )
 
 bzl_library(
