@@ -493,19 +493,17 @@ absl::StatusOr<NativeString> ToNative(
 
 #ifndef _WIN32
 static absl::StatusOr<FileName> WorkingDirectory() {
-  struct Free {
-    void operator()(char* const absl_nonnull p) const { std::free(p); }
-  };
   // Assume that we always run on an OS that allocates a buffer when passed a
   // null pointer.
-  const absl_nullable std::unique_ptr<char, Free> ptr(getcwd(nullptr, 0));
+  char* const absl_nullable ptr = getcwd(nullptr, 0);
   if (ptr == nullptr) return ErrnoStatus("getcwd", nullptr, 0);
+  const absl::Cleanup cleanup = [ptr] { std::free(ptr); };
   // See the Linux man page for getcwd(3) why this can happen.
   if (*ptr != '/') {
-    return absl::NotFoundError(absl::StrCat("Current working directory ",
-                                            ptr.get(), " is unreachable"));
+    return absl::NotFoundError(
+        absl::StrFormat("Current working directory %s is unreachable", ptr));
   }
-  return FileName::FromString(ptr.get());
+  return FileName::FromString(ptr);
 }
 #endif
 
