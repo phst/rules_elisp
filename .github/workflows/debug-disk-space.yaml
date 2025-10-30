@@ -33,6 +33,10 @@ jobs:
       - name: Show directory usage
         shell: bash
         run: du -s -k -- /usr/share/* /usr/local/share/* | sort -n
+      - name: Install packages
+        shell: bash
+        run: sudo apt-get update && sudo apt-get install debian-goodies
+        if: runner.os == 'Linux'
       - name: Show largest Debian packages
         shell: bash
         run: dpigs -n 50
