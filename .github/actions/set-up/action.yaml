@@ -35,6 +35,15 @@ runs:
       shell: bash
       run: sudo apt-get update && sudo apt-get install libxml2-utils
       if: runner.os == 'Linux'
+    - name: Free up some disk space
+      shell: bash
+      run: |
+        sudo apt-get remove \
+          firefox google-chrome-stable microsoft-edge-stable \
+          azure-cli google-cloud-cli google-cloud-cli-anthoscli \
+          llvm-{16..18}-dev
+        rm -r -f /usr/share/dotnet /usr/share/swift
+      if: runner.os == 'Linux'
     - id: msys2
       name: Install MSYS2
       uses: msys2/setup-msys2@v2
