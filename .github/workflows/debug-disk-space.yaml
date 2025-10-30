@@ -32,7 +32,7 @@ jobs:
         run: df -k
       - name: Show directory usage
         shell: bash
-        run: du -s -k -- /usr/share/* /usr/local/share/*
+        run: du -s -k -- /usr/* /usr/share/* /usr/local/share/*
       - name: Show largest Debian packages
         shell: bash
         run: dpigs -n 50
