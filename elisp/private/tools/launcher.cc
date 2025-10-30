@@ -75,7 +75,7 @@ int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
 #endif
   const absl::StatusOr<int> code = rules_elisp::Main(
 #ifdef RULES_ELISP_EMACS
-      RULES_ELISP_MODE, RULES_ELISP_INSTALL,
+      RULES_ELISP_TYPE, RULES_ELISP_INSTALL,
 #else
       opts,
 #endif

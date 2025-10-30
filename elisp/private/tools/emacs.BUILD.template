@@ -34,7 +34,7 @@ elisp_emacs_binary(
         allow_empty = False,
     ),
     builtin_features = "builtin_features.json",
-    mode = "[mode]",
+    mode = "[type]",
     module_header = "emacs-module.h",
     readme = "README",
     target_compatible_with = [[compatible_with]],

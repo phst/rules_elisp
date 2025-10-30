@@ -34,7 +34,7 @@
 namespace rules_elisp {
 
 static absl::StatusOr<int> RunEmacs(
-    const std::string_view source_repository, const Mode mode,
+    const std::string_view source_repository, const RepositoryType type,
     const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
   const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
@@ -43,10 +43,10 @@ static absl::StatusOr<int> RunEmacs(
   bool release;
   // We currently support pre-built Emacsen only on Windows because there are no
   // official binary release archives for Unix systems.
-  if (kWindows && mode == Mode::kRelease) {
+  if (kWindows && type == RepositoryType::kRelease) {
     release = true;
   } else {
-    CHECK_EQ(mode, Mode::kSource) << "invalid mode";
+    CHECK_EQ(type, RepositoryType::kSource) << "invalid repository type";
     release = false;
   }
   std::optional<FileName> emacs;
@@ -122,9 +122,9 @@ static absl::StatusOr<int> RunEmacs(
 }
 
 absl::StatusOr<int> Main(
-    const Mode mode, const std::string_view install,
+    const RepositoryType type, const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
-  return RunEmacs(BAZEL_CURRENT_REPOSITORY, mode, install, original_args);
+  return RunEmacs(BAZEL_CURRENT_REPOSITORY, type, install, original_args);
 }
 
 }  // namespace rules_elisp

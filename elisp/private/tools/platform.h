@@ -50,7 +50,7 @@ inline constexpr NativeChar kSeparator = kWindows
                                              ? RULES_ELISP_NATIVE_LITERAL('\\')
                                              : RULES_ELISP_NATIVE_LITERAL('/');
 
-enum class Mode { kSource, kRelease };
+enum class RepositoryType { kSource, kRelease };
 enum class ToolchainMode { kDirect, kWrap };
 
 struct Options final {

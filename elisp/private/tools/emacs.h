@@ -28,7 +28,7 @@
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(Mode mode, std::string_view install,
+absl::StatusOr<int> Main(RepositoryType type, std::string_view install,
                          absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp

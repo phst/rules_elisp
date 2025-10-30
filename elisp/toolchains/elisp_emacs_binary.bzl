@@ -32,21 +32,21 @@ def _elisp_emacs_binary_impl(ctx):
 
     # It’s not possible to refer to a directory as a label, so we refer to a
     # known file (README in the source root) instead.
-    mode = ctx.attr.mode
-    if mode == "source":
+    type = ctx.attr.mode
+    if type == "source":
         shell_toolchain = ctx.toolchains[Label("@rules_shell//shell:toolchain_type")]
         emacs_cc_toolchain = ctx.attr._emacs_cc_toolchain[cc_common.CcToolchainInfo]
         install = _install(ctx, shell_toolchain, emacs_cc_toolchain, ctx.file.readme)
-    elif mode == "release":
+    elif type == "release":
         install = _unpack(ctx, ctx.file.readme)
     else:
-        fail("invalid build mode {}".format(mode))
+        fail("invalid repository type", type)
 
     executable, runfiles = cc_launcher(
         ctx,
         defines = [
             "RULES_ELISP_EMACS=1",
-            "RULES_ELISP_MODE=rules_elisp::Mode::k" + mode.capitalize(),
+            "RULES_ELISP_TYPE=rules_elisp::RepositoryType::k" + type.capitalize(),
             "RULES_ELISP_INSTALL=" + cpp_string(runfile_location(ctx, install), native = False),
         ],
     )
@@ -55,7 +55,7 @@ def _elisp_emacs_binary_impl(ctx):
         _builtin_features(
             ctx.actions,
             ctx.executable._builtin_features,
-            [f for f in ctx.files.srcs if _is_lisp_source(f, mode)],
+            [f for f in ctx.files.srcs if _is_lisp_source(f, type)],
             ctx.outputs.builtin_features,
         )
 
@@ -313,12 +313,12 @@ def _munge_msvc_flag(s):
     # Crude way to work around specifying Visual C++ options in .bazelrc.
     return None if s.startswith("/external:") else s.replace("/std:c", "-std=gnu")
 
-def _is_lisp_source(file, mode):
+def _is_lisp_source(file, type):
     if file.extension != "el":
         return False
     rel = repository_relative_filename(file)
-    if mode == "source":
+    if type == "source":
         return paths.starts_with(rel, "lisp")
-    elif mode == "release":
+    elif type == "release":
         return "/lisp/" in rel and paths.starts_with(rel, "share/emacs")
-    fail("Invalid mode", mode)
+    fail("Invalid repository type", type)
