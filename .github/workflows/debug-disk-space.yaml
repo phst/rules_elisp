@@ -16,7 +16,7 @@ name: Debug runner disk space
 on: workflow_dispatch
 
 permissions:
-  contents: none
+  contents: read
 
 jobs:
   debug:
@@ -27,6 +27,12 @@ jobs:
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+      - name: Set up workspace
+        uses: ./.github/actions/set-up
+        with:
+          bazel-version: latest
       - name: Show disk space
         shell: bash
         run: df -k
