@@ -30,7 +30,6 @@ namespace rules_elisp {
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
-using ::testing::IsEmpty;
 
 TEST(RunfilesTest, ResolvesRunfile) {
   const absl::StatusOr<Runfiles> runfiles =
