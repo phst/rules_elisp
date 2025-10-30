@@ -99,26 +99,26 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   const absl::StatusOr<int> code = RunProcess(program, args, *env, options);
   if (!code.ok()) return code.status();
   if (*code == 0) return absl::OkStatus();
-  absl::PrintF("command %s failed, output follows:\n",
-               QuoteForBash(program, args));
   {
     std::ifstream stream(output.string(), std::ios::in | std::ios::binary);
-    std::cout << std::endl << stream.rdbuf() << std::endl;
+    std::cerr << "command  " << QuoteForBash(program, args)
+              << "failed, output follows:" << std::endl
+              << stream.rdbuf() << std::endl;
   }
   {
     const FileName config_log =
         build.Child(RULES_ELISP_NATIVE_LITERAL("config.log")).value();
     std::ifstream stream(config_log.string(), std::ios::in | std::ios::binary);
     if (stream.is_open() && stream.good()) {
-      std::cout << "config.log follows:" << std::endl
+      std::cerr << "config.log follows:" << std::endl
                 << stream.rdbuf() << std::endl;
     } else {
-      std::cout << "config.log not found" << std::endl;
+      std::cerr << "config.log not found" << std::endl;
     }
   }
-  std::cout << std::endl;
-  absl::PrintF("temporary build directory is %v", temp);
-  std::cout << std::endl;
+  std::cerr << std::endl
+            << absl::StreamFormat("temporary build directory is %v", temp)
+            << std::endl;
   return absl::UnavailableError(absl::StrFormat(
       "Command %s failed with code %d", QuoteForBash(program, args), *code));
 }
