@@ -28,7 +28,8 @@ namespace rules_elisp {
 using absl_testing::IsOk;
 using absl_testing::StatusIs;
 
-// Helper function template to create string views from literals with embedded null characters.
+// Helper function template to create string views from literals with embedded
+// null characters.
 template <typename Char, std::size_t Size>
 std::basic_string_view<Char> View(
     const Char (&string ABSL_ATTRIBUTE_LIFETIME_BOUND)[Size]) {
