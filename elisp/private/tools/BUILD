@@ -335,7 +335,6 @@ cc_library(
         ":platform",
         ":strings",
         ":system",
-        "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/base:nullability",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",

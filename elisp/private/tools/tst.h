@@ -19,8 +19,6 @@
 #  error this file requires at least C++17
 #endif
 
-#include <vector>
-
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
