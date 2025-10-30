@@ -1080,112 +1080,78 @@ namespace {
 
 class EnvironmentBlock final {
  private:
-  struct Free;
-#ifdef _WIN32
-  struct Free {
-    void operator()(wchar_t* const absl_nonnull p) const noexcept {
-      const BOOL ok = ::FreeEnvironmentStringsW(p);
-      // If this fails, we can’t really do much except logging the error.
-      if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
-    }
-  };
-#endif
-
-  using Pointer = std::conditional_t<kWindows, std::unique_ptr<wchar_t, Free>,
-                                     const char* const absl_nullable*>;
+  using Pointer =
+      std::conditional_t<kWindows, wchar_t*, const char* const absl_nullable*>;
 
  public:
   static absl::StatusOr<EnvironmentBlock> Current() {
-#ifdef _WIN32
-    absl_nullable Pointer envp(::GetEnvironmentStringsW());
+#if defined _WIN32
+    const absl_nullable LPWCH envp = ::GetEnvironmentStringsW();
     if (envp == nullptr) {
       // Don’t use WindowsStatus since the documentation
       // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
       // doesn’t say we can use GetLastError.
       return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
     }
-    return EnvironmentBlock(std::move(envp));
-#else
-#  ifdef __APPLE__
+    return EnvironmentBlock(envp);
+#elif defined __APPLE__
     // See environ(7) why this is necessary.
     return EnvironmentBlock(*_NSGetEnviron());
-#  else
+#else
     return EnvironmentBlock(environ);
-#  endif
 #endif
   }
 
-  EnvironmentBlock(EnvironmentBlock&&) = default;
-  EnvironmentBlock& operator=(EnvironmentBlock&&) = default;
+  EnvironmentBlock(const EnvironmentBlock&) = delete;
+  EnvironmentBlock& operator=(const EnvironmentBlock&) = delete;
 
-  struct Sentinel final {};
+  EnvironmentBlock(EnvironmentBlock&& other)
+      : start_(std::exchange(other.start_, nullptr)),
+        next_(std::exchange(other.next_, nullptr)) {}
 
-  class Iterator final {
-   private:
-    using Environ = const char* const absl_nullable* absl_nonnull;
-    using Pointer =
-        std::conditional_t<kWindows, const wchar_t* absl_nonnull, Environ>;
+  EnvironmentBlock& operator=(EnvironmentBlock&& other) {
+    start_ = std::exchange(other.start_, nullptr);
+    next_ = std::exchange(other.next_, nullptr);
+    return *this;
+  }
 
-   public:
-    explicit Iterator(const Pointer ptr) : cur_(ABSL_DIE_IF_NULL(ptr)) {}
-
-    Iterator(const Iterator&) = default;
-    Iterator& operator=(const Iterator&) = default;
-
-    NativeStringView operator*() const {
-      CHECK(!AtEnd());
+  ~EnvironmentBlock() noexcept {
+    if (start_ == nullptr) return;
 #ifdef _WIN32
-      return cur_;
-#else
-      return *cur_;
-#endif
+    if (!::FreeEnvironmentStringsW(start_)) {
+      // If this fails, we can’t really do much except logging the error.
+      LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
     }
-
-    Iterator& operator++() {
-      CHECK(!AtEnd());
-#ifdef _WIN32
-      cur_ = cur_.data() + cur_.length() + 1;
-#else
-      ++cur_;
-#endif
-      return *this;
-    }
-
-    bool operator!=(Sentinel) const { return !AtEnd(); }
-
-   private:
-    std::conditional_t<kWindows, std::wstring_view, Environ> cur_;
-
-    ABSL_MUST_USE_RESULT bool AtEnd() const {
-#ifdef _WIN32
-      return cur_.empty();
-#else
-      return *cur_ == nullptr;
-#endif
-    }
-  };
-
-  Iterator begin() const {
-#ifdef _WIN32
-    return Iterator(ptr_.get());
-#else
-    return Iterator(ptr_);
 #endif
   }
 
-  Sentinel end() const { return {}; }
+  [[nodiscard]] bool Next(NativeStringView& element) {
+    CHECK_NE(start_, nullptr);
+    CHECK_NE(next_, nullptr);
+#ifdef _WIN32
+    element = next_;
+    next_ += element.length() + 1;
+    return !element.empty();
+#else
+    if (*next_ == nullptr) return false;
+    element = *next_;
+    next_++;
+    return true;
+#endif
+  }
 
  private:
-  explicit EnvironmentBlock(absl_nonnull Pointer ptr)
-      : ptr_(std::move(ABSL_DIE_IF_NULL(ptr))) {}
+  explicit EnvironmentBlock(const absl_nonnull Pointer ptr)
+      : start_(ABSL_DIE_IF_NULL(ptr)), next_(ptr) {}
 
-  absl_nonnull Pointer ptr_;
+  absl_nullable Pointer start_;
+  absl_nullable Pointer next_;
 };
 
 }  // namespace
 
 absl::StatusOr<Environment> Environment::Current() {
-  const absl::StatusOr<EnvironmentBlock> block = EnvironmentBlock::Current();
+  absl::StatusOr<EnvironmentBlock> block = EnvironmentBlock::Current();
   if (!block.ok()) return block.status();
   Map map;
   // Skip over the first character to properly deal with the magic “per-drive
@@ -1193,7 +1159,8 @@ absl::StatusOr<Environment> Environment::Current() {
   // cf. https://devblogs.microsoft.com/oldnewthing/20100506-00/?p=14133.  Their
   // names start with an equals sign.
   constexpr std::size_t skip = kWindows ? 1 : 0;
-  for (const NativeStringView var : *block) {
+  NativeStringView var;
+  while (block->Next(var)) {
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
           absl::StrFormat("Invalid environment block entry %s", var));
