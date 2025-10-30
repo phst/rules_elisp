@@ -48,7 +48,7 @@ func (elisp) GenerateRules(args language.GenerateArgs) language.GenerateResult {
 		res.Gen = append(res.Gen, r)
 		res.Imports = append(res.Imports, i)
 	}
-	sort.Sort(byName(res)) // make output deterministic
+	sort.Stable(byName(res)) // make output deterministic
 	return res
 }
 
