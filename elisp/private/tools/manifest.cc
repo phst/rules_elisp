@@ -42,7 +42,7 @@ static absl::StatusOr<std::vector<FileName>> ConvertNames(
       return absl::InvalidArgumentError(
           absl::StrFormat("Filename %v is absolute", name));
     }
-   result.push_back(*std::move(name));
+    result.push_back(*std::move(name));
   }
   return result;
 }

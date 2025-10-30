@@ -19,6 +19,7 @@
 
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
+
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
 
@@ -27,6 +28,6 @@ namespace rules_elisp {
 absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
     const Runfiles& runfiles, absl::Span<const NativeString> load_path);
 
-}  // namespace
+}  // namespace rules_elisp
 
 #endif  // ELISP_PRIVATE_TOOLS_LOAD_H_

@@ -25,7 +25,8 @@ namespace rules_elisp {
 // directories, and `list` names a text file containing newline-separated
 // filenames to copy.  All the filenames in `list` must be within `from`, and
 // they are interpreted as relative to `from`.
-absl::Status CopyFiles(const FileName& from, const FileName& to, const FileName& list);
+absl::Status CopyFiles(const FileName& from, const FileName& to,
+                       const FileName& list);
 
 }  // namespace rules_elisp
 
