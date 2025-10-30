@@ -82,6 +82,7 @@
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
+#include "absl/random/random.h"
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
@@ -1474,17 +1475,26 @@ absl::StatusOr<DosDevice> DosDevice::Create(
 #ifdef _WIN32
   const DWORD drives = ::GetLogicalDrives();
   if (drives == 0) return WindowsStatus("GetLogicalDrives");
-  for (wchar_t letter = L'Z'; letter >= L'D'; --letter) {
-    const DWORD bit = 1U << (letter - L'A');
-    if ((drives & bit) == 0) {
-      constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
-      const wchar_t name[] = {letter, L':', L'\0'};
-      if (!::DefineDosDeviceW(flags, name, target.pointer())) {
-        return WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name,
-                             target);
-      }
-      return DosDevice(name, target);
+  constexpr wchar_t first = L'D';
+  constexpr wchar_t last = L'Z';
+  constexpr unsigned int count{last - first + 1};
+  std::array<wchar_t, count> letters;
+  auto end = letters.begin();
+  for (wchar_t letter = first; letter <= last; ++letter) {
+    static_assert(sizeof(DWORD) * CHAR_BIT > count);
+    const DWORD bit{1U << (letter - L'A')};
+    if ((drives & bit) == 0) *end++ = letter;
+  }
+  absl::BitGen gen;
+  std::shuffle(letters.begin(), end, gen);
+  for (auto it = letters.begin(); it != end; ++it) {
+    constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
+    const wchar_t name[] = {*it, L':', L'\0'};
+    if (!::DefineDosDeviceW(flags, name, target.pointer())) {
+      return WindowsStatus("DefineDosDeviceW", absl::Hex(flags), name,
+                           target);
     }
+    return DosDevice(name, target);
   }
   return absl::ResourceExhaustedError("no drive letters available");
 #else
