@@ -15,6 +15,7 @@
 package gazelle
 
 import (
+	"maps"
 	"path"
 	"regexp"
 	"slices"
@@ -88,12 +89,7 @@ func loadPathForFile(name sourceFile, content []byte) loadPath {
 		}
 		dirs[dir] = struct{}{}
 	}
-	var r loadPath
-	for dir := range dirs {
-		r = append(r, dir)
-	}
-	slices.Sort(r)
-	return r
+	return slices.Sorted(maps.Keys(dirs))
 }
 
 var providePattern = regexp.MustCompile(`(?m)^\(provide '([-/\w]+)\)`)
