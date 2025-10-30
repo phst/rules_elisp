@@ -101,8 +101,9 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   if (*code == 0) return absl::OkStatus();
   {
     std::ifstream stream(output.string(), std::ios::in | std::ios::binary);
-    std::cerr << "command  " << QuoteForBash(program, args)
-              << "failed, output follows:" << std::endl
+    std::cerr << absl::StreamFormat("command %s failed, output follows:",
+                                    QuoteForBash(program, args))
+              << std::endl
               << stream.rdbuf() << std::endl;
   }
   {
