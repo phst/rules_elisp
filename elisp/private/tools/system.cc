@@ -31,6 +31,7 @@
 #    define WIN32_LEAN_AND_MEAN
 #  endif
 #  include <windows.h>
+#  include <pathcch.h>
 #  include <shellapi.h>
 #else
 #  include <dirent.h>
@@ -523,9 +524,7 @@ bool FileName::IsAbsolute() const {
 
 absl::StatusOr<FileName> FileName::MakeAbsolute() const {
 #ifdef _WIN32
-  // 0x8000 is the maximum length of a filename on Windows.  See
-  // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfullpathnamew#parameters.
-  constexpr DWORD size{0x8000};
+  constexpr DWORD size{PATHCCH_MAX_CCH};
   wchar_t buffer[size];
   const DWORD result =
       ::GetFullPathNameW(this->pointer(), size, buffer, nullptr);
@@ -597,7 +596,7 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   const absl::Cleanup cleanup = [handle] {
     if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus("CloseHandle");
   };
-  std::array<wchar_t, 0x8000> buffer;
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
   constexpr DWORD name_flags = FILE_NAME_NORMALIZED | VOLUME_NAME_DOS;
   const DWORD length = ::GetFinalPathNameByHandleW(
       handle, buffer.data(), DWORD{buffer.size()}, name_flags);
@@ -1231,7 +1230,7 @@ absl::StatusOr<FileName> CreateTemporaryDirectory() {
 absl::StatusOr<FileName> SearchPath(const FileName& program) {
 #ifdef _WIN32
   constexpr LPCWSTR extension = L".exe";
-  std::array<wchar_t, 0x8000> buffer;
+  std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
   const DWORD length =
       ::SearchPathW(nullptr, program.pointer(), extension, DWORD{buffer.size()},
                     buffer.data(), nullptr);
