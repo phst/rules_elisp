@@ -17,6 +17,7 @@ package gazelle
 import (
 	"io/fs"
 	"log"
+	"maps"
 	"os"
 	"regexp"
 	"slices"
@@ -105,20 +106,15 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string, ext *extension) (*r
 		r.SetAttr("load_path", loadPath.attr(pkg))
 	}
 	// Also return required features.
-	requiresMap := make(map[Feature]struct{})
+	requires := make(map[Feature]struct{})
 	for _, m := range requirePattern.FindAllSubmatch(b, -1) {
 		feat := Feature(m[1])
 		if _, ok := builtinFeatures[feat]; ok {
 			continue
 		}
-		requiresMap[feat] = struct{}{}
+		requires[feat] = struct{}{}
 	}
-	var requires []Feature
-	for f := range requiresMap {
-		requires = append(requires, f)
-	}
-	slices.Sort(requires)
-	return r, Imports{requires}
+	return r, Imports{slices.Sorted(maps.Keys(requires))}
 }
 
 // Imports documents which features an Emacs Lisp file requires.  The
