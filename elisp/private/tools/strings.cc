@@ -33,10 +33,8 @@
 
 namespace rules_elisp {
 
-namespace {
-
 template <typename Char>
-std::string DoQuote(const std::basic_string_view<Char> string) {
+static std::string DoQuote(const std::basic_string_view<Char> string) {
   std::basic_ostringstream<Char> stream;
   stream.exceptions(std::ios::badbit | std::ios::failbit | std::ios::eofbit);
   stream.imbue(std::locale::classic());
@@ -44,17 +42,13 @@ std::string DoQuote(const std::basic_string_view<Char> string) {
   return absl::StrFormat("%s", stream.str());
 }
 
-}  // namespace
-
 std::string Quote(const std::string_view string) { return DoQuote(string); }
 std::string Quote(const std::wstring_view string) { return DoQuote(string); }
 
-namespace {
-
-inline constexpr unsigned int kMaxAscii{0x7F};
+static constexpr unsigned int kMaxAscii{0x7F};
 
 template <typename Char>
-absl::Status DoCheckAscii(const std::basic_string_view<Char> string) {
+static absl::Status DoCheckAscii(const std::basic_string_view<Char> string) {
   using Traits = typename std::basic_string_view<Char>::traits_type;
   const auto it = absl::c_find_if(string, [](const Char ch) {
     return Traits::lt(ch, Char{0}) || Traits::lt(Char{kMaxAscii}, ch);
@@ -67,8 +61,6 @@ absl::Status DoCheckAscii(const std::basic_string_view<Char> string) {
   }
   return absl::OkStatus();
 }
-
-}  // namespace
 
 absl::Status CheckAscii(const std::string_view string) {
   return DoCheckAscii(string);
