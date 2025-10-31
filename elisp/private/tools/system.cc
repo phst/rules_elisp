@@ -102,12 +102,117 @@
 
 namespace rules_elisp {
 
-#ifdef _WIN32
+namespace {
+
+static absl::Status MakeErrorStatus(const std::error_code& code,
+                                    const std::string_view function) {
+  if (!code) return absl::OkStatus();
+  const std::error_condition condition = code.default_error_condition();
+  const std::string message =
+      absl::StrCat(function, ": ", code.category().name(), "/", code.value(),
+                   ": ", code.message());
+  return condition.category() == std::generic_category()
+             ? absl::ErrnoToStatus(condition.value(), message)
+             : absl::UnknownError(message);
+}
+
 template <typename... Ts>
-static absl::Status HResultStatus(HRESULT hr,
+static absl::Status ErrorStatus(const std::error_code& code,
+                                const absl::FormatSpec<Ts...>& format,
+                                const Ts&... args) {
+  return MakeErrorStatus(code, absl::StrFormat(format, args...));
+}
+
+[[nodiscard]] static std::error_code ErrnoError() {
+  const int code = errno;
+  return std::error_code(code, std::generic_category());
+}
+
+template <typename... Ts>
+static absl::Status ErrnoStatus(const absl::FormatSpec<Ts...>& format,
+                                const Ts&... args) {
+  const std::error_code code = ErrnoError();
+  return ErrorStatus(code, format, args...);
+}
+
+#ifdef _WIN32
+[[nodiscard]] static std::error_code WindowsError() {
+  const DWORD code = ::GetLastError();
+  const std::optional<int> i = CastNumber<int>(code);
+  return i.has_value() ? std::error_code(*i, std::system_category())
+                       : std::make_error_code(std::errc::value_too_large);
+}
+
+template <typename... Ts>
+static absl::Status WindowsStatus(const absl::FormatSpec<Ts...>& format,
+                                  const Ts&... args) {
+  const std::error_code code = WindowsError();
+  return ErrorStatus(code, format, args...);
+}
+
+class HResultCategory final : public std::error_category {
+ public:
+  static const HResultCategory& Get() {
+    static const absl::NoDestructor<HResultCategory> instance;
+    return *instance;
+  }
+
+  const char* absl_nonnull name() const noexcept final {
+    return "rules_elisp::HResultCategory";
+  }
+
+  std::string message(int val) const final {
+    const HRESULT hr{val};
+    std::string result = absl::StrFormat(
+        "HRESULT %#010x (severity %d, facility %#06x, code %#06x)", hr,
+        HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr));
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    if (win32.has_value()) absl::StrAppend(&result, "; ", win32->message());
+    return result;
+  };
+
+  std::error_condition default_error_condition(int val) const noexcept final {
+    const HRESULT hr{val};
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    return win32.has_value()
+               ? win32->default_error_condition()
+               : this->std::error_category::default_error_condition(val);
+  }
+
+  bool equivalent(const std::error_code& code, int val) const noexcept final {
+    if (this->std::error_category::equivalent(code, val)) return true;
+    const HRESULT hr{val};
+    const std::optional<std::error_code> win32 = ToWin32(hr);
+    return win32.has_value() && code == *win32;
+  }
+
+ private:
+  static std::optional<std::error_code> ToWin32(const HRESULT hr) {
+    if (hr == S_OK) return std::error_code();
+    if (HRESULT_SEVERITY(hr) == SEVERITY_ERROR &&
+        HRESULT_FACILITY(hr) == FACILITY_WIN32) {
+      const int code{HRESULT_CODE(hr)};
+      if (HRESULT_FROM_WIN32(code) == hr) {
+        return std::error_code(code, std::system_category());
+      }
+    }
+    return std::nullopt;
+  }
+};
+
+[[nodiscard]] static std::error_code HResultError(const HRESULT hr) {
+  return std::error_code(hr, HResultCategory::Get());
+}
+
+template <typename... Ts>
+static absl::Status HResultStatus(const HRESULT hr,
                                   const absl::FormatSpec<Ts...>& format,
-                                  const Ts&... args);
+                                  const Ts&... args) {
+  return ErrorStatus(HResultError(hr), format, args...);
+}
 #endif
+
+}  // namespace
 
 absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   if (string.empty()) return absl::InvalidArgumentError("Empty filename");
@@ -268,118 +373,6 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::s> AbslFormatConvert(
 
 void PrintTo(const FileName& file, std::ostream* const absl_nonnull stream) {
   *stream << absl::StreamFormat("%s", file.string());
-}
-
-static absl::Status MakeErrorStatus(const std::error_code& code,
-                                    const std::string_view function) {
-  if (!code) return absl::OkStatus();
-  const std::error_condition condition = code.default_error_condition();
-  const std::string message =
-      absl::StrCat(function, ": ", code.category().name(), "/", code.value(),
-                   ": ", code.message());
-  return condition.category() == std::generic_category()
-             ? absl::ErrnoToStatus(condition.value(), message)
-             : absl::UnknownError(message);
-}
-
-template <typename... Ts>
-static absl::Status ErrorStatus(const std::error_code& code,
-                                const absl::FormatSpec<Ts...>& format,
-                                const Ts&... args) {
-  return MakeErrorStatus(code, absl::StrFormat(format, args...));
-}
-
-#ifdef _WIN32
-[[nodiscard]] static std::error_code WindowsError() {
-  const DWORD code = ::GetLastError();
-  const std::optional<int> i = CastNumber<int>(code);
-  return i.has_value() ? std::error_code(*i, std::system_category())
-                       : std::make_error_code(std::errc::value_too_large);
-}
-
-template <typename... Ts>
-static absl::Status WindowsStatus(const absl::FormatSpec<Ts...>& format,
-                                  const Ts&... args) {
-  const std::error_code code = WindowsError();
-  return ErrorStatus(code, format, args...);
-}
-
-namespace {
-
-class HResultCategory final : public std::error_category {
- public:
-  static const HResultCategory& Get() {
-    static const absl::NoDestructor<HResultCategory> instance;
-    return *instance;
-  }
-
-  const char* absl_nonnull name() const noexcept final {
-    return "rules_elisp::HResultCategory";
-  }
-
-  std::string message(int val) const final {
-    const HRESULT hr{val};
-    std::string result = absl::StrFormat(
-        "HRESULT %#010x (severity %d, facility %#06x, code %#06x)", hr,
-        HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr));
-    const std::optional<std::error_code> win32 = ToWin32(hr);
-    if (win32.has_value()) absl::StrAppend(&result, "; ", win32->message());
-    return result;
-  };
-
-  std::error_condition default_error_condition(int val) const noexcept final {
-    const HRESULT hr{val};
-    const std::optional<std::error_code> win32 = ToWin32(hr);
-    return win32.has_value()
-               ? win32->default_error_condition()
-               : this->std::error_category::default_error_condition(val);
-  }
-
-  bool equivalent(const std::error_code& code, int val) const noexcept final {
-    if (this->std::error_category::equivalent(code, val)) return true;
-    const HRESULT hr{val};
-    const std::optional<std::error_code> win32 = ToWin32(hr);
-    return win32.has_value() && code == *win32;
-  }
-
- private:
-  static std::optional<std::error_code> ToWin32(const HRESULT hr) {
-    if (hr == S_OK) return std::error_code();
-    if (HRESULT_SEVERITY(hr) == SEVERITY_ERROR &&
-        HRESULT_FACILITY(hr) == FACILITY_WIN32) {
-      const int code{HRESULT_CODE(hr)};
-      if (HRESULT_FROM_WIN32(code) == hr) {
-        return std::error_code(code, std::system_category());
-      }
-    }
-    return std::nullopt;
-  }
-};
-
-}  // namespace
-
-[[nodiscard]] static std::error_code HResultError(const HRESULT hr) {
-  return std::error_code(hr, HResultCategory::Get());
-}
-
-template <typename... Ts>
-static absl::Status HResultStatus(const HRESULT hr,
-                                  const absl::FormatSpec<Ts...>& format,
-                                  const Ts&... args) {
-  return ErrorStatus(HResultError(hr), format, args...);
-}
-#endif
-
-[[nodiscard]] static std::error_code ErrnoError() {
-  const int code = errno;
-  return std::error_code(code, std::generic_category());
-}
-
-template <typename... Ts>
-static absl::Status ErrnoStatus(const absl::FormatSpec<Ts...>& format,
-                                const Ts&... args) {
-  const std::error_code code = ErrnoError();
-  return ErrorStatus(code, format, args...);
 }
 
 #ifdef _WIN32
