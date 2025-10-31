@@ -29,6 +29,7 @@
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
+namespace {
 
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
@@ -102,4 +103,5 @@ TEST(ManifestFileTest, Create) {
   EXPECT_THAT(ReadFile(*filename), IsOkAndHolds(want));
 }
 
+}  // namespace
 }  // namespace rules_elisp

@@ -24,6 +24,7 @@
 #include "gtest/gtest.h"
 
 namespace rules_elisp {
+namespace {
 
 using absl_testing::IsOk;
 using absl_testing::StatusIs;
@@ -73,4 +74,5 @@ TEST(PercentEncode, EncodesToAscii) {
   EXPECT_EQ(PercentEncode(View("Foó % \0\1\xFF")), "Fo%c3%b3 %25 %00%01%ff");
 }
 
+}  // namespace
 }  // namespace rules_elisp

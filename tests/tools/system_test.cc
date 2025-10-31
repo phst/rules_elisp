@@ -42,6 +42,7 @@
 #include "elisp/private/tools/strings.h"
 
 namespace rules_elisp {
+namespace {
 
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
@@ -942,4 +943,5 @@ TEST(DosDeviceTest, CreatesDevice) {
   }
 }
 
+}  // namespace
 }  // namespace rules_elisp
