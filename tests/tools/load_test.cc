@@ -31,6 +31,7 @@
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
+namespace {
 
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
@@ -209,4 +210,5 @@ TEST(LoadPathArgsTest, Manifest) {
                       "--directory=/bazel-runfile:bar äα𝐴🐈'"))));
 }
 
+}  // namespace
 }  // namespace rules_elisp

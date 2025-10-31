@@ -22,6 +22,7 @@
 #include "gtest/gtest.h"
 
 namespace rules_elisp {
+namespace {
 
 using ::testing::Optional;
 
@@ -83,4 +84,5 @@ TEST(MultiplyTest, ReturnsNullOnOverflow) {
   EXPECT_EQ(Multiply<std::uint8_t>(50u, 30u), std::nullopt);
 }
 
+}  // namespace
 }  // namespace rules_elisp

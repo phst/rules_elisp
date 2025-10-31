@@ -26,6 +26,7 @@
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
+namespace {
 
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
@@ -80,4 +81,5 @@ TEST(RunfilesTest, ParsesManifest) {
   EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));
 }
 
+}  // namespace
 }  // namespace rules_elisp
