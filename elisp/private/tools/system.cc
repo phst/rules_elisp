@@ -107,7 +107,7 @@ namespace rules_elisp {
 template <typename... Ts>
 static absl::Status HResultStatus(HRESULT hr,
                                   const absl::FormatSpec<Ts...>& format,
-                                  Ts&&... args);
+                                  const Ts&... args);
 #endif
 
 absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
@@ -286,9 +286,8 @@ static absl::Status MakeErrorStatus(const std::error_code& code,
 template <typename... Ts>
 static absl::Status ErrorStatus(const std::error_code& code,
                                 const absl::FormatSpec<Ts...>& format,
-                                Ts&&... args) {
-  return MakeErrorStatus(code,
-                         absl::StrFormat(format, std::forward<Ts>(args)...));
+                                const Ts&... args) {
+  return MakeErrorStatus(code, absl::StrFormat(format, args...));
 }
 
 #ifdef _WIN32
@@ -301,9 +300,9 @@ static absl::Status ErrorStatus(const std::error_code& code,
 
 template <typename... Ts>
 static absl::Status WindowsStatus(const absl::FormatSpec<Ts...>& format,
-                                  Ts&&... args) {
+                                  const Ts&... args) {
   const std::error_code code = WindowsError();
-  return ErrorStatus(code, format, std::forward<Ts>(args)...);
+  return ErrorStatus(code, format, args...);
 }
 
 namespace {
@@ -367,8 +366,8 @@ class HResultCategory final : public std::error_category {
 template <typename... Ts>
 static absl::Status HResultStatus(const HRESULT hr,
                                   const absl::FormatSpec<Ts...>& format,
-                                  Ts&&... args) {
-  return ErrorStatus(HResultError(hr), format, std::forward<Ts>(args)...);
+                                  const Ts&... args) {
+  return ErrorStatus(HResultError(hr), format, args...);
 }
 #endif
 
@@ -379,9 +378,9 @@ static absl::Status HResultStatus(const HRESULT hr,
 
 template <typename... Ts>
 static absl::Status ErrnoStatus(const absl::FormatSpec<Ts...>& format,
-                                Ts&&... args) {
+                                const Ts&... args) {
   const std::error_code code = ErrnoError();
-  return ErrorStatus(code, format, std::forward<Ts>(args)...);
+  return ErrorStatus(code, format, args...);
 }
 
 #ifdef _WIN32
