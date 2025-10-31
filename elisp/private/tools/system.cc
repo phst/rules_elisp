@@ -86,7 +86,7 @@
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
-#include "absl/random/random.h"
+#include "absl/random/random.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
