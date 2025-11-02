@@ -1436,49 +1436,90 @@ absl::StatusOr<int> RunProcess(const FileName& program,
 #endif
 }
 
-absl::StatusOr<DosDevice> DosDevice::Create(
-    [[maybe_unused]] const FileName& target) {
+class DosDevice::Impl final {
+ public:
+  static absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> Create(
+      [[maybe_unused]] const FileName& target) {
 #ifdef _WIN32
-  const DWORD drives = ::GetLogicalDrives();
-  if (drives == 0) return WindowsStatus("GetLogicalDrives");
-  constexpr wchar_t first = L'D';
-  constexpr wchar_t last = L'Z';
-  constexpr unsigned int count{last - first + 1};
-  std::array<wchar_t, count> letters;
-  auto end = letters.begin();
-  for (wchar_t letter = first; letter <= last; ++letter) {
-    static_assert(sizeof(DWORD) * CHAR_BIT > count);
-    const DWORD bit{1U << (letter - L'A')};
-    if ((drives & bit) == 0) *end++ = letter;
-  }
-  absl::BitGen gen;
-  std::shuffle(letters.begin(), end, gen);
-  for (auto it = letters.begin(); it != end; ++it) {
-    constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
-    const wchar_t name[] = {*it, L':', L'\0'};
-    if (!::DefineDosDeviceW(flags, name, target.pointer())) {
-      return WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags, name,
-                           target);
+    const DWORD drives = ::GetLogicalDrives();
+    if (drives == 0) return WindowsStatus("GetLogicalDrives");
+    constexpr wchar_t first = L'D';
+    constexpr wchar_t last = L'Z';
+    constexpr unsigned int count{last - first + 1};
+    std::array<wchar_t, count> letters;
+    auto end = letters.begin();
+    for (wchar_t letter = first; letter <= last; ++letter) {
+      static_assert(sizeof(DWORD) * CHAR_BIT > count);
+      const DWORD bit{1U << (letter - L'A')};
+      if ((drives & bit) == 0) *end++ = letter;
     }
-    return DosDevice(name, target);
-  }
-  return absl::ResourceExhaustedError("no drive letters available");
+    absl::BitGen gen;
+    std::shuffle(letters.begin(), end, gen);
+    for (auto it = letters.begin(); it != end; ++it) {
+      constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
+      const wchar_t name[] = {*it, L':', L'\0'};
+      if (!::DefineDosDeviceW(flags, name, target.pointer())) {
+        return WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags, name,
+                             target);
+      }
+      return absl::WrapUnique(new const Impl(name, target));
+    }
+    return absl::ResourceExhaustedError("no drive letters available");
 #else
-  return absl::UnimplementedError("this system doesn’t support DOS devices");
+    return absl::UnimplementedError("this system doesn’t support DOS devices");
 #endif
+  }
+
+  Impl(const Impl&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator=(Impl&&) = delete;
+
+  ~Impl() noexcept {
+#ifdef _WIN32
+    CHECK(!name_.empty());
+    constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
+                            DDD_NO_BROADCAST_SYSTEM;
+    if (!::DefineDosDeviceW(flags, Pointer(name_), target_.pointer())) {
+      LOG(ERROR) << WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags,
+                                  name_, target_);
+    }
+#endif
+  }
+
+  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    CHECK(!name_.empty());
+    return name_;
+  }
+
+ private:
+  explicit Impl(NativeString name, FileName target)
+      : name_(std::move(name)), target_(std::move(target)) {
+    CHECK(!name_.empty());
+  }
+
+  NativeString name_;
+  FileName target_;
+};
+
+absl::StatusOr<DosDevice> DosDevice::Create(const FileName& target) {
+  absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> impl =
+      Impl::Create(target);
+  if (!impl.ok()) return impl.status();
+  return DosDevice(*std::move(impl));
 }
 
-DosDevice::~DosDevice() noexcept {
-#ifdef _WIN32
-  if (name_.empty()) return;
-  CHECK(target_.has_value());
-  constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
-                          DDD_NO_BROADCAST_SYSTEM;
-  if (!::DefineDosDeviceW(flags, Pointer(name_), target_->pointer())) {
-    LOG(ERROR) << WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags, name_,
-                                *target_);
-  }
-#endif
+DosDevice::DosDevice(absl_nonnull std::unique_ptr<const Impl> impl)
+    : impl_(std::move(ABSL_DIE_IF_NULL(impl))) {}
+
+DosDevice::DosDevice(DosDevice&&) = default;
+DosDevice& DosDevice::operator=(DosDevice&&) = default;
+
+DosDevice::~DosDevice() noexcept = default;
+
+const NativeString& DosDevice::name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  CHECK_NE(impl_, nullptr);
+  return impl_->name();
 }
 
 }  // namespace rules_elisp

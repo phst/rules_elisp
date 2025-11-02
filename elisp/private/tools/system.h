@@ -16,6 +16,7 @@
 #define ELISP_PRIVATE_TOOLS_SYSTEM_H_
 
 #include <cstddef>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <string>
@@ -271,34 +272,20 @@ class DosDevice final {
  public:
   static absl::StatusOr<DosDevice> Create(const FileName& target);
 
-  ~DosDevice() noexcept;
-
   DosDevice(const DosDevice&) = delete;
   DosDevice& operator=(const DosDevice&) = delete;
+  DosDevice(DosDevice&&);
+  DosDevice& operator=(DosDevice&&);
+  ~DosDevice() noexcept;
 
-  DosDevice(DosDevice&& other)
-      : name_(std::exchange(other.name_, NativeString())),
-        target_(std::exchange(other.target_, std::nullopt)) {}
-
-  DosDevice& operator=(DosDevice&& other) {
-    name_ = std::exchange(other.name_, NativeString());
-    target_ = std::exchange(other.target_, std::nullopt);
-    return *this;
-  }
-
-  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    ABSL_CHECK(!name_.empty());
-    return name_;
-  }
+  const NativeString& name() const ABSL_ATTRIBUTE_LIFETIME_BOUND;
 
  private:
-  explicit DosDevice(NativeString name, FileName target)
-      : name_(std::move(name)), target_(std::move(target)) {
-    ABSL_CHECK(!name_.empty());
-  }
+  class Impl;
 
-  NativeString name_;
-  std::optional<FileName> target_;
+  explicit DosDevice(absl_nonnull std::unique_ptr<const Impl> impl);
+
+  absl_nullable std::unique_ptr<const Impl> impl_;
 };
 
 }  // namespace rules_elisp
