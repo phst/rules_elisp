@@ -240,12 +240,6 @@ class Environment final {
     map_.emplace(key, value);
   }
 
-  template <std::size_t N>
-  void Remove(const NativeChar (&key)[N]) {
-    static_assert(N > 1, "empty environment variable");
-    map_.erase(key);
-  }
-
   void Merge(const Environment& other) {
     map_.insert(other.begin(), other.end());
   }

@@ -779,17 +779,6 @@ TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
   EXPECT_THAT(*env, SizeIs(pairs.size() + (kWindows ? 0 : 1)));
 }
 
-TEST(EnvironmentTest, RemoveIsCaseSensitiveOnlyOnUnix) {
-  const std::vector<std::pair<NativeString, NativeString>> pairs = {
-      {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
-  };
-  absl::StatusOr<Environment> env =
-      Environment::Create(pairs.cbegin(), pairs.cend());
-  ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
-  env->Remove(RULES_ELISP_NATIVE_LITERAL("Foo"));
-  EXPECT_THAT(*env, SizeIs(pairs.size() - (kWindows ? 1 : 0)));
-}
-
 TEST(TemporaryFileTest, CreateWorks) {
   absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
   ASSERT_THAT(file, IsOk());
