@@ -17,14 +17,19 @@
 #include <fstream>
 #include <ios>
 #include <locale>
+#include <memory>
 #include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
+#include "absl/base/nullability.h"
 #include "absl/cleanup/cleanup.h"
+#include "absl/log/check.h"
+#include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
+#include "absl/memory/memory.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
@@ -141,43 +146,79 @@ static absl::Status Write(const Options& opts,
   return absl::OkStatus();
 }
 
+class ManifestFile::Impl final {
+ public:
+  static absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> Create(
+      const Options& opts, const absl::Span<const FileName> input_files,
+      const absl::Span<const FileName> output_files) {
+    CHECK_EQ(opts.mode, ToolchainMode::kWrap);
+    const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
+    if (!directory.ok()) return directory.status();
+    absl::Cleanup cleanup = [&directory] {
+      const absl::Status status = RemoveTree(*directory);
+      if (!status.ok()) LOG(ERROR) << status;
+    };
+    absl::StatusOr<FileName> name =
+        directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest.json"));
+    if (!name.ok()) return name.status();
+    std::ofstream file(name->string(),
+                       std::ios::out | std::ios::trunc | std::ios::binary);
+    if (!file.is_open() || !file.good()) {
+      return absl::FailedPreconditionError(
+          absl::StrFormat("Cannot open manifest file %s for writing", *name));
+    }
+    file.imbue(std::locale::classic());
+    const absl::Status status = Write(opts, input_files, output_files, file);
+    if (!status.ok()) return status;
+    std::move(cleanup).Cancel();
+    return absl::WrapUnique(
+        new const Impl(*std::move(directory), *std::move(name)));
+  }
+
+  Impl(const Impl&) = delete;
+  Impl& operator=(const Impl&) = delete;
+  Impl(Impl&&) = delete;
+  Impl& operator=(Impl&&) = delete;
+
+  ~Impl() noexcept {
+    const absl::Status status = RemoveTree(directory_);
+    if (!status.ok()) LOG(ERROR) << status;
+  }
+
+  void AppendArgs(std::vector<NativeString>& args) const {
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") + file_.string());
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  }
+
+ private:
+  explicit Impl(FileName directory, FileName file)
+      : directory_(std::move(directory)), file_(std::move(file)) {}
+
+  FileName directory_;
+  FileName file_;
+};
+
 absl::StatusOr<ManifestFile> ManifestFile::Create(
     const Options& opts, const absl::Span<const FileName> input_files,
     const absl::Span<const FileName> output_files) {
   if (opts.mode == ToolchainMode::kDirect) return ManifestFile();
-  const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
-  if (!directory.ok()) return directory.status();
-  absl::Cleanup cleanup = [&directory] {
-    const absl::Status status = RemoveTree(*directory);
-    if (!status.ok()) LOG(ERROR) << status;
-  };
-  absl::StatusOr<FileName> name =
-      directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest.json"));
-  if (!name.ok()) return name.status();
-  std::ofstream file(name->string(),
-                     std::ios::out | std::ios::trunc | std::ios::binary);
-  if (!file.is_open() || !file.good()) {
-    return absl::FailedPreconditionError(
-        absl::StrFormat("Cannot open manifest file %s for writing", *name));
-  }
-  file.imbue(std::locale::classic());
-  const absl::Status status = Write(opts, input_files, output_files, file);
-  if (!status.ok()) return status;
-  std::move(cleanup).Cancel();
-  return ManifestFile(*std::move(directory), *std::move(name));
+  absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> impl =
+      Impl::Create(opts, input_files, output_files);
+  if (!impl.ok()) return impl.status();
+  return ManifestFile(*std::move(impl));
 }
 
-ManifestFile::~ManifestFile() noexcept {
-  if (directory_.has_value()) {
-    const absl::Status status = RemoveTree(*directory_);
-    if (!status.ok()) LOG(ERROR) << status;
-  }
-}
+ManifestFile::ManifestFile(absl_nonnull std::unique_ptr<const Impl> impl)
+    : impl_(std::move(ABSL_DIE_IF_NULL(impl))) {}
+
+ManifestFile::ManifestFile(ManifestFile&&) = default;
+ManifestFile& ManifestFile::operator=(ManifestFile&&) = default;
+
+ManifestFile::~ManifestFile() noexcept = default;
 
 void ManifestFile::AppendArgs(std::vector<NativeString>& args) const {
-  if (!file_.has_value()) return;
-  args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") + file_->string());
-  args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
+  if (impl_ == nullptr) return;
+  impl_->AppendArgs(args);
 }
 
 }  // namespace rules_elisp

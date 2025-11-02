@@ -15,10 +15,10 @@
 #ifndef ELISP_PRIVATE_TOOLS_MANIFEST_H_
 #define ELISP_PRIVATE_TOOLS_MANIFEST_H_
 
-#include <optional>
-#include <utility>
+#include <memory>
 #include <vector>
 
+#include "absl/base/nullability.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
@@ -35,28 +35,20 @@ class ManifestFile final {
 
   ManifestFile(const ManifestFile&) = delete;
   ManifestFile& operator=(const ManifestFile&) = delete;
-
-  ManifestFile(ManifestFile&& other)
-      : directory_(std::exchange(other.directory_, std::nullopt)),
-        file_(std::exchange(other.file_, std::nullopt)) {}
+  ManifestFile(ManifestFile&&);
+  ManifestFile& operator=(ManifestFile&&);
 
   ~ManifestFile() noexcept;
-
-  ManifestFile& operator=(ManifestFile&& other) {
-    directory_ = std::exchange(other.directory_, std::nullopt);
-    file_ = std::exchange(other.file_, std::nullopt);
-    return *this;
-  }
 
   void AppendArgs(std::vector<NativeString>& args) const;
 
  private:
-  explicit ManifestFile() = default;
-  explicit ManifestFile(FileName directory, FileName file)
-      : directory_(std::move(directory)), file_(std::move(file)) {}
+  class Impl;
 
-  std::optional<FileName> directory_;
-  std::optional<FileName> file_;
+  explicit ManifestFile() = default;
+  explicit ManifestFile(absl_nonnull std::unique_ptr<const Impl> impl);
+
+  absl_nullable std::unique_ptr<const Impl> impl_;
 };
 
 }  // namespace rules_elisp
