@@ -87,6 +87,15 @@ TEST(FileNameTest, RejectsNull) {
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
+TEST(FileNameTest, AcceptsRootLocalDevice) {
+  // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
+  EXPECT_THAT(
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\DEF")),
+      IsOk());
+  EXPECT_THAT(FileName::FromString(RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\")),
+              IsOk());
+}
+
 class FileNameTest : public TestWithParam<NativeStringView> {};
 
 TEST_P(FileNameTest, RejectsExoticNamesOnWindows) {
@@ -94,7 +103,8 @@ TEST_P(FileNameTest, RejectsExoticNamesOnWindows) {
     // See
     // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html
     // for an exhaustive description of Windows filenames.  We want to reject
-    // all of them except relative and MS-DOS-style drive absolute ones.
+    // all of them except relative MS-DOS-style drive absolute, and root-local
+    // device ones.
     EXPECT_THAT(FileName::FromString(this->GetParam()),
                 StatusIs(absl::StatusCode::kInvalidArgument));
   }
@@ -127,8 +137,6 @@ INSTANTIATE_TEST_SUITE_P(
         RULES_ELISP_NATIVE_LITERAL("\\\\.\\X:/ABC/DEF"),
         RULES_ELISP_NATIVE_LITERAL("\\\\.\\X:\\ABC\\..\\..\\C:\\"),
         // Root Local Device
-        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\DEF"),
-        RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\"),
         RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:"),
         RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:/ABC/DEF"),
         RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\..\\..\\.."),
@@ -358,7 +366,22 @@ INSTANTIATE_TEST_SUITE_P(
         IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("NUL"), true, false},
         IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/"), !kWindows, !kWindows},
         IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("/foo"), !kWindows,
-                        !kWindows}));
+                        !kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\DEF"), true,
+                        kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\"), true,
+                        kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:"), !kWindows,
+                        kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\DEF. ."),
+                        !kWindows, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:/ABC/DEF"),
+                        !kWindows, kWindows},
+        IsAbsoluteParam{RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\..\\XYZ"),
+                        !kWindows, kWindows},
+        IsAbsoluteParam{
+            RULES_ELISP_NATIVE_LITERAL("\\\\?\\X:\\ABC\\..\\..\\.."), !kWindows,
+            kWindows}));
 
 TEST(MakeAbsoluteTest, KeepsAbsoluteName) {
   const absl::StatusOr<FileName> file = FileName::FromString(
