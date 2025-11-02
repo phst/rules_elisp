@@ -67,6 +67,7 @@
 #include <ios>
 #include <iostream>
 #include <locale>
+#include <memory>
 #include <optional>
 #include <ostream>
 #include <sstream>
@@ -86,6 +87,7 @@
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
+#include "absl/memory/memory.h"
 #include "absl/random/random.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
 #include "absl/strings/ascii.h"
@@ -1016,17 +1018,32 @@ class EnvironmentBlock final {
   using Pointer =
       std::conditional_t<kWindows, wchar_t*, const char* const absl_nullable*>;
 
+  struct Free;
+#ifdef _WIN32
+  struct Free {
+    void operator()(wchar_t* const absl_nonnull p) const noexcept {
+      const BOOL ok = ::FreeEnvironmentStringsW(p);
+      // If this fails, we can’t really do much except logging the error.
+      if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
+    }
+  };
+#endif
+
+  using OwningPointer =
+      std::conditional_t<kWindows, std::unique_ptr<wchar_t, Free>,
+                         const char* const absl_nullable*>;
+
  public:
   static absl::StatusOr<EnvironmentBlock> Current() {
 #if defined _WIN32
-    const absl_nullable LPWCH envp = ::GetEnvironmentStringsW();
+    absl_nullable OwningPointer envp(::GetEnvironmentStringsW());
     if (envp == nullptr) {
       // Don’t use WindowsStatus since the documentation
       // (https://learn.microsoft.com/en-us/windows/win32/api/processenv/nf-processenv-getenvironmentstringsw)
       // doesn’t say we can use GetLastError.
       return absl::ResourceExhaustedError("GetEnvironmentStringsW failed");
     }
-    return EnvironmentBlock(envp);
+    return EnvironmentBlock(std::move(envp));
 #elif defined __APPLE__
     // See environ(7) why this is necessary.
     return EnvironmentBlock(*_NSGetEnviron());
@@ -1037,26 +1054,8 @@ class EnvironmentBlock final {
 
   EnvironmentBlock(const EnvironmentBlock&) = delete;
   EnvironmentBlock& operator=(const EnvironmentBlock&) = delete;
-
-  EnvironmentBlock(EnvironmentBlock&& other)
-      : start_(std::exchange(other.start_, nullptr)),
-        next_(std::exchange(other.next_, nullptr)) {}
-
-  EnvironmentBlock& operator=(EnvironmentBlock&& other) {
-    start_ = std::exchange(other.start_, nullptr);
-    next_ = std::exchange(other.next_, nullptr);
-    return *this;
-  }
-
-  ~EnvironmentBlock() noexcept {
-    if (start_ == nullptr) return;
-#ifdef _WIN32
-    if (!::FreeEnvironmentStringsW(start_)) {
-      // If this fails, we can’t really do much except logging the error.
-      LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
-    }
-#endif
-  }
+  EnvironmentBlock(EnvironmentBlock&&) = default;
+  EnvironmentBlock& operator=(EnvironmentBlock&&) = default;
 
   [[nodiscard]] bool Next(NativeStringView& element) {
     CHECK_NE(start_, nullptr);
@@ -1074,10 +1073,10 @@ class EnvironmentBlock final {
   }
 
  private:
-  explicit EnvironmentBlock(const absl_nonnull Pointer ptr)
-      : start_(ABSL_DIE_IF_NULL(ptr)), next_(ptr) {}
+  explicit EnvironmentBlock(absl_nonnull OwningPointer ptr)
+      : start_(std::move(ABSL_DIE_IF_NULL(ptr))), next_(absl::RawPtr(start_)) {}
 
-  absl_nullable Pointer start_;
+  absl_nullable OwningPointer start_;
   absl_nullable Pointer next_;
 };
 
