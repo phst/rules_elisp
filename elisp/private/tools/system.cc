@@ -224,24 +224,44 @@ absl::StatusOr<FileName> FileName::FromString(const NativeStringView string) {
   }
   NativeString name(string);
   if constexpr (kWindows) {
-    absl::c_replace(name, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+    NativeStringView rest = name;
+    if (ConsumePrefix(rest, RULES_ELISP_NATIVE_LITERAL("\\\\?\\"))) {
+      // Root Local Device name.
+      if (rest.empty() ||
+          rest.find(RULES_ELISP_NATIVE_LITERAL('/')) != rest.npos ||
+          rest.find(RULES_ELISP_NATIVE_LITERAL("\\.\\")) != rest.npos ||
+          rest.find(RULES_ELISP_NATIVE_LITERAL("\\..\\")) != rest.npos ||
+          NativeString(RULES_ELISP_NATIVE_LITERAL(" .")).find(rest.back()) !=
+              NativeString::npos) {
+        return absl::InvalidArgumentError(
+            absl::StrFormat("Invalid filename %s", name));
+      }
+    } else {
+      absl::c_replace(name, RULES_ELISP_NATIVE_LITERAL('/'), kSeparator);
+    }
+    // Reject wildcards and other invalid characters.
+    if (rest.find_first_of(RULES_ELISP_NATIVE_LITERAL("?*\"/<>|")) !=
+        rest.npos) {
+      return absl::InvalidArgumentError(
+          absl::StrFormat("Invalid filename %s", name));
+    }
     // Reject most of the “exotic” names from
     // https://googleprojectzero.blogspot.com/2016/02/the-definitive-guide-on-win32-to-nt.html.
-    if (name.front() == kSeparator) {
+    if (rest.front() == kSeparator) {
       return absl::InvalidArgumentError(
           absl::StrFormat("Invalid filename %s", name));
     }
     const NativeString::size_type i =
-        name.find(RULES_ELISP_NATIVE_LITERAL(':'));
-    if (i != name.npos) {
+        rest.find(RULES_ELISP_NATIVE_LITERAL(':'));
+    if (i != rest.npos) {
       // Reject alternate data streams or drive-relative names.
-      if (i != 1 || name.length() < 3 || name.at(2) != kSeparator) {
+      if (i != 1 || rest.length() < 3 || rest.at(2) != kSeparator) {
         return absl::InvalidArgumentError(
             absl::StrFormat("Invalid filename %s", name));
       }
       // Reject non-alphabetic drive letters.
       const std::optional<unsigned char> drive =
-          CastNumber<unsigned char>(name.front());
+          CastNumber<unsigned char>(rest.front());
       if (!drive.has_value() || !absl::ascii_isalpha(*drive)) {
         return absl::InvalidArgumentError(
             absl::StrFormat("Invalid filename %s", name));
@@ -274,7 +294,7 @@ absl::StatusOr<FileName> FileName::Parent() const {
 #ifdef _WIN32
   std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
   {
-    constexpr ULONG flags = PATHCCH_NONE;
+    constexpr ULONG flags = PATHCCH_ALLOW_LONG_PATHS;
     const HRESULT hr = PathCchCanonicalizeEx(buffer.data(), buffer.size(),
                                              Pointer(string), flags);
     if (FAILED(hr)) {
@@ -333,7 +353,7 @@ absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
   }
 #ifdef _WIN32
   std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
-  constexpr ULONG flags = PATHCCH_NONE;
+  constexpr ULONG flags = PATHCCH_ALLOW_LONG_PATHS;
   const HRESULT hr =
       ::PathCchCombineEx(buffer.data(), buffer.size(), this->pointer(),
                          descendant.pointer(), flags);
@@ -574,10 +594,11 @@ static absl::StatusOr<FileName> WorkingDirectory() {
 bool FileName::IsAbsolute() const {
   if constexpr (kWindows) {
     if (string_.length() < 3) return false;
-    return string_.length() > 2 &&
-           string_[1] == RULES_ELISP_NATIVE_LITERAL(':') &&
-           (string_[2] == RULES_ELISP_NATIVE_LITERAL('\\') ||
-            string_[2] == RULES_ELISP_NATIVE_LITERAL('/'));
+    return (string_.length() > 2 &&
+            string_[1] == RULES_ELISP_NATIVE_LITERAL(':') &&
+            (string_[2] == RULES_ELISP_NATIVE_LITERAL('\\') ||
+             string_[2] == RULES_ELISP_NATIVE_LITERAL('/'))) ||
+           StartsWith(string_, RULES_ELISP_NATIVE_LITERAL("\\\\?\\"));
   } else {
     return string_.front() == RULES_ELISP_NATIVE_LITERAL('/');
   }
@@ -672,16 +693,7 @@ absl::StatusOr<FileName> FileName::Resolve() const {
     return absl::FailedPreconditionError(absl::StrFormat(
         "Resolved filename is too long (%d characters)", length));
   }
-  std::wstring_view result(buffer.data(), length);
-  // The resolved name always starts with the \\?\ prefix,
-  // cf. https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-getfinalpathnamebyhandlew#remarks.
-  // FileName doesn’t accept that, so we strip it.
-  constexpr std::wstring_view prefix = L"\\\\?\\";
-  if (result.substr(0, prefix.length()) != prefix) {
-    return absl::FailedPreconditionError(absl::StrFormat(
-        "Resolved filename %s doesn’t start with %s prefix", result, prefix));
-  }
-  result.remove_prefix(prefix.length());
+  const std::wstring_view result(buffer.data(), length);
   return FileName::FromString(result);
 #else
   char* const absl_nullable result = realpath(this->pointer(), nullptr);
