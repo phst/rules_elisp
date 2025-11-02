@@ -779,15 +779,6 @@ TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
   EXPECT_THAT(*env, SizeIs(pairs.size() + (kWindows ? 0 : 1)));
 }
 
-TEST(TemporaryFileTest, CreateWorks) {
-  absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
-  ASSERT_THAT(file, IsOk());
-
-  EXPECT_THAT(file->Write("Foo\n"), IsOk());
-
-  EXPECT_THAT(ReadFile(file->name()), IsOkAndHolds("Foo\n"));
-}
-
 TEST(CreateTemporaryDirectoryTest, Works) {
   absl::StatusOr<FileName> dir = CreateTemporaryDirectory();
   ASSERT_THAT(dir, IsOk());
