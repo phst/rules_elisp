@@ -139,6 +139,7 @@ cc_test(
         "//elisp/private/tools:platform",
         "//elisp/private/tools:runfiles",
         "//elisp/private/tools:system",
+        "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",

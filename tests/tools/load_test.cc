@@ -184,7 +184,7 @@ TEST(LoadPathArgsTest, Manifest) {
   const NativeString runfiles_elc =
       runfiles_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("runfiles.elc");
 
-  const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
+  const absl::StatusOr<FileName> directory = TempDir();
   ASSERT_THAT(directory, IsOk());
   const FileName manifest =
       directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest")).value();

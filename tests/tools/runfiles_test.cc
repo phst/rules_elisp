@@ -16,6 +16,7 @@
 
 #include <optional>
 
+#include "absl/cleanup/cleanup.h"
 #include "absl/status/status.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
@@ -31,6 +32,13 @@ namespace {
 using absl_testing::IsOk;
 using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
+
+static absl::StatusOr<FileName> TempDir() {
+  const absl::StatusOr<NativeString> native =
+      ToNative(::testing::TempDir(), Encoding::kAscii);
+  if (!native.ok()) return native.status();
+  return FileName::FromString(*native);
+}
 
 TEST(RunfilesTest, ResolvesRunfile) {
   const absl::StatusOr<Runfiles> runfiles =
@@ -63,19 +71,25 @@ TEST(RunfilesTest, AllowsRunningTool) {
 }
 
 TEST(RunfilesTest, ParsesManifest) {
-  absl::StatusOr<TemporaryFile> manifest = TemporaryFile::Create();
-  ASSERT_THAT(manifest, IsOk());
+  const absl::StatusOr<FileName> temp = TempDir();
+  ASSERT_THAT(temp, IsOk());
+
+  const FileName manifest =
+      temp->Child(RULES_ELISP_NATIVE_LITERAL("manifest")).value();
   EXPECT_THAT(
-      manifest->Write(kWindows ? "foo C:\\Bar\\Baz\n" : "foo /bar/baz\n"),
+      WriteFile(manifest, kWindows ? "foo C:\\Bar\\Baz\n" : "foo /bar/baz\n"),
       IsOk());
+  const absl::Cleanup cleanup = [&manifest] {
+    EXPECT_THAT(Unlink(manifest), IsOk());
+  };
 
   const FileName file =
       FileName::FromString(kWindows ? RULES_ELISP_NATIVE_LITERAL("C:\\Bar\\Baz")
                                     : RULES_ELISP_NATIVE_LITERAL("/bar/baz"))
           .value();
 
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      BAZEL_CURRENT_REPOSITORY, {}, manifest->name(), std::nullopt);
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest, std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
   EXPECT_THAT(runfiles->Resolve("foo"), IsOkAndHolds(file));
   EXPECT_THAT(runfiles->Resolve("qux"), StatusIs(absl::StatusCode::kNotFound));
