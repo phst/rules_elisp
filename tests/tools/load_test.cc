@@ -193,6 +193,9 @@ TEST(LoadPathArgsTest, Manifest) {
   // Runfiles manifests contain POSIX-style filenames even on Windows.
   if constexpr (kWindows) absl::c_replace(line, '\\', '/');
   EXPECT_THAT(WriteFile(manifest, line), IsOk());
+  const absl::Cleanup cleanup = [&manifest] {
+    EXPECT_THAT(Unlink(manifest), IsOk());
+  };
 
   const absl::StatusOr<Runfiles> runfiles =
       Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest, std::nullopt);
