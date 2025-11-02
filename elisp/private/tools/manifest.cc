@@ -14,15 +14,22 @@
 
 #include "elisp/private/tools/manifest.h"
 
+#include <fstream>
+#include <ios>
+#include <locale>
+#include <ostream>
 #include <string>
 #include <utility>
 #include <vector>
 
 #include "absl/algorithm/container.h"
+#include "absl/cleanup/cleanup.h"
+#include "absl/log/log.h"
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
+#include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/json/json.h"
 #include "google/protobuf/repeated_ptr_field.h"
 
@@ -77,7 +84,7 @@ static absl::Status Assign(
 static absl::Status Write(const Options& opts,
                           const absl::Span<const FileName> input_files,
                           const absl::Span<const FileName> output_files,
-                          TemporaryFile& file) {
+                          std::ostream& file) {
   const absl::StatusOr<std::vector<FileName>> load_path =
       ConvertNames(opts.load_path);
   if (!load_path.ok()) return load_path.status();
@@ -123,29 +130,53 @@ static absl::Status Write(const Options& opts,
     return status;
   }
 
-  std::string json;
+  google::protobuf::io::OstreamOutputStream stream(&file);
   const absl::Status status =
-      google::protobuf::json::MessageToJsonString(manifest, &json);
+      google::protobuf::json::MessageToJsonStream(manifest, &stream);
   if (!status.ok()) return status;
-
-  return file.Write(json);
+  file.flush();
+  if (!file.good()) {
+    return absl::DataLossError("Cannot write manifest file");
+  }
+  return absl::OkStatus();
 }
 
 absl::StatusOr<ManifestFile> ManifestFile::Create(
     const Options& opts, const absl::Span<const FileName> input_files,
     const absl::Span<const FileName> output_files) {
   if (opts.mode == ToolchainMode::kDirect) return ManifestFile();
-  absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
-  if (!file.ok()) return file.status();
-  const absl::Status status = Write(opts, input_files, output_files, *file);
+  const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
+  if (!directory.ok()) return directory.status();
+  absl::Cleanup cleanup = [&directory] {
+    const absl::Status status = RemoveTree(*directory);
+    if (!status.ok()) LOG(ERROR) << status;
+  };
+  absl::StatusOr<FileName> name =
+      directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest.json"));
+  if (!name.ok()) return name.status();
+  std::ofstream file(name->string(),
+                     std::ios::out | std::ios::trunc | std::ios::binary);
+  if (!file.is_open() || !file.good()) {
+    return absl::FailedPreconditionError(
+        absl::StrFormat("Cannot open manifest file %s for writing", *name));
+  }
+  file.imbue(std::locale::classic());
+  const absl::Status status = Write(opts, input_files, output_files, file);
   if (!status.ok()) return status;
-  return ManifestFile(*std::move(file));
+  std::move(cleanup).Cancel();
+  return ManifestFile(*std::move(directory), *std::move(name));
+}
+
+ManifestFile::~ManifestFile() noexcept {
+  if (directory_.has_value()) {
+    const absl::Status status = RemoveTree(*directory_);
+    if (!status.ok()) LOG(ERROR) << status;
+  }
 }
 
 void ManifestFile::AppendArgs(std::vector<NativeString>& args) const {
   if (!file_.has_value()) return;
-  args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") +
-                 file_->name().string());
+  args.push_back(RULES_ELISP_NATIVE_LITERAL("--manifest=") + file_->string());
   args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
 }
 

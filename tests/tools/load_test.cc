@@ -184,16 +184,18 @@ TEST(LoadPathArgsTest, Manifest) {
   const NativeString runfiles_elc =
       runfiles_dir + kSeparator + RULES_ELISP_NATIVE_LITERAL("runfiles.elc");
 
-  absl::StatusOr<TemporaryFile> file = TemporaryFile::Create();
-  ASSERT_THAT(file, IsOk());
+  const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
+  ASSERT_THAT(directory, IsOk());
+  const FileName manifest =
+      directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest")).value();
   std::string line =
       absl::StrFormat("%s %s\n", RULES_ELISP_RUNFILES_ELC, runfiles_elc);
   // Runfiles manifests contain POSIX-style filenames even on Windows.
   if constexpr (kWindows) absl::c_replace(line, '\\', '/');
-  EXPECT_THAT(file->Write(line), IsOk());
+  EXPECT_THAT(WriteFile(manifest, line), IsOk());
 
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      BAZEL_CURRENT_REPOSITORY, {}, file->name(), std::nullopt);
+  const absl::StatusOr<Runfiles> runfiles =
+      Runfiles::Create(BAZEL_CURRENT_REPOSITORY, {}, manifest, std::nullopt);
   ASSERT_THAT(runfiles, IsOk());
 
   EXPECT_THAT(LoadPathArgs(*runfiles,

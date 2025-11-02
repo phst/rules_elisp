@@ -36,16 +36,27 @@ class ManifestFile final {
   ManifestFile(const ManifestFile&) = delete;
   ManifestFile& operator=(const ManifestFile&) = delete;
 
-  ManifestFile(ManifestFile&&) = default;
-  ManifestFile& operator=(ManifestFile&&) = default;
+  ManifestFile(ManifestFile&& other)
+      : directory_(std::exchange(other.directory_, std::nullopt)),
+        file_(std::exchange(other.file_, std::nullopt)) {}
+
+  ~ManifestFile() noexcept;
+
+  ManifestFile& operator=(ManifestFile&& other) {
+    directory_ = std::exchange(other.directory_, std::nullopt);
+    file_ = std::exchange(other.file_, std::nullopt);
+    return *this;
+  }
 
   void AppendArgs(std::vector<NativeString>& args) const;
 
  private:
   explicit ManifestFile() = default;
-  explicit ManifestFile(TemporaryFile file) : file_(std::move(file)) {}
+  explicit ManifestFile(FileName directory, FileName file)
+      : directory_(std::move(directory)), file_(std::move(file)) {}
 
-  std::optional<TemporaryFile> file_;
+  std::optional<FileName> directory_;
+  std::optional<FileName> file_;
 };
 
 }  // namespace rules_elisp

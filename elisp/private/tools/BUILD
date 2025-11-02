@@ -294,11 +294,14 @@ cc_library(
         ":platform",
         ":system",
         "@abseil-cpp//absl/algorithm:container",
+        "@abseil-cpp//absl/cleanup",
+        "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/types:span",
         "@protobuf//:protobuf_lite",  # keep
+        "@protobuf//src/google/protobuf/io",
         "@protobuf//src/google/protobuf/json",
     ],
 )
