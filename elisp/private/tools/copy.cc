@@ -32,16 +32,20 @@ namespace rules_elisp {
 
 absl::Status CopyFiles(const FileName& from, const FileName& to,
                        const FileName& list) {
-  FileName dest = to;
+  const absl::StatusOr<FileName> from_abs = from.MakeAbsolute();
+  if (!from_abs.ok()) return from_abs.status();
+
+  absl::StatusOr<FileName> to_abs = to.MakeAbsolute();
+  if (!to_abs.ok()) return to_abs.status();
 
   std::optional<DosDevice> dos_device;
   if constexpr (kWindows) {
-    absl::StatusOr<DosDevice> dev = DosDevice::Create(to);
+    absl::StatusOr<DosDevice> dev = DosDevice::Create(*to_abs);
     if (!dev.ok()) return dev.status();
     absl::StatusOr<FileName> root =
         FileName::FromString(dev->name() + RULES_ELISP_NATIVE_LITERAL("\\"));
     if (!root.ok()) return root.status();
-    dest = *std::move(root);
+    to_abs = *std::move(root);
     dos_device = *std::move(dev);
   }
 
@@ -56,11 +60,14 @@ absl::Status CopyFiles(const FileName& from, const FileName& to,
   while (std::getline(stream, line)) {
     const absl::StatusOr<NativeString> native = ToNative(line, Encoding::kUtf8);
     if (!native.ok()) return native.status();
-    const absl::StatusOr<FileName> from_file = FileName::FromString(*native);
+    absl::StatusOr<FileName> from_file = FileName::FromString(*native);
     if (!from_file.ok()) return from_file.status();
-    const absl::StatusOr<FileName> relative = from_file->MakeRelative(from);
+    from_file = from_file->MakeAbsolute();
+    if (!from_file.ok()) return from_file.status();
+    const absl::StatusOr<FileName> relative =
+        from_file->MakeRelative(*from_abs);
     if (!relative.ok()) return relative.status();
-    const absl::StatusOr<FileName> to_file = dest.Join(*relative);
+    const absl::StatusOr<FileName> to_file = to_abs->Join(*relative);
     if (!to_file.ok()) return to_file.status();
     const absl::StatusOr<FileName> parent = to_file->Parent();
     if (!parent.ok()) return parent.status();
