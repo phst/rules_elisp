@@ -607,14 +607,6 @@ absl::StatusOr<FileName> FileName::MakeAbsolute() const {
 #endif
 }
 
-[[nodiscard]] static bool ConsumePrefix(NativeStringView& string,
-                                        const NativeStringView prefix) {
-  const NativeStringView::size_type n = prefix.length();
-  if (string.substr(0, n) != prefix) return false;
-  string.remove_prefix(n);
-  return true;
-}
-
 absl::StatusOr<FileName> FileName::MakeRelative(const FileName& base) const {
   NativeString file_str = string_;
   NativeString base_str = base.string();

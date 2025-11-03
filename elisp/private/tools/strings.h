@@ -19,8 +19,33 @@
 #include <string_view>
 
 #include "absl/status/status.h"
+#include "absl/strings/match.h"
+#include "absl/strings/strip.h"
 
 namespace rules_elisp {
+
+[[nodiscard]] inline constexpr bool StartsWith(const std::string_view string,
+                                               const std::string_view prefix) {
+  return absl::StartsWith(string, prefix);
+}
+
+[[nodiscard]] inline constexpr bool StartsWith(const std::wstring_view string,
+                                               const std::wstring_view prefix) {
+  return string.substr(0, prefix.length()) == prefix;
+}
+
+[[nodiscard]] inline constexpr bool ConsumePrefix(
+    std::string_view& string, const std::string_view prefix) {
+  return absl::ConsumePrefix(&string, prefix);
+}
+
+[[nodiscard]] inline constexpr bool ConsumePrefix(
+    std::wstring_view& string, const std::wstring_view prefix) {
+  const std::wstring_view::size_type n = prefix.length();
+  if (string.substr(0, n) != prefix) return false;
+  string.remove_prefix(n);
+  return true;
+}
 
 std::string Quote(std::string_view string);
 std::string Quote(std::wstring_view string);
