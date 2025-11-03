@@ -209,7 +209,7 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add(readme)
-    args.add(install.path)
+    args.add_all([install], expand_directories = False)
     args.add(shell_toolchain.path)
     args.add(cc)
     args.add_joined(
@@ -263,7 +263,7 @@ def _unpack(ctx, readme):
     install = ctx.actions.declare_directory("_" + ctx.label.name)
     args = ctx.actions.args()
     args.add(readme)
-    args.add(install.path)
+    args.add_all([install], expand_directories = False)
     srcs = ctx.actions.args()
     srcs.use_param_file("%s", use_always = True)
     srcs.set_param_file_format("multiline")
