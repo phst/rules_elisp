@@ -1001,7 +1001,7 @@ exact copies as equal."
 
 ;; Set a few environment variables as required or recommended in
 ;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
-(unless (@getenv "HOME") (setenv "HOME" temporary-file-directory))
+(unless (@getenv "HOME") (setenv "HOME" (getenv "TEST_TMPDIR")))
 (setenv "LC_CTYPE")
 (unless (@getenv "LOGNAME") (setenv "LOGNAME" user-login-name))
 ;; Don’t use unsafe default from
