@@ -81,7 +81,10 @@ def _elisp_cc_module_impl(ctx):
         # @bazel_tools//tools/test:collect_cc_coverage.sh requires a file whose
         # name ends in “runtime_objects_list.txt”.
         objects_list = ctx.actions.declare_file(ctx.label.name + ".runtime_objects_list.txt")
-        ctx.actions.write(objects_list, lib.path + "\n")
+        ctx.actions.write(
+            objects_list,
+            ctx.actions.args().set_param_file_format("multiline").add(lib),
+        )
         metadata_files += [lib, objects_list]
 
     load_path = [resolve_load_path(ctx, "")]
