@@ -17,9 +17,7 @@
 #include <fstream>
 #include <ios>
 #include <locale>
-#include <optional>
 #include <string>
-#include <utility>
 
 #include "absl/status/status.h"
 #include "absl/status/statusor.h"
@@ -35,19 +33,8 @@ absl::Status CopyFiles(const FileName& from, const FileName& to,
   const absl::StatusOr<FileName> from_abs = from.MakeAbsolute();
   if (!from_abs.ok()) return from_abs.status();
 
-  absl::StatusOr<FileName> to_abs = to.MakeAbsolute();
+  const absl::StatusOr<FileName> to_abs = to.MakeAbsolute();
   if (!to_abs.ok()) return to_abs.status();
-
-  std::optional<DosDevice> dos_device;
-  if constexpr (kWindows) {
-    absl::StatusOr<DosDevice> dev = DosDevice::Create(*to_abs);
-    if (!dev.ok()) return dev.status();
-    absl::StatusOr<FileName> root =
-        FileName::FromString(dev->name() + RULES_ELISP_NATIVE_LITERAL("\\"));
-    if (!root.ok()) return root.status();
-    to_abs = *std::move(root);
-    dos_device = *std::move(dev);
-  }
 
   std::ifstream stream(list.string(), std::ios::in | std::ios::binary);
   if (!stream.is_open() || !stream.good()) {
