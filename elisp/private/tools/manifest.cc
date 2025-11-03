@@ -25,7 +25,6 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/base/nullability.h"
-#include "absl/cleanup/cleanup.h"
 #include "absl/log/check.h"
 #include "absl/log/die_if_null.h"
 #include "absl/log/log.h"
@@ -154,10 +153,6 @@ class ManifestFile::Impl final {
     CHECK_EQ(opts.mode, ToolchainMode::kWrap);
     const absl::StatusOr<FileName> directory = CreateTemporaryDirectory();
     if (!directory.ok()) return directory.status();
-    absl::Cleanup cleanup = [&directory] {
-      const absl::Status status = RemoveTree(*directory);
-      if (!status.ok()) LOG(ERROR) << status;
-    };
     absl::StatusOr<FileName> name =
         directory->Child(RULES_ELISP_NATIVE_LITERAL("manifest.json"));
     if (!name.ok()) return name.status();
@@ -170,7 +165,6 @@ class ManifestFile::Impl final {
     file.imbue(std::locale::classic());
     const absl::Status status = Write(opts, input_files, output_files, file);
     if (!status.ok()) return status;
-    std::move(cleanup).Cancel();
     return absl::WrapUnique(
         new const Impl(*std::move(directory), *std::move(name)));
   }
