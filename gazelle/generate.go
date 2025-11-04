@@ -15,6 +15,7 @@
 package gazelle
 
 import (
+	"fmt"
 	"io/fs"
 	"log"
 	"maps"
@@ -87,21 +88,26 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string, ext *extension) (*r
 		return nil, Imports{}
 	}
 	// We assume that most files are libraries and only assume a test file
-	// if the filename makes that likely.  We don’t look at the file
-	// contents at all: libraries can legitimately contain ‘ert-deftest’
-	// forms, and we want to support empty files, too.  We never detect
-	// binaries: they are rather rare and hard to distinguish from
-	// libraries.
+	// if the filename makes that likely.  We allow the user to overwrite
+	// the heuristic by adding a Gazelle-Type header comment.
 	kind := "elisp_library"
-	if testFilePattern.MatchString(file) {
-		kind = "elisp_test"
+	if m := typeCommentPattern.FindSubmatch(b); m == nil {
+		if testFilePattern.MatchString(file) {
+			kind = "elisp_test"
+		}
+	} else {
+		kind = fmt.Sprintf("elisp_%s", m[1])
 	}
 	var loadPath loadPath
 	if kind == "elisp_library" { // only libraries have a load path
 		loadPath = loadPathForFile(src, b)
 	}
 	r := rule.NewRule(kind, src.ruleName())
-	r.SetAttr("srcs", []string{file})
+	srcsAttr := "srcs"
+	if kind == "elisp_binary" {
+		srcsAttr = "src"
+	}
+	r.SetAttr(srcsAttr, []string{file})
 	if len(loadPath) > 0 {
 		r.SetAttr("load_path", loadPath.attr(pkg))
 	}
@@ -125,8 +131,9 @@ type Imports struct {
 }
 
 var (
-	testFilePattern = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)
-	requirePattern  = regexp.MustCompile(`(?m)^\(require '([-./\w]+)\)`)
+	typeCommentPattern = regexp.MustCompile(`(?m)^;; Gazelle-Type: (library|binary|test)$`)
+	testFilePattern    = regexp.MustCompile(`(?:^|[-_])(?:unit)?tests?\.el$`)
+	requirePattern     = regexp.MustCompile(`(?m)^\(require '([-./\w]+)\)`)
 )
 
 type byName language.GenerateResult

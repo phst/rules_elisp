@@ -14,6 +14,8 @@
 ;; See the License for the specific language governing permissions and
 ;; limitations under the License.
 
+;; Gazelle-Type: binary
+
 ;;; Commentary:
 
 ;; Usage: docs/merge OUTPUT.org MAIN.org INCLUDE-DIR

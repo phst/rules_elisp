@@ -448,9 +448,7 @@ elisp_binary(
     name = "gen_proto",
     src = "gen-proto.el",
     visibility = ["//elisp/proto:__pkg__"],
-    deps = [
-        "//elisp/proto",  # keep
-    ],
+    deps = ["//elisp/proto"],
 )
 
 elisp_binary(

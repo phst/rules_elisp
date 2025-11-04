@@ -15,6 +15,7 @@
 ;; limitations under the License.
 
 ;; Version: 0.1.0
+;; Gazelle-Type: binary
 
 ;;; Commentary:
 
