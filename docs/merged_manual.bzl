@@ -39,6 +39,7 @@ def _merged_manual_impl(ctx):
             mnemonic = "GenOrg",
             progress_message = "Generating Org file %{output}",
             toolchain = None,
+            execution_requirements = {"supports-path-mapping": ""},
         )
         orgs.append(org)
         sets.insert(roots, org.root)

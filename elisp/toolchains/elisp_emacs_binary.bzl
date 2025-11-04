@@ -308,6 +308,7 @@ def _builtin_features(actions, extract, srcs, out):
         arguments = [args],
         mnemonic = "FindBuiltinFeatures",
         progress_message = "Extracting builtin features to %{output}",
+        execution_requirements = {"supports-path-mapping": ""},
     )
 
 def _munge_msvc_flag(s):

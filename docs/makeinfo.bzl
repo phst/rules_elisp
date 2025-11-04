@@ -38,6 +38,7 @@ def _makeinfo_impl(ctx):
         arguments = [args],
         mnemonic = "Makeinfo",
         progress_message = "Generating Info manual %{output}",
+        execution_requirements = {"supports-path-mapping": ""},
     )
 
 makeinfo = rule(

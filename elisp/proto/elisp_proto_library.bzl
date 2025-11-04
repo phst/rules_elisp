@@ -54,6 +54,7 @@ def _elisp_proto_aspect_impl(target, ctx):
         mnemonic = "GenElispProtoBundle",
         progress_message = "Generating Emacs Lisp protocol buffer bundle %{output}",
         toolchain = None,
+        execution_requirements = {"supports-path-mapping": ""},
     )
 
     load_dir = info.proto_source_root.removeprefix(ctx.bin_dir.path + "/")

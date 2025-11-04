@@ -35,6 +35,7 @@ def _elisp_manual_impl(ctx):
         mnemonic = "Export",
         progress_message = "Exporting %{input} into Texinfo file",
         toolchain = None,
+        execution_requirements = {"supports-path-mapping": ""},
     )
 
 elisp_manual = rule(
