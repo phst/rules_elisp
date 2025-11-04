@@ -16,7 +16,7 @@ load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("//elisp:elisp_test.bzl", "elisp_test")
-load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
+load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -64,10 +64,6 @@ cc_test(
         shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
     ],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@googletest//:gtest_main",  # keep
         "//elisp/private/tools:load",
         "//elisp/private/tools:platform",
         "//elisp/private/tools:runfiles",
@@ -78,7 +74,8 @@ cc_test(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@googletest//:gtest",
-    ],
+        "@googletest//:gtest_main",  # keep
+    ] + RUNFILES_LIBS,  # keep
 )
 
 cc_test(
@@ -132,11 +129,6 @@ cc_test(
         shell.quote('RULES_ELISP_PROGRAM=R"*($(rlocationpath //tests:empty))*"'),
     ],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@googletest//:gtest_main",  # keep
-        "@rules_cc//cc/runfiles",  # keep
         "//elisp/private/tools:platform",
         "//elisp/private/tools:runfiles",
         "//elisp/private/tools:system",
@@ -145,7 +137,8 @@ cc_test(
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@googletest//:gtest",
-    ],
+        "@googletest//:gtest_main",  # keep
+    ] + RUNFILES_LIBS,  # keep
 )
 
 cc_test(
@@ -168,11 +161,6 @@ cc_test(
         shell.quote('RULES_ELISP_HELPER=R"*($(rlocationpath //tests/tools/helper))*"'),
     ],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@googletest//:gtest_main",  # keep
-        "@rules_cc//cc/runfiles",  # keep
         "//elisp/private/tools:numeric",
         "//elisp/private/tools:platform",
         "//elisp/private/tools:runfiles",
@@ -188,7 +176,8 @@ cc_test(
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
         "@googletest//:gtest",
-    ],
+        "@googletest//:gtest_main",  # keep
+    ] + RUNFILES_LIBS,  # keep
 )
 
 build_test(

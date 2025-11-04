@@ -110,3 +110,12 @@ DEFINES = [
 })
 
 LINKOPTS = []
+
+# These libraries have to be added to a cc_library dependencies to defined the
+# BAZEL_CURRENT_REPOSITORY preprocessor symbol.
+RUNFILES_LIBS = [
+    # FIXME: Remove the next dependency once we drop support for Bazel
+    # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
+    Label("@bazel_tools//tools/cpp/runfiles"),
+    Label("@rules_cc//cc/runfiles"),
+]

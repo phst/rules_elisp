@@ -23,7 +23,7 @@ load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp/private:bootstrap.bzl", "bootstrap")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
 load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
-load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
+load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -147,10 +147,6 @@ cc_library(
     local_defines = DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@rules_cc//cc/runfiles",  # keep
         ":platform",
         ":runfiles",
         ":strings",
@@ -159,7 +155,7 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
-    ],
+    ] + RUNFILES_LIBS,  # keep
 )
 
 cc_library(
@@ -176,10 +172,6 @@ cc_library(
         "//tests/integration/wrap:__pkg__",
     ],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@rules_cc//cc/runfiles",  # keep
         ":load",
         ":manifest",
         ":numeric",
@@ -194,7 +186,7 @@ cc_library(
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/types:span",
-    ],
+    ] + RUNFILES_LIBS,  # keep
 )
 
 # This is called “tst” and not “test” to keep Gazelle from thinking it’s a test
@@ -216,10 +208,6 @@ cc_library(
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
-        # FIXME: Remove the next dependency once we drop support for Bazel
-        # before 8.1.0.  See https://github.com/bazelbuild/rules_cc/issues/285.
-        "@bazel_tools//tools/cpp/runfiles",  # keep
-        "@rules_cc//cc/runfiles",  # keep
         ":load",
         ":manifest",
         ":numeric",
@@ -234,7 +222,7 @@ cc_library(
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
         "@abseil-cpp//absl/types:span",
-    ],
+    ] + RUNFILES_LIBS,  # keep
 )
 
 # keep
