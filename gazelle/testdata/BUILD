@@ -27,12 +27,12 @@ filegroup(
     name = "testdata",
     testonly = True,
     data = glob(["**"]),
-    visibility = ["//gazelle:__pkg__"],
+    visibility = ["//gazelle/elisp:__pkg__"],
 )
 
 exports_files(
     ["BUILD"],
-    visibility = ["//gazelle:__pkg__"],
+    visibility = ["//gazelle/elisp:__pkg__"],
 )
 
 # gazelle:exclude update

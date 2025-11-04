@@ -26,7 +26,7 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/phst/rules_elisp/gazelle"
+	gazelle "github.com/phst/rules_elisp/gazelle/elisp"
 )
 
 func TestResolve(t *testing.T) {

@@ -31,7 +31,7 @@ def _emacs_repository_impl(ctx):
             '"[elisp_emacs_binary.bzl]"': repr(str(Label("//elisp/toolchains:elisp_emacs_binary.bzl"))),
             '"[cc_library.bzl]"': repr(str(Label("@rules_cc//cc:cc_library.bzl"))),
             '"[emacs_pkg]"': repr(str(Label("//emacs:__pkg__"))),
-            '"[gazelle_pkg]"': repr(str(Label("//gazelle:__pkg__"))),
+            '"[gazelle_pkg]"': repr(str(Label("//gazelle/elisp:__pkg__"))),
             '"[type]"': repr(ctx.attr.type),
             "[[compatible_with]]": repr([str(label) for label in ctx.attr.target_compatible_with]),
         },

@@ -24,7 +24,7 @@ import (
 	"github.com/bazelbuild/buildtools/build"
 	"github.com/google/go-cmp/cmp"
 
-	"github.com/phst/rules_elisp/gazelle"
+	gazelle "github.com/phst/rules_elisp/gazelle/elisp"
 )
 
 func TestGenerateRules(t *testing.T) {

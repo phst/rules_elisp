@@ -30,7 +30,7 @@ go_library(
     srcs = ["runfileflag.go"],
     importpath = "github.com/phst/rules_elisp/private/testutil",
     visibility = [
-        "//gazelle:__pkg__",
+        "//gazelle/elisp:__pkg__",
         "//tests/integration:__pkg__",
         "//tests/proto/integration:__pkg__",
     ],

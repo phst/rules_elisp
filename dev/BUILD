@@ -114,7 +114,7 @@ gazelle_test(
 gazelle_binary(
     name = "gazelle_binary",
     languages = DEFAULT_LANGUAGES + [
-        "//gazelle",
+        "//gazelle/elisp",
         "@bazel_skylib_gazelle_plugin//bzl",
         "@gazelle_cc//language/cc",
     ],

@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
-load("@rules_go//go:def.bzl", "go_library", "go_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -29,88 +26,10 @@ licenses(["notice"])
 gazelle(
     name = "wrapper",
     gazelle = ":binary",
+    visibility = ["//gazelle/elisp:__pkg__"],
 )
 
 gazelle_binary(
     name = "binary",
-    languages = [":gazelle"],
-)
-
-go_library(
-    name = "gazelle",
-    srcs = [
-        "builtin.go",
-        "extension.go",
-        "feature.go",
-        "generate.go",
-        "imports.go",
-        "language.go",
-        "loadpath.go",
-        "resolve.go",
-        "source.go",
-    ],
-    embedsrcs = ["builtin_features.json"],
-    importpath = "github.com/phst/rules_elisp/gazelle",
-    visibility = ["//dev:__pkg__"],
-    deps = [
-        "@gazelle//config",
-        "@gazelle//label",
-        "@gazelle//language",
-        "@gazelle//pathtools",
-        "@gazelle//repo",
-        "@gazelle//resolve",
-        "@gazelle//rule",
-    ],
-)
-
-TEST_DATA = [
-    # keep sorted
-    "//gazelle:wrapper",
-    "//gazelle/testdata:BUILD",
-]
-
-go_test(
-    name = "gazelle_test",
-    size = "medium",
-    timeout = "short",
-    srcs = [
-        "generate_test.go",
-        "imports_test.go",
-        "integration_test.go",
-        "resolve_test.go",
-    ],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
-        for t in TEST_DATA
-    ],
-    data = TEST_DATA + ["//gazelle/testdata"],
-    deps = [
-        ":gazelle",
-        "//private/testutil",
-        "@com_github_bazelbuild_buildtools//build",
-        "@com_github_google_go_cmp//cmp",
-        "@gazelle//config",
-        "@gazelle//label",
-        "@gazelle//language",
-        "@gazelle//repo",
-        "@gazelle//resolve",
-        "@gazelle//rule",
-        "@gazelle//testtools",
-    ],
-)
-
-copy_file(
-    name = "copy_builtin_features",
-    src = ":builtin_features",
-    out = "builtin_features.json",
-)
-
-alias(
-    name = "builtin_features",
-    actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30//:builtin_features",
-        "//conditions:default": "@gnu_emacs_30//:builtin_features",
-    }),
+    languages = ["//gazelle/elisp"],
 )

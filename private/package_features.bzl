@@ -30,6 +30,7 @@ visibility([
     "//emacs",
     "//examples",
     "//gazelle",
+    "//gazelle/elisp",
     "//gazelle/testdata",
     "//private/testutil",
     "//tests",
