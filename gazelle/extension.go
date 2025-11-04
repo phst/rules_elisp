@@ -32,12 +32,12 @@ func initExtension(c *config.Config) *extension {
 		}
 	}
 	ext = ext.clone()
-	c.Exts[languageName] = ext
+	c.Exts["elisp"] = ext
 	return ext
 }
 
 func getExtension(c *config.Config) *extension {
-	switch ext := c.Exts[languageName].(type) {
+	switch ext := c.Exts["elisp"].(type) {
 	case nil:
 		return nil
 	case *extension:

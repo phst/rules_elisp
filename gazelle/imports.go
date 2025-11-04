@@ -33,11 +33,11 @@ func (elisp) Imports(c *config.Config, r *rule.Rule, f *rule.File) []resolve.Imp
 	pkg := bazelPackage(f.Pkg)
 	var provides []Feature
 	switch r.Kind() {
-	case libraryKind:
+	case "elisp_library":
 		provides = libraryProvides(pkg, r)
-	case protoLibraryKind:
+	case "elisp_proto_library":
 		provides = protoProvides(pkg, r)
-	case binaryKind, testKind, manualKind:
+	case "elisp_binary", "elisp_test", "elisp_manual":
 		// Never provide any feature.
 	default:
 		// Don’t touch rules we don’t know about.

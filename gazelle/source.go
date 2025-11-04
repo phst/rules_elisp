@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2024 Google LLC
+// Copyright 2021, 2022, 2024, 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,8 +26,6 @@ import (
 // extension should always be “.el”.
 type sourceFile string
 
-const sourceExt = ".el"
-
 // srcFile returns the source file for the given label.  The label must be
 // absolute.  srcFile returns an empty string if the label isn’t in the main
 // repository or doesn’t refer to an Emacs Lisp source file.
@@ -36,7 +34,7 @@ func srcFile(lbl label.Label) sourceFile {
 		// Currently we don’t support sources from other repositories.
 		return ""
 	}
-	if path.Ext(lbl.Name) != sourceExt {
+	if path.Ext(lbl.Name) != ".el" {
 		// Not an Emacs Lisp source file.
 		return ""
 	}
@@ -47,7 +45,7 @@ func (f sourceFile) valid() bool { return f != "" }
 
 // stem returns the filename without extension.
 func (f sourceFile) stem() string {
-	return strings.TrimSuffix(string(f), sourceExt)
+	return strings.TrimSuffix(string(f), ".el")
 }
 
 // ruleName returns a suggestion for a rule name that consumes the receiver

@@ -25,7 +25,7 @@ func (f Feature) valid() bool { return f != "" }
 
 func (f Feature) importSpec() resolve.ImportSpec {
 	return resolve.ImportSpec{
-		Lang: languageName,
+		Lang: "elisp",
 		Imp:  string(f),
 	}
 }

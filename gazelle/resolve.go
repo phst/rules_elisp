@@ -35,7 +35,7 @@ func (elisp) Resolve(
 	c *config.Config, ix *resolve.RuleIndex, rc *repo.RemoteCache,
 	r *rule.Rule, imports any, from label.Label,
 ) {
-	if r.Kind() == protoLibraryKind {
+	if r.Kind() == "elisp_proto_library" {
 		return
 	}
 	imp, ok := imports.(Imports)
@@ -64,11 +64,11 @@ func (elisp) Resolve(
 
 func resolveFeature(c *config.Config, ix *resolve.RuleIndex, from label.Label, feat Feature) label.Label {
 	spec := feat.importSpec()
-	if lbl, ok := resolve.FindRuleWithOverride(c, spec, languageName); ok && lbl != label.NoLabel {
+	if lbl, ok := resolve.FindRuleWithOverride(c, spec, "elisp"); ok && lbl != label.NoLabel {
 		return lbl
 	}
 
-	res := ix.FindRulesByImportWithConfig(c, spec, languageName)
+	res := ix.FindRulesByImportWithConfig(c, spec, "elisp")
 	res = slices.DeleteFunc(res, func(r resolve.FindResult) bool {
 		s := r.IsSelfImport(from)
 		if s {

@@ -46,10 +46,6 @@ func NewLanguage() language.Language {
 	return elisp{}
 }
 
-const languageName = "elisp"
-
-const generateProtoDirective = "elisp_generate_proto"
-
 var _ language.ModuleAwareLanguage = elisp{}
 
 type elisp struct{}
@@ -71,7 +67,7 @@ func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 	if f != nil {
 		for _, d := range f.Directives {
 			switch d.Key {
-			case generateProtoDirective:
+			case "elisp_generate_proto":
 				b, err := strconv.ParseBool(d.Value)
 				if err != nil {
 					log.Printf("%s: invalid value for %s directive: %s", f.Path, d.Key, err)
@@ -83,13 +79,13 @@ func (elisp) Configure(c *config.Config, rel string, f *rule.File) {
 	}
 }
 
-func (elisp) Name() string { return languageName }
+func (elisp) Name() string { return "elisp" }
 
 func (elisp) Embeds(r *rule.Rule, from label.Label) []label.Label { return nil }
 
 func (elisp) Kinds() map[string]rule.KindInfo {
 	return map[string]rule.KindInfo{
-		libraryKind: {
+		"elisp_library": {
 			NonEmptyAttrs: map[string]bool{
 				"srcs":      true,
 				"outs":      true,
@@ -99,17 +95,17 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 			MergeableAttrs: map[string]bool{"srcs": true},
 			ResolveAttrs:   map[string]bool{"deps": true},
 		},
-		protoLibraryKind: {
+		"elisp_proto_library": {
 			NonEmptyAttrs: map[string]bool{"deps": true},
 		},
-		binaryKind: {
+		"elisp_binary": {
 			NonEmptyAttrs: map[string]bool{
 				"src":  true,
 				"deps": true,
 			},
 			ResolveAttrs: map[string]bool{"deps": true},
 		},
-		testKind: {
+		"elisp_test": {
 			NonEmptyAttrs: map[string]bool{
 				"srcs": true,
 				"deps": true,
@@ -117,7 +113,7 @@ func (elisp) Kinds() map[string]rule.KindInfo {
 			MergeableAttrs: map[string]bool{"srcs": true},
 			ResolveAttrs:   map[string]bool{"deps": true},
 		},
-		manualKind: {
+		"elisp_manual": {
 			NonEmptyAttrs: map[string]bool{"src": true},
 		},
 	}
@@ -133,11 +129,11 @@ func (e elisp) ApparentLoads(moduleToApparentName func(string) string) []rule.Lo
 
 func loads(repo string) []rule.LoadInfo {
 	return []rule.LoadInfo{
-		load(libraryKind, repo, "elisp"),
-		load(protoLibraryKind, repo, "elisp/proto"),
-		load(binaryKind, repo, "elisp"),
-		load(testKind, repo, "elisp"),
-		load(manualKind, repo, "elisp"),
+		load("elisp_library", repo, "elisp"),
+		load("elisp_proto_library", repo, "elisp/proto"),
+		load("elisp_binary", repo, "elisp"),
+		load("elisp_test", repo, "elisp"),
+		load("elisp_manual", repo, "elisp"),
 	}
 }
 
@@ -149,13 +145,5 @@ func load(kind, repo, pkg string) rule.LoadInfo {
 }
 
 func (elisp) Fix(c *config.Config, f *rule.File) {}
-
-const (
-	libraryKind      = "elisp_library"
-	protoLibraryKind = "elisp_proto_library"
-	binaryKind       = "elisp_binary"
-	testKind         = "elisp_test"
-	manualKind       = "elisp_manual"
-)
 
 const moduleName = "phst_rules_elisp"

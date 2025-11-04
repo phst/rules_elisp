@@ -66,12 +66,12 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string, ext *extension) (*r
 		return nil, Imports{}
 	}
 	if stem, ok := strings.CutSuffix(file, ".proto"); ok && stem != "" && ext.generateProto {
-		r := rule.NewRule(protoLibraryKind, stem+"_elisp_proto")
+		r := rule.NewRule("elisp_proto_library", stem+"_elisp_proto")
 		r.SetAttr("deps", []string{":" + stem + "_proto"})
 		return r, Imports{}
 	}
 	if stem, ok := strings.CutSuffix(file, ".org"); ok && stem != "" {
-		r := rule.NewRule(manualKind, stem)
+		r := rule.NewRule("elisp_manual", stem)
 		r.SetAttr("src", file)
 		r.SetAttr("out", stem+".texi")
 		return r, Imports{}
@@ -92,12 +92,12 @@ func generateRule(fsys fs.FS, pkg bazelPackage, file string, ext *extension) (*r
 	// forms, and we want to support empty files, too.  We never detect
 	// binaries: they are rather rare and hard to distinguish from
 	// libraries.
-	kind := libraryKind
+	kind := "elisp_library"
 	if testFilePattern.MatchString(file) {
-		kind = testKind
+		kind = "elisp_test"
 	}
 	var loadPath loadPath
-	if kind == libraryKind { // only libraries have a load path
+	if kind == "elisp_library" { // only libraries have a load path
 		loadPath = loadPathForFile(src, b)
 	}
 	r := rule.NewRule(kind, src.ruleName())
