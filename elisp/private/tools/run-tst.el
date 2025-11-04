@@ -1008,6 +1008,8 @@ exact copies as equal."
 ;; Don’t use unsafe default from
 ;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
 (setenv "PATH" "/usr/bin:/usr/sbin:/bin:/sbin")
+(unless (@getenv "PWD")
+  (setenv "PWD" (file-name-unquote (directory-file-name default-directory))))
 (setenv "SHLVL" "2")
 (unless (@getenv "BAZEL_TEST") (setenv "BAZEL_TEST" "1"))
 
