@@ -57,7 +57,7 @@ go_library(
 
 TEST_DATA = [
     # keep sorted
-    "//gazelle:wrapper",
+    "//gazelle:gazelle",
     "//gazelle/testdata:BUILD",
 ]
 

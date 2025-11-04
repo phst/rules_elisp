@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	gazelleBinary    = testutil.RunfileFlag("//gazelle:wrapper")
+	gazelleBinary    = testutil.RunfileFlag("//gazelle:gazelle")
 	testdataSentinel = testutil.RunfileFlag("//gazelle/testdata:BUILD")
 )
 

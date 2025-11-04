@@ -24,7 +24,7 @@ package(
 licenses(["notice"])
 
 gazelle(
-    name = "wrapper",
+    name = "gazelle",
     gazelle = ":binary",
     visibility = ["//gazelle/elisp:__pkg__"],
 )
