@@ -41,7 +41,7 @@ runs:
         sudo apt-get remove \
           firefox google-chrome-stable microsoft-edge-stable \
           azure-cli google-cloud-cli google-cloud-cli-anthoscli \
-          llvm-{16..18}-dev hhvm mono-devel libgl1-mesa-dri
+          llvm-{16..18}-dev mono-devel libgl1-mesa-dri
         sudo apt-get autoremove
         sudo apt-get clean
         rm -r -f \
