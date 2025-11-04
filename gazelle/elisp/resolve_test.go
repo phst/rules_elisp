@@ -26,11 +26,11 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/google/go-cmp/cmp"
 
-	gazelle "github.com/phst/rules_elisp/gazelle/elisp"
+	"github.com/phst/rules_elisp/gazelle/elisp"
 )
 
 func TestResolve(t *testing.T) {
-	lang := gazelle.NewLanguage()
+	lang := elisp.NewLanguage()
 	cfg := testtools.NewTestConfig(t, []config.Configurer{new(resolve.Configurer)}, []language.Language{lang}, nil)
 	build, err := rule.LoadData("pkg/BUILD", "pkg", []byte(`
 elisp_library(
@@ -51,7 +51,7 @@ elisp_library(
 	rc, cleanup := repo.NewRemoteCache(nil)
 	defer cleanup()
 	testRule := rule.NewRule("elisp_test", "lib_test")
-	imports := gazelle.Imports{Requires: []gazelle.Feature{"lib"}}
+	imports := elisp.Imports{Requires: []elisp.Feature{"lib"}}
 	lbl := label.New("", "pkg", "lib_test")
 
 	lang.Resolve(cfg, ix, rc, testRule, imports, lbl)

@@ -25,11 +25,11 @@ import (
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 	"github.com/google/go-cmp/cmp"
 
-	gazelle "github.com/phst/rules_elisp/gazelle/elisp"
+	"github.com/phst/rules_elisp/gazelle/elisp"
 )
 
 func TestImports(t *testing.T) {
-	lang := gazelle.NewLanguage()
+	lang := elisp.NewLanguage()
 	config := testtools.NewTestConfig(t, nil, []language.Language{lang}, nil)
 	for _, tc := range []struct {
 		desc, pkg, build string
