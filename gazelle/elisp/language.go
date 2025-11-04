@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package gazelle implements Gazelle support for Emacs Lisp.  It generates and
+// Package elisp implements Gazelle support for Emacs Lisp.  It generates and
 // maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
 // rules from the phst_rules_elisp repository.  See https://phst.eu/rules_elisp
 // and https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
@@ -22,7 +22,7 @@
 //	# gazelle:elisp_generate_proto false
 //
 // to your BUILD file.
-package gazelle
+package elisp
 
 import (
 	"cmp"
