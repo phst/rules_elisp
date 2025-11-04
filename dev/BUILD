@@ -103,11 +103,6 @@ gazelle_test(
     size = "medium",
     timeout = "short",
     gazelle = ":gazelle_binary",
-    target_compatible_with = select({
-        # FIXME: Make this work on Windows.
-        "@platforms//os:windows": ["@platforms//:incompatible"],
-        "//conditions:default": [],
-    }),
     workspace = "//:MODULE.bazel",
 )
 
