@@ -33,7 +33,8 @@ runs:
   steps:
     - name: Install APT packages
       shell: bash
-      run: sudo apt-get update && sudo apt-get install libxml2-utils
+      run: |
+        sudo apt-get update && sudo apt-get install libxml2-utils libncurses-dev
       if: runner.os == 'Linux'
     - name: Free up some disk space
       shell: bash
