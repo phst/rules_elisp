@@ -263,7 +263,7 @@ static absl::Status Build(const FileName& source, const FileName& install,
   const absl::StatusOr<FileName> shared =
       GlobUnique(install, {RULES_ELISP_NATIVE_LITERAL("share"),
                            RULES_ELISP_NATIVE_LITERAL("emacs"),
-                           RULES_ELISP_NATIVE_LITERAL("[0-9]*")});
+                           RULES_ELISP_NATIVE_LITERAL("?*.?*")});
   if (!shared.ok()) return shared.status();
   const FileName etc_from =
       shared->Child(RULES_ELISP_NATIVE_LITERAL("etc")).value();

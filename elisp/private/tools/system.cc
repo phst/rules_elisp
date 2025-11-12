@@ -840,8 +840,11 @@ absl::Status RemoveDirectory(const FileName& name) {
 
 absl::StatusOr<std::vector<FileName>> ListDirectory(
     const FileName& dir, const NativeStringView pattern) {
-  if (pattern.empty() || pattern.find(kSeparator) != pattern.npos ||
-      pattern.find(RULES_ELISP_NATIVE_LITERAL('/')) != pattern.npos) {
+  // Reject non-portable patterns.  Only POSIX supports backslash escaping and
+  // bracketed ranges, and only Windows supports the MS-DOS wildcards
+  // (https://stackoverflow.com/a/24193649).  Also reject indirect descendants.
+  if (pattern.empty() || pattern.find_first_of(RULES_ELISP_NATIVE_LITERAL(
+                             "/\\[]<>\"")) != pattern.npos) {
     return absl::InvalidArgumentError(
         absl::StrFormat("Invalid pattern %s", pattern));
   }
