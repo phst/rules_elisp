@@ -149,7 +149,8 @@ absl::Status CreateDirectory(const FileName& name);
 absl::Status CreateDirectories(const FileName& name);
 absl::Status RemoveDirectory(const FileName& name);
 absl::Status RemoveTree(const FileName& directory);
-absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir);
+absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir,
+                                                    NativeStringView pattern);
 absl::Status Rename(const FileName& from, const FileName& to);
 absl::Status CopyFile(const FileName& from, const FileName& to);
 
