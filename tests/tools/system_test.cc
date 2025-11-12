@@ -643,20 +643,26 @@ TEST(ListDirectoryTests, ListsDirectory) {
   const FileName element =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
 
-  EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
+              StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(CreateDirectory(dir), IsOk());
-  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")), IsOkAndHolds(IsEmpty()));
 
   const FileName file =
       dir.Child(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
   EXPECT_THAT(WriteFile(file, ""), IsOk());
 
-  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(ElementsAre(element)));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
+              IsOkAndHolds(ElementsAre(element)));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*i?? *")),
+              IsOkAndHolds(ElementsAre(element)));
 
   EXPECT_THAT(Unlink(file), IsOk());
-  EXPECT_THAT(ListDirectory(dir), IsOkAndHolds(IsEmpty()));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
+              IsOkAndHolds(IsEmpty()));
   EXPECT_THAT(RemoveDirectory(dir), IsOk());
-  EXPECT_THAT(ListDirectory(dir), StatusIs(absl::StatusCode::kNotFound));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
+              StatusIs(absl::StatusCode::kNotFound));
 }
 
 TEST(RenameTest, RenamesFile) {

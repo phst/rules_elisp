@@ -19,7 +19,6 @@
 #include <iostream>
 #include <optional>
 #include <ostream>
-#include <regex>
 #include <string>
 #include <utility>
 #include <vector>
@@ -141,15 +140,9 @@ static absl::StatusOr<FileName> GlobUnique(
   if (!abs.ok()) return abs.status();
   FileName result = *std::move(abs);
   for (const NativeString& pattern : patterns) {
-    const std::basic_regex<NativeChar> regex(pattern);
-    absl::StatusOr<std::vector<FileName>> entries = ListDirectory(result);
+    const absl::StatusOr<std::vector<FileName>> entries =
+        ListDirectory(result, pattern);
     if (!entries.ok()) return entries.status();
-    entries->erase(std::remove_if(entries->begin(), entries->end(),
-                                  [&regex](const FileName& name) {
-                                    return !std::regex_match(name.string(),
-                                                             regex);
-                                  }),
-                   entries->end());
     if (entries->empty()) {
       return absl::NotFoundError(absl::StrFormat(
           "No entry matching %s in directory %s found", pattern, result));
@@ -270,7 +263,7 @@ static absl::Status Build(const FileName& source, const FileName& install,
   const absl::StatusOr<FileName> shared =
       GlobUnique(install, {RULES_ELISP_NATIVE_LITERAL("share"),
                            RULES_ELISP_NATIVE_LITERAL("emacs"),
-                           RULES_ELISP_NATIVE_LITERAL(R"(\d.+)")});
+                           RULES_ELISP_NATIVE_LITERAL("[0-9]*")});
   if (!shared.ok()) return shared.status();
   const FileName etc_from =
       shared->Child(RULES_ELISP_NATIVE_LITERAL("etc")).value();
@@ -284,9 +277,9 @@ static absl::Status Build(const FileName& source, const FileName& install,
   const absl::StatusOr<FileName> dump_from =
       GlobUnique(install, {RULES_ELISP_NATIVE_LITERAL("libexec"),
                            RULES_ELISP_NATIVE_LITERAL("emacs"),
-                           RULES_ELISP_NATIVE_LITERAL(R"(.+)"),
-                           RULES_ELISP_NATIVE_LITERAL(R"(.+)"),
-                           RULES_ELISP_NATIVE_LITERAL(R"(emacs.+\.pdmp)")});
+                           RULES_ELISP_NATIVE_LITERAL("*"),
+                           RULES_ELISP_NATIVE_LITERAL("*"),
+                           RULES_ELISP_NATIVE_LITERAL("emacs*.pdmp")});
   if (!dump_from.ok()) return dump_from.status();
   const FileName dump_to =
       install.Child(RULES_ELISP_NATIVE_LITERAL("emacs.pdmp")).value();

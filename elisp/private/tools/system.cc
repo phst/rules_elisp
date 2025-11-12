@@ -37,6 +37,7 @@
 #else
 #  include <dirent.h>
 #  include <fcntl.h>
+#  include <fnmatch.h>
 #  include <ftw.h>
 #  include <limits.h>
 #  include <spawn.h>
@@ -477,14 +478,12 @@ static NativeChar* absl_nonnull Pointer(
   return string.data();
 }
 
-#ifdef _WIN32
 static const NativeChar* absl_nonnull Pointer(
     const NativeString& string ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   CHECK(!ContainsNull(string))
       << absl::StreamFormat("%s contains null character", string);
   return string.data();
 }
-#endif
 
 #ifndef _WIN32
 static std::vector<char* absl_nullable> Pointers(
@@ -839,15 +838,21 @@ absl::Status RemoveDirectory(const FileName& name) {
   return absl::OkStatus();
 }
 
-absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
+absl::StatusOr<std::vector<FileName>> ListDirectory(
+    const FileName& dir, const NativeStringView pattern) {
+  if (pattern.empty() || pattern.find(kSeparator) != pattern.npos ||
+      pattern.find(RULES_ELISP_NATIVE_LITERAL('/')) != pattern.npos) {
+    return absl::InvalidArgumentError(
+        absl::StrFormat("Invalid pattern %s", pattern));
+  }
   std::vector<FileName> result;
 #ifdef _WIN32
-  std::wstring pattern = dir.string() + L"\\*";
+  const std::wstring pat = dir.string() + L"\\" + std::wstring(pattern);
   WIN32_FIND_DATAW data;
-  const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
+  const HANDLE handle = ::FindFirstFileW(Pointer(pat), &data);
   if (handle == INVALID_HANDLE_VALUE) {
     if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
-      return WindowsStatus("FindFirstFileW(%#s)", pattern);
+      return WindowsStatus("FindFirstFileW(%#s)", pat);
     }
     return result;
   }
@@ -870,6 +875,7 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
   const absl::Cleanup cleanup = [handle] {
     if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
   };
+  const std::string pat(pattern);
   while (true) {
     errno = 0;
     const struct dirent* const absl_nullable entry = readdir(handle);
@@ -877,11 +883,24 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(const FileName& dir) {
       if (errno != 0) return ErrnoStatus("readdir");
       break;
     }
-    const std::string_view name = entry->d_name;
+    const char* const absl_nonnull ptr = entry->d_name;
+    const std::string_view name = ptr;
     if (name == "." || name == "..") continue;
-    absl::StatusOr<FileName> file = FileName::FromString(name);
-    if (!file.ok()) return file.status();
-    result.push_back(*std::move(file));
+    constexpr int flags = FNM_PATHNAME | FNM_NOESCAPE | FNM_PERIOD;
+    switch (const int error = fnmatch(Pointer(pat), ptr, flags); error) {
+      case 0: {
+        absl::StatusOr<FileName> file = FileName::FromString(name);
+        if (!file.ok()) return file.status();
+        result.push_back(*std::move(file));
+        break;
+      }
+      case FNM_NOMATCH:
+        break;
+      default:
+        return absl::UnknownError(
+            absl::StrFormat("fnmatch(%#s, %#s, %#x) failed with error %d",
+                            pattern, name, flags, error));
+    }
   }
 #endif
   return result;
