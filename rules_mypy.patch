@@ -1,0 +1,63 @@
+From 485f9c3de33771f2cdb552de99b59033dc521616 Mon Sep 17 00:00:00 2001
+From: Keith Smiley <keithbsmiley@gmail.com>
+Date: Fri, 12 Sep 2025 20:22:05 +0000
+Subject: [PATCH] Handle PyInfo removal in bazel 9.x
+
+This optionally fetches PyInfo from bazel_features during the
+transition.
+---
+ MODULE.bazel          | 1 +
+ mypy/private/mypy.bzl | 9 ++++++---
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/MODULE.bazel b/MODULE.bazel
+index 11e0a65..a1cdb62 100644
+--- MODULE.bazel
++++ MODULE.bazel
+@@ -10,6 +10,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "7.3.1")
+ bazel_dep(name = "platforms", version = "0.0.8")
+ bazel_dep(name = "rules_python", version = "1.1.0")
+ bazel_dep(name = "rules_uv", version = "0.21.0")
++bazel_dep(name = "bazel_features", version = "1.21.0")
+ 
+ # configuration
+ PYTHON_VERSION = "3.12"
+diff --git a/mypy/private/mypy.bzl b/mypy/private/mypy.bzl
+index 54dd825..6898444 100644
+--- mypy/private/mypy.bzl
++++ mypy/private/mypy.bzl
+@@ -7,11 +7,14 @@ directories (the results of other mypy builds), the underlying action first atte
+ directories.
+ """
+ 
++load("@bazel_features//:features.bzl", "bazel_features")
+ load("@rules_mypy_pip//:requirements.bzl", "requirement")
+ load("@rules_python//python:py_binary.bzl", "py_binary")
+ load("@rules_python//python:py_info.bzl", RulesPythonPyInfo = "PyInfo")
+ load(":py_type_library.bzl", "PyTypeLibraryInfo")
+ 
++_LegacyPyInfo = bazel_features.globals.PyInfo or RulesPythonPyInfo
++
+ MypyCacheInfo = provider(
+     doc = "Output details of the mypy build rule.",
+     fields = {
+@@ -31,8 +34,8 @@ def _extract_import_dir(import_):
+ def _imports(target):
+     if RulesPythonPyInfo in target:
+         return target[RulesPythonPyInfo].imports.to_list()
+-    elif PyInfo in target:
+-        return target[PyInfo].imports.to_list()
++    elif _LegacyPyInfo in target:
++        return target[_LegacyPyInfo].imports.to_list()
+     else:
+         return []
+ 
+@@ -69,7 +72,7 @@ def _mypy_impl(target, ctx):
+     if target.label.workspace_root != "":
+         return []
+ 
+-    if RulesPythonPyInfo not in target and PyInfo not in target:
++    if RulesPythonPyInfo not in target and _LegacyPyInfo not in target:
+         return []
+ 
+     # disable if a target is tagged with at least one suppression tag
