@@ -196,6 +196,14 @@ git_override(
 
 bazel_dep(name = "rules_mypy", version = "0.40.0", dev_dependency = True)
 
+# Make rules_mypy compatible with Bazel 9.
+# FIXME: Remove local patch once
+# https://github.com/bazel-contrib/rules_mypy/pull/118 is merged and released.
+single_version_override(
+    module_name = "rules_mypy",
+    patches = ["rules_mypy.patch"],
+)
+
 types = use_extension("@rules_mypy//mypy:types.bzl", "types", dev_dependency = True)
 types.requirements(
     name = "pip_types",
