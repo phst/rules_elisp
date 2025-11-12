@@ -107,6 +107,7 @@ cc_binary(
         "@abseil-cpp//absl/strings:str_format",
         "@protobuf//src/google/protobuf/io",
         "@protobuf//src/google/protobuf/json",
+        "@re2",
     ],
 )
 

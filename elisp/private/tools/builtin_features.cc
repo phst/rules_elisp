@@ -17,7 +17,6 @@
 #include <fstream>
 #include <ios>
 #include <locale>
-#include <regex>
 #include <string>
 #include <vector>
 
@@ -32,6 +31,7 @@
 #include "absl/strings/str_format.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
 #include "google/protobuf/json/json.h"
+#include "re2/re2.h"
 
 #include "elisp/private/tools/builtin_features.pb.h"
 #include "elisp/private/tools/platform.h"
@@ -54,7 +54,8 @@ static absl::Status Extract(const NativeStringView param_file) {
       ToNative(param_line, Encoding::kUtf8);
   if (!output_file.ok()) return output_file.status();
 
-  std::regex regex(R"(\(provide '([-/\w]+)\))");
+  RE2 regex = R"(\(provide '([-/\w]+)\).*)";
+  CHECK(regex.ok()) << regex.error();
   std::vector<std::string> features_vector;
   while (std::getline(param_stream, param_line)) {
     const absl::StatusOr<NativeString> lisp_file =
@@ -68,10 +69,9 @@ static absl::Status Extract(const NativeStringView param_file) {
     lisp_stream.imbue(std::locale::classic());
     std::string lisp_line;
     while (std::getline(lisp_stream, lisp_line)) {
-      std::smatch match;
-      if (std::regex_search(lisp_line, match, regex,
-                            std::regex_constants::match_continuous)) {
-        features_vector.push_back(match.str(1));
+      std::string_view feature;
+      if (RE2::FullMatch(lisp_line, regex, &feature)) {
+        features_vector.emplace_back(feature);
       }
     }
     if (lisp_stream.bad() || !lisp_stream.eof()) {
