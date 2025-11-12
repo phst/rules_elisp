@@ -33,6 +33,11 @@ runs:
   steps:
     - name: Set up Ubuntu worker
       shell: bash
+      # We need to free up some disk space on the Ubuntu runners,
+      # cf. https://github.com/actions/runner-images/issues/13189.
+      # FIXME: Remove the cleanup steps once
+      # https://github.com/actions/runner-images/issues/13189 or
+      # https://github.com/actions/runner-images/issues/12721 are fixed.
       run: |
         set -x
         sudo apt-get update
