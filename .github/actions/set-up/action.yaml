@@ -56,7 +56,10 @@ runs:
       if: runner.os == 'Windows'
     - name: Install Texinfo
       shell: bash
-      run: brew update && brew install texinfo
+      # The Texinfo bottle is currently broken.
+      # FIXME: Remove --skip-post-install once the bottle installs cleanly
+      # again.
+      run: brew update && brew install --skip-post-install texinfo
       if: runner.os == 'macOS'
     - name: Set up Bazel
       uses: bazel-contrib/setup-bazel@0.15.0
