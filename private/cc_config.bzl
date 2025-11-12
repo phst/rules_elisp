@@ -39,6 +39,7 @@ COPTS = select({
     Label(":gcc_or_clang"): [
         "-finput-charset=utf-8",
         "-fexec-charset=utf-8",
+        "-fvisibility=hidden",
         "-Wall",
         "-Wextra",
         "-Wconversion",
@@ -80,6 +81,9 @@ CXXOPTS = select({
         "-Wno-redundant-move",
     ],
     Label("@rules_cc//cc/compiler:clang"): [],
+}) + select({
+    Label(":gcc_or_clang"): ["-fvisibility-inlines-hidden"],
+    Label("//conditions:default"): [],
 })
 
 CONLYOPTS = select({
