@@ -32,7 +32,7 @@ bazel_dep(name = "protobuf", version = "33.1")
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.8.0", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.59.0", dev_dependency = True)
-bazel_dep(name = "rules_python", version = "1.6.3", dev_dependency = True)
+bazel_dep(name = "rules_python", version = "1.7.0", dev_dependency = True)
 bazel_dep(name = "gazelle", version = "0.47.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.8.2", dev_dependency = True)
 bazel_dep(name = "bazel_features", version = "1.38.0", dev_dependency = True)
@@ -133,14 +133,6 @@ pip.parse(
     requirements_windows = "//dev:requirements-windows.lock",
 )
 use_repo(pip, "pip")
-
-# Work around https://github.com/bazel-contrib/rules_python/issues/2762.
-# FIXME: Remove once https://github.com/bazel-contrib/rules_python/issues/2762
-# is fixed upstream.
-single_version_override(
-    module_name = "rules_python",
-    patches = ["rules_python.patch"],
-)
 
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
