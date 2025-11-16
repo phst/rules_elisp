@@ -42,6 +42,7 @@ COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 
 compdb:
+	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
 	  -- @hedron_compile_commands//:refresh_all $(COMPDB_BAZELFLAGS)
 
