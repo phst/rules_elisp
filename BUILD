@@ -53,3 +53,6 @@ exports_files(
 # gazelle:resolve elisp elisp/proto/module //elisp/proto:module
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)\.proto$ //elisp/proto:${1}_elisp_proto
 # gazelle:resolve_regexp elisp ^google/protobuf/(\w+)/(\w+)\.proto$ //elisp/proto:${1}_${2}_elisp_proto
+
+# gazelle:resolve cc cc/runfiles/runfiles.h @rules_cc//cc/runfiles
+# gazelle:resolve cc google/protobuf/repeated_ptr_field.h @protobuf//:protobuf_lite
