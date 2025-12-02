@@ -37,6 +37,7 @@ cc_test(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    # keep
     deps = [
         "//elisp/private/tools:manifest",
         "//elisp/private/tools:platform",
@@ -87,6 +88,7 @@ cc_test(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    # keep
     deps = [
         "//elisp/private/tools:numeric",
         "@googletest//:gtest",
@@ -103,6 +105,7 @@ cc_test(
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
+    # keep
     deps = [
         "//elisp/private/tools:strings",
         "@abseil-cpp//absl/base:core_headers",
