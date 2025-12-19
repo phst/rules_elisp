@@ -86,6 +86,8 @@ github.com/bazelbuild/buildtools v0.0.0-20251209115752-d171b38a20c7 h1:mNJjpowJo
 github.com/bazelbuild/buildtools v0.0.0-20251209115752-d171b38a20c7/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
 github.com/bazelbuild/buildtools v0.0.0-20251218142154-c9f3ac67542a h1:bqORQDubczoFv3zFI4VNhqZH7oiB2LLp10Y/D0GNxZE=
 github.com/bazelbuild/buildtools v0.0.0-20251218142154-c9f3ac67542a/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
+github.com/bazelbuild/buildtools v0.0.0-20251219084625-9e5607d3130a h1:jbDeLT/tMTjnBVE5QgnX4OW8St/jeG21SgUdBfML6RM=
+github.com/bazelbuild/buildtools v0.0.0-20251219084625-9e5607d3130a/go.mod h1:PLNUetjLa77TCCziPsz0EI8a6CUxgC+1jgmWv0H25tg=
 github.com/bazelbuild/rules_go v0.52.0 h1:+ozpngVAW67pCAwfhepaXSSrG3yHcj8K9hNAxSYBno4=
 github.com/bazelbuild/rules_go v0.52.0/go.mod h1:M+YrupNArA7OiTlv++rFUgQ6Sm+ZXbQ5HPUj0cGa0us=
 github.com/bazelbuild/rules_go v0.53.0 h1:u160DT+RRb+Xb2aSO4piN8xhs4aZvWz2UDXCq48F4ao=
