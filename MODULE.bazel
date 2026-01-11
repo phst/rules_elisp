@@ -151,7 +151,7 @@ bazel_dep(name = "buildifier_prebuilt", version = "8.2.1.1", dev_dependency = Tr
 bazel_dep(name = "phst_license_test", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_license_test",
-    commit = "3d06204cc53f102032836643f711855605a75018",
+    commit = "7e442b9a26488ebf459fa66f85219f5acd8fdaed",
     remote = "https://github.com/phst/license_test.git",
 )
 
