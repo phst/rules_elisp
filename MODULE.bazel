@@ -113,7 +113,7 @@ junit_xsd(
 register_toolchains("//elisp:hermetic_toolchain")
 
 # C++-specific dependencies
-bazel_dep(name = "gazelle_cc", version = "0.4.0", dev_dependency = True)
+bazel_dep(name = "gazelle_cc", version = "0.5.0", dev_dependency = True)
 
 register_toolchains("@local_config_cc_toolchains//:all")
 
