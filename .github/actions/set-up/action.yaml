@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -107,6 +107,13 @@ runs:
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
+    - name: Configure system (macOS)
+      # Detect Xcode command-line tools on macOS.
+      shell: bash
+      run: |
+        profdata="$(xcrun --find llvm-profdata)"
+        echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
+      if: runner.os == 'macOS'
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
