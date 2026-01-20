@@ -111,6 +111,8 @@ runs:
       # Detect Xcode command-line tools on macOS.
       shell: bash
       run: |
+        cov="$(xcrun --find llvm-cov)"
+        echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
         profdata="$(xcrun --find llvm-profdata)"
         echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
       if: runner.os == 'macOS'
