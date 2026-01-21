@@ -108,7 +108,8 @@ runs:
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
     - name: Configure system (macOS)
-      # Detect Xcode command-line tools on macOS.
+      # Detect Xcode command-line tools on macOS to work around
+      # https://github.com/bazelbuild/bazel/issues/14970.
       shell: bash
       run: |
         profdata="$(xcrun --find llvm-profdata)"
