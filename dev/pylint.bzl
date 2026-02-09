@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,9 +21,7 @@ visibility("private")
 
 def _pylint_impl(target, ctx):
     tags = ctx.rule.attr.tags
-
-    # TODO: Require PyInfo provider using required_providers, see below.
-    if "no-pylint" in tags or PyInfo not in target:
+    if "no-pylint" in tags:
         return []
     info = target[PyInfo]
     output_file = ctx.actions.declare_file("_{}.pylint.stamp".format(target.label.name))
@@ -87,10 +85,7 @@ pylint = aspect(
             allow_single_file = True,
         ),
     },
-    # The Python rules don’t advertise the PyInfo provider, so we can’t use
-    # required_providers here.
-    # TODO: File bug against rules_python.
-    # required_providers = [PyInfo],
+    required_providers = [PyInfo],
 )
 
 def _import(file):
