@@ -1,0 +1,62 @@
+From 6b54911ec50b024eb109cc304c0784378482a42e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?R=C3=A9gis=20Desgroppes?= <rdesgroppes@gmail.com>
+Date: Sun, 8 Feb 2026 17:59:15 +0100
+Subject: [PATCH] fix(runfiles): assume main repository on Windows
+
+With any Python version on Windows, `RUNFILES_*` environment variables
+still point to an intermediate stage path instead of the module path,
+causing `CurrentRepository()` to raise a `ValueError` since
+`rules_python` v1.8.0:
+```
+ValueError: C:\Users\bot\AppData\Local\Temp\Bazel.runfiles_gh34ij5_\runfiles\+_repo_rules+cpython\my_script.py does not lie under the runfiles root C:/cache/ab1cdef2/execroot/_main/bazel-out/x64_windows-fastbuild/bin/external/+_repo_rules+cpython/install.exe.runfiles
+```
+
+This was not the case with `rules_python` v1.7.0. The issue stems from
+#3086 which, by eliminating a wrong assumption, also brought a stricter
+behavior.
+
+Since #3086 came up with a corresponding workaround in
+`//tests/runtime_env_toolchain:toolchain_runs_test`, the proposed fix
+simply consists in moving it to `CurrentRepository()`, thus adding
+another case to the workaround introduced by #1634 for Python < 3.11.
+It therefore leads to assuming the main module path on Windows as well.
+
+Removing the workaround from `CurrentRepository()` would make the test
+fail as follows:
+```
+==================== Test output for //tests/runtime_env_toolchain:toolchain_runs_test:
+E
+======================================================================
+ERROR: test_ran (__main__.RunTest.test_ran)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+[...]
+ValueError: C:\Users\user\AppData\Local\Temp\Bazel.runfiles_1f08smy6\runfiles\_main\tests\runtime_env_toolchain\toolchain_runs_test.py does not lie under the runfiles root c:\users\user\_bazel_user\cxxeswjo\execroot\_main\bazel-out\x64_windows-fastbuild-st-c530e4918e48\bin\tests\runtime_env_toolchain\toolchain_runs_test.exe.runfiles
+```
+---
+ CHANGELOG.md                                      |  2 ++
+ python/runfiles/runfiles.py                       |  6 +++++-
+ .../runtime_env_toolchain/toolchain_runs_test.py  | 15 +++------------
+ 3 files changed, 10 insertions(+), 13 deletions(-)
+
+diff --git a/python/runfiles/runfiles.py b/python/runfiles/runfiles.py
+index bfa9d0d053..f98646b1c2 100644
+--- a/python/runfiles/runfiles.py
++++ b/python/runfiles/runfiles.py
+@@ -389,11 +389,15 @@ def CurrentRepository(self, frame: int = 1) -> str:
+             # located in the main repository.
+             # With Python 3.11 and higher, the Python launcher sets
+             # PYTHONSAFEPATH, which prevents this behavior.
++            # On Windows, the current toolchain being used has a buggy zip file
++            # bootstrap, which leaves RUNFILES_DIR pointing at the first stage
++            # path and not the module path. In this case too, assume that the
++            # module is located in the main repository.
+             # TODO: This doesn't cover the case of a script being run from an
+             #       external repository, which could be heuristically detected
+             #       by parsing the script's path.
+             if (
+-                sys.version_info.minor <= 10
++                (sys.version_info.minor <= 10 or sys.platform == "win32")
+                 and sys.path[0] != self._python_runfiles_root
+             ):
+                 return ""
