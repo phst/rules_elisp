@@ -84,7 +84,7 @@ runs:
           common --remote_download_minimal
           common --incompatible_config_setting_private_default_visibility
           common --experimental_ui_max_stdouterr_bytes=2000000
-          common --lockfile_mode=${{inputs.bazel-version == 'latest' && 'error' || 'off'}}
+          common --lockfile_mode=${{inputs.bazel-version == 'default' && 'error' || 'off'}}
           build --verbose_failures
           build --experimental_convenience_symlinks=ignore
           build --show_result=0
@@ -93,7 +93,7 @@ runs:
           build --incompatible_strict_action_env
           test --test_output=errors
           ${{
-            inputs.bazel-version == 'latest' &&
+            inputs.bazel-version == 'default' &&
             'common --incompatible_enforce_starlark_utf8=error' || ''
           }}
           ${{
@@ -140,9 +140,12 @@ runs:
       shell: pwsh
       run: |
         $PSNativeCommandUseErrorActionPreference = $true
-        Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value @(
-          'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
-        )
+        $BazelVersion = '${{inputs.bazel-version}}'
+        if ($BazelVersion -ne 'default') {
+            Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value @(
+                "USE_BAZEL_VERSION=$BazelVersion"
+            )
+        }
         # If we don’t have consistent line endings across the operating systems,
         # the MODULE.bazel.lock hashes will diverge for external repositories
         # using git_override.
