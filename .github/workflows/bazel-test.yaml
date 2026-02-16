@@ -27,7 +27,7 @@ jobs:
         # allow Bazel to cache intermediate results between the test runs.
         bazel: [7.4.0, 7.x, 8.x, latest]
         os: [ubuntu-latest, macos-latest, windows-latest]
-        cc: [gcc-14, clang, msvc]
+        cc: [gcc, clang, msvc]
         exclude:
           # Visual C++ works only on Windows.  Windows doesn’t use the CC
           # environment variable and always uses Visual C++ by default.
@@ -36,7 +36,7 @@ jobs:
           - os: macos-latest
             cc: msvc
           - os: windows-latest
-            cc: gcc-14
+            cc: gcc
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
@@ -57,7 +57,7 @@ jobs:
           ./check.ps1
           -Coverage:$${{
             runner.os != 'Windows' &&
-            (runner.os != 'macOS' || matrix.cc != 'gcc-14')
+            (runner.os != 'macOS' || matrix.cc != 'gcc')
           }}
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
