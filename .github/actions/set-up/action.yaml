@@ -131,10 +131,9 @@ runs:
       shell: pwsh
       run: |
         $PSNativeCommandUseErrorActionPreference = $true
-        $BazelVersion = '${{inputs.bazel-version}}'
-        if ($BazelVersion -ne 'default') {
+        if ('${{inputs.bazel-version}}' -ne 'default') {
             Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value @(
-                "USE_BAZEL_VERSION=$BazelVersion"
+                'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
             )
         }
         # If we don’t have consistent line endings across the operating systems,
