@@ -146,8 +146,3 @@ runs:
                 "USE_BAZEL_VERSION=$BazelVersion"
             )
         }
-        # If we don’t have consistent line endings across the operating systems,
-        # the MODULE.bazel.lock hashes will diverge for external repositories
-        # using git_override.
-        git config --global core.autocrlf false
-        git config --global core.eol lf
