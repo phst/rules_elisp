@@ -50,6 +50,7 @@ runs:
         sudo apt-get autoremove
         sudo apt-get clean
         rm -r -f /usr/share/dotnet /usr/share/swift /usr/local/graalvm
+        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
       if: runner.os == 'Linux'
     - id: msys2
       name: Install MSYS2
@@ -60,9 +61,20 @@ runs:
         install: >
           texinfo
       if: runner.os == 'Windows'
-    - name: Install Texinfo
+    - name: Set up macOS worker
       shell: bash
-      run: brew update && brew install texinfo
+      run: |
+        brew update && brew install texinfo
+        # Detect Xcode command-line tools on macOS to work around
+        # https://github.com/bazelbuild/bazel/issues/14970.
+        cov="$(xcrun --find llvm-cov)"
+        echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
+        profdata="$(xcrun --find llvm-profdata)"
+        echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
+        if [ '${{matrix.cc}}' = gcc ]; then
+          # “gcc” points to Clang on macOS.
+          echo 'CC=gcc-14' >> "${GITHUB_ENV:?}"
+        fi
       if: runner.os == 'macOS'
     - name: Set up Bazel
       uses: bazel-contrib/setup-bazel@0.18.0
@@ -105,25 +117,6 @@ runs:
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
-    - name: Configure system (Linux)
-      shell: bash
-      run: |
-        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
-      if: runner.os == 'Linux'
-    - name: Configure system (macOS)
-      # Detect Xcode command-line tools on macOS to work around
-      # https://github.com/bazelbuild/bazel/issues/14970.
-      shell: bash
-      run: |
-        cov="$(xcrun --find llvm-cov)"
-        echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
-        profdata="$(xcrun --find llvm-profdata)"
-        echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
-        if [ '${{matrix.cc}}' = gcc ]; then
-          # “gcc” points to Clang on macOS.
-          echo 'CC=gcc-14' >> "${GITHUB_ENV:?}"
-        fi
-      if: runner.os == 'macOS'
     - name: Configure system (Windows)
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
