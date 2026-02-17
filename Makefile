@@ -51,8 +51,7 @@ compdb:
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands
 
 coverage:
-	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) \
-	  -- //...
+	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
