@@ -75,14 +75,15 @@ runs:
         repository-cache: true
     - id: msys2
       name: Install MSYS2
+      if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
       with:
         update: false
         release: false
         install: >
           texinfo
-      if: runner.os == 'Windows'
     - name: Set up Ubuntu worker
+      if: runner.os == 'Linux'
       shell: bash
       # We need to free up some disk space on the Ubuntu runners,
       # cf. https://github.com/actions/runner-images/issues/13189.
@@ -101,8 +102,8 @@ runs:
         sudo apt-get clean
         rm -r -f /usr/share/dotnet /usr/share/swift /usr/local/graalvm
         echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
-      if: runner.os == 'Linux'
     - name: Set up macOS worker
+      if: runner.os == 'macOS'
       shell: bash
       run: |
         brew update && brew install texinfo
@@ -116,8 +117,8 @@ runs:
           # “gcc” points to Clang on macOS.
           echo 'CC=gcc-14' >> "${GITHUB_ENV:?}"
         fi
-      if: runner.os == 'macOS'
     - name: Set up Windows worker
+      if: runner.os == 'Windows'
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
       shell: pwsh
@@ -126,7 +127,6 @@ runs:
         -Verbose
         -LiteralPath $Env:GITHUB_ENV
         -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
-      if: runner.os == 'Windows'
     - name: Configure system
       shell: pwsh
       run: |
