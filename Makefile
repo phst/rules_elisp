@@ -39,10 +39,7 @@ GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --output_groups=-mypy \
   --features=-parse_headers --host_features=-parse_headers
-COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS) \
-  --color=no --curses=no \
-  --test_output=summary --test_summary=terse \
-  --noshow_progress --noshow_loading_progress --noprogress_in_terminal_title
+COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
