@@ -1,4 +1,4 @@
-// Copyright 2022-2025 Google LLC
+// Copyright 2022-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -2763,7 +2763,7 @@ struct FileDefProtoPair {
 
 // Helper function for ConvertGeneratorRequest.  The arguments must point to
 // FileDefProtoPair structures.
-int CompareFileDefProtoPairs(const void* a, const void* b) {
+static int CompareFileDefProtoPairs(const void* a, const void* b) {
   const struct FileDefProtoPair* p = a;
   const struct FileDefProtoPair* q = b;
   uintptr_t u = (uintptr_t)p->def;
