@@ -132,9 +132,7 @@ runs:
       run: |
         $PSNativeCommandUseErrorActionPreference = $true
         if ('${{inputs.bazel-version}}' -ne 'default') {
-            Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value @(
-                'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
-            )
+            Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value 'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
         }
         # If we don’t have consistent line endings across the operating systems,
         # the MODULE.bazel.lock hashes will diverge for external repositories
