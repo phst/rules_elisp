@@ -51,7 +51,7 @@ compdb:
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands
 
 coverage:
-	$(BAZEL) coverage $(COVERAGE_BAZELFLAGS) --combined_report=lcov \
+	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) \
 	  -- //...
 	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
@@ -86,9 +86,9 @@ check-extra:
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
 
 benchmark:
-	$(HYPERFINE) $(HYPERFINEFLAGS) --shell=none --warmup=5 \
+	$(HYPERFINE) --shell=none --warmup=5 \
 	  --setup='$(BAZEL) build $(BENCHMARK_BAZELFLAGS) -- //tests:empty' \
-	  -- \
+	  $(HYPERFINEFLAGS) -- \
 	  '$(BAZEL) run $(BENCHMARK_BAZELFLAGS) -- //tests:empty' \
 	  './bazel-bin/tests/empty' \
 	  '$(EMACS) -Q -batch $(EMACSFLAGS) -l bazel-bin/tests/empty.elc'
