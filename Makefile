@@ -49,14 +49,10 @@ compdb:
 coverage:
 	$(BAZEL) coverage $(COVERAGE_BAZELFLAGS) --combined_report=lcov \
 	  -- //...
-        # Make filenames absolute.
-	sed -E -e "s|^(SF:)([^/].+)|\\1$${PWD:?}/\\2|" \
-	  -- bazel-out/_coverage/_coverage_report.dat > coverage.info
 	genhtml --output-directory=coverage-report \
 	  --branch-coverage --demangle-cpp \
 	  --rc=genhtml_demangle_cpp_params=--no-strip-underscore \
-	  -- coverage.info
-	rm -- coverage.info
+	  -- bazel-out/_coverage/_coverage_report.dat
 
 check-extra:
         # We don’t want any Python or Go rules in the public packages, as our
