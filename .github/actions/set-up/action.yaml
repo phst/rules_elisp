@@ -18,7 +18,8 @@ description: Install necessary dependencies and load remote caches
 inputs:
   bazel-version:
     description: Bazel version to use
-    required: true
+    required: false
+    default: default
   cc:
     description: C/C++ compiler to use
     required: false
