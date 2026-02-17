@@ -121,7 +121,7 @@ runs:
         echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
         profdata="$(xcrun --find llvm-profdata)"
         echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
-        if [[ '${{matrix.cc}}' == gcc ]]; then
+        if [ '${{matrix.cc}}' = gcc ]; then
           # “gcc” points to Clang on macOS.
           echo 'CC=gcc-14' >> "${GITHUB_ENV:?}"
         fi
