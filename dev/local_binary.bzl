@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,7 @@ def _local_binary_impl(ctx):
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
     file = ctx.which(program + (".exe" if windows else ""))
-    if not file:
+    if not file and windows:
         # On Windows, retry with MSYS2.
         bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
         result = ctx.execute(
