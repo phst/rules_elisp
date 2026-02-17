@@ -1,4 +1,4 @@
-# Copyright 2021, 2023-2025 Google LLC
+# Copyright 2021, 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
-	  -- @hedron_compile_commands//:refresh_all $(COMPDB_BAZELFLAGS)
+	  -- @wolfd_bazel_compile_commands//:generate_compile_commands
 
 coverage:
 	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
