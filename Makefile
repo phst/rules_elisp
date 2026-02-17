@@ -40,6 +40,10 @@ COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --output_groups=-mypy \
   --features=-parse_headers --host_features=-parse_headers
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
+GENHTML = genhtml
+GENHTMLFLAGS = --branch-coverage \
+  --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
+CPPFILT = c++filt
 
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
@@ -49,9 +53,7 @@ compdb:
 coverage:
 	$(BAZEL) coverage $(COVERAGE_BAZELFLAGS) --combined_report=lcov \
 	  -- //...
-	genhtml --output-directory=coverage-report \
-	  --branch-coverage \
-	  --demangle-cpp=c++filt --demangle-cpp=--no-strip-underscore \
+	$(GENHTML) --output-directory=coverage-report $(GENHTMLFLAGS) \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
 check-extra:
