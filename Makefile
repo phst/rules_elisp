@@ -39,7 +39,10 @@ GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --output_groups=-mypy \
   --features=-parse_headers --host_features=-parse_headers
-COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
+COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS) \
+  --color=no --curses=no \
+  --test_output=summary --test_summary=terse \
+  --noshow_progress --noshow_loading_progress --noprogress_in_terminal_title
 
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
@@ -47,8 +50,20 @@ compdb:
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands
 
 coverage:
-	$(BAZEL) run $(COVERAGE_BAZELFLAGS) \
-	  -- @bazelcov --bazel='$(BAZEL)' --output=coverage-report
+	$(BAZEL) coverage $(COVERAGE_BAZELFLAGS) --combined_report=lcov \
+	  -- //...
+        # coverage.py occasionally writes branch coverage data for line 0,
+        # which genhtml doesn’t accept.
+	sed -E -n -e '/^BRDA:0,.+/!p' \
+	  -- bazel-out/_coverage/_coverage_report.dat > coverage.tmp
+        # Make filenames absolute.
+	sed -E -e "s|^(SF:)([^/].+)|\\1$${PWD:?}/\\2|" \
+	  -- coverage.tmp > coverage.info
+	genhtml --output-directory=coverage-report \
+	  --branch-coverage --demangle-cpp \
+	  --rc=genhtml_demangle_cpp_params=--no-strip-underscore \
+	  -- coverage.info
+	rm -- coverage.tmp coverage.info
 
 check-extra:
         # We don’t want any Python or Go rules in the public packages, as our
