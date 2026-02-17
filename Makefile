@@ -50,8 +50,8 @@ coverage:
 	$(BAZEL) coverage $(COVERAGE_BAZELFLAGS) --combined_report=lcov \
 	  -- //...
 	genhtml --output-directory=coverage-report \
-	  --branch-coverage --demangle-cpp \
-	  --rc=genhtml_demangle_cpp_params=--no-strip-underscore \
+	  --branch-coverage --demangle-cpp=c++filt \
+	  --demangle-cpp=--no-strip-underscore \
 	  -- bazel-out/_coverage/_coverage_report.dat
 
 check-extra:
