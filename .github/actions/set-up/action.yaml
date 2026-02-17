@@ -117,7 +117,7 @@ runs:
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
-    - name: Configure system (Windows)
+    - name: Set up Windows worker
       # Make Bazel find the right binaries on GitHub.  See
       # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
       shell: pwsh
@@ -127,7 +127,7 @@ runs:
         -LiteralPath $Env:GITHUB_ENV
         -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
       if: runner.os == 'Windows'
-    - name: Configure system (all platforms)
+    - name: Configure system
       shell: pwsh
       run: |
         $PSNativeCommandUseErrorActionPreference = $true
