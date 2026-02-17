@@ -172,13 +172,6 @@ git_override(
     remote = "https://github.com/phst/update-workspace-snippets.git",
 )
 
-bazel_dep(name = "phst_bazelcov", version = "0", dev_dependency = True, repo_name = "bazelcov")
-git_override(
-    module_name = "phst_bazelcov",
-    commit = "c8c029a78f2b475401420b330209b666fe2773ca",
-    remote = "https://github.com/phst/bazelcov.git",
-)
-
 bazel_dep(name = "phst_merge_bazel_lockfiles", version = "0", dev_dependency = True)
 git_override(
     module_name = "phst_merge_bazel_lockfiles",
