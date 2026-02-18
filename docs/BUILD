@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("@pip//:requirements.bzl", "requirement")
 load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
-load("@rules_python//python:py_binary.bzl", "py_binary")
+load("@rules_go//go:def.bzl", "go_binary", "go_library")
+load("@rules_go//proto:def.bzl", "go_proto_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_manual.bzl", "elisp_manual")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -114,19 +114,26 @@ elisp_binary(
     for pkg, name in DOCS
 ]
 
-py_binary(
+go_binary(
     name = "generate",
-    srcs = ["generate.py"],
-    python_version = "3.12",
-    tags = [
-        # Disable Mypy until
-        # https://github.com/bazel-contrib/rules_mypy/pull/117 is merged and
-        # released.
-        "no-mypy",
-    ],
+    embed = [":docs"],
+)
+
+go_library(
+    name = "docs",
+    srcs = ["generate.go"],
+    importpath = "github.com/phst/rules_elisp/docs",
     deps = [
-        ":stardoc_output_py_proto",
-        requirement("commonmark"),
+        ":stardoc_output_go_proto",
+        "@com_github_yuin_goldmark//:goldmark",
+        "@com_github_yuin_goldmark//ast",
+        "@com_github_yuin_goldmark//renderer",
+        "@com_github_yuin_goldmark//util",
+        "@org_golang_google_protobuf//proto",
+        "@org_golang_x_net//html",
+        "@org_golang_x_text//cases",
+        "@org_golang_x_text//encoding/charmap",
+        "@org_golang_x_text//language",
     ],
 )
 
@@ -134,6 +141,12 @@ py_proto_library(
     name = "stardoc_output_py_proto",
     tags = ["no-pylint"],
     deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
+)
+
+go_proto_library(
+    name = "stardoc_output_go_proto",
+    importpath = "github.com/phst/rules_elisp/docs/stardoc_output_go_proto",
+    protos = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )
 
 bzl_library(

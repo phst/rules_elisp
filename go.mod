@@ -1,4 +1,4 @@
-// Copyright 2023-2025 Google LLC
+// Copyright 2023-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,10 +21,14 @@ require (
 	github.com/bazelbuild/buildtools v0.0.0-20260211083412-859bfffeef82
 	github.com/bazelbuild/rules_go v0.60.0
 	github.com/google/go-cmp v0.7.0
+	github.com/yuin/goldmark v1.7.16
+	golang.org/x/net v0.50.0
+	golang.org/x/text v0.34.0
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
-	golang.org/x/mod v0.25.0 // indirect
-	golang.org/x/sys v0.33.0 // indirect
+	golang.org/x/mod v0.32.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 )
