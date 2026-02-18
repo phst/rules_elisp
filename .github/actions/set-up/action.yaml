@@ -130,7 +130,6 @@ runs:
     - name: Configure system
       shell: pwsh
       run: |
-        $PSNativeCommandUseErrorActionPreference = $true
         if ('${{inputs.bazel-version}}' -ne 'default') {
             Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value 'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
         }
