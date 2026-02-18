@@ -152,6 +152,10 @@ use_repo(
     go_deps,
     "com_github_bazelbuild_buildtools",
     "com_github_google_go_cmp",
+    "com_github_yuin_goldmark",
+    "org_golang_google_protobuf",
+    "org_golang_x_net",
+    "org_golang_x_text",
 )
 
 # Tools for development
