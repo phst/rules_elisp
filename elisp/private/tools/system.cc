@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -975,7 +975,7 @@ absl::Status CopyFile(const FileName& from, const FileName& to) {
     return WindowsStatus("CopyFileW(%#s, %#s, TRUE)", from, to);
   }
 #else
-  const int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
+  constexpr int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
   const int from_fd = open(from.pointer(), from_flags);
   if (from_fd < 0) return ErrnoStatus("open(%#s, %#x)", from, from_flags);
   const absl::Cleanup close_from = [from_fd] {
@@ -990,7 +990,7 @@ absl::Status CopyFile(const FileName& from, const FileName& to) {
         "Source file %s is irregular (mode %#04o)", from, from_stat.st_mode));
   }
 
-  const int to_flags =
+  constexpr int to_flags =
       O_WRONLY | O_CREAT | O_EXCL | O_TRUNC | O_NOFOLLOW | O_CLOEXEC | O_NOCTTY;
   const mode_t to_mode = from_stat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
   const int to_fd = open(to.pointer(), to_flags, to_mode);
