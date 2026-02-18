@@ -1,4 +1,4 @@
-// Copyright 2020-2023, 2025 Google LLC
+// Copyright 2020-2023, 2025, 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 package bin_test
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 )
@@ -44,15 +43,6 @@ func Example() {
 	// You can run the programs produced by elisp_binary rules like any
 	// other binary.
 	cmd := exec.Command(bin, "human")
-	cmd.Stdout = os.Stdout
-	// Note: Emacs writes to stderr, but the example runner only captures
-	// stdout.  We filter out some irrelevant messages that can cause
-	// spurious failures.
-	r, w := io.Pipe()
-	defer r.Close()
-	defer w.Close()
-	go filter(r, os.Stdout)
-	cmd.Stderr = w
 	// The working directory doesn’t matter.  Binaries still find their
 	// runfiles.
 	cmd.Dir = "/"
@@ -69,8 +59,19 @@ func Example() {
 		"GCOV_PREFIX="+tempDir,
 		"LLVM_PROFILE_FILE="+filepath.Join(tempDir, "bazel.%p.profraw"),
 	)
-	if err := cmd.Run(); err != nil {
+	// Note: Emacs writes to stderr, but the example runner only captures
+	// stdout.
+	out, err := cmd.CombinedOutput()
+	if err != nil {
 		panic(err)
+	}
+	// We filter out some irrelevant messages that can cause spurious
+	// failures.
+	for line := range strings.Lines(string(out)) {
+		line := strings.TrimRight(line, "\n")
+		if !irrelevant.MatchString(line) {
+			fmt.Println(line)
+		}
 	}
 	// Output:
 	// hi from bin, ("human")
@@ -78,16 +79,6 @@ func Example() {
 	// hi from lib-4
 	// hi from lib-1
 	// hi from data dependency
-}
-
-func filter(r io.Reader, w io.Writer) {
-	s := bufio.NewScanner(r)
-	for s.Scan() {
-		line := s.Text()
-		if !irrelevant.MatchString(line) {
-			fmt.Fprintln(w, line)
-		}
-	}
 }
 
 // This message can happen depending on the mtime of files in the Bazel
