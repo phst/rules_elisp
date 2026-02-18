@@ -1053,7 +1053,7 @@ static upb_Arena* NewArena(struct Context ctx) {
 
 static void FreeArena(void* ptr) { upb_Arena_Free(ptr); }
 
-// Allocate and return a new arena and a user pointer pointing to it.
+// Allocates and returns a new arena and a user pointer pointing to it.
 static struct LispArena MakeArena(struct Context ctx) {
   struct LispArena null = {NULL, NULL};
   upb_Arena* ptr = NewArena(ctx);
