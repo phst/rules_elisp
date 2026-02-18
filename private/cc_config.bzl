@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -115,7 +115,7 @@ DEFINES = [
 
 LINKOPTS = []
 
-# These libraries have to be added to a cc_library dependencies to defined the
+# These libraries have to be added to cc_library dependencies to define the
 # BAZEL_CURRENT_REPOSITORY preprocessor symbol.
 RUNFILES_LIBS = [
     # FIXME: Remove the next dependency once we drop support for Bazel
