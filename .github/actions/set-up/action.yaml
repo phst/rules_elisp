@@ -127,9 +127,8 @@ runs:
         -Verbose
         -LiteralPath $Env:GITHUB_ENV
         -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
-    - name: Configure system
+    - name: Override Bazel version
+      if: inputs.bazel-version != 'default'
       shell: pwsh
       run: |
-        if ('${{inputs.bazel-version}}' -ne 'default') {
-            Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value 'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
-        }
+        Add-Content -Verbose -LiteralPath $Env:GITHUB_ENV -Value 'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
