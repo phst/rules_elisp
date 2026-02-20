@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copyright 2024, 2025 Philipp Stephani
+# Copyright 2024, 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,35 +17,14 @@
 set -euC
 
 workflow=update-lockfiles.yaml
-stamp=lock.stamp
 run=lock.run
-
-if [ -f "${stamp:?}" ]; then
-  read -r branch time < "${stamp:?}"
-else
-  branch="$(git branch --show-current)"
-  time="$(date -u -Iseconds)"
-  gh workflow run "${workflow:?}" --ref="${branch:?}"
-  echo "${branch:?} ${time:?}" > "${stamp:?}"
-fi
-
-fetch_run_id() {
-  gh run list \
-    --workflow="${workflow:?}" \
-    --event=workflow_dispatch \
-    --branch="${branch:?}" \
-    --created=">=${time:?}" \
-    --limit=1 \
-    --json=databaseId \
-    --jq='.[].databaseId'
-}
 
 if [ -f "${run:?}" ]; then
   read -r id < "${run:?}"
 else
-  while id="$(fetch_run_id)" && [ -z "${id}" ]; do
-    sleep 1
-  done
+  branch="$(git branch --show-current)"
+  url="$(gh workflow run "${workflow:?}" --ref="${branch:?}")"
+  id="${url##*/}"
   echo "${id:?}" > "${run:?}"
 fi
 
@@ -77,4 +56,4 @@ rmdir -- \
   lockfiles-*/examples \
   lockfiles-*
 
-rm -- "${stamp:?}" "${run:?}"
+rm -- "${run:?}"
