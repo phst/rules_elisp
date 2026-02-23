@@ -146,13 +146,16 @@ func (g *generator) doRun(module *spb.ModuleInfo) {
 	apply(g.macro, module.GetMacroInfo())
 }
 
-func apply[T any](f func(T), s []T) {
-	for _, e := range s {
-		f(e)
+func apply[T any](f func(T) error, s []T) error {
+	for i, e := range s {
+		if err := f(e); err != nil {
+			return fmt.Errorf("error processing %d-th %T: %w", i, e, err)
+		}
 	}
+	return nil
 }
 
-func (g *generator) rule(rule *spb.RuleInfo) {
+func (g *generator) rule(rule *spb.RuleInfo) error {
 	name := rule.GetRuleName()
 	var elts []string
 	for _, a := range rule.GetAttribute() {
@@ -174,9 +177,10 @@ func (g *generator) rule(rule *spb.RuleInfo) {
 		g.attribute(attr)
 	}
 	g.write("#+END_deffn\n\n")
+	return nil
 }
 
-func (g *generator) function(function *spb.StarlarkFunctionInfo) {
+func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 	name := function.GetFunctionName()
 	var elts []string
 	for _, p := range function.GetParameter() {
@@ -204,6 +208,7 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) {
 		panic(fmt.Errorf("unsupported deprecated function %s", name))
 	}
 	g.write("#+END_defun\n\n")
+	return nil
 }
 
 func (g *generator) parameter(param *spb.FunctionParamInfo) {
@@ -220,7 +225,7 @@ func (g *generator) parameter(param *spb.FunctionParamInfo) {
 	g.item(fmt.Sprintf("%s :: %s  %s.", param.GetName(), doc, suffix))
 }
 
-func (g *generator) provider(provider *spb.ProviderInfo) {
+func (g *generator) provider(provider *spb.ProviderInfo) error {
 	name := provider.GetProviderName()
 	var elts []string
 	for _, f := range provider.GetFieldInfo() {
@@ -241,9 +246,10 @@ func (g *generator) provider(provider *spb.ProviderInfo) {
 		g.item(fmt.Sprintf("~%s~ :: %s", field.GetName(), doc))
 	}
 	g.write("#+END_deftp\n\n")
+	return nil
 }
 
-func (g *generator) aspect(aspect *spb.AspectInfo) {
+func (g *generator) aspect(aspect *spb.AspectInfo) error {
 	name := aspect.GetAspectName()
 	var elts []string
 	for _, a := range aspect.GetAttribute() {
@@ -272,9 +278,10 @@ func (g *generator) aspect(aspect *spb.AspectInfo) {
 		g.attribute(attr)
 	}
 	g.write("#+END_deffn\n\n")
+	return nil
 }
 
-func (g *generator) extension(ext *spb.ModuleExtensionInfo) {
+func (g *generator) extension(ext *spb.ModuleExtensionInfo) error {
 	name := ext.GetExtensionName()
 	var elts []string
 	for _, t := range ext.GetTagClass() {
@@ -294,6 +301,7 @@ func (g *generator) extension(ext *spb.ModuleExtensionInfo) {
 		g.tagClass(name, tag)
 	}
 	g.write("#+END_deftp\n\n")
+	return nil
 }
 
 func (g *generator) tagClass(extensionName string,
@@ -321,7 +329,7 @@ func (g *generator) tagClass(extensionName string,
 	g.write("#+END_defop\n\n")
 }
 
-func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) {
+func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) error {
 	name := rule.GetRuleName()
 	var elts []string
 	for _, a := range rule.GetAttribute() {
@@ -352,9 +360,10 @@ func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) {
 		g.write(fmt.Sprintf("It depends on the following environment variables: %s\n\n", env))
 	}
 	g.write("#+END_deffn\n\n")
+	return nil
 }
 
-func (g *generator) macro(macro *spb.MacroInfo) {
+func (g *generator) macro(macro *spb.MacroInfo) error {
 	name := macro.GetMacroName()
 	var elts []string
 	for _, a := range macro.GetAttribute() {
@@ -377,6 +386,7 @@ func (g *generator) macro(macro *spb.MacroInfo) {
 		g.attribute(attr)
 	}
 	g.write("#+END_defmac\n\n")
+	return nil
 }
 
 func (g *generator) load(key *spb.OriginKey) {
