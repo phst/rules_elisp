@@ -408,15 +408,15 @@ default: <code class="code">[]</code>; required providers: <code class="code">Em
 <dt><code class="code">skip_tests</code></dt>
 <dd><p>List of tests to skip.  This attribute contains a list of ERT
 test symbols; when running the test rule, these tests are skipped.  Most of
-the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>. The <code class="code">skip_tests</code>
+the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>.  The <code class="code">skip_tests</code>
 attribute is mainly useful for third-party code that you don’t control.  List
 of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">skip_tags</code></dt>
 <dd><p>List of test tags to skip.  This attribute contains a list of
 tag names; if a test is tagged with one of the tags from this list, it is
-skipped.  This can be useful to e.g.  skip tests that are flaky or only work
-in interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
 tests.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
@@ -1102,7 +1102,7 @@ mandatory.
 mandatory.
 </p></dd>
 <dt><code class="code">additional_inputs</code></dt>
-<dd><p>List of additional files made available during export.
+<dd><p>List of additional files made available during export. 
 List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
@@ -1172,7 +1172,7 @@ attribute for <code class="code">http_archive</code></a>.  String; optional; def
 optional; default: <code class="code">&quot;library&quot;</code>.
 </p></dd>
 <dt><code class="code">exclude</code></dt>
-<dd><p>Glob patterns of additional files to exclude from the library.
+<dd><p>Glob patterns of additional files to exclude from the library. 
 List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
@@ -1285,7 +1285,8 @@ should be merged indirectly into the result.  Optional; default: <code class="co
 </p></dd>
 </dl>
 <p>Returns: 
-A fresh <code class="code">EmacsLispInfo</code> provider.
+</p>
+<p>A fresh <code class="code">EmacsLispInfo</code> provider.
 </p></dd></dl>
 
 <p>To compile Emacs Lisp source files and runs tests, <code class="code">rules_elisp</code> registers the
@@ -1347,8 +1348,8 @@ attributes of the <code class="code">elisp_binary</code> rule.
 <dt><code class="code">emacs</code></dt>
 <dd><p>An executable file that behaves like the Emacs binary.  Depending
 on whether <code class="code">wrap</code> is <code class="code">True</code>, Bazel invokes this executable with a command line
-like <code class="code">emacs --manifest=MANIFEST -- ARGS…</code> or <code class="code">emacs ARGS…</code>. The <code class="code">--manifest</code>
-flag is only present if <code class="code">wrap</code> is <code class="code">True</code>. See the rule documentation for
+like <code class="code">emacs --manifest=MANIFEST -- ARGS…</code> or <code class="code">emacs ARGS…</code>.  The <code class="code">--manifest</code>
+flag is only present if <code class="code">wrap</code> is <code class="code">True</code>.  See the rule documentation for
 details.  Label; mandatory.
 </p></dd>
 <dt><code class="code">use_default_shell_env</code></dt>
@@ -1386,11 +1387,11 @@ The resulting executable can be used to run the compiled Emacs.
 </p></dd>
 <dt><code class="code">mode</code></dt>
 <dd><p>How to build and install Emacs.  Possible values are: - <code class="code">source</code>:
-Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>. <code class="code">srcs</code> must
+Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>.  <code class="code">srcs</code> must
 refer to an unpacked Emacs source archive.  - <code class="code">release</code>: Run Emacs directly
 without building or installing.  <code class="code">srcs</code> must refer to an unpacked Emacs
 release archive containing pre-built   binaries for the correct target
-operating system and architecture.   Currently this only works on Windows.
+operating system and architecture.    Currently this only works on Windows. 
 String; optional; default: <code class="code">&quot;source&quot;</code>.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
