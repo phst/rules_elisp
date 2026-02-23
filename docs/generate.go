@@ -214,8 +214,7 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 func (g *generator) parameter(param *spb.FunctionParamInfo) {
 	doc := strings.TrimSpace(g.markdown(param.GetDocString()))
 	if !strings.HasSuffix(doc, ".") {
-		panic(
-			fmt.Sprintf("documentation string %q should end with a period", doc))
+		panic(fmt.Sprintf("documentation string %q should end with a period", doc))
 	}
 	suffixes := []string{capitalize(mandatory[param.GetMandatory()])}
 	if param.GetDefaultValue() != "" {
@@ -303,8 +302,7 @@ func (g *generator) extension(ext *spb.ModuleExtensionInfo) error {
 	return nil
 }
 
-func (g *generator) tagClass(extensionName string,
-	tag *spb.ModuleExtensionTagClassInfo) {
+func (g *generator) tagClass(extensionName string, tag *spb.ModuleExtensionTagClassInfo) {
 	name := tag.GetTagName()
 	var elts []string
 	for _, a := range tag.GetAttribute() {
@@ -434,8 +432,7 @@ func (g *generator) attribute(attr *spb.AttributeInfo) {
 }
 
 func (g *generator) item(text string) {
-	g.write(
-		fill(text, "- ", "  ") + "\n")
+	g.write(fill(text, "- ", "  ") + "\n")
 }
 
 func (g *generator) write(text string) {
