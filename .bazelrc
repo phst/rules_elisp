@@ -26,10 +26,6 @@ build --host_features=external_include_paths
 # TODO: File bug against rules_cc.
 build:windows --copt='/external:W0' --host_copt='/external:W0'
 
-# Run Mypy by default.
-build --aspects='//dev:mypy.bzl%mypy'
-build --output_groups='+mypy'
-
 # Make Googletest use Abseil to support AbslStringify.
 # See https://github.com/google/googletest/issues/4383.
 build --define=absl=1
