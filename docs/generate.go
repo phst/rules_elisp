@@ -620,13 +620,13 @@ func (r *orgRenderer) item(writer util.BufWriter, source []byte, n ast.Node, ent
 	_ = n.(*ast.ListItem)
 	if entering {
 		if r.indent != "" {
-			panic(errors.New("no support for nested lists"))
+			return ast.WalkStop, errors.New("no support for nested lists")
 		}
 		r.lit(writer, "- ")
 		r.indent = "  "
 	} else {
 		if r.indent != "  " {
-			panic(errors.New("no support for nested lists"))
+			return ast.WalkStop, errors.New("no support for nested lists")
 		}
 		r.indent = ""
 		r.cr(writer)
@@ -651,7 +651,7 @@ func (r *orgRenderer) codeBlock(writer util.BufWriter, source []byte, n ast.Node
 	if entering {
 		lang := rendererLanguage[string(node.Language(source))]
 		if lang == "" {
-			panic(fmt.Errorf("unknown language %q", lang))
+			return ast.WalkStop, fmt.Errorf("unknown language %q", lang)
 		}
 		r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang))
 		r.lit(writer, string(node.Lines().Value(source)))
@@ -672,7 +672,7 @@ func (r *orgRenderer) link(writer util.BufWriter, source []byte, n ast.Node, ent
 		if match != nil {
 			s, err := url.PathUnescape(match[2])
 			if err != nil {
-				panic(err)
+				return ast.WalkStop, err
 			}
 			dest = match[1] + s
 		}
