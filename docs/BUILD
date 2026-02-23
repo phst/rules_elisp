@@ -130,7 +130,6 @@ go_library(
         "@com_github_yuin_goldmark//renderer",
         "@com_github_yuin_goldmark//util",
         "@org_golang_google_protobuf//proto",
-        "@org_golang_x_net//html",
         "@org_golang_x_text//cases",
         "@org_golang_x_text//encoding/charmap",
         "@org_golang_x_text//language",

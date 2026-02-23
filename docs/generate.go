@@ -16,7 +16,6 @@
 package main
 
 import (
-	"bytes"
 	"errors"
 	"flag"
 	"fmt"
@@ -34,7 +33,6 @@ import (
 	"github.com/yuin/goldmark/ast"
 	"github.com/yuin/goldmark/renderer"
 	"github.com/yuin/goldmark/util"
-	"golang.org/x/net/html"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/language"
@@ -688,10 +686,12 @@ func (r *orgRenderer) link(writer util.BufWriter, source []byte, n ast.Node, ent
 func (r *orgRenderer) htmlInline(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
 	node := n.(*ast.RawHTML)
 	if entering {
-		w := new(strings.Builder)
-		parser := newHTMLParser(w)
-		parser.feed(node.Segments.Value(source))
-		r.lit(writer, w.String())
+		tag := string(node.Segments.Value(source))
+		org := tags[tag]
+		if org == "" {
+			return ast.WalkStop, fmt.Errorf("unknown HTML tag %s", tag)
+		}
+		r.lit(writer, org)
 	}
 	return ast.WalkContinue, nil
 }
@@ -706,62 +706,9 @@ func (r *orgRenderer) unknown(writer util.BufWriter, source []byte, n ast.Node, 
 	return ast.WalkStop, fmt.Errorf("unknown node type %q", n.Kind())
 }
 
-type htmlParser struct {
-	writer io.StringWriter
-}
-
-var tags = map[string][2]string{
-	"code": {"@@texinfo:@code{@@", "@@texinfo:}@@"},
-	"var":  {"@@texinfo:@var{@@", "@@texinfo:}@@"},
-}
-
-func newHTMLParser(w io.StringWriter) *htmlParser {
-	return &htmlParser{w}
-}
-
-func (p *htmlParser) feed(b []byte) {
-	t := html.NewTokenizer(bytes.NewReader(b))
-	for {
-		switch tok := t.Next(); tok {
-		case html.ErrorToken:
-			err := t.Err()
-			if errors.Is(err, io.EOF) {
-				return
-			}
-			panic(err)
-		case html.StartTagToken:
-			name, hasAttr := t.TagName()
-			p.handleStartTag(string(name), hasAttr)
-		case html.EndTagToken:
-			name, _ := t.TagName()
-			p.handleEndTag(string(name))
-		default:
-			panic(fmt.Errorf("unknown token %s", tok))
-		}
-	}
-}
-
-func (p *htmlParser) handleStartTag(tag string, hasAttr bool) {
-	if hasAttr {
-		panic(fmt.Errorf("got attributes for <%s> tag", tag))
-	}
-	a, ok := tags[tag]
-	if !ok {
-		panic(fmt.Errorf("unknown start tag <%s>", tag))
-	}
-	start := a[0]
-	if _, err := p.writer.WriteString(start); err != nil {
-		panic(err)
-	}
-}
-
-func (p *htmlParser) handleEndTag(tag string) {
-	a, ok := tags[tag]
-	if !ok {
-		panic(fmt.Errorf("unknown end tag <%s>", tag))
-	}
-	end := a[1]
-	if _, err := p.writer.WriteString(end); err != nil {
-		panic(err)
-	}
+var tags = map[string]string{
+	"<code>":  "@@texinfo:@code{@@",
+	"</code>": "@@texinfo:}@@",
+	"<var>":   "@@texinfo:@var{@@",
+	"</var>":  "@@texinfo:}@@",
 }
