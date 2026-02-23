@@ -656,7 +656,7 @@ func (r *orgRenderer) codeBlock(writer util.BufWriter, source []byte, n ast.Node
 		r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang))
 		r.lit(writer, string(node.Lines().Value(source)))
 	} else {
-		r.lit(writer, fmt.Sprintf("#+END_SRC\n\n"))
+		r.lit(writer, "#+END_SRC\n\n")
 		r.lit(writer, "#+TEXINFO: @noindent")
 	}
 	return ast.WalkContinue, nil
