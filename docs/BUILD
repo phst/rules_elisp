@@ -14,7 +14,6 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("@protobuf//bazel:py_proto_library.bzl", "py_proto_library")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_go//proto:def.bzl", "go_proto_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -134,12 +133,6 @@ go_library(
         "@org_golang_x_text//encoding/charmap",
         "@org_golang_x_text//language",
     ],
-)
-
-py_proto_library(
-    name = "stardoc_output_py_proto",
-    tags = ["no-pylint"],
-    deps = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )
 
 go_proto_library(
