@@ -137,26 +137,18 @@ func (g *generator) doRun(module *spb.ModuleInfo) {
 	if len(doc) > 100 && strings.ContainsRune(doc, '\n') {
 		g.write(g.markdown(doc))
 	}
-	for _, rule := range module.GetRuleInfo() {
-		g.rule(rule)
-	}
-	for _, provider := range module.GetProviderInfo() {
-		g.provider(provider)
-	}
-	for _, function := range module.GetFuncInfo() {
-		g.function(function)
-	}
-	for _, aspect := range module.GetAspectInfo() {
-		g.aspect(aspect)
-	}
-	for _, extension := range module.GetModuleExtensionInfo() {
-		g.extension(extension)
-	}
-	for _, rule := range module.GetRepositoryRuleInfo() {
-		g.repoRule(rule)
-	}
-	for _, macro := range module.GetMacroInfo() {
-		g.macro(macro)
+	apply(g.rule, module.GetRuleInfo())
+	apply(g.provider, module.GetProviderInfo())
+	apply(g.function, module.GetFuncInfo())
+	apply(g.aspect, module.GetAspectInfo())
+	apply(g.extension, module.GetModuleExtensionInfo())
+	apply(g.repoRule, module.GetRepositoryRuleInfo())
+	apply(g.macro, module.GetMacroInfo())
+}
+
+func apply[T any](f func(T), s []T) {
+	for _, e := range s {
+		f(e)
 	}
 }
 
