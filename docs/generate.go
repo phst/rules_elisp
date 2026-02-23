@@ -711,7 +711,6 @@ type htmlParser struct {
 }
 
 var tags = map[string][2]string{
-	"p":    {"\n\n", ""},
 	"code": {"@@texinfo:@code{@@", "@@texinfo:}@@"},
 	"var":  {"@@texinfo:@var{@@", "@@texinfo:}@@"},
 }
