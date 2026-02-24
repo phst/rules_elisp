@@ -17,7 +17,6 @@ load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
 load("@phst_license_test//:def.bzl", "license_test")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
-load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -47,29 +46,6 @@ license_test(
         "index.html",
     ],
     marker = "//:MODULE.bazel",
-)
-
-compile_pip_requirements(
-    name = "requirements",
-    timeout = "moderate",
-    python_version = "3.12",
-    requirements_in = "requirements.txt",
-    requirements_txt = ":requirements_lock",
-    tags = [
-        # Don’t try to run Pylint or Mypy.  This target doesn’t contain any of
-        # our source files.
-        "no-pylint",
-        "no-mypy",
-    ],
-)
-
-alias(
-    name = "requirements_lock",
-    actual = select({
-        "@platforms//os:linux": "requirements-unix.lock",
-        "@platforms//os:macos": "requirements-unix.lock",
-        "@platforms//os:windows": "requirements-windows.lock",
-    }),
 )
 
 nogo(
