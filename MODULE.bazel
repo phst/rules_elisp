@@ -32,7 +32,6 @@ bazel_dep(name = "protobuf", version = "33.5")
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True)
-bazel_dep(name = "rules_python", version = "1.8.5", dev_dependency = True)
 bazel_dep(name = "gazelle", version = "0.47.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.9.0", dev_dependency = True)
 bazel_dep(name = "bazel_features", version = "1.41.0", dev_dependency = True)
@@ -116,13 +115,6 @@ register_toolchains("//elisp:hermetic_toolchain")
 bazel_dep(name = "gazelle_cc", version = "0.5.0", dev_dependency = True)
 
 register_toolchains("@local_config_cc_toolchains//:all")
-
-# Python-specific dependencies
-python = use_extension("@rules_python//python/extensions:python.bzl", "python", dev_dependency = True)
-python.toolchain(
-    configure_coverage_tool = True,
-    python_version = "3.12",
-)
 
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
