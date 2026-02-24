@@ -1,4 +1,4 @@
-# Copyright 2023-2026 Google LLC
+# Copyright 2023-2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,12 +42,6 @@ bazel_dep(name = "googletest", version = "1.17.0.bcr.2", dev_dependency = True)
 # //emacs:windows_cc_toolchain.
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
-
-single_version_override(
-    module_name = "rules_python",
-    patch_strip = 1,
-    patches = ["rules_python.patch"],
-)
 
 # Non-module dependencies
 emacs_repository = use_repo_rule("//elisp/private:emacs_repository.bzl", "emacs_repository")
