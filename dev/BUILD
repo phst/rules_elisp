@@ -115,15 +115,6 @@ gazelle_binary(
 )
 
 bzl_library(
-    name = "pylint",
-    srcs = ["pylint.bzl"],
-    deps = [
-        "@bazel_skylib//lib:paths",
-        "@rules_python//python:py_info_bzl",
-    ],
-)
-
-bzl_library(
     name = "local_binary",
     srcs = ["local_binary.bzl"],
 )
