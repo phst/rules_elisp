@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,11 +28,6 @@ exports_files(["LICENSE"])
 license(
     name = "license",
     license_kind = "@rules_license//licenses/spdx:Apache-2.0",
-)
-
-exports_files(
-    [".pylintrc"],
-    visibility = ["//dev:__pkg__"],
 )
 
 exports_files(
