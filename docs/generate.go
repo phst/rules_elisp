@@ -339,8 +339,7 @@ func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) error {
 		elts = append(elts, s)
 	}
 	attrs := strings.Join(elts, ", ")
-	g.write(
-		fmt.Sprintf("#+ATTR_TEXINFO: :options {Repository rule} %s (%s)\n", name, attrs))
+	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options {Repository rule} %s (%s)\n", name, attrs))
 	g.write("#+BEGIN_deffn\n")
 	g.load(rule.GetOriginKey())
 	g.write(lstrip(g.markdown(rule.GetDocString())))
