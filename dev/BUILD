@@ -50,7 +50,6 @@ license_test(
 
 nogo(
     name = "nogo",
-    config = "nogo.json",
     visibility = ["//visibility:public"],
     deps = TOOLS_NOGO,
 )
