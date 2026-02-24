@@ -44,7 +44,8 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # FIXME: Remove rules_python.patch once
-# https://github.com/bazel-contrib/rules_python/issues/3614 is fixed.
+# https://github.com/bazel-contrib/rules_python/pull/3086#issuecomment-3765803662
+# is isolated and fixed.
 single_version_override(
     module_name = "rules_python",
     patch_strip = 1,
