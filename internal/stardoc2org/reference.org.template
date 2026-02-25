@@ -1,0 +1,180 @@
+{{/*
+Copyright 2026 Philipp Stephani
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/ -}}
+
+{{with .GetModuleDocstring -}}
+{{if and (gt (len .) 100) (containsRune . '\n') -}}
+{{markdown .}}
+{{end -}}
+{{end -}}
+
+{{range .GetRuleInfo -}}
+{{template "rule" .}}
+{{end -}}
+
+{{range .GetProviderInfo -}}
+{{template "provider" .}}
+{{end -}}
+
+{{range .GetFuncInfo -}}
+{{template "function" .}}
+{{end -}}
+
+{{range .GetAspectInfo -}}
+{{template "aspect" .}}
+{{end -}}
+
+{{range .GetModuleExtensionInfo -}}
+{{template "extension" .}}
+{{end -}}
+
+{{range .GetRepositoryRuleInfo -}}
+{{template "repo rule" .}}
+{{end -}}
+
+{{range .GetMacroInfo -}}
+{{template "macro" .}}
+{{end -}}
+
+{{define "rule" -}}
+#+ATTR_TEXINFO: :options Rule {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+#+BEGIN_deffn
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip -}}
+The ~{{.GetRuleName}}~ rule supports the following attributes:
+
+{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+#+END_deffn
+
+{{end -}}
+
+{{define "function" -}}
+#+ATTR_TEXINFO: :options {{.GetFunctionName}} ({{range $i, $p := .GetParameter}}{{if $i}}, {{end}}{{if $p.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+#+BEGIN_defun
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip -}}
+{{range .GetParameter -}}{{item "parameter" .}}{{end -}}
+{{with .GetReturn.GetDocString -}}
+Returns: {{markdown .}}
+
+{{end -}}
+{{requireEmpty .GetDeprecated.GetDocString -}}
+#+END_defun
+{{end -}}
+
+{{define "parameter" -}}
+{{.GetName}} :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetMandatory | mandatory | capitalize}}{{with .GetDefaultValue}}; default: ~{{.}}~{{end}}.
+{{- end -}}
+
+{{define "provider" -}}
+#+ATTR_TEXINFO: :options Provider {{.GetProviderName}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
+#+BEGIN_deftp
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip -}}
+The ~{{.GetProviderName}}~ provider has the following fields:
+
+{{range .GetFieldInfo -}}{{item "field info" .}}{{end -}}
+#+END_deftp
+{{end -}}
+
+{{define "field info" -}}
+~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
+{{end -}}
+
+{{define "aspect" -}}
+#+ATTR_TEXINFO: :options Aspect {{.GetName}}{{range .GetAttribute}} {{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}}
+#+BEGIN_deffn
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip}}
+{{with .GetAspectAttribute -}}
+This aspect propagates along the following attributes: {{range $i, $a := .}}{{if $i}}, {{end}}~{{$a}}~{{end}}
+{{end}}
+{{range .GetAttribute -}}
+{{template "attribute" . -}}
+{{end -}}
+#+END_deffn
+{{end -}}
+
+{{define "extension" -}}
+{{$extName := .GetExtensionName}}
+#+ATTR_TEXINFO: :options {Module extension} {{$extName}}{{range .GetTagClass}} {{.GetTagName}}{{end}}
+#+BEGIN_deftp
+
+#+BEGIN_SRC bazel-module
+{{$extName}} = use_extension("{{.GetOriginKey.GetFile}}", "{{$extName}}")
+#+END_SRC
+
+{{.GetDocString | markdown | lstrip -}}
+
+The ~{{$extName}}~ module extension provides the following tag classes:
+
+{{range .GetTagClass -}}
+#+ATTR_TEXINFO: :options {Tag class} {{$extName}} {{.GetTagName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+#+BEGIN_defop
+{{.GetDocString | markdown | lstrip -}}
+The ~{{.GetTagName}}~ tag class supports the following attributes:
+
+{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+#+END_defop
+
+{{end -}}
+#+END_deftp
+
+{{end -}}
+
+{{define "repo rule" -}}
+#+ATTR_TEXINFO: :options {Repository rule} {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+#+BEGIN_deffn
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip}}
+The ~{{.GetRuleName}}~ repository rule supports the following attributes:
+
+{{range .GetAttribute -}}{{item "attribute" .}}{{end}}
+{{with .GetEnviron -}}
+It depends on the following environment variables: {{range $i, $v := .}}{{if $i}}, {{end}}{{$v}}{{end}}
+{{- end}}
+#+END_deffn
+
+{{end -}}
+
+{{define "macro" -}}
+#+ATTR_TEXINFO: :options {{.GetMacroName}} ({{range $i, $a := .GetAttribute}}{{if $i}}, {{end}}{{if $a.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+#+BEGIN_defmac
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip}}
+The ~{{.GetName}}~ macro supports the following attributes:
+
+{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+#+END_defmac
+{{end -}}
+
+{{define "load"}}
+#+BEGIN_SRC bazel-starlark
+load("{{requireNonEmpty .GetFile}}", "{{requireNonEmpty .GetName}}")
+#+END_SRC
+
+{{end -}}
+
+{{define "attribute" -}}
+{{if not (hasPrefix .GetDocString "Deprecated;") -}}
+~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetType | attributeType}}; {{.GetMandatory | mandatory -}}
+{{with .GetDefaultValue}}; default: ~{{.}}~{{end -}}
+{{with .GetProviderNameGroup -}}
+{{with exactlyOne . -}}
+; required providers: {{range $i, $n := .GetProviderName}}{{if $i}}, {{end}}~{{$n}}~{{end -}}
+{{end -}}
+{{end -}}
+.{{end -}}
+{{end -}}

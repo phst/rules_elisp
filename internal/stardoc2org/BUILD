@@ -34,6 +34,7 @@ go_binary(
 go_library(
     name = "lib",
     srcs = ["generate.go"],
+    embedsrcs = ["reference.org.template"],
     importpath = "github.com/phst/rules_elisp/internal/stardoc2org",
     deps = [
         ":stardoc_output_go_proto",
