@@ -26,8 +26,11 @@ import (
 	"regexp"
 	"runtime/debug"
 	"strings"
+	"text/template"
 	"unicode"
 	"unicode/utf8"
+
+	_ "embed"
 
 	"github.com/yuin/goldmark/v2/ast"
 	"github.com/yuin/goldmark/v2/parser"
@@ -99,9 +102,21 @@ var attributeType = map[spb.AttributeType]string{
 	spb.AttributeType_OUTPUT_LIST:       "List of output files",
 }
 
+func formatAttributeType(t spb.AttributeType) (string, error) {
+	s, ok := attributeType[t]
+	if !ok {
+		return "", fmt.Errorf("unknown attribute type %s", t)
+	}
+	return s, nil
+}
+
 var mandatory = map[bool]string{
 	false: "optional",
 	true:  "mandatory",
+}
+
+func formatMandatory(b bool) string {
+	return mandatory[b]
 }
 
 func newGenerator(file io.Writer) *generator {
@@ -128,312 +143,42 @@ func runRecover(err *error) {
 }
 
 func (g *generator) doRun(module *spb.ModuleInfo) {
-	doc := module.GetModuleDocstring()
-	if len(doc) > 100 && strings.ContainsRune(doc, '\n') {
-		g.write(markdown(doc))
-	}
-	apply(g.rule, module.GetRuleInfo())
-	apply(g.provider, module.GetProviderInfo())
-	apply(g.function, module.GetFuncInfo())
-	apply(g.aspect, module.GetAspectInfo())
-	apply(g.extension, module.GetModuleExtensionInfo())
-	apply(g.repoRule, module.GetRepositoryRuleInfo())
-	apply(g.macro, module.GetMacroInfo())
-}
-
-func apply[T any](f func(T) error, s []T) error {
-	for i, e := range s {
-		if err := f(e); err != nil {
-			return fmt.Errorf("error processing %d-th %T: %w", i, e, err)
+	tpl := template.New("reference.org.template")
+	item := func(template string, data any) (string, error) {
+		var w strings.Builder
+		err := tpl.ExecuteTemplate(&w, template, data)
+		if err != nil {
+			return "", err
 		}
-	}
-	return nil
-}
-
-func (g *generator) rule(rule *spb.RuleInfo) error {
-	name := rule.GetRuleName()
-	var elts []string
-	for _, a := range rule.GetAttribute() {
-		var s string
-		if a.GetMandatory() {
-			s = a.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", a.GetName())
+		s := w.String()
+		if s == "" {
+			return "", nil
 		}
-		elts = append(elts, s)
+		return fill(s, "- ", "  ") + "\n", nil
 	}
-	attrs := strings.Join(elts, ", ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Rule %s (%s)\n", name, attrs))
-	g.write("#+BEGIN_deffn\n")
-	g.load(rule.GetOriginKey())
-	g.write(lstrip(markdown(rule.GetDocString())))
-	g.write(fmt.Sprintf("The ~%s~ rule supports the following attributes:\n\n", name))
-	for _, attr := range rule.GetAttribute() {
-		g.attribute(attr)
+	funcs := template.FuncMap{
+		"containsRune":    strings.ContainsRune,
+		"hasPrefix":       strings.HasPrefix,
+		"trimSpace":       strings.TrimSpace,
+		"lstrip":          lstrip,
+		"capitalize":      capitalize,
+		"mandatory":       formatMandatory,
+		"attributeType":   formatAttributeType,
+		"requireEmpty":    requireEmpty,
+		"requireNonEmpty": requireNonEmpty,
+		"requirePeriod":   requirePeriod,
+		"exactlyOne":      exactlyOne,
+		"markdown":        markdown,
+		"item":            item,
 	}
-	g.write("#+END_deffn\n\n")
-	return nil
-}
-
-func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
-	name := function.GetFunctionName()
-	var elts []string
-	for _, p := range function.GetParameter() {
-		var s string
-		if p.GetMandatory() {
-			s = p.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", p.GetName())
-		}
-		elts = append(elts, s)
-	}
-	params := strings.Join(elts, ", ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options %s (%s)\n", name, params))
-	g.write("#+BEGIN_defun\n")
-	g.load(function.GetOriginKey())
-	g.write(lstrip(markdown(function.GetDocString())))
-	for _, param := range function.GetParameter() {
-		g.parameter(param)
-	}
-	returns := function.GetReturn().GetDocString()
-	if returns != "" {
-		g.write(fmt.Sprintf("Returns: %s\n\n", markdown(returns)))
-	}
-	if function.GetDeprecated().GetDocString() != "" {
-		panic(fmt.Errorf("unsupported deprecated function %s", name))
-	}
-	g.write("#+END_defun\n\n")
-	return nil
-}
-
-func (g *generator) parameter(param *spb.FunctionParamInfo) {
-	doc := strings.TrimSpace(markdown(param.GetDocString()))
-	if !strings.HasSuffix(doc, ".") {
-		panic(fmt.Errorf("documentation string %q should end with a period", doc))
-	}
-	suffixes := []string{capitalize(mandatory[param.GetMandatory()])}
-	if param.GetDefaultValue() != "" {
-		suffixes = append(suffixes, fmt.Sprintf("default: ~%s~", param.GetDefaultValue()))
-	}
-	suffix := strings.Join(suffixes, "; ")
-	g.item(fmt.Sprintf("%s :: %s  %s.", param.GetName(), doc, suffix))
-}
-
-func (g *generator) provider(provider *spb.ProviderInfo) error {
-	name := provider.GetProviderName()
-	var elts []string
-	for _, f := range provider.GetFieldInfo() {
-		elts = append(elts, f.GetName())
-	}
-	fields := strings.Join(elts, " ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Provider %s %s\n", name, fields))
-	g.write("#+BEGIN_deftp\n")
-	g.load(provider.GetOriginKey())
-	g.write(lstrip(markdown(provider.GetDocString())))
-	g.write(fmt.Sprintf("The ~%s~ provider has the following fields:\n\n", name))
-	for _, field := range provider.GetFieldInfo() {
-		doc := strings.TrimSpace(markdown(field.GetDocString()))
-		if !strings.HasSuffix(doc, ".") {
-			panic(fmt.Errorf("documentation string %q should end with a period", doc))
-		}
-		g.item(fmt.Sprintf("~%s~ :: %s", field.GetName(), doc))
-	}
-	g.write("#+END_deftp\n\n")
-	return nil
-}
-
-func (g *generator) aspect(aspect *spb.AspectInfo) error {
-	name := aspect.GetAspectName()
-	var elts []string
-	for _, a := range aspect.GetAttribute() {
-		var s string
-		if a.GetMandatory() {
-			s = a.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", a.GetName())
-		}
-		elts = append(elts, s)
-	}
-	attrs := strings.Join(elts, " ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Aspect %s %s\n", name, attrs))
-	g.write("#+BEGIN_deffn\n")
-	g.load(aspect.GetOriginKey())
-	g.write(lstrip(markdown(aspect.GetDocString())))
-	if len(aspect.GetAspectAttribute()) != 0 {
-		var elts []string
-		for _, a := range aspect.GetAspectAttribute() {
-			elts = append(elts, fmt.Sprintf("~%s~", a))
-		}
-		attrs := strings.Join(elts, ", ")
-		g.write(fmt.Sprintf("This aspect propagates along the following attributes: %s\n", attrs))
-	}
-	for _, attr := range aspect.GetAttribute() {
-		g.attribute(attr)
-	}
-	g.write("#+END_deffn\n\n")
-	return nil
-}
-
-func (g *generator) extension(ext *spb.ModuleExtensionInfo) error {
-	name := ext.GetExtensionName()
-	var elts []string
-	for _, t := range ext.GetTagClass() {
-		elts = append(elts, t.GetTagName())
-	}
-	tags := strings.Join(elts, " ")
-	g.write(
-		fmt.Sprintf("#+ATTR_TEXINFO: :options {Module extension} %s %s\n", name, tags))
-	g.write("#+BEGIN_deftp\n\n")
-	g.write("#+BEGIN_SRC bazel-module\n")
-	g.write(
-		fmt.Sprintf("%s = use_extension(\"%s\", \"%s\")\n", name, ext.GetOriginKey().GetFile(), name))
-	g.write("#+END_SRC\n\n")
-	g.write(lstrip(markdown(ext.GetDocString())))
-	g.write(fmt.Sprintf("The ~%s~ module extension provides the following tag classes:\n\n", name))
-	for _, tag := range ext.GetTagClass() {
-		g.tagClass(name, tag)
-	}
-	g.write("#+END_deftp\n\n")
-	return nil
-}
-
-func (g *generator) tagClass(extensionName string, tag *spb.ModuleExtensionTagClassInfo) {
-	name := tag.GetTagName()
-	var elts []string
-	for _, a := range tag.GetAttribute() {
-		var s string
-		if a.GetMandatory() {
-			s = a.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", a.GetName())
-		}
-		elts = append(elts, s)
-	}
-	attrs := strings.Join(elts, ", ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options {Tag class} %s %s (%s)\n", extensionName, name, attrs))
-	g.write("#+BEGIN_defop\n")
-	g.write(lstrip(markdown(tag.GetDocString())))
-	g.write(
-		fmt.Sprintf("The ~%s~ tag class supports the following attributes:\n\n", name))
-	for _, attr := range tag.GetAttribute() {
-		g.attribute(attr)
-	}
-	g.write("#+END_defop\n\n")
-}
-
-func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) error {
-	name := rule.GetRuleName()
-	var elts []string
-	for _, a := range rule.GetAttribute() {
-		var s string
-		if a.GetMandatory() {
-			s = a.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", a.GetName())
-		}
-		elts = append(elts, s)
-	}
-	attrs := strings.Join(elts, ", ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options {Repository rule} %s (%s)\n", name, attrs))
-	g.write("#+BEGIN_deffn\n")
-	g.load(rule.GetOriginKey())
-	g.write(lstrip(markdown(rule.GetDocString())))
-	g.write(fmt.Sprintf("The ~%s~ repository rule supports the following attributes:\n\n", name))
-	for _, attr := range rule.GetAttribute() {
-		g.attribute(attr)
-	}
-	if len(rule.GetEnviron()) != 0 {
-		var elts []string
-		for _, e := range rule.GetEnviron() {
-			elts = append(elts, fmt.Sprintf("~%s~", e))
-		}
-		env := strings.Join(elts, ", ")
-		g.write(fmt.Sprintf("It depends on the following environment variables: %s\n\n", env))
-	}
-	g.write("#+END_deffn\n\n")
-	return nil
-}
-
-func (g *generator) macro(macro *spb.MacroInfo) error {
-	name := macro.GetMacroName()
-	var elts []string
-	for _, a := range macro.GetAttribute() {
-		var s string
-		if a.GetMandatory() {
-			s = a.GetName()
-		} else {
-			s = fmt.Sprintf("[%s]", a.GetName())
-		}
-		elts = append(elts, s)
-	}
-	attrs := strings.Join(elts, ", ")
-	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options %s (%s)\n", name, attrs))
-	g.write("#+BEGIN_defmac\n")
-	g.load(macro.GetOriginKey())
-	g.write(lstrip(markdown(macro.GetDocString())))
-	g.write(
-		fmt.Sprintf("The ~%s~ macro supports the following attributes:\n\n", name))
-	for _, attr := range macro.GetAttribute() {
-		g.attribute(attr)
-	}
-	g.write("#+END_defmac\n\n")
-	return nil
-}
-
-func (g *generator) load(key *spb.OriginKey) {
-	if key.GetFile() == "" {
-		panic(errors.New("unknown file"))
-	}
-	if key.GetName() == "" {
-		panic(fmt.Errorf("unknown symbol name in file %s", key.GetFile()))
-	}
-	g.write("\n#+BEGIN_SRC bazel-starlark\n")
-	g.write(fmt.Sprintf("load(\"%s\", \"%s\")\n", key.GetFile(), key.GetName()))
-	g.write("#+END_SRC\n\n")
-}
-
-func (g *generator) attribute(attr *spb.AttributeInfo) {
-	if strings.HasPrefix(attr.GetDocString(), "Deprecated;") {
-		return
-	}
-	doc := strings.TrimSpace(markdown(attr.GetDocString()))
-	if !strings.HasSuffix(doc, ".") {
-		panic(
-			fmt.Errorf("documentation string %q should end with a period", doc))
-	}
-	s := attributeType[attr.GetType()]
-	if s == "" {
-		panic(fmt.Errorf("unknown attribute type %s", attr.GetType()))
-	}
-	suffixes := []string{s, mandatory[attr.GetMandatory()]}
-	if attr.GetDefaultValue() != "" {
-		suffixes = append(suffixes, fmt.Sprintf("default: ~%s~", attr.GetDefaultValue()))
-	}
-	if len(attr.GetProviderNameGroup()) != 0 {
-		if n := len(attr.GetProviderNameGroup()); n != 1 {
-			panic(fmt.Errorf("got %d provider name groups, want one", n))
-		}
-		group := attr.GetProviderNameGroup()[0]
-		var elts []string
-		for _, name := range group.GetProviderName() {
-			elts = append(elts, fmt.Sprintf("~%s~", name))
-		}
-		names := strings.Join(elts, ", ")
-		suffixes = append(suffixes, fmt.Sprintf("required providers: %s", names))
-	}
-	suffix := strings.Join(suffixes, "; ")
-	g.item(fmt.Sprintf("~%s~ :: %s  %s.", attr.GetName(), doc, suffix))
-}
-
-func (g *generator) item(text string) {
-	g.write(fill(text, "- ", "  ") + "\n")
-}
-
-func (g *generator) write(text string) {
-	if _, err := io.WriteString(g.file, text); err != nil {
+	tpl = template.Must(tpl.Funcs(funcs).Parse(templateText))
+	if err := tpl.Execute(g.file, module); err != nil {
 		panic(err)
 	}
 }
+
+//go:embed reference.org.template
+var templateText string
 
 // Convert a Markdown snippet to Org-mode.
 func markdown(text string) string {
@@ -505,6 +250,34 @@ func lstrip(s string) string {
 
 func capitalize(s string) string {
 	return cases.Title(language.English, cases.NoLower).String(s)
+}
+
+func requireEmpty(s string) (string, error) {
+	if s != "" {
+		return "", fmt.Errorf("string %q isn’t empty", s)
+	}
+	return "", nil
+}
+
+func requireNonEmpty(s string) (string, error) {
+	if s == "" {
+		return s, errors.New("empty string")
+	}
+	return s, nil
+}
+
+func requirePeriod(s string) (string, error) {
+	if !strings.HasSuffix(s, ".") {
+		return "", fmt.Errorf("documentation string %q should end with a period", s)
+	}
+	return s, nil
+}
+
+func exactlyOne(groups []*spb.ProviderNameGroup) (*spb.ProviderNameGroup, error) {
+	if n := len(groups); n != 1 {
+		return nil, fmt.Errorf("got %d provider name groups, want one", n)
+	}
+	return groups[0], nil
 }
 
 type orgRenderer struct {
