@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Google LLC
+# Copyright 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -165,6 +165,7 @@ local_binary = use_repo_rule("//dev:local_binary.bzl", "local_binary")
 local_binary(
     name = "makeinfo",
     dev_dependency = True,
+    environment = "MAKEINFO",
     library_visibility = ["//docs:__pkg__"],
     program = "makeinfo",
 )
@@ -172,6 +173,7 @@ local_binary(
 local_binary(
     name = "xmllint",
     dev_dependency = True,
+    environment = "XMLLINT",
     library_visibility = [],
     program = "xmllint",
 )
