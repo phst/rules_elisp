@@ -38,7 +38,7 @@ jobs:
           Join-Path -Path examples -ChildPath ext | Set-Location
           bazelisk mod deps --lockfile_mode=update
       - name: Upload lockfiles
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: lockfiles-${{runner.os}}-${{runner.arch}}
           path: '**/MODULE.bazel.lock'
