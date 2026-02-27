@@ -18,20 +18,27 @@ visibility("private")
 
 def _local_binary_impl(ctx):
     windows = ctx.os.name.startswith("windows")
+    environment = ctx.attr.environment or fail("missing environment variable name")
     program = ctx.attr.program or fail("missing program name")
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
-    file = ctx.which(program + (".exe" if windows else ""))
-    if not file and windows:
-        # On Windows, retry with MSYS2.
-        bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
-        result = ctx.execute(
-            [bash, "-l", "-c", 'which "$0"', program],
-            timeout = 10,
-        )
-        if result.return_code != 0:
-            fail("which failed, standard error:\n", result.stderr)
-        file = result.stdout
+    program = ctx.getenv(environment, program)
+    sep = "\\" if windows else "/"
+    if sep in program:
+        file = program
+    else:
+        suffix = ".exe" if windows and not program.lower().endswith(".exe") else ""
+        file = ctx.which(program + suffix)
+        if not file and windows:
+            # On Windows, retry with MSYS2.
+            bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
+            result = ctx.execute(
+                [bash, "-l", "-c", 'which "$0"', program],
+                timeout = 10,
+            )
+            if result.return_code != 0:
+                fail("which failed, standard error:\n", result.stderr)
+            file = result.stdout
     if not file:
         fail("program %r not found" % program)
     ctx.template(
@@ -55,6 +62,7 @@ def _local_binary_impl(ctx):
 local_binary = repository_rule(
     # @unsorted-dict-items
     attrs = {
+        "environment": attr.string(mandatory = True),
         "program": attr.string(mandatory = True),
         "library_visibility": attr.label_list(mandatory = True, allow_empty = False),
     },
