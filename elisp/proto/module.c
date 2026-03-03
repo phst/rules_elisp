@@ -294,8 +294,6 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
   X(kMalformedUtf8, "malformed-utf-8",                                        \
     "Serialized protocol buffer message contains malformed UTF-8",            \
     kParseError)                                                              \
-  X(kUnlinkedSubMessage, "unlinked-sub-message",                              \
-    "Internal protocol buffer error", kParseError)                            \
   X(kMissingRequiredField, "missing-required-field",                          \
     "Required protocol buffer field not present", kNil)                       \
   X(kArenaFusionFailed, "arena-fusion-failed",                                \
@@ -1481,9 +1479,6 @@ static void ParseError(struct Context ctx, upb_DecodeStatus status,
       break;
     case kUpb_DecodeStatus_MissingRequired:
       Signal1(ctx, kMissingRequiredField, value);
-      break;
-    case kUpb_DecodeStatus_UnlinkedSubMessage:
-      Signal1(ctx, kUnlinkedSubMessage, value);
       break;
     default:
       Signal2(ctx, kParseError, MakeInteger(ctx, status), value);
