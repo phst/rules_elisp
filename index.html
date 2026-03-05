@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<!-- Created by GNU Texinfo 7.2, https://www.gnu.org/software/texinfo/ -->
+<!-- Created by GNU Texinfo 7.3, https://www.gnu.org/software/texinfo/ -->
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <title>Bazel rules for Emacs Lisp</title>
@@ -17,19 +17,17 @@
 <link href="#SEC_Contents" rel="contents" title="Table of Contents">
 <link href="#Introduction" rel="next" title="Introduction">
 <style type="text/css">
-<!--
 a.copiable-link {visibility: hidden; text-decoration: none; line-height: 0em}
 a.summary-letter-printindex {text-decoration: none}
 div.example {margin-left: 3.2em}
+dt.def-line {font-size: 1rem}
 span:hover a.copiable-link {visibility: visible}
-strong.def-name {font-family: monospace; font-weight: bold; font-size: larger}
-td.printindex-index-entry {vertical-align: top}
+strong.def-name {font-family: monospace; font-weight: bold}
+td.printindex-index-entry {vertical-align: top; padding-left: 1.5em}
 td.printindex-index-section {vertical-align: top; padding-left: 1em}
-th.entries-header-printindex {text-align:left}
-th.sections-header-printindex {text-align:left; padding-left: 1em}
+th.index-letter-header-printindex {text-align: left}
 ul.mark-bullet {list-style-type: disc}
 ul.toc-numbered-mark {list-style: none}
--->
 </style>
 
 
@@ -41,10 +39,8 @@ ul.toc-numbered-mark {list-style: none}
 
 
 <div class="top-level-extent" id="Top">
-<div class="nav-panel">
-<p>
-Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Introduction" rel="next">Introduction</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h1 class="top" id="Bazel-rules-for-Emacs-Lisp"><span>Bazel rules for Emacs Lisp<a class="copiable-link" href="#Bazel-rules-for-Emacs-Lisp"> &para;</a></span></h1>
 
 
@@ -80,10 +76,8 @@ Next: <a href="#Introduction" accesskey="n" rel="next">Introduction</a> &nbsp; [
 </div>
 <hr>
 <div class="chapter-level-extent" id="Introduction">
-<div class="nav-panel">
-<p>
-Next: <a href="#Requirements" accesskey="n" rel="next">Requirements</a>, Previous: <a href="#Top" accesskey="p" rel="prev">Bazel rules for Emacs Lisp</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Requirements" rel="next">Requirements</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Top" rel="prev">Bazel rules for Emacs Lisp</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Introduction-1"><span>1 Introduction<a class="copiable-link" href="#Introduction-1"> &para;</a></span></h2>
 
 <p>This repository provides a Bazel integration for Emacs Lisp; see
@@ -97,10 +91,8 @@ rules definitions for other languages, like the
 <hr>
 </div>
 <div class="chapter-level-extent" id="Requirements">
-<div class="nav-panel">
-<p>
-Next: <a href="#Usage" accesskey="n" rel="next">Usage</a>, Previous: <a href="#Introduction" accesskey="p" rel="prev">Introduction</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Usage" rel="next">Usage</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Introduction" rel="prev">Introduction</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Requirements-1"><span>2 Requirements<a class="copiable-link" href="#Requirements-1"> &para;</a></span></h2>
 
 <p>To use <code class="code">rules_elisp</code>, you need <a class="uref" href="https://bazel.build/">Bazel</a>.  For
@@ -118,10 +110,8 @@ released, support for Emacs 29 will be dropped.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Usage">
-<div class="nav-panel">
-<p>
-Next: <a href="#Load-path-management" accesskey="n" rel="next">Load path management</a>, Previous: <a href="#Requirements" accesskey="p" rel="prev">Requirements</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Load-path-management" rel="next">Load path management</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Requirements" rel="prev">Requirements</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Usage-1"><span>3 Usage<a class="copiable-link" href="#Usage-1"> &para;</a></span></h2>
 
 <p>Add a snippet like the following to your <code class="code">MODULE.bazel</code> file:
@@ -425,10 +415,8 @@ tests.  List of strings; optional; default: <code class="code">[]</code>.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Load-path-management">
-<div class="nav-panel">
-<p>
-Next: <a href="#Runfiles" accesskey="n" rel="next">Runfiles</a>, Previous: <a href="#Usage" accesskey="p" rel="prev">Usage</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Runfiles" rel="next">Runfiles</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Usage" rel="prev">Usage</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Load-path-management-1"><span>4 Load path management<a class="copiable-link" href="#Load-path-management-1"> &para;</a></span></h2>
 
 <a class="index-entry-id" id="index-Load-path"></a>
@@ -446,10 +434,8 @@ load path.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Runfiles">
-<div class="nav-panel">
-<p>
-Next: <a href="#Protocol-buffers" accesskey="n" rel="next">Protocol buffers</a>, Previous: <a href="#Load-path-management" accesskey="p" rel="prev">Load path management</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Protocol-buffers" rel="next">Protocol buffers</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Load-path-management" rel="prev">Load path management</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Runfiles-1"><span>5 Runfiles<a class="copiable-link" href="#Runfiles-1"> &para;</a></span></h2>
 
 <a class="index-entry-id" id="index-Runfiles"></a>
@@ -472,10 +458,8 @@ class <code class="code">elisp/runfiles/runfiles</code>.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Protocol-buffers">
-<div class="nav-panel">
-<p>
-Next: <a href="#Building-manuals" accesskey="n" rel="next">Building manuals</a>, Previous: <a href="#Runfiles" accesskey="p" rel="prev">Runfiles</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Building-manuals" rel="next">Building manuals</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Runfiles" rel="prev">Runfiles</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Protocol-buffers-1"><span>6 Protocol buffers<a class="copiable-link" href="#Protocol-buffers-1"> &para;</a></span></h2>
 
 <a class="index-entry-id" id="index-Protocol-buffers"></a>
@@ -714,17 +698,15 @@ duration protocol buffer message, you can write
 </p>
 
 <ul class="mini-toc">
-<li><a href="#Protocol-buffer-fields" accesskey="1">Accessing protocol buffer message fields</a></li>
-<li><a href="#Protocol-buffer-serialization" accesskey="2">Parsing and serializing protocol buffer messages</a></li>
-<li><a href="#Well_002dknown-protocol-buffer-types" accesskey="3">Well-known protocol buffer types</a></li>
-<li><a href="#Protocol-buffer-array-and-map-functions" accesskey="4">Specialized array and map functions</a></li>
+<li><a href="#Protocol-buffer-fields">Accessing protocol buffer message fields</a></li>
+<li><a href="#Protocol-buffer-serialization">Parsing and serializing protocol buffer messages</a></li>
+<li><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></li>
+<li><a href="#Protocol-buffer-array-and-map-functions">Specialized array and map functions</a></li>
 </ul>
 <hr>
 <div class="section-level-extent" id="Protocol-buffer-fields">
-<div class="nav-panel">
-<p>
-Next: <a href="#Protocol-buffer-serialization" accesskey="n" rel="next">Parsing and serializing protocol buffer messages</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Protocol-buffer-serialization" rel="next">Parsing and serializing protocol buffer messages</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Protocol-buffers" rel="up">Protocol buffers</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Accessing-protocol-buffer-message-fields"><span>6.1 Accessing protocol buffer message fields<a class="copiable-link" href="#Accessing-protocol-buffer-message-fields"> &para;</a></span></h3>
 
 <p>The functions described in this section retrieve and manipulate message fields.
@@ -798,10 +780,8 @@ object is immutable, or if the new value isn’t compatible with the field type.
 <hr>
 </div>
 <div class="section-level-extent" id="Protocol-buffer-serialization">
-<div class="nav-panel">
-<p>
-Next: <a href="#Well_002dknown-protocol-buffer-types" accesskey="n" rel="next">Well-known protocol buffer types</a>, Previous: <a href="#Protocol-buffer-fields" accesskey="p" rel="prev">Accessing protocol buffer message fields</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Well_002dknown-protocol-buffer-types" rel="next">Well-known protocol buffer types</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Protocol-buffer-fields" rel="prev">Accessing protocol buffer message fields</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Protocol-buffers" rel="up">Protocol buffers</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Parsing-and-serializing-protocol-buffer-messages"><span>6.2 Parsing and serializing protocol buffer messages<a class="copiable-link" href="#Parsing-and-serializing-protocol-buffer-messages"> &para;</a></span></h3>
 
 <p>The primary purpose of protocol buffers is data serialization.  The Emacs Lisp
@@ -888,10 +868,8 @@ like <code class="code">print</code> will result in a representation that’s no
 <hr>
 </div>
 <div class="section-level-extent" id="Well_002dknown-protocol-buffer-types">
-<div class="nav-panel">
-<p>
-Next: <a href="#Protocol-buffer-array-and-map-functions" accesskey="n" rel="next">Specialized array and map functions</a>, Previous: <a href="#Protocol-buffer-serialization" accesskey="p" rel="prev">Parsing and serializing protocol buffer messages</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Protocol-buffer-array-and-map-functions" rel="next">Specialized array and map functions</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Protocol-buffer-serialization" rel="prev">Parsing and serializing protocol buffer messages</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Protocol-buffers" rel="up">Protocol buffers</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Well_002dknown-protocol-buffer-types-1"><span>6.3 Well-known protocol buffer types<a class="copiable-link" href="#Well_002dknown-protocol-buffer-types-1"> &para;</a></span></h3>
 
 <p>The Emacs Lisp protocol buffer bindings contain some dedicated support for a few
@@ -950,10 +928,8 @@ full name of the type of the message packed in <var class="var">any</var> as a s
 <hr>
 </div>
 <div class="section-level-extent" id="Protocol-buffer-array-and-map-functions">
-<div class="nav-panel">
-<p>
-Previous: <a href="#Well_002dknown-protocol-buffer-types" accesskey="p" rel="prev">Well-known protocol buffer types</a>, Up: <a href="#Protocol-buffers" accesskey="u" rel="up">Protocol buffers</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Well_002dknown-protocol-buffer-types" rel="prev">Well-known protocol buffer types</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Protocol-buffers" rel="up">Protocol buffers</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Specialized-array-and-map-functions"><span>6.4 Specialized array and map functions<a class="copiable-link" href="#Specialized-array-and-map-functions"> &para;</a></span></h3>
 
 <p>This section describes a few additional functions that deal with arrays and
@@ -1064,10 +1040,8 @@ from <var class="var">array</var>.  Elements are shifted left to fill in the hol
 </div>
 </div>
 <div class="chapter-level-extent" id="Building-manuals">
-<div class="nav-panel">
-<p>
-Next: <a href="#Depending-on-external-libraries" accesskey="n" rel="next">Depending on external libraries</a>, Previous: <a href="#Protocol-buffers" accesskey="p" rel="prev">Protocol buffers</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Depending-on-external-libraries" rel="next">Depending on external libraries</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Protocol-buffers" rel="prev">Protocol buffers</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Building-manuals-1"><span>7 Building manuals<a class="copiable-link" href="#Building-manuals-1"> &para;</a></span></h2>
 
 <p>You can use the <code class="code">elisp_manual</code> rule to generate a Texinfo manual from an
@@ -1111,10 +1085,8 @@ List of labels; optional; default: <code class="code">[]</code>.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Depending-on-external-libraries">
-<div class="nav-panel">
-<p>
-Next: <a href="#Starlark-infrastructure" accesskey="n" rel="next">Starlark infrastructure</a>, Previous: <a href="#Building-manuals" accesskey="p" rel="prev">Building manuals</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Starlark-infrastructure" rel="next">Starlark infrastructure</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Building-manuals" rel="prev">Building manuals</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Depending-on-external-libraries-1"><span>8 Depending on external libraries<a class="copiable-link" href="#Depending-on-external-libraries-1"> &para;</a></span></h2>
 
 <p><code class="code">rules_elisp</code> provides a module extension to make it easier to depend on
@@ -1182,10 +1154,8 @@ List of strings; optional; default: <code class="code">[]</code>.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Starlark-infrastructure">
-<div class="nav-panel">
-<p>
-Next: <a href="#Indices" accesskey="n" rel="next">Indices</a>, Previous: <a href="#Depending-on-external-libraries" accesskey="p" rel="prev">Depending on external libraries</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Indices" rel="next">Indices</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Depending-on-external-libraries" rel="prev">Depending on external libraries</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Starlark-infrastructure-1"><span>9 Starlark infrastructure<a class="copiable-link" href="#Starlark-infrastructure-1"> &para;</a></span></h2>
 
 <p>The <code class="code">emacs_library</code>, <code class="code">emacs_cc_module</code>, and <code class="code">emacs_proto_library</code> return the
@@ -1417,51 +1387,46 @@ Output file; optional; default: <code class="code">None</code>.
 <hr>
 </div>
 <div class="chapter-level-extent" id="Indices">
-<div class="nav-panel">
-<p>
-Previous: <a href="#Starlark-infrastructure" accesskey="p" rel="prev">Starlark infrastructure</a>, Up: <a href="#Top" accesskey="u" rel="up">Bazel rules for Emacs Lisp</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Starlark-infrastructure" rel="prev">Starlark infrastructure</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Indices-1"><span>10 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
 
 
 <ul class="mini-toc">
-<li><a href="#Concept-index" accesskey="1">Concept index</a></li>
-<li><a href="#Symbol-index" accesskey="2">Symbol index</a></li>
-<li><a href="#Type-index" accesskey="3">Type index</a></li>
+<li><a href="#Concept-index">Concept index</a></li>
+<li><a href="#Symbol-index">Symbol index</a></li>
+<li><a href="#Type-index">Type index</a></li>
 </ul>
 <hr>
 <div class="section-level-extent" id="Concept-index">
-<div class="nav-panel">
-<p>
-Next: <a href="#Symbol-index" accesskey="n" rel="next">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Symbol-index" rel="next">Symbol index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Concept-index-1"><span>10.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
 
 <div class="printindex cp-printindex">
-<table class="cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+<table class="index-letters-header-printindex cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Concept-index_cp_letter-R"><b>R</b></a>
  &nbsp; 
 </td></tr></table>
-<table class="cp-entries-printindex">
-<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Concept-index_cp_letter-L">L</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-Load-path">Load path</a></td><td class="printindex-index-section"><a href="#Load-path-management">Load path management</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Concept-index_cp_letter-P">P</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-array">protocol buffer array</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-map">protocol buffer map</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-protocol-buffer-message">protocol buffer message</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-Protocol-buffers">Protocol buffers</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Concept-index_cp_letter-R">R</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-Runfiles">Runfiles</a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
+<table class="index-entries-printindex cp-entries-printindex">
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex cp-letter-header-printindex" colspan="2" id="Concept-index_cp_letter-L">L</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-Load-path">Load path</a></td><td class="printindex-index-section"><a href="#Load-path-management">Load path management</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex cp-letter-header-printindex" colspan="2" id="Concept-index_cp_letter-P">P</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-protocol-buffer-array">protocol buffer array</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-protocol-buffer-map">protocol buffer map</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-protocol-buffer-message">protocol buffer message</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-Protocol-buffers">Protocol buffers</a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex cp-letter-header-printindex" colspan="2" id="Concept-index_cp_letter-R">R</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-Runfiles">Runfiles</a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
 </table>
-<table class="cp-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+<table class="index-letters-footer-printindex cp-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
  &nbsp; 
@@ -1473,87 +1438,84 @@ Next: <a href="#Symbol-index" accesskey="n" rel="next">Symbol index</a>, Up: <a 
 <hr>
 </div>
 <div class="section-level-extent" id="Symbol-index">
-<div class="nav-panel">
-<p>
-Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <a href="#Concept-index" accesskey="p" rel="prev">Concept index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Type-index" rel="next">Type index</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Concept-index" rel="prev">Concept index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Symbol-index-1"><span>10.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
 
 <div class="printindex fn-printindex">
-<table class="fn-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
+<table class="index-letters-header-printindex fn-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Symbol-index_fn_letter-M"><b>M</b></a>
  &nbsp; 
 </td></tr></table>
-<table class="fn-entries-printindex">
-<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Symbol-index_fn_letter-E">E</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Building-manuals">Building manuals</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto"><code>elisp/proto</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fany_002dtype_002dname"><code>elisp/proto/any-type-name</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fappend_002darray"><code>elisp/proto/append-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002ddelete"><code>elisp/proto/array-delete</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dlength"><code>elisp/proto/array-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dmutable_002dp"><code>elisp/proto/array-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dp"><code>elisp/proto/array-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dpop"><code>elisp/proto/array-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002darray"><code>elisp/proto/clear-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002dmap"><code>elisp/proto/clear-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002darray"><code>elisp/proto/copy-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002dmap"><code>elisp/proto/copy-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002darray"><code>elisp/proto/do-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002dmap"><code>elisp/proto/do-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fduration"><code>elisp/proto/duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fextend_002darray"><code>elisp/proto/extend-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ffield"><code>elisp/proto/field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fhas_002dfield"><code>elisp/proto/has-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake"><code>elisp/proto/make</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dduration"><code>elisp/proto/make-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dtimestamp"><code>elisp/proto/make-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dlength"><code>elisp/proto/map-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dmutable_002dp"><code>elisp/proto/map-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dp"><code>elisp/proto/map-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dpop"><code>elisp/proto/map-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dput"><code>elisp/proto/map-put</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dset"><code>elisp/proto/map-set</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dmutable_002dp"><code>elisp/proto/message-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dp"><code>elisp/proto/message-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fpack_002dany"><code>elisp/proto/pack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse"><code>elisp/proto/parse</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse_002djson"><code>elisp/proto/parse-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002darray"><code>elisp/proto/replace-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002dmap"><code>elisp/proto/replace-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize"><code>elisp/proto/serialize</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002djson"><code>elisp/proto/serialize-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002dtext"><code>elisp/proto/serialize-text</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dduration"><code>elisp/proto/set-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dfield"><code>elisp/proto/set-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dtimestamp"><code>elisp/proto/set-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fsubarray"><code>elisp/proto/subarray</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ftimestamp"><code>elisp/proto/timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002funpack_002dany"><code>elisp/proto/unpack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fupdate_002dmap"><code>elisp/proto/update-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002ffile_002dhandler"><code>elisp/runfiles/file-handler</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frlocation"><code>elisp/runfiles/rlocation</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Symbol-index_fn_letter-H">H</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Symbol-index_fn_letter-M">M</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-merge_005felisp_005finfos"><code>merge_elisp_infos</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
+<table class="index-entries-printindex fn-entries-printindex">
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex fn-letter-header-printindex" colspan="2" id="Symbol-index_fn_letter-E">E</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005fbinary"><code>elisp_binary</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005fcc_005fmodule"><code>elisp_cc_module</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005femacs_005fbinary"><code>elisp_emacs_binary</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005flibrary"><code>elisp_library</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005fmanual"><code>elisp_manual</code></a></td><td class="printindex-index-section"><a href="#Building-manuals">Building manuals</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005fproto_005flibrary"><code>elisp_proto_library</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005ftest"><code>elisp_test</code></a></td><td class="printindex-index-section"><a href="#Usage">Usage</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_005ftoolchain"><code>elisp_toolchain</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto"><code>elisp/proto</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fany_002dtype_002dname"><code>elisp/proto/any-type-name</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fappend_002darray"><code>elisp/proto/append-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002ddelete"><code>elisp/proto/array-delete</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dlength"><code>elisp/proto/array-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dmutable_002dp"><code>elisp/proto/array-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dp"><code>elisp/proto/array-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray_002dpop"><code>elisp/proto/array-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002darray"><code>elisp/proto/clear-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fclear_002dmap"><code>elisp/proto/clear-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002darray"><code>elisp/proto/copy-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fcopy_002dmap"><code>elisp/proto/copy-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002darray"><code>elisp/proto/do-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fdo_002dmap"><code>elisp/proto/do-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fduration"><code>elisp/proto/duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fextend_002darray"><code>elisp/proto/extend-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ffield"><code>elisp/proto/field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fhas_002dfield"><code>elisp/proto/has-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake"><code>elisp/proto/make</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dduration"><code>elisp/proto/make-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmake_002dtimestamp"><code>elisp/proto/make-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dlength"><code>elisp/proto/map-length</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dmutable_002dp"><code>elisp/proto/map-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dp"><code>elisp/proto/map-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dpop"><code>elisp/proto/map-pop</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dput"><code>elisp/proto/map-put</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap_002dset"><code>elisp/proto/map-set</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dmutable_002dp"><code>elisp/proto/message-mutable-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage_002dp"><code>elisp/proto/message-p</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fpack_002dany"><code>elisp/proto/pack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse"><code>elisp/proto/parse</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fparse_002djson"><code>elisp/proto/parse-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002darray"><code>elisp/proto/replace-array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002freplace_002dmap"><code>elisp/proto/replace-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize"><code>elisp/proto/serialize</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002djson"><code>elisp/proto/serialize-json</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fserialize_002dtext"><code>elisp/proto/serialize-text</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-serialization">Protocol buffer serialization</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dduration"><code>elisp/proto/set-duration</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dfield"><code>elisp/proto/set-field</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-fields">Protocol buffer fields</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fset_002dtimestamp"><code>elisp/proto/set-timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fsubarray"><code>elisp/proto/subarray</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002ftimestamp"><code>elisp/proto/timestamp</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002funpack_002dany"><code>elisp/proto/unpack-any</code></a></td><td class="printindex-index-section"><a href="#Well_002dknown-protocol-buffer-types">Well-known protocol buffer types</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fupdate_002dmap"><code>elisp/proto/update-map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffer-array-and-map-functions">Protocol buffer array and map functions</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002ffile_002dhandler"><code>elisp/runfiles/file-handler</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frlocation"><code>elisp/runfiles/rlocation</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex fn-letter-header-printindex" colspan="2" id="Symbol-index_fn_letter-H">H</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-http_005farchive-on-elisp"><code>http_archive on elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex fn-letter-header-printindex" colspan="2" id="Symbol-index_fn_letter-M">M</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-merge_005felisp_005finfos"><code>merge_elisp_infos</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
 </table>
-<table class="fn-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
+<table class="index-letters-footer-printindex fn-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Symbol-index_fn_letter-H"><b>H</b></a>
  &nbsp; 
@@ -1565,24 +1527,21 @@ Next: <a href="#Type-index" accesskey="n" rel="next">Type index</a>, Previous: <
 <hr>
 </div>
 <div class="section-level-extent" id="Type-index">
-<div class="nav-panel">
-<p>
-Previous: <a href="#Symbol-index" accesskey="p" rel="prev">Symbol index</a>, Up: <a href="#Indices" accesskey="u" rel="up">Indices</a> &nbsp; [<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>][<a href="#Indices" title="Index" rel="index">Index</a>]</p>
-</div>
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Symbol-index" rel="prev">Symbol index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h3 class="section" id="Type-index-1"><span>10.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
 
 <div class="printindex tp-printindex">
-<table class="tp-entries-printindex">
-<tr><td></td><th class="entries-header-printindex">Index Entry</th><th class="sections-header-printindex">Section</th></tr>
-<tr><td colspan="3"><hr></td></tr>
-<tr><th id="Type-index_tp_letter-E">E</th></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp"><code>elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray"><code>elisp/proto/array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap"><code>elisp/proto/map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage"><code>elisp/proto/message</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frunfiles"><code>elisp/runfiles/runfiles</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
-<tr><td></td><td class="printindex-index-entry"><a href="#index-EmacsLispInfo"><code>EmacsLispInfo</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
-<tr><td colspan="3"><hr></td></tr>
+<table class="index-entries-printindex tp-entries-printindex">
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex tp-letter-header-printindex" colspan="2" id="Type-index_tp_letter-E">E</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp"><code>elisp</code></a></td><td class="printindex-index-section"><a href="#Depending-on-external-libraries">Depending on external libraries</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002farray"><code>elisp/proto/array</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmap"><code>elisp/proto/map</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002fproto_002fmessage"><code>elisp/proto/message</code></a></td><td class="printindex-index-section"><a href="#Protocol-buffers">Protocol buffers</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-elisp_002frunfiles_002frunfiles"><code>elisp/runfiles/runfiles</code></a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
+<tr><td class="printindex-index-entry"><a href="#index-EmacsLispInfo"><code>EmacsLispInfo</code></a></td><td class="printindex-index-section"><a href="#Starlark-infrastructure">Starlark infrastructure</a></td></tr>
+<tr><td colspan="2"><hr></td></tr>
 </table>
 </div>
 
