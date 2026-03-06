@@ -27,6 +27,7 @@ def _local_binary_impl(ctx):
             if not file.exists:
                 fail("program file %r doesn’t exist" % str(file))
             file = str(file.realpath)
+            version = _version(ctx, [file, "--version"])
         else:
             # On Windows, retry with MSYS2.
             bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
@@ -37,11 +38,13 @@ def _local_binary_impl(ctx):
             if result.return_code != 0:
                 fail("command -v failed, standard error:\n", result.stderr)
             file = result.stdout.rstrip()
+            version = _version(ctx, [bash, "-l", "-c", 'exec "$0" --version', file])
     else:
         file = ctx.which(program) or fail("program %r not found" % program)
         if not file.exists:
             fail("program file %r doesn’t exist" % str(file))
         file = str(file.realpath)
+        version = _version(ctx, [file, "--version"])
     ctx.template(
         "BUILD.bazel",
         Label(":local_binary.BUILD.template"),
@@ -56,6 +59,7 @@ def _local_binary_impl(ctx):
         Label(":local_binary.bzl.template"),
         {
             '"[file]"': repr(file),
+            '"[version]"': repr(version),
         },
         executable = False,
     )
@@ -70,3 +74,10 @@ local_binary = repository_rule(
     configure = True,
     implementation = _local_binary_impl,
 )
+
+def _version(ctx, command):
+    result = ctx.execute(command, timeout = 10)
+    if result.return_code != 0:
+        fail("%r failed, standard error:\n%s" % (command, result.stderr))
+    lines = result.stdout.splitlines() + result.stderr.splitlines()
+    return lines[0] if lines else None
