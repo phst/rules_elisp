@@ -26,7 +26,10 @@ def _local_binary_impl(ctx):
         if file:
             if not file.exists:
                 fail("program file %r doesn’t exist" % str(file))
-            file = str(file.realpath)
+            ctx.watch(file)
+            file = file.realpath
+            ctx.watch(file)
+            file = str(file)
         else:
             # On Windows, retry with MSYS2.
             bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
@@ -41,7 +44,10 @@ def _local_binary_impl(ctx):
         file = ctx.which(program) or fail("program %r not found" % program)
         if not file.exists:
             fail("program file %r doesn’t exist" % str(file))
-        file = str(file.realpath)
+        ctx.watch(file)
+        file = file.realpath
+        ctx.watch(file)
+        file = str(file)
     ctx.template(
         "BUILD.bazel",
         Label(":local_binary.BUILD.template"),
