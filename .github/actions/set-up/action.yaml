@@ -70,6 +70,10 @@ runs:
             runner.os == 'Windows' && inputs.cc == 'clang' &&
             'build --config=clang-cl' || ''
           }}
+          ${{
+            inputs.bazel-version == '8.0.0' &&
+            'build --noexperimental_inprocess_symlink_creation' || ''
+          }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
         repository-cache: true
