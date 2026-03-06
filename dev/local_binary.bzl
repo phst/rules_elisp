@@ -25,6 +25,7 @@ def _local_binary_impl(ctx):
     program = ctx.getenv(environment, program)
     suffix = ".exe" if windows and not program.lower().endswith(".exe") else ""
     file = ctx.which(program + suffix)
+    virtual = False
     if not file and windows:
         # On Windows, retry with MSYS2.
         bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
@@ -35,8 +36,11 @@ def _local_binary_impl(ctx):
         if result.return_code != 0:
             fail("command -v failed, standard error:\n", result.stderr)
         file = ctx.path(result.stdout.rstrip())
+        virtual = True
     if not file:
         fail("program %r not found" % program)
+    if not (virtual or file.exists):
+        fail("program file %s doesn’t exist" % file)
     ctx.template(
         "BUILD.bazel",
         Label(":local_binary.BUILD.template"),
