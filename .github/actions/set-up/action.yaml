@@ -111,6 +111,8 @@ runs:
       shell: bash
       run: |
         brew update && brew install texinfo
+        texinfo="$(brew --prefix texinfo)"
+        echo "MAKEINFO=${texinfo:?}/bin/makeinfo" >> "${GITHUB_ENV:?}"
         # Detect Xcode command-line tools on macOS to work around
         # https://github.com/bazelbuild/bazel/issues/14970.
         cov="$(xcrun --find llvm-cov)"
@@ -130,7 +132,10 @@ runs:
         Add-Content
         -Verbose
         -LiteralPath $Env:GITHUB_ENV
-        -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
+        -Value (
+          'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe',
+          'MAKEINFO=${{steps.msys2.outputs.msys2-location}}\usr\bin\texi2any.exe'
+        )
     - name: Override Bazel version
       if: inputs.bazel-version != 'default'
       shell: pwsh
