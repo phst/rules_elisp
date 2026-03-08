@@ -54,8 +54,9 @@ def _local_binary(ctx, program):
         file = file.realpath
         ctx.watch(file)
         return str(file)
-    elif windows:
-        # On Windows, retry with MSYS2.
+
+    # On Windows, retry with MSYS2.
+    if windows:
         bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
         result = ctx.execute(
             [bash, "-l", "-c", 'command -v -- "$1"', "-", program],
@@ -67,8 +68,8 @@ def _local_binary(ctx, program):
         if not file.startswith("/"):
             fail("program %r was found as %r instead of absolute file" % (program, file))
         return file
-    else:
-        fail("program %r not found" % program)
+
+    fail("program %r not found" % program)
 
 local_config = repository_rule(
     local = True,
