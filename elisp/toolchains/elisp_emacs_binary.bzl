@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -247,6 +247,7 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
         progress_message = "Installing Emacs into %{output}",
         env = env,
         toolchain = None,
+        execution_requirements = {"block-network": ""},
     )
     return install
 
@@ -276,6 +277,7 @@ def _unpack(ctx, readme):
         mnemonic = "EmacsInstall",
         progress_message = "Unpacking Emacs into %{output}",
         toolchain = None,
+        execution_requirements = {"block-network": ""},
     )
 
     if ctx.outputs.module_header:
@@ -308,7 +310,10 @@ def _builtin_features(actions, extract, srcs, out):
         arguments = [args],
         mnemonic = "FindBuiltinFeatures",
         progress_message = "Extracting builtin features to %{output}",
-        execution_requirements = {"supports-path-mapping": ""},
+        execution_requirements = {
+            "block-network": "",
+            "supports-path-mapping": "",
+        },
     )
 
 def _munge_msvc_flag(s):

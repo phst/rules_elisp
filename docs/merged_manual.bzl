@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,10 @@ def _merged_manual_impl(ctx):
             mnemonic = "GenOrg",
             progress_message = "Generating Org file %{output}",
             toolchain = None,
-            execution_requirements = {"supports-path-mapping": ""},
+            execution_requirements = {
+                "block-network": "",
+                "supports-path-mapping": "",
+            },
         )
         orgs.append(org)
         sets.insert(roots, org.root)
@@ -61,6 +64,7 @@ def _merged_manual_impl(ctx):
         mnemonic = "MergeManual",
         progress_message = "Generating merged manual %{output}",
         toolchain = None,
+        execution_requirements = {"block-network": ""},
     )
 
 merged_manual = rule(

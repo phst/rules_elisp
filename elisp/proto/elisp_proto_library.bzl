@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,10 @@ def _elisp_proto_aspect_impl(target, ctx):
         mnemonic = "GenElispProtoBundle",
         progress_message = "Generating Emacs Lisp protocol buffer bundle %{output}",
         toolchain = None,
-        execution_requirements = {"supports-path-mapping": ""},
+        execution_requirements = {
+            "block-network": "",
+            "supports-path-mapping": "",
+        },
     )
 
     load_dir = info.proto_source_root.removeprefix(ctx.bin_dir.path + "/")

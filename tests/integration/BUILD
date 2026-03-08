@@ -120,6 +120,7 @@ run_binary(
     name = "version",
     outs = ["version.txt"],
     args = ["$(execpath version.txt)"],
+    tags = ["block-network"],
     tool = ":print_version",
 )
 
