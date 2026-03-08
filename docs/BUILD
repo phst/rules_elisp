@@ -14,6 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@is_default_bazel_version//:is_default_bazel_version.bzl", "IS_DEFAULT_BAZEL_VERSION")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_go//proto:def.bzl", "go_proto_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -64,7 +65,11 @@ diff_test(
     # installed version and the version used for development (on macOS) don’t
     # match.
     # FIXME: Find a better solution.
-    target_compatible_with = ["@platforms//os:macos"],
+    #
+    # The output of starlark_doc_extract slightly differs between Bazel
+    # versions, so run this test only with the default Bazel version.
+    # FIXME: Find a better solution.
+    target_compatible_with = ["@platforms//os:macos" if IS_DEFAULT_BAZEL_VERSION else "@platforms//:incompatible"],
 )
 
 DOCS = [
