@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -35,7 +35,10 @@ def _elisp_manual_impl(ctx):
         mnemonic = "Export",
         progress_message = "Exporting %{input} into Texinfo file",
         toolchain = None,
-        execution_requirements = {"supports-path-mapping": ""},
+        execution_requirements = {
+            "block-network": "",
+            "supports-path-mapping": "",
+        },
     )
 
 elisp_manual = rule(

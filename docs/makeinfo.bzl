@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,10 @@ def _makeinfo_impl(ctx):
         arguments = [args],
         mnemonic = "Makeinfo",
         progress_message = "Generating Info manual %{output}",
-        execution_requirements = {"supports-path-mapping": ""},
+        execution_requirements = {
+            "block-network": "",
+            "supports-path-mapping": "",
+        },
     )
 
 makeinfo = rule(
