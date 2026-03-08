@@ -23,8 +23,12 @@ def _local_binary_impl(ctx):
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
     program = ctx.getenv(environment, program)
-    suffix = ".exe" if windows and not program.lower().endswith(".exe") else ""
-    file = ctx.which(program + suffix)
+    if "/" in program or (windows and "\\" in program):
+        file = ctx.path(program)
+        file = file if file.exists else None
+    else:
+        suffix = ".exe" if windows and not program.lower().endswith(".exe") else ""
+        file = ctx.which(program + suffix)
     if not file and windows:
         # On Windows, retry with MSYS2.
         bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
