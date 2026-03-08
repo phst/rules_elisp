@@ -14,7 +14,7 @@
 
 """Defines the `makeinfo` rule."""
 
-load("@makeinfo//:file.bzl", "FILE")
+load("@local_config//:config.bzl", "MAKEINFO")
 
 visibility("private")
 
@@ -24,7 +24,7 @@ def _makeinfo_impl(ctx):
         fail("Unknown output file name", out.basename)
     src = ctx.file.src
     args = ctx.actions.args()
-    args.add(FILE)
+    args.add(MAKEINFO)
     args.add("--no-split")
     if out.extension == "html":
         args.add("--html")

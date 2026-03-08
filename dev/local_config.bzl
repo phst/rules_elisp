@@ -12,13 +12,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the internal `local_binary` repository rule."""
+"""Defines the internal `local_config` repository rule."""
 
 visibility("private")
 
-def _local_binary_impl(ctx):
+def _local_config_impl(ctx):
+    is_default_bazel_version = not ctx.getenv("USE_BAZEL_VERSION")
+    makeinfo = _local_binary(ctx, "makeinfo")
+    xmllint = _local_binary(ctx, "xmllint")
+    ctx.template(
+        "BUILD.bazel",
+        Label(":local_config.BUILD.template"),
+        {
+            '"[bzl_library.bzl]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
+            '"[docs_pkg]"': repr(str(Label("//docs:__pkg__"))),
+        },
+        executable = False,
+    )
+    ctx.template(
+        "config.bzl",
+        Label(":local_config.bzl.template"),
+        {
+            '"[makeinfo]"': repr(makeinfo),
+            '"[xmllint]"': repr(xmllint),
+            "[is_default_bazel_version]": repr(is_default_bazel_version),
+        },
+        executable = False,
+    )
+
+def _local_binary(ctx, program):
     windows = ctx.os.name.startswith("windows")
-    program = ctx.attr.program or fail("missing program name")
+    program = program or fail("missing program name")
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
     suffix = ".exe" if windows else ""
@@ -29,7 +53,7 @@ def _local_binary_impl(ctx):
         ctx.watch(file)
         file = file.realpath
         ctx.watch(file)
-        file = str(file)
+        return str(file)
     elif windows:
         # On Windows, retry with MSYS2.
         bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
@@ -39,34 +63,12 @@ def _local_binary_impl(ctx):
         )
         if result.return_code != 0:
             fail("command -v failed, standard error:\n", result.stderr)
-        file = result.stdout.rstrip()
+        return result.stdout.rstrip()
     else:
         fail("program %r not found" % program)
-    ctx.template(
-        "BUILD.bazel",
-        Label(":local_binary.BUILD.template"),
-        {
-            '"[bzl_library.bzl]"': repr(str(Label("@bazel_skylib//:bzl_library.bzl"))),
-            "[[visibility]]": repr([str(v) for v in ctx.attr.library_visibility]),
-        },
-        executable = False,
-    )
-    ctx.template(
-        "file.bzl",
-        Label(":local_binary.bzl.template"),
-        {
-            '"[file]"': repr(file),
-        },
-        executable = False,
-    )
 
-local_binary = repository_rule(
-    # @unsorted-dict-items
-    attrs = {
-        "program": attr.string(mandatory = True),
-        "library_visibility": attr.label_list(mandatory = True, allow_empty = False),
-    },
+local_config = repository_rule(
     local = True,
     configure = True,
-    implementation = _local_binary_impl,
+    implementation = _local_config_impl,
 )

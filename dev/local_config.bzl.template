@@ -1,4 +1,4 @@
-# Copyright 2026 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,8 @@
 visibility("public")
 
 IS_DEFAULT_BAZEL_VERSION = [is_default_bazel_version]
+MAKEINFO = "[makeinfo]"
+XMLLINT = "[xmllint]"
 
 # Local Variables:
 # mode: bazel-starlark
