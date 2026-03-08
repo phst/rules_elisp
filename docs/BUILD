@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
+load("@bazel_skylib//rules:common_settings.bzl", "bool_flag")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_go//proto:def.bzl", "go_proto_library")
@@ -49,6 +50,17 @@ makeinfo(
     out = "manual.html",
 )
 
+bool_flag(
+    name = "check_diff",
+    build_setting_default = True,
+    scope = "universal",
+)
+
+config_setting(
+    name = "check_diff_enabled",
+    flag_values = {":check_diff": "true"},
+)
+
 diff_test(
     name = "html_test",
     size = "medium",
@@ -64,7 +76,10 @@ diff_test(
     # installed version and the version used for development (on macOS) don’t
     # match.
     # FIXME: Find a better solution.
-    target_compatible_with = ["@platforms//os:macos"],
+    target_compatible_with = ["@platforms//os:macos"] + select({
+        ":check_diff_enabled": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 DOCS = [
