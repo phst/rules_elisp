@@ -63,7 +63,10 @@ def _local_binary(ctx, program):
         )
         if result.return_code != 0:
             fail("command -v failed, standard error:\n", result.stderr)
-        return result.stdout.rstrip()
+        file = result.stdout.rstrip()
+        if not file.startswith("/"):
+            fail("program %r was found as %r instead of absolute file" % (program, file))
+        return file
     else:
         fail("program %r not found" % program)
 
