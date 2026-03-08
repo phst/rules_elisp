@@ -77,6 +77,11 @@ gazelle_binary(
 )
 
 bzl_library(
+    name = "is_default_bazel_version",
+    srcs = ["is_default_bazel_version.bzl"],
+)
+
+bzl_library(
     name = "local_binary",
     srcs = ["local_binary.bzl"],
 )
