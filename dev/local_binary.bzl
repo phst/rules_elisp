@@ -25,7 +25,8 @@ def _local_binary_impl(ctx):
     program = ctx.getenv(environment, program)
     if "/" in program or (windows and "\\" in program):
         file = ctx.path(program)
-        file = file if file.exists else None
+        if not file.exists:
+            fail("program file %r doesn’t exist" % program)
     else:
         suffix = ".exe" if windows and not program.lower().endswith(".exe") else ""
         file = ctx.which(program + suffix)
