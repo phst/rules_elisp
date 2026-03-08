@@ -14,7 +14,7 @@
 
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("@is_default_bazel_version//:is_default_bazel_version.bzl", "IS_DEFAULT_BAZEL_VERSION")
+load("@local_config//:config.bzl", "IS_DEFAULT_BAZEL_VERSION")
 load("@rules_go//go:def.bzl", "go_binary", "go_library")
 load("@rules_go//proto:def.bzl", "go_proto_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -149,5 +149,5 @@ go_proto_library(
 bzl_library(
     name = "makeinfo",
     srcs = ["makeinfo.bzl"],
-    deps = ["@makeinfo//:file"],
+    deps = ["@local_config//:config"],
 )

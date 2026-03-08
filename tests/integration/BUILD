@@ -18,8 +18,8 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
+load("@local_config//:config.bzl", "XMLLINT")
 load("@rules_go//go:def.bzl", "go_test")
-load("@xmllint//:file.bzl", XMLLINT = "FILE")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")

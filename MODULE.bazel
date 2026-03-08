@@ -160,26 +160,10 @@ git_override(
 )
 
 # Local binaries that need to be installed on the host/exec machine.
-local_binary = use_repo_rule("//dev:local_binary.bzl", "local_binary")
+local_config = use_repo_rule("//dev:local_config.bzl", "local_config")
 
-local_binary(
-    name = "makeinfo",
-    dev_dependency = True,
-    library_visibility = ["//docs:__pkg__"],
-    program = "makeinfo",
-)
-
-local_binary(
-    name = "xmllint",
-    dev_dependency = True,
-    library_visibility = [],
-    program = "xmllint",
-)
-
-is_default_bazel_version = use_repo_rule("//dev:is_default_bazel_version.bzl", "is_default_bazel_version")
-
-is_default_bazel_version(
-    name = "is_default_bazel_version",
+local_config(
+    name = "local_config",
     dev_dependency = True,
 )
 
