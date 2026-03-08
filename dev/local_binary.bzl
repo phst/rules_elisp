@@ -31,7 +31,7 @@ def _local_binary_impl(ctx):
         )
         if result.return_code != 0:
             fail("command -v failed, standard error:\n", result.stderr)
-        file = ctx.path(result.stdout.rstrip())
+        file = result.stdout.rstrip()
     if not file:
         fail("program %r not found" % program)
     ctx.template(
