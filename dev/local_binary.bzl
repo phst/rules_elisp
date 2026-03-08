@@ -21,19 +21,27 @@ def _local_binary_impl(ctx):
     program = ctx.attr.program or fail("missing program name")
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
-    file = ctx.which(program + (".exe" if windows else ""))
-    if not file and windows:
-        # On Windows, retry with MSYS2.
-        bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
-        result = ctx.execute(
-            [bash, "-l", "-c", 'command -v -- "$1"', "-", program],
-            timeout = 10,
-        )
-        if result.return_code != 0:
-            fail("command -v failed, standard error:\n", result.stderr)
-        file = result.stdout.rstrip()
-    if not file:
-        fail("program %r not found" % program)
+    if windows:
+        file = ctx.which(program + ".exe")
+        if file:
+            if not file.exists:
+                fail("program file %r doesn’t exist" % str(file))
+            file = str(file.realpath)
+        else:
+            # On Windows, retry with MSYS2.
+            bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
+            result = ctx.execute(
+                [bash, "-l", "-c", 'command -v -- "$1"', "-", program],
+                timeout = 10,
+            )
+            if result.return_code != 0:
+                fail("command -v failed, standard error:\n", result.stderr)
+            file = result.stdout.rstrip()
+    else:
+        file = ctx.which(program) or fail("program %r not found" % program)
+        if not file.exists:
+            fail("program file %r doesn’t exist" % str(file))
+        file = str(file.realpath)
     ctx.template(
         "BUILD.bazel",
         Label(":local_binary.BUILD.template"),
@@ -47,7 +55,7 @@ def _local_binary_impl(ctx):
         "file.bzl",
         Label(":local_binary.bzl.template"),
         {
-            '"[file]"': repr(str(file)),
+            '"[file]"': repr(file),
         },
         executable = False,
     )
