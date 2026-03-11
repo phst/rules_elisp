@@ -16,3 +16,6 @@
 
 // Dummy package to make ‘go get’ work.
 package stardoc_output_go_proto
+
+// FIXME: Remove this package once
+// https://github.com/bazel-contrib/rules_go/issues/2262 is fixed.
