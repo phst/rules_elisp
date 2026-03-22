@@ -38,8 +38,3 @@ bazel_dep(name = "rules_cc", version = "0.2.17", dev_dependency = True)
 
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension", dev_dependency = True)
 use_repo(cc_configure, "local_config_cc")
-
-# FIXME: The following two lines shouldn’t be needed, but the build breaks
-# without them.
-bazel_dep(name = "rules_android", version = "0.7.1", dev_dependency = True)
-bazel_dep(name = "rules_go", version = "0.60.0", dev_dependency = True)
