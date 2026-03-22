@@ -177,4 +177,4 @@ local_path_override(
 
 # FIXME: The following line shouldn’t be needed, but the build breaks without
 # it.
-bazel_dep(name = "rules_android", version = "0.7.1", dev_dependency = True)
+bazel_dep(name = "rules_android", version = "0.7.1")
