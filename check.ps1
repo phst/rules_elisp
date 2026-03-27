@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,6 +56,8 @@ Run-Tests
 foreach ($version in $versions) {
     Run-Tests "--extra_toolchains=//elisp:emacs_${version}_toolchain"
 }
+
+Run-Tests '--extra_toolchains=//elisp:local_toolchain'
 
 Run-Bazel 'mod' 'graph' > $null
 
