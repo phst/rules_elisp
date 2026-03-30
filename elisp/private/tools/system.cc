@@ -167,7 +167,7 @@ class HResultCategory final : public std::error_category {
   std::string message(int val) const final {
     const HRESULT hr{val};
     std::string result = absl::StrFormat(
-        "HRESULT %#010x (severity %d, facility %#06x, code %#06x)", hr,
+        "HRESULT %#010x (severity %u, facility %#06x, code %#06x)", hr,
         HRESULT_SEVERITY(hr), HRESULT_FACILITY(hr), HRESULT_CODE(hr));
     const std::optional<std::error_code> win32 = ToWin32(hr);
     if (win32.has_value()) absl::StrAppend(&result, "; ", win32->message());
@@ -516,17 +516,17 @@ absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
       Multiply<std::string::size_type>(string.length(), max_bytes_per_wchar);
   if (!buffer_size.has_value()) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("String too long (%d code units)", string.length()));
+        absl::StrFormat("String too long (%u code units)", string.length()));
   }
   const std::optional<int> wide_length = CastNumber<int>(string.length());
   if (!wide_length.has_value()) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("String too long (%d code units)", string.length()));
+        absl::StrFormat("String too long (%u code units)", string.length()));
   }
   const std::optional<int> narrow_length = CastNumber<int>(*buffer_size);
   if (!narrow_length.has_value()) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("String too long (%d code units)", string.length()));
+        absl::StrFormat("String too long (%u code units)", string.length()));
   }
   std::string buffer(*buffer_size, '\0');
   const int result =
@@ -534,7 +534,7 @@ absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
                             buffer.data(), *narrow_length, nullptr, nullptr);
   if (result == 0) {
     return WindowsStatus(
-        "WideCharToMultiByte(%d, %#x, ..., %d, ..., %d, nullptr, nullptr)",
+        "WideCharToMultiByte(%u, %#x, ..., %d, ..., %d, nullptr, nullptr)",
         codepage, flags, *wide_length, *narrow_length);
   }
   return buffer.substr(0, CastNumber<std::string::size_type>(result).value());
@@ -559,13 +559,13 @@ absl::StatusOr<NativeString> ToNative(
   const std::optional<int> length = CastNumber<int>(string.length());
   if (!length.has_value()) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("String too long (%d bytes)", string.length()));
+        absl::StrFormat("String too long (%u bytes)", string.length()));
   }
   NativeString buffer(string.length(), L'\0');
   const int result = ::MultiByteToWideChar(codepage, flags, string.data(),
                                            *length, buffer.data(), *length);
   if (result == 0) {
-    return WindowsStatus("MultiByteToWideChar(%d, %#x, ..., %d, ..., %d)",
+    return WindowsStatus("MultiByteToWideChar(%u, %#x, ..., %d, ..., %d)",
                          codepage, flags, *length, *length);
   }
   return buffer.substr(0, CastNumber<NativeString::size_type>(result).value());
@@ -674,7 +674,7 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   const HANDLE handle = ::CreateFileW(this->pointer(), access, share, nullptr,
                                       disposition, open_flags, nullptr);
   if (handle == INVALID_HANDLE_VALUE) {
-    return WindowsStatus("CreateFileW(%#x, %#x, nullptr, %d, %#x, nullptr)",
+    return WindowsStatus("CreateFileW(%#x, %#x, nullptr, %u, %#x, nullptr)",
                          access, share, disposition, open_flags);
   }
   const absl::Cleanup cleanup = [handle] {
@@ -690,7 +690,7 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   }
   if (length >= buffer.size()) {
     return absl::FailedPreconditionError(absl::StrFormat(
-        "Resolved filename is too long (%d characters)", length));
+        "Resolved filename is too long (%u characters)", length));
   }
   const std::wstring_view result(buffer.data(), length);
   return FileName::FromString(result);
@@ -732,7 +732,7 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
       CastNumber<std::streamsize>(contents.size());
   if (!count.has_value()) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("Content too big (%d bytes)", contents.size()));
+        absl::StrFormat("Content too big (%u bytes)", contents.size()));
   }
   stream.write(contents.data(), *count);
   stream.flush();
@@ -1023,7 +1023,7 @@ absl::Status CopyFile(const FileName& from, const FileName& to) {
       if (w == 0) {
         // Avoid infinite loop.
         return absl::DataLossError(absl::StrFormat(
-            "Cannot write %d bytes to file %s", view.size(), to));
+            "Cannot write %u bytes to file %s", view.size(), to));
       }
       view.remove_prefix(static_cast<std::make_unsigned_t<ssize_t>>(w));
     }
@@ -1147,12 +1147,12 @@ static std::wstring CanonicalizeEnvironmentVariable(
   const int length = CastNumber<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
   CHECK_GT(result, 0) << WindowsStatus(
-      "LCMapStringW(%d, %#x, ..., %d, nullptr, 0)", locale, flags, length);
+      "LCMapStringW(%u, %#x, ..., %d, nullptr, 0)", locale, flags, length);
   std::wstring buffer(result, L'\0');
   result = ::LCMapStringW(locale, flags, string.data(), length, buffer.data(),
                           result);
   CHECK_GT(result, 0) << WindowsStatus(
-      "LCMapStringW(%d, %#x, ..., %d, ..., %d)", locale, flags, length,
+      "LCMapStringW(%u, %#x, ..., %d, ..., %u)", locale, flags, length,
       buffer.size());
   return buffer.substr(0, result);
 }
@@ -1233,7 +1233,7 @@ absl::StatusOr<FileName> SearchPath(const FileName& program) {
   }
   if (length >= buffer.size()) {
     return absl::FailedPreconditionError(
-        absl::StrFormat("Program filename too long (%d characters)", length));
+        absl::StrFormat("Program filename too long (%u characters)", length));
   }
   return FileName::FromString(std::wstring_view(buffer.data(), length));
 #else
@@ -1315,7 +1315,7 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   if (options.output_file.has_value()) {
     startup_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     if (startup_info.hStdInput == INVALID_HANDLE_VALUE) {
-      return WindowsStatus("GetStdHandle(%d)", STD_INPUT_HANDLE);
+      return WindowsStatus("GetStdHandle(%u)", STD_INPUT_HANDLE);
     }
     constexpr DWORD access = GENERIC_WRITE;
     constexpr DWORD share = FILE_SHARE_READ;
@@ -1329,7 +1329,7 @@ absl::StatusOr<int> RunProcess(const FileName& program,
         ::CreateFileW(options.output_file->pointer(), access, share, &security,
                       disposition, attributes, nullptr);
     if (startup_info.hStdOutput == INVALID_HANDLE_VALUE) {
-      return WindowsStatus("CreateFileW(%#s, %#x, %#x, ..., %d, %#x, nullptr)",
+      return WindowsStatus("CreateFileW(%#s, %#x, %#x, ..., %u, %#x, nullptr)",
                            *options.output_file, access, share, disposition,
                            attributes);
     }
@@ -1371,14 +1371,14 @@ absl::StatusOr<int> RunProcess(const FileName& program,
       LOG(WARNING) << "Process timed out, sending CTRL + BREAK";
       if (!::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
                                       process_info.dwProcessId)) {
-        LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent(%d, %d)",
+        LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent(%u, %u)",
                                     CTRL_BREAK_EVENT, process_info.dwProcessId);
       }
       return absl::DeadlineExceededError(absl::StrFormat(
           "Deadline %v exceeded waiting for process (timeout %v)",
           options.deadline, absl::Milliseconds(timeout_ms)));
     default:
-      return WindowsStatus("WaitForSingleObject(..., %d)", timeout_ms);
+      return WindowsStatus("WaitForSingleObject(..., %u)", timeout_ms);
   }
   DWORD code;
   if (!::GetExitCodeProcess(process_info.hProcess, &code)) {

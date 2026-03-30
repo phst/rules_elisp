@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
         CastNumber<std::streamsize>(file.length());
     if (!length.has_value()) {
       return absl::DataLossError(
-          absl::StrFormat("Line too long (%d bytes)", file.length()));
+          absl::StrFormat("Line too long (%u bytes)", file.length()));
     }
     stream.write(file.data(), *length);
     stream.put('\n');
