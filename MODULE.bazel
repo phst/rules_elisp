@@ -112,8 +112,13 @@ junit_xsd(
     dev_dependency = True,
 )
 
-# Local toolchains
-register_toolchains("//elisp:hermetic_toolchain")
+# Local toolchains.  We only register toolchains for the most recent Emacs
+# release, with binary builds coming first.  Source builds will be selected as a
+# fallback in case none of the binary ones apply.
+register_toolchains(
+    "//elisp:emacs_30_windows_x86_64_toolchain",
+    "//elisp:emacs_30_toolchain",
+)
 
 # C++-specific dependencies
 bazel_dep(name = "gazelle_cc", version = "0.5.0", dev_dependency = True)

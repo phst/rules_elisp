@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,8 +43,36 @@ toolchain(
 )
 
 toolchain(
+    name = "emacs_29_windows_x86_64_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = "emacs_29_windows_x86_64",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
     name = "emacs_30_toolchain",
     toolchain = "emacs_30",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_30_windows_x86_64_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = "emacs_30_windows_x86_64",
     toolchain_type = ":toolchain_type",
 )
 
@@ -67,12 +95,22 @@ elisp_toolchain(
 
 elisp_toolchain(
     name = "emacs_29",
-    emacs = "//emacs:emacs_29",
+    emacs = "@gnu_emacs_29//:emacs",
+)
+
+elisp_toolchain(
+    name = "emacs_29_windows_x86_64",
+    emacs = "@gnu_emacs_windows_29//:emacs",
 )
 
 elisp_toolchain(
     name = "emacs_30",
-    emacs = "//emacs:emacs_30",
+    emacs = "@gnu_emacs_30//:emacs",
+)
+
+elisp_toolchain(
+    name = "emacs_30_windows_x86_64",
+    emacs = "@gnu_emacs_windows_30//:emacs",
 )
 
 bzl_library(
