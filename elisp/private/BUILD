@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025-2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -265,6 +265,7 @@ bzl_library(
 bzl_library(
     name = "emacs_repository",
     srcs = ["emacs_repository.bzl"],
+    deps = ["@bazel_tools//tools/build_defs/repo:utils.bzl"],
 )
 
 bzl_library(
