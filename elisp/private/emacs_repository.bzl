@@ -21,6 +21,7 @@ def _emacs_repository_impl(ctx):
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
         url = ctx.attr.urls or fail("archive URLs missing"),
         stripPrefix = ctx.attr.strip_prefix,
+        type = ctx.attr.format,
     )
     ctx.delete("test")
     ctx.template(
@@ -42,6 +43,7 @@ emacs_repository = repository_rule(
     # @unsorted-dict-items
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
+        "format": attr.string(mandatory = True, values = ["zip", "tar.gz", "tar.xz"]),
         "integrity": attr.string(mandatory = True),
         "strip_prefix": attr.string(),
         "type": attr.string(mandatory = True, values = ["source", "release"]),
