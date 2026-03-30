@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Google LLC
+# Copyright 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,14 +14,18 @@
 
 """Defines the `emacs_repository` repository rule."""
 
+load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
+
 visibility("private")
 
 def _emacs_repository_impl(ctx):
+    urls = ctx.attr.urls
     ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
-        url = ctx.attr.urls,
+        url = urls,
         stripPrefix = ctx.attr.strip_prefix,
         type = ctx.attr.format,
+        auth = get_auth(ctx, urls),
     )
     ctx.delete("test")
     ctx.template(
@@ -43,6 +47,8 @@ emacs_repository = repository_rule(
     # @unsorted-dict-items
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
+        "netrc": attr.label(allow_single_file = [".netrc"]),
+        "auth_patterns": attr.string_dict(),
         "format": attr.string(mandatory = True, values = ["zip", "tar.gz", "tar.xz"]),
         "integrity": attr.string(mandatory = True),
         "strip_prefix": attr.string(mandatory = True),

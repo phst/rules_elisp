@@ -61,7 +61,7 @@ check-extra:
         # Restrict loaded Starlark files in public packages to well-known
         # official repositories to avoid dependency creep.
 	! $(GIT) grep -I -r -E -n -e '^load\("@' \
-	  --and --not -e '@(bazel_skylib|protobuf|rules_cc)//' \
+	  --and --not -e '@(bazel_tools|bazel_skylib|protobuf|rules_cc)//' \
 	  -- elisp emacs
         # Find BUILD files without default visibility.  See
         # https://opensource.google/documentation/reference/thirdparty/new_license_rules#new_requirements.
