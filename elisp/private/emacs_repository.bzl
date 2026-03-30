@@ -19,7 +19,7 @@ visibility("private")
 def _emacs_repository_impl(ctx):
     ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
-        url = ctx.attr.urls or fail("archive URLs missing"),
+        url = ctx.attr.urls,
         stripPrefix = ctx.attr.strip_prefix,
     )
     ctx.delete("test")
