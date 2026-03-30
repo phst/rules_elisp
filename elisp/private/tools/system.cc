@@ -674,8 +674,9 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   const HANDLE handle = ::CreateFileW(this->pointer(), access, share, nullptr,
                                       disposition, open_flags, nullptr);
   if (handle == INVALID_HANDLE_VALUE) {
-    return WindowsStatus("CreateFileW(%#x, %#x, nullptr, %u, %#x, nullptr)",
-                         access, share, disposition, open_flags);
+    return WindowsStatus(
+        "CreateFileW(%#s, %#x, %#x, nullptr, %u, %#x, nullptr)", *this, access,
+        share, disposition, open_flags);
   }
   const absl::Cleanup cleanup = [handle] {
     if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus("CloseHandle");
