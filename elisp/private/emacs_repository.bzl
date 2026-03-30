@@ -45,7 +45,7 @@ emacs_repository = repository_rule(
         "urls": attr.string_list(mandatory = True, allow_empty = False),
         "format": attr.string(mandatory = True, values = ["zip", "tar.gz", "tar.xz"]),
         "integrity": attr.string(mandatory = True),
-        "strip_prefix": attr.string(),
+        "strip_prefix": attr.string(mandatory = True),
         "type": attr.string(mandatory = True, values = ["source", "release"]),
         "target_compatible_with": attr.label_list(),
     },
