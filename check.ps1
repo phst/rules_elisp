@@ -1,6 +1,6 @@
 #!/usr/bin/env pwsh
 
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,11 @@ Set-Location -Path $PSScriptRoot
 Run-Tests
 
 foreach ($version in $versions) {
-    Run-Tests "--extra_toolchains=//elisp:emacs_${version}_toolchain"
+    $toolchains = @(
+        "//elisp:emacs_${version}_toolchain",
+        "//elisp:emacs_${version}_windows_x86_64_toolchain"
+    )
+    Run-Tests "--extra_toolchains=$($toolchains -join ',')"
 }
 
 Run-Bazel 'mod' 'graph' > $null
