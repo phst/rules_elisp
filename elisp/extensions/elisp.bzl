@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Google LLC
+# Copyright 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ def _elisp_http_archive_impl(ctx):
     ctx.download_and_extract(
         url = ctx.attr.urls,
         integrity = ctx.attr.integrity or fail("missing archive checksum"),
-        stripPrefix = ctx.attr.strip_prefix,
+        strip_prefix = ctx.attr.strip_prefix,
     )
     ctx.template(
         "BUILD.bazel",

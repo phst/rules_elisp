@@ -314,7 +314,7 @@
   "moduleExtensions": {
     "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "pmDJiaPykPQ2w8eBdYV3RXYg6ANG7ITD7S87zAYlS5Y=",
+        "bzlTransitiveDigest": "0EbFJ6+8AV6eao9YuFK6+e1iOXtKxNljDQ4LI8vkTdk=",
         "usagesDigest": "npTbN5S3ZviiMfeJIN6H/MKRJZVKrtLGSssndXBi8zs=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_skylib bazel_skylib+"
