@@ -23,7 +23,7 @@ def _emacs_repository_impl(ctx):
     ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
         url = urls,
-        stripPrefix = ctx.attr.strip_prefix,
+        strip_prefix = ctx.attr.strip_prefix,
         type = ctx.attr.format,
         auth = get_auth(ctx, urls),
     )

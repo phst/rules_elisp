@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ def _junit_xsd_impl(ctx):
         url = [
             "https://github.com/windyroad/JUnit-Schema/archive/refs/tags/1.0.0.tar.gz",  # 2022-04-09
         ],
-        stripPrefix = "JUnit-Schema-1.0.0/",
+        strip_prefix = "JUnit-Schema-1.0.0/",
     )
     ctx.template(
         "BUILD.bazel",
