@@ -57,6 +57,7 @@ runs:
           build --nostamp
           build --experimental_repository_cache_hardlinks
           build --incompatible_strict_action_env
+          build --toolchain_resolution_debug=//elisp/runfiles:runfiles
           test --test_output=errors
           ${{
             inputs.bazel-version == 'default' &&
