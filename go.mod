@@ -22,12 +22,12 @@ require (
 	github.com/bazelbuild/rules_go v0.60.0
 	github.com/google/go-cmp v0.7.0
 	github.com/yuin/goldmark v1.8.2
-	golang.org/x/text v0.35.0
+	golang.org/x/text v0.36.0
 	google.golang.org/protobuf v1.36.11
 )
 
 require (
-	golang.org/x/mod v0.33.0 // indirect
+	golang.org/x/mod v0.34.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 )
