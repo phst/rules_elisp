@@ -95,7 +95,6 @@
     "https://bcr.bazel.build/modules/gazelle/0.41.0/MODULE.bazel": "fdce8a8f5129d5b6d693d91cb191d0a014fdcb88e9094e528325a7165de2a826",
     "https://bcr.bazel.build/modules/gazelle/0.46.0/MODULE.bazel": "3dec215dacf2427df87b524a2c99da387882a18d753f0b1b38675992bd0a99c6",
     "https://bcr.bazel.build/modules/gazelle/0.47.0/MODULE.bazel": "b61bb007c4efad134aa30ee7f4a8e2a39b22aa5685f005edaa022fbd1de43ebc",
-    "https://bcr.bazel.build/modules/gazelle/0.48.0/MODULE.bazel": "ed89ed9e7e4f15a63434d553496088c5d02faa3dccc654331f3533d6542a9bb5",
     "https://bcr.bazel.build/modules/gazelle/0.50.0/MODULE.bazel": "5dce69aa1d7b5bc85d1e1cfe61f0a9a27426c46425ec1d064685f941a5977329",
     "https://bcr.bazel.build/modules/gazelle/0.50.0/source.json": "3cadcd284172c4274dc44c71b571f08ec4f22b28d5e9ad2708347c6e6c3a41b9",
     "https://bcr.bazel.build/modules/gazelle_cc/0.5.0/MODULE.bazel": "d97e251aadc93c66b54ffb8c59a7ecb06c5af9fa4ac530930fc87085190eecb0",
