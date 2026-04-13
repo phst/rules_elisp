@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,7 @@ go_library(
         "//gazelle/elisp:__pkg__",
         "//tests/integration:__pkg__",
         "//tests/proto/integration:__pkg__",
+        "//tests/tools:__pkg__",
     ],
     deps = ["@rules_go//go/runfiles"],
 )

@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
+load("@rules_go//go:def.bzl", "go_test")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -203,4 +204,19 @@ elisp_test(
     name = "run_tst_test",
     size = "small",
     srcs = ["run-tst-test.el"],
+)
+
+TOOLS_TEST_DATA = ["//elisp/private/tools:copy_tree"]
+
+go_test(
+    name = "tools_test",
+    size = "medium",
+    timeout = "short",
+    srcs = ["copy_tree_test.go"],
+    args = ["--%s=$(rlocationpath %s)" % (f, f) for f in TOOLS_TEST_DATA],
+    data = TOOLS_TEST_DATA,
+    deps = [
+        "//private/testutil",
+        "@com_github_google_go_cmp//cmp",
+    ],
 )
