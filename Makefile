@@ -17,14 +17,14 @@
 
 SHELL = /bin/sh
 
-BAZEL = bazel
+BAZEL ?= bazel
 BAZELFLAGS =
-GIT = git
-EMACS = emacs
+GIT ?= git
+EMACS ?= emacs
 EMACSFLAGS =
-SHELLCHECK = shellcheck
+SHELLCHECK ?= shellcheck
 SHELLCHECKFLAGS =
-HYPERFINE = hyperfine
+HYPERFINE ?= hyperfine
 HYPERFINEFLAGS =
 
 all:
@@ -39,10 +39,10 @@ GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --features=-parse_headers --host_features=-parse_headers
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
-GENHTML = genhtml
+GENHTML ?= genhtml
 GENHTMLFLAGS = --branch-coverage \
   --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
-CPPFILT = c++filt
+CPPFILT ?= c++filt
 
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
@@ -96,7 +96,7 @@ clean:
 
 PREFIX = /usr/local
 INFODIR = $(PREFIX)/share/info
-INSTALL = install
+INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 INSTALL_INFO = install-info
