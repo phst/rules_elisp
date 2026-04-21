@@ -318,7 +318,7 @@ def _builtin_features(actions, extract, srcs, out):
 
 def _munge_msvc_flag(s):
     # Crude way to work around specifying Visual C++ options in .bazelrc.
-    return None if s.startswith("/external:") else s.replace("/std:c", "-std=gnu")
+    return s.replace("/std:c", "-std=gnu")
 
 def _is_lisp_source(file, type):
     if file.extension != "el":
