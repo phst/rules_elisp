@@ -22,10 +22,6 @@ build --process_headers_in_dependencies
 build --features=external_include_paths
 build --host_features=external_include_paths
 
-# The next line shouldn’t be necessary.
-# TODO: File bug against rules_cc.
-build:windows --copt='/external:W0' --host_copt='/external:W0'
-
 # Make Googletest use Abseil to support AbslStringify.
 # See https://github.com/google/googletest/issues/4383.
 build --define=absl=1
