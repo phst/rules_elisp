@@ -94,21 +94,22 @@ benchmark:
 clean:
 	$(BAZEL) clean
 
-PREFIX = /usr/local
-INFODIR = $(PREFIX)/share/info
+prefix = /usr/local
+datarootdir = $(prefix)/share
+infodir = $(datarootdir)/info
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
 
 install:
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
-	$(INSTALL) -d -- '$(INFODIR)'
+	$(INSTALL) -d -- '$(infodir)'
 	$(INSTALL_DATA) -- \
 	  bazel-bin/docs/rules_elisp.info \
-	  '$(INFODIR)/rules_elisp.info'
-	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+	  '$(infodir)/rules_elisp.info'
+	install-info -- '$(infodir)/rules_elisp.info' '$(infodir)/dir'
 
 uninstall:
 	install-info --delete -- \
-	  '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
-	rm -- '$(INFODIR)/rules_elisp.info'
+	  '$(infodir)/rules_elisp.info' '$(infodir)/dir'
+	rm -- '$(infodir)/rules_elisp.info'
