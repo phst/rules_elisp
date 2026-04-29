@@ -99,7 +99,6 @@ INFODIR = $(PREFIX)/share/info
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
-INSTALL_INFO = install-info
 
 install:
 	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
@@ -107,9 +106,9 @@ install:
 	$(INSTALL_DATA) -- \
 	  bazel-bin/docs/rules_elisp.info \
 	  '$(INFODIR)/rules_elisp.info'
-	$(INSTALL_INFO) -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
+	install-info -- '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
 
 uninstall:
-	$(INSTALL_INFO) --delete -- \
+	install-info --delete -- \
 	  '$(INFODIR)/rules_elisp.info' '$(INFODIR)/dir'
 	rm -- '$(INFODIR)/rules_elisp.info'
