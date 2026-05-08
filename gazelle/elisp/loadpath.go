@@ -1,4 +1,4 @@
-// Copyright 2021, 2022, 2024, 2025 Google LLC
+// Copyright 2021-2022, 2024-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/bazelbuild/bazel-gazelle/pathtools"
+	"github.com/bazel-contrib/bazel-gazelle/v2/pathtools"
 )
 
 // loadDirectory names a directory in the Emacs load path.  See

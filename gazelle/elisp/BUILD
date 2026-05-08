@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,12 +46,12 @@ go_library(
     ],
     deps = [
         "@gazelle//config",
-        "@gazelle//label",
         "@gazelle//language",
-        "@gazelle//pathtools",
         "@gazelle//repo",
         "@gazelle//resolve",
-        "@gazelle//rule",
+        "@gazelle//v2/label",  # keep
+        "@gazelle//v2/pathtools",  # keep
+        "@gazelle//v2/rule",  # keep
     ],
 )
 
@@ -84,12 +84,12 @@ go_test(
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
         "@gazelle//config",
-        "@gazelle//label",
         "@gazelle//language",
         "@gazelle//repo",
         "@gazelle//resolve",
-        "@gazelle//rule",
-        "@gazelle//testtools",
+        "@gazelle//v2/label",  # keep
+        "@gazelle//v2/rule",  # keep
+        "@gazelle//v2/testtools",  # keep
     ],
 )
 
