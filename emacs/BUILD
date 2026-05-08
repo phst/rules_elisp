@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,8 +33,8 @@ alias(
 alias(
     name = "module_header",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30//:module_header",
-        "//conditions:default": "@gnu_emacs_30//:module_header",
+        "@platforms//os:windows": "@emacs_windows_30//:module_header",
+        "//conditions:default": "@emacs_30//:module_header",
     }),
     visibility = ["//visibility:public"],
 )
@@ -42,8 +42,8 @@ alias(
 alias(
     name = "emacs_29",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_29//:emacs",
-        "//conditions:default": "@gnu_emacs_29//:emacs",
+        "@platforms//os:windows": "@emacs_windows_29//:emacs",
+        "//conditions:default": "@emacs_29//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
@@ -51,8 +51,8 @@ alias(
 alias(
     name = "emacs_30",
     actual = select({
-        "@platforms//os:windows": "@gnu_emacs_windows_30//:emacs",
-        "//conditions:default": "@gnu_emacs_30//:emacs",
+        "@platforms//os:windows": "@emacs_windows_30//:emacs",
+        "//conditions:default": "@emacs_30//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
