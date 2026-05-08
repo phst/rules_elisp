@@ -95,22 +95,22 @@ elisp_toolchain(
 
 elisp_toolchain(
     name = "emacs_29",
-    emacs = "@gnu_emacs_29//:emacs",
+    emacs = "@emacs_29//:emacs",
 )
 
 elisp_toolchain(
     name = "emacs_29_windows_x86_64",
-    emacs = "@gnu_emacs_windows_29//:emacs",
+    emacs = "@emacs_windows_29//:emacs",
 )
 
 elisp_toolchain(
     name = "emacs_30",
-    emacs = "@gnu_emacs_30//:emacs",
+    emacs = "@emacs_30//:emacs",
 )
 
 elisp_toolchain(
     name = "emacs_30_windows_x86_64",
-    emacs = "@gnu_emacs_windows_30//:emacs",
+    emacs = "@emacs_windows_30//:emacs",
 )
 
 bzl_library(
