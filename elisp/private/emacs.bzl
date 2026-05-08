@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the `emacs_repository` repository rule."""
+"""Defines the `emacs` repository rule."""
 
 load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
 
 visibility("private")
 
-def _emacs_repository_impl(ctx):
+def _emacs_impl(ctx):
     urls = ctx.attr.urls
     ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
@@ -44,7 +44,7 @@ def _emacs_repository_impl(ctx):
         executable = False,
     )
 
-emacs_repository = repository_rule(
+emacs = repository_rule(
     # @unsorted-dict-items
     attrs = {
         "urls": attr.string_list(mandatory = True, allow_empty = False),
@@ -56,5 +56,5 @@ emacs_repository = repository_rule(
         "type": attr.string(mandatory = True, values = ["source", "release"]),
         "target_compatible_with": attr.label_list(),
     },
-    implementation = _emacs_repository_impl,
+    implementation = _emacs_impl,
 )
