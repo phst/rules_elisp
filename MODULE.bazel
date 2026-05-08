@@ -43,9 +43,9 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 
 # Non-module dependencies
-emacs_repository = use_repo_rule("//elisp/private:emacs_repository.bzl", "emacs_repository")
+emacs = use_repo_rule("//elisp/private:emacs.bzl", "emacs")
 
-emacs_repository(
+emacs(
     name = "gnu_emacs_29",
     format = "tar.xz",
     integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
@@ -57,7 +57,7 @@ emacs_repository(
     ],
 )
 
-emacs_repository(
+emacs(
     name = "gnu_emacs_windows_29",
     format = "zip",
     integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
@@ -73,7 +73,7 @@ emacs_repository(
     ],
 )
 
-emacs_repository(
+emacs(
     name = "gnu_emacs_30",
     format = "tar.xz",
     integrity = "sha384-2hDJF2LcSpB7ZTLRyCpYBkXpMs1QVlANlrSPNfU6sUrrs57Q+7QY3Ff7MIYRwNRt",
@@ -85,7 +85,7 @@ emacs_repository(
     ],
 )
 
-emacs_repository(
+emacs(
     name = "gnu_emacs_windows_30",
     format = "zip",
     integrity = "sha384-MeW1g2s6e5UBWMBYEU+FCMeLnZMKaiBo6BWfc4Re/Dy//JBaN7RXRJtzXLq9QTSg",
@@ -101,9 +101,9 @@ emacs_repository(
     ],
 )
 
-local_emacs_repository = use_repo_rule("//elisp/private:local_emacs_repository.bzl", "local_emacs_repository")
+local_emacs = use_repo_rule("//elisp/private:local_emacs.bzl", "local_emacs")
 
-local_emacs_repository(name = "local_emacs")
+local_emacs(name = "local_emacs")
 
 junit_xsd = use_repo_rule("//private:junit_xsd.bzl", "junit_xsd")
 

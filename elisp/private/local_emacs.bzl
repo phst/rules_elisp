@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Google LLC
+# Copyright 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Defines the `local_emacs_repository` repository rule."""
+"""Defines the `local_emacs` repository rule."""
 
 visibility("private")
 
-def _local_emacs_repository_impl(ctx):
+def _local_emacs_impl(ctx):
     windows = ctx.os.name.startswith("windows")
     emacs = ctx.getenv("EMACS", "emacs")
     if windows and not emacs.lower().endswith(".exe"):
@@ -40,7 +40,7 @@ def _local_emacs_repository_impl(ctx):
         executable = False,
     )
 
-local_emacs_repository = repository_rule(
-    implementation = _local_emacs_repository_impl,
+local_emacs = repository_rule(
+    implementation = _local_emacs_impl,
     local = True,
 )
