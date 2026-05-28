@@ -1,4 +1,4 @@
-// Copyright 2021-2023, 2025 Google LLC
+// Copyright 2021-2023, 2025, 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/bazelbuild/bazel-gazelle/testtools"
+
 	"github.com/phst/rules_elisp/private/testutil"
 )
 
