@@ -100,7 +100,7 @@ runs:
         sudo apt-get update
         sudo apt-get remove \
           firefox google-chrome-stable microsoft-edge-stable \
-          azure-cli google-cloud-cli google-cloud-cli-anthoscli \
+          azure-cli google-cloud-cli \
           llvm-{16..18}-dev
         sudo apt-get install libxml2-utils libncurses-dev
         sudo apt-get autoremove
