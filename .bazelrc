@@ -46,5 +46,4 @@ test:windows --test_timeout=240,1200,3600,14400
 # the default heuristic for coverage instrumentation filtering doesn’t work.
 coverage --instrumentation_filter='^//'
 
-import %workspace%/c-std.bazelrc
 import %workspace%/macos-gcc.bazelrc
