@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,12 @@ build:macos-gcc --copt='-D_DARWIN_C_SOURCE' --host_copt='-D_DARWIN_C_SOURCE'
 # TODO: File bug against rules_cc.
 build:macos-gcc --features='-macos_default_link_flags'
 build:macos-gcc --host_features='-macos_default_link_flags'
+
+# The macos_reproducible feature unconditionally adds -ffile-compilation-dir,
+# which isn’t supported by GCC.
+# TODO: File bug against rules_cc.
+build:macos-gcc --features='-macos_reproducible'
+build:macos-gcc --host_features='-macos_reproducible'
 
 # Local Variables:
 # mode: bazelrc
