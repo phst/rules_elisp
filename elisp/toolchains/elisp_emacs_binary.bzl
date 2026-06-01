@@ -215,7 +215,6 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
     args.add_joined(
         cflags,
         join_with = " ",
-        map_each = _munge_msvc_flag,
         omit_if_empty = False,
         expand_directories = False,
     )
@@ -315,10 +314,6 @@ def _builtin_features(actions, extract, srcs, out):
             "supports-path-mapping": "",
         },
     )
-
-def _munge_msvc_flag(s):
-    # Crude way to work around specifying Visual C++ options in .bazelrc.
-    return s.replace("/std:c", "-std=gnu")
 
 def _is_lisp_source(file, type):
     if file.extension != "el":
