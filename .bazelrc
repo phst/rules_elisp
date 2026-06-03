@@ -31,6 +31,11 @@ build --define=absl=1
 build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'
 build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
 
+# The next line shouldn’t be needed.  This is probably caused by
+# https://github.com/bazel-contrib/rules_go/pull/4593.
+# TODO: File bug against rules_go.
+build:windows --@rules_go//go/config:pure
+
 # Treat warnings as errors, but only for this repository.
 build --//private:treat_warnings_as_errors
 
