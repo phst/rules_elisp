@@ -162,6 +162,8 @@ github.com/bazelbuild/rules_go v0.60.0 h1:apGSxTTrFUyLNvX9NQmF4CbntWAO0/S5eALeVg
 github.com/bazelbuild/rules_go v0.60.0/go.mod h1:CYcohJVxs4n7eftbC39GCqaEJm3E1EME+6QAkGguKoI=
 github.com/bazelbuild/rules_go v0.61.0 h1:Anz8trQHMdiCIjUzSjqL1JEZRFZZMYzKkIqwT7ESaMI=
 github.com/bazelbuild/rules_go v0.61.0/go.mod h1:6YghDRf6l3FSiAwncK+Ww9jE1naoQzNq28gaKJeB67I=
+github.com/bazelbuild/rules_go v0.61.1 h1:F7jqdw0Zp/RtWFDbLFuVa2DaPjUQkqZOLCns8vCxSWg=
+github.com/bazelbuild/rules_go v0.61.1/go.mod h1:6YghDRf6l3FSiAwncK+Ww9jE1naoQzNq28gaKJeB67I=
 github.com/google/go-cmp v0.6.0 h1:ofyhxvXcZhMsU5ulbFiLKl/XBFqE1GSq7atu8tAmTRI=
 github.com/google/go-cmp v0.6.0/go.mod h1:17dUlkBOakJ0+DkrSSNjCkIjxS6bF9zb3elmeNGIjoY=
 github.com/google/go-cmp v0.7.0 h1:wk8382ETsv4JYUZwIsn6YpYiWiBsYLSJiTsyBybVuN8=
