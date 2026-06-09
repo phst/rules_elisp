@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@ load("@protobuf//bazel:upb_proto_reflection_library.bzl", "upb_proto_reflection_
 load("@protobuf//bazel/toolchains:proto_lang_toolchain.bzl", "proto_lang_toolchain")
 load("//elisp:elisp_cc_module.bzl", "elisp_cc_module")
 load("//elisp:elisp_library.bzl", "elisp_library")
-load("//private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES")
+load("//private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":elisp_proto_library.bzl", "elisp_proto_library")
 
@@ -144,6 +144,7 @@ elisp_cc_module(
         "//private:msvc_or_clang_cl": ["/wd4100"],
     }),
     features = FEATURES + ["-default_link_libs"],
+    linkopts = LINKOPTS,
     local_defines = DEFINES,
     visibility = ["//tests/proto/integration:__pkg__"],
     deps = [
