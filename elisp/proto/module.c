@@ -4368,7 +4368,15 @@ enum InitializationResult {
 #  define VISIBLE
 #endif
 
-int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
+#if ABSL_HAVE_ATTRIBUTE(used)
+#  define USED __attribute__((used))
+#else
+#  define USED
+#endif
+
+#define EXPORT VISIBLE USED
+
+int EXPORT emacs_module_init(struct emacs_runtime* rt) {
   enum {
     kMinimumRuntimeSize = sizeof *rt,
     kMinimumEnvironmentSize = sizeof(struct emacs_env_29)
@@ -4814,6 +4822,8 @@ int VISIBLE emacs_module_init(struct emacs_runtime* rt) {
   return kSuccess;
 }
 
-int VISIBLE plugin_is_GPL_compatible = 1;
+int EXPORT plugin_is_GPL_compatible = 1;
 
 #undef VISIBLE
+#undef USED
+#undef EXPORT
