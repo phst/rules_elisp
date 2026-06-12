@@ -15,6 +15,7 @@
 """Defines the `elisp_library` rule."""
 
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
+load("//elisp/private:build_package.bzl", "build_package")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS", "compile")
 
 visibility("public")
@@ -30,14 +31,38 @@ def _elisp_library_impl(ctx):
         tags = ctx.attr.tags,
         fatal_warnings = ctx.attr.fatal_warnings,
     )
+    extra_out = []
+    package_file = None
+    metadata_file = None
+    autoloads_file = None
+    if ctx.attr.enable_package and not ctx.attr.testonly:
+        pkg = build_package(ctx, ctx.files.srcs, ctx.files.data)
+        extra_out += [pkg.package_file, pkg.metadata_file, pkg.autoloads_file]
+        package_file = pkg.package_file
+        metadata_file = pkg.metadata_file
+        autoloads_file = pkg.autoloads_file
     return [
-        default_info,
+        DefaultInfo(
+            files = depset(direct = extra_out, transitive = [default_info.files]),
+            runfiles = default_info.default_runfiles,
+        ),
         coverage_common.instrumented_files_info(
             ctx,
             source_attributes = ["srcs"],
             dependency_attributes = ["deps", "srcs", "data"],
         ),
-        elisp_info,
+        EmacsLispInfo(
+            source_files = elisp_info.source_files,
+            compiled_files = elisp_info.compiled_files,
+            load_path = elisp_info.load_path,
+            data_files = elisp_info.data_files,
+            transitive_source_files = elisp_info.transitive_source_files,
+            transitive_compiled_files = elisp_info.transitive_compiled_files,
+            transitive_load_path = elisp_info.transitive_load_path,
+            package_file = package_file,
+            metadata_file = metadata_file,
+            autoloads_file = autoloads_file,
+        ),
     ]
 
 elisp_library = rule(
@@ -74,6 +99,34 @@ To add a load path entry for the current package, specify `.` here.""",
         "deps": attr.label_list(
             doc = "List of `elisp_library` dependencies.",
             providers = [EmacsLispInfo],
+        ),
+        "enable_package": attr.bool(
+            doc = """Enable generation of package.el package for this library.
+This value is forced to False if testonly is True.""",
+            default = True,
+        ),
+        "emacs_package_name": attr.string(
+            doc = """The name used for the package.el package.
+This attribute is ignored if enable_package is False.
+Otherwise, srcs should contain a package description file `<name>-pkg.el`.
+If there is no such package description file, then srcs must contain a file
+`<name>.el` containing the appropriate package headers.
+
+If there is only one file in srcs, then the default value is the file basename
+with the .el suffix removed.  Otherwise, the default is the target label name,
+with underscores replaced with dashes.""",
+        ),
+        "_gen_pkg_el": attr.label(
+            default = "//elisp/private/tools:gen-pkg-el.elc",
+            allow_single_file = [".elc"],
+        ),
+        "_gen_metadata": attr.label(
+            default = "//elisp/private/tools:gen-metadata.elc",
+            allow_single_file = [".elc"],
+        ),
+        "_gen_autoloads": attr.label(
+            default = "//elisp/private/tools:gen-autoloads.elc",
+            allow_single_file = [".elc"],
         ),
     },
     doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
