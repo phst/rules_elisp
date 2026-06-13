@@ -48,7 +48,8 @@ COPTS = select({
 }) + select({
     Label("@rules_cc//cc/compiler:clang"): [
         "-Wno-nullability-extension",
-        # Work around https://github.com/llvm/llvm-project/issues/121984.
+        # Work around https://github.com/llvm/llvm-project/issues/121984 and
+        # https://github.com/bazelbuild/rules_cc/issues/729.
         "--system-header-prefix=absl/",
         "--system-header-prefix=google/",
         "--system-header-prefix=tools/",
