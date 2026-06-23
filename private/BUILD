@@ -78,6 +78,7 @@ bzl_library(
     name = "cc_config",
     srcs = ["cc_config.bzl"],
     visibility = ["//elisp/private:__pkg__"],
+    deps = [":package_features"],
 )
 
 bzl_library(

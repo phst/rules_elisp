@@ -14,6 +14,8 @@
 
 """Defines shared C/C++ configuration constants for this repository."""
 
+load(":package_features.bzl", "PACKAGE_FEATURES")
+
 visibility([
     # keep sorted
     "//elisp/private",
@@ -22,7 +24,7 @@ visibility([
     "//tests/tools",
 ])
 
-FEATURES = select({
+FEATURES = PACKAGE_FEATURES + select({
     Label("//private:treat_warnings_as_errors_enabled"): ["treat_warnings_as_errors"],
     Label("//conditions:default"): [],
 })
