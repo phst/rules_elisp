@@ -13,6 +13,8 @@
 # limitations under the License.
 
 .POSIX:
+.PHONY: all generate check compdb coverage check-extra benchmark
+.PHONY: clean install uninstall
 .SUFFIXES:
 
 SHELL = /bin/sh
