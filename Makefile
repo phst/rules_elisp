@@ -47,7 +47,8 @@ CPPFILT ?= c++filt
 compdb:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
-	  -- @wolfd_bazel_compile_commands//:generate_compile_commands
+	  -- @wolfd_bazel_compile_commands//:generate_compile_commands \
+	  $(COMPDB_BAZELFLAGS:%=--extra_aquery_arg=%)
 
 coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
