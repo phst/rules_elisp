@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Support for building with GCC on macOS.  Ideally “CC=gcc-14” would suffice,
+# Support for building with GCC on macOS.  Ideally “CC=gcc-15” would suffice,
 # but there seem to be various bugs in GCC and rules_cc that we need to work
 # around.
 
