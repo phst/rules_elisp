@@ -279,7 +279,7 @@ static const NativeChar* absl_nonnull Pointer(
 
 absl::StatusOr<FileName> FileName::Parent() const {
   NativeString string = string_;
-  while (string.back() == kSeparator) string.pop_back();
+  while (!string.empty() && string.back() == kSeparator) string.pop_back();
   NativeString::size_type i = string.rfind(kSeparator);
   if (i == string.npos || (kWindows && i == 0)) {
     return absl::InvalidArgumentError(
