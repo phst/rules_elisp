@@ -1,6 +1,6 @@
 ;;; gen-proto.el --- generate protocol buffer bindings -*- lexical-binding: t; -*-
 
-;; Copyright 2021-2025 Google LLC
+;; Copyright 2021-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ qualified name of a protocol buffer message type, and FIELDS is a list
 of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
 where FULL-NAME specifies the qualified name of a protocol buffer
 enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
-  (declare (ftype (function (cons) t)))
+  (declare (ftype (function (&rest t) t)))
   (cl-check-type proto-file @simple-string)
   (cl-check-type descriptor string)
   (cl-check-type deps list)
