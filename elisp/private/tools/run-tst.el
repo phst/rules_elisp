@@ -90,7 +90,7 @@ be determined, return nil."
   (let ((case-fold-search nil)
         (directory default-directory))
     ;; Yuck!  ‘ert--test’ is an implementation detail.
-    (when-let ((file (symbol-file test 'ert--test)))
+    (when-let* ((file (symbol-file test 'ert--test)))
       ;; The filename typically refers to a compiled file in the execution root.
       ;; Try to resolve it to a source file.  See
       ;; https://bazel.build/remote/output-directories#layout-diagram.
@@ -109,7 +109,7 @@ be determined, return nil."
       ;; ‘find-library-name’ signals errors if it can’t find the library.  Since
       ;; we’re only attempting to print a log message here, ignore them and move
       ;; on.
-      (when-let ((file (ignore-errors (find-library-name file))))
+      (when-let* ((file (ignore-errors (find-library-name file))))
         (with-temp-buffer
           (let ((coding-system-for-read 'utf-8-unix)
                 (format-alist nil)
@@ -148,7 +148,7 @@ failure messages."
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
     (dolist (test tests)
-      (when-let ((result (ert-test-most-recent-result test)))
+      (when-let* ((result (ert-test-most-recent-result test)))
         (let* ((name (ert-test-name test))
                (duration (ert-test-result-duration result))
                (expected (ert-test-result-expected-p test result))
@@ -411,7 +411,7 @@ defined."
          (@instrument-form seen vector form)
          ;; Determine whether this is a branching form.  If so, generate a
          ;; branch frequency vector and attach it to DATA.
-         (when-let ((branches (@instrument-branches vector form)))
+         (when-let* ((branches (@instrument-branches vector form)))
            (setf (@coverage-data-branches data) branches))))
       ((or (pred vectorp) (pred proper-list-p))
        ;; Use ‘seq-doseq’ where possible to avoid deep recursion.
@@ -505,9 +505,9 @@ the corresponding element in the return value will be nil."
                                           nil index (1+ index)))))
        branches))
     (`(cl-loop . ,(and (pred proper-list-p) rest))
-     (when-let ((conditions (cl-loop for (keyword form) on rest
-                                     when (memq keyword '(if when unless))
-                                     collect form)))
+     (when-let* ((conditions (cl-loop for (keyword form) on rest
+                                      when (memq keyword '(if when unless))
+                                      collect form)))
        (let ((branches (make-vector (* 2 (length conditions)) nil)))
          (cl-loop for form in conditions
                   and index from 0 by 2
@@ -588,8 +588,8 @@ the form.  Return (before . BEFORE-INDEX)."
     (cl-incf (@coverage-data-hits data))
     ;; If this is a subform of a branching form and we’re supposed to
     ;; unconditionally increment a branch frequency, do so now.
-    (when-let ((branches (@coverage-data-parent-branches data))
-               (branch-index (@coverage-data-branch-index data)))
+    (when-let* ((branches (@coverage-data-parent-branches data))
+                (branch-index (@coverage-data-branch-index data)))
       (cl-incf (aref branches branch-index))))
   ;; The return value gets passed to the BEFORE-INDEX argument of
   ;; ‘edebug-after’.  Pick a form that allows it to distinguish this case from
@@ -626,10 +626,10 @@ form.  Return VALUE."
       ;; so, increment the branch hit count for the “then” or “else” branch
       ;; depending on VALUE.  We need to do this in ‘edebug-after’ because only
       ;; then we know the return value of the form.
-      (when-let ((branches (@coverage-data-parent-branches data))
-                 (branch-index (if value
-                                   (@coverage-data-then-index data)
-                                 (@coverage-data-else-index data))))
+      (when-let* ((branches (@coverage-data-parent-branches data))
+                  (branch-index (if value
+                                    (@coverage-data-then-index data)
+                                  (@coverage-data-else-index data))))
         (cl-incf (aref branches branch-index)))))
   value)
 
@@ -664,7 +664,7 @@ instrumented using Edebug."
     (let ((coding-system-for-write 'utf-8-unix)
           (write-region-annotate-functions nil)
           (write-region-post-annotation-function nil))
-      (when-let ((test-name (@getenv "TEST_TARGET")))
+      (when-let* ((test-name (@getenv "TEST_TARGET")))
         (insert "TN:" (@sanitize-string test-name) ?\n))
       (dolist (buffer buffers)
         (@insert-coverage-report buffer)
@@ -760,7 +760,7 @@ Lisp source file that has been instrumented with Edebug using
             (when ours
               ;; Collect branch coverage information if the form has multiple
               ;; branches.
-              (when-let ((frequencies (@coverage-data-branches cov)))
+              (when-let* ((frequencies (@coverage-data-branches cov)))
                 ;; Remove branches that Edebug didn’t instrument.
                 (cl-callf2 cl-remove nil frequencies)
                 ;; If fewer than two branches are left, we don’t really have any
@@ -867,7 +867,7 @@ assume the file name always refers to a local file, and quote it."
   (declare (ftype (function (string) (or null string)))
            (side-effect-free error-free))
   (cl-check-type name string)
-  (when-let ((value (@getenv name)))
+  (when-let* ((value (@getenv name)))
     ;; Expand relative filenames so that they are unaffected by changes to
     ;; ‘default-directory’.
     (@expand-and-quote value)))
@@ -996,7 +996,7 @@ exact copies as equal."
 
 (random (or (@getenv "TEST_RANDOM_SEED") ""))
 
-(when-let ((shard-status-file (@env-file "TEST_SHARD_STATUS_FILE")))
+(when-let* ((shard-status-file (@env-file "TEST_SHARD_STATUS_FILE")))
   (let ((coding-system-for-write 'no-conversion)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))
@@ -1140,7 +1140,7 @@ exact copies as equal."
 
   ;; The test sources should have processed any remaining command-line
   ;; arguments.
-  (when-let ((args command-line-args-left))
+  (when-let* ((args command-line-args-left))
     (error "Unprocessed command-line arguments: %S" args))
   (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
 
@@ -1152,7 +1152,7 @@ exact copies as equal."
 
   ;; Take test sharding into account if desired.
   (cl-flet ((env-int (name)
-              (when-let ((value (getenv name)))
+              (when-let* ((value (getenv name)))
                 (cl-parse-integer value))))
     (let ((shard-count (or (env-int "TEST_TOTAL_SHARDS") 1))
           (shard-index (or (env-int "TEST_SHARD_INDEX") 0)))
@@ -1191,7 +1191,7 @@ exact copies as equal."
             (unless expected
               ;; Print a nice error message that should point back to the source
               ;; file in a compilation buffer.
-              (when-let ((prefix (@message-prefix name)))
+              (when-let* ((prefix (@message-prefix name)))
                 (message "%s: Test %s %s" prefix name status)))
             (when (ert-test-result-with-condition-p result)
               (let ((message (@failure-message name result)))
@@ -1206,7 +1206,7 @@ exact copies as equal."
             (message "Running %d tests finished, %d results unexpected"
                      completed unexpected)
             (setq exit-code (min unexpected 1)))
-          (when-let ((report-file (@env-file "XML_OUTPUT_FILE")))
+          (when-let* ((report-file (@env-file "XML_OUTPUT_FILE")))
             (@write-report report-file start-time tests stats failure-messages))
           (when coverage-enabled
             (let ((reporter (when verbose-coverage

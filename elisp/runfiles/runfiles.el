@@ -1,6 +1,6 @@
 ;;; runfiles.el --- access to Bazel runfiles  -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2025 Google LLC
+;; Copyright 2020-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -62,10 +62,10 @@ aren’t found at either location, signal an error of type
                 (and value (not (string-empty-p value))
                      (concat "/:" (expand-file-name value))))))
     (unless manifest
-      (when-let ((value (env "RUNFILES_MANIFEST_FILE")))
+      (when-let* ((value (env "RUNFILES_MANIFEST_FILE")))
         (setq manifest value)))
     (unless directory
-      (when-let ((value (env "RUNFILES_DIR")))
+      (when-let* ((value (env "RUNFILES_DIR")))
         (setq directory value))))
   (let* ((impl (or (and manifest (not (string-empty-p manifest))
                         (file-regular-p manifest)
@@ -76,8 +76,8 @@ aren’t found at either location, signal an error of type
                         (@make-directory directory))
                    (signal 'elisp/runfiles/not-found
                            (list "Runfiles not found" manifest directory))))
-         (mapping (when-let ((file (ignore-error elisp/runfiles/not-found
-                                     (@rlocation impl "_repo_mapping"))))
+         (mapping (when-let* ((file (ignore-error elisp/runfiles/not-found
+                                      (@rlocation impl "_repo_mapping"))))
                     (@parse-repo-mapping file))))
     (@runfiles-make impl mapping)))
 
@@ -117,14 +117,14 @@ in its place."
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
-  (when-let ((repo-mapping (@runfiles-repo-mapping runfiles))
-             (canonical caller-repo))
+  (when-let* ((repo-mapping (@runfiles-repo-mapping runfiles))
+              (canonical caller-repo))
     (pcase-exhaustive filename
       ((rx bos
            (let apparent (+ (not (any "/\n"))))
            (let rest (? ?/ (+ nonl)))
            eos)
-       (when-let ((mapping (@map-repo repo-mapping canonical apparent)))
+       (when-let* ((mapping (@map-repo repo-mapping canonical apparent)))
          (setq filename (concat mapping rest))))))
   (@rlocation (@runfiles-impl runfiles) filename))
 
@@ -159,7 +159,7 @@ determined."
 (cl-define-compiler-macro elisp/runfiles/rlocation
     (&whole form filename &optional runfiles &key caller-repo)
   (unless caller-repo
-    (when-let ((name (elisp/runfiles/current-repo)))
+    (when-let* ((name (elisp/runfiles/current-repo)))
       (setq form `(elisp/runfiles/rlocation ,filename ,runfiles
                                             :caller-repo ,name))))
   form)
