@@ -78,7 +78,8 @@ This type corresponds to the protocol buffer message type ‘%s’."
     (terpri)
     (pp `(defun ,public-constructor (,@(and fields '(&rest fields)))
            ,public-constructor-doc
-           (declare (ftype (function (&rest t) ,struct)) (side-effect-free t))
+           (declare (ftype (function (,@(and fields '(&rest t))) ,struct))
+                    (side-effect-free t))
            ,(if fields
                 `(apply #'elisp/proto/make ',struct fields)
               `(elisp/proto/make ',struct))))
