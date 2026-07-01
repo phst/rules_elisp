@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -282,8 +282,8 @@ func reportTemplate() report {
 				ClassName: "ERT",
 				Time:      wantElapsed,
 				Error: message{
-					Message:     `peculiar error: "Boo"`,
-					Type:        `undefined-error-symbol`,
+					Message:     `Invalid error symbol: undefined-error-symbol`,
+					Type:        `error`,
 					Description: nonEmptyDesc,
 				},
 			},
@@ -397,16 +397,21 @@ func reportTemplate() report {
 			},
 		},
 	}
-	if emacsMajor == 30 {
+	if emacsMajor < 31 {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
-		abort.Error = message{}
-		abort.Skipped = message{
-			Message:     `Test skipped: ((skip-unless (not (eql emacs-major-version 30))) :form (not t) :value nil)`,
-			Description: nonEmptyDesc,
+		if emacsMajor < 30 {
+			abort.Error.Message = `peculiar error: "Boo"`
+			abort.Error.Type = `undefined-error-symbol`
+		} else {
+			abort.Error = message{}
+			abort.Skipped = message{
+				Message:     `Test skipped: ((skip-unless (not (eql emacs-major-version 30))) :form (not t) :value nil)`,
+				Description: nonEmptyDesc,
+			}
+			r.Errors--
+			r.Skipped++
 		}
-		r.Errors--
-		r.Skipped++
 	}
 	return r
 }
