@@ -385,7 +385,7 @@ either nil (for a toplevel definition) or a vector of optional
 ‘@coverage-data’ objects with the same length as the offset vector.  The
 vector is attached to the ‘@coverage’ property of the symbol being
 defined."
-  (declare (ftype (function (hash-table (or null vector)) t)))
+  (declare (ftype (function (hash-table (or null vector) t) t)))
   (cl-check-type seen hash-table)
   (cl-check-type vector (or null vector))
   (unless (gethash form seen)

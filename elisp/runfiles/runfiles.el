@@ -174,9 +174,9 @@ instance.  REMOTE must be nil or a remote host identifier (see Info node
 ‘(elisp) Magic File Names’); if the returned values are on the same
 remote host as REMOTE, return the local names on that host, otherwise
 signal an error of type ‘elisp/runfiles/remote’."
-  (declare (ftype (function (&optional (or null elisp/runfiles/runfiles)
-                                       (or string null))
-                            list)))
+  (declare (ftype (function
+                   (&optional (or null elisp/runfiles/runfiles) &rest t)
+                   list)))
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type remote (or string null))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
