@@ -77,6 +77,26 @@ toolchain(
 )
 
 toolchain(
+    name = "emacs_31_toolchain",
+    toolchain = "emacs_31",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
+    name = "emacs_31_windows_x86_64_toolchain",
+    exec_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    toolchain = "emacs_31_windows_x86_64",
+    toolchain_type = ":toolchain_type",
+)
+
+toolchain(
     name = "local_toolchain",
     toolchain = ":local",
     toolchain_type = ":toolchain_type",
@@ -111,6 +131,16 @@ elisp_toolchain(
 elisp_toolchain(
     name = "emacs_30_windows_x86_64",
     emacs = "@emacs_windows_30//:emacs",
+)
+
+elisp_toolchain(
+    name = "emacs_31",
+    emacs = "@emacs_31//:emacs",
+)
+
+elisp_toolchain(
+    name = "emacs_31_windows_x86_64",
+    emacs = "@emacs_windows_31//:emacs",
 )
 
 bzl_library(
