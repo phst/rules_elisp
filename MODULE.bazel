@@ -95,6 +95,34 @@ emacs(
     ],
 )
 
+emacs(
+    name = "emacs_31",
+    format = "tar.xz",
+    integrity = "sha384-h6ZYgI3s8kLzbTuxFvsnIVc9KbkjYKfEcGE+NWs8PVR6FYzxQx1UVe/TbDxqNG/o",
+    strip_prefix = "emacs-31.1",
+    type = "source",
+    urls = [
+        "https://ftpmirror.gnu.org/emacs/emacs-31.1.tar.xz",
+        "https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.xz",
+    ],
+)
+
+emacs(
+    name = "emacs_windows_31",
+    format = "zip",
+    integrity = "sha384-JDRuV+m/5XRPobs/w8e0SSWQNNRg88rTd76poM/auST7b7wJlTAC+F5gxxsLzdLb",
+    strip_prefix = "",
+    target_compatible_with = [
+        "@platforms//os:windows",
+        "@platforms//cpu:x86_64",
+    ],
+    type = "release",
+    urls = [
+        "https://ftpmirror.gnu.org/emacs/windows/emacs-31/emacs-31.1.zip",
+        "https://ftp.gnu.org/gnu/emacs/windows/emacs-31/emacs-31.1.zip",
+    ],
+)
+
 local_emacs = use_repo_rule("//elisp/private:local_emacs.bzl", "local_emacs")
 
 local_emacs(name = "local_emacs")
