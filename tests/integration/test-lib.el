@@ -52,7 +52,8 @@
   (condition-case nil
       (message "%S" arg)
     (error arg))
-  (when-let (a arg) (message "%s" a))
+  (with-suppressed-warnings ((obsolete when-let))
+    (when-let (a arg) (message "%s" a)))
   (when-let* ((a arg) (arg) a) (message "%s" a))
   (cl-loop for x in '(1 2 3) if x do (message "%s" x))
   ;; Improper lists and vectors should also work.
