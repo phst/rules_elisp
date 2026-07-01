@@ -1,6 +1,6 @@
 ;;; test-lib.el --- test to check the test runner -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2023, 2025 Google LLC
+;; Copyright 2020, 2021, 2023, 2025, 2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@
       (message "%S" arg)
     (error arg))
   (when-let (a arg) (message "%s" a))
-  (when-let ((a arg) (arg) a) (message "%s" a))
+  (when-let* ((a arg) (arg) a) (message "%s" a))
   (cl-loop for x in '(1 2 3) if x do (message "%s" x))
   ;; Improper lists and vectors should also work.
   (message "%S %S %S" `(,arg . q) #1='(a . #1#) `[,arg q])

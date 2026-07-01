@@ -1,6 +1,6 @@
 ;;; proto.el --- basic protocol buffer functionality  -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2023, 2025 Google LLC
+;; Copyright 2020-2023, 2025, 2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ FORM.  This internal function is meant to be used in compiler macros."
   (declare (ftype (function (t symbol t) t)))
   ;; Emacs turns errors in compiler macros into messages, see
   ;; ‘macroexp--compiler-macro’.  Print a compiler warning instead.
-  (if-let ((message (@keys-message type keys)))
+  (if-let* ((message (@keys-message type keys)))
       (macroexp-warn-and-return message form 'callargs)
     form))
 
