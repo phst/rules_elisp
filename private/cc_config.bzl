@@ -77,14 +77,13 @@ COPTS = select({
 
 CXXOPTS = select({
     Label(":msvc_or_clang_cl"): [],
+    Label(":gcc_or_clang"): ["-fvisibility-inlines-hidden"],
+}) + select({
     Label("@rules_cc//cc/compiler:gcc"): [
         # GCC appears to treat some moves as redundant that are in fact
         # necessary.
         "-Wno-redundant-move",
     ],
-    Label("@rules_cc//cc/compiler:clang"): [],
-}) + select({
-    Label(":gcc_or_clang"): ["-fvisibility-inlines-hidden"],
     Label("//conditions:default"): [],
 })
 
