@@ -88,9 +88,9 @@ def _char(point):
         return esc
     if 0x20 <= point and point <= 0x7F:  # ASCII, no need to escape
         return CHR[point]
-    if point <= 0xFFFF:  # BMP character
+    if 0 <= point and point <= 0xFFFF:  # BMP character
         return "\\u" + _hex(point, pad = 4)
-    if point <= 0x10FFFF:  # Non-BMP character
+    if 0x10000 <= point and point <= 0x10FFFF:  # Non-BMP character
         return "\\U" + _hex(point, pad = 8)
     fail("invalid code point U+%X" % point)
 
