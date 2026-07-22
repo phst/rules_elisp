@@ -19,7 +19,7 @@ load("@bazel_skylib//lib:types.bzl", "types")
 
 visibility("public")
 
-def _init_elisp_info(*, source_files, compiled_files, load_path, data_files, transitive_source_files, transitive_compiled_files, transitive_load_path):
+def _init_elisp_info(*, source_files, compiled_files, load_path, data_files, transitive_source_files, transitive_compiled_files, transitive_load_path, package_file = None, metadata_file = None, autoloads_file = None):
     if not types.is_list(source_files):
         fail("source_files must be a list, got", source_files)
     if not types.is_list(compiled_files):
@@ -44,6 +44,9 @@ def _init_elisp_info(*, source_files, compiled_files, load_path, data_files, tra
         "transitive_source_files": transitive_source_files,
         "transitive_compiled_files": transitive_compiled_files,
         "transitive_load_path": transitive_load_path,
+        "package_file": package_file,
+        "metadata_file": metadata_file,
+        "autoloads_file": autoloads_file,
     }
 
 EmacsLispInfo, _ = provider(
@@ -78,6 +81,12 @@ additions for this library and all its transitive dependencies.
 The `depset` uses preorder traversal: entries for libraries closer to the root
 of the dependency graph come first.  The `depset` elements are structures as
 described in the provider documentation.""",
+        "package_file": """A `File` object for the -pkg.el file.
+None if `enable_package` is False.""",
+        "metadata_file": """A `File` object for the metadata file.
+None if `enable_package` is False.""",
+        "autoloads_file": """A `File` object for the autoloads file.
+None if `enable_package` is False.""",
     },
     init = _init_elisp_info,
 )
