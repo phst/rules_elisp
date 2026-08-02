@@ -59,6 +59,7 @@ runs:
           build --incompatible_strict_action_env
           build --toolchain_resolution_debug=//elisp/runfiles:runfiles
           test --test_output=errors
+          run --noomit_run_args
           ${{
             inputs.bazel-version == 'default' &&
             'common --incompatible_enforce_starlark_utf8=error' || ''
