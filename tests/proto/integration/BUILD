@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
-load("@rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 

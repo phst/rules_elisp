@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@rules_go//go:def.bzl", "go_library")
+load("@rules_go//go:go_library.bzl", "go_library")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
