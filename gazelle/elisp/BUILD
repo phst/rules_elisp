@@ -14,7 +14,8 @@
 
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
-load("@rules_go//go:def.bzl", "go_library", "go_test")
+load("@rules_go//go:go_library.bzl", "go_library")
+load("@rules_go//go:go_test.bzl", "go_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(

@@ -15,7 +15,7 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
-load("@rules_go//go:def.bzl", "go_test")
+load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
