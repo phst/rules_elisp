@@ -39,6 +39,7 @@ for dir in . examples/ext; do
   bazel run \
     --lockfile_mode=off \
     --norun_validations \
+    --noomit_run_args \
     -- \
     @phst_merge_bazel_lockfiles//:merge \
     --linux-amd64="${linux:?}" \
