@@ -1,0 +1,17 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "packageRules": [
+    {
+      "enabled": false,
+      "matchDepTypes": [
+        "bazel_dep"
+      ],
+      "matchManagers": [
+        "bazel-module"
+      ]
+    }
+  ]
+}
