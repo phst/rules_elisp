@@ -53,9 +53,9 @@ released, support for Emacs 29 will be dropped.
 Add a snippet like the following to your ~MODULE.bazel~ file:
 
 #+BEGIN_SRC bazel-module
-bazel_dep(name = "phst_rules_elisp")
+bazel_dep(name = "rules_elisp")
 git_override(
-    module_name = "phst_rules_elisp",
+    module_name = "rules_elisp",
     remote = "https://github.com/phst/rules_elisp.git",
     commit = "c80b4ad393a971252b56364887f214c13a5ef026",
 )
@@ -95,7 +95,7 @@ load path.
 This repository also includes a library to access runfiles; see
 [[https://bazel.build/extending/rules#runfiles][the Bazel documentation on
 runfiles]].  To use it, add a build dependency on
-~@phst_rules_elisp//elisp/runfiles~.
+~@rules_elisp//elisp/runfiles~.
 
 #+FINDEX: elisp/runfiles/rlocation
 #+TINDEX: elisp/runfiles/runfiles
@@ -122,7 +122,7 @@ corresponding ~elisp_proto_library~ rule has the same prefix and ends in
 =_elisp_proto=.  For example:
 
 #+BEGIN_SRC bazel-build
-load("@phst_rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
+load("@rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 
 proto_library(
@@ -658,7 +658,7 @@ information about providers.
 #+INCLUDE: elisp/common/elisp_info.org
 
 To compile Emacs Lisp source files and runs tests, ~rules_elisp~ registers the
-toolchains of type ~@phst_rules_elisp//elisp:toolchain_type~; see
+toolchains of type ~@rules_elisp//elisp:toolchain_type~; see
 [[https://bazel.build/extending/toolchains][Toolchains]].  Emacs Lisp toolchains
 are created using the `elisp_toolchain` rule.
 

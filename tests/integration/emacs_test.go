@@ -1,4 +1,4 @@
-// Copyright 2020-2023, 2025 Google LLC
+// Copyright 2020-2023, 2025, 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -112,7 +112,7 @@ func TestRunWrapped(t *testing.T) {
 	}
 	runfilesLib := *runfilesElc
 	gotArgs := got.Args
-	dir, err := runfiles.Rlocation("phst_rules_elisp")
+	dir, err := runfiles.Rlocation("rules_elisp")
 	if err != nil {
 		dir = "ERROR \u0000" // this can never match
 	}
@@ -135,7 +135,7 @@ func TestRunWrapped(t *testing.T) {
 			"--batch",
 			"--load=" + runfilesLib,
 			"--funcall=elisp/runfiles/install-handler",
-			"--directory=/bazel-runfile:phst_rules_elisp",
+			"--directory=/bazel-runfile:rules_elisp",
 			"--option",
 			*binaryCc,
 			" \t\n\r\f äα𝐴🐈'\\\"",
@@ -158,7 +158,7 @@ func TestRunWrapped(t *testing.T) {
 	wantManifest := map[string]any{
 		"root":        "RUNFILES_ROOT",
 		"tags":        []any{"local", "mytag"},
-		"loadPath":    []any{"phst_rules_elisp"},
+		"loadPath":    []any{"rules_elisp"},
 		"inputFiles":  []any{*binaryCc, *binaryH},
 		"outputFiles": []any{outputFile},
 	}

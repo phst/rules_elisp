@@ -39,7 +39,7 @@ elisp_library(
     deps = [
         ":lib_2",
         "//elisp/runfiles",
-        "@phst_rules_elisp_example//:lib_4",
+        "@rules_elisp_example//:lib_4",
     ],
 )
 
