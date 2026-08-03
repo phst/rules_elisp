@@ -1,4 +1,4 @@
-# Copyright 2020, 2021, 2023-2025 Google LLC
+# Copyright 2020, 2021, 2023-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@phst_rules_elisp//elisp:elisp_library.bzl", "elisp_library")
-load("@phst_rules_elisp//elisp:elisp_test.bzl", "elisp_test")
+load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
 
 package(
-    default_applicable_licenses = ["@phst_rules_elisp//:license"],
+    default_applicable_licenses = ["@rules_elisp//:license"],
     default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = [
@@ -34,7 +34,7 @@ licenses(["notice"])
 elisp_library(
     name = "lib_4",
     srcs = ["lib-4.el"],
-    visibility = ["@phst_rules_elisp//examples:__pkg__"],
+    visibility = ["@rules_elisp//examples:__pkg__"],
     deps = ["@dash"],
 )
 

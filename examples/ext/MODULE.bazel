@@ -14,15 +14,15 @@
 
 """Bzlmod module definition for an external example."""
 
-module(name = "phst_rules_elisp_example")
+module(name = "rules_elisp_example")
 
-bazel_dep(name = "phst_rules_elisp")
+bazel_dep(name = "rules_elisp")
 local_path_override(
-    module_name = "phst_rules_elisp",
+    module_name = "rules_elisp",
     path = "../..",
 )
 
-elisp = use_extension("@phst_rules_elisp//elisp/extensions:elisp.bzl", "elisp")
+elisp = use_extension("@rules_elisp//elisp/extensions:elisp.bzl", "elisp")
 elisp.http_archive(
     name = "dash",
     exclude = ["dash-functional.el"],

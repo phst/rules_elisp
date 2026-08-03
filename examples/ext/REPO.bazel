@@ -1,4 +1,4 @@
-# Copyright 2023-2025 Philipp Stephani
+# Copyright 2023-2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """Example repository."""
 
 repo(
-    default_applicable_licenses = ["@phst_rules_elisp//:license"],
+    default_applicable_licenses = ["@rules_elisp//:license"],
     default_visibility = ["//visibility:private"],
     features = [
         "no_copts_tokenization",

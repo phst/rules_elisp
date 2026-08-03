@@ -302,7 +302,7 @@
     "//elisp/extensions:elisp.bzl%elisp": {
       "general": {
         "bzlTransitiveDigest": "0EbFJ6+8AV6eao9YuFK6+e1iOXtKxNljDQ4LI8vkTdk=",
-        "usagesDigest": "npTbN5S3ZviiMfeJIN6H/MKRJZVKrtLGSssndXBi8zs=",
+        "usagesDigest": "Z2iXVGb56awmtRKD79GCNnW7nVG9+SMJLjK6wgiWCK8=",
         "recordedInputs": [
           "REPO_MAPPING:,bazel_skylib bazel_skylib+"
         ],

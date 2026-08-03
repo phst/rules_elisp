@@ -1,6 +1,6 @@
 ;;; lib-1.el --- example library 1 -*- lexical-binding: t; -*-
 
-;; Copyright 2020 Google LLC
+;; Copyright 2020, 2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@
   ;; Use runfiles library to access data dependencies.
   (with-temp-buffer
     (insert-file-contents
-     (elisp/runfiles/rlocation "phst_rules_elisp/examples/data.txt"))
+     (elisp/runfiles/rlocation "rules_elisp/examples/data.txt"))
     (message "%s" (buffer-string))))
 
 (provide 'examples/lib-1)

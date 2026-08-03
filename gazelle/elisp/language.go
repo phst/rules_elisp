@@ -1,4 +1,4 @@
-// Copyright 2021-2025 Google LLC
+// Copyright 2021-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 // Package elisp implements Gazelle support for Emacs Lisp.  It generates and
 // maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
-// rules from the phst_rules_elisp repository.  See https://phst.eu/rules_elisp
+// rules from the rules_elisp repository.  See https://phst.eu/rules_elisp
 // and https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
 //
 // To suppress generation of elisp_proto_library rules, add a Gazelle directive
@@ -146,4 +146,4 @@ func load(kind, repo, pkg string) rule.LoadInfo {
 
 func (elisp) Fix(c *config.Config, f *rule.File) {}
 
-const moduleName = "phst_rules_elisp"
+const moduleName = "rules_elisp"

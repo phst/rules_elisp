@@ -268,35 +268,6 @@
   },
   "selectedYankedVersions": {},
   "moduleExtensions": {
-    "@@phst_rules_elisp+//elisp/extensions:elisp.bzl%elisp": {
-      "general": {
-        "bzlTransitiveDigest": "0EbFJ6+8AV6eao9YuFK6+e1iOXtKxNljDQ4LI8vkTdk=",
-        "usagesDigest": "4iwtS36k67JNpdV652VZFifE4/W14A+Nc4dcPiMj9ZU=",
-        "recordedInputs": [
-          "REPO_MAPPING:phst_rules_elisp+,bazel_skylib bazel_skylib+"
-        ],
-        "generatedRepoSpecs": {
-          "dash": {
-            "repoRuleId": "@@phst_rules_elisp+//elisp/extensions:elisp.bzl%_elisp_http_archive",
-            "attributes": {
-              "urls": [
-                "https://github.com/magnars/dash.el/archive/refs/tags/2.20.0.zip"
-              ],
-              "integrity": "sha384-25uwEahS6SGEeyat+3yTddDwvqPJxpjWxovKFvvWgxYh2WZIVxye1VqJ1tVI7wYb",
-              "strip_prefix": "dash.el-2.20.0/",
-              "target_name": "dash",
-              "exclude": [
-                "dash-functional.el"
-              ]
-            }
-          }
-        },
-        "moduleExtensionMetadata": {
-          "useAllRepos": "REGULAR",
-          "reproducible": false
-        }
-      }
-    },
     "@@protobuf+//python/dist:system_python.bzl%system_python_extension": {
       "general": {
         "bzlTransitiveDigest": "qh0n9IrXU/xS94wxKQrG1J63zrLkA1Wy2Y3BQxptPcI=",
@@ -364,6 +335,35 @@
             "repoRuleId": "@@rules_android+//rules/android_sdk_repository:rule.bzl%_android_sdk_repository",
             "attributes": {}
           }
+        }
+      }
+    },
+    "@@rules_elisp+//elisp/extensions:elisp.bzl%elisp": {
+      "general": {
+        "bzlTransitiveDigest": "0EbFJ6+8AV6eao9YuFK6+e1iOXtKxNljDQ4LI8vkTdk=",
+        "usagesDigest": "wP8wtjtd1AcGuOL7tcjFr4Ce3sosBwTBzwY/lAc6Yjc=",
+        "recordedInputs": [
+          "REPO_MAPPING:rules_elisp+,bazel_skylib bazel_skylib+"
+        ],
+        "generatedRepoSpecs": {
+          "dash": {
+            "repoRuleId": "@@rules_elisp+//elisp/extensions:elisp.bzl%_elisp_http_archive",
+            "attributes": {
+              "urls": [
+                "https://github.com/magnars/dash.el/archive/refs/tags/2.20.0.zip"
+              ],
+              "integrity": "sha384-25uwEahS6SGEeyat+3yTddDwvqPJxpjWxovKFvvWgxYh2WZIVxye1VqJ1tVI7wYb",
+              "strip_prefix": "dash.el-2.20.0/",
+              "target_name": "dash",
+              "exclude": [
+                "dash-functional.el"
+              ]
+            }
+          }
+        },
+        "moduleExtensionMetadata": {
+          "useAllRepos": "REGULAR",
+          "reproducible": false
         }
       }
     },
