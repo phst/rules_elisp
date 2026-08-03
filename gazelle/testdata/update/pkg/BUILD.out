@@ -1,4 +1,4 @@
-load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@my_rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 
 elisp_library(
     name = "lib_2",
