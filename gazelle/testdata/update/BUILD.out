@@ -1,7 +1,7 @@
-load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
-load("@rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
-load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
-load("@rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
+load("@my_rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@my_rules_elisp//elisp:elisp_manual.bzl", "elisp_manual")
+load("@my_rules_elisp//elisp:elisp_test.bzl", "elisp_test")
+load("@my_rules_elisp//elisp/proto:elisp_proto_library.bzl", "elisp_proto_library")
 
 proto_library(
     name = "my_proto",

@@ -1,5 +1,5 @@
 proto_library(name = "my_proto", srcs = ["my.proto"])
-load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
+load("@my_rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 some_rule(name = "module")
 # gazelle:resolve elisp module :module
 

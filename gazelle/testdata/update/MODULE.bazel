@@ -14,4 +14,4 @@
 
 module(name = "test")
 
-bazel_dep(name = "phst_rules_elisp", repo_name = "rules_elisp")
+bazel_dep(name = "phst_rules_elisp", repo_name = "my_rules_elisp")
