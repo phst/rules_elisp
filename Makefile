@@ -39,7 +39,11 @@ check: all check-extra
 
 GENERATE_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off
 COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
-  --features=-parse_headers --host_features=-parse_headers
+  --features=-parse_headers --host_features=-parse_headers \
+  --features=-header_modules --host_features=-header_modules \
+  --features=-module_maps --host_features=-module_maps \
+  --features=-use_module_maps --host_features=-use_module_maps \
+  --features=-layering_check --host_features=-layering_check
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 GENHTML ?= genhtml
 GENHTMLFLAGS = --branch-coverage \
