@@ -15,7 +15,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
-load("@phst_license_test//:def.bzl", "license_test")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -35,17 +34,6 @@ buildifier_test(
     lint_warnings = ["all"],
     no_sandbox = True,
     workspace = "//:MODULE.bazel",
-)
-
-license_test(
-    name = "license_test",
-    size = "medium",
-    timeout = "short",
-    ignore = [
-        "coverage-report/**",
-        "index.html",
-    ],
-    marker = "//:MODULE.bazel",
 )
 
 nogo(

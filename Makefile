@@ -87,6 +87,9 @@ check-extra:
 	  -- '*/BUILD' '*/BUILD.bazel' ':^/examples/ext/'
 	$(GIT) grep -I -r -E -l -z -e '^#!/' -- ':^*.ps1' | \
 	  xargs -t -r -0 -- $(SHELLCHECK) $(SHELLCHECKFLAGS) --
+        # Find files without license headers.
+	$(BAZEL) run $(BAZELFLAGS) -- @addlicense --check \
+	  --ignore='**/index.html' --ignore='**/coverage-report/**' -- "$${PWD}"
 
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
 
