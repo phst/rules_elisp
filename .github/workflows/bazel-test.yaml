@@ -29,9 +29,18 @@ jobs:
       matrix:
         # We don’t use the GitHub matrix support for the Emacs toolchain to
         # allow Bazel to cache intermediate results between the test runs.
-        bazel: [8.0.0, 8.x, default]
-        os: [ubuntu-latest, macos-latest, windows-latest]
-        cc: [gcc, clang, msvc]
+        bazel:
+          - 8.0.0
+          - 8.x
+          - default
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+        cc:
+          - gcc
+          - clang
+          - msvc
         exclude:
           # Visual C++ works only on Windows.  Windows doesn’t use the CC
           # environment variable and always uses Visual C++ by default.

@@ -23,7 +23,10 @@ jobs:
     name: Build Emacs
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:

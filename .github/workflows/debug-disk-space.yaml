@@ -23,7 +23,9 @@ jobs:
     name: Debug disk space
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os:
+          - ubuntu-latest
+          - macos-latest
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
