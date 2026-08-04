@@ -138,17 +138,11 @@ use_repo(
     "com_github_yuin_goldmark",
     "org_golang_google_protobuf",
     "org_golang_x_text",
+    addlicense = "com_github_google_addlicense",
 )
 
 # Tools for development
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.3", dev_dependency = True, repo_name = "buildifier")
-bazel_dep(name = "phst_license_test", version = "0", dev_dependency = True)
-git_override(
-    module_name = "phst_license_test",
-    commit = "6c1ef186ecce537f0ce25f4cb43ab45628631c86",
-    remote = "https://github.com/phst/license_test.git",
-)
-
 bazel_dep(name = "wolfd_bazel_compile_commands", version = "0.5.2", dev_dependency = True)
 
 # Bogus versions added because of
