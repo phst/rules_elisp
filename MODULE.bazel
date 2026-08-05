@@ -145,10 +145,6 @@ use_repo(
 bazel_dep(name = "buildifier_prebuilt", version = "8.5.1.3", dev_dependency = True, repo_name = "buildifier")
 bazel_dep(name = "wolfd_bazel_compile_commands", version = "0.5.2", dev_dependency = True)
 
-# Bogus versions added because of
-# https://github.com/renovatebot/renovate/issues/33476.
-# FIXME: Remove them once Renovate issue is fixed.
-
 # Local binaries that need to be installed on the host/exec machine.
 local_config = use_repo_rule("//dev:local_config.bzl", "local_config")
 
@@ -159,7 +155,7 @@ local_config(
 
 # We want to test the external example without adding its repository to the
 # registry.  So we override the dependency immediately locally.
-bazel_dep(name = "rules_elisp_example", version = "0", dev_dependency = True)
+bazel_dep(name = "rules_elisp_example", dev_dependency = True)
 local_path_override(
     module_name = "rules_elisp_example",
     path = "examples/ext",
