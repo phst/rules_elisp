@@ -1,0 +1,16 @@
+{
+  "homepage": "https://phst.eu/rules_elisp/",
+  "maintainers": [
+    {
+      "email": "m@phst.eu",
+      "github": "phst",
+      "github_user_id": 398701,
+      "name": "Philipp Stephani"
+    }
+  ],
+  "repository": [
+    "github:phst/rules_elisp"
+  ],
+  "versions": [],
+  "yanked_versions": {}
+}
