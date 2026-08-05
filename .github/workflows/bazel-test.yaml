@@ -50,6 +50,8 @@ jobs:
             cc: msvc
           - os: windows-latest
             cc: gcc
+          - os: macos-latest
+            cc: gcc
       fail-fast: false
     runs-on: ${{matrix.os}}
     steps:
