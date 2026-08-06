@@ -6,11 +6,8 @@
   "packageRules": [
     {
       "enabled": false,
-      "matchDepTypes": [
-        "bazel_dep"
-      ],
-      "matchManagers": [
-        "bazel-module"
+      "matchFileNames": [
+        "MODULE.bazel"
       ]
     }
   ]
