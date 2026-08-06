@@ -41,6 +41,8 @@ runs:
         # --incompatible_enforce_starlark_utf8 was added in Bazel 8.1.
         # FIXME: Add it to the project’s .bazelrc once we drop support for
         # Bazel 8.0 and below.
+        # --omit_run_args was added in Bazel 9.
+        # FIXME: Add it unconditionally once we drop support for Bazel 8.
         # See https://bazel.build/configure/windows#clang for how to configure
         # Bazel to use Clang on Windows.
         bazelrc: |
