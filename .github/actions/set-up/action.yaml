@@ -19,7 +19,6 @@ inputs:
   bazel-version:
     description: Bazel version to use
     required: false
-    default: default
   cc:
     description: C/C++ compiler to use
     required: false
@@ -50,7 +49,7 @@ runs:
           common --remote_download_minimal
           common --incompatible_config_setting_private_default_visibility
           common --experimental_ui_max_stdouterr_bytes=2000000
-          common --lockfile_mode=${{inputs.bazel-version == 'default' && 'error' || 'off'}}
+          common --lockfile_mode=${{inputs.bazel-version == '' && 'error' || 'off'}}
           build --verbose_failures
           build --experimental_convenience_symlinks=ignore
           build --show_result=0
@@ -60,11 +59,11 @@ runs:
           build --toolchain_resolution_debug=//elisp/runfiles:runfiles
           test --test_output=errors
           ${{
-            inputs.bazel-version == 'default' &&
+            inputs.bazel-version == '' &&
             'run --noomit_run_args' || ''
           }}
           ${{
-            inputs.bazel-version == 'default' &&
+            inputs.bazel-version == '' &&
             'common --incompatible_enforce_starlark_utf8=error' || ''
           }}
           ${{
@@ -130,7 +129,7 @@ runs:
         -LiteralPath $Env:GITHUB_ENV
         -Value 'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe'
     - name: Override Bazel version
-      if: inputs.bazel-version != 'default'
+      if: inputs.bazel-version != ''
       shell: pwsh
       run: >-
         Add-Content

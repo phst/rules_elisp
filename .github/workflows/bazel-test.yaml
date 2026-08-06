@@ -32,7 +32,7 @@ jobs:
         bazel:
           - '8.0.0'
           - '8.x'
-          - 'default'
+          - ''  # use .bazelversion
         os:
           - ubuntu-latest
           - macos-latest
