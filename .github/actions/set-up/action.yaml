@@ -106,7 +106,6 @@ runs:
         sudo apt-get autoremove
         sudo apt-get clean
         rm -r -f /usr/share/dotnet /usr/share/swift /usr/local/graalvm
-        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
     - name: Set up macOS worker
       if: runner.os == 'macOS'
       shell: bash
@@ -118,7 +117,6 @@ runs:
         echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
         profdata="$(xcrun --find llvm-profdata)"
         echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
-        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
     - name: Set up Windows worker
       if: runner.os == 'Windows'
       # Make Bazel find the right binaries on GitHub.  See
@@ -137,3 +135,8 @@ runs:
         -Verbose
         -LiteralPath $Env:GITHUB_ENV
         -Value 'USE_BAZEL_VERSION=${{inputs.bazel-version}}'
+    - name: Override C/C++ compiler
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
