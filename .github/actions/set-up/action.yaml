@@ -60,11 +60,8 @@ runs:
           build --incompatible_strict_action_env
           build --toolchain_resolution_debug=//elisp/runfiles:runfiles
           test --test_output=errors
-          ${{inputs.bazel-version && '#' || 'run --noomit_run_args'}}
-          ${{
-            inputs.bazel-version && '#' ||
-            'common --incompatible_enforce_starlark_utf8=error'
-          }}
+          ${{inputs.bazel-version && '# ' || ''}}run --noomit_run_args
+          ${{inputs.bazel-version && '# ' || ''}}common --incompatible_enforce_starlark_utf8=error
           ${{
             runner.os == 'Windows' && inputs.cc == 'clang' &&
             'build --config=clang-cl' || ''
