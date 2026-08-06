@@ -75,7 +75,7 @@ runs:
             'build --noexperimental_inprocess_symlink_creation' || ''
           }}
         # Use disk cache to speed up runs.
-        disk-cache: ${{inputs.bazel-version}}-${{inputs.cc}}
+        disk-cache: ${{inputs.bazel-version || 'default'}}-${{inputs.cc}}
         repository-cache: true
     - id: msys2
       name: Install MSYS2
