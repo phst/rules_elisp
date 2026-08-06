@@ -30,9 +30,9 @@ jobs:
         # We don’t use the GitHub matrix support for the Emacs toolchain to
         # allow Bazel to cache intermediate results between the test runs.
         bazel:
-          - 8.0.0
-          - 8.x
-          - default
+          - '8.0.0'
+          - '8.x'
+          - 'default'
         os:
           - ubuntu-latest
           - macos-latest
