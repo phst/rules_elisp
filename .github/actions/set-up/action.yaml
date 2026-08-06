@@ -118,10 +118,7 @@ runs:
         echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
         profdata="$(xcrun --find llvm-profdata)"
         echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
-        if [ '${{matrix.cc}}' = gcc ]; then
-          # “gcc” points to Clang on macOS.
-          echo 'CC=gcc-15' >> "${GITHUB_ENV:?}"
-        fi
+        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
     - name: Set up Windows worker
       if: runner.os == 'Windows'
       # Make Bazel find the right binaries on GitHub.  See
