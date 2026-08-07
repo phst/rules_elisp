@@ -29,6 +29,7 @@ SHELLCHECKFLAGS =
 HYPERFINE ?= hyperfine
 HYPERFINEFLAGS =
 GO = $(BAZEL) run $(BAZELFLAGS) -- @rules_go//go
+ADDLICENSE = $(GO) tool addlicense
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -89,7 +90,7 @@ check-extra:
 	$(GIT) grep -I -r -E -l -z -e '^#!/' -- ':^*.ps1' | \
 	  xargs -t -r -0 -- $(SHELLCHECK) $(SHELLCHECKFLAGS) --
         # Find files without license headers.
-	$(GO) tool addlicense --check \
+	$(ADDLICENSE) --check \
 	  --ignore='index.html' --ignore='coverage-report/**' -- .
 
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
