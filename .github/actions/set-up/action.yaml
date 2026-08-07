@@ -24,8 +24,9 @@ inputs:
     required: false
     default: >-
       ${{
-      runner.os == 'Linux' && 'gcc'
-      || (runner.os == 'macOS' && 'clang' || 'msvc')
+      case(runner.os == 'Linux', 'gcc',
+           runner.os == 'macOS', 'clang',
+           'msvc')
       }}
 
 runs:
@@ -51,7 +52,7 @@ runs:
           common --remote_download_minimal
           common --incompatible_config_setting_private_default_visibility
           common --experimental_ui_max_stdouterr_bytes=2000000
-          common --lockfile_mode=${{inputs.bazel-version && 'off' || 'error'}}
+          common --lockfile_mode=${{case(inputs.bazel-version == '', 'error', 'off')}}
           build --verbose_failures
           build --experimental_convenience_symlinks=ignore
           build --show_result=0
@@ -60,15 +61,15 @@ runs:
           build --incompatible_strict_action_env
           build --toolchain_resolution_debug=//elisp/runfiles:runfiles
           test --test_output=errors
-          ${{inputs.bazel-version && '# ' || ''}}run --noomit_run_args
-          ${{inputs.bazel-version && '# ' || ''}}common --incompatible_enforce_starlark_utf8=error
+          ${{case(inputs.bazel-version == '', '', '# ')}}run --noomit_run_args
+          ${{case(inputs.bazel-version == '', '', '# ')}}common --incompatible_enforce_starlark_utf8=error
           ${{
-            runner.os == 'Windows' && inputs.cc == 'clang' &&
-            'build --config=clang-cl' || ''
+            case(runner.os == 'Windows' && inputs.cc == 'clang',
+                 'build --config=clang-cl', '')
           }}
           ${{
-            inputs.bazel-version == '8.0.0' &&
-            'build --noexperimental_inprocess_symlink_creation' || ''
+            case(inputs.bazel-version == '8.0.0',
+                 'build --noexperimental_inprocess_symlink_creation', '')
           }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.bazel-version || 'default'}}-${{inputs.cc}}
