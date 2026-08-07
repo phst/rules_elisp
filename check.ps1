@@ -61,6 +61,8 @@ foreach ($version in $versions) {
     Run-Tests "--extra_toolchains=$($toolchains -join ',')"
 }
 
+Run-Tests '--extra_toolchains=//elisp:local_toolchain'
+
 Run-Bazel 'mod' 'graph' > $null
 
 Join-Path -Path examples -ChildPath ext | Set-Location
