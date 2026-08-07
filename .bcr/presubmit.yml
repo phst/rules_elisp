@@ -30,6 +30,8 @@ tasks:
     bazel: ${{bazel}}
     build_targets:
       - '@rules_elisp//elisp/...'
+    build_flags:
+      - '--experimental_ui_max_stdouterr_bytes=2000000'
 
 bcr_test_module:
   module_path: examples/ext
