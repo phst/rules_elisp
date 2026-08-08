@@ -104,17 +104,6 @@ static absl::Status Run(const FileName& temp, const FileName& build,
               << std::endl
               << stream.rdbuf() << std::endl;
   }
-  {
-    const FileName config_log =
-        build.Child(RULES_ELISP_NATIVE_LITERAL("config.log")).value();
-    std::ifstream stream(config_log.string(), std::ios::in | std::ios::binary);
-    if (stream.is_open() && stream.good()) {
-      std::cerr << "config.log follows:" << std::endl
-                << stream.rdbuf() << std::endl;
-    } else {
-      std::cerr << "config.log not found" << std::endl;
-    }
-  }
   std::cerr << std::endl
             << absl::StreamFormat("temporary build directory is %s", temp)
             << std::endl;
