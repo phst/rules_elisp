@@ -44,3 +44,11 @@ jobs:
       attest: true
     secrets:
       publish_token: ${{secrets.BCR_PUBLISH_TOKEN}}
+  publish:
+    name: Publish release
+    needs: bcr
+    steps:
+      - name: Publish release
+        uses: softprops/action-gh-release@v3
+        with:
+          draft: false
