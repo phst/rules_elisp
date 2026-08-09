@@ -17,11 +17,10 @@
 # Generate release archive.  See
 # https://github.com/bazel-contrib/.github/blob/master/.github/workflows/release_ruleset.yaml.
 
-# shellcheck disable=SC3040
-set -Cefux -o pipefail
+set -Cefux
 
 tag="$1"
-version="${tag:1}"
+version="${tag#v}"
 archive="rules_elisp-${tag:?}.tar.gz"
 
 git archive --output="${archive:?}" "refs/tags/${tag:?}"
