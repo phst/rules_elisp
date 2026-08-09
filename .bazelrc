@@ -50,3 +50,7 @@ test:windows --test_timeout=240,1200,3600,14400
 # Since the tests are usually in separate packages from the targets under test,
 # the default heuristic for coverage instrumentation filtering doesn’t work.
 coverage --instrumentation_filter='^//'
+
+# Try to unbreak build on Buildkite.
+# TODO: Investigate and fix.
+common --repo_env='=ANDROID_HOME'
