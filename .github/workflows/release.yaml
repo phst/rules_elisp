@@ -25,8 +25,8 @@ permissions:
   contents: write
 
 jobs:
-  release:
-    name: Release
+  create:
+    name: Create release
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.7.0
     with:
       release_files: rules_elisp-*.tar.gz
@@ -34,9 +34,9 @@ jobs:
         sudo apt-get install libxml2-utils libncurses-dev && bazel test //...
       prerelease: false
       draft: true
-  publish:
+  bcr:
     name: Publish to BCR
-    needs: release
+    needs: create
     uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.4.2
     with:
       tag_name: ${{github.ref_name}}
