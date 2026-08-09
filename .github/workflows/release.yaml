@@ -34,3 +34,13 @@ jobs:
         sudo apt-get install libxml2-utils libncurses-dev && bazel test //...
       prerelease: false
       draft: true
+  publish:
+    name: Publish to BCR
+    needs: release
+    uses: bazel-contrib/publish-to-bcr/.github/workflows/publish.yaml@v1.4.2
+    with:
+      tag_name: ${{github.ref_name}}
+      registry_fork: phst/bazel-central-registry
+      attest: true
+    secrets:
+      publish_token: ${{secrets.BCR_PUBLISH_TOKEN}}
