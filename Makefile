@@ -14,7 +14,7 @@
 
 .POSIX:
 .PHONY: all generate check compdb coverage check-extra benchmark
-.PHONY: clean install uninstall release
+.PHONY: clean install uninstall
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -125,16 +125,3 @@ uninstall:
 	install-info --delete -- \
 	  '$(infodir)/rules_elisp.info' '$(infodir)/dir'
 	rm -- '$(infodir)/rules_elisp.info'
-
-current_tag != $(GIT) tag --points-at=HEAD -- 'v*'
-tag = $(current_tag)
-archive = rules_elisp-$(tag).tar.gz
-
-GH = gh
-
-release: check
-	test -n '$(tag)'
-	$(GIT) archive --output='$(archive)' 'refs/tags/$(tag)'
-	$(GH) release create --generate-notes --verify-tag -- \
-	  '$(tag)' '$(archive)'
-	rm -- '$(archive)'
