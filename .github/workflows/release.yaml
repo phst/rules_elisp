@@ -30,7 +30,7 @@ jobs:
     uses: bazel-contrib/.github/.github/workflows/release_ruleset.yaml@v7.7.0
     with:
       release_files: rules_elisp-*.tar.gz
-      bazel_test_command: |
+      bazel_test_command: |-
         sudo apt-get install libxml2-utils libncurses-dev && bazel test //...
       prerelease: false
       draft: true
