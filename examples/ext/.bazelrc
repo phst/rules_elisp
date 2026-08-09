@@ -15,3 +15,5 @@
 build:clang-cl --compiler=clang-cl --host_compiler=clang-cl
 build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-clang-cl'
 build:clang-cl --extra_execution_platforms='@rules_elisp//elisp/private:windows_clang_cl'
+
+import %workspace%/../../ci.bazelrc
