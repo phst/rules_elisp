@@ -31,7 +31,7 @@ jobs:
     with:
       release_files: rules_elisp-*.tar.gz
       bazel_test_command: |-
-        sudo apt-get install libxml2-utils libncurses-dev && bazel test //...
+        sudo apt-get install libxml2-utils && bazel test //...
       prerelease: false
       draft: true
   bcr:
