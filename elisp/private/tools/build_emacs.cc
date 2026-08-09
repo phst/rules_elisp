@@ -209,6 +209,10 @@ static absl::Status Build(const FileName& source, const FileName& install,
       RULES_ELISP_NATIVE_LITERAL("CC=") + AsPosix(*cc_resolved),
       RULES_ELISP_NATIVE_LITERAL("CFLAGS=") + NativeString(cflags),
       RULES_ELISP_NATIVE_LITERAL("LDFLAGS=") + NativeString(ldflags),
+      // Try to work around https://bugs.gnu.org/79489 in older Emacsen.
+      // FIXME: Remove this once we drop support for Emacs 29 and 30.
+      RULES_ELISP_NATIVE_LITERAL(
+          "ac_cv_func_posix_spawn_file_actions_addchdir=no"),
   };
   if (const absl::Status status =
           Run(*temp, build, bash, configure, std::move(configure_args));
