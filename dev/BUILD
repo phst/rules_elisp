@@ -19,7 +19,7 @@ load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )

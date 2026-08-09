@@ -27,7 +27,7 @@ load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINK
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )

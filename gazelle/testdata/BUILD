@@ -1,4 +1,4 @@
-# Copyright 2025 Philipp Stephani
+# Copyright 2025, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )

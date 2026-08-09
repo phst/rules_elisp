@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@ load("@gazelle//:def.bzl", "gazelle", "gazelle_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
