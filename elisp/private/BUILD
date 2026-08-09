@@ -179,8 +179,6 @@ cc_defaults(
         "-coverage",
         # Don’t link against the C++ standard library, as Emacs is pure C code.
         "-default_link_libs",
-        # This feature might cause build breakage on Buildkite.
-        "-macos_minimum_os",
     ],
     linkopts = [],
     visibility = ["//elisp/toolchains:__pkg__"],
