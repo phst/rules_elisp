@@ -51,6 +51,6 @@ test:windows --test_timeout=240,1200,3600,14400
 # the default heuristic for coverage instrumentation filtering doesn’t work.
 coverage --instrumentation_filter='^//'
 
-# Try to unbreak build on Buildkite.
-# TODO: Investigate and fix.
+# Work around https://github.com/bazelbuild/continuous-integration/issues/2466.
+# TODO: Remove once bug is fixed.
 common --repo_env='=ANDROID_HOME'
