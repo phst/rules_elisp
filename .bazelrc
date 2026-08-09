@@ -50,7 +50,3 @@ test:windows --test_timeout=240,1200,3600,14400
 # Since the tests are usually in separate packages from the targets under test,
 # the default heuristic for coverage instrumentation filtering doesn’t work.
 coverage --instrumentation_filter='^//'
-
-# Work around https://github.com/bazelbuild/continuous-integration/issues/2466.
-# TODO: Remove once bug is fixed.
-common --repo_env='=ANDROID_HOME'
