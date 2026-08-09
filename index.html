@@ -117,12 +117,7 @@ released, support for Emacs 29 will be dropped.
 <p>Add a snippet like the following to your <code class="code">MODULE.bazel</code> file:
 </p>
 <div class="example">
-<pre class="example-preformatted">bazel_dep(name = &quot;rules_elisp&quot;)
-git_override(
-    module_name = &quot;rules_elisp&quot;,
-    remote = &quot;https://github.com/phst/rules_elisp.git&quot;,
-    commit = &quot;c80b4ad393a971252b56364887f214c13a5ef026&quot;,
-)
+<pre class="example-preformatted">bazel_dep(name = &quot;rules_elisp&quot;, version = &quot;0.0.2&quot;)
 </pre></div>
 
 <p>See <a class="uref" href="https://bazel.build/external/overview#bzlmod">the Bzlmod documentation</a>
