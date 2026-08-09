@@ -80,7 +80,7 @@ check-extra:
         # Find Starlark files without visibility declaration.
 	! $(GIT) grep -I -r -E -L -e '^visibility\(' -- '*.bzl'
         # Find BUILD files without correct license declaration.
-	! $(GIT) grep -I -r -F -L -e 'default_applicable_licenses' \
+	! $(GIT) grep -I -r -F -L -e 'default_package_metadata' \
 	  -- '*/BUILD' '*/BUILD.bazel'
 	! $(GIT) grep -I -r -E -L -e '^licenses\(\["notice"\]\)' \
 	  -- '*/BUILD' '*/BUILD.bazel'

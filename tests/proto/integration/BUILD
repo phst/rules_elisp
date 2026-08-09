@@ -18,7 +18,7 @@ load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,

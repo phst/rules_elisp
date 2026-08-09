@@ -15,7 +15,7 @@
 """Example repository."""
 
 repo(
-    default_applicable_licenses = ["@rules_elisp//:license"],
+    default_package_metadata = ["@rules_elisp//:license"],
     default_visibility = ["//visibility:private"],
     features = [
         "no_copts_tokenization",

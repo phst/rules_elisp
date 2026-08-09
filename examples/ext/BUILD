@@ -16,7 +16,7 @@ load("@rules_elisp//elisp:elisp_library.bzl", "elisp_library")
 load("@rules_elisp//elisp:elisp_test.bzl", "elisp_test")
 
 package(
-    default_applicable_licenses = ["@rules_elisp//:license"],
+    default_package_metadata = ["@rules_elisp//:license"],
     default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = [

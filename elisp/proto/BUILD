@@ -23,7 +23,7 @@ load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load(":elisp_proto_library.bzl", "elisp_proto_library")
 
 package(
-    default_applicable_licenses = ["//:license"],
+    default_package_metadata = ["//:license"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
