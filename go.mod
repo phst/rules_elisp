@@ -30,7 +30,7 @@ require (
 require (
 	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
-	golang.org/x/mod v0.37.0 // indirect
+	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
