@@ -28,7 +28,7 @@ require (
 )
 
 require (
-	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2.0.20260811172631-e9e199e6ec50
+	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2.0.20260813233317-2a34c89c1d44
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
