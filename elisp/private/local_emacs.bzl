@@ -22,7 +22,7 @@ def _local_emacs_impl(ctx):
     if windows and not emacs.lower().endswith(".exe"):
         emacs += ".exe"
     sep = "\\" if windows else "/"
-    if sep not in emacs:
+    if emacs and sep not in emacs:
         emacs = ctx.which(emacs)
 
     # Don’t fail during the loading phase if Emacs isn’t locally installed, only
