@@ -1,5 +1,7 @@
 github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2 h1:lSINS7DK4xjm0Z4CBd7onO63uIe6WUsEZ/0voExa+JY=
 github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2/go.mod h1:B76PjnaM2KyUG8ypV/ePHHDmGbyUNZ2PCEdEQIJISQM=
+github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2.0.20260811172631-e9e199e6ec50 h1:PAiWfMCSVHgeLKcqA508Ldn8DnA7xDCgMJOJFeTW/bs=
+github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-2.0.20260811172631-e9e199e6ec50/go.mod h1:B76PjnaM2KyUG8ypV/ePHHDmGbyUNZ2PCEdEQIJISQM=
 github.com/bazelbuild/bazel-gazelle v0.40.0 h1:SAYys3KRG5i3KTgQAvO423bLT1rQMSgqEKReMkM/CW0=
 github.com/bazelbuild/bazel-gazelle v0.40.0/go.mod h1:xI42W5YdKQg0g3rj1jZfdW8j1UihNmvb5KwWDdHg2ec=
 github.com/bazelbuild/bazel-gazelle v0.41.0 h1:blh57YCxe3QNFbzRtEuLxaak+f5KYSQynznGnUNDRc4=
