@@ -170,6 +170,28 @@ cc_library(
 )
 
 cc_library(
+    name = "local",
+    srcs = ["local.cc"],
+    hdrs = ["local.h"],
+    copts = COPTS + CXXOPTS,
+    features = FEATURES,
+    implementation_deps = [
+        ":strings",
+        ":system",
+        "@abseil-cpp//absl/status",
+    ],
+    linkopts = LINKOPTS,
+    linkstatic = True,
+    local_defines = DEFINES,
+    visibility = ["//elisp/private:__pkg__"],
+    deps = [
+        ":platform",
+        "@abseil-cpp//absl/status:statusor",
+        "@abseil-cpp//absl/types:span",
+    ],
+)
+
+cc_library(
     name = "binary",
     srcs = ["binary.cc"],
     hdrs = ["binary.h"],
@@ -443,6 +465,7 @@ cc_library(
     local_defines = DEFINES,
     visibility = [
         "//elisp:__pkg__",
+        "//elisp/private:__pkg__",
         "//elisp/toolchains:__pkg__",
         "//tests/integration/wrap:__pkg__",
         "//tests/tools:__pkg__",
@@ -522,6 +545,7 @@ exports_files(
     ["launcher.cc"],
     visibility = [
         "//elisp:__pkg__",
+        "//elisp/private:__pkg__",
         "//elisp/toolchains:__pkg__",
         "//tests/integration/wrap:__pkg__",
     ],
