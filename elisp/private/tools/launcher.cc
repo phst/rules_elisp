@@ -1,4 +1,4 @@
-// Copyright 2020, 2021, 2024, 2025 Google LLC
+// Copyright 2020, 2021, 2024-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +24,17 @@
 
 #include "elisp/private/tools/platform.h"
 
-#if (defined RULES_ELISP_EMACS + defined RULES_ELISP_BINARY + \
-     defined RULES_ELISP_TEST) != 1
+#if (defined RULES_ELISP_EMACS + defined RULES_ELISP_LOCAL + \
+     defined RULES_ELISP_BINARY + defined RULES_ELISP_TEST) != 1
 #  error Incorrect launcher setup
 #endif
 
 #ifdef RULES_ELISP_EMACS
 #  include "elisp/private/tools/emacs.h"
+#endif
+
+#ifdef RULES_ELISP_LOCAL
+#  include "elisp/private/tools/local.h"
 #endif
 
 #ifdef RULES_ELISP_BINARY
@@ -54,7 +58,7 @@ int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   );
   const absl::FixedArray<rules_elisp::NativeStringView> original_args(
       argv, argv + argc);
-#ifndef RULES_ELISP_EMACS
+#if defined RULES_ELISP_BINARY || defined RULES_ELISP_TEST
   rules_elisp::Options opts;
   opts.wrapper = RULES_ELISP_WRAPPER;
   opts.mode = RULES_ELISP_MODE;
@@ -74,8 +78,10 @@ int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   opts.module_assertions = RULES_ELISP_MODULE_ASSERTIONS;
 #endif
   const absl::StatusOr<int> code = rules_elisp::Main(
-#ifdef RULES_ELISP_EMACS
+#if defined RULES_ELISP_EMACS
       RULES_ELISP_TYPE, RULES_ELISP_INSTALL,
+#elif defined RULES_ELISP_LOCAL
+      RULES_ELISP_PROGRAM,
 #else
       opts,
 #endif

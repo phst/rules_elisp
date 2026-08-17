@@ -269,6 +269,18 @@ bzl_library(
 )
 
 bzl_library(
+    name = "local_binary",
+    srcs = ["local_binary.bzl"],
+    deps = [
+        ":cc_launcher",
+        ":cc_launcher_config",
+        ":cc_literals",
+        "@rules_cc//cc:find_cc_toolchain_bzl",
+        "@rules_cc//cc/common",
+    ],
+)
+
+bzl_library(
     name = "features",
     srcs = ["features.bzl"],
 )

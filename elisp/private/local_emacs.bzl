@@ -27,14 +27,13 @@ def _local_emacs_impl(ctx):
 
     # Don’t fail during the loading phase if Emacs isn’t locally installed, only
     # when Emacs is actually needed.
-    if emacs:
-        ctx.symlink(emacs, "source.exe")
     ctx.template(
         "BUILD.bazel",
         Label("//elisp/private/tools:local.BUILD.template"),
         # @unsorted-dict-items
         {
-            '"[native_binary.bzl]"': repr(str(Label("@bazel_skylib//rules:native_binary.bzl"))),
+            '"[local_binary.bzl]"': repr(str(Label("//elisp/private:local_binary.bzl"))),
+            '"[program]"': repr(str(emacs or "")),
             '"[elisp_pkg]"': repr(str(Label("//elisp:__pkg__"))),
         },
         executable = False,

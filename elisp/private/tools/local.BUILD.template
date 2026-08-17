@@ -1,4 +1,4 @@
-# Copyright 2024 Philipp Stephani
+# Copyright 2024, 2026 Philipp Stephani
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("[native_binary.bzl]", "native_binary")
+load("[local_binary.bzl]", "local_binary")
 
-native_binary(
+local_binary(
     name = "emacs",
-    src = "source.exe",
-    out = "emacs.exe",
+    program = "[program]",
     visibility = ["[elisp_pkg]"],
 )
 
