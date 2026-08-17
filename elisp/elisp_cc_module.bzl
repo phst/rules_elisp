@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 """Defines the `elisp_cc_module` rule."""
 
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
+load("@rules_cc//cc:use_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
@@ -141,10 +141,8 @@ using
 ```
 
 to implement module functions.""",
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | {
+    attrs = {
         "srcs": attr.label_list(
             doc = """C and C++ source files for the module.
 See the [corresponding attribute for
