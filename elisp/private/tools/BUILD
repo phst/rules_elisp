@@ -151,6 +151,7 @@ cc_library(
         ":strings",
         ":system",
         "@abseil-cpp//absl/log:check",
+        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
     ],
     linkopts = LINKOPTS,
