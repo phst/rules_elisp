@@ -14,10 +14,8 @@
 
 """Defines the rule `local_binary`, which runs a locally-installed Emacs."""
 
-load("@rules_cc//cc:use_cc_toolchain.bzl", "use_cc_toolchain")
-load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher")
-load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
+load("//elisp/private:cc_launcher_rule.bzl", "cc_launcher_rule")
 load("//elisp/private:cc_literals.bzl", "cc_string")
 
 # Not really public, but loaded by external generated repositories
@@ -38,16 +36,9 @@ def _local_binary_impl(ctx):
         runfiles = runfiles,
     )
 
-local_binary = rule(
-    attrs = LAUNCHER_ATTRS | {
-        "program": attr.string(mandatory = True),
-        "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:local")],
-            providers = [CcInfo],
-        ),
-    },
+local_binary = cc_launcher_rule(
+    attrs = {"program": attr.string(mandatory = True)},
     executable = True,
-    fragments = ["cpp"],
-    toolchains = use_cc_toolchain(),
+    launcher_deps = [Label("//elisp/private/tools:local")],
     implementation = _local_binary_impl,
 )

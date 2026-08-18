@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
 
 """Defines the `elisp_test` rule."""
 
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
-load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
-load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
+load("//elisp/private:cc_launcher_rule.bzl", "cc_launcher_rule")
 load("//elisp/private:cc_literals.bzl", "cc_bool", "cc_strings")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
@@ -90,11 +88,9 @@ def _elisp_test_impl(ctx):
         ),
     ]
 
-elisp_test = rule(
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+elisp_test = cc_launcher_rule(
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | COMPILE_ATTRS | {
+    attrs = COMPILE_ATTRS | {
         "srcs": attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",
@@ -104,10 +100,6 @@ elisp_test = rule(
             # “bazel build --compile_one_dependency”.  See
             # https://github.com/bazelbuild/bazel/blob/7.4.1/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L74.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
-        ),
-        "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:tst")],
-            providers = [CcInfo],
         ),
         # Magic coverage attributes,
         # cf. https://bazel.build/extending/rules#test_rules.
@@ -169,8 +161,8 @@ variable.  After processing known arguments, test files must remove them from
 `command-line-args-left` so that it’s empty after all test files are loaded.
 Emacs will not automatically process these arguments using
 `command-switch-alist` or `command-line-functions`.""",
-    fragments = ["cpp"],
     test = True,
-    toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
+    toolchains = [Label("//elisp:toolchain_type")],
+    launcher_deps = [Label("//elisp/private/tools:tst")],
     implementation = _elisp_test_impl,
 )
