@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 """Defines the `elisp_test` rule."""
 
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
+load("@rules_cc//cc:use_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
@@ -91,10 +91,8 @@ def _elisp_test_impl(ctx):
     ]
 
 elisp_test = rule(
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | COMPILE_ATTRS | {
+    attrs = COMPILE_ATTRS | {
         "srcs": attr.label_list(
             allow_empty = False,
             doc = "List of source files to load.",

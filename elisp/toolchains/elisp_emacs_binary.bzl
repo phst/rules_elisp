@@ -17,7 +17,7 @@ Bazel."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
+load("@rules_cc//cc:use_cc_toolchain.bzl", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
@@ -69,10 +69,8 @@ def _elisp_emacs_binary_impl(ctx):
     ]
 
 elisp_emacs_binary = rule(
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | LAUNCHER_ATTRS | {
+    attrs = LAUNCHER_ATTRS | {
         "mode": attr.string(
             doc = """How to build and install Emacs.  Possible values are:
 - `source`: Build Emacs from sources using `configure` and `make install`.
