@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,9 @@
 
 """Defines the `elisp_binary` rule."""
 
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
-load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:binary.bzl", "binary")
-load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_DEPS")
+load("//elisp/private:cc_launcher_rule.bzl", "cc_launcher_rule")
 load("//elisp/private:cc_literals.bzl", "cc_bool", "cc_ints")
 load("//elisp/private:compile.bzl", "COMPILE_ATTRS")
 
@@ -48,19 +46,13 @@ def _elisp_binary_impl(ctx):
         ),
     ]
 
-elisp_binary = rule(
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+elisp_binary = cc_launcher_rule(
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | COMPILE_ATTRS | {
+    attrs = COMPILE_ATTRS | {
         "src": attr.label(
             doc = "Source file to load.",
             allow_single_file = [".el"],
             mandatory = True,
-        ),
-        "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:binary")],
-            providers = [CcInfo],
         ),
         "data": attr.label_list(
             doc = "List of files to be made available at runtime.",
@@ -98,7 +90,7 @@ effect for toolchains that specify `wrap = True`.""",
 The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless `interactive` is `True`.""",
     executable = True,
-    fragments = ["cpp"],
-    toolchains = use_cc_toolchain() + [Label("//elisp:toolchain_type")],
+    toolchains = [Label("//elisp:toolchain_type")],
+    launcher_deps = [Label("//elisp/private/tools:binary")],
     implementation = _elisp_binary_impl,
 )

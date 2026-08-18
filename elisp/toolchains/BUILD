@@ -39,12 +39,11 @@ bzl_library(
     deps = [
         "//elisp/private:cc_default_info",
         "//elisp/private:cc_launcher",
-        "//elisp/private:cc_launcher_config",
+        "//elisp/private:cc_launcher_rule",
         "//elisp/private:cc_literals",
         "//elisp/private:filenames",
         "@bazel_skylib//lib:paths",
         "@rules_cc//cc:action_names_bzl",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],
 )

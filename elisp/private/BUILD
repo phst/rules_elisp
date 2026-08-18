@@ -273,8 +273,20 @@ bzl_library(
     srcs = ["local_binary.bzl"],
     deps = [
         ":cc_launcher",
-        ":cc_launcher_config",
+        ":cc_launcher_rule",
         ":cc_literals",
+    ],
+)
+
+bzl_library(
+    name = "cc_launcher_rule",
+    srcs = ["cc_launcher_rule.bzl"],
+    visibility = [
+        "//elisp:__pkg__",
+        "//elisp/toolchains:__pkg__",
+    ],
+    deps = [
+        ":cc_launcher_config",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
     ],

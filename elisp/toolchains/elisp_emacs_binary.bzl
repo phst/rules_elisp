@@ -17,12 +17,10 @@ Bazel."""
 
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
-load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
 load("//elisp/private:cc_launcher.bzl", "cc_launcher")
-load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_ATTRS", "LAUNCHER_DEPS")
+load("//elisp/private:cc_launcher_rule.bzl", "cc_launcher_rule")
 load("//elisp/private:cc_literals.bzl", "cc_string")
 load("//elisp/private:filenames.bzl", "repository_relative_filename", "runfile_location")
 
@@ -68,11 +66,9 @@ def _elisp_emacs_binary_impl(ctx):
         ),
     ]
 
-elisp_emacs_binary = rule(
-    # FIXME: Remove CC_TOOLCHAIN_ATTRS once
-    # https://github.com/bazelbuild/bazel/issues/7260 is fixed.
+elisp_emacs_binary = cc_launcher_rule(
     # @unsorted-dict-items
-    attrs = CC_TOOLCHAIN_ATTRS | LAUNCHER_ATTRS | {
+    attrs = {
         "mode": attr.string(
             doc = """How to build and install Emacs.  Possible values are:
 - `source`: Build Emacs from sources using `configure` and `make install`.
@@ -129,10 +125,6 @@ This is used by Gazelle.""",
             default = Label("//elisp/private:emacs_cc_toolchain"),
             providers = [cc_common.CcToolchainInfo],
         ),
-        "_launcher_deps": attr.label_list(
-            default = LAUNCHER_DEPS + [Label("//elisp/private/tools:emacs")],
-            providers = [CcInfo],
-        ),
         "_emacs_defaults": attr.label(
             default = Label("//elisp/private:emacs_defaults"),
             providers = [CcDefaultInfo],
@@ -141,8 +133,8 @@ This is used by Gazelle.""",
     doc = """Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.""",
     executable = True,
-    fragments = ["cpp"],
-    toolchains = use_cc_toolchain() + [Label("@rules_shell//shell:toolchain_type")],
+    toolchains = [Label("@rules_shell//shell:toolchain_type")],
+    launcher_deps = [Label("//elisp/private/tools:emacs")],
     implementation = _elisp_emacs_binary_impl,
 )
 

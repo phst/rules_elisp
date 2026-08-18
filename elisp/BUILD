@@ -160,11 +160,9 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
-        "//elisp/private:cc_launcher_config",
+        "//elisp/private:cc_launcher_rule",
         "//elisp/private:cc_literals",
         "//elisp/private:compile",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
     ],
 )
 
@@ -177,11 +175,9 @@ bzl_library(
     deps = [
         "//elisp/common:elisp_info",
         "//elisp/private:binary",
-        "//elisp/private:cc_launcher_config",
+        "//elisp/private:cc_launcher_rule",
         "//elisp/private:cc_literals",
         "//elisp/private:compile",
-        "@rules_cc//cc:find_cc_toolchain_bzl",
-        "@rules_cc//cc/common",
     ],
 )
 
