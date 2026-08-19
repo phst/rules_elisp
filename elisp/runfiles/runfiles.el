@@ -138,7 +138,7 @@ during byte compilation).  Return nil if the current repository can’t be
 determined."
     (declare (ftype (function () (or null string)))
              (side-effect-free error-free))
-    ;; ‘elisp/current-repository’ is bound by //elisp:compile.el.
+    ;; ‘elisp/current-repository’ is bound by //elisp/private/tools:compile.el.
     (or (bound-and-true-p elisp/current-repository)
         (pcase (macroexp-file-name)
           ;; The directory after the execution root should be the repository
