@@ -17,7 +17,7 @@ module github.com/phst/rules_elisp
 go 1.25.0
 
 require (
-	github.com/bazelbuild/bazel-gazelle v0.52.2
+	github.com/bazelbuild/bazel-gazelle v0.53.0
 	github.com/bazelbuild/buildtools v0.0.0-20260716142318-04cf7de1434f
 	github.com/bazelbuild/rules_go v0.63.0
 	github.com/google/addlicense v1.2.0
