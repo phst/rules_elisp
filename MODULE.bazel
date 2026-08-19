@@ -115,7 +115,7 @@ register_toolchains("@local_config_cc_toolchains//:all")
 # Development-only module dependencies
 bazel_dep(name = "stardoc", version = "0.8.1", dev_dependency = True)
 bazel_dep(name = "rules_go", version = "0.63.0", dev_dependency = True)
-bazel_dep(name = "gazelle", version = "0.52.2", dev_dependency = True)
+bazel_dep(name = "gazelle", version = "0.53.0", dev_dependency = True)
 bazel_dep(name = "bazel_skylib_gazelle_plugin", version = "1.9.2", dev_dependency = True)
 bazel_dep(name = "bazel_features", version = "1.51.0", dev_dependency = True)
 bazel_dep(name = "googletest", version = "1.17.0.bcr.2", dev_dependency = True)
