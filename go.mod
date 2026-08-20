@@ -20,7 +20,6 @@ require (
 	github.com/bazelbuild/bazel-gazelle v0.53.0
 	github.com/bazelbuild/buildtools v0.0.0-20260819135130-5d08cfd22031
 	github.com/bazelbuild/rules_go v0.63.0
-	github.com/google/addlicense v1.2.0
 	github.com/google/go-cmp v0.7.0
 	github.com/yuin/goldmark v1.8.5
 	golang.org/x/text v0.41.0
@@ -30,6 +29,7 @@ require (
 require (
 	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-3 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/google/addlicense v1.2.0 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
