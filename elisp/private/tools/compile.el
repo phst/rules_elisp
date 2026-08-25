@@ -43,13 +43,6 @@
 (setq byte-compile-root-dir
       (file-name-quote (expand-file-name default-directory)))
 
-;; Emacs 29 doesn’t yet support the ‘ftype’ declaration.  Ensure that
-;; compilation works without warnings.
-(dolist (var '(defun-declarations-alist macro-declarations-alist))
-  (let ((value (symbol-value var)))
-    (unless (assq 'ftype value)
-      (set var (cons '(ftype ignore) value)))))
-
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
   (let ((file-name-handler-alist ()))
     (cl-flet ((quote-file (file) (concat "/:" (expand-file-name file))))
