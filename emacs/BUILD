@@ -40,15 +40,6 @@ alias(
 )
 
 alias(
-    name = "emacs_29",
-    actual = select({
-        "@platforms//os:windows": "@emacs_windows_29//:emacs",
-        "//conditions:default": "@emacs_29//:emacs",
-    }),
-    visibility = ["//visibility:public"],
-)
-
-alias(
     name = "emacs_30",
     actual = select({
         "@platforms//os:windows": "@emacs_windows_30//:emacs",

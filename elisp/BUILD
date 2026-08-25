@@ -37,26 +37,6 @@ toolchain(
 )
 
 toolchain(
-    name = "emacs_29_toolchain",
-    toolchain = "emacs_29",
-    toolchain_type = ":toolchain_type",
-)
-
-toolchain(
-    name = "emacs_29_windows_x86_64_toolchain",
-    exec_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    target_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    toolchain = "emacs_29_windows_x86_64",
-    toolchain_type = ":toolchain_type",
-)
-
-toolchain(
     name = "emacs_30_toolchain",
     toolchain = "emacs_30",
     toolchain_type = ":toolchain_type",
@@ -111,16 +91,6 @@ elisp_toolchain(
     name = "local",
     emacs = "@local_emacs//:emacs",
     use_default_shell_env = True,
-)
-
-elisp_toolchain(
-    name = "emacs_29",
-    emacs = "@emacs_29//:emacs",
-)
-
-elisp_toolchain(
-    name = "emacs_29_windows_x86_64",
-    emacs = "@emacs_windows_29//:emacs",
 )
 
 elisp_toolchain(

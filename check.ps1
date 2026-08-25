@@ -44,7 +44,7 @@ function Run-Tests {
 }
 
 # All supported Emacs major versions.
-$versions = '29', '30', '31'
+$versions = '30', '31'
 
 $VerbosePreference = 'Continue'
 
