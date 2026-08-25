@@ -47,7 +47,7 @@ jobs:
   publish:
     name: Publish release
     needs: bcr
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Publish release
         uses: softprops/action-gh-release@v3
