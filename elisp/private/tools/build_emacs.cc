@@ -220,12 +220,7 @@ static absl::Status Build(const FileName& source, const FileName& install,
     return status;
   }
 
-  std::vector<NativeString> make_args = {
-      RULES_ELISP_NATIVE_LITERAL("install"),
-      // Work around https://bugs.gnu.org/76441.
-      // We can remove the workaround once we drop support for Emacs 29.
-      RULES_ELISP_NATIVE_LITERAL("MAKEINFO=:"),
-  };
+  std::vector<NativeString> make_args = {RULES_ELISP_NATIVE_LITERAL("install")};
   if (const absl::Status status =
           Run(*temp, build, bash, make, std::move(make_args));
       !status.ok()) {
