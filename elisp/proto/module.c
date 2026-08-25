@@ -139,7 +139,7 @@ static_assert(INT_MAX <= PTRDIFF_MAX, "unsupported architecture");
 
 #include "emacs-module.h"
 
-#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 29
+#if !defined EMACS_MAJOR_VERSION || EMACS_MAJOR_VERSION < 30
 #  error Emacs module header too old
 #endif
 
@@ -373,18 +373,18 @@ static upb_DefPool* MutableDefPool(struct Context ctx) {
 // version check to ensure that both emacs-module.h and the running Emacs binary
 // are recent enough, using this pattern:
 //
-//   #if EMACS_MAJOR_VERSION >= 30
-//   if (IsEmacs30(ctx)) {
-//     …code that assumes Emacs 30…
+//   #if EMACS_MAJOR_VERSION >= 31
+//   if (IsEmacs31(ctx)) {
+//     …code that assumes Emacs 31…
 //     return …;
 //   }
 //   #endif
 //   …fallback code…
 
-// Uncomment the code below once we actually need a check for Emacs 30:
-// #if EMACS_MAJOR_VERSION >= 30
-// static bool IsEmacs30(struct Context ctx) {
-//   enum { kMinimumSize = sizeof(struct emacs_env_30) };
+// Uncomment the code below once we actually need a check for Emacs 31:
+// #if EMACS_MAJOR_VERSION >= 31
+// static bool IsEmacs31(struct Context ctx) {
+//   enum { kMinimumSize = sizeof(struct emacs_env_31) };
 //   return ctx.env->size >= kMinimumSize;
 // }
 // #endif
@@ -4379,7 +4379,7 @@ enum InitializationResult {
 int EXPORT emacs_module_init(struct emacs_runtime* rt) {
   enum {
     kMinimumRuntimeSize = sizeof *rt,
-    kMinimumEnvironmentSize = sizeof(struct emacs_env_29)
+    kMinimumEnvironmentSize = sizeof(struct emacs_env_30)
   };
   if (rt->size < kMinimumRuntimeSize) return kRuntimeTooSmall;
   emacs_env* env = rt->get_environment(rt);
