@@ -26,7 +26,7 @@ licenses(["notice"])
 # keep
 alias(
     name = "emacs",
-    actual = ":emacs_30",
+    actual = ":emacs_31",
     visibility = ["//visibility:public"],
 )
 
@@ -53,6 +53,15 @@ alias(
     actual = select({
         "@platforms//os:windows": "@emacs_windows_30//:emacs",
         "//conditions:default": "@emacs_30//:emacs",
+    }),
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "emacs_31",
+    actual = select({
+        "@platforms//os:windows": "@emacs_windows_31//:emacs",
+        "//conditions:default": "@emacs_31//:emacs",
     }),
     visibility = ["//visibility:public"],
 )
