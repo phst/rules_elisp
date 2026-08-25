@@ -40,34 +40,6 @@ use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
 emacs = use_repo_rule("//elisp/private:emacs.bzl", "emacs")
 
 emacs(
-    name = "emacs_29",
-    format = "tar.xz",
-    integrity = "sha384-1LIwxBtAr9RzK3VJ359OfOh/PN83fyfl7uckmMw+Z0mKabbOOsvy00PhXvm5wJtf",
-    strip_prefix = "emacs-29.4",
-    type = "source",
-    urls = [
-        "https://ftpmirror.gnu.org/emacs/emacs-29.4.tar.xz",
-        "https://ftp.gnu.org/gnu/emacs/emacs-29.4.tar.xz",
-    ],
-)
-
-emacs(
-    name = "emacs_windows_29",
-    format = "zip",
-    integrity = "sha384-wu5kKCCMX6BLgSoUfMEUf1gLk4Ua+rWa8mldAeW+Y6q+RXyCmdPZP/XuJPO9uWrt",
-    strip_prefix = "",
-    target_compatible_with = [
-        "@platforms//os:windows",
-        "@platforms//cpu:x86_64",
-    ],
-    type = "release",
-    urls = [
-        "https://ftpmirror.gnu.org/emacs/windows/emacs-29/emacs-29.4.zip",
-        "https://ftp.gnu.org/gnu/emacs/windows/emacs-29/emacs-29.4.zip",
-    ],
-)
-
-emacs(
     name = "emacs_30",
     format = "tar.xz",
     integrity = "sha384-2hDJF2LcSpB7ZTLRyCpYBkXpMs1QVlANlrSPNfU6sUrrs57Q+7QY3Ff7MIYRwNRt",
