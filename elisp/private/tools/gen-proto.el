@@ -166,6 +166,7 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
       (cons output-file
             (buffer-substring-no-properties (point-min) (point-max))))))
 
+(unless noninteractive (user-error "This file works only in batch mode"))
 (set-binary-mode 'stdin :binary)
 (set-binary-mode 'stdout :binary)
 (let* ((standard-output #'external-debugging-output)

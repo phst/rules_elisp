@@ -1,6 +1,6 @@
 ;;; cat.el --- helper binary for module test -*- lexical-binding: t; -*-
 
-;; Copyright 2024, 2025 Philipp Stephani
+;; Copyright 2024-2026 Philipp Stephani
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 
 (require 'elisp/proto/module)
 
+(unless noninteractive (user-error "This file works only in batch mode"))
 (set-binary-mode 'stdin :binary)
 (set-binary-mode 'stdout :binary)
 
