@@ -34,7 +34,7 @@ var cat = testutil.RunfileFlag("//tests/proto/integration:cat")
 // Integration test for elisp/proto/insert-stdin.
 func TestInsertStdin(t *testing.T) {
 	outfile := filepath.Join(t.TempDir(), "out")
-	cmd := exec.Command(*cat, ">", outfile)
+	cmd := exec.Command(*cat, outfile)
 	cmd.Stdin = strings.NewReader("stdin \xFF")
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
