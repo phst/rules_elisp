@@ -41,10 +41,6 @@
       (pcase-exhaustive op
         (">"
          (with-temp-file file
-           (elisp/proto/insert-stdin)))
-        ("<"
-         (insert-file-contents-literally file)
-         (elisp/proto/write-stdout
-          (buffer-substring-no-properties (point-min) (point-max))))))))
+           (elisp/proto/insert-stdin)))))))
 
 ;;; cat.el ends here

@@ -2945,10 +2945,6 @@ static HANDLE StdinHandle(struct Context ctx) {
   return StandardHandle(ctx, STD_INPUT_HANDLE);
 }
 
-static HANDLE StdoutHandle(struct Context ctx) {
-  return StandardHandle(ctx, STD_OUTPUT_HANDLE);
-}
-
 static upb_StringView ReadHandle(struct Context ctx, HANDLE handle,
                                  char* buffer, size_t size) {
   upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
@@ -2964,22 +2960,6 @@ static upb_StringView ReadHandle(struct Context ctx, HANDLE handle,
   assert(n <= size);
   if (n == 0) return null;
   return upb_StringView_FromDataAndSize(buffer, n);
-}
-
-static bool WriteHandle(struct Context ctx, HANDLE handle,
-                        upb_StringView* data) {
-  if (!Success(ctx)) return false;
-  DWORD n;
-  if (!WriteFile(handle, data->data,
-                 data->size <= MAXDWORD ? (DWORD)data->size : MAXDWORD, &n,
-                 NULL)) {
-    assert(n == 0);
-    FileError(ctx, GetLastError());
-    return false;
-  }
-  data->data += n;
-  data->size -= n;
-  return true;
 }
 #else
 static void FileError(struct Context ctx, int code) {
@@ -3004,10 +2984,6 @@ static int StdinHandle(struct Context ctx ABSL_ATTRIBUTE_UNUSED) {
   return STDIN_FILENO;
 }
 
-static int StdoutHandle(struct Context ctx ABSL_ATTRIBUTE_UNUSED) {
-  return STDOUT_FILENO;
-}
-
 static upb_StringView ReadHandle(struct Context ctx, int fd, char* buffer,
                                  size_t size) {
   upb_StringView null = UPB_STRINGVIEW_INIT(NULL, 0);
@@ -3020,18 +2996,6 @@ static upb_StringView ReadHandle(struct Context ctx, int fd, char* buffer,
   if (n == 0) return null;
   assert((size_t)n <= size);
   return upb_StringView_FromDataAndSize(buffer, (size_t)n);
-}
-
-static bool WriteHandle(struct Context ctx, int fd, upb_StringView* data) {
-  if (!Success(ctx)) return false;
-  ssize_t n = write(fd, data->data, data->size <= kMaxIO ? data->size : kMaxIO);
-  if (n < 0) {
-    FileError(ctx, errno);
-    return false;
-  }
-  data->data += n;
-  data->size -= (size_t)n;
-  return true;
 }
 #endif
 
@@ -4245,22 +4209,6 @@ static emacs_value InsertStdin(emacs_env* env,
   return Nil(ctx);
 }
 
-static emacs_value WriteStdout(emacs_env* env,
-                               ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED,
-                               emacs_value* args, void* data) {
-  struct Context ctx = {env, data};
-  assert(nargs == 1);
-  struct Allocator alloc = HeapAllocator();
-  FileHandle handle = StdoutHandle(ctx);
-  if (!ValidHandle(handle)) return NULL;
-  struct MutableString content = ExtractUnibyteString(ctx, alloc, args[0]);
-  if (content.data == NULL) return NULL;
-  upb_StringView left = View(content);
-  while (left.size > 0 && WriteHandle(ctx, handle, &left));
-  Free(alloc, content.data);
-  return Nil(ctx);
-}
-
 static emacs_value ParseCodeGeneratorRequest(
     emacs_env* env, ptrdiff_t nargs ABSL_ATTRIBUTE_UNUSED, emacs_value* args,
     void* data) {
@@ -4776,13 +4724,6 @@ int EXPORT emacs_module_init(struct emacs_runtime* rt) {
         "This function is used by the protocol buffer compiler;\n"
         "users should not call it directly.",
         Params0(), kT, 0, InsertStdin);
-  Defun(ctx, "elisp/proto/write-stdout", 1, 1,
-        "Write STRING to standard output.\n"
-        "STRING must be a unibyte string.\n"
-        "This function is used by the protocol buffer compiler;\n"
-        "users should not call it directly.\n\n"
-        "(fn string)",
-        Params1(kString), kT, 0, WriteStdout);
   Defun(ctx, "elisp/proto/parse-code-generator-request", 1, 1,
         "Parse a protocol buffer code generator request.\n"
         "SERIALIZED must be the serialized form of a\n"
