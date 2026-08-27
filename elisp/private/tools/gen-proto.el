@@ -177,7 +177,7 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
        (request (elisp/proto/parse-code-generator-request stdin))
        (response (mapcar #'@generate-file request))
        (stdout (elisp/proto/serialize-code-generator-response response)))
-  (elisp/proto/write-stdout stdout))
+  (send-string-to-terminal stdout))
 
 ;; Page delimiter so that Emacs doesn’t get confused by the strings above.  See
 ;; Info node ‘(emacs) Specifying File Variables’.
