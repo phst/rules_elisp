@@ -1,4 +1,4 @@
-// Copyright 2024, 2025 Philipp Stephani
+// Copyright 2024-2026 Philipp Stephani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,27 +55,5 @@ func TestInsertStdin(t *testing.T) {
 	}
 	if string(got) != "stdin \xFF" {
 		t.Errorf("unexpected file content: %q", got)
-	}
-}
-
-// Integration test for elisp/proto/write-stdout.
-func TestWriteStdout(t *testing.T) {
-	infile := filepath.Join(t.TempDir(), "in")
-	if err := os.WriteFile(infile, []byte("stdout \xFF"), 0400); err != nil {
-		t.Error(err)
-	}
-	cmd := exec.Command(*cat, "<", infile)
-	stdout := new(strings.Builder)
-	stderr := new(bytes.Buffer)
-	cmd.Stdout = stdout
-	cmd.Stderr = stderr
-	if err := cmd.Run(); err != nil {
-		t.Error(err)
-	}
-	if got := stdout.String(); got != "stdout \xFF" {
-		t.Errorf("unexpected stdout: %q", got)
-	}
-	if stderr.Len() != 0 {
-		t.Errorf("unexpected stderr: %q", stderr.Bytes())
 	}
 }

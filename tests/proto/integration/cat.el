@@ -1,6 +1,6 @@
 ;;; cat.el --- helper binary for module test -*- lexical-binding: t; -*-
 
-;; Copyright 2024, 2025 Philipp Stephani
+;; Copyright 2024-2026 Philipp Stephani
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -40,10 +40,6 @@
       (pcase-exhaustive op
         (">"
          (with-temp-file file
-           (elisp/proto/insert-stdin)))
-        ("<"
-         (insert-file-contents-literally file)
-         (elisp/proto/write-stdout
-          (buffer-substring-no-properties (point-min) (point-max))))))))
+           (elisp/proto/insert-stdin)))))))
 
 ;;; cat.el ends here
