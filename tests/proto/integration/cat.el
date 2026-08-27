@@ -28,19 +28,16 @@
 (set-binary-mode 'stdin :binary)
 (set-binary-mode 'stdout :binary)
 
-(cl-destructuring-bind (op file) command-line-args-left
+(cl-destructuring-bind (file) command-line-args-left
   (setq command-line-args-left nil)
-  (with-temp-buffer
-    (set-buffer-multibyte nil)
-    (let ((file-name-handler-alist ())
-          (coding-system-for-read 'no-conversion)
-          (coding-system-for-write 'no-conversion)
-          (inhibit-modification-hooks t)
-          (write-region-annotate-functions nil)
-          (write-region-post-annotation-function nil))
-      (pcase-exhaustive op
-        (">"
-         (with-temp-file file
-           (elisp/proto/insert-stdin)))))))
+  (let ((file-name-handler-alist ())
+        (coding-system-for-read 'no-conversion)
+        (coding-system-for-write 'no-conversion)
+        (inhibit-modification-hooks t)
+        (write-region-annotate-functions nil)
+        (write-region-post-annotation-function nil))
+    (with-temp-file file
+      (set-buffer-multibyte nil)
+      (elisp/proto/insert-stdin))))
 
 ;;; cat.el ends here
