@@ -130,10 +130,9 @@ go_library(
     importpath = "github.com/phst/rules_elisp/docs",
     deps = [
         ":stardoc_output_go_proto",
-        "@com_github_yuin_goldmark//:goldmark",
-        "@com_github_yuin_goldmark//ast",
-        "@com_github_yuin_goldmark//renderer",
-        "@com_github_yuin_goldmark//util",
+        "@com_github_yuin_goldmark_v2//ast",
+        "@com_github_yuin_goldmark_v2//parser",
+        "@com_github_yuin_goldmark_v2//renderer",
         "@org_golang_google_protobuf//proto",
         "@org_golang_x_text//cases",
         "@org_golang_x_text//encoding/charmap",
