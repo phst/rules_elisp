@@ -29,10 +29,9 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	"github.com/yuin/goldmark"
-	"github.com/yuin/goldmark/ast"
-	"github.com/yuin/goldmark/renderer"
-	"github.com/yuin/goldmark/util"
+	"github.com/yuin/goldmark/v2/ast"
+	"github.com/yuin/goldmark/v2/parser"
+	"github.com/yuin/goldmark/v2/renderer"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/language"
@@ -457,8 +456,15 @@ func (g *generator) markdown(text string) string {
 		}
 		text = s
 	}
+	source := []byte(text)
+	doc := parser.New().Parse(source)
+	orgRenderer := newOrgRenderer()
+	type config struct {
+		Config renderer.Config[*strings.Builder, config]
+	}
+	renderer := new(renderer.HelperBuilder[*strings.Builder, config]).Options(renderer.WithNodeRenderers[*strings.Builder, config](orgRenderer.nodeRenderers())).Build()
 	var w strings.Builder
-	if err := goldmark.New(goldmark.WithRenderer(renderer.NewRenderer(renderer.WithNodeRenderers(util.Prioritized(newOrgRenderer(), 0))))).Convert([]byte(text), &w); err != nil {
+	if err := renderer.Render(&w, source, doc); err != nil {
 		panic(err)
 	}
 	return w.String() + "\n"
@@ -510,46 +516,44 @@ func newOrgRenderer() *orgRenderer {
 	return &orgRenderer{"", ""}
 }
 
-var _ renderer.NodeRenderer = (*orgRenderer)(nil)
+func (r *orgRenderer) nodeRenderers() map[ast.NodeKind]renderer.NodeRenderer[*strings.Builder] {
+	return map[ast.NodeKind]renderer.NodeRenderer[*strings.Builder]{
+		ast.KindDocument:  renderer.NodeRendererFunc(r.document),
+		ast.KindText:      renderer.NodeRendererFunc(r.text),
+		ast.KindParagraph: renderer.NodeRendererFunc(r.paragraph),
+		ast.KindList:      renderer.NodeRendererFunc(r.list),
+		ast.KindListItem:  renderer.NodeRendererFunc(r.item),
+		ast.KindEmphasis:  renderer.NodeRendererFunc(r.emph),
+		ast.KindCodeSpan:  renderer.NodeRendererFunc(r.code),
+		ast.KindCodeBlock: renderer.NodeRendererFunc(r.codeBlock),
+		ast.KindLink:      renderer.NodeRendererFunc(r.link),
+		ast.KindRawHTML:   renderer.NodeRendererFunc(r.htmlInline),
 
-func (r *orgRenderer) RegisterFuncs(reg renderer.NodeRendererFuncRegisterer) {
-	reg.Register(ast.KindDocument, r.document)
-	reg.Register(ast.KindText, r.text)
-	reg.Register(ast.KindParagraph, r.paragraph)
-	reg.Register(ast.KindList, r.list)
-	reg.Register(ast.KindListItem, r.item)
-	reg.Register(ast.KindEmphasis, r.emph)
-	reg.Register(ast.KindCodeSpan, r.code)
-	reg.Register(ast.KindFencedCodeBlock, r.codeBlock)
-	reg.Register(ast.KindLink, r.link)
-	reg.Register(ast.KindRawHTML, r.htmlInline)
-
-	reg.Register(ast.KindTextBlock, r.textBlock)
-
-	reg.Register(ast.KindAutoLink, r.unknown)
-	reg.Register(ast.KindBlockquote, r.unknown)
-	reg.Register(ast.KindCodeBlock, r.unknown)
-	reg.Register(ast.KindHTMLBlock, r.unknown)
-	reg.Register(ast.KindHeading, r.unknown)
-	reg.Register(ast.KindImage, r.unknown)
-	reg.Register(ast.KindString, r.unknown)
-	reg.Register(ast.KindThematicBreak, r.unknown)
+		ast.KindAutoLink:                renderer.NodeRendererFunc(r.unknown),
+		ast.KindBlockquote:              renderer.NodeRendererFunc(r.unknown),
+		ast.KindHTMLBlock:               renderer.NodeRendererFunc(r.unknown),
+		ast.KindHeading:                 renderer.NodeRendererFunc(r.unknown),
+		ast.KindImage:                   renderer.NodeRendererFunc(r.unknown),
+		ast.KindLinkReferenceDefinition: renderer.NodeRendererFunc(r.unknown),
+		ast.KindStrong:                  renderer.NodeRendererFunc(r.unknown),
+		ast.KindThematicBreak:           renderer.NodeRendererFunc(r.unknown),
+	}
 }
 
-func (r *orgRenderer) lit(w util.BufWriter, s string) {
+func (r *orgRenderer) lit(w *strings.Builder, s string) {
 	if _, err := w.WriteString(s); err != nil {
 		panic(err)
 	}
 	r.lastOut = s
 }
 
-func (r *orgRenderer) cr(w util.BufWriter) {
+func (r *orgRenderer) cr(w *strings.Builder) {
 	if r.lastOut != "\n" {
 		r.lit(w, "\n")
 	}
 }
 
-func (r *orgRenderer) out(w util.BufWriter, s string) {
+func (r *orgRenderer) out(w *strings.Builder, s string) {
 	indent := ""
 	if strings.HasSuffix(r.lastOut, "\n") {
 		indent = r.indent
@@ -562,22 +566,18 @@ func escape(s string) string {
 	return regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")
 }
 
-func (r *orgRenderer) document(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) document(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Document)
 	r.cr(writer)
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) text(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) text(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Text)
 	if entering {
-		s := string(node.Value(source))
-		if node.IsRaw() {
-			r.lit(writer, s)
-		} else {
-			s := regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
-			r.out(writer, s)
-		}
+		s := node.Value.Str(source)
+		s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
+		r.out(writer, s)
 		if node.SoftLineBreak() {
 			r.softBreak(writer)
 		}
@@ -588,16 +588,16 @@ func (r *orgRenderer) text(writer util.BufWriter, source []byte, n ast.Node, ent
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) softBreak(writer util.BufWriter) {
+func (r *orgRenderer) softBreak(writer *strings.Builder) {
 	r.cr(writer)
 }
 
-func (r *orgRenderer) lineBreak(writer util.BufWriter) {
+func (r *orgRenderer) lineBreak(writer *strings.Builder) {
 	r.lit(writer, `\\`)
 	r.cr(writer)
 }
 
-func (r *orgRenderer) paragraph(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) paragraph(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Paragraph)
 	if node.Parent().Kind() != ast.KindListItem {
 		r.lit(writer, "\n")
@@ -605,7 +605,7 @@ func (r *orgRenderer) paragraph(writer util.BufWriter, source []byte, n ast.Node
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) list(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) list(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.List)
 	if entering {
 		r.cr(writer)
@@ -613,7 +613,7 @@ func (r *orgRenderer) list(writer util.BufWriter, source []byte, n ast.Node, ent
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) item(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) item(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.ListItem)
 	if entering {
 		if r.indent != "" {
@@ -631,27 +631,34 @@ func (r *orgRenderer) item(writer util.BufWriter, source []byte, n ast.Node, ent
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) emph(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) emph(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Emphasis)
 	r.lit(writer, "/")
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) code(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
-	_ = n.(*ast.CodeSpan)
+func (r *orgRenderer) code(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	node := n.(*ast.CodeSpan)
 	r.lit(writer, "~")
+	if entering {
+		r.lit(writer, node.Value.Str(source))
+	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) codeBlock(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
-	node := n.(*ast.FencedCodeBlock)
+func (r *orgRenderer) codeBlock(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	node := n.(*ast.CodeBlock)
 	if entering {
-		lang := rendererLanguage[string(node.Language(source))]
+		lang, ok := node.Language(source)
+		if !ok {
+			return ast.WalkStop, errors.New("language not given")
+		}
+		lang = rendererLanguage[lang]
 		if lang == "" {
 			return ast.WalkStop, fmt.Errorf("unknown language %q", lang)
 		}
 		r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang))
-		r.lit(writer, string(node.Lines().Value(source)))
+		r.lit(writer, node.Value.Str(source))
 	} else {
 		r.lit(writer, "#+END_SRC\n\n")
 		r.lit(writer, "#+TEXINFO: @noindent")
@@ -659,10 +666,10 @@ func (r *orgRenderer) codeBlock(writer util.BufWriter, source []byte, n ast.Node
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) link(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) link(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Link)
 	if entering {
-		dest := string(node.Destination)
+		dest := node.Destination.Str(source)
 		// CommonMark helpfully URL-escapes link destinations, but this
 		// prevents links to Info nodes containing spaces.
 		match := regexp.MustCompile(`^(info:[^#:]+[#:])(.*%.*)$`).FindStringSubmatch(dest)
@@ -680,10 +687,10 @@ func (r *orgRenderer) link(writer util.BufWriter, source []byte, n ast.Node, ent
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) htmlInline(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) htmlInline(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.RawHTML)
 	if entering {
-		tag := string(node.Segments.Value(source))
+		tag := node.Value.Str(source)
 		org := tags[tag]
 		if org == "" {
 			return ast.WalkStop, fmt.Errorf("unknown HTML tag %s", tag)
@@ -693,13 +700,8 @@ func (r *orgRenderer) htmlInline(writer util.BufWriter, source []byte, n ast.Nod
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) textBlock(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
-	_ = n.(*ast.TextBlock)
-	return ast.WalkContinue, nil
-}
-
 // Signal an error if we don’t implement something.
-func (r *orgRenderer) unknown(writer util.BufWriter, source []byte, n ast.Node, entering bool) (ast.WalkStatus, error) {
+func (r *orgRenderer) unknown(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unknown node type %q", n.Kind())
 }
 
