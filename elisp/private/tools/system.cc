@@ -1456,8 +1456,11 @@ absl::StatusOr<int> RunProcess(const FileName& program,
     return ErrorStatus(std::error_code(error, std::system_category()),
                        "posix_spawn(..., %#s)", *abs_program);
   }
+  pid_t status;
   int wstatus;
-  const pid_t status = waitpid(pid, &wstatus, 0);
+  do {
+    status = waitpid(pid, &wstatus, 0);
+  } while (status == -1 && errno == EINTR);
   if (status != pid) return ErrnoStatus("waitpid(%d, ..., 0)", pid);
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 #endif
