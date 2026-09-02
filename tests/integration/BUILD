@@ -41,6 +41,7 @@ TEST_DATA = [
     "//elisp/runfiles:runfiles.elc",
     "//emacs",
     "//tests:empty",
+    "//tests/integration:exit",
     "//tests/integration:signal",
     "//tests/integration:test",
     "//tests/integration:test.el",
@@ -55,6 +56,9 @@ go_test(
     srcs = [
         "emacs_test.go",
         "ert_test.go",
+        "sys_darwin_test.go",
+        "sys_linux_test.go",
+        "sys_windows_test.go",
         "unix_test.go",
         "windows_test.go",
     ],
@@ -132,6 +136,11 @@ elisp_binary(
 elisp_binary(
     name = "signal",
     src = "signal.el",
+)
+
+elisp_binary(
+    name = "exit",
+    src = "exit.el",
 )
 
 elisp_library(

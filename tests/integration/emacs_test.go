@@ -19,6 +19,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -26,7 +27,9 @@ import (
 	"reflect"
 	"regexp"
 	"slices"
+	"strconv"
 	"testing"
+	"testing/quick"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/google/go-cmp/cmp"
@@ -36,6 +39,7 @@ import (
 var (
 	emacs       = testutil.RunfileFlag("//emacs")
 	empty       = testutil.RunfileFlag("//tests:empty")
+	exit        = testutil.RunfileFlag("//tests/integration:exit")
 	signal      = testutil.RunfileFlag("//tests/integration:signal")
 	launcher    = testutil.RunfileFlag("//tests/integration/wrap:launcher")
 	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
@@ -86,6 +90,45 @@ $`, `(?m)^Foo\r?\n\z`},
 				t.Errorf("standard error: got:\n%s\nwant something that matches:\n%s", gotErr, wantErr)
 			}
 		})
+	}
+}
+
+func TestRunExitCode(t *testing.T) {
+	env, err := runfiles.Env()
+	if err != nil {
+		t.Fatal(err)
+	}
+	// Dealing with exit codes in a portable way is a bit of a mess.  On
+	// Unix, exit codes are 32-bit signed integers, cf. _exit and waitid.
+	// On Windows, exit codes are 32-bit unsigned integers (DWORDs),
+	// cf. ExitProcess and GetExitCodeProcess.  Go correctly obtains the
+	// exit status and converts it to a 64-bit signed integer.  Emacs calls
+	// exit, which on Windows casts the 32-bit argument to a DWORD and calls
+	// ExitProcess.  We need to perform the inverse of that cast here to get
+	// the right results.
+	run := func(i exitStatus) int {
+		cmd := exec.Command(*exit, strconv.Itoa(int(int32(i))))
+		cmd.Env = env
+		err := cmd.Run()
+		return exitCode(t, err)
+	}
+	cast := func(i exitStatus) int { return int(i) }
+	// Test some special magic exit codes.
+	for _, s := range []int{-1, +1} {
+		for _, m := range []int{0, 1, 0x7F, 0x80, 0xFF, 0x100} {
+			i := exitStatus(s * m)
+			t.Run(fmt.Sprintf("%#x", i), func(t *testing.T) {
+				got := run(i)
+				want := cast(i)
+				if got != want {
+					t.Errorf("got %#x, want %#x", got, want)
+				}
+			})
+		}
+	}
+	// Test random exit codes.
+	if err := quick.CheckEqual(run, cast, nil); err != nil {
+		t.Error(err)
 	}
 }
 
