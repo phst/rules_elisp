@@ -56,8 +56,6 @@ go_test(
     srcs = [
         "emacs_test.go",
         "ert_test.go",
-        "sys_unix_test.go",
-        "sys_windows_test.go",
         "unix_test.go",
         "windows_test.go",
     ],
