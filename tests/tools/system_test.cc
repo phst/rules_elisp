@@ -1,4 +1,4 @@
-// Copyright 2025 Philipp Stephani
+// Copyright 2025, 2026 Philipp Stephani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -646,7 +646,8 @@ TEST(ListDirectoryTests, ListsDirectory) {
   EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
               StatusIs(absl::StatusCode::kNotFound));
   EXPECT_THAT(CreateDirectory(dir), IsOk());
-  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")), IsOkAndHolds(IsEmpty()));
+  EXPECT_THAT(ListDirectory(dir, RULES_ELISP_NATIVE_LITERAL("*")),
+              IsOkAndHolds(IsEmpty()));
 
   const FileName file =
       dir.Child(RULES_ELISP_NATIVE_LITERAL("file äα𝐴🐈'")).value();
