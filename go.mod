@@ -21,7 +21,7 @@ require (
 	github.com/bazelbuild/buildtools v0.0.0-20260903103648-d171d550ae01
 	github.com/bazelbuild/rules_go v0.63.0
 	github.com/google/go-cmp v0.7.0
-	github.com/yuin/goldmark/v2 v2.0.0
+	github.com/yuin/goldmark/v2 v2.0.1
 	golang.org/x/text v0.41.0
 	google.golang.org/protobuf v1.36.12
 )
