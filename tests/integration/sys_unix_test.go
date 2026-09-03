@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+//go:build unix
+
 package integration_test
 
 // FIXME: This should support the full 32-bit exit status range.
