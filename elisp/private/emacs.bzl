@@ -19,6 +19,7 @@ load("@bazel_tools//tools/build_defs/repo:utils.bzl", "get_auth")
 visibility("private")
 
 def _emacs_impl(ctx):
+    ctx.report_progress("Downloading Emacs %s archive" % ctx.attr.type)
     urls = ctx.attr.urls
     ctx.download_and_extract(
         integrity = ctx.attr.integrity or fail("archive integrity missing"),
@@ -27,7 +28,11 @@ def _emacs_impl(ctx):
         type = ctx.attr.format,
         auth = get_auth(ctx, urls),
     )
+
+    ctx.report_progress("Deleting test files")
     ctx.delete("test")
+
+    ctx.report_progress("Generating BUILD file")
     ctx.template(
         "BUILD.bazel",
         Label("//elisp/private/tools:emacs.BUILD.template"),
