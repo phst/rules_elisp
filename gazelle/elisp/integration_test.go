@@ -17,7 +17,6 @@ package elisp_test
 import (
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 
@@ -35,7 +34,6 @@ func TestGazelleBinary(t *testing.T) {
 		TestDataPathAbsolute: filepath.Join(filepath.Dir(*testdataSentinel), "update"),
 		TestDataPathRelative: "gazelle/testdata/update",
 		GazelleBinaryPath:    *gazelleBinary,
-		Timeout:              time.Minute,
 	}
 	// Set GOCOVERDIR to avoid a warning message if coverage is enabled.
 	// FIXME: Remove this once
