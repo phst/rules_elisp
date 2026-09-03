@@ -189,6 +189,16 @@ static absl::Status Build(const FileName& source, const FileName& install,
     make = *std::move(file);
   }
 
+  // On Windows, let Bash search the MinGW path for GZip.  On POSIX, do the
+  // search ourselves.
+  FileName gzip =
+      FileName::FromString(RULES_ELISP_NATIVE_LITERAL("gzip")).value();
+  if constexpr (!kWindows) {
+    absl::StatusOr<FileName> file = SearchPath(gzip);
+    if (!file.ok()) return file.status();
+    gzip = *std::move(file);
+  }
+
   const FileName configure =
       build.Child(RULES_ELISP_NATIVE_LITERAL("configure")).value();
   const absl::StatusOr<FileName> cc_resolved = cc.Resolve();
@@ -205,7 +215,16 @@ static absl::Status Build(const FileName& source, const FileName& install,
       RULES_ELISP_NATIVE_LITERAL("--with-modules"),
       RULES_ELISP_NATIVE_LITERAL("--with-toolkit-scroll-bars"),
       RULES_ELISP_NATIVE_LITERAL("--disable-build-details"),
+      // Compress .el source files.  This isn’t really necessary, but works
+      // around an apparent Bazel issue where some of the .el source files are
+      // newer than the corresponding .elc files in the sandbox, causing
+      // spurious “Source file […] newer than byte-compiled file; using older
+      // file” warnings.  Emacs’s ‘load’ function only checks for the
+      // modification time of .el files, not .el.gz files; see the logic in
+      // lread.c.
+      RULES_ELISP_NATIVE_LITERAL("--with-compress-install"),
       RULES_ELISP_NATIVE_LITERAL("MAKE=") + AsPosix(make),
+      RULES_ELISP_NATIVE_LITERAL("GZIP_PROG=") + AsPosix(gzip),
       RULES_ELISP_NATIVE_LITERAL("CC=") + AsPosix(*cc_resolved),
       RULES_ELISP_NATIVE_LITERAL("CFLAGS=") + NativeString(cflags),
       RULES_ELISP_NATIVE_LITERAL("LDFLAGS=") + NativeString(ldflags),
