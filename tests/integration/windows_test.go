@@ -1,4 +1,4 @@
-// Copyright 2020-2023, 2025 Google LLC
+// Copyright 2020-2023, 2025, 2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,3 +23,5 @@ const outputFile = `C:\Temp\output.dat`
 // Emacs exits with a code of −1 in case of a signal, which gets converted to an
 // exit status with all bits set: 8 bits on Unix systems, 32 bits on Windows.
 const signalCode = math.MaxUint32
+
+type exitStatus uint32
