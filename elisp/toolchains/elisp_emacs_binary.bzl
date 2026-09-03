@@ -15,6 +15,7 @@
 """Defines the rule `elisp_emacs_binary`, which compiles Emacs for use in
 Bazel."""
 
+load("@bazel_skylib//lib:new_sets.bzl", "sets")
 load("@bazel_skylib//lib:paths.bzl", "paths")
 load("@rules_cc//cc:action_names.bzl", "CPP_LINK_EXECUTABLE_ACTION_NAME", "C_COMPILE_ACTION_NAME")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
@@ -255,10 +256,21 @@ def _unpack(ctx, readme):
     args = ctx.actions.args()
     args.add(readme)
     args.add_all([install], expand_directories = False)
+    elc = sets.make([f.path for f in ctx.files.srcs if f.extension == "elc"])
     srcs = ctx.actions.args()
     srcs.use_param_file("%s", use_always = True)
     srcs.set_param_file_format("multiline")
-    srcs.add_all(ctx.files.srcs, uniquify = True)
+    srcs.add_all(
+        ctx.files.srcs,
+        # Exclude source files that have a corresponding compiled file, as these
+        # files don’t work well with Coverage (see
+        # e.g. https://debbugs.gnu.org/40766).  Do this only for release
+        # archives, as some source files are needed for building from source
+        # even if they have already been byte-compiled.
+        allow_closure = True,
+        map_each = lambda f: None if f.extension == "el" and sets.contains(elc, f.path + "c") else f.path,
+        uniquify = True,
+    )
     ctx.actions.run(
         outputs = [install],
         inputs = ctx.files.srcs,
