@@ -25,7 +25,8 @@ import (
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-	"github.com/phst/rules_elisp/private/testutil"
+
+	"github.com/phst/rules_elisp/internal/testutil"
 )
 
 var copyTree = testutil.RunfileFlag("//elisp/private/tools:copy_tree")

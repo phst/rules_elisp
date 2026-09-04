@@ -39,7 +39,7 @@ go_test(
         for t in TEST_DATA
     ],
     data = TEST_DATA,
-    deps = ["//private/testutil"],
+    deps = ["//internal/testutil"],
 )
 
 elisp_binary(

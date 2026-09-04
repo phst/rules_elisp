@@ -26,7 +26,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/phst/rules_elisp/private/testutil"
+	"github.com/phst/rules_elisp/internal/testutil"
 )
 
 var cat = testutil.RunfileFlag("//tests/proto/integration:cat")

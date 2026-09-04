@@ -83,7 +83,7 @@ merged_manual = rule(
         "_generate": attr.label(
             executable = True,
             cfg = "exec",
-            default = Label("//docs:generate"),
+            default = Label("//internal/docs:generate"),
         ),
         "_merge": attr.label(
             executable = True,

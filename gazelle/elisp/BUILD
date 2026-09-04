@@ -81,7 +81,7 @@ go_test(
     data = TEST_DATA + ["//gazelle/testdata"],
     deps = [
         ":elisp",
-        "//private/testutil",
+        "//internal/testutil",
         "@com_github_bazelbuild_buildtools//build",
         "@com_github_google_go_cmp//cmp",
         "@gazelle//config",

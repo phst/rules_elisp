@@ -35,7 +35,8 @@ import (
 	"github.com/bazelbuild/rules_go/go/runfiles"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/phst/rules_elisp/private/testutil"
+
+	"github.com/phst/rules_elisp/internal/testutil"
 )
 
 var (

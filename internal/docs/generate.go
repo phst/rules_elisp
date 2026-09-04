@@ -37,7 +37,7 @@ import (
 	"golang.org/x/text/language"
 	"google.golang.org/protobuf/proto"
 
-	spb "github.com/phst/rules_elisp/docs/stardoc_output_go_proto"
+	spb "github.com/phst/rules_elisp/internal/docs/stardoc_output_go_proto"
 )
 
 // Main function.

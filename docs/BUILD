@@ -15,9 +15,6 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@local_config//:config.bzl", "IS_DEFAULT_BAZEL_VERSION")
-load("@rules_go//go:go_binary.bzl", "go_binary")
-load("@rules_go//go:go_library.bzl", "go_library")
-load("@rules_go//proto:def.bzl", "go_proto_library")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_manual.bzl", "elisp_manual")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -118,33 +115,6 @@ elisp_binary(
     )
     for pkg, name in DOCS
 ]
-
-go_binary(
-    name = "generate",
-    embed = [":docs"],
-)
-
-go_library(
-    name = "docs",
-    srcs = ["generate.go"],
-    importpath = "github.com/phst/rules_elisp/docs",
-    deps = [
-        ":stardoc_output_go_proto",
-        "@com_github_yuin_goldmark_v2//ast",
-        "@com_github_yuin_goldmark_v2//parser",
-        "@com_github_yuin_goldmark_v2//renderer",
-        "@org_golang_google_protobuf//proto",
-        "@org_golang_x_text//cases",
-        "@org_golang_x_text//encoding/charmap",
-        "@org_golang_x_text//language",
-    ],
-)
-
-go_proto_library(
-    name = "stardoc_output_go_proto",
-    importpath = "github.com/phst/rules_elisp/docs/stardoc_output_go_proto",
-    protos = ["@stardoc//stardoc/proto:stardoc_output_proto"],
-)
 
 bzl_library(
     name = "makeinfo",
