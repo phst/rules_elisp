@@ -42,7 +42,6 @@ go_library(
         "@com_github_yuin_goldmark_v2//renderer",
         "@org_golang_google_protobuf//proto",
         "@org_golang_x_text//cases",
-        "@org_golang_x_text//encoding/charmap",
         "@org_golang_x_text//language",
     ],
 )

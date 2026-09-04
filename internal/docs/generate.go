@@ -33,7 +33,6 @@ import (
 	"github.com/yuin/goldmark/v2/parser"
 	"github.com/yuin/goldmark/v2/renderer"
 	"golang.org/x/text/cases"
-	"golang.org/x/text/encoding/charmap"
 	"golang.org/x/text/language"
 	"google.golang.org/protobuf/proto"
 
@@ -43,8 +42,6 @@ import (
 // Main function.
 func main() {
 	flag.Usage = usage
-	var utf8 bool
-	flag.BoolVar(&utf8, "utf8", false, "")
 	flag.Parse()
 	if flag.NArg() != 2 {
 		usage()
@@ -65,7 +62,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	generator := newGenerator(file, utf8)
+	generator := newGenerator(file)
 	if err := generator.run(&module); err != nil {
 		log.Fatal(err)
 	}
@@ -84,7 +81,6 @@ func usage() {
 
 type generator struct {
 	file io.Writer
-	utf8 bool
 }
 
 var attributeType = map[spb.AttributeType]string{
@@ -108,8 +104,8 @@ var mandatory = map[bool]string{
 	true:  "mandatory",
 }
 
-func newGenerator(file io.Writer, utf8 bool) *generator {
-	return &generator{file, utf8}
+func newGenerator(file io.Writer) *generator {
+	return &generator{file}
 }
 
 // Writes the generated Org Mode output.
@@ -134,7 +130,7 @@ func runRecover(err *error) {
 func (g *generator) doRun(module *spb.ModuleInfo) {
 	doc := module.GetModuleDocstring()
 	if len(doc) > 100 && strings.ContainsRune(doc, '\n') {
-		g.write(g.markdown(doc))
+		g.write(markdown(doc))
 	}
 	apply(g.rule, module.GetRuleInfo())
 	apply(g.provider, module.GetProviderInfo())
@@ -170,7 +166,7 @@ func (g *generator) rule(rule *spb.RuleInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Rule %s (%s)\n", name, attrs))
 	g.write("#+BEGIN_deffn\n")
 	g.load(rule.GetOriginKey())
-	g.write(lstrip(g.markdown(rule.GetDocString())))
+	g.write(lstrip(markdown(rule.GetDocString())))
 	g.write(fmt.Sprintf("The ~%s~ rule supports the following attributes:\n\n", name))
 	for _, attr := range rule.GetAttribute() {
 		g.attribute(attr)
@@ -195,13 +191,13 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options %s (%s)\n", name, params))
 	g.write("#+BEGIN_defun\n")
 	g.load(function.GetOriginKey())
-	g.write(lstrip(g.markdown(function.GetDocString())))
+	g.write(lstrip(markdown(function.GetDocString())))
 	for _, param := range function.GetParameter() {
 		g.parameter(param)
 	}
 	returns := function.GetReturn().GetDocString()
 	if returns != "" {
-		g.write(fmt.Sprintf("Returns: %s\n\n", g.markdown(returns)))
+		g.write(fmt.Sprintf("Returns: %s\n\n", markdown(returns)))
 	}
 	if function.GetDeprecated().GetDocString() != "" {
 		return fmt.Errorf("unsupported deprecated function %s", name)
@@ -211,7 +207,7 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 }
 
 func (g *generator) parameter(param *spb.FunctionParamInfo) {
-	doc := strings.TrimSpace(g.markdown(param.GetDocString()))
+	doc := strings.TrimSpace(markdown(param.GetDocString()))
 	if !strings.HasSuffix(doc, ".") {
 		panic(fmt.Sprintf("documentation string %q should end with a period", doc))
 	}
@@ -233,10 +229,10 @@ func (g *generator) provider(provider *spb.ProviderInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Provider %s %s\n", name, fields))
 	g.write("#+BEGIN_deftp\n")
 	g.load(provider.GetOriginKey())
-	g.write(lstrip(g.markdown(provider.GetDocString())))
+	g.write(lstrip(markdown(provider.GetDocString())))
 	g.write(fmt.Sprintf("The ~%s~ provider has the following fields:\n\n", name))
 	for _, field := range provider.GetFieldInfo() {
-		doc := strings.TrimSpace(g.markdown(field.GetDocString()))
+		doc := strings.TrimSpace(markdown(field.GetDocString()))
 		if !strings.HasSuffix(doc, ".") {
 			return fmt.Errorf("documentation string %q should end with a period", doc)
 		}
@@ -262,7 +258,7 @@ func (g *generator) aspect(aspect *spb.AspectInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options Aspect %s %s\n", name, attrs))
 	g.write("#+BEGIN_deffn\n")
 	g.load(aspect.GetOriginKey())
-	g.write(lstrip(g.markdown(aspect.GetDocString())))
+	g.write(lstrip(markdown(aspect.GetDocString())))
 	if len(aspect.GetAspectAttribute()) != 0 {
 		var elts []string
 		for _, a := range aspect.GetAspectAttribute() {
@@ -292,7 +288,7 @@ func (g *generator) extension(ext *spb.ModuleExtensionInfo) error {
 	g.write(
 		fmt.Sprintf("%s = use_extension(\"%s\", \"%s\")\n", name, ext.GetOriginKey().GetFile(), name))
 	g.write("#+END_SRC\n\n")
-	g.write(lstrip(g.markdown(ext.GetDocString())))
+	g.write(lstrip(markdown(ext.GetDocString())))
 	g.write(fmt.Sprintf("The ~%s~ module extension provides the following tag classes:\n\n", name))
 	for _, tag := range ext.GetTagClass() {
 		g.tagClass(name, tag)
@@ -316,7 +312,7 @@ func (g *generator) tagClass(extensionName string, tag *spb.ModuleExtensionTagCl
 	attrs := strings.Join(elts, ", ")
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options {Tag class} %s %s (%s)\n", extensionName, name, attrs))
 	g.write("#+BEGIN_defop\n")
-	g.write(lstrip(g.markdown(tag.GetDocString())))
+	g.write(lstrip(markdown(tag.GetDocString())))
 	g.write(
 		fmt.Sprintf("The ~%s~ tag class supports the following attributes:\n\n", name))
 	for _, attr := range tag.GetAttribute() {
@@ -341,7 +337,7 @@ func (g *generator) repoRule(rule *spb.RepositoryRuleInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options {Repository rule} %s (%s)\n", name, attrs))
 	g.write("#+BEGIN_deffn\n")
 	g.load(rule.GetOriginKey())
-	g.write(lstrip(g.markdown(rule.GetDocString())))
+	g.write(lstrip(markdown(rule.GetDocString())))
 	g.write(fmt.Sprintf("The ~%s~ repository rule supports the following attributes:\n\n", name))
 	for _, attr := range rule.GetAttribute() {
 		g.attribute(attr)
@@ -374,7 +370,7 @@ func (g *generator) macro(macro *spb.MacroInfo) error {
 	g.write(fmt.Sprintf("#+ATTR_TEXINFO: :options %s (%s)\n", name, attrs))
 	g.write("#+BEGIN_defmac\n")
 	g.load(macro.GetOriginKey())
-	g.write(lstrip(g.markdown(macro.GetDocString())))
+	g.write(lstrip(markdown(macro.GetDocString())))
 	g.write(
 		fmt.Sprintf("The ~%s~ macro supports the following attributes:\n\n", name))
 	for _, attr := range macro.GetAttribute() {
@@ -400,7 +396,7 @@ func (g *generator) attribute(attr *spb.AttributeInfo) {
 	if strings.HasPrefix(attr.GetDocString(), "Deprecated;") {
 		return
 	}
-	doc := strings.TrimSpace(g.markdown(attr.GetDocString()))
+	doc := strings.TrimSpace(markdown(attr.GetDocString()))
 	if !strings.HasSuffix(doc, ".") {
 		panic(
 			fmt.Errorf("documentation string %q should end with a period", doc))
@@ -440,21 +436,10 @@ func (g *generator) write(text string) {
 }
 
 // Convert a Markdown snippet to Org-mode.
-func (g *generator) markdown(text string) string {
+func markdown(text string) string {
 	text = strings.TrimSpace(text)
 	if text == "" {
 		panic("Missing docstring")
-	}
-	// Bazel before 8.1 (including Stardoc) interpreted all files as Latin-1,
-	// cf. https://bazel.build/versions/8.0.0/concepts/build-files.  However,
-	// our files all use UTF-8, leading to double encoding.  Reverse that
-	// effect here.
-	if !g.utf8 {
-		s, err := charmap.ISO8859_1.NewEncoder().String(text)
-		if err != nil {
-			panic(err)
-		}
-		text = s
 	}
 	source := []byte(text)
 	doc := parser.New().Parse(source)
