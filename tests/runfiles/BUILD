@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@bazel_skylib//rules:select_file.bzl", "select_file")
+load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -34,11 +35,18 @@ TEST_DATA = [
 ]
 
 UNICODE = [
-    # This filename contains only letters.
+    # This filename contains only letters and can be checked in.
     "testäα𝐴.txt",
-    # This filename contains non-letter characters.
+    # This filename contains non-letter characters and can’t be checked in; see
+    # https://go.dev/ref/mod#zip-path-size-constraints.
     "testäα𝐴🐈'.txt",
 ]
+
+write_file(
+    name = "write_file",
+    out = "testäα𝐴🐈'.txt",
+    content = ["test file with non-letter characters in its name"],
+)
 
 elisp_test(
     name = "runfiles_test",
