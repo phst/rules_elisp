@@ -16,7 +16,7 @@
 
 module(
     name = "rules_elisp",
-    bazel_compatibility = [">=8.0.0"],
+    bazel_compatibility = [">=8.1.0"],
 )
 
 ## Production dependencies
