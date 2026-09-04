@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_features//:features.bzl", "bazel_features")
 load("@bazel_skylib//rules:select_file.bzl", "select_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
@@ -34,14 +33,14 @@ TEST_DATA = [
     "test-mapping",
 ]
 
-UNICODE = "testäα𝐴🐈'.txt" if bazel_features.docs.utf8_enabled else "test.txt"
+UNICODE = "testäα𝐴🐈'.txt"
 
 elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
     args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["unicode=$(rlocationpath %s)" % UNICODE],
-    data = TEST_DATA + ([UNICODE] if bazel_features.docs.utf8_enabled else []),
+    data = TEST_DATA + [UNICODE],
     deps = ["//elisp/runfiles"],
 )
 
