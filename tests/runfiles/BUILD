@@ -33,14 +33,19 @@ TEST_DATA = [
     "test-mapping",
 ]
 
-UNICODE = "testäα𝐴🐈'.txt"
+UNICODE = [
+    # This filename contains only letters.
+    "testäα𝐴.txt",
+    # This filename contains non-letter characters.
+    "testäα𝐴🐈'.txt",
+]
 
 elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["unicode=$(rlocationpath %s)" % UNICODE],
-    data = TEST_DATA + [UNICODE],
+    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["unicode-%d=$(rlocationpath %s)" % (i, f) for i, f in enumerate(UNICODE, 1)],
+    data = TEST_DATA + UNICODE,
     deps = ["//elisp/runfiles"],
 )
 

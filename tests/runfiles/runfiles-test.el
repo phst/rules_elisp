@@ -1,6 +1,6 @@
 ;;; runfiles-test.el --- unit test for runfiles.el  -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2025 Google LLC
+;; Copyright 2020-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@
 (defvar @flag/test.txt)
 (defvar @flag/test-manifest)
 (defvar @flag/test-mapping)
-(defvar @flag/unicode)
+(defvar @flag/unicode-1)
+(defvar @flag/unicode-2)
 
 (while command-line-args-left
   (pcase (pop command-line-args-left)
@@ -37,14 +38,16 @@
 
 (ert-deftest elisp/runfiles/rlocation ()
   (let* ((runfiles (elisp/runfiles/make))
-         (filename (elisp/runfiles/rlocation @flag/unicode runfiles))
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
-    (should (file-exists-p filename))
-    (should (file-readable-p filename))
-    (should (file-regular-p filename))
-    (should (> (file-attribute-size (file-attributes filename)) 0))
-    (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))))
+    (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))
+    (dolist (name (list @flag/test.txt @flag/unicode-1 @flag/unicode-2))
+      (ert-info (name :prefix "Name: ")
+        (let ((filename (elisp/runfiles/rlocation name runfiles)))
+          (should (file-exists-p filename))
+          (should (file-readable-p filename))
+          (should (file-regular-p filename))
+          (should (> (file-attribute-size (file-attributes filename)) 0)))))))
 
 (ert-deftest elisp/runfiles/special-chars/directory ()
   (let* ((windows (memq system-type '(ms-dos windows-nt)))
