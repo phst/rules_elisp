@@ -20,7 +20,7 @@ import (
 
 	"github.com/bazelbuild/bazel-gazelle/testtools"
 
-	"github.com/phst/rules_elisp/private/testutil"
+	"github.com/phst/rules_elisp/internal/testutil"
 )
 
 var (

@@ -216,7 +216,7 @@ go_test(
     args = ["--%s=$(rlocationpath %s)" % (f, f) for f in TOOLS_TEST_DATA],
     data = TOOLS_TEST_DATA,
     deps = [
-        "//private/testutil",
+        "//internal/testutil",
         "@com_github_google_go_cmp//cmp",
     ],
 )
