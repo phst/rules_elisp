@@ -30,6 +30,7 @@ HYPERFINE ?= hyperfine
 HYPERFINEFLAGS =
 GO = $(BAZEL) run $(BAZELFLAGS) -- @rules_go//go
 ADDLICENSE = $(GO) tool addlicense
+GOMODZIP = $(GO) tool gomodzip
 
 all:
 	$(BAZEL) build $(BAZELFLAGS) -- //...
@@ -92,6 +93,11 @@ check-extra:
         # Find files without license headers.
 	$(ADDLICENSE) --check \
 	  --ignore='index.html' --ignore='coverage-report/**' -- .
+        # Attempt to create a Go module archive; see
+        # https://go.dev/ref/mod#zip-files.  This detects issues that prevent
+        # https://pkg.go.dev/ from updating.
+	$(GOMODZIP) v0.0.0 --output=mod.tmp.zip
+	rm mod.tmp.zip
 
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
 
