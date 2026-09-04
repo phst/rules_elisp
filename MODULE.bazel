@@ -135,6 +135,10 @@ bazel_dep(name = "gazelle_cc", version = "0.6.0", dev_dependency = True)
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
 go_sdk.nogo(nogo = "//dev:nogo")
 
+# Require Go version explicitly until the fix for
+# https://github.com/bazel-contrib/rules_go/issues/4696 is released.
+go_sdk.from_file(go_mod = "//:go.mod")
+
 go_deps = use_extension("@gazelle//:extensions.bzl", "go_deps", dev_dependency = True)
 go_deps.from_file(go_mod = "//:go.mod")
 use_repo(

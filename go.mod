@@ -14,7 +14,7 @@
 
 module github.com/phst/rules_elisp
 
-go 1.25.0
+go 1.26.7
 
 require (
 	github.com/bazelbuild/bazel-gazelle v0.54.0
