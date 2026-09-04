@@ -33,7 +33,7 @@ ADDLICENSE = $(GO) tool addlicense
 GOMODZIP = $(GO) tool gomodzip
 
 all:
-	$(BAZEL) build $(BAZELFLAGS) -- //...
+	$(BAZEL) build --norun_validations $(BAZELFLAGS) -- //...
 
 generate: compdb coverage
 
