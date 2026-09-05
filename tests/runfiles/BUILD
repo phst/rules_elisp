@@ -44,7 +44,7 @@ elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    args = ["%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["unicode-%d=$(rlocationpath %s)" % (i, f) for i, f in enumerate(UNICODE, 1)],
+    args = ["--%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["--unicode-%d=$(rlocationpath %s)" % (i, f) for i, f in enumerate(UNICODE, 1)],
     data = TEST_DATA + UNICODE,
     deps = ["//elisp/runfiles"],
 )
