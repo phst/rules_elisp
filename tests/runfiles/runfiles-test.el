@@ -27,8 +27,8 @@
 (defvar @flag/test.txt)
 (defvar @flag/test-manifest)
 (defvar @flag/test-mapping)
-(defvar @flag/unicode-1)
-(defvar @flag/unicode-2)
+(defvar @flag/testäα𝐴.txt)
+(defvar @flag/testäα𝐴🐈\'.txt)
 
 (while command-line-args-left
   (pcase (pop command-line-args-left)
@@ -41,7 +41,7 @@
          (process-environment (elisp/runfiles/env-vars runfiles)))
     (should (cl-typep runfiles 'elisp/runfiles/runfiles))
     (should (or (getenv "RUNFILES_DIR") (getenv "RUNFILES_MANIFEST_FILE")))
-    (dolist (name (list @flag/test.txt @flag/unicode-1 @flag/unicode-2))
+    (dolist (name (list @flag/test.txt @flag/testäα𝐴.txt @flag/testäα𝐴🐈\'.txt))
       (ert-info (name :prefix "Name: ")
         (let ((filename (elisp/runfiles/rlocation name runfiles)))
           (should (file-exists-p filename))

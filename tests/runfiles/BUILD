@@ -17,7 +17,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
-load("//private:rlocation.bzl", "rlocation", "runfileflag")
+load("//private:rlocation.bzl", "runfileflag")
 
 package(
     default_package_metadata = ["//:license"],
@@ -33,9 +33,6 @@ TEST_DATA = [
     "test-lib.elc",
     "test-manifest",
     "test-mapping",
-]
-
-UNICODE = [
     # This filename contains only letters and can be checked in.
     "testäα𝐴.txt",
     # This filename contains non-letter characters and can’t be checked in; see
@@ -53,11 +50,8 @@ elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    args = [runfileflag(t) for t in TEST_DATA] + [rlocation(
-        "--unicode-%d=%%s" % i,
-        f,
-    ) for i, f in enumerate(UNICODE, 1)],
-    data = TEST_DATA + UNICODE,
+    args = [runfileflag(t) for t in TEST_DATA],
+    data = TEST_DATA,
     deps = ["//elisp/runfiles"],
 )
 
