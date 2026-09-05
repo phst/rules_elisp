@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@protobuf//bazel:proto_library.bzl", "proto_library")
 load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
@@ -109,11 +108,7 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = ["bin_test.go"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--bin=$(rlocationpath :bin)"),
-    ],
+    args = ["--bin=$(rlocationpath :bin)"],
     data = ["bin"],
     deps = ["@rules_go//go/runfiles"],
 )
