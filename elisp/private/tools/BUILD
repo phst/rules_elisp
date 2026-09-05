@@ -25,6 +25,7 @@ load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFIN
 load("//elisp/private:manual.bzl", "MAX_MANUAL_ADDITIONAL_INPUTS")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "rlocation")
 
 package(
     default_package_metadata = ["//:license"],
@@ -264,7 +265,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUN_TST_ELC=R"*($(rlocationpath :run-tst.elc))*"'),
+        rlocation('RULES_ELISP_RUN_TST_ELC=R"*(%s)*"', ":run-tst.elc"),
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
@@ -318,7 +319,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
+        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(%s)*"', "//elisp/runfiles:runfiles.elc"),
     ],
     visibility = ["//tests/tools:__pkg__"],
     deps = [

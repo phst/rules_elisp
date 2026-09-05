@@ -17,6 +17,7 @@ load("@bazel_skylib//rules:write_file.bzl", "write_file")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "rlocation", "runfileflag")
 
 package(
     default_package_metadata = ["//:license"],
@@ -52,7 +53,10 @@ elisp_test(
     name = "runfiles_test",
     size = "small",
     srcs = ["runfiles-test.el"],
-    args = ["--%s=$(rlocationpath %s)" % (f, f) for f in TEST_DATA] + ["--unicode-%d=$(rlocationpath %s)" % (i, f) for i, f in enumerate(UNICODE, 1)],
+    args = [runfileflag(t) for t in TEST_DATA] + [rlocation(
+        "--unicode-%d=%%s" % i,
+        f,
+    ) for i, f in enumerate(UNICODE, 1)],
     data = TEST_DATA + UNICODE,
     deps = ["//elisp/runfiles"],
 )

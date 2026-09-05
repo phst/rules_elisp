@@ -24,6 +24,7 @@ load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "runfileflag")
 
 package(
     default_package_metadata = ["//:license"],
@@ -63,10 +64,7 @@ go_test(
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         shell.quote("--xmllint=" + XMLLINT),
-    ] + [
-        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
-        for t in TEST_DATA
-    ],
+    ] + [runfileflag(t) for t in TEST_DATA],
     data = TEST_DATA,
     embedsrcs = [
         "coverage.dat",
