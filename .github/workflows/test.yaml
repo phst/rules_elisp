@@ -60,7 +60,7 @@ jobs:
       - name: Set up workspace
         uses: ./.github/actions/set-up
         with:
-          bazel-version: ${{matrix.bazel}}
+          bazel: ${{matrix.bazel}}
           cc: ${{matrix.cc}}
       - name: Run Bazel tests
         shell: pwsh
