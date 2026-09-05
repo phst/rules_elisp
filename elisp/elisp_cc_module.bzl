@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,6 +48,10 @@ def _elisp_cc_module_impl(ctx):
         local_defines = defaults.defines + ctx.attr.local_defines,
         user_compile_flags = defaults.copts + ctx.attr.copts,
     )
+
+    # Ensure that the library file has the expected name.
+    filename = ctx.label.name + config.suffix
+    lib = ctx.actions.declare_file(filename)
     out = cc_common.link(
         name = ctx.label.name,
         actions = ctx.actions,
@@ -56,23 +60,12 @@ def _elisp_cc_module_impl(ctx):
         compilation_outputs = objs,
         linking_contexts = [info.linking_context for info in infos],
         output_type = "dynamic_library",
+        main_output = lib,
         user_link_flags = defaults.linkopts + ctx.attr.linkopts,
         additional_inputs = config.additional_linker_inputs,
     )
     if not (out.library_to_link and out.library_to_link.dynamic_library):
         fail("linking Emacs module didn’t produce a dynamic library")
-
-    # Ensure that the library file has the expected name.
-    filename = ctx.label.name + config.suffix
-    if out.library_to_link.dynamic_library.basename == filename:
-        lib = out.library_to_link.dynamic_library
-    else:
-        lib = ctx.actions.declare_file(filename)
-        ctx.actions.symlink(
-            output = lib,
-            target_file = out.library_to_link.dynamic_library,
-            progress_message = "Creating symbolic link " + lib.short_path,
-        )
 
     # Replicate some implementation details of cc_binary to make coverage work,
     # at least with llvm-cov.  See
