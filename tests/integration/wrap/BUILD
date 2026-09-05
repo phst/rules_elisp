@@ -19,6 +19,7 @@ load("@rules_go//go:go_binary.bzl", "go_binary")
 load("@rules_go//go:go_library.bzl", "go_library")
 load("//elisp/private:cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_DEPS", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")  # buildifier: disable=bzl-visibility
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "rlocation")
 
 package(
     default_package_metadata = ["//:license"],
@@ -43,7 +44,7 @@ cc_binary(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote("RULES_ELISP_BINARY=1"),
-        shell.quote('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL(R"*($(rlocationpath :wrap))*")'),
+        rlocation('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL(R"*(%s)*")', ":wrap"),
         shell.quote("RULES_ELISP_MODE=rules_elisp::ToolchainMode::kWrap"),
         shell.quote('RULES_ELISP_TAGS=RULES_ELISP_NATIVE_LITERAL("local"), RULES_ELISP_NATIVE_LITERAL("mytag")'),
         shell.quote('RULES_ELISP_LOAD_PATH=RULES_ELISP_NATIVE_LITERAL("rules_elisp")'),

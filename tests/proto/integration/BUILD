@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "runfileflag")
 
 package(
     default_package_metadata = ["//:license"],
@@ -32,12 +32,9 @@ go_test(
     name = "integration_test",
     size = "medium",
     srcs = ["module_test.go"],
-    args = [
-        # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
-        # add additional quoting.
-        shell.quote("--{t}=$(rlocationpath {t})".format(t = t))
-        for t in TEST_DATA
-    ],
+    # See https://github.com/bazelbuild/bazel/issues/12313 why we need to add
+    # additional quoting.
+    args = [runfileflag(t) for t in TEST_DATA],
     data = TEST_DATA,
     deps = ["//internal/testutil"],
 )

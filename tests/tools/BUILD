@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_test.bzl", "elisp_test")
 load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
+load("//private:rlocation.bzl", "rlocation", "runfileflag")
 
 package(
     default_package_metadata = ["//:license"],
@@ -63,7 +63,7 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_RUNFILES_ELC=R"*($(rlocationpath //elisp/runfiles:runfiles.elc))*"'),
+        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(%s)*"', "//elisp/runfiles:runfiles.elc"),
     ],
     deps = [
         "//elisp/private/tools:load",
@@ -130,7 +130,7 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_PROGRAM=R"*($(rlocationpath //tests:empty))*"'),
+        rlocation('RULES_ELISP_PROGRAM=R"*(%s)*"', "//tests:empty"),
     ],
     deps = [
         "//elisp/private/tools:platform",
@@ -161,8 +161,8 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        shell.quote('RULES_ELISP_DATA=R"*($(rlocationpath :BUILD))*"'),
-        shell.quote('RULES_ELISP_HELPER=R"*($(rlocationpath //tests/tools/helper))*"'),
+        rlocation('RULES_ELISP_DATA=R"*(%s)*"', ":BUILD"),
+        rlocation('RULES_ELISP_HELPER=R"*(%s)*"', "//tests/tools/helper"),
     ],
     deps = [
         "//elisp/private/tools:numeric",
@@ -213,7 +213,7 @@ go_test(
     size = "medium",
     timeout = "short",
     srcs = ["copy_tree_test.go"],
-    args = ["--%s=$(rlocationpath %s)" % (f, f) for f in TOOLS_TEST_DATA],
+    args = [runfileflag(t) for t in TOOLS_TEST_DATA],
     data = TOOLS_TEST_DATA,
     deps = [
         "//internal/testutil",

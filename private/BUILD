@@ -82,6 +82,12 @@ bzl_library(
 )
 
 bzl_library(
+    name = "rlocation",
+    srcs = ["rlocation.bzl"],
+    deps = ["@bazel_skylib//lib:shell"],
+)
+
+bzl_library(
     name = "junit_xsd",
     srcs = ["junit_xsd.bzl"],
 )
