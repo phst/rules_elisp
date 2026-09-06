@@ -27,7 +27,7 @@ def _merged_manual_impl(ctx):
         ctx.actions.run(
             outputs = [org],
             inputs = [bin],
-            executable = ctx.executable._generate,
+            executable = ctx.executable._stardoc2org,
             arguments = [ctx.actions.args().add("--").add(bin).add(org)],
             mnemonic = "GenOrg",
             progress_message = "Generating Org file %{output}",
@@ -73,10 +73,10 @@ merged_manual = rule(
             allow_empty = False,
         ),
         "out": attr.output(mandatory = True),
-        "_generate": attr.label(
+        "_stardoc2org": attr.label(
             executable = True,
             cfg = "exec",
-            default = Label("//internal/docs:generate"),
+            default = Label("//internal/stardoc2org"),
         ),
         "_merge": attr.label(
             executable = True,
