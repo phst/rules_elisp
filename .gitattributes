@@ -16,6 +16,7 @@
 # cf. https://github.com/bazelbuild/buildtools/issues/914.
 BUILD                           text eol=lf
 MODULE.bazel                    text eol=lf
+REPO.bazel                      text eol=lf
 WORKSPACE                       text eol=lf
 WORKSPACE.bzlmod                text eol=lf
 *.bzl                           text eol=lf
