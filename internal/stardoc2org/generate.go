@@ -538,19 +538,6 @@ func (r *orgRenderer) cr(w *strings.Builder) {
 	}
 }
 
-func (r *orgRenderer) out(w *strings.Builder, s string) {
-	indent := ""
-	if strings.HasSuffix(r.lastOut, "\n") {
-		indent = r.indent
-	}
-	r.lit(w, indent+escape(s))
-}
-
-func escape(s string) string {
-	// See https://orgmode.org/manual/Escape-Character.html.
-	return regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")
-}
-
 func (r *orgRenderer) document(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Document)
 	r.cr(writer)
@@ -562,24 +549,21 @@ func (r *orgRenderer) text(writer *strings.Builder, source []byte, n ast.Node, e
 	if entering {
 		s := node.Value.Str(source)
 		s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
-		r.out(writer, s)
+		indent := ""
+		if strings.HasSuffix(r.lastOut, "\n") {
+			indent = r.indent
+		}
+		// See https://orgmode.org/manual/Escape-Character.html.
+		r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B"))
 		if node.SoftLineBreak() {
-			r.softBreak(writer)
+			r.cr(writer)
 		}
 		if node.HardLineBreak() {
-			r.lineBreak(writer)
+			r.lit(writer, `\\`)
+			r.cr(writer)
 		}
 	}
 	return ast.WalkContinue, nil
-}
-
-func (r *orgRenderer) softBreak(writer *strings.Builder) {
-	r.cr(writer)
-}
-
-func (r *orgRenderer) lineBreak(writer *strings.Builder) {
-	r.lit(writer, `\\`)
-	r.cr(writer)
 }
 
 func (r *orgRenderer) paragraph(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
