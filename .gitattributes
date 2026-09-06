@@ -1,4 +1,4 @@
-# Copyright 2021-2023, 2025 Google LLC
+# Copyright 2021-2023, 2025, 2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,10 +28,6 @@ WORKSPACE.bzlmod                text eol=lf
 
 # Don’t mess with coverage test data.
 /tests/integration/coverage.dat text eol=lf
-
-# The hashes of the requirements files are recorded in MODULE.bazel.lock.  Make
-# sure that they stay intact across operating systems.
-/dev/requirements-*.lock        text eol=lf
 
 # Local Variables:
 # tab-stop-list: (32)
