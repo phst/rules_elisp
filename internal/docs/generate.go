@@ -200,7 +200,7 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 		g.write(fmt.Sprintf("Returns: %s\n\n", markdown(returns)))
 	}
 	if function.GetDeprecated().GetDocString() != "" {
-		return fmt.Errorf("unsupported deprecated function %s", name)
+		panic(fmt.Errorf("unsupported deprecated function %s", name))
 	}
 	g.write("#+END_defun\n\n")
 	return nil
@@ -234,7 +234,7 @@ func (g *generator) provider(provider *spb.ProviderInfo) error {
 	for _, field := range provider.GetFieldInfo() {
 		doc := strings.TrimSpace(markdown(field.GetDocString()))
 		if !strings.HasSuffix(doc, ".") {
-			return fmt.Errorf("documentation string %q should end with a period", doc)
+			panic(fmt.Errorf("documentation string %q should end with a period", doc))
 		}
 		g.item(fmt.Sprintf("~%s~ :: %s", field.GetName(), doc))
 	}
