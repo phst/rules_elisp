@@ -209,7 +209,7 @@ func (g *generator) function(function *spb.StarlarkFunctionInfo) error {
 func (g *generator) parameter(param *spb.FunctionParamInfo) {
 	doc := strings.TrimSpace(markdown(param.GetDocString()))
 	if !strings.HasSuffix(doc, ".") {
-		panic(fmt.Sprintf("documentation string %q should end with a period", doc))
+		panic(fmt.Errorf("documentation string %q should end with a period", doc))
 	}
 	suffixes := []string{capitalize(mandatory[param.GetMandatory()])}
 	if param.GetDefaultValue() != "" {
@@ -439,7 +439,7 @@ func (g *generator) write(text string) {
 func markdown(text string) string {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		panic("Missing docstring")
+		panic(errors.New("Missing docstring"))
 	}
 	source := []byte(text)
 	doc := parser.New().Parse(source)
