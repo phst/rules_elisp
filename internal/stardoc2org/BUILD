@@ -26,15 +26,15 @@ package(
 licenses(["notice"])
 
 go_binary(
-    name = "generate",
-    embed = [":docs"],
+    name = "stardoc2org",
+    embed = [":lib"],
     visibility = ["//docs:__pkg__"],
 )
 
 go_library(
-    name = "docs",
+    name = "lib",
     srcs = ["generate.go"],
-    importpath = "github.com/phst/rules_elisp/internal/docs",
+    importpath = "github.com/phst/rules_elisp/internal/stardoc2org",
     deps = [
         ":stardoc_output_go_proto",
         "@com_github_yuin_goldmark_v2//ast",
@@ -48,6 +48,6 @@ go_library(
 
 go_proto_library(
     name = "stardoc_output_go_proto",
-    importpath = "github.com/phst/rules_elisp/internal/docs/stardoc_output_go_proto",
+    importpath = "github.com/phst/rules_elisp/internal/stardoc2org/stardoc_output_go_proto",
     protos = ["@stardoc//stardoc/proto:stardoc_output_proto"],
 )
