@@ -189,35 +189,36 @@ func markdown(text string) string {
 	source := []byte(text)
 	doc := parser.New().Parse(source)
 	orgRenderer := newOrgRenderer()
-	type config struct {
-		Config renderer.Config[io.Writer, config]
-	}
-	renderer := new(renderer.HelperBuilder[io.Writer, config]).Options(
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindDocument, renderer.NodeRendererFunc(orgRenderer.document)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindText, renderer.NodeRendererFunc(orgRenderer.text)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindParagraph, renderer.NodeRendererFunc(orgRenderer.paragraph)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindList, renderer.NodeRendererFunc(orgRenderer.list)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindListItem, renderer.NodeRendererFunc(orgRenderer.item)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindEmphasis, renderer.NodeRendererFunc(orgRenderer.emph)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindCodeSpan, renderer.NodeRendererFunc(orgRenderer.code)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindCodeBlock, renderer.NodeRendererFunc(orgRenderer.codeBlock)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindLink, renderer.NodeRendererFunc(orgRenderer.link)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindRawHTML, renderer.NodeRendererFunc(orgRenderer.htmlInline)),
+	renderer := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindDocument, renderer.NodeRendererFunc(orgRenderer.document)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindText, renderer.NodeRendererFunc(orgRenderer.text)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindParagraph, renderer.NodeRendererFunc(orgRenderer.paragraph)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindList, renderer.NodeRendererFunc(orgRenderer.list)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindListItem, renderer.NodeRendererFunc(orgRenderer.item)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindEmphasis, renderer.NodeRendererFunc(orgRenderer.emph)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindCodeSpan, renderer.NodeRendererFunc(orgRenderer.code)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindCodeBlock, renderer.NodeRendererFunc(orgRenderer.codeBlock)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindLink, renderer.NodeRendererFunc(orgRenderer.link)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindRawHTML, renderer.NodeRendererFunc(orgRenderer.htmlInline)),
 
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindAutoLink, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindBlockquote, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindHTMLBlock, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindHeading, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindImage, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindLinkReferenceDefinition, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindStrong, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[io.Writer, config](ast.KindThematicBreak, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindAutoLink, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindBlockquote, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindHTMLBlock, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindHeading, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindImage, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindLinkReferenceDefinition, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindStrong, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, rendererConfig](ast.KindThematicBreak, renderer.NodeRendererFunc(orgRenderer.unknown)),
 	).Build()
 	var w strings.Builder
 	if err := renderer.Render(&w, source, doc); err != nil {
 		panic(err)
 	}
 	return w.String() + "\n"
+}
+
+type rendererConfig struct {
+	Config renderer.Config[io.Writer, rendererConfig]
 }
 
 func fill(text, initialIndent, subsequentIndent string) string {
