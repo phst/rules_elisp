@@ -32,7 +32,10 @@ go_binary(
 
 go_library(
     name = "lib",
-    srcs = ["generate.go"],
+    srcs = [
+        "generate.go",
+        "stardoc2org.go",
+    ],
     embedsrcs = ["reference.org.template"],
     importpath = "github.com/phst/rules_elisp/internal/stardoc2org",
     deps = [
