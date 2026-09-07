@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"regexp"
-	"runtime/debug"
 	"strings"
 	"text/template"
 	"unicode"
@@ -85,21 +84,8 @@ func newGenerator(file io.Writer) *generator {
 }
 
 // Writes the generated Org Mode output.
-func (g *generator) run(module *spb.ModuleInfo) (err error) {
-	defer runRecover(&err)
+func (g *generator) run(module *spb.ModuleInfo) error {
 	return g.doRun(module)
-}
-
-func runRecover(err *error) {
-	switch x := recover().(type) {
-	case nil:
-		return
-	case error:
-		*err = fmt.Errorf("Generator panic: %w", x)
-	default:
-		*err = fmt.Errorf("Generator panic: %#v", x)
-	}
-	debug.PrintStack()
 }
 
 func (g *generator) doRun(module *spb.ModuleInfo) error {
