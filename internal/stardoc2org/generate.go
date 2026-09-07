@@ -295,23 +295,24 @@ func newOrgRenderer() *orgRenderer {
 	return &orgRenderer{"", ""}
 }
 
-func (r *orgRenderer) lit(w io.Writer, s string) {
+func (r *orgRenderer) lit(w io.Writer, s string) error {
 	if _, err := io.WriteString(w, s); err != nil {
-		panic(err)
+		return err
 	}
 	r.lastOut = s
+	return nil
 }
 
-func (r *orgRenderer) cr(w io.Writer) {
+func (r *orgRenderer) cr(w io.Writer) error {
 	if r.lastOut != "\n" {
-		r.lit(w, "\n")
+		return r.lit(w, "\n")
 	}
+	return nil
 }
 
 func (r *orgRenderer) document(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Document)
-	r.cr(writer)
-	return ast.WalkContinue, nil
+	return ast.WalkContinue, r.cr(writer)
 }
 
 func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
@@ -324,13 +325,21 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering
 			indent = r.indent
 		}
 		// See https://orgmode.org/manual/Escape-Character.html.
-		r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B"))
+		if err := r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
+			return ast.WalkStop, err
+		}
 		if node.SoftLineBreak() {
-			r.cr(writer)
+			if err := r.cr(writer); err != nil {
+				return ast.WalkStop, err
+			}
 		}
 		if node.HardLineBreak() {
-			r.lit(writer, `\\`)
-			r.cr(writer)
+			if err := r.lit(writer, `\\`); err != nil {
+				return ast.WalkStop, err
+			}
+			if err := r.cr(writer); err != nil {
+				return ast.WalkStop, err
+			}
 		}
 	}
 	return ast.WalkContinue, nil
@@ -339,7 +348,7 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering
 func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Paragraph)
 	if node.Parent().Kind() != ast.KindListItem {
-		r.lit(writer, "\n")
+		return ast.WalkContinue, r.lit(writer, "\n")
 	}
 	return ast.WalkContinue, nil
 }
@@ -347,7 +356,7 @@ func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n ast.Node, ent
 func (r *orgRenderer) list(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.List)
 	if entering {
-		r.cr(writer)
+		return ast.WalkContinue, r.cr(writer)
 	}
 	return ast.WalkContinue, nil
 }
@@ -358,29 +367,29 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering
 		if r.indent != "" {
 			return ast.WalkStop, errors.New("no support for nested lists")
 		}
-		r.lit(writer, "- ")
 		r.indent = "  "
+		return ast.WalkContinue, r.lit(writer, "- ")
 	} else {
 		if r.indent != "  " {
 			return ast.WalkStop, errors.New("no support for nested lists")
 		}
 		r.indent = ""
-		r.cr(writer)
+		return ast.WalkContinue, r.cr(writer)
 	}
-	return ast.WalkContinue, nil
 }
 
 func (r *orgRenderer) emph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Emphasis)
-	r.lit(writer, "/")
-	return ast.WalkContinue, nil
+	return ast.WalkContinue, r.lit(writer, "/")
 }
 
 func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.CodeSpan)
-	r.lit(writer, "~")
+	if err := r.lit(writer, "~"); err != nil {
+		return ast.WalkStop, err
+	}
 	if entering {
-		r.lit(writer, node.Value.Str(source))
+		return ast.WalkContinue, r.lit(writer, node.Value.Str(source))
 	}
 	return ast.WalkContinue, nil
 }
@@ -396,13 +405,16 @@ func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, ent
 		if lang == "" {
 			return ast.WalkStop, fmt.Errorf("unknown language %q", lang)
 		}
-		r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang))
-		r.lit(writer, node.Value.Str(source))
+		return ast.WalkContinue, errors.Join(
+			r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang)),
+			r.lit(writer, node.Value.Str(source)),
+		)
 	} else {
-		r.lit(writer, "#+END_SRC\n\n")
-		r.lit(writer, "#+TEXINFO: @noindent")
+		return ast.WalkContinue, errors.Join(
+			r.lit(writer, "#+END_SRC\n\n"),
+			r.lit(writer, "#+TEXINFO: @noindent"),
+		)
 	}
-	return ast.WalkContinue, nil
 }
 
 func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
@@ -419,11 +431,10 @@ func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering
 			}
 			dest = match[1] + s
 		}
-		r.lit(writer, fmt.Sprintf("[[%s][", dest))
+		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("[[%s][", dest))
 	} else {
-		r.lit(writer, "]]")
+		return ast.WalkContinue, r.lit(writer, "]]")
 	}
-	return ast.WalkContinue, nil
 }
 
 func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
@@ -434,7 +445,7 @@ func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, en
 		if org == "" {
 			return ast.WalkStop, fmt.Errorf("unknown HTML tag %s", tag)
 		}
-		r.lit(writer, org)
+		return ast.WalkContinue, r.lit(writer, org)
 	}
 	return ast.WalkContinue, nil
 }
