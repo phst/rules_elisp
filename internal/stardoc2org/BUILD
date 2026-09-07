@@ -34,6 +34,7 @@ go_library(
     name = "lib",
     srcs = [
         "generate.go",
+        "stardoc.go",
         "stardoc2org.go",
     ],
     embedsrcs = ["reference.org.template"],
