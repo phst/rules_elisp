@@ -37,6 +37,11 @@ import (
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
 
+func stardocToOrg(module *spb.ModuleInfo, w io.Writer) error {
+	generator := newGenerator(w)
+	return generator.run(module)
+}
+
 type generator struct {
 	file io.Writer
 }

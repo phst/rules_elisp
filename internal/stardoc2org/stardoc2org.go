@@ -49,8 +49,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	generator := newGenerator(file)
-	if err := generator.run(&module); err != nil {
+	if err := stardocToOrg(&module, file); err != nil {
 		log.Fatal(err)
 	}
 	if err := file.Sync(); err != nil {
