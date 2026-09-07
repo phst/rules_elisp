@@ -447,7 +447,27 @@ func markdown(text string) string {
 	type config struct {
 		Config renderer.Config[*strings.Builder, config]
 	}
-	renderer := new(renderer.HelperBuilder[*strings.Builder, config]).Options(renderer.WithNodeRenderers[*strings.Builder, config](orgRenderer.nodeRenderers())).Build()
+	renderer := new(renderer.HelperBuilder[*strings.Builder, config]).Options(
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindDocument, renderer.NodeRendererFunc(orgRenderer.document)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindText, renderer.NodeRendererFunc(orgRenderer.text)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindParagraph, renderer.NodeRendererFunc(orgRenderer.paragraph)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindList, renderer.NodeRendererFunc(orgRenderer.list)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindListItem, renderer.NodeRendererFunc(orgRenderer.item)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindEmphasis, renderer.NodeRendererFunc(orgRenderer.emph)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindCodeSpan, renderer.NodeRendererFunc(orgRenderer.code)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindCodeBlock, renderer.NodeRendererFunc(orgRenderer.codeBlock)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindLink, renderer.NodeRendererFunc(orgRenderer.link)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindRawHTML, renderer.NodeRendererFunc(orgRenderer.htmlInline)),
+
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindAutoLink, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindBlockquote, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindHTMLBlock, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindHeading, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindImage, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindLinkReferenceDefinition, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindStrong, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindThematicBreak, renderer.NodeRendererFunc(orgRenderer.unknown)),
+	).Build()
 	var w strings.Builder
 	if err := renderer.Render(&w, source, doc); err != nil {
 		panic(err)
@@ -499,30 +519,6 @@ var rendererLanguage = map[string]string{
 
 func newOrgRenderer() *orgRenderer {
 	return &orgRenderer{"", ""}
-}
-
-func (r *orgRenderer) nodeRenderers() map[ast.NodeKind]renderer.NodeRenderer[*strings.Builder] {
-	return map[ast.NodeKind]renderer.NodeRenderer[*strings.Builder]{
-		ast.KindDocument:  renderer.NodeRendererFunc(r.document),
-		ast.KindText:      renderer.NodeRendererFunc(r.text),
-		ast.KindParagraph: renderer.NodeRendererFunc(r.paragraph),
-		ast.KindList:      renderer.NodeRendererFunc(r.list),
-		ast.KindListItem:  renderer.NodeRendererFunc(r.item),
-		ast.KindEmphasis:  renderer.NodeRendererFunc(r.emph),
-		ast.KindCodeSpan:  renderer.NodeRendererFunc(r.code),
-		ast.KindCodeBlock: renderer.NodeRendererFunc(r.codeBlock),
-		ast.KindLink:      renderer.NodeRendererFunc(r.link),
-		ast.KindRawHTML:   renderer.NodeRendererFunc(r.htmlInline),
-
-		ast.KindAutoLink:                renderer.NodeRendererFunc(r.unknown),
-		ast.KindBlockquote:              renderer.NodeRendererFunc(r.unknown),
-		ast.KindHTMLBlock:               renderer.NodeRendererFunc(r.unknown),
-		ast.KindHeading:                 renderer.NodeRendererFunc(r.unknown),
-		ast.KindImage:                   renderer.NodeRendererFunc(r.unknown),
-		ast.KindLinkReferenceDefinition: renderer.NodeRendererFunc(r.unknown),
-		ast.KindStrong:                  renderer.NodeRendererFunc(r.unknown),
-		ast.KindThematicBreak:           renderer.NodeRendererFunc(r.unknown),
-	}
 }
 
 func (r *orgRenderer) lit(w *strings.Builder, s string) {
