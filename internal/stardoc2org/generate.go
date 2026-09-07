@@ -445,28 +445,28 @@ func markdown(text string) string {
 	doc := parser.New().Parse(source)
 	orgRenderer := newOrgRenderer()
 	type config struct {
-		Config renderer.Config[*strings.Builder, config]
+		Config renderer.Config[io.Writer, config]
 	}
-	renderer := new(renderer.HelperBuilder[*strings.Builder, config]).Options(
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindDocument, renderer.NodeRendererFunc(orgRenderer.document)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindText, renderer.NodeRendererFunc(orgRenderer.text)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindParagraph, renderer.NodeRendererFunc(orgRenderer.paragraph)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindList, renderer.NodeRendererFunc(orgRenderer.list)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindListItem, renderer.NodeRendererFunc(orgRenderer.item)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindEmphasis, renderer.NodeRendererFunc(orgRenderer.emph)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindCodeSpan, renderer.NodeRendererFunc(orgRenderer.code)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindCodeBlock, renderer.NodeRendererFunc(orgRenderer.codeBlock)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindLink, renderer.NodeRendererFunc(orgRenderer.link)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindRawHTML, renderer.NodeRendererFunc(orgRenderer.htmlInline)),
+	renderer := new(renderer.HelperBuilder[io.Writer, config]).Options(
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindDocument, renderer.NodeRendererFunc(orgRenderer.document)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindText, renderer.NodeRendererFunc(orgRenderer.text)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindParagraph, renderer.NodeRendererFunc(orgRenderer.paragraph)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindList, renderer.NodeRendererFunc(orgRenderer.list)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindListItem, renderer.NodeRendererFunc(orgRenderer.item)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindEmphasis, renderer.NodeRendererFunc(orgRenderer.emph)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindCodeSpan, renderer.NodeRendererFunc(orgRenderer.code)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindCodeBlock, renderer.NodeRendererFunc(orgRenderer.codeBlock)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindLink, renderer.NodeRendererFunc(orgRenderer.link)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindRawHTML, renderer.NodeRendererFunc(orgRenderer.htmlInline)),
 
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindAutoLink, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindBlockquote, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindHTMLBlock, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindHeading, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindImage, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindLinkReferenceDefinition, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindStrong, renderer.NodeRendererFunc(orgRenderer.unknown)),
-		renderer.WithNodeRenderer[*strings.Builder, config](ast.KindThematicBreak, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindAutoLink, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindBlockquote, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindHTMLBlock, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindHeading, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindImage, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindLinkReferenceDefinition, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindStrong, renderer.NodeRendererFunc(orgRenderer.unknown)),
+		renderer.WithNodeRenderer[io.Writer, config](ast.KindThematicBreak, renderer.NodeRendererFunc(orgRenderer.unknown)),
 	).Build()
 	var w strings.Builder
 	if err := renderer.Render(&w, source, doc); err != nil {
@@ -521,26 +521,26 @@ func newOrgRenderer() *orgRenderer {
 	return &orgRenderer{"", ""}
 }
 
-func (r *orgRenderer) lit(w *strings.Builder, s string) {
-	if _, err := w.WriteString(s); err != nil {
+func (r *orgRenderer) lit(w io.Writer, s string) {
+	if _, err := io.WriteString(w, s); err != nil {
 		panic(err)
 	}
 	r.lastOut = s
 }
 
-func (r *orgRenderer) cr(w *strings.Builder) {
+func (r *orgRenderer) cr(w io.Writer) {
 	if r.lastOut != "\n" {
 		r.lit(w, "\n")
 	}
 }
 
-func (r *orgRenderer) document(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) document(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Document)
 	r.cr(writer)
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) text(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Text)
 	if entering {
 		s := node.Value.Str(source)
@@ -562,7 +562,7 @@ func (r *orgRenderer) text(writer *strings.Builder, source []byte, n ast.Node, e
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) paragraph(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Paragraph)
 	if node.Parent().Kind() != ast.KindListItem {
 		r.lit(writer, "\n")
@@ -570,7 +570,7 @@ func (r *orgRenderer) paragraph(writer *strings.Builder, source []byte, n ast.No
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) list(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) list(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.List)
 	if entering {
 		r.cr(writer)
@@ -578,7 +578,7 @@ func (r *orgRenderer) list(writer *strings.Builder, source []byte, n ast.Node, e
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) item(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.ListItem)
 	if entering {
 		if r.indent != "" {
@@ -596,13 +596,13 @@ func (r *orgRenderer) item(writer *strings.Builder, source []byte, n ast.Node, e
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) emph(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) emph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	_ = n.(*ast.Emphasis)
 	r.lit(writer, "/")
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) code(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.CodeSpan)
 	r.lit(writer, "~")
 	if entering {
@@ -611,7 +611,7 @@ func (r *orgRenderer) code(writer *strings.Builder, source []byte, n ast.Node, e
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) codeBlock(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.CodeBlock)
 	if entering {
 		lang, ok := node.Language(source)
@@ -631,7 +631,7 @@ func (r *orgRenderer) codeBlock(writer *strings.Builder, source []byte, n ast.No
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) link(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Link)
 	if entering {
 		dest := node.Destination.Str(source)
@@ -652,7 +652,7 @@ func (r *orgRenderer) link(writer *strings.Builder, source []byte, n ast.Node, e
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) htmlInline(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.RawHTML)
 	if entering {
 		tag := node.Value.Str(source)
@@ -666,7 +666,7 @@ func (r *orgRenderer) htmlInline(writer *strings.Builder, source []byte, n ast.N
 }
 
 // Signal an error if we don’t implement something.
-func (r *orgRenderer) unknown(writer *strings.Builder, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func (r *orgRenderer) unknown(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unknown node type %q", n.Kind())
 }
 
