@@ -103,8 +103,8 @@ local_emacs(name = "local_emacs")
 # release, with binary builds coming first.  Source builds will be selected as a
 # fallback in case none of the binary ones apply.
 register_toolchains(
-    "//elisp:emacs_30_windows_x86_64_toolchain",
-    "//elisp:emacs_30_toolchain",
+    "//elisp:emacs_31_windows_x86_64_toolchain",
+    "//elisp:emacs_31_toolchain",
 )
 
 # C++-specific dependencies
