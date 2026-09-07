@@ -27,7 +27,7 @@ go_library(
     name = "mdorg",
     srcs = ["renderer.go"],
     importpath = "github.com/phst/rules_elisp/internal/mdorg",
-    visibility = ["//internal/stardoc2org:__pkg__"],
+    visibility = ["//internal/stardoc:__pkg__"],
     deps = [
         "@com_github_yuin_goldmark_v2//ast",
         "@com_github_yuin_goldmark_v2//renderer",

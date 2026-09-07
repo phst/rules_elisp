@@ -23,6 +23,7 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
+	"github.com/phst/rules_elisp/internal/stardoc"
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
 
@@ -49,7 +50,7 @@ func main() {
 		log.Fatal(err)
 	}
 	defer file.Close()
-	if err := stardocToOrg(&module, file); err != nil {
+	if err := stardoc.Org(&module, file); err != nil {
 		log.Fatal(err)
 	}
 	if err := file.Sync(); err != nil {

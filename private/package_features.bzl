@@ -33,6 +33,7 @@ visibility([
     "//gazelle/elisp",
     "//gazelle/testdata",
     "//internal/mdorg",
+    "//internal/stardoc",
     "//internal/stardoc2org",
     "//internal/stardoc_output_go_proto",
     "//internal/testutil",
