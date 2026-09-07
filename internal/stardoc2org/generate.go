@@ -136,19 +136,19 @@ func (g *generator) doRun(module *spb.ModuleInfo) {
 var templateText string
 
 // Convert a Markdown snippet to Org-mode.
-func markdown(text string) string {
+func markdown(text string) (string, error) {
 	text = strings.TrimSpace(text)
 	if text == "" {
-		panic(errors.New("Missing docstring"))
+		return "", errors.New("Missing docstring")
 	}
 	source := []byte(text)
 	doc := parser.New().Parse(source)
 	renderer := newRenderer()
 	var w strings.Builder
 	if err := renderer.Render(&w, source, doc); err != nil {
-		panic(err)
+		return "", err
 	}
-	return w.String() + "\n"
+	return w.String() + "\n", nil
 }
 
 func fill(text, initialIndent, subsequentIndent string) string {
