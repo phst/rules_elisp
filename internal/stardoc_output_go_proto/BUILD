@@ -27,5 +27,8 @@ go_proto_library(
     name = "stardoc_output_go_proto",
     importpath = "github.com/phst/rules_elisp/internal/stardoc_output_go_proto",
     protos = ["@stardoc//stardoc/proto:stardoc_output_proto"],
-    visibility = ["//internal/stardoc2org:__pkg__"],
+    visibility = [
+        "//internal/stardoc:__pkg__",
+        "//internal/stardoc2org:__pkg__",
+    ],
 )

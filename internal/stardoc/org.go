@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//     https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// Package stardoc contains functions to render Starlark documentation.
+package stardoc
 
 import (
 	"errors"
@@ -35,7 +36,9 @@ import (
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
 
-func stardocToOrg(module *spb.ModuleInfo, w io.Writer) error {
+// Org renders documentation for the given Starlark module into the writer as
+// Org-mode document.
+func Org(module *spb.ModuleInfo, w io.Writer) error {
 	generator := newGenerator(w)
 	return generator.run(module)
 }

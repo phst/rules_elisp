@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@rules_go//go:go_binary.bzl", "go_binary")
 load("@rules_go//go:go_library.bzl", "go_library")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
@@ -24,19 +23,17 @@ package(
 
 licenses(["notice"])
 
-go_binary(
-    name = "stardoc2org",
-    embed = [":lib"],
-    visibility = ["//docs:__pkg__"],
-)
-
 go_library(
-    name = "lib",
-    srcs = ["stardoc2org.go"],
-    importpath = "github.com/phst/rules_elisp/internal/stardoc2org",
+    name = "stardoc",
+    srcs = ["org.go"],
+    embedsrcs = ["reference.org.template"],
+    importpath = "github.com/phst/rules_elisp/internal/stardoc",
+    visibility = ["//internal/stardoc2org:__pkg__"],
     deps = [
-        "//internal/stardoc",
+        "//internal/mdorg",
         "//internal/stardoc_output_go_proto",
-        "@org_golang_google_protobuf//proto",
+        "@com_github_yuin_goldmark_v2//parser",
+        "@org_golang_x_text//cases",
+        "@org_golang_x_text//language",
     ],
 )
