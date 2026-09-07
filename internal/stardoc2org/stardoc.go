@@ -84,8 +84,7 @@ func newGenerator(file io.Writer) *generator {
 // Writes the generated Org Mode output.
 func (g *generator) run(module *spb.ModuleInfo) (err error) {
 	defer runRecover(&err)
-	g.doRun(module)
-	return
+	return g.doRun(module)
 }
 
 func runRecover(err *error) {
@@ -100,7 +99,7 @@ func runRecover(err *error) {
 	debug.PrintStack()
 }
 
-func (g *generator) doRun(module *spb.ModuleInfo) {
+func (g *generator) doRun(module *spb.ModuleInfo) error {
 	tpl := template.New("reference.org.template")
 	item := func(template string, data any) (string, error) {
 		var w strings.Builder
@@ -130,9 +129,7 @@ func (g *generator) doRun(module *spb.ModuleInfo) {
 		"item":            item,
 	}
 	tpl = template.Must(tpl.Funcs(funcs).Parse(templateText))
-	if err := tpl.Execute(g.file, module); err != nil {
-		panic(err)
-	}
+	return tpl.Execute(g.file, module)
 }
 
 //go:embed reference.org.template
