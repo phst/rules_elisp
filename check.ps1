@@ -18,6 +18,9 @@
 
 param ([switch]$Coverage)
 
+Set-PSDebug -Strict
+Set-StrictMode -Version 'latest'
+
 $ErrorActionPreference = 'Stop'
 $PSNativeCommandUseErrorActionPreference = $true
 
