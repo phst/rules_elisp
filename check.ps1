@@ -34,9 +34,26 @@ if (! $candidates) {
 
 $bazel = $candidates[0].Path
 
+[bool]$github = [bool]$Env:CI
+
+function Begin-Group {
+    param ([string]$message)
+    [string]$prefix = $github ? '::group::' : '>>> '
+    Write-Host "${prefix}${message}" -ForegroundColor 'DarkCyan'
+}
+
+function End-Group {
+    if ($github) {
+        Write-Host '::endgroup::' -ForegroundColor 'DarkCyan'
+    }
+}
+
 function Run-Bazel {
-    Write-Verbose -Message "cd $(Get-Location) && ${bazel} ${args}"
+    $version = $Env:USE_BAZEL_VERSION
+    $prefix = $version ? "USE_BAZEL_VERSION=${version} " : ''
+    Begin-Group "cd $(Get-Location) && ${prefix}${bazel} ${args}"
     & $bazel @args
+    End-Group
 }
 
 function Run-Tests {
