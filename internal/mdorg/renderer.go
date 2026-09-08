@@ -76,16 +76,11 @@ func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, render
 	kind := zero.Kind()
 	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 		node := n.(T)
-		var err error
 		if entering {
-			err = enter(w, source, node, rc)
+			return ast.WalkContinue, enter(w, source, node, rc)
 		} else {
-			err = leave(w, source, node, rc)
+			return ast.WalkContinue, leave(w, source, node, rc)
 		}
-		if err != nil {
-			return ast.WalkStop, err
-		}
-		return ast.WalkContinue, nil
 	}
 	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fn))
 }
