@@ -1052,7 +1052,7 @@ file; see <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/ma
 <dd><p>Org-mode file to use as manual source; must end in <code class="code">.org</code>.  Label; mandatory.
 </p></dd>
 <dt><code class="code">out</code></dt>
-<dd><p>Texinfo manual file to write; must end in <code class="code">.texi</code>.  Output file; mandatory.
+<dd><p>Texinfo manual file to write; must end in <code class="code">.texi</code>.  Output file; mandatory; nonconfigurable.
 </p></dd>
 <dt><code class="code">additional_inputs</code></dt>
 <dd><p>List of additional files made available during export.  List of labels; optional; default: <code class="code">[]</code>.
@@ -1346,12 +1346,12 @@ This is necessary to determine the source root directory.  Label; mandatory.
 </p></dd>
 <dt><code class="code">module_header</code></dt>
 <dd><p>Label for a file target that will receive the
-<code class="code">emacs-module.h</code> header.  If not provided, don’t install the header.  Output file; optional; default: <code class="code">None</code>.
+<code class="code">emacs-module.h</code> header.  If not provided, don’t install the header.  Output file; optional; nonconfigurable; default: <code class="code">None</code>.
 </p></dd>
 <dt><code class="code">builtin_features</code></dt>
 <dd><p>Label for a file into which to write the list
 of builtin features.  If not provided, don’t write such a file.
-This is used by Gazelle.  Output file; optional; default: <code class="code">None</code>.
+This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code class="code">None</code>.
 </p></dd>
 </dl>
 </dd></dl>

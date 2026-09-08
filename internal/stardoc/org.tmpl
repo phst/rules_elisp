@@ -144,6 +144,7 @@ load("{{requireNonEmpty .GetFile}}", "{{requireNonEmpty .GetName}}")
 {{define "attribute" -}}
 {{if not (hasPrefix .GetDocString "Deprecated;") -}}
 ~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetType | attributeType}}; {{.GetMandatory | mandatory -}}
+{{if .GetNonconfigurable}}; nonconfigurable{{end -}}
 {{with .GetDefaultValue}}; default: ~{{.}}~{{end -}}
 {{with .GetProviderNameGroup -}}
 {{with exactlyOne . -}}
