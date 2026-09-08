@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net/url"
 	"regexp"
 	"strings"
 
@@ -210,16 +209,6 @@ func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering
 	node := n.(*ast.Link)
 	if entering {
 		dest := node.Destination.Str(source)
-		// CommonMark helpfully URL-escapes link destinations, but this
-		// prevents links to Info nodes containing spaces.
-		match := regexp.MustCompile(`^(info:[^#:]+[#:])(.*%.*)$`).FindStringSubmatch(dest)
-		if match != nil {
-			s, err := url.PathUnescape(match[2])
-			if err != nil {
-				return ast.WalkStop, err
-			}
-			dest = match[1] + s
-		}
 		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("[[%s][", dest))
 	} else {
 		return ast.WalkContinue, r.lit(writer, "]]")
