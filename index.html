@@ -220,7 +220,6 @@ using
 </p><div class="example">
 <pre class="example-preformatted">#include &quot;emacs-module.h&quot;
 </pre></div>
-
 <p>to implement module functions.
 </p>
 <p>The <code class="code">elisp_cc_module</code> rule supports the following attributes:
@@ -1232,9 +1231,7 @@ should be merged directly into the result.  Optional; default: <code class="code
 should be merged indirectly into the result.  Optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
-<p>Returns: 
-</p>
-<p>A fresh <code class="code">EmacsLispInfo</code> provider.
+<p>Returns: A fresh <code class="code">EmacsLispInfo</code> provider.
 </p></dd></dl>
 
 <p>To compile Emacs Lisp source files and runs tests, <code class="code">rules_elisp</code> registers the
@@ -1265,7 +1262,6 @@ Toolchains can use this to sandbox Emacs, if desired.
 </p><div class="example">
 <pre class="example-preformatted">emacs --manifest=MANIFEST -- ARGS…
 </pre></div>
-
 <p>That is, the original arguments for Emacs are separated by a double hyphen
 (<code class="code">--</code>) so that argument parsers can distinguish between the <code class="code">--manifest</code> option
 and Emacs arguments.
@@ -1279,7 +1275,6 @@ the root directory for relative file names.
 </li><li><code class="code">outputFiles</code> is a list of files that should be writable.
 </li><li><code class="code">tags</code> is the list of tags for the current rule.
 </li></ul>
-
 <p>When executing an action, file names are relative to the execution root.
 Otherwise, file names are relative to the runfiles root.  File names in
 <code class="code">inputFiles</code> or <code class="code">outputFiles</code> can also be absolute; in this case they specify

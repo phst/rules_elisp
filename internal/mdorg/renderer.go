@@ -36,10 +36,10 @@ type Renderer struct {
 func NewRenderer() *Renderer {
 	s := new(renderState)
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
-		withNodeRenderer(s.document, doNothing),
+		withNodeRenderer[*ast.Document](doNothing, doNothing),
 		withChildlessNodeRenderer(s.text),
-		withNodeRenderer(s.paragraph, s.paragraph),
-		withNodeRenderer(s.list, doNothing),
+		withNodeRenderer(doNothing, s.paragraph),
+		withNodeRenderer[*ast.List](doNothing, doNothing),
 		withNodeRenderer(s.item, s.endItem),
 		withChildlessNodeRenderer(s.code),
 		withChildlessNodeRenderer(s.codeBlock),
@@ -132,10 +132,6 @@ func (r *renderState) cr(w io.Writer) error {
 	return nil
 }
 
-func (r *renderState) document(writer io.Writer, source []byte, n *ast.Document) error {
-	return r.cr(writer)
-}
-
 func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
@@ -159,14 +155,10 @@ func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
 }
 
 func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
-	if n.Parent().Kind() != ast.KindListItem {
-		return r.lit(writer, "\n")
+	if s := n.NextSibling(); s != nil && s.Kind() == ast.KindParagraph {
+		return r.lit(writer, "\n\n")
 	}
-	return nil
-}
-
-func (r *renderState) list(writer io.Writer, source []byte, n *ast.List) error {
-	return r.cr(writer)
+	return r.lit(writer, "\n")
 }
 
 func (r *renderState) item(writer io.Writer, source []byte, n *ast.ListItem) error {
@@ -182,7 +174,7 @@ func (r *renderState) endItem(writer io.Writer, source []byte, n *ast.ListItem) 
 		return errors.New("no support for nested lists")
 	}
 	r.indent = ""
-	return r.cr(writer)
+	return nil
 }
 
 func (r *renderState) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
@@ -198,7 +190,7 @@ func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBloc
 	if lang == "" {
 		return fmt.Errorf("unknown language %q", lang)
 	}
-	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
+	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n#+TEXINFO: @noindent\n", lang, n.Value.Str(source)))
 }
 
 func (r *renderState) link(writer io.Writer, source []byte, n *ast.Link) error {
