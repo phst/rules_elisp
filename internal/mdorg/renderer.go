@@ -115,6 +115,9 @@ func (r *orgRenderer) document(writer io.Writer, source []byte, n ast.Node, ente
 
 func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.Text)
+	if node.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+	}
 	if entering {
 		s := node.Value.Str(source)
 		s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
@@ -173,6 +176,9 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering
 
 func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.CodeSpan)
+	if node.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+	}
 	if err := r.lit(writer, "~"); err != nil {
 		return ast.WalkStop, err
 	}
@@ -184,6 +190,9 @@ func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering
 
 func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.CodeBlock)
+	if node.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+	}
 	if entering {
 		lang, ok := node.Language(source)
 		if !ok {
@@ -217,6 +226,9 @@ func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering
 
 func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	node := n.(*ast.RawHTML)
+	if node.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+	}
 	if entering {
 		tag := node.Value.Str(source)
 		org := tags[tag]
