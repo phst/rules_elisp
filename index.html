@@ -1330,15 +1330,13 @@ The resulting executable can be used to run the compiled Emacs.
 <dd><p>How to build and install Emacs.  Possible values are:
 </p><ul class="itemize mark-bullet">
 <li><code class="code">source</code>: Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>.
+<code class="code">srcs</code> must refer to an unpacked Emacs source archive.
+</li><li><code class="code">release</code>: Run Emacs directly without building or installing.
+<code class="code">srcs</code> must refer to an unpacked Emacs release archive containing pre-built
+binaries for the correct target operating system and architecture.
+Currently this only works on Windows.  String; optional; default: <code class="code">&quot;source&quot;</code>.
 </li></ul>
-<p><code class="code">srcs</code> must refer to an unpacked Emacs source archive.
-</p><ul class="itemize mark-bullet">
-<li><code class="code">release</code>: Run Emacs directly without building or installing.
-</li></ul>
-<p><code class="code">srcs</code> must refer to an unpacked Emacs release archive containing pre-built
-  binaries for the correct target operating system and architecture.
-  Currently this only works on Windows.  String; optional; default: <code class="code">&quot;source&quot;</code>.
-</p></dd>
+</dd>
 <dt><code class="code">srcs</code></dt>
 <dd><p>All Emacs source files.  List of labels; mandatory.
 </p></dd>

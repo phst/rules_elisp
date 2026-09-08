@@ -108,8 +108,8 @@ type config struct {
 }
 
 type renderState struct {
-	indent  string
-	lastOut string
+	inLine bool
+	inItem bool
 }
 
 var rendererLanguage = map[string]string{
@@ -117,12 +117,16 @@ var rendererLanguage = map[string]string{
 	"c":  "c",
 }
 
-func (r *renderState) lit(w io.Writer, s string) error {
-	if _, err := io.WriteString(w, s); err != nil {
-		return err
+func (r *renderState) write(w io.Writer, s string) error {
+	if strings.ContainsAny(s, "\r\n\u0085\u2028\u2029") {
+		return fmt.Errorf("newline in string %q", s)
 	}
-	r.lastOut = s
-	return nil
+	if !r.inLine && r.inItem {
+		s = "  " + s
+	}
+	_, err := io.WriteString(w, s)
+	r.inLine = true
+	return err
 }
 
 func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
@@ -131,45 +135,67 @@ func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
 	}
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
-	if n.SoftLineBreak() {
-		s += "\n"
-	}
-	indent := ""
-	if strings.HasSuffix(r.lastOut, "\n") {
-		indent = r.indent
-	}
 	// See https://orgmode.org/manual/Escape-Character.html.
-	return r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B"))
+	if err := r.write(writer, regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
+		return err
+	}
+	if n.SoftLineBreak() {
+		if _, err := io.WriteString(writer, "\n"); err != nil {
+			return err
+		}
+		r.inLine = false
+	}
+	return nil
 }
 
 func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
-	if s := n.NextSibling(); s != nil && s.Kind() == ast.KindParagraph {
-		return r.lit(writer, "\n\n")
+	if !r.inLine {
+		return errors.New("trying to end paragraph at beginning of line")
 	}
-	return r.lit(writer, "\n")
+	var o string
+	if s := n.NextSibling(); s != nil && s.Kind() == ast.KindParagraph {
+		o = "\n\n"
+	} else {
+		o = "\n"
+	}
+	_, err := io.WriteString(writer, o)
+	r.inLine = false
+	return err
 }
 
 func (r *renderState) item(writer io.Writer, source []byte, n *ast.ListItem) error {
-	if r.indent != "" {
+	if r.inLine {
+		return errors.New("trying to begin list item in the middle of a line")
+	}
+	if r.inItem {
 		return errors.New("no support for nested lists")
 	}
-	r.indent = "  "
-	return r.lit(writer, "- ")
+	_, err := io.WriteString(writer, "- ")
+	r.inLine = true
+	r.inItem = true
+	return err
+
 }
 
 func (r *renderState) endItem(writer io.Writer, source []byte, n *ast.ListItem) error {
-	if r.indent != "  " {
-		return errors.New("no support for nested lists")
+	if !r.inItem {
+		return errors.New("imbalanced list item")
 	}
-	r.indent = ""
+	r.inItem = false
 	return nil
 }
 
 func (r *renderState) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
-	return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
+	return r.write(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
 func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
+	if r.inLine {
+		return errors.New("trying to begin code block in the middle of a line")
+	}
+	if r.inItem {
+		return errors.New("no support for code blocks in lists")
+	}
 	lang, ok := n.Language(source)
 	if !ok {
 		return errors.New("language not given")
@@ -178,15 +204,17 @@ func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBloc
 	if lang == "" {
 		return fmt.Errorf("unknown language %q", lang)
 	}
-	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n#+TEXINFO: @noindent\n", lang, n.Value.Str(source)))
+	_, err := fmt.Fprintf(writer, "#+BEGIN_SRC %s\n%s#+END_SRC\n#+TEXINFO: @noindent\n", lang, n.Value.Str(source))
+	return err
 }
 
 func (r *renderState) link(writer io.Writer, source []byte, n *ast.Link) error {
 	dest := n.Destination.Str(source)
-	return r.lit(writer, fmt.Sprintf("[[%s][", dest))
+	return r.write(writer, fmt.Sprintf("[[%s][", dest))
 }
+
 func (r *renderState) endLink(writer io.Writer, source []byte, n *ast.Link) error {
-	return r.lit(writer, "]]")
+	return r.write(writer, "]]")
 }
 
 func (r *renderState) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML) error {
@@ -195,7 +223,7 @@ func (r *renderState) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML
 	if org == "" {
 		return fmt.Errorf("unknown HTML tag %s", tag)
 	}
-	return r.lit(writer, org)
+	return r.write(writer, org)
 }
 
 func doNothing[T ast.Node](io.Writer, []byte, T) error {
