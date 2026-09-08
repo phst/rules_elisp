@@ -1,6 +1,6 @@
 
 
-Text paragraph with ~code span~ and some special characters: [​]​`_​~​.
+Text paragraph with ~code span~ and some special characters: [​]​`_​~​\.
 #+BEGIN_SRC sh
 # code block with `special characters`
 #+END_SRC
