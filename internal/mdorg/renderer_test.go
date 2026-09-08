@@ -33,6 +33,8 @@ func TestNewRenderer(t *testing.T) {
 
 func TestRenderer_Render(t *testing.T) {
 	doc := parser.New().Parse(input)
+	t.Log("Document:")
+	doc.Dump(input).PrettyPrint(t.Output(), input)
 	var b strings.Builder
 	if err := mdorg.NewRenderer().Render(&b, input, doc); err != nil {
 		t.Fatal(err)
