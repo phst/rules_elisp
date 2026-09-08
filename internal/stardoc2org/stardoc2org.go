@@ -27,7 +27,6 @@ import (
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
 
-// Main function.
 func main() {
 	flag.Usage = usage
 	flag.Parse()
