@@ -64,8 +64,8 @@ func parseTemplate(text string) (*template.Template, error) {
 		"trimSpace":       strings.TrimSpace,
 		"lstrip":          lstrip,
 		"capitalize":      capitalize,
-		"mandatory":       formatMandatory,
-		"attributeType":   formatAttributeType,
+		"mandatory":       mandatory,
+		"attributeType":   attributeType,
 		"requireEmpty":    requireEmpty,
 		"requireNonEmpty": requireNonEmpty,
 		"requirePeriod":   requirePeriod,
@@ -84,16 +84,16 @@ func capitalize(s string) string {
 	return cases.Title(language.English, cases.NoLower).String(s)
 }
 
-var mandatory = map[bool]string{
+var mandatoryStrings = map[bool]string{
 	false: "optional",
 	true:  "mandatory",
 }
 
-func formatMandatory(b bool) string {
-	return mandatory[b]
+func mandatory(b bool) string {
+	return mandatoryStrings[b]
 }
 
-var attributeType = map[spb.AttributeType]string{
+var attributeTypeStrings = map[spb.AttributeType]string{
 	spb.AttributeType_NAME:              "Name",
 	spb.AttributeType_INT:               "Integer",
 	spb.AttributeType_LABEL:             "Label",
@@ -109,8 +109,8 @@ var attributeType = map[spb.AttributeType]string{
 	spb.AttributeType_OUTPUT_LIST:       "List of output files",
 }
 
-func formatAttributeType(t spb.AttributeType) (string, error) {
-	s, ok := attributeType[t]
+func attributeType(t spb.AttributeType) (string, error) {
+	s, ok := attributeTypeStrings[t]
 	if !ok {
 		return "", fmt.Errorf("unknown attribute type %s", t)
 	}
