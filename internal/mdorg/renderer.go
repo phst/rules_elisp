@@ -125,33 +125,21 @@ func (r *renderState) lit(w io.Writer, s string) error {
 	return nil
 }
 
-func (r *renderState) cr(w io.Writer) error {
-	if r.lastOut != "\n" {
-		return r.lit(w, "\n")
-	}
-	return nil
-}
-
 func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
+	if n.HardLineBreak() {
+		return errors.New("unsupported hard line break")
+	}
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
+	if n.SoftLineBreak() {
+		s += "\n"
+	}
 	indent := ""
 	if strings.HasSuffix(r.lastOut, "\n") {
 		indent = r.indent
 	}
 	// See https://orgmode.org/manual/Escape-Character.html.
-	if err := r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
-		return err
-	}
-	if n.SoftLineBreak() {
-		if err := r.cr(writer); err != nil {
-			return err
-		}
-	}
-	if n.HardLineBreak() {
-		return errors.New("unsupported hard line break")
-	}
-	return nil
+	return r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B"))
 }
 
 func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
