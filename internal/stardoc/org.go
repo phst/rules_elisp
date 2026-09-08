@@ -45,7 +45,7 @@ var tplText string
 var tpl = template.Must(parseTemplate(tplText))
 
 func parseTemplate(text string) (*template.Template, error) {
-	tpl := template.New("reference.org.template")
+	tpl := template.New("org.tmpl")
 	item := func(template string, data any) (string, error) {
 		var w strings.Builder
 		err := tpl.ExecuteTemplate(&w, template, data)
