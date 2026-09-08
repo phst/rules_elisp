@@ -151,9 +151,8 @@ func markdown(text string) (string, error) {
 		return "", errors.New("Missing docstring")
 	}
 	doc := parser.New().ParseStringSource(text)
-	renderer := mdorg.NewRenderer()
 	var w strings.Builder
-	if err := renderer.RenderStringSource(&w, text, doc); err != nil {
+	if err := mdorg.NewRenderer().RenderStringSource(&w, text, doc); err != nil {
 		return "", err
 	}
 	return w.String() + "\n", nil
