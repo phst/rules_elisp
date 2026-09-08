@@ -67,9 +67,7 @@ Returns: {{markdown .}}
 {{with .GetAspectAttribute -}}
 This aspect propagates along the following attributes: {{range $i, $a := .}}{{if $i}}, {{end}}~{{$a}}~{{end}}
 {{end}}
-{{range .GetAttribute -}}
-{{template "attribute" . -}}
-{{end -}}
+{{range .GetAttribute}}{{template "attribute" .}}{{end -}}
 #+END_deffn
 
 {{end -}}
