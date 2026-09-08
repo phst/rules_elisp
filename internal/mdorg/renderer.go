@@ -133,12 +133,7 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering
 			}
 		}
 		if node.HardLineBreak() {
-			if err := r.lit(writer, `\\`); err != nil {
-				return ast.WalkStop, err
-			}
-			if err := r.cr(writer); err != nil {
-				return ast.WalkStop, err
-			}
+			return ast.WalkStop, errors.New("unsupported hard line break")
 		}
 	}
 	return ast.WalkContinue, nil
