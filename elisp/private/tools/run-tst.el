@@ -1141,7 +1141,8 @@ exact copies as equal."
   ;; The test sources should have processed any remaining command-line
   ;; arguments.
   (when-let* ((args command-line-args-left))
-    (error "Unprocessed command-line arguments: %S" args))
+    (error "Unprocessed command-line arguments: %s"
+           (combine-and-quote-strings args)))
   (setq load-file-name nil)     ; hide ourselves from ‘macroexp-warn-and-return’
 
   ;; We select the tests now.  ‘ert-run-tests’ could also do it, but we need the
