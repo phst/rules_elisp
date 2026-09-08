@@ -42,7 +42,7 @@ func NewRenderer() *Renderer {
 		withChildlessNodeRenderer(s.doCodeSpan),
 		withChildlessNodeRenderer(s.doCodeBlock),
 		withNodeRenderer(s.beginLink, s.endLink),
-		withChildlessNodeRenderer(s.emitRawHTML),
+		withChildlessNodeRenderer(s.doRawHTML),
 
 		withUnsupported(ast.KindAutoLink),
 		withUnsupported(ast.KindBlockquote),
@@ -220,7 +220,7 @@ func (r *renderState) endLink(writer io.Writer, source []byte, n *ast.Link) erro
 	return r.write(writer, "]]")
 }
 
-func (r *renderState) emitRawHTML(writer io.Writer, source []byte, n *ast.RawHTML) error {
+func (r *renderState) doRawHTML(writer io.Writer, source []byte, n *ast.RawHTML) error {
 	tag := n.Value.Str(source)
 	org := tags[tag]
 	if org == "" {
