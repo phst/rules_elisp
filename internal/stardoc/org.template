@@ -69,6 +69,7 @@ The ~{{.GetProviderName}}~ provider has the following fields:
 
 {{range .GetFieldInfo}}{{item "field info" .}}{{end -}}
 #+END_deftp
+
 {{end -}}
 
 {{define "field info" -}}
@@ -87,6 +88,7 @@ Returns: {{markdown .}}
 {{end -}}
 {{requireEmpty .GetDeprecated.GetDocString -}}
 #+END_defun
+
 {{end -}}
 
 {{define "parameter" -}}
@@ -105,6 +107,7 @@ This aspect propagates along the following attributes: {{range $i, $a := .}}{{if
 {{template "attribute" . -}}
 {{end -}}
 #+END_deffn
+
 {{end -}}
 
 {{define "extension" -}}
@@ -158,6 +161,7 @@ The ~{{.GetName}}~ macro supports the following attributes:
 
 {{range .GetAttribute}}{{item "attribute" .}}{{end -}}
 #+END_defmac
+
 {{end -}}
 
 {{define "load"}}
