@@ -34,17 +34,17 @@ type Renderer struct {
 
 // NewRenderer creates a new [Renderer].
 func NewRenderer() *Renderer {
-	orgRenderer := new(orgRenderer)
+	s := new(renderState)
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
-		withNodeRenderer(orgRenderer.document, doNothing),
-		withChildlessNodeRenderer(orgRenderer.text),
-		withNodeRenderer(orgRenderer.paragraph, orgRenderer.paragraph),
-		withNodeRenderer(orgRenderer.list, doNothing),
-		withNodeRenderer(orgRenderer.item, orgRenderer.endItem),
-		withChildlessNodeRenderer(orgRenderer.code),
-		withChildlessNodeRenderer(orgRenderer.codeBlock),
-		withNodeRenderer(orgRenderer.link, orgRenderer.endLink),
-		withChildlessNodeRenderer(orgRenderer.htmlInline),
+		withNodeRenderer(s.document, doNothing),
+		withChildlessNodeRenderer(s.text),
+		withNodeRenderer(s.paragraph, s.paragraph),
+		withNodeRenderer(s.list, doNothing),
+		withNodeRenderer(s.item, s.endItem),
+		withChildlessNodeRenderer(s.code),
+		withChildlessNodeRenderer(s.codeBlock),
+		withNodeRenderer(s.link, s.endLink),
+		withChildlessNodeRenderer(s.htmlInline),
 
 		withUnknown(ast.KindAutoLink),
 		withUnknown(ast.KindBlockquote),
@@ -107,7 +107,7 @@ type rendererConfig struct {
 	Config renderer.Config[io.Writer, rendererConfig]
 }
 
-type orgRenderer struct {
+type renderState struct {
 	indent  string
 	lastOut string
 }
@@ -117,7 +117,7 @@ var rendererLanguage = map[string]string{
 	"c":  "c",
 }
 
-func (r *orgRenderer) lit(w io.Writer, s string) error {
+func (r *renderState) lit(w io.Writer, s string) error {
 	if _, err := io.WriteString(w, s); err != nil {
 		return err
 	}
@@ -125,18 +125,18 @@ func (r *orgRenderer) lit(w io.Writer, s string) error {
 	return nil
 }
 
-func (r *orgRenderer) cr(w io.Writer) error {
+func (r *renderState) cr(w io.Writer) error {
 	if r.lastOut != "\n" {
 		return r.lit(w, "\n")
 	}
 	return nil
 }
 
-func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document) error {
+func (r *renderState) document(writer io.Writer, source []byte, n *ast.Document) error {
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text) error {
+func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
 	indent := ""
@@ -158,18 +158,18 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text) error {
 	return nil
 }
 
-func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
+func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
 	if n.Parent().Kind() != ast.KindListItem {
 		return r.lit(writer, "\n")
 	}
 	return nil
 }
 
-func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List) error {
+func (r *renderState) list(writer io.Writer, source []byte, n *ast.List) error {
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem) error {
+func (r *renderState) item(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if r.indent != "" {
 		return errors.New("no support for nested lists")
 	}
@@ -177,7 +177,7 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem) err
 	return r.lit(writer, "- ")
 }
 
-func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem) error {
+func (r *renderState) endItem(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if r.indent != "  " {
 		return errors.New("no support for nested lists")
 	}
@@ -185,11 +185,11 @@ func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem) 
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
+func (r *renderState) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
 	return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
-func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
+func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
 	lang, ok := n.Language(source)
 	if !ok {
 		return errors.New("language not given")
@@ -201,15 +201,15 @@ func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBloc
 	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
 }
 
-func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link) error {
+func (r *renderState) link(writer io.Writer, source []byte, n *ast.Link) error {
 	dest := n.Destination.Str(source)
 	return r.lit(writer, fmt.Sprintf("[[%s][", dest))
 }
-func (r *orgRenderer) endLink(writer io.Writer, source []byte, n *ast.Link) error {
+func (r *renderState) endLink(writer io.Writer, source []byte, n *ast.Link) error {
 	return r.lit(writer, "]]")
 }
 
-func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML) error {
+func (r *renderState) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML) error {
 	tag := n.Value.Str(source)
 	org := tags[tag]
 	if org == "" {
