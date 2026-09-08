@@ -61,6 +61,6 @@ func main() {
 }
 
 func usage() {
-	fmt.Fprintln(os.Stderr, "Usage: generate INPUT OUTPUT")
+	fmt.Fprintln(os.Stderr, "Usage: stardoc2org INPUT OUTPUT")
 	flag.PrintDefaults()
 }
