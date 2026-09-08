@@ -145,7 +145,6 @@ func exactlyOne(groups []*spb.ProviderNameGroup) (*spb.ProviderNameGroup, error)
 	return groups[0], nil
 }
 
-// Convert a Markdown snippet to Org-mode.
 func markdown(text string) (string, error) {
 	text = strings.TrimSpace(text)
 	if text == "" {
