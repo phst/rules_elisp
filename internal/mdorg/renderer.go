@@ -36,25 +36,25 @@ type Renderer struct {
 func NewRenderer() *Renderer {
 	orgRenderer := newOrgRenderer()
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
-		withNodeRenderer(ast.KindDocument, orgRenderer.document),
-		withNodeRenderer(ast.KindText, orgRenderer.text),
-		withNodeRenderer(ast.KindParagraph, orgRenderer.paragraph),
-		withNodeRenderer(ast.KindList, orgRenderer.list),
-		withNodeRenderer(ast.KindListItem, orgRenderer.item),
-		withNodeRenderer(ast.KindCodeSpan, orgRenderer.code),
-		withNodeRenderer(ast.KindCodeBlock, orgRenderer.codeBlock),
-		withNodeRenderer(ast.KindLink, orgRenderer.link),
-		withNodeRenderer(ast.KindRawHTML, orgRenderer.htmlInline),
+		withNodeRenderer(orgRenderer.document),
+		withNodeRenderer(orgRenderer.text),
+		withNodeRenderer(orgRenderer.paragraph),
+		withNodeRenderer(orgRenderer.list),
+		withNodeRenderer(orgRenderer.item),
+		withNodeRenderer(orgRenderer.code),
+		withNodeRenderer(orgRenderer.codeBlock),
+		withNodeRenderer(orgRenderer.link),
+		withNodeRenderer(orgRenderer.htmlInline),
 
-		withNodeRenderer(ast.KindAutoLink, orgRenderer.unknown),
-		withNodeRenderer(ast.KindBlockquote, orgRenderer.unknown),
-		withNodeRenderer(ast.KindEmphasis, orgRenderer.unknown),
-		withNodeRenderer(ast.KindHTMLBlock, orgRenderer.unknown),
-		withNodeRenderer(ast.KindHeading, orgRenderer.unknown),
-		withNodeRenderer(ast.KindImage, orgRenderer.unknown),
-		withNodeRenderer(ast.KindLinkReferenceDefinition, orgRenderer.unknown),
-		withNodeRenderer(ast.KindStrong, orgRenderer.unknown),
-		withNodeRenderer(ast.KindThematicBreak, orgRenderer.unknown),
+		withUnknown(ast.KindAutoLink),
+		withUnknown(ast.KindBlockquote),
+		withUnknown(ast.KindEmphasis),
+		withUnknown(ast.KindHTMLBlock),
+		withUnknown(ast.KindHeading),
+		withUnknown(ast.KindImage),
+		withUnknown(ast.KindLinkReferenceDefinition),
+		withUnknown(ast.KindStrong),
+		withUnknown(ast.KindThematicBreak),
 	).Build()
 	return &Renderer{helper}
 }
@@ -71,8 +71,18 @@ func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, op
 
 var _ renderer.Renderer[io.Writer] = (*Renderer)(nil)
 
-func withNodeRenderer(kind ast.NodeKind, fun func(io.Writer, []byte, ast.Node, bool, renderer.Context) (ast.WalkStatus, error)) renderer.Option[rendererConfig] {
-	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fun))
+func withNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T, bool, renderer.Context) (ast.WalkStatus, error)) renderer.Option[rendererConfig] {
+	var zero T
+	kind := zero.Kind()
+	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+		node := n.(T)
+		return fun(w, source, node, entering, rc)
+	}
+	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fn))
+}
+
+func withUnknown(kind ast.NodeKind) renderer.Option[rendererConfig] {
+	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(unknown))
 }
 
 type rendererConfig struct {
@@ -108,18 +118,16 @@ func (r *orgRenderer) cr(w io.Writer) error {
 	return nil
 }
 
-func (r *orgRenderer) document(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	_ = n.(*ast.Document)
+func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkContinue, r.cr(writer)
 }
 
-func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.Text)
-	if node.HasChildren() {
-		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	if n.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", n)
 	}
 	if entering {
-		s := node.Value.Str(source)
+		s := n.Value.Str(source)
 		s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
 		indent := ""
 		if strings.HasSuffix(r.lastOut, "\n") {
@@ -129,36 +137,33 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n ast.Node, entering
 		if err := r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
 			return ast.WalkStop, err
 		}
-		if node.SoftLineBreak() {
+		if n.SoftLineBreak() {
 			if err := r.cr(writer); err != nil {
 				return ast.WalkStop, err
 			}
 		}
-		if node.HardLineBreak() {
+		if n.HardLineBreak() {
 			return ast.WalkStop, errors.New("unsupported hard line break")
 		}
 	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.Paragraph)
-	if node.Parent().Kind() != ast.KindListItem {
+func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	if n.Parent().Kind() != ast.KindListItem {
 		return ast.WalkContinue, r.lit(writer, "\n")
 	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) list(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	_ = n.(*ast.List)
+func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	if entering {
 		return ast.WalkContinue, r.cr(writer)
 	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	_ = n.(*ast.ListItem)
+func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	if entering {
 		if r.indent != "" {
 			return ast.WalkStop, errors.New("no support for nested lists")
@@ -174,24 +179,22 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering
 	}
 }
 
-func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.CodeSpan)
-	if node.HasChildren() {
-		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	if n.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", n)
 	}
 	if entering {
-		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("~%s~", node.Value.Str(source)))
+		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.CodeBlock)
-	if node.HasChildren() {
-		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	if n.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", n)
 	}
 	if entering {
-		lang, ok := node.Language(source)
+		lang, ok := n.Language(source)
 		if !ok {
 			return ast.WalkStop, errors.New("language not given")
 		}
@@ -199,28 +202,26 @@ func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, ent
 		if lang == "" {
 			return ast.WalkStop, fmt.Errorf("unknown language %q", lang)
 		}
-		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, node.Value.Str(source)))
+		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
 	}
 	return ast.WalkContinue, nil
 }
 
-func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.Link)
+func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	if entering {
-		dest := node.Destination.Str(source)
+		dest := n.Destination.Str(source)
 		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("[[%s][", dest))
 	} else {
 		return ast.WalkContinue, r.lit(writer, "]]")
 	}
 }
 
-func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	node := n.(*ast.RawHTML)
-	if node.HasChildren() {
-		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
+func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	if n.HasChildren() {
+		return ast.WalkStop, fmt.Errorf("node %#v has children", n)
 	}
 	if entering {
-		tag := node.Value.Str(source)
+		tag := n.Value.Str(source)
 		org := tags[tag]
 		if org == "" {
 			return ast.WalkStop, fmt.Errorf("unknown HTML tag %s", tag)
@@ -231,7 +232,7 @@ func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n ast.Node, en
 }
 
 // Signal an error if we don’t implement something.
-func (r *orgRenderer) unknown(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func unknown(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unknown node type %q", n.Kind())
 }
 
