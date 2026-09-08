@@ -21,34 +21,6 @@ limitations under the License.
 {{end -}}
 
 {{range .GetRuleInfo -}}
-{{template "rule" .}}
-{{end -}}
-
-{{range .GetProviderInfo -}}
-{{template "provider" .}}
-{{end -}}
-
-{{range .GetFuncInfo -}}
-{{template "function" .}}
-{{end -}}
-
-{{range .GetAspectInfo -}}
-{{template "aspect" .}}
-{{end -}}
-
-{{range .GetModuleExtensionInfo -}}
-{{template "extension" .}}
-{{end -}}
-
-{{range .GetRepositoryRuleInfo -}}
-{{template "repo rule" .}}
-{{end -}}
-
-{{range .GetMacroInfo -}}
-{{template "macro" .}}
-{{end -}}
-
-{{define "rule" -}}
 #+ATTR_TEXINFO: :options Rule {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_deffn
 {{template "load" .GetOriginKey -}}
@@ -60,7 +32,7 @@ The ~{{.GetRuleName}}~ rule supports the following attributes:
 
 {{end -}}
 
-{{define "provider" -}}
+{{range .GetProviderInfo -}}
 #+ATTR_TEXINFO: :options Provider {{.GetProviderName}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
 #+BEGIN_deftp
 {{template "load" .GetOriginKey -}}
@@ -72,11 +44,7 @@ The ~{{.GetProviderName}}~ provider has the following fields:
 
 {{end -}}
 
-{{define "field" -}}
-~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
-{{end -}}
-
-{{define "function" -}}
+{{range .GetFuncInfo -}}
 #+ATTR_TEXINFO: :options {{.GetFunctionName}} ({{range $i, $p := .GetParameter}}{{if $i}}, {{end}}{{if $p.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_defun
 {{template "load" .GetOriginKey -}}
@@ -91,11 +59,7 @@ Returns: {{markdown .}}
 
 {{end -}}
 
-{{define "parameter" -}}
-{{.GetName}} :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetMandatory | mandatory | capitalize}}{{with .GetDefaultValue}}; default: ~{{.}}~{{end}}.
-{{- end -}}
-
-{{define "aspect" -}}
+{{range .GetAspectInfo -}}
 #+ATTR_TEXINFO: :options Aspect {{.GetName}}{{range .GetAttribute}} {{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}}
 #+BEGIN_deffn
 {{template "load" .GetOriginKey -}}
@@ -110,7 +74,7 @@ This aspect propagates along the following attributes: {{range $i, $a := .}}{{if
 
 {{end -}}
 
-{{define "extension" -}}
+{{range .GetModuleExtensionInfo -}}
 {{$extName := .GetExtensionName}}
 #+ATTR_TEXINFO: :options {Module extension} {{$extName}}{{range .GetTagClass}} {{.GetTagName}}{{end}}
 #+BEGIN_deftp
@@ -137,7 +101,7 @@ The ~{{.GetTagName}}~ tag class supports the following attributes:
 
 {{end -}}
 
-{{define "repo rule" -}}
+{{range .GetRepositoryRuleInfo -}}
 #+ATTR_TEXINFO: :options {Repository rule} {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_deffn
 {{template "load" .GetOriginKey -}}
@@ -152,7 +116,7 @@ It depends on the following environment variables: {{range $i, $v := .}}{{if $i}
 
 {{end -}}
 
-{{define "macro" -}}
+{{range .GetMacroInfo -}}
 #+ATTR_TEXINFO: :options {{.GetMacroName}} ({{range $i, $a := .GetAttribute}}{{if $i}}, {{end}}{{if $a.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_defmac
 {{template "load" .GetOriginKey -}}
@@ -163,6 +127,14 @@ The ~{{.GetName}}~ macro supports the following attributes:
 #+END_defmac
 
 {{end -}}
+
+{{define "field" -}}
+~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
+{{end -}}
+
+{{define "parameter" -}}
+{{.GetName}} :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetMandatory | mandatory | capitalize}}{{with .GetDefaultValue}}; default: ~{{.}}~{{end}}.
+{{- end -}}
 
 {{define "load"}}
 #+BEGIN_SRC bazel-starlark
