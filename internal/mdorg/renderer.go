@@ -37,14 +37,14 @@ func NewRenderer() *Renderer {
 	orgRenderer := newOrgRenderer()
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
 		withNodeRenderer(orgRenderer.document, doNothing),
-		withNodeRenderer(orgRenderer.text, doNothing),
+		withChildlessNodeRenderer(orgRenderer.text),
 		withNodeRenderer(orgRenderer.paragraph, orgRenderer.paragraph),
 		withNodeRenderer(orgRenderer.list, doNothing),
 		withNodeRenderer(orgRenderer.item, orgRenderer.endItem),
-		withNodeRenderer(orgRenderer.code, doNothing),
-		withNodeRenderer(orgRenderer.codeBlock, doNothing),
+		withChildlessNodeRenderer(orgRenderer.code),
+		withChildlessNodeRenderer(orgRenderer.codeBlock),
 		withNodeRenderer(orgRenderer.link, orgRenderer.endLink),
-		withNodeRenderer(orgRenderer.htmlInline, doNothing),
+		withChildlessNodeRenderer(orgRenderer.htmlInline),
 
 		withUnknown(ast.KindAutoLink),
 		withUnknown(ast.KindBlockquote),
@@ -90,6 +90,17 @@ func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, render
 	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fn))
 }
 
+func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T, renderer.Context) error) renderer.Option[rendererConfig] {
+	enter := func(w io.Writer, source []byte, n T, rc renderer.Context) error {
+		if n.HasChildren() {
+			return fmt.Errorf("node %#v has children", n)
+		}
+		return fun(w, source, n, rc)
+	}
+	leave := doNothing[T]
+	return withNodeRenderer(enter, leave)
+}
+
 func withUnknown(kind ast.NodeKind) renderer.Option[rendererConfig] {
 	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(unknown))
 }
@@ -132,9 +143,6 @@ func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document,
 }
 
 func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, rc renderer.Context) error {
-	if n.HasChildren() {
-		return fmt.Errorf("node %#v has children", n)
-	}
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
 	indent := ""
@@ -184,16 +192,10 @@ func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem, 
 }
 
 func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan, rc renderer.Context) error {
-	if n.HasChildren() {
-		return fmt.Errorf("node %#v has children", n)
-	}
 	return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
 func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock, rc renderer.Context) error {
-	if n.HasChildren() {
-		return fmt.Errorf("node %#v has children", n)
-	}
 	lang, ok := n.Language(source)
 	if !ok {
 		return errors.New("language not given")
@@ -214,9 +216,6 @@ func (r *orgRenderer) endLink(writer io.Writer, source []byte, n *ast.Link, rc r
 }
 
 func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML, rc renderer.Context) error {
-	if n.HasChildren() {
-		return fmt.Errorf("node %#v has children", n)
-	}
 	tag := n.Value.Str(source)
 	org := tags[tag]
 	if org == "" {
