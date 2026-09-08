@@ -44,15 +44,15 @@ func NewRenderer() *Renderer {
 		withNodeRenderer(s.link, s.endLink),
 		withChildlessNodeRenderer(s.htmlInline),
 
-		withUnknown(ast.KindAutoLink),
-		withUnknown(ast.KindBlockquote),
-		withUnknown(ast.KindEmphasis),
-		withUnknown(ast.KindHTMLBlock),
-		withUnknown(ast.KindHeading),
-		withUnknown(ast.KindImage),
-		withUnknown(ast.KindLinkReferenceDefinition),
-		withUnknown(ast.KindStrong),
-		withUnknown(ast.KindThematicBreak),
+		withUnsupported(ast.KindAutoLink),
+		withUnsupported(ast.KindBlockquote),
+		withUnsupported(ast.KindEmphasis),
+		withUnsupported(ast.KindHTMLBlock),
+		withUnsupported(ast.KindHeading),
+		withUnsupported(ast.KindImage),
+		withUnsupported(ast.KindLinkReferenceDefinition),
+		withUnsupported(ast.KindStrong),
+		withUnsupported(ast.KindThematicBreak),
 	).Build()
 	return &Renderer{helper}
 }
@@ -97,8 +97,8 @@ func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error)
 	return withNodeRenderer(enter, leave)
 }
 
-func withUnknown(kind ast.NodeKind) renderer.Option[config] {
-	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(unknown))
+func withUnsupported(kind ast.NodeKind) renderer.Option[config] {
+	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(unsupported))
 }
 
 type config struct {
@@ -229,8 +229,8 @@ func doNothing[T ast.Node](io.Writer, []byte, T) error {
 }
 
 // Signal an error if we don’t implement something.
-func unknown(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	return ast.WalkStop, fmt.Errorf("unknown node type %q", n.Kind())
+func unsupported(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+	return ast.WalkStop, fmt.Errorf("unsupported node type %q", n.Kind())
 }
 
 var tags = map[string]string{
