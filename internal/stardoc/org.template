@@ -55,7 +55,7 @@ limitations under the License.
 {{.GetDocString | markdown | lstrip -}}
 The ~{{.GetRuleName}}~ rule supports the following attributes:
 
-{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
 #+END_deffn
 
 {{end -}}
@@ -67,7 +67,7 @@ The ~{{.GetRuleName}}~ rule supports the following attributes:
 {{.GetDocString | markdown | lstrip -}}
 The ~{{.GetProviderName}}~ provider has the following fields:
 
-{{range .GetFieldInfo -}}{{item "field info" .}}{{end -}}
+{{range .GetFieldInfo}}{{item "field info" .}}{{end -}}
 #+END_deftp
 {{end -}}
 
@@ -80,7 +80,7 @@ The ~{{.GetProviderName}}~ provider has the following fields:
 #+BEGIN_defun
 {{template "load" .GetOriginKey -}}
 {{.GetDocString | markdown | lstrip -}}
-{{range .GetParameter -}}{{item "parameter" .}}{{end -}}
+{{range .GetParameter}}{{item "parameter" .}}{{end -}}
 {{with .GetReturn.GetDocString -}}
 Returns: {{markdown .}}
 
@@ -126,7 +126,7 @@ The ~{{$extName}}~ module extension provides the following tag classes:
 {{.GetDocString | markdown | lstrip -}}
 The ~{{.GetTagName}}~ tag class supports the following attributes:
 
-{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
 #+END_defop
 
 {{end -}}
@@ -141,7 +141,7 @@ The ~{{.GetTagName}}~ tag class supports the following attributes:
 {{.GetDocString | markdown | lstrip}}
 The ~{{.GetRuleName}}~ repository rule supports the following attributes:
 
-{{range .GetAttribute -}}{{item "attribute" .}}{{end}}
+{{range .GetAttribute}}{{item "attribute" .}}{{end}}
 {{with .GetEnviron -}}
 It depends on the following environment variables: {{range $i, $v := .}}{{if $i}}, {{end}}{{$v}}{{end}}
 {{- end}}
@@ -156,7 +156,7 @@ It depends on the following environment variables: {{range $i, $v := .}}{{if $i}
 {{.GetDocString | markdown | lstrip}}
 The ~{{.GetName}}~ macro supports the following attributes:
 
-{{range .GetAttribute -}}{{item "attribute" .}}{{end -}}
+{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
 #+END_defmac
 {{end -}}
 
