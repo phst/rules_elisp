@@ -84,13 +84,21 @@ func capitalize(s string) string {
 	return cases.Title(language.English, cases.NoLower).String(s)
 }
 
+func mandatory(b bool) string {
+	return mandatoryStrings[b]
+}
+
 var mandatoryStrings = map[bool]string{
 	false: "optional",
 	true:  "mandatory",
 }
 
-func mandatory(b bool) string {
-	return mandatoryStrings[b]
+func attributeType(t spb.AttributeType) (string, error) {
+	s, ok := attributeTypeStrings[t]
+	if !ok {
+		return "", fmt.Errorf("unknown attribute type %s", t)
+	}
+	return s, nil
 }
 
 var attributeTypeStrings = map[spb.AttributeType]string{
@@ -107,14 +115,6 @@ var attributeTypeStrings = map[spb.AttributeType]string{
 	spb.AttributeType_STRING_LIST_DICT:  "Dictionary string → list of strings",
 	spb.AttributeType_OUTPUT:            "Output file",
 	spb.AttributeType_OUTPUT_LIST:       "List of output files",
-}
-
-func attributeType(t spb.AttributeType) (string, error) {
-	s, ok := attributeTypeStrings[t]
-	if !ok {
-		return "", fmt.Errorf("unknown attribute type %s", t)
-	}
-	return s, nil
 }
 
 func requireEmpty(s string) (string, error) {
