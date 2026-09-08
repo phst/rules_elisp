@@ -114,11 +114,6 @@ type renderState struct {
 	inItem bool
 }
 
-var rendererLanguage = map[string]string{
-	"sh": "sh",
-	"c":  "c",
-}
-
 func (r *renderState) write(w io.Writer, s string) error {
 	if strings.ContainsAny(s, "\r\n\u0085\u2028\u2029") {
 		return fmt.Errorf("newline in string %q", s)
@@ -215,6 +210,11 @@ func (r *renderState) doCodeBlock(writer io.Writer, source []byte, n *ast.CodeBl
 	return err
 }
 
+var rendererLanguage = map[string]string{
+	"sh": "sh",
+	"c":  "c",
+}
+
 func (r *renderState) beginLink(writer io.Writer, source []byte, n *ast.Link) error {
 	dest := n.Destination.Str(source)
 	return r.write(writer, fmt.Sprintf("[[%s][", dest))
@@ -233,6 +233,13 @@ func (r *renderState) doRawHTML(writer io.Writer, source []byte, n *ast.RawHTML)
 	return r.write(writer, org)
 }
 
+var tags = map[string]string{
+	"<code>":  "@@texinfo:@code{@@",
+	"</code>": "@@texinfo:}@@",
+	"<var>":   "@@texinfo:@var{@@",
+	"</var>":  "@@texinfo:}@@",
+}
+
 func doNothing[T ast.Node](io.Writer, []byte, T) error {
 	return nil
 }
@@ -240,11 +247,4 @@ func doNothing[T ast.Node](io.Writer, []byte, T) error {
 // Signal an error if we don’t implement something.
 func doUnsupported(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unsupported node type %q", n.Kind())
-}
-
-var tags = map[string]string{
-	"<code>":  "@@texinfo:@code{@@",
-	"</code>": "@@texinfo:}@@",
-	"<var>":   "@@texinfo:@var{@@",
-	"</var>":  "@@texinfo:}@@",
 }
