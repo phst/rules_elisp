@@ -62,7 +62,7 @@ func (r *Renderer) Render(w io.Writer, source []byte, n ast.Node, opts ...render
 	return r.helper.Render(w, source, n, opts...)
 }
 
-// RenderStringSource implements [renderer.Renderer.RenderStringSource]
+// RenderStringSource implements [renderer.Renderer.RenderStringSource].
 func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, opts ...renderer.RenderOption) error {
 	return r.helper.RenderStringSource(w, source, n, opts...)
 }
