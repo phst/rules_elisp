@@ -114,18 +114,6 @@ type renderState struct {
 	inItem bool
 }
 
-func (r *renderState) write(w io.Writer, s string) error {
-	if strings.ContainsAny(s, "\r\n\u0085\u2028\u2029") {
-		return fmt.Errorf("newline in string %q", s)
-	}
-	if !r.inLine && r.inItem {
-		s = "  " + s
-	}
-	_, err := io.WriteString(w, s)
-	r.inLine = true
-	return err
-}
-
 func (r *renderState) doText(writer io.Writer, source []byte, n *ast.Text) error {
 	if n.HardLineBreak() {
 		return errors.New("unsupported hard line break")
@@ -247,4 +235,16 @@ func doNothing[T ast.Node](io.Writer, []byte, T) error {
 // Signal an error if we don’t implement something.
 func doUnsupported(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unsupported node type %q", n.Kind())
+}
+
+func (r *renderState) write(w io.Writer, s string) error {
+	if strings.ContainsAny(s, "\r\n\u0085\u2028\u2029") {
+		return fmt.Errorf("newline in string %q", s)
+	}
+	if !r.inLine && r.inItem {
+		s = "  " + s
+	}
+	_, err := io.WriteString(w, s)
+	r.inLine = true
+	return err
 }
