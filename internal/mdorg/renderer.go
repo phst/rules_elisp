@@ -36,10 +36,8 @@ type Renderer struct {
 func NewRenderer() *Renderer {
 	s := new(renderState)
 	helper := new(renderer.HelperBuilder[io.Writer, config]).Options(
-		withNodeRenderer[*ast.Document](doNothing, doNothing),
 		withChildlessNodeRenderer(s.text),
 		withNodeRenderer(doNothing, s.paragraph),
-		withNodeRenderer[*ast.List](doNothing, doNothing),
 		withNodeRenderer(s.item, s.endItem),
 		withChildlessNodeRenderer(s.code),
 		withChildlessNodeRenderer(s.codeBlock),
