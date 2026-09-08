@@ -106,7 +106,11 @@ type config struct {
 }
 
 type renderState struct {
+	// If false, we are at the beginning of a line, otherwise in the middle
+	// of a line.
 	inLine bool
+
+	// If true, we are inside a list item.
 	inItem bool
 }
 
