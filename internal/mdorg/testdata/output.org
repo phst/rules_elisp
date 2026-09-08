@@ -1,12 +1,10 @@
-
-
 Text paragraph with ~code span~ and some special characters: [​]​`_​~​\.
 #+BEGIN_SRC sh
 # code block with `special characters`
 #+END_SRC
-
 #+TEXINFO: @noindent
 - List item, single paragraph.
-- List item, first paragraph.List item, second paragraph.
+- List item, first paragraph.
 
+  List item, second paragraph.
 [[info:emacs#User input][Link to Info node]].
