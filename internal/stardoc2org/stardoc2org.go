@@ -12,7 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Helper binary to convert Stardoc output into Org Mode format.
+// Binary stardoc2org converts Stardoc output into Org Mode format.
+//
+// Usage:
+//
+//	stardoc2org INPUT-FILE OUTPUT-FILE
+//
+// INPUT-FILE must contain the binary serialization of a
+// stardoc_output.ModuleInfo protocol buffer message; this is usually generated
+// by a starlark_doc_extract Bazel rule.  The program writes an Org-mode
+// rendering of the module documentation into OUTPUT-FILE.
 package main
 
 import (
