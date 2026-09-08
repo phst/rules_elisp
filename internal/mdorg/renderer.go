@@ -190,7 +190,7 @@ func (r *renderState) doCodeBlock(writer io.Writer, source []byte, n *ast.CodeBl
 	if !ok {
 		return errors.New("language not given")
 	}
-	lang = rendererLanguage[lang]
+	lang = markdownToOrgLang[lang]
 	if lang == "" {
 		return fmt.Errorf("unknown language %q", lang)
 	}
@@ -198,7 +198,7 @@ func (r *renderState) doCodeBlock(writer io.Writer, source []byte, n *ast.CodeBl
 	return err
 }
 
-var rendererLanguage = map[string]string{
+var markdownToOrgLang = map[string]string{
 	"sh": "sh",
 	"c":  "c",
 }
