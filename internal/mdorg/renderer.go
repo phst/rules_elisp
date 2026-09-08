@@ -42,7 +42,6 @@ func NewRenderer() *Renderer {
 		withNodeRenderer(ast.KindParagraph, orgRenderer.paragraph),
 		withNodeRenderer(ast.KindList, orgRenderer.list),
 		withNodeRenderer(ast.KindListItem, orgRenderer.item),
-		withNodeRenderer(ast.KindEmphasis, orgRenderer.emph),
 		withNodeRenderer(ast.KindCodeSpan, orgRenderer.code),
 		withNodeRenderer(ast.KindCodeBlock, orgRenderer.codeBlock),
 		withNodeRenderer(ast.KindLink, orgRenderer.link),
@@ -50,6 +49,7 @@ func NewRenderer() *Renderer {
 
 		withNodeRenderer(ast.KindAutoLink, orgRenderer.unknown),
 		withNodeRenderer(ast.KindBlockquote, orgRenderer.unknown),
+		withNodeRenderer(ast.KindEmphasis, orgRenderer.unknown),
 		withNodeRenderer(ast.KindHTMLBlock, orgRenderer.unknown),
 		withNodeRenderer(ast.KindHeading, orgRenderer.unknown),
 		withNodeRenderer(ast.KindImage, orgRenderer.unknown),
@@ -175,11 +175,6 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n ast.Node, entering
 		r.indent = ""
 		return ast.WalkContinue, r.cr(writer)
 	}
-}
-
-func (r *orgRenderer) emph(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-	_ = n.(*ast.Emphasis)
-	return ast.WalkContinue, r.lit(writer, "/")
 }
 
 func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
