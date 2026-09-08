@@ -36,15 +36,15 @@ type Renderer struct {
 func NewRenderer() *Renderer {
 	orgRenderer := newOrgRenderer()
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
-		withNodeRenderer(orgRenderer.document),
-		withNodeRenderer(orgRenderer.text),
-		withNodeRenderer(orgRenderer.paragraph),
-		withNodeRenderer(orgRenderer.list),
-		withNodeRenderer(orgRenderer.item),
-		withNodeRenderer(orgRenderer.code),
-		withNodeRenderer(orgRenderer.codeBlock),
-		withNodeRenderer(orgRenderer.link),
-		withNodeRenderer(orgRenderer.htmlInline),
+		withNodeRenderer(orgRenderer.document, doNothing),
+		withNodeRenderer(orgRenderer.text, doNothing),
+		withNodeRenderer(orgRenderer.paragraph, orgRenderer.paragraph),
+		withNodeRenderer(orgRenderer.list, doNothing),
+		withNodeRenderer(orgRenderer.item, orgRenderer.endItem),
+		withNodeRenderer(orgRenderer.code, doNothing),
+		withNodeRenderer(orgRenderer.codeBlock, doNothing),
+		withNodeRenderer(orgRenderer.link, orgRenderer.endLink),
+		withNodeRenderer(orgRenderer.htmlInline, doNothing),
 
 		withUnknown(ast.KindAutoLink),
 		withUnknown(ast.KindBlockquote),
@@ -71,12 +71,17 @@ func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, op
 
 var _ renderer.Renderer[io.Writer] = (*Renderer)(nil)
 
-func withNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T, bool, renderer.Context) error) renderer.Option[rendererConfig] {
+func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, renderer.Context) error) renderer.Option[rendererConfig] {
 	var zero T
 	kind := zero.Kind()
 	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 		node := n.(T)
-		err := fun(w, source, node, entering, rc)
+		var err error
+		if entering {
+			err = enter(w, source, node, rc)
+		} else {
+			err = leave(w, source, node, rc)
+		}
 		if err != nil {
 			return ast.WalkStop, err
 		}
@@ -122,116 +127,105 @@ func (r *orgRenderer) cr(w io.Writer) error {
 	return nil
 }
 
-func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document, rc renderer.Context) error {
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, rc renderer.Context) error {
 	if n.HasChildren() {
 		return fmt.Errorf("node %#v has children", n)
 	}
-	if entering {
-		s := n.Value.Str(source)
-		s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
-		indent := ""
-		if strings.HasSuffix(r.lastOut, "\n") {
-			indent = r.indent
-		}
-		// See https://orgmode.org/manual/Escape-Character.html.
-		if err := r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
+	s := n.Value.Str(source)
+	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
+	indent := ""
+	if strings.HasSuffix(r.lastOut, "\n") {
+		indent = r.indent
+	}
+	// See https://orgmode.org/manual/Escape-Character.html.
+	if err := r.lit(writer, indent+regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
+		return err
+	}
+	if n.SoftLineBreak() {
+		if err := r.cr(writer); err != nil {
 			return err
 		}
-		if n.SoftLineBreak() {
-			if err := r.cr(writer); err != nil {
-				return err
-			}
-		}
-		if n.HardLineBreak() {
-			return errors.New("unsupported hard line break")
-		}
+	}
+	if n.HardLineBreak() {
+		return errors.New("unsupported hard line break")
 	}
 	return nil
 }
 
-func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph, rc renderer.Context) error {
 	if n.Parent().Kind() != ast.KindListItem {
 		return r.lit(writer, "\n")
 	}
 	return nil
 }
 
-func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List, entering bool, rc renderer.Context) error {
-	if entering {
-		return r.cr(writer)
-	}
-	return nil
+func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List, rc renderer.Context) error {
+	return r.cr(writer)
 }
 
-func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem, entering bool, rc renderer.Context) error {
-	if entering {
-		if r.indent != "" {
-			return errors.New("no support for nested lists")
-		}
-		r.indent = "  "
-		return r.lit(writer, "- ")
-	} else {
-		if r.indent != "  " {
-			return errors.New("no support for nested lists")
-		}
-		r.indent = ""
-		return r.cr(writer)
+func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem, rc renderer.Context) error {
+	if r.indent != "" {
+		return errors.New("no support for nested lists")
 	}
+	r.indent = "  "
+	return r.lit(writer, "- ")
 }
 
-func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem, rc renderer.Context) error {
+	if r.indent != "  " {
+		return errors.New("no support for nested lists")
+	}
+	r.indent = ""
+	return r.cr(writer)
+}
+
+func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan, rc renderer.Context) error {
 	if n.HasChildren() {
 		return fmt.Errorf("node %#v has children", n)
 	}
-	if entering {
-		return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
-	}
-	return nil
+	return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
-func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock, rc renderer.Context) error {
 	if n.HasChildren() {
 		return fmt.Errorf("node %#v has children", n)
 	}
-	if entering {
-		lang, ok := n.Language(source)
-		if !ok {
-			return errors.New("language not given")
-		}
-		lang = rendererLanguage[lang]
-		if lang == "" {
-			return fmt.Errorf("unknown language %q", lang)
-		}
-		return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
+	lang, ok := n.Language(source)
+	if !ok {
+		return errors.New("language not given")
 	}
-	return nil
+	lang = rendererLanguage[lang]
+	if lang == "" {
+		return fmt.Errorf("unknown language %q", lang)
+	}
+	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
 }
 
-func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link, entering bool, rc renderer.Context) error {
-	if entering {
-		dest := n.Destination.Str(source)
-		return r.lit(writer, fmt.Sprintf("[[%s][", dest))
-	} else {
-		return r.lit(writer, "]]")
-	}
+func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link, rc renderer.Context) error {
+	dest := n.Destination.Str(source)
+	return r.lit(writer, fmt.Sprintf("[[%s][", dest))
+}
+func (r *orgRenderer) endLink(writer io.Writer, source []byte, n *ast.Link, rc renderer.Context) error {
+	return r.lit(writer, "]]")
 }
 
-func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML, entering bool, rc renderer.Context) error {
+func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML, rc renderer.Context) error {
 	if n.HasChildren() {
 		return fmt.Errorf("node %#v has children", n)
 	}
-	if entering {
-		tag := n.Value.Str(source)
-		org := tags[tag]
-		if org == "" {
-			return fmt.Errorf("unknown HTML tag %s", tag)
-		}
-		return r.lit(writer, org)
+	tag := n.Value.Str(source)
+	org := tags[tag]
+	if org == "" {
+		return fmt.Errorf("unknown HTML tag %s", tag)
 	}
+	return r.lit(writer, org)
+}
+
+func doNothing[T ast.Node](io.Writer, []byte, T, renderer.Context) error {
 	return nil
 }
 
