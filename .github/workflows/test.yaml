@@ -64,8 +64,10 @@ jobs:
         # https://github.com/bazelbuild/bazel/issues/6374,
         # https://github.com/bazelbuild/bazel/issues/15835, and
         # https://github.com/bazelbuild/bazel/issues/18839 are fixed.
-        run: |
-          ./check.ps1 -Coverage:$${{runner.os != 'Windows'}}
+        run: >-
+          ./check.ps1
+          -Coverage:$${{runner.os != 'Windows'}}
+          -BazelVersions '8.1.0', '8.x'
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
         shell: bash

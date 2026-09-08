@@ -16,7 +16,7 @@
 
 #Requires -Version 7.4
 
-param ([switch]$Coverage)
+param ([switch]$Coverage, [string[]]$BazelVersions)
 
 Set-PSDebug -Strict
 Set-StrictMode -Version 'latest'
@@ -73,9 +73,6 @@ function Run-Tests {
 # All supported Emacs major versions.
 $versions = '30', '31'
 
-# Selection of supported non-default Bazel versions.
-$bazelVersions = '8.1.0', '8.x'
-
 $VerbosePreference = 'Continue'
 
 Set-Location -Path $PSScriptRoot
@@ -101,7 +98,7 @@ Run-Tests -Version $null -- '--extra_toolchains=//elisp:local_toolchain'
 Run-Bazel -Version $null -- 'mod' 'graph' > $null
 
 # Run the Bazel tests for all supported Bazel versions.
-foreach ($version in $bazelVersions) {
+foreach ($version in $BazelVersions) {
     # The lockfile format differs between the Bazel versions, so only for one
     # version --lockfile_mode=error can work.  --lockfile_mode=update would be
     # useless in GitHub since we never use the updated lockfiles, so switch
@@ -113,7 +110,7 @@ Join-Path -Path examples -ChildPath ext | Set-Location
 Run-Tests -Version $null
 Run-Bazel -Version $null -- 'mod' 'graph' > $null
 
-foreach ($version in $bazelVersions) {
+foreach ($version in $BazelVersions) {
     # The lockfile format differs between the Bazel versions, so only for one
     # version --lockfile_mode=error can work.  --lockfile_mode=update would be
     # useless in GitHub since we never use the updated lockfiles, so switch
