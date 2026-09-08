@@ -34,7 +34,7 @@ type Renderer struct {
 
 // NewRenderer creates a new [Renderer].
 func NewRenderer() *Renderer {
-	orgRenderer := newOrgRenderer()
+	orgRenderer := &orgRenderer{"", ""}
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
 		withNodeRenderer(orgRenderer.document, doNothing),
 		withChildlessNodeRenderer(orgRenderer.text),
@@ -115,10 +115,6 @@ type orgRenderer struct {
 var rendererLanguage = map[string]string{
 	"sh": "sh",
 	"c":  "c",
-}
-
-func newOrgRenderer() *orgRenderer {
-	return &orgRenderer{"", ""}
 }
 
 func (r *orgRenderer) lit(w io.Writer, s string) error {
