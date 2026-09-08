@@ -75,7 +75,10 @@ func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, render
 	var zero T
 	kind := zero.Kind()
 	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
-		node := n.(T)
+		node, ok := n.(T)
+		if !ok {
+			return ast.WalkStop, fmt.Errorf("node of kind %s has wrong type %T, want %T", n.Kind(), n, node)
+		}
 		if entering {
 			return ast.WalkContinue, enter(w, source, node, rc)
 		} else {
