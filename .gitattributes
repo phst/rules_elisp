@@ -24,6 +24,7 @@ REPO.bazel                      text eol=lf
 # We enforce Unix-style line endings for the Stardoc files to address
 # https://github.com/bazelbuild/stardoc/issues/110.
 /docs/*.org                     text eol=lf
+/internal/mdorg/testdata/*.*    text eol=lf
 
 # Don’t mess with coverage test data.
 /tests/integration/coverage.dat text eol=lf
