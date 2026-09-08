@@ -13,6 +13,7 @@
 # limitations under the License.
 
 load("@rules_go//go:go_library.bzl", "go_library")
+load("@rules_go//go:go_test.bzl", "go_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -31,5 +32,15 @@ go_library(
     deps = [
         "@com_github_yuin_goldmark_v2//ast",
         "@com_github_yuin_goldmark_v2//renderer",
+    ],
+)
+
+go_test(
+    name = "mdorg_test",
+    size = "small",
+    srcs = ["renderer_test.go"],
+    deps = [
+        ":mdorg",
+        "@com_github_yuin_goldmark_v2//parser",
     ],
 )
