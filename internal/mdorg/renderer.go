@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+// Package mdorg contains functionality to convert Markdown to Org-mode.
+package mdorg
 
 import (
 	"errors"
@@ -26,11 +27,14 @@ import (
 	"github.com/yuin/goldmark/v2/renderer"
 )
 
-type markdownRenderer struct {
+// Renderer is a [renderer.Renderer] that writes Org-mode text.
+// Use [NewRenderer] to create Renderer objects; the zero Renderer is not valid.
+type Renderer struct {
 	helper *renderer.Helper[io.Writer, rendererConfig]
 }
 
-func newRenderer() *markdownRenderer {
+// NewRenderer creates a new [Renderer].
+func NewRenderer() *Renderer {
 	orgRenderer := newOrgRenderer()
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
 		withNodeRenderer(ast.KindDocument, orgRenderer.document),
@@ -53,18 +57,20 @@ func newRenderer() *markdownRenderer {
 		withNodeRenderer(ast.KindStrong, orgRenderer.unknown),
 		withNodeRenderer(ast.KindThematicBreak, orgRenderer.unknown),
 	).Build()
-	return &markdownRenderer{helper}
+	return &Renderer{helper}
 }
 
-func (r *markdownRenderer) Render(w io.Writer, source []byte, n ast.Node, opts ...renderer.RenderOption) error {
+// Render implements [renderer.Renderer.Render].
+func (r *Renderer) Render(w io.Writer, source []byte, n ast.Node, opts ...renderer.RenderOption) error {
 	return r.helper.Render(w, source, n, opts...)
 }
 
-func (r *markdownRenderer) RenderStringSource(w io.Writer, source string, n ast.Node, opts ...renderer.RenderOption) error {
+// RenderStringSource implements [renderer.Renderer.RenderStringSource]
+func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, opts ...renderer.RenderOption) error {
 	return r.helper.RenderStringSource(w, source, n, opts...)
 }
 
-var _ renderer.Renderer[io.Writer] = (*markdownRenderer)(nil)
+var _ renderer.Renderer[io.Writer] = (*Renderer)(nil)
 
 func withNodeRenderer(kind ast.NodeKind, fun func(io.Writer, []byte, ast.Node, bool, renderer.Context) (ast.WalkStatus, error)) renderer.Option[rendererConfig] {
 	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fun))
