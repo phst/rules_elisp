@@ -39,39 +39,6 @@ func Org(module *spb.ModuleInfo, w io.Writer) error {
 	return tpl.Execute(w, module)
 }
 
-var attributeType = map[spb.AttributeType]string{
-	spb.AttributeType_NAME:              "Name",
-	spb.AttributeType_INT:               "Integer",
-	spb.AttributeType_LABEL:             "Label",
-	spb.AttributeType_STRING:            "String",
-	spb.AttributeType_STRING_LIST:       "List of strings",
-	spb.AttributeType_INT_LIST:          "List of integers",
-	spb.AttributeType_LABEL_LIST:        "List of labels",
-	spb.AttributeType_BOOLEAN:           "Boolean",
-	spb.AttributeType_LABEL_STRING_DICT: "Dictionary string → label",
-	spb.AttributeType_STRING_DICT:       "Dictionary string → string",
-	spb.AttributeType_STRING_LIST_DICT:  "Dictionary string → list of strings",
-	spb.AttributeType_OUTPUT:            "Output file",
-	spb.AttributeType_OUTPUT_LIST:       "List of output files",
-}
-
-func formatAttributeType(t spb.AttributeType) (string, error) {
-	s, ok := attributeType[t]
-	if !ok {
-		return "", fmt.Errorf("unknown attribute type %s", t)
-	}
-	return s, nil
-}
-
-var mandatory = map[bool]string{
-	false: "optional",
-	true:  "mandatory",
-}
-
-func formatMandatory(b bool) string {
-	return mandatory[b]
-}
-
 //go:embed reference.org.template
 var templateText string
 
@@ -109,42 +76,45 @@ func parseTemplate(text string) (*template.Template, error) {
 	return tpl.Funcs(funcs).Parse(text)
 }
 
-// Convert a Markdown snippet to Org-mode.
-func markdown(text string) (string, error) {
-	text = strings.TrimSpace(text)
-	if text == "" {
-		return "", errors.New("Missing docstring")
-	}
-	source := []byte(text)
-	doc := parser.New().Parse(source)
-	renderer := mdorg.NewRenderer()
-	var w strings.Builder
-	if err := renderer.Render(&w, source, doc); err != nil {
-		return "", err
-	}
-	return w.String() + "\n", nil
-}
-
-func fill(text, initialIndent, subsequentIndent string) string {
-	var b strings.Builder
-	b.WriteString(initialIndent)
-	first := true
-	for line := range strings.Lines(text) {
-		if !first && line != "\n" {
-			b.WriteString(subsequentIndent)
-		}
-		first = false
-		b.WriteString(line)
-	}
-	return b.String()
-}
-
 func lstrip(s string) string {
 	return strings.TrimLeftFunc(s, unicode.IsSpace)
 }
 
 func capitalize(s string) string {
 	return cases.Title(language.English, cases.NoLower).String(s)
+}
+
+var mandatory = map[bool]string{
+	false: "optional",
+	true:  "mandatory",
+}
+
+func formatMandatory(b bool) string {
+	return mandatory[b]
+}
+
+var attributeType = map[spb.AttributeType]string{
+	spb.AttributeType_NAME:              "Name",
+	spb.AttributeType_INT:               "Integer",
+	spb.AttributeType_LABEL:             "Label",
+	spb.AttributeType_STRING:            "String",
+	spb.AttributeType_STRING_LIST:       "List of strings",
+	spb.AttributeType_INT_LIST:          "List of integers",
+	spb.AttributeType_LABEL_LIST:        "List of labels",
+	spb.AttributeType_BOOLEAN:           "Boolean",
+	spb.AttributeType_LABEL_STRING_DICT: "Dictionary string → label",
+	spb.AttributeType_STRING_DICT:       "Dictionary string → string",
+	spb.AttributeType_STRING_LIST_DICT:  "Dictionary string → list of strings",
+	spb.AttributeType_OUTPUT:            "Output file",
+	spb.AttributeType_OUTPUT_LIST:       "List of output files",
+}
+
+func formatAttributeType(t spb.AttributeType) (string, error) {
+	s, ok := attributeType[t]
+	if !ok {
+		return "", fmt.Errorf("unknown attribute type %s", t)
+	}
+	return s, nil
 }
 
 func requireEmpty(s string) (string, error) {
@@ -173,4 +143,34 @@ func exactlyOne(groups []*spb.ProviderNameGroup) (*spb.ProviderNameGroup, error)
 		return nil, fmt.Errorf("got %d provider name groups, want one", n)
 	}
 	return groups[0], nil
+}
+
+// Convert a Markdown snippet to Org-mode.
+func markdown(text string) (string, error) {
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return "", errors.New("Missing docstring")
+	}
+	source := []byte(text)
+	doc := parser.New().Parse(source)
+	renderer := mdorg.NewRenderer()
+	var w strings.Builder
+	if err := renderer.Render(&w, source, doc); err != nil {
+		return "", err
+	}
+	return w.String() + "\n", nil
+}
+
+func fill(text, initialIndent, subsequentIndent string) string {
+	var b strings.Builder
+	b.WriteString(initialIndent)
+	first := true
+	for line := range strings.Lines(text) {
+		if !first && line != "\n" {
+			b.WriteString(subsequentIndent)
+		}
+		first = false
+		b.WriteString(line)
+	}
+	return b.String()
 }
