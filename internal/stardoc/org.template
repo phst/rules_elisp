@@ -60,6 +60,21 @@ The ~{{.GetRuleName}}~ rule supports the following attributes:
 
 {{end -}}
 
+{{define "provider" -}}
+#+ATTR_TEXINFO: :options Provider {{.GetProviderName}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
+#+BEGIN_deftp
+{{template "load" .GetOriginKey -}}
+{{.GetDocString | markdown | lstrip -}}
+The ~{{.GetProviderName}}~ provider has the following fields:
+
+{{range .GetFieldInfo -}}{{item "field info" .}}{{end -}}
+#+END_deftp
+{{end -}}
+
+{{define "field info" -}}
+~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
+{{end -}}
+
 {{define "function" -}}
 #+ATTR_TEXINFO: :options {{.GetFunctionName}} ({{range $i, $p := .GetParameter}}{{if $i}}, {{end}}{{if $p.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_defun
@@ -77,21 +92,6 @@ Returns: {{markdown .}}
 {{define "parameter" -}}
 {{.GetName}} :: {{.GetDocString | markdown | trimSpace | requirePeriod}}  {{.GetMandatory | mandatory | capitalize}}{{with .GetDefaultValue}}; default: ~{{.}}~{{end}}.
 {{- end -}}
-
-{{define "provider" -}}
-#+ATTR_TEXINFO: :options Provider {{.GetProviderName}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
-#+BEGIN_deftp
-{{template "load" .GetOriginKey -}}
-{{.GetDocString | markdown | lstrip -}}
-The ~{{.GetProviderName}}~ provider has the following fields:
-
-{{range .GetFieldInfo -}}{{item "field info" .}}{{end -}}
-#+END_deftp
-{{end -}}
-
-{{define "field info" -}}
-~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
-{{end -}}
 
 {{define "aspect" -}}
 #+ATTR_TEXINFO: :options Aspect {{.GetName}}{{range .GetAttribute}} {{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}}
