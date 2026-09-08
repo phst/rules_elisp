@@ -132,9 +132,9 @@ func (r *renderState) doText(writer io.Writer, source []byte, n *ast.Text) error
 		return errors.New("unsupported hard line break")
 	}
 	s := n.Value.Str(source)
-	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
+	s = escapedChar.ReplaceAllString(s, "$1")
 	// See https://orgmode.org/manual/Escape-Character.html.
-	if err := r.write(writer, regexp.MustCompile(`([\[\]*/_=~+])`).ReplaceAllString(s, "$1\u200B")); err != nil {
+	if err := r.write(writer, specialChar.ReplaceAllString(s, "$1\u200B")); err != nil {
 		return err
 	}
 	if n.SoftLineBreak() {
@@ -145,6 +145,11 @@ func (r *renderState) doText(writer io.Writer, source []byte, n *ast.Text) error
 	}
 	return nil
 }
+
+var (
+	escapedChar = regexp.MustCompile(`\\(.)`)
+	specialChar = regexp.MustCompile(`([\[\]*/_=~+])`)
+)
 
 func (r *renderState) endParagraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
 	if !r.inLine {
