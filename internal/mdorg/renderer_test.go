@@ -31,10 +31,10 @@ func TestNewRenderer(t *testing.T) {
 	mdorg.NewRenderer()
 }
 
-func TestRenderer_RenderStringSource(t *testing.T) {
-	doc := parser.New().ParseStringSource(input)
+func TestRenderer_Render(t *testing.T) {
+	doc := parser.New().Parse(input)
 	var b strings.Builder
-	if err := mdorg.NewRenderer().RenderStringSource(&b, input, doc); err != nil {
+	if err := mdorg.NewRenderer().Render(&b, input, doc); err != nil {
 		t.Fatal(err)
 	}
 	if diff := cmp.Diff(b.String(), output); diff != "" {
@@ -43,7 +43,7 @@ func TestRenderer_RenderStringSource(t *testing.T) {
 }
 
 //go:embed testdata/input.md
-var input string
+var input []byte
 
 //go:embed testdata/output.org
 var output string
