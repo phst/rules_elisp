@@ -37,7 +37,7 @@ import (
 // Org-mode document.
 func Org(module *spb.ModuleInfo, w io.Writer) error {
 	g := &generator{w}
-	return g.run(module)
+	return tpl.Execute(g.file, module)
 }
 
 type generator struct {
@@ -75,11 +75,6 @@ var mandatory = map[bool]string{
 
 func formatMandatory(b bool) string {
 	return mandatory[b]
-}
-
-// Writes the generated Org Mode output.
-func (g *generator) run(module *spb.ModuleInfo) error {
-	return tpl.Execute(g.file, module)
 }
 
 //go:embed reference.org.template
