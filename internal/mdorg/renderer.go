@@ -179,11 +179,8 @@ func (r *orgRenderer) code(writer io.Writer, source []byte, n ast.Node, entering
 	if node.HasChildren() {
 		return ast.WalkStop, fmt.Errorf("node %#v has children", node)
 	}
-	if err := r.lit(writer, "~"); err != nil {
-		return ast.WalkStop, err
-	}
 	if entering {
-		return ast.WalkContinue, r.lit(writer, node.Value.Str(source))
+		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("~%s~", node.Value.Str(source)))
 	}
 	return ast.WalkContinue, nil
 }
@@ -202,16 +199,9 @@ func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n ast.Node, ent
 		if lang == "" {
 			return ast.WalkStop, fmt.Errorf("unknown language %q", lang)
 		}
-		return ast.WalkContinue, errors.Join(
-			r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n", lang)),
-			r.lit(writer, node.Value.Str(source)),
-		)
-	} else {
-		return ast.WalkContinue, errors.Join(
-			r.lit(writer, "#+END_SRC\n\n"),
-			r.lit(writer, "#+TEXINFO: @noindent"),
-		)
+		return ast.WalkContinue, r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, node.Value.Str(source)))
 	}
+	return ast.WalkContinue, nil
 }
 
 func (r *orgRenderer) link(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
