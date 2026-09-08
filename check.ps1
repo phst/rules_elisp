@@ -49,17 +49,24 @@ function End-Group {
 }
 
 function Run-Bazel {
-    $version = $Env:USE_BAZEL_VERSION
-    $prefix = $version ? "USE_BAZEL_VERSION=${version} " : ''
+    param ([string]$Version)
+    $prefix = $Version ? "USE_BAZEL_VERSION=${Version} " : ''
     Begin-Group "cd $(Get-Location) && ${prefix}${bazel} ${args}"
+    if ($Version) {
+        New-Item -Verbose -Path Env: -Name USE_BAZEL_VERSION -Value $Version
+    }
     & $bazel @args
+    if ($Version) {
+        Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+    }
     End-Group
 }
 
 function Run-Tests {
-    Run-Bazel 'test' @args '--' '//...'
+    param ([string]$Version)
+    Run-Bazel -Version $Version -- 'test' @args '--' '//...'
     if ($Coverage) {
-        Run-Bazel 'coverage' @args '--' '//...'
+        Run-Bazel -Version $Version -- 'coverage' @args '--' '//...'
     }
 }
 
@@ -79,41 +86,37 @@ if (Test-Path Env:USE_BAZEL_VERSION) {
 }
 
 # Test both default toolchain and versioned toolchains.
-Run-Tests
+Run-Tests -Version $null
 
 foreach ($version in $versions) {
     $toolchains = @(
         "//elisp:emacs_${version}_toolchain",
         "//elisp:emacs_${version}_windows_x86_64_toolchain"
     )
-    Run-Tests "--extra_toolchains=$($toolchains -join ',')"
+    Run-Tests -Version $null -- "--extra_toolchains=$($toolchains -join ',')"
 }
 
-Run-Tests '--extra_toolchains=//elisp:local_toolchain'
+Run-Tests -Version $null -- '--extra_toolchains=//elisp:local_toolchain'
 
-Run-Bazel 'mod' 'graph' > $null
+Run-Bazel -Version $null -- 'mod' 'graph' > $null
 
 # Run the Bazel tests for all supported Bazel versions.
 foreach ($version in $bazelVersions) {
-    New-Item -Verbose -Path Env: -Name USE_BAZEL_VERSION -Value $version
     # The lockfile format differs between the Bazel versions, so only for one
     # version --lockfile_mode=error can work.  --lockfile_mode=update would be
     # useless in GitHub since we never use the updated lockfiles, so switch
     # lockfiles off entirely in other Bazel versions.
-    Run-Tests '--lockfile_mode=off'
-    Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+    Run-Tests -Version $version -- '--lockfile_mode=off'
 }
 
 Join-Path -Path examples -ChildPath ext | Set-Location
-Run-Tests
-Run-Bazel 'mod' 'graph' > $null
+Run-Tests -Version $null
+Run-Bazel -Version $null -- 'mod' 'graph' > $null
 
 foreach ($version in $bazelVersions) {
-    New-Item -Verbose -Path Env: -Name USE_BAZEL_VERSION -Value $version
     # The lockfile format differs between the Bazel versions, so only for one
     # version --lockfile_mode=error can work.  --lockfile_mode=update would be
     # useless in GitHub since we never use the updated lockfiles, so switch
     # lockfiles off entirely in other Bazel versions.
-    Run-Tests '--lockfile_mode=off'
-    Remove-Item -Verbose -Path Env:USE_BAZEL_VERSION
+    Run-Tests -Version $version -- '--lockfile_mode=off'
 }
