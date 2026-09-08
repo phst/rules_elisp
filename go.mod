@@ -22,7 +22,7 @@ require (
 	github.com/bazelbuild/rules_go v0.63.0
 	github.com/google/go-cmp v0.7.0
 	github.com/yuin/goldmark/v2 v2.0.1
-	golang.org/x/text v0.41.0
+	golang.org/x/text v0.42.0
 	google.golang.org/protobuf v1.36.12
 )
 
@@ -34,8 +34,8 @@ require (
 	github.com/lvthillo/gomodzip v0.2.0
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.9 // indirect
-	golang.org/x/mod v0.38.0 // indirect
-	golang.org/x/sync v0.22.0 // indirect
+	golang.org/x/mod v0.41.0 // indirect
+	golang.org/x/sync v0.23.0 // indirect
 	golang.org/x/sys v0.41.0 // indirect
 	golang.org/x/tools/go/vcs v0.1.0-deprecated // indirect
 )
