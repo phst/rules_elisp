@@ -36,13 +36,13 @@ type Renderer struct {
 func NewRenderer() *Renderer {
 	s := new(renderState)
 	helper := new(renderer.HelperBuilder[io.Writer, config]).Options(
-		withChildlessNodeRenderer(s.text),
-		withNodeRenderer(doNothing, s.paragraph),
-		withNodeRenderer(s.item, s.endItem),
-		withChildlessNodeRenderer(s.code),
-		withChildlessNodeRenderer(s.codeBlock),
-		withNodeRenderer(s.link, s.endLink),
-		withChildlessNodeRenderer(s.htmlInline),
+		withChildlessNodeRenderer(s.doText),
+		withNodeRenderer(doNothing, s.endParagraph),
+		withNodeRenderer(s.beginListItem, s.endListItem),
+		withChildlessNodeRenderer(s.doCodeSpan),
+		withChildlessNodeRenderer(s.doCodeBlock),
+		withNodeRenderer(s.beginLink, s.endLink),
+		withChildlessNodeRenderer(s.emitRawHTML),
 
 		withUnsupported(ast.KindAutoLink),
 		withUnsupported(ast.KindBlockquote),
@@ -98,7 +98,7 @@ func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error)
 }
 
 func withUnsupported(kind ast.NodeKind) renderer.Option[config] {
-	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(unsupported))
+	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(doUnsupported))
 }
 
 type config struct {
@@ -127,7 +127,7 @@ func (r *renderState) write(w io.Writer, s string) error {
 	return err
 }
 
-func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
+func (r *renderState) doText(writer io.Writer, source []byte, n *ast.Text) error {
 	if n.HardLineBreak() {
 		return errors.New("unsupported hard line break")
 	}
@@ -146,7 +146,7 @@ func (r *renderState) text(writer io.Writer, source []byte, n *ast.Text) error {
 	return nil
 }
 
-func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
+func (r *renderState) endParagraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
 	if !r.inLine {
 		return errors.New("trying to end paragraph at beginning of line")
 	}
@@ -161,7 +161,7 @@ func (r *renderState) paragraph(writer io.Writer, source []byte, n *ast.Paragrap
 	return err
 }
 
-func (r *renderState) item(writer io.Writer, source []byte, n *ast.ListItem) error {
+func (r *renderState) beginListItem(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if r.inLine {
 		return errors.New("trying to begin list item in the middle of a line")
 	}
@@ -175,7 +175,7 @@ func (r *renderState) item(writer io.Writer, source []byte, n *ast.ListItem) err
 
 }
 
-func (r *renderState) endItem(writer io.Writer, source []byte, n *ast.ListItem) error {
+func (r *renderState) endListItem(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if !r.inItem {
 		return errors.New("imbalanced list item")
 	}
@@ -183,11 +183,11 @@ func (r *renderState) endItem(writer io.Writer, source []byte, n *ast.ListItem) 
 	return nil
 }
 
-func (r *renderState) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
+func (r *renderState) doCodeSpan(writer io.Writer, source []byte, n *ast.CodeSpan) error {
 	return r.write(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
-func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
+func (r *renderState) doCodeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
 	if r.inLine {
 		return errors.New("trying to begin code block in the middle of a line")
 	}
@@ -206,7 +206,7 @@ func (r *renderState) codeBlock(writer io.Writer, source []byte, n *ast.CodeBloc
 	return err
 }
 
-func (r *renderState) link(writer io.Writer, source []byte, n *ast.Link) error {
+func (r *renderState) beginLink(writer io.Writer, source []byte, n *ast.Link) error {
 	dest := n.Destination.Str(source)
 	return r.write(writer, fmt.Sprintf("[[%s][", dest))
 }
@@ -215,7 +215,7 @@ func (r *renderState) endLink(writer io.Writer, source []byte, n *ast.Link) erro
 	return r.write(writer, "]]")
 }
 
-func (r *renderState) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML) error {
+func (r *renderState) emitRawHTML(writer io.Writer, source []byte, n *ast.RawHTML) error {
 	tag := n.Value.Str(source)
 	org := tags[tag]
 	if org == "" {
@@ -229,7 +229,7 @@ func doNothing[T ast.Node](io.Writer, []byte, T) error {
 }
 
 // Signal an error if we don’t implement something.
-func unsupported(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
+func doUnsupported(writer io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
 	return ast.WalkStop, fmt.Errorf("unsupported node type %q", n.Kind())
 }
 
