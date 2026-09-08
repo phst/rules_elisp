@@ -79,6 +79,15 @@ func formatMandatory(b bool) string {
 
 // Writes the generated Org Mode output.
 func (g *generator) run(module *spb.ModuleInfo) error {
+	return tpl.Execute(g.file, module)
+}
+
+//go:embed reference.org.template
+var templateText string
+
+var tpl = template.Must(parseTemplate(templateText))
+
+func parseTemplate(text string) (*template.Template, error) {
 	tpl := template.New("reference.org.template")
 	item := func(template string, data any) (string, error) {
 		var w strings.Builder
@@ -107,12 +116,8 @@ func (g *generator) run(module *spb.ModuleInfo) error {
 		"markdown":        markdown,
 		"item":            item,
 	}
-	tpl = template.Must(tpl.Funcs(funcs).Parse(templateText))
-	return tpl.Execute(g.file, module)
+	return tpl.Funcs(funcs).Parse(text)
 }
-
-//go:embed reference.org.template
-var templateText string
 
 // Convert a Markdown snippet to Org-mode.
 func markdown(text string) (string, error) {
