@@ -28,7 +28,7 @@ licenses(["notice"])
 go_library(
     name = "stardoc",
     srcs = ["org.go"],
-    embedsrcs = ["org.template"],
+    embedsrcs = ["org.tmpl"],
     importpath = "github.com/phst/rules_elisp/internal/stardoc",
     visibility = ["//internal/stardoc2org:__pkg__"],
     deps = [
