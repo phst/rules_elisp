@@ -34,7 +34,7 @@ type Renderer struct {
 
 // NewRenderer creates a new [Renderer].
 func NewRenderer() *Renderer {
-	orgRenderer := &orgRenderer{"", ""}
+	orgRenderer := new(orgRenderer)
 	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
 		withNodeRenderer(orgRenderer.document, doNothing),
 		withChildlessNodeRenderer(orgRenderer.text),
