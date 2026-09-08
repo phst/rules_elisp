@@ -40,9 +40,9 @@ func Org(module *spb.ModuleInfo, w io.Writer) error {
 }
 
 //go:embed reference.org.template
-var templateText string
+var tplText string
 
-var tpl = template.Must(parseTemplate(templateText))
+var tpl = template.Must(parseTemplate(tplText))
 
 func parseTemplate(text string) (*template.Template, error) {
 	tpl := template.New("reference.org.template")
