@@ -39,7 +39,7 @@ func Org(module *spb.ModuleInfo, w io.Writer) error {
 	return tpl.Execute(w, module)
 }
 
-//go:embed reference.org.template
+//go:embed org.template
 var tplText string
 
 var tpl = template.Must(parseTemplate(tplText))
