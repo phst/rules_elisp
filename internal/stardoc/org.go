@@ -36,8 +36,8 @@ import (
 // Org renders documentation for the given Starlark module into the writer as
 // Org-mode document.
 func Org(module *spb.ModuleInfo, w io.Writer) error {
-	generator := &generator{w}
-	return generator.run(module)
+	g := &generator{w}
+	return g.run(module)
 }
 
 type generator struct {
