@@ -67,12 +67,12 @@ The ~{{.GetRuleName}}~ rule supports the following attributes:
 {{.GetDocString | markdown | lstrip -}}
 The ~{{.GetProviderName}}~ provider has the following fields:
 
-{{range .GetFieldInfo}}{{item "field info" .}}{{end -}}
+{{range .GetFieldInfo}}{{item "field" .}}{{end -}}
 #+END_deftp
 
 {{end -}}
 
-{{define "field info" -}}
+{{define "field" -}}
 ~{{.GetName}}~ :: {{.GetDocString | markdown | trimSpace | requirePeriod -}}
 {{end -}}
 
