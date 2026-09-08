@@ -79,10 +79,6 @@ func formatMandatory(b bool) string {
 
 // Writes the generated Org Mode output.
 func (g *generator) run(module *spb.ModuleInfo) error {
-	return g.doRun(module)
-}
-
-func (g *generator) doRun(module *spb.ModuleInfo) error {
 	tpl := template.New("reference.org.template")
 	item := func(template string, data any) (string, error) {
 		var w strings.Builder
