@@ -36,7 +36,7 @@ import (
 // Org renders documentation for the given Starlark module into the writer as
 // Org-mode document.
 func Org(module *spb.ModuleInfo, w io.Writer) error {
-	generator := newGenerator(w)
+	generator := &generator{w}
 	return generator.run(module)
 }
 
@@ -75,10 +75,6 @@ var mandatory = map[bool]string{
 
 func formatMandatory(b bool) string {
 	return mandatory[b]
-}
-
-func newGenerator(file io.Writer) *generator {
-	return &generator{file}
 }
 
 // Writes the generated Org Mode output.
