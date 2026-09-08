@@ -39,8 +39,16 @@ go_test(
     name = "mdorg_test",
     size = "small",
     srcs = ["renderer_test.go"],
+    data = [],
+    embedsrcs = [
+        "testdata/input.md",
+        "testdata/output.org",
+    ],
     deps = [
         ":mdorg",
+        "@com_github_google_go_cmp//cmp",
         "@com_github_yuin_goldmark_v2//parser",
     ],
 )
+
+# gazelle:lang visibility_extension,bzl,proto,cc,go
