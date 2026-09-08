@@ -36,12 +36,7 @@ import (
 // Org renders documentation for the given Starlark module into the writer as
 // Org-mode document.
 func Org(module *spb.ModuleInfo, w io.Writer) error {
-	g := &generator{w}
-	return tpl.Execute(g.file, module)
-}
-
-type generator struct {
-	file io.Writer
+	return tpl.Execute(w, module)
 }
 
 var attributeType = map[spb.AttributeType]string{
