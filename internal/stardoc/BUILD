@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+load("@bazel_skylib//rules:copy_file.bzl", "copy_file")
 load("@rules_go//go:go_library.bzl", "go_library")
+load("@rules_go//go:go_test.bzl", "go_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -36,4 +38,24 @@ go_library(
         "@org_golang_x_text//cases",
         "@org_golang_x_text//language",
     ],
+)
+
+go_test(
+    name = "stardoc_test",
+    timeout = "short",
+    srcs = ["org_test.go"],
+    embedsrcs = ["protos.tar"],
+    deps = [
+        ":stardoc",
+        "//internal/stardoc_output_go_proto",
+        "@org_golang_google_protobuf//proto",
+    ],
+)
+
+copy_file(
+    name = "copy_protos",
+    testonly = True,
+    src = "//docs:protos.tar",
+    out = "protos.tar",
+    is_executable = False,
 )
