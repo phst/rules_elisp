@@ -31,6 +31,7 @@ import (
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 
+	"github.com/phst/rules_elisp/internal/mdorg"
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
 
@@ -145,7 +146,7 @@ func markdown(text string) (string, error) {
 	}
 	source := []byte(text)
 	doc := parser.New().Parse(source)
-	renderer := newRenderer()
+	renderer := mdorg.NewRenderer()
 	var w strings.Builder
 	if err := renderer.Render(&w, source, doc); err != nil {
 		return "", err
