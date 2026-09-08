@@ -71,7 +71,7 @@ func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, op
 
 var _ renderer.Renderer[io.Writer] = (*Renderer)(nil)
 
-func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, renderer.Context) error) renderer.Option[rendererConfig] {
+func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T) error) renderer.Option[rendererConfig] {
 	var zero T
 	kind := zero.Kind()
 	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
@@ -80,20 +80,20 @@ func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T, render
 			return ast.WalkStop, fmt.Errorf("node of kind %s has wrong type %T, want %T", n.Kind(), n, node)
 		}
 		if entering {
-			return ast.WalkContinue, enter(w, source, node, rc)
+			return ast.WalkContinue, enter(w, source, node)
 		} else {
-			return ast.WalkContinue, leave(w, source, node, rc)
+			return ast.WalkContinue, leave(w, source, node)
 		}
 	}
 	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fn))
 }
 
-func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T, renderer.Context) error) renderer.Option[rendererConfig] {
-	enter := func(w io.Writer, source []byte, n T, rc renderer.Context) error {
+func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error) renderer.Option[rendererConfig] {
+	enter := func(w io.Writer, source []byte, n T) error {
 		if n.HasChildren() {
 			return fmt.Errorf("node %#v has children", n)
 		}
-		return fun(w, source, n, rc)
+		return fun(w, source, n)
 	}
 	leave := doNothing[T]
 	return withNodeRenderer(enter, leave)
@@ -132,11 +132,11 @@ func (r *orgRenderer) cr(w io.Writer) error {
 	return nil
 }
 
-func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document, rc renderer.Context) error {
+func (r *orgRenderer) document(writer io.Writer, source []byte, n *ast.Document) error {
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, rc renderer.Context) error {
+func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text) error {
 	s := n.Value.Str(source)
 	s = regexp.MustCompile(`\\(.)`).ReplaceAllString(s, "$1")
 	indent := ""
@@ -158,18 +158,18 @@ func (r *orgRenderer) text(writer io.Writer, source []byte, n *ast.Text, rc rend
 	return nil
 }
 
-func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph, rc renderer.Context) error {
+func (r *orgRenderer) paragraph(writer io.Writer, source []byte, n *ast.Paragraph) error {
 	if n.Parent().Kind() != ast.KindListItem {
 		return r.lit(writer, "\n")
 	}
 	return nil
 }
 
-func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List, rc renderer.Context) error {
+func (r *orgRenderer) list(writer io.Writer, source []byte, n *ast.List) error {
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem, rc renderer.Context) error {
+func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if r.indent != "" {
 		return errors.New("no support for nested lists")
 	}
@@ -177,7 +177,7 @@ func (r *orgRenderer) item(writer io.Writer, source []byte, n *ast.ListItem, rc 
 	return r.lit(writer, "- ")
 }
 
-func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem, rc renderer.Context) error {
+func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem) error {
 	if r.indent != "  " {
 		return errors.New("no support for nested lists")
 	}
@@ -185,11 +185,11 @@ func (r *orgRenderer) endItem(writer io.Writer, source []byte, n *ast.ListItem, 
 	return r.cr(writer)
 }
 
-func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan, rc renderer.Context) error {
+func (r *orgRenderer) code(writer io.Writer, source []byte, n *ast.CodeSpan) error {
 	return r.lit(writer, fmt.Sprintf("~%s~", n.Value.Str(source)))
 }
 
-func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock, rc renderer.Context) error {
+func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBlock) error {
 	lang, ok := n.Language(source)
 	if !ok {
 		return errors.New("language not given")
@@ -201,15 +201,15 @@ func (r *orgRenderer) codeBlock(writer io.Writer, source []byte, n *ast.CodeBloc
 	return r.lit(writer, fmt.Sprintf("#+BEGIN_SRC %s\n%s#+END_SRC\n\n#+TEXINFO: @noindent", lang, n.Value.Str(source)))
 }
 
-func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link, rc renderer.Context) error {
+func (r *orgRenderer) link(writer io.Writer, source []byte, n *ast.Link) error {
 	dest := n.Destination.Str(source)
 	return r.lit(writer, fmt.Sprintf("[[%s][", dest))
 }
-func (r *orgRenderer) endLink(writer io.Writer, source []byte, n *ast.Link, rc renderer.Context) error {
+func (r *orgRenderer) endLink(writer io.Writer, source []byte, n *ast.Link) error {
 	return r.lit(writer, "]]")
 }
 
-func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML, rc renderer.Context) error {
+func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML) error {
 	tag := n.Value.Str(source)
 	org := tags[tag]
 	if org == "" {
@@ -218,7 +218,7 @@ func (r *orgRenderer) htmlInline(writer io.Writer, source []byte, n *ast.RawHTML
 	return r.lit(writer, org)
 }
 
-func doNothing[T ast.Node](io.Writer, []byte, T, renderer.Context) error {
+func doNothing[T ast.Node](io.Writer, []byte, T) error {
 	return nil
 }
 
