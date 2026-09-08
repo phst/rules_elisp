@@ -29,13 +29,13 @@ import (
 // Renderer is a [renderer.Renderer] that writes Org-mode text.
 // Use [NewRenderer] to create Renderer objects; the zero Renderer is not valid.
 type Renderer struct {
-	helper *renderer.Helper[io.Writer, rendererConfig]
+	helper *renderer.Helper[io.Writer, config]
 }
 
 // NewRenderer creates a new [Renderer].
 func NewRenderer() *Renderer {
 	s := new(renderState)
-	helper := new(renderer.HelperBuilder[io.Writer, rendererConfig]).Options(
+	helper := new(renderer.HelperBuilder[io.Writer, config]).Options(
 		withNodeRenderer[*ast.Document](doNothing, doNothing),
 		withChildlessNodeRenderer(s.text),
 		withNodeRenderer(doNothing, s.paragraph),
@@ -71,7 +71,7 @@ func (r *Renderer) RenderStringSource(w io.Writer, source string, n ast.Node, op
 
 var _ renderer.Renderer[io.Writer] = (*Renderer)(nil)
 
-func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T) error) renderer.Option[rendererConfig] {
+func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T) error) renderer.Option[config] {
 	var zero T
 	kind := zero.Kind()
 	fn := func(w io.Writer, source []byte, n ast.Node, entering bool, rc renderer.Context) (ast.WalkStatus, error) {
@@ -85,10 +85,10 @@ func withNodeRenderer[T ast.Node](enter, leave func(io.Writer, []byte, T) error)
 			return ast.WalkContinue, leave(w, source, node)
 		}
 	}
-	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(fn))
+	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(fn))
 }
 
-func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error) renderer.Option[rendererConfig] {
+func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error) renderer.Option[config] {
 	enter := func(w io.Writer, source []byte, n T) error {
 		if n.HasChildren() {
 			return fmt.Errorf("node %#v has children", n)
@@ -99,12 +99,12 @@ func withChildlessNodeRenderer[T ast.Node](fun func(io.Writer, []byte, T) error)
 	return withNodeRenderer(enter, leave)
 }
 
-func withUnknown(kind ast.NodeKind) renderer.Option[rendererConfig] {
-	return renderer.WithNodeRenderer[io.Writer, rendererConfig](kind, renderer.NodeRendererFunc(unknown))
+func withUnknown(kind ast.NodeKind) renderer.Option[config] {
+	return renderer.WithNodeRenderer[io.Writer, config](kind, renderer.NodeRendererFunc(unknown))
 }
 
-type rendererConfig struct {
-	Config renderer.Config[io.Writer, rendererConfig]
+type config struct {
+	Config renderer.Config[io.Writer, config]
 }
 
 type renderState struct {
