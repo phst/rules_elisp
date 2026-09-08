@@ -1,4 +1,4 @@
-Text paragraph with `code span` and some special characters: []\`\_~.
+Text paragraph with `code span` and some special characters: []\`\_~\\.
 
 ```sh
 # code block with `special characters`
