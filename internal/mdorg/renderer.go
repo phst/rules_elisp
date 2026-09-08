@@ -190,11 +190,11 @@ func (r *renderState) doCodeBlock(writer io.Writer, source []byte, n *ast.CodeBl
 	if !ok {
 		return errors.New("language not given")
 	}
-	lang = markdownToOrgLang[lang]
-	if lang == "" {
+	orgLang := markdownToOrgLang[lang]
+	if orgLang == "" {
 		return fmt.Errorf("unknown language %q", lang)
 	}
-	_, err := fmt.Fprintf(writer, "#+BEGIN_SRC %s\n%s#+END_SRC\n#+TEXINFO: @noindent\n", lang, n.Value.Str(source))
+	_, err := fmt.Fprintf(writer, "#+BEGIN_SRC %s\n%s#+END_SRC\n#+TEXINFO: @noindent\n", orgLang, n.Value.Str(source))
 	return err
 }
 
