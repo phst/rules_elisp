@@ -15,6 +15,7 @@
 load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@local_config//:config.bzl", "IS_DEFAULT_BAZEL_VERSION")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_manual.bzl", "elisp_manual")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
@@ -115,6 +116,15 @@ elisp_binary(
     )
     for pkg, name in DOCS
 ]
+
+pkg_tar(
+    name = "protos",
+    testonly = True,
+    srcs = ["{}/{}.binaryproto".format(pkg, name) for pkg, name in DOCS],
+    mode = "0444",
+    strip_prefix = ".",
+    visibility = ["//internal/stardoc:__pkg__"],
+)
 
 bzl_library(
     name = "makeinfo",
