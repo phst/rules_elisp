@@ -162,33 +162,30 @@ e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = Tr
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should be
+treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
 cause the compilation to fail.  Most targets should leave this attribute as
 <code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
 attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
+compile cleanly and that you don’t control.  Boolean; optional; default: <code class="code">True</code>.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
-<dd><p>List of source files.  These must either be Emacs Lisp files ending
-in <code class="code">.el</code>, or module objects ending in <code class="code">.so</code>, <code class="code">.dylib</code>, or <code class="code">.dll</code>.  List of
-labels; mandatory.
+<dd><p>List of source files.  These must either be Emacs Lisp
+files ending in <code class="code">.el</code>, or module objects ending in <code class="code">.so</code>, <code class="code">.dylib</code>, or
+<code class="code">.dll</code>.  List of labels; mandatory.
 </p></dd>
 <dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
+<dd><p>List of files to be made available at runtime.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">load_path</code></dt>
-<dd><p>List of additional load path elements.  The elements are
-directory names, which can be either relative or absolute.  Relative names are
-relative to the current package.  Absolute names are relative to the
-repository root.  To add a load path entry for the current package, specify
-<code class="code">.</code> here.  List of strings; optional; default: <code class="code">[]</code>.
+<dd><p>List of additional load path elements.
+The elements are directory names, which can be either relative or absolute.
+Relative names are relative to the current package.
+Absolute names are relative to the repository root.
+To add a load path entry for the current package, specify <code class="code">.</code> here.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional; default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -233,36 +230,34 @@ using
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
-<dd><p>C and C+​+​ source files for the module.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.srcs">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+<dd><p>C and C+​+​ source files for the module.
+See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.srcs">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">deps</code></dt>
-<dd><p><code class="code">cc_library</code> targets that the module depends on.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.deps">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>;
-required providers: <code class="code">CcInfo</code>.
+<dd><p><code class="code">cc_library</code> targets that the module depends on.
+See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.deps">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>; required providers: <code class="code">CcInfo</code>.
 </p></dd>
 <dt><code class="code">data</code></dt>
-<dd><p>Data dependencies to make available at runtime.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.data">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
+<dd><p>Data dependencies to make available at runtime.
+See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.data">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">copts</code></dt>
-<dd><p>Additional options to pass to the C/​C+​+​ compiler.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.copts">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+<dd><p>Additional options to pass to the C/​C+​+​ compiler.
+See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.copts">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">linkopts</code></dt>
-<dd><p>Additional options to pass to the C/​C+​+​ linker.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.linkopts">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+<dd><p>Additional options to pass to the C/​C+​+​ linker.
+See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.linkopts">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">local_defines</code></dt>
-<dd><p>Additional preprocessor definitions to pass to the C/​C+​+​
-compiler.  See the
-<a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.local_defines">corresponding
-attribute for <code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
+<dd><p>Additional preprocessor definitions to pass to the
+C/​C+​+​ compiler.  See the <a class="uref" href="https://bazel.build/reference/be/c-cpp#cc_library.local_defines">corresponding attribute for
+<code class="code">cc_library</code></a>.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -285,50 +280,44 @@ in batch mode unless <code class="code">interactive</code> is <code class="code"
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should be
+treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
 cause the compilation to fail.  Most targets should leave this attribute as
 <code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
 attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
+compile cleanly and that you don’t control.  Boolean; optional; default: <code class="code">True</code>.
 </p></dd>
 <dt><code class="code">src</code></dt>
 <dd><p>Source file to load.  Label; mandatory.
 </p></dd>
 <dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
+<dd><p>List of files to be made available at runtime.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional; default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
 </p></dd>
 <dt><code class="code">interactive</code></dt>
-<dd><p>Run Emacs in interactive instead of batch mode.  Boolean;
-optional; default: <code class="code">False</code>.
+<dd><p>Run Emacs in interactive instead of batch mode.  Boolean; optional; default: <code class="code">False</code>.
 </p></dd>
 <dt><code class="code">input_args</code></dt>
 <dd><p>Indices of command-line arguments that represent input
 filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
-the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
-  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
-the corresponding arguments are treated as filenames for input files and added
-to the <code class="code">inputFiles</code> field of the manifest.  This only has an effect for
-toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
-<code class="code">[]</code>.
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for
+<code class="code">argv[argc - 2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the
+command line, the corresponding arguments are treated as filenames for input
+files and added to the <code class="code">inputFiles</code> field of the manifest.  This only has an
+effect for toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">output_args</code></dt>
 <dd><p>Indices of command-line arguments that represent output
 filenames.  These numbers specify indices into the <code class="code">argv</code> array.  Negative
 indices are interpreted as counting from the end of the array.  For example,
-the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for <code class="code">argv[argc -
-  2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the command line,
-the corresponding arguments are treated as filenames for output files and
-added to the <code class="code">outputFiles</code> field of the manifest.  This only has an effect for
-toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default:
-<code class="code">[]</code>.
+the index <code class="code">2</code> stands for <code class="code">argv[2]</code>, and the index <code class="code">-2</code> stands for
+<code class="code">argv[argc - 2]</code>.  When passing arguments to an <code class="code">emacs_binary</code> program on the
+command line, the corresponding arguments are treated as filenames for output
+files and added to the <code class="code">outputFiles</code> field of the manifest.  This only has an
+effect for toolchains that specify <code class="code">wrap = True</code>.  List of integers; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -371,35 +360,34 @@ Emacs will not automatically process these arguments using
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">fatal_warnings</code></dt>
-<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should
-be treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
+<dd><p>If <code class="code">True</code> (the default), then byte compile warnings should be
+treated as errors.  If <code class="code">False</code>, they still show up in the output, but don’t
 cause the compilation to fail.  Most targets should leave this attribute as
 <code class="code">True</code>, because otherwise important issues might remain undetected.  Set this
 attribute to <code class="code">False</code> only for integrating third-party libraries that don’t
-compile cleanly and that you don’t control.  Boolean; optional; default:
-<code class="code">True</code>.
+compile cleanly and that you don’t control.  Boolean; optional; default: <code class="code">True</code>.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
 <dd><p>List of source files to load.  List of labels; mandatory.
 </p></dd>
 <dt><code class="code">data</code></dt>
-<dd><p>List of files to be made available at runtime.  List of labels;
-optional; default: <code class="code">[]</code>.
+<dd><p>List of files to be made available at runtime.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">deps</code></dt>
-<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional;
-default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
+<dd><p>List of <code class="code">elisp_library</code> dependencies.  List of labels; optional; default: <code class="code">[]</code>; required providers: <code class="code">EmacsLispInfo</code>.
 </p></dd>
 <dt><code class="code">skip_tests</code></dt>
-<dd><p>List of tests to skip.  This attribute contains a list of ERT
-test symbols; when running the test rule, these tests are skipped.  Most of
-the time, you should use the <code class="code">skip-unless</code> macro instead; see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>.  The <code class="code">skip_tests</code>
-attribute is mainly useful for third-party code that you don’t control.  List
-of strings; optional; default: <code class="code">[]</code>.
+<dd><p>List of tests to skip.  This attribute contains a list of
+ERT test symbols; when running the test rule, these tests are skipped.
+</p>
+<p>Most of the time, you should use the <code class="code">skip-unless</code> macro instead; see
+<a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>.
+The <code class="code">skip_tests</code> attribute is mainly useful for third-party code that
+you don’t control.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">skip_tags</code></dt>
-<dd><p>List of test tags to skip.  This attribute contains a list of
-tag names; if a test is tagged with one of the tags from this list, it is
+<dd><p>List of test tags to skip.  This attribute contains a list
+of tag names; if a test is tagged with one of the tags from this list, it is
 skipped.  This can be useful to e.g. skip tests that are flaky or only work in
 interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
 tests.  List of strings; optional; default: <code class="code">[]</code>.
@@ -519,8 +507,7 @@ relative to its repository root.
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">deps</code></dt>
-<dd><p>List of exactly one <code class="code">proto_library</code> rule.  List of labels;
-mandatory; required providers: <code class="code">ProtoInfo</code>.
+<dd><p>List of exactly one <code class="code">proto_library</code> rule.  List of labels; mandatory; required providers: <code class="code">ProtoInfo</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -1063,16 +1050,13 @@ file; see <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/ma
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">src</code></dt>
-<dd><p>Org-mode file to use as manual source; must end in <code class="code">.org</code>.  Label;
-mandatory.
+<dd><p>Org-mode file to use as manual source; must end in <code class="code">.org</code>.  Label; mandatory.
 </p></dd>
 <dt><code class="code">out</code></dt>
-<dd><p>Texinfo manual file to write; must end in <code class="code">.texi</code>.  Output file;
-mandatory.
+<dd><p>Texinfo manual file to write; must end in <code class="code">.texi</code>.  Output file; mandatory.
 </p></dd>
 <dt><code class="code">additional_inputs</code></dt>
-<dd><p>List of additional files made available during export. 
-List of labels; optional; default: <code class="code">[]</code>.
+<dd><p>List of additional files made available during export.  List of labels; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -1118,29 +1102,27 @@ by the <code class="code">target_name</code> attribute.
 <dd><p>Name of the repository to generate.  Name; mandatory.
 </p></dd>
 <dt><code class="code">urls</code></dt>
-<dd><p>List of archive URLs to try.  See the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-urls">corresponding
-attribute for <code class="code">http_archive</code></a>.  List of strings; mandatory.
+<dd><p>List of archive URLs to try.
+See the <a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-urls">corresponding attribute for
+<code class="code">http_archive</code></a>.  List of strings; mandatory.
 </p></dd>
 <dt><code class="code">integrity</code></dt>
-<dd><p>Expected checksum of the archive file in
-<a class="uref" href="https://www.w3.org/TR/SRI/">Subresource Integrity</a> format.  See the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-integrity">corresponding
-attribute for <code class="code">http_archive</code></a>.  String; mandatory.
+<dd><p>Expected checksum of the archive file in <a class="uref" href="https://www.w3.org/TR/SRI/">Subresource
+Integrity</a> format.
+See the <a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-integrity">corresponding attribute for
+<code class="code">http_archive</code></a>.  String; mandatory.
 </p></dd>
 <dt><code class="code">strip_prefix</code></dt>
-<dd><p>Directory prefix to strip from the archive contents.  See
-the
-<a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix">corresponding
-attribute for <code class="code">http_archive</code></a>.  String; optional; default: <code class="code">&quot;&quot;</code>.
+<dd><p>Directory prefix to strip from the archive contents.
+See the <a class="uref" href="https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix">corresponding attribute for
+<code class="code">http_archive</code></a>.  String; optional; default: <code class="code">&quot;&quot;</code>.
 </p></dd>
 <dt><code class="code">target_name</code></dt>
-<dd><p>Name of the <code class="code">elisp_library</code> target to generate.  String;
-optional; default: <code class="code">&quot;library&quot;</code>.
+<dd><p>Name of the <code class="code">elisp_library</code> target to generate.  String; optional; default: <code class="code">&quot;library&quot;</code>.
 </p></dd>
 <dt><code class="code">exclude</code></dt>
-<dd><p>Glob patterns of additional files to exclude from the library. 
-List of strings; optional; default: <code class="code">[]</code>.
+<dd><p>Glob patterns of additional files to exclude from
+the library.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -1183,37 +1165,38 @@ relative to the runfiles root.
 </p>
 <dl class="table">
 <dt><code class="code">source_files</code></dt>
-<dd><p>A list of <code class="code">File</code> objects containing the Emacs Lisp source
-files of this library.
+<dd><p>A list of <code class="code">File</code> objects containing
+the Emacs Lisp source files of this library.
 </p></dd>
 <dt><code class="code">compiled_files</code></dt>
-<dd><p>A list of <code class="code">File</code> objects containing the byte-compiled
-Emacs Lisp files and module objects of this library.
+<dd><p>A list of <code class="code">File</code> objects containing
+the byte-compiled Emacs Lisp files and module objects of this library.
 </p></dd>
 <dt><code class="code">load_path</code></dt>
-<dd><p>A list containing necessary load path additions for this
-library.  The list elements are structures as described in the provider
-documentation.
+<dd><p>A list containing necessary load path
+additions for this library.  The list elements are structures as
+described in the provider documentation.
 </p></dd>
 <dt><code class="code">data_files</code></dt>
-<dd><p>A list of <code class="code">File</code> objects that this library requires at
-runtime.
+<dd><p>A list of <code class="code">File</code> objects that this library requires
+at runtime.
 </p></dd>
 <dt><code class="code">transitive_source_files</code></dt>
-<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing the Emacs
-Lisp source files of this library and all its transitive dependencies.
+<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing
+the Emacs Lisp source files of this library
+and all its transitive dependencies.
 </p></dd>
 <dt><code class="code">transitive_compiled_files</code></dt>
-<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing the
-byte-compiled Emacs Lisp files and module objects of this library and all its
-transitive dependencies.
+<dd><p>A <code class="code">depset</code> of <code class="code">File</code> objects containing
+the byte-compiled Emacs Lisp files and module objects of this library
+and all its transitive dependencies.
 </p></dd>
 <dt><code class="code">transitive_load_path</code></dt>
-<dd><p>A <code class="code">depset</code> containing necessary load path additions
-for this library and all its transitive dependencies.  The <code class="code">depset</code> uses
-preorder traversal: entries for libraries closer to the root of the dependency
-graph come first.  The <code class="code">depset</code> elements are structures as described in the
-provider documentation.
+<dd><p>A <code class="code">depset</code> containing necessary load path
+additions for this library and all its transitive dependencies.
+The <code class="code">depset</code> uses preorder traversal: entries for libraries closer to the root
+of the dependency graph come first.  The <code class="code">depset</code> elements are structures as
+described in the provider documentation.
 </p></dd>
 </dl>
 </dd></dl>
@@ -1311,25 +1294,23 @@ attributes of the <code class="code">elisp_binary</code> rule.
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">emacs</code></dt>
-<dd><p>An executable file that behaves like the Emacs binary.  Depending
-on whether <code class="code">wrap</code> is <code class="code">True</code>, Bazel invokes this executable with a command line
-like <code class="code">emacs --manifest=MANIFEST -- ARGS…</code> or <code class="code">emacs ARGS…</code>.  The <code class="code">--manifest</code>
-flag is only present if <code class="code">wrap</code> is <code class="code">True</code>.  See the rule documentation for
-details.  Label; mandatory.
+<dd><p>An executable file that behaves like the Emacs binary.
+Depending on whether <code class="code">wrap</code> is <code class="code">True</code>, Bazel invokes this executable
+with a command line like <code class="code">emacs --manifest=MANIFEST -- ARGS…</code> or <code class="code">emacs ARGS…</code>.
+The <code class="code">--manifest</code> flag is only present if <code class="code">wrap</code> is <code class="code">True</code>.
+See the rule documentation for details.  Label; mandatory.
 </p></dd>
 <dt><code class="code">use_default_shell_env</code></dt>
-<dd><p>Whether actions should inherit the external shell
-environment.  Boolean; optional; default: <code class="code">False</code>.
+<dd><p>Whether actions should inherit the external shell environment.  Boolean; optional; default: <code class="code">False</code>.
 </p></dd>
 <dt><code class="code">execution_requirements</code></dt>
-<dd><p>Execution requirements for compilation and test
-actions.  Dictionary string → string; optional; default: <code class="code">{}</code>.
+<dd><p>Execution requirements for compilation and test actions.  Dictionary string → string; optional; default: <code class="code">{}</code>.
 </p></dd>
 <dt><code class="code">wrap</code></dt>
-<dd><p>Whether the binary given in the <code class="code">emacs</code> attribute is a wrapper
-around Emacs proper.  If <code class="code">True</code>, Bazel passes a manifest file using the
-<code class="code">--manifest</code> option.  See the rule documentation for details.  Boolean;
-optional; default: <code class="code">False</code>.
+<dd><p>Whether the binary given in the <code class="code">emacs</code> attribute is a
+wrapper around Emacs proper.
+If <code class="code">True</code>, Bazel passes a manifest file using the <code class="code">--manifest</code> option.
+See the rule documentation for details.  Boolean; optional; default: <code class="code">False</code>.
 </p></dd>
 </dl>
 </dd></dl>
@@ -1351,30 +1332,33 @@ The resulting executable can be used to run the compiled Emacs.
 <dd><p>A unique name for this target.  Name; mandatory.
 </p></dd>
 <dt><code class="code">mode</code></dt>
-<dd><p>How to build and install Emacs.  Possible values are: - <code class="code">source</code>:
-Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>.  <code class="code">srcs</code> must
-refer to an unpacked Emacs source archive.  - <code class="code">release</code>: Run Emacs directly
-without building or installing.  <code class="code">srcs</code> must refer to an unpacked Emacs
-release archive containing pre-built   binaries for the correct target
-operating system and architecture.    Currently this only works on Windows. 
-String; optional; default: <code class="code">&quot;source&quot;</code>.
+<dd><p>How to build and install Emacs.  Possible values are:
+</p><ul class="itemize mark-bullet">
+<li><code class="code">source</code>: Build Emacs from sources using <code class="code">configure</code> and <code class="code">make install</code>.
+</li></ul>
+<p><code class="code">srcs</code> must refer to an unpacked Emacs source archive.
+</p><ul class="itemize mark-bullet">
+<li><code class="code">release</code>: Run Emacs directly without building or installing.
+</li></ul>
+<p><code class="code">srcs</code> must refer to an unpacked Emacs release archive containing pre-built
+  binaries for the correct target operating system and architecture.
+  Currently this only works on Windows.  String; optional; default: <code class="code">&quot;source&quot;</code>.
 </p></dd>
 <dt><code class="code">srcs</code></dt>
 <dd><p>All Emacs source files.  List of labels; mandatory.
 </p></dd>
 <dt><code class="code">readme</code></dt>
-<dd><p>The README file in the root of the Emacs repository.  This is
-necessary to determine the source root directory.  Label; mandatory.
+<dd><p>The README file in the root of the Emacs repository.
+This is necessary to determine the source root directory.  Label; mandatory.
 </p></dd>
 <dt><code class="code">module_header</code></dt>
 <dd><p>Label for a file target that will receive the
-<code class="code">emacs-module.h</code> header.  If not provided, don’t install the header.  Output
-file; optional; default: <code class="code">None</code>.
+<code class="code">emacs-module.h</code> header.  If not provided, don’t install the header.  Output file; optional; default: <code class="code">None</code>.
 </p></dd>
 <dt><code class="code">builtin_features</code></dt>
-<dd><p>Label for a file into which to write the list of builtin
-features.  If not provided, don’t write such a file.  This is used by Gazelle.
-Output file; optional; default: <code class="code">None</code>.
+<dd><p>Label for a file into which to write the list
+of builtin features.  If not provided, don’t write such a file.
+This is used by Gazelle.  Output file; optional; default: <code class="code">None</code>.
 </p></dd>
 </dl>
 </dd></dl>

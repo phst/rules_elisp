@@ -19,11 +19,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"regexp"
 	"strings"
 	"text/template"
 	"unicode"
-	"unicode/utf8"
 
 	_ "embed"
 
@@ -141,25 +139,15 @@ func markdown(text string) (string, error) {
 }
 
 func fill(text, initialIndent, subsequentIndent string) string {
-	text = regexp.MustCompile(`([.!?])\n+`).ReplaceAllString(text, "$1  ")
-	text = strings.ReplaceAll(text, "\t", "    ")
-	words := regexp.MustCompile(`[ \n]`).Split(text, -1)
 	var b strings.Builder
 	b.WriteString(initialIndent)
-	i := 0
-	width := 80 - len(initialIndent)
-	for _, w := range words {
-		l := utf8.RuneCountInString(w)
-		if i+l >= width {
-			b.WriteByte('\n')
+	first := true
+	for line := range strings.Lines(text) {
+		if !first && line != "\n" {
 			b.WriteString(subsequentIndent)
-			i = 0
-		} else if i > 0 {
-			b.WriteByte(' ')
-			i++
 		}
-		b.WriteString(w)
-		i += l
+		first = false
+		b.WriteString(line)
 	}
 	return b.String()
 }
