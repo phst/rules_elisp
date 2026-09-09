@@ -166,6 +166,9 @@ cc_defaults(
             "-fno-diagnostics-color",
         ],
         "//conditions:default": [],
+    }) + select({
+        "@platforms//os:macos": ["-mmacosx-version-min=11.0"],
+        "//conditions:default": [],
     }),
     defines = [],
     features = [
@@ -182,7 +185,10 @@ cc_defaults(
         # This feature might cause build breakage on Buildkite.
         "-macos_minimum_os",
     ],
-    linkopts = [],
+    linkopts = select({
+        "@platforms//os:macos": ["-mmacosx-version-min=11.0"],
+        "//conditions:default": [],
+    }),
     visibility = ["//elisp/toolchains:__pkg__"],
 )
 
