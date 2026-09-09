@@ -18,6 +18,7 @@ import (
 	"archive/tar"
 	"bytes"
 	"io"
+	"os"
 	"testing"
 
 	_ "embed"
@@ -27,6 +28,26 @@ import (
 	"github.com/phst/rules_elisp/internal/stardoc"
 	spb "github.com/phst/rules_elisp/internal/stardoc_output_go_proto"
 )
+
+func ExampleOrg() {
+	mod := &spb.ModuleInfo{RuleInfo: []*spb.RuleInfo{{
+		RuleName:  "myrule",
+		DocString: "An example rule",
+		OriginKey: &spb.OriginKey{Name: "myrule", File: "myrule.bzl"},
+	}}}
+	stardoc.Org(mod, os.Stdout)
+	// Output:
+	// #+ATTR_TEXINFO: :options Rule myrule ()
+	// #+BEGIN_deffn
+	//
+	// #+BEGIN_SRC bazel-starlark
+	// load("myrule.bzl", "myrule")
+	// #+END_SRC
+	//
+	// An example rule
+	//
+	// #+END_deffn
+}
 
 func TestOrg(t *testing.T) {
 	arch := tar.NewReader(bytes.NewReader(archiveBytes))
