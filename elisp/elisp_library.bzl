@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -78,8 +78,8 @@ To add a load path entry for the current package, specify `.` here.""",
     },
     doc = """Byte-compiles Emacs Lisp source files and makes the compiled output
 available to dependencies.  All sources are byte-compiled.
-`elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this binary
-can then use `load` or `require` to load them.
+`elisp_library`, `elisp_binary`, and `elisp_test` rules depending on this
+library can then use `load` or `require` to load them.
 
 By default, libraries need to be loaded using a filename relative to the
 repository root, i.e., <var>package</var>/<var>file</var>.  If you want to add
