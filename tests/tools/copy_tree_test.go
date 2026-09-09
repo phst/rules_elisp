@@ -15,7 +15,9 @@
 package tools_test
 
 import (
+	"bytes"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"os/exec"
@@ -24,6 +26,7 @@ import (
 	"testing/fstest"
 	"time"
 
+	"github.com/goaux/decowriter"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/phst/rules_elisp/internal/testutil"
@@ -59,12 +62,14 @@ func TestCopyTree(t *testing.T) {
 	}
 
 	cmd := exec.Command(*copyTree, sentinel, destDir, sentinel)
-	out, err := cmd.CombinedOutput()
-	t.Logf("copy_tree output:\n%s", out)
-	if err != nil {
+	var b bytes.Buffer
+	w := io.MultiWriter(decowriter.New(t.Output(), []byte("[copy_tree] "), nil), &b)
+	cmd.Stdout = w
+	cmd.Stderr = w
+	if err := cmd.Run(); err != nil {
 		t.Fatal(err)
 	}
-	if n := len(out); n != 0 {
+	if n := b.Len(); n != 0 {
 		t.Errorf("copy_tree produced %d bytes of output", n)
 	}
 

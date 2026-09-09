@@ -217,6 +217,7 @@ go_test(
     data = TOOLS_TEST_DATA,
     deps = [
         "//internal/testutil",
+        "@com_github_goaux_decowriter//:decowriter",
         "@com_github_google_go_cmp//cmp",
     ],
 )
