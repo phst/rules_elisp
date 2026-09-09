@@ -33,6 +33,6 @@ go_binary(
 
 go_library(
     name = "lib",
-    srcs = ["helper.go"],
+    srcs = ["testhelper.go"],
     importpath = "github.com/phst/rules_elisp/internal/testhelper",
 )

@@ -63,13 +63,13 @@ build_test(
     targets = [":launcher"],
 )
 
-go_library(
-    name = "wrap_lib",
-    srcs = ["main.go"],
-    importpath = "github.com/phst/rules_elisp/internal/wrap",
-)
-
 go_binary(
     name = "wrap",
-    embed = [":wrap_lib"],
+    embed = [":lib"],
+)
+
+go_library(
+    name = "lib",
+    srcs = ["wrap.go"],
+    importpath = "github.com/phst/rules_elisp/internal/wrap",
 )
