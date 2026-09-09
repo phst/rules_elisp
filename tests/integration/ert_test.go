@@ -15,12 +15,10 @@
 package integration_test
 
 import (
-	"bufio"
 	"context"
 	"encoding/xml"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -33,6 +31,7 @@ import (
 	_ "embed"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/goaux/decowriter"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 
@@ -534,23 +533,10 @@ func run(t *testing.T, p string, c *exec.Cmd) error {
 	if c.Stderr != nil {
 		t.Fatalf("%s: exec.Cmd.Stderr already set", p)
 	}
-	r, err := c.StdoutPipe()
-	if err != nil {
-		t.Fatalf("%s: %s", p, err)
-	}
-	c.Stderr = c.Stdout
-	if err := c.Start(); err != nil {
-		t.Fatalf("%s: %s", p, err)
-	}
-	s := bufio.NewScanner(r)
-	for s.Scan() {
-		t.Logf("[%s] %s", p, s.Bytes())
-	}
-	if err := s.Err(); err != nil {
-		t.Errorf("[%s] error: %s", p, err)
-	}
-	io.Copy(io.Discard, r)
-	return c.Wait()
+	w := decowriter.New(t.Output(), []byte(fmt.Sprintf("[%s] ", p)), nil)
+	c.Stdout = w
+	c.Stderr = w
+	return c.Run()
 }
 
 type timestamp time.Time

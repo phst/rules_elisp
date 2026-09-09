@@ -144,6 +144,7 @@ go_deps.from_file(go_mod = "//:go.mod")
 use_repo(
     go_deps,
     "com_github_bazelbuild_buildtools",
+    "com_github_goaux_decowriter",
     "com_github_google_addlicense",
     "com_github_google_go_cmp",
     "com_github_lvthillo_gomodzip",

@@ -29,6 +29,7 @@ require (
 require (
 	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-3 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
+	github.com/goaux/decowriter v1.0.0
 	github.com/google/addlicense v1.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lvthillo/gomodzip v0.2.0
