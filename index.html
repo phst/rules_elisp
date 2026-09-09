@@ -135,8 +135,8 @@ documentation below and the examples in the <code class="code">examples</code> d
 
 <p>Byte-compiles Emacs Lisp source files and makes the compiled output
 available to dependencies.  All sources are byte-compiled.
-<code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this binary
-can then use <code class="code">load</code> or <code class="code">require</code> to load them.
+<code class="code">elisp_library</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules depending on this
+library can then use <code class="code">load</code> or <code class="code">require</code> to load them.
 </p>
 <p>By default, libraries need to be loaded using a filename relative to the
 repository root, i.e., <var class="var">package</var>/​<var class="var">file</var>.  If you want to add
