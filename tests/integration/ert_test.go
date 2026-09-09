@@ -19,6 +19,7 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -527,16 +528,20 @@ func runTest(t *testing.T, testEnv ...string) error {
 
 func run(t *testing.T, p string, c *exec.Cmd) error {
 	t.Helper()
-	if c.Stdout != nil {
-		t.Fatalf("%s: exec.Cmd.Stdout already set", p)
-	}
-	if c.Stderr != nil {
-		t.Fatalf("%s: exec.Cmd.Stderr already set", p)
-	}
-	w := decowriter.New(t.Output(), []byte(fmt.Sprintf("[%s] ", p)), nil)
-	c.Stdout = w
-	c.Stderr = w
+	w := decowriter.New(t.Output(), fmt.Appendf(nil, "[%s] ", p), nil)
+	c.Stdout = tee(c.Stdout, w)
+	c.Stderr = tee(c.Stderr, w)
 	return c.Run()
+}
+
+func tee(a, b io.Writer) io.Writer {
+	if a == nil {
+		return b
+	}
+	if b == nil {
+		return a
+	}
+	return io.MultiWriter(a, b)
 }
 
 type timestamp time.Time
