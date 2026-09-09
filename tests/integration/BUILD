@@ -41,12 +41,12 @@ TEST_DATA = [
     "//elisp/private/tools:binary.h",
     "//elisp/runfiles:runfiles.elc",
     "//emacs",
+    "//internal/wrap:launcher",
     "//tests:empty",
     "//tests/integration:exit",
     "//tests/integration:signal",
     "//tests/integration:test",
     "//tests/integration:test.el",
-    "//tests/integration/wrap:launcher",
     "@junit_xsd//:JUnit.xsd",
 ]
 

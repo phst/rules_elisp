@@ -42,7 +42,7 @@ var (
 	empty       = testutil.RunfileFlag("//tests:empty")
 	exit        = testutil.RunfileFlag("//tests/integration:exit")
 	signal      = testutil.RunfileFlag("//tests/integration:signal")
-	launcher    = testutil.RunfileFlag("//tests/integration/wrap:launcher")
+	launcher    = testutil.RunfileFlag("//internal/wrap:launcher")
 	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
 	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
 	runfilesElc = testutil.RunfileFlag("//elisp/runfiles:runfiles.elc")

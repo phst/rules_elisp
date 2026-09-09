@@ -153,7 +153,7 @@ cc_test(
     copts = COPTS + CXXOPTS,
     data = [
         "BUILD",
-        "//tests/tools/helper",
+        "//internal/testhelper",
     ],
     features = FEATURES,
     linkopts = LINKOPTS,
@@ -162,7 +162,7 @@ cc_test(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         rlocation('RULES_ELISP_DATA=R"*(%s)*"', ":BUILD"),
-        rlocation('RULES_ELISP_HELPER=R"*(%s)*"', "//tests/tools/helper"),
+        rlocation('RULES_ELISP_HELPER=R"*(%s)*"', "//internal/testhelper"),
     ],
     deps = [
         "//elisp/private/tools:numeric",

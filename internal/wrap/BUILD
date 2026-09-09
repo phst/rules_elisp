@@ -66,7 +66,7 @@ build_test(
 go_library(
     name = "wrap_lib",
     srcs = ["main.go"],
-    importpath = "github.com/phst/rules_elisp/tests/integration/wrap",
+    importpath = "github.com/phst/rules_elisp/internal/wrap",
 )
 
 go_binary(

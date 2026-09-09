@@ -20,8 +20,8 @@ visibility([
     # keep sorted
     "//elisp/private/tools",
     "//gazelle/elisp",
+    "//internal/wrap",
     "//tests/integration",
-    "//tests/integration/wrap",
     "//tests/proto/integration",
     "//tests/runfiles",
     "//tests/tools",

@@ -36,16 +36,16 @@ visibility([
     "//internal/stardoc",
     "//internal/stardoc2org",
     "//internal/stardoc_output_go_proto",
+    "//internal/testhelper",
     "//internal/testutil",
+    "//internal/wrap",
     "//tests",
     "//tests/integration",
     "//tests/integration/pkg",
-    "//tests/integration/wrap",
     "//tests/proto",
     "//tests/proto/integration",
     "//tests/runfiles",
     "//tests/tools",
-    "//tests/tools/helper",
 ])
 
 # Features for all packages.  These may not contain select expressions.
