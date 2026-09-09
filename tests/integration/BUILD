@@ -72,6 +72,7 @@ go_test(
     ],
     deps = [
         "//internal/testutil",
+        "@com_github_goaux_decowriter//:decowriter",
         "@com_github_google_go_cmp//cmp",
         "@com_github_google_go_cmp//cmp/cmpopts",
         "@rules_go//go/runfiles",
