@@ -63,8 +63,11 @@ for background information.  Then you can use the ~elisp_library~,
 documentation below and the examples in the ~examples~ directory for details.
 
 #+INCLUDE: elisp/elisp_library.org
+
 #+INCLUDE: elisp/elisp_cc_module.org
+
 #+INCLUDE: elisp/elisp_binary.org
+
 #+INCLUDE: elisp/elisp_test.org
 
 * Load path management
@@ -654,6 +657,7 @@ toolchains of type ~@rules_elisp//elisp:toolchain_type~; see
 are created using the `elisp_toolchain` rule.
 
 #+INCLUDE: elisp/toolchains/elisp_toolchain.org
+
 #+INCLUDE: elisp/toolchains/elisp_emacs_binary.org
 
 * Indices
