@@ -124,10 +124,6 @@ released, support for Emacs 30 will be dropped.
 for background information.  Then you can use the <code class="code">elisp_library</code>,
 <code class="code">elisp_cc_module</code>, <code class="code">elisp_binary</code>, and <code class="code">elisp_test</code> rules.  See the rule
 documentation below and the examples in the <code class="code">examples</code> directory for details.
-Note that the C++ code used by <code class="code">rules_elisp</code> requires at least C++17, but Bazel
-still compiles with C++11 by default.  See
-<a class="uref" href="https://github.com/abseil/abseil-cpp/blob/master/FAQ.md#how-to-i-set-the-c-dialect-used-to-build-abseil">the
-Abseil FAQ</a> how to correctly change the C++ standard for your project.
 </p>
 <dl class="first-deffn def-block">
 <dt class="deffn def-line" id="index-elisp_005flibrary"><span class="category-def">Rule: </span><span><strong class="def-name">elisp_library</strong> <var class="def-var-arguments">(name, [fatal_warnings], srcs, [outs], [data], [load_path], [deps])</var><a class="copiable-link" href="#index-elisp_005flibrary"> &para;</a></span></dt>
