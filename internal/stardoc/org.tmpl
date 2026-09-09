@@ -21,25 +21,31 @@ limitations under the License.
 {{end -}}
 
 {{range .GetRuleInfo -}}
-#+ATTR_TEXINFO: :options Rule {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+{{$name := .GetRuleName -}}
+#+ATTR_TEXINFO: :options Rule {{$name}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_deffn
 {{template "load" .GetOriginKey -}}
 {{.GetDocString | markdown | lstrip -}}
-The ~{{.GetRuleName}}~ rule supports the following attributes:
+{{with .GetAttribute}}
+The ~{{$name}}~ rule supports the following attributes:
 
-{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
+{{range .}}{{item "attribute" .}}{{end -}}
+{{end -}}
 #+END_deffn
 
 {{end -}}
 
 {{range .GetProviderInfo -}}
-#+ATTR_TEXINFO: :options Provider {{.GetProviderName}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
+{{$name := .GetProviderName -}}
+#+ATTR_TEXINFO: :options Provider {{$name}}{{range .GetFieldInfo}} {{.GetName}}{{end}}
 #+BEGIN_deftp
 {{template "load" .GetOriginKey -}}
 {{.GetDocString | markdown | lstrip -}}
-The ~{{.GetProviderName}}~ provider has the following fields:
+{{with .GetFieldInfo}}
+The ~{{$name}}~ provider has the following fields:
 
-{{range .GetFieldInfo}}{{item "field" .}}{{end -}}
+{{range .}}{{item "field" .}}{{end -}}
+{{end -}}
 #+END_deftp
 
 {{end -}}
@@ -82,32 +88,39 @@ This aspect propagates along the following attributes: {{range $i, $a := .}}{{if
 #+END_SRC
 
 {{.GetDocString | markdown | lstrip -}}
-
+{{with .GetTagClass}}
 The ~{{$extName}}~ module extension provides the following tag classes:
 
-{{range .GetTagClass -}}
-#+ATTR_TEXINFO: :options {Tag class} {{$extName}} {{.GetTagName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+{{range . -}}
+{{$tagName := .GetTagName}}
+#+ATTR_TEXINFO: :options {Tag class} {{$extName}} {{$tagName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_defop
 {{.GetDocString | markdown | lstrip -}}
-The ~{{.GetTagName}}~ tag class supports the following attributes:
+{{with .GetAttribute}}
+The ~{{$tagName}}~ tag class supports the following attributes:
 
-{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
+{{range .}}{{item "attribute" .}}{{end -}}
 #+END_defop
 
+{{end -}}
+{{end -}}
 {{end -}}
 #+END_deftp
 
 {{end -}}
 
 {{range .GetRepositoryRuleInfo -}}
-#+ATTR_TEXINFO: :options {Repository rule} {{.GetRuleName}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+{{$name := .GetRuleName}}
+#+ATTR_TEXINFO: :options {Repository rule} {{$name}} ({{range $i, $e := .GetAttribute}}{{if $i}}, {{end}}{{if .GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_deffn
 {{template "load" .GetOriginKey -}}
 {{.GetDocString | markdown | lstrip}}
+{{with .GetAttribute}}
 The ~{{.GetRuleName}}~ repository rule supports the following attributes:
 
-{{range .GetAttribute}}{{item "attribute" .}}{{end}}
-{{with .GetEnviron -}}
+{{range .}}{{item "attribute" .}}{{end -}}
+{{end -}}
+{{with .GetEnviron}}
 It depends on the following environment variables: {{range $i, $v := .}}{{if $i}}, {{end}}{{$v}}{{end}}
 {{- end}}
 #+END_deffn
@@ -115,13 +128,16 @@ It depends on the following environment variables: {{range $i, $v := .}}{{if $i}
 {{end -}}
 
 {{range .GetMacroInfo -}}
-#+ATTR_TEXINFO: :options {{.GetMacroName}} ({{range $i, $a := .GetAttribute}}{{if $i}}, {{end}}{{if $a.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
+{{$name := .GetMacroName}}
+#+ATTR_TEXINFO: :options {{$name}} ({{range $i, $a := .GetAttribute}}{{if $i}}, {{end}}{{if $a.GetMandatory}}{{.GetName}}{{else}}[{{.GetName}}]{{end}}{{end}})
 #+BEGIN_defmac
 {{template "load" .GetOriginKey -}}
-{{.GetDocString | markdown | lstrip}}
-The ~{{.GetName}}~ macro supports the following attributes:
+{{.GetDocString | markdown | lstrip -}}
+{{with .GetAttribute}}
+The ~{{$name}}~ macro supports the following attributes:
 
-{{range .GetAttribute}}{{item "attribute" .}}{{end -}}
+{{range .}}{{item "attribute" .}}{{end -}}
+{{end -}}
 #+END_defmac
 
 {{end -}}
