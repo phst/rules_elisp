@@ -20,6 +20,7 @@ require (
 	github.com/bazelbuild/bazel-gazelle v0.54.0
 	github.com/bazelbuild/buildtools v0.0.0-20260904073137-eaa4d125b423
 	github.com/bazelbuild/rules_go v0.63.0
+	github.com/goaux/decowriter v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/yuin/goldmark/v2 v2.0.1
 	golang.org/x/text v0.42.0
@@ -29,7 +30,6 @@ require (
 require (
 	github.com/bazel-contrib/bazel-gazelle/v2 v2.0.0-3 // indirect
 	github.com/bmatcuk/doublestar/v4 v4.9.1 // indirect
-	github.com/goaux/decowriter v1.0.0
 	github.com/google/addlicense v1.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/lvthillo/gomodzip v0.2.0
