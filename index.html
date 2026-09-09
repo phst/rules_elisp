@@ -155,6 +155,7 @@ ensure that files get only loaded in their byte-compiled form.
 as Emacs modules and doesn’t try to byte-compile them.  You can use
 e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
 </p>
+
 <p>The <code class="code">elisp_library</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -222,6 +223,7 @@ using
 </pre></div>
 <p>to implement module functions.
 </p>
+
 <p>The <code class="code">elisp_cc_module</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -272,6 +274,7 @@ C/​C+​+​ compiler.  See the <a class="uref" href="https://bazel.build/refe
 The source file is byte-compiled.  At runtime, the compiled version is loaded
 in batch mode unless <code class="code">interactive</code> is <code class="code">True</code>.
 </p>
+
 <p>The <code class="code">elisp_binary</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -352,6 +355,7 @@ variable.  After processing known arguments, test files must remove them from
 Emacs will not automatically process these arguments using
 <code class="code">command-switch-alist</code> or <code class="code">command-line-functions</code>.
 </p>
+
 <p>The <code class="code">elisp_test</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -499,6 +503,7 @@ direct and indirect dependencies.  The feature symbol for <code class="code">req
 filename of the original <code class="code">.proto</code> file listed in the <code class="code">proto_library</code> rule,
 relative to its repository root.
 </p>
+
 <p>The <code class="code">elisp_proto_library</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -1042,6 +1047,7 @@ Uses Org’s exporting functionality; see <a data-manual="org" href="https://www
 You can then use <code class="code">texi2any</code> to generate other document formats from the output
 file; see <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/manual/texinfo/texinfo.html#Generic-Translator-texi2any"><code class="code">texi2any</code></a>.
 </p>
+
 <p>The <code class="code">elisp_manual</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -1080,8 +1086,10 @@ external Emacs Lisp libraries that don’t bring their own Bazel support.
 
 <p>Module extension for Emacs Lisp.
 </p>
+
 <p>The <code class="code">elisp</code> module extension provides the following tag classes:
 </p>
+
 <dl class="first-defop def-block">
 <dt class="defop def-line" id="index-http_005farchive-on-elisp"><span class="category-def">Tag class on <code class="code">elisp</code>: </span><span><strong class="def-name">http_archive</strong> <var class="def-var-arguments">(name, urls, integrity, [strip_prefix], [target_name], [exclude])</var><a class="copiable-link" href="#index-http_005farchive-on-elisp"> &para;</a></span></dt>
 <dd><p>Downloads an archive file over HTTP and makes its contents
@@ -1094,6 +1102,7 @@ are excluded.
 The <code class="code">elisp_library</code> rule is named <code class="code">library</code> by default, unless overridden
 by the <code class="code">target_name</code> attribute.
 </p>
+
 <p>The <code class="code">http_archive</code> tag class supports the following attributes:
 </p>
 <dl class="table">
@@ -1159,6 +1168,7 @@ relative to the execution root.
 </li><li><code class="code">for_runfiles</code> is a string specifying the load directory to use at runtime,
 relative to the runfiles root.
 </li></ul>
+
 
 <p>The <code class="code">EmacsLispInfo</code> provider has the following fields:
 </p>
@@ -1282,6 +1292,7 @@ temporary files that are deleted after the action completes, or files passed on
 the command line interpreted according to the <code class="code">input_args</code> and <code class="code">output_args</code>
 attributes of the <code class="code">elisp_binary</code> rule.
 </p>
+
 <p>The <code class="code">elisp_toolchain</code> rule supports the following attributes:
 </p>
 <dl class="table">
@@ -1320,6 +1331,7 @@ See the rule documentation for details.  Boolean; optional; default: <code class
 <p>Builds Emacs from a source repository.
 The resulting executable can be used to run the compiled Emacs.
 </p>
+
 <p>The <code class="code">elisp_emacs_binary</code> rule supports the following attributes:
 </p>
 <dl class="table">
