@@ -92,7 +92,7 @@ ensure that files get only loaded in their byte-compiled form.
 
 The source files in `srcs` can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
-e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
+e.g. `cc_binary` with `linkshared = True` to create shared objects.""",
     provides = [EmacsLispInfo],
     toolchains = [Label("//elisp:toolchain_type")],
     implementation = _elisp_library_impl,

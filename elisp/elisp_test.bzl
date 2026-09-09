@@ -133,7 +133,7 @@ you don’t control.""",
         "skip_tags": attr.string_list(
             doc = """List of test tags to skip.  This attribute contains a list
 of tag names; if a test is tagged with one of the tags from this list, it is
-skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
 interactive mode.  Use the `:tags` keyword argument to `ert-deftest` to tag
 tests.""",
         ),

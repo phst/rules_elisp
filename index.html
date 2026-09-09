@@ -149,7 +149,7 @@ ensure that files get only loaded in their byte-compiled form.
 </p>
 <p>The source files in <code class="code">srcs</code> can also list shared objects.  The rule treats them
 as Emacs modules and doesn’t try to byte-compile them.  You can use
-e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
+e.g. <code class="code">cc_binary</code> with <code class="code">linkshared = True</code> to create shared objects.
 </p>
 
 <p>The <code class="code">elisp_library</code> rule supports the following attributes:
@@ -390,7 +390,7 @@ you don’t control.  List of strings; optional; default: <code class="code">[]<
 <dt><code class="code">skip_tags</code></dt>
 <dd><p>List of test tags to skip.  This attribute contains a list
 of tag names; if a test is tagged with one of the tags from this list, it is
-skipped.  This can be useful to e.g. skip tests that are flaky or only work in
+skipped.  This can be useful to e.g. skip tests that are flaky or only work in
 interactive mode.  Use the <code class="code">:tags</code> keyword argument to <code class="code">ert-deftest</code> to tag
 tests.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
