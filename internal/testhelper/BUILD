@@ -25,15 +25,14 @@ package(
 
 licenses(["notice"])
 
-# keep
 go_binary(
-    name = "helper",
-    embed = [":helper_lib"],
+    name = "testhelper",
+    embed = [":lib"],
     visibility = ["//tests/tools:__pkg__"],
 )
 
 go_library(
-    name = "helper_lib",
+    name = "lib",
     srcs = ["helper.go"],
-    importpath = "github.com/phst/rules_elisp/tests/tools/helper",
+    importpath = "github.com/phst/rules_elisp/internal/testhelper",
 )

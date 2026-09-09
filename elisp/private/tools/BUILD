@@ -217,7 +217,7 @@ cc_library(
     local_defines = DEFINES,
     visibility = [
         "//elisp:__pkg__",
-        "//tests/integration/wrap:__pkg__",
+        "//internal/wrap:__pkg__",
     ],
     deps = [
         ":load",
@@ -469,7 +469,7 @@ cc_library(
         "//elisp:__pkg__",
         "//elisp/private:__pkg__",
         "//elisp/toolchains:__pkg__",
-        "//tests/integration/wrap:__pkg__",
+        "//internal/wrap:__pkg__",
         "//tests/tools:__pkg__",
     ],
 )
@@ -549,7 +549,7 @@ exports_files(
         "//elisp:__pkg__",
         "//elisp/private:__pkg__",
         "//elisp/toolchains:__pkg__",
-        "//tests/integration/wrap:__pkg__",
+        "//internal/wrap:__pkg__",
     ],
 )
 
@@ -559,10 +559,7 @@ exports_files(
         "binary.cc",
         "binary.h",
     ],
-    visibility = [
-        "//tests/integration:__pkg__",
-        "//tests/integration/wrap:__pkg__",
-    ],
+    visibility = ["//tests/integration:__pkg__"],
 )
 
 exports_files(
