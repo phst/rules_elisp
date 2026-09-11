@@ -49,3 +49,7 @@ test:windows --test_timeout=240,1200,3600,14400
 coverage --instrumentation_filter='^//'
 
 import %workspace%/ci.bazelrc
+
+# Release configuration
+build:release --compilation_mode=opt
+build:release --stamp

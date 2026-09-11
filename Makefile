@@ -118,9 +118,10 @@ infodir = $(datarootdir)/info
 INSTALL ?= install
 INSTALL_PROGRAM = $(INSTALL)
 INSTALL_DATA = $(INSTALL) -m 644
+INSTALL_BAZELFLAGS = --config=release $(BAZELFLAGS)
 
 install:
-	$(BAZEL) build $(BAZELFLAGS) -- //docs:rules_elisp.info
+	$(BAZEL) build $(INSTALL_BAZELFLAGS) -- //docs:rules_elisp.info
 	$(INSTALL) -d -- '$(infodir)'
 	$(INSTALL_DATA) -- \
 	  bazel-bin/docs/rules_elisp.info \
