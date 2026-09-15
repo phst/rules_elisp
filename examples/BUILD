@@ -110,6 +110,9 @@ go_test(
     srcs = ["bin_test.go"],
     args = ["--bin=$(rlocationpath :bin)"],
     data = ["bin"],
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     deps = ["@rules_go//go/runfiles"],
 )
 

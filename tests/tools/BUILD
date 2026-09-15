@@ -215,6 +215,9 @@ go_test(
     srcs = ["copy_tree_test.go"],
     args = [runfileflag(t) for t in TOOLS_TEST_DATA],
     data = TOOLS_TEST_DATA,
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     deps = [
         "//internal/testutil",
         "@com_github_goaux_decowriter//:decowriter",

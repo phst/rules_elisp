@@ -25,6 +25,9 @@ licenses(["notice"])
 
 go_proto_library(
     name = "stardoc_output_go_proto",
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     importpath = "github.com/phst/rules_elisp/internal/stardoc_output_go_proto",
     protos = ["@stardoc//stardoc/proto:stardoc_output_proto"],
     visibility = [

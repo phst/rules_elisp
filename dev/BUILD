@@ -38,6 +38,9 @@ buildifier_test(
 
 nogo(
     name = "nogo",
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     visibility = ["//visibility:public"],
     deps = TOOLS_NOGO,
 )
@@ -57,6 +60,9 @@ gazelle_test(
 
 gazelle_binary(
     name = "gazelle_binary",
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     languages = DEFAULT_LANGUAGES + [
         "//gazelle/elisp",
         "@bazel_skylib_gazelle_plugin//bzl",
