@@ -29,6 +29,9 @@ go_library(
     name = "stardoc",
     srcs = ["org.go"],
     embedsrcs = ["org.tmpl"],
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     importpath = "github.com/phst/rules_elisp/internal/stardoc",
     visibility = ["//internal/stardoc2org:__pkg__"],
     deps = [
@@ -45,6 +48,9 @@ go_test(
     timeout = "short",
     srcs = ["org_test.go"],
     embedsrcs = ["protos.tar"],
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     deps = [
         ":stardoc",
         "//internal/stardoc_output_go_proto",

@@ -66,10 +66,16 @@ build_test(
 go_binary(
     name = "wrap",
     embed = [":lib"],
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
 )
 
 go_library(
     name = "lib",
     srcs = ["wrap.go"],
+    # FIXME: Reenable layering check once
+    # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
+    features = ["-layering_check"],
     importpath = "github.com/phst/rules_elisp/internal/wrap",
 )
