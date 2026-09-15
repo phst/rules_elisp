@@ -121,9 +121,3 @@ LINKOPTS = select({
     ],
     "//conditions:default": [],
 })
-
-# These libraries have to be added to cc_library dependencies to define the
-# BAZEL_CURRENT_REPOSITORY preprocessor symbol.
-RUNFILES_LIBS = [
-    Label("@rules_cc//cc/runfiles"),
-]
