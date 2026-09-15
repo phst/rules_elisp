@@ -15,6 +15,7 @@
 .POSIX:
 .PHONY: all generate check compdb coverage check-extra benchmark
 .PHONY: clean install uninstall
+.PHONY: MODULE.bazel.lock examples/ext/MODULE.bazel.lock
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -32,8 +33,14 @@ GO = $(BAZEL) run $(BAZELFLAGS) -- @rules_go//go
 ADDLICENSE = $(GO) tool addlicense
 GOMODZIP = $(GO) tool gomodzip
 
-all:
+all: MODULE.bazel.lock examples/ext/MODULE.bazel.lock
 	$(BAZEL) build --norun_validations $(BAZELFLAGS) -- //...
+
+MODULE.bazel.lock:
+	$(BAZEL) mod graph > /dev/null
+
+examples/ext/MODULE.bazel.lock:
+	cd examples/ext && $(BAZEL) mod graph > /dev/null
 
 generate: compdb coverage
 
