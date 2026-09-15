@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ def _elisp_cc_module_impl(ctx):
     # https://github.com/bazelbuild/bazel/issues/15974.
     metadata_files = []
     if ctx.configuration.coverage_enabled and ctx.coverage_instrumented():
-        # @bazel_tools//tools/test:collect_cc_coverage.sh requires a file whose
+        # @rules_cc//cc/coverage:collect_cc_coverage.sh requires a file whose
         # name ends in “runtime_objects_list.txt”.
         objects_list = ctx.actions.declare_file(ctx.label.name + ".runtime_objects_list.txt")
         ctx.actions.write(
