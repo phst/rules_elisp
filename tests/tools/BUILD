@@ -16,7 +16,7 @@ load("@bazel_skylib//rules:build_test.bzl", "build_test")
 load("@rules_cc//cc:cc_test.bzl", "cc_test")
 load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_test.bzl", "elisp_test")
-load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS", "RUNFILES_LIBS")
+load("//private:cc_config.bzl", "COPTS", "CXXOPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load("//private:rlocation.bzl", "rlocation", "runfileflag")
 
@@ -77,7 +77,8 @@ cc_test(
         "@abseil-cpp//absl/strings:str_format",
         "@googletest//:gtest",
         "@googletest//:gtest_main",  # keep
-    ] + RUNFILES_LIBS,  # keep
+        "@rules_cc//cc/runfiles",  # keep
+    ],
 )
 
 cc_test(
@@ -142,7 +143,8 @@ cc_test(
         "@abseil-cpp//absl/status:statusor",
         "@googletest//:gtest",
         "@googletest//:gtest_main",  # keep
-    ] + RUNFILES_LIBS,  # keep
+        "@rules_cc//cc/runfiles",  # keep
+    ],
 )
 
 cc_test(
@@ -181,7 +183,8 @@ cc_test(
         "@abseil-cpp//absl/time",
         "@googletest//:gtest",
         "@googletest//:gtest_main",  # keep
-    ] + RUNFILES_LIBS,  # keep
+        "@rules_cc//cc/runfiles",  # keep
+    ],
 )
 
 build_test(
