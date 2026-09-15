@@ -154,21 +154,16 @@ cc_library(
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings",
-    ],
+    ] + RUNFILES_LIBS,  # keep
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
         ":platform",
-        ":runfiles",
-        ":strings",
-        ":system",
-        "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:span",
-    ] + RUNFILES_LIBS,  # keep
+    ],
 )
 
 cc_library(
@@ -211,7 +206,7 @@ cc_library(
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/strings:str_format",
-    ],
+    ] + RUNFILES_LIBS,  # keep
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES,
@@ -220,21 +215,10 @@ cc_library(
         "//internal/wrap:__pkg__",
     ],
     deps = [
-        ":load",
-        ":manifest",
-        ":numeric",
         ":platform",
-        ":runfiles",
-        ":system",
-        "@abseil-cpp//absl/algorithm:container",
-        "@abseil-cpp//absl/base:core_headers",
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/log:check",
-        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/types:span",
-    ] + RUNFILES_LIBS,  # keep
+    ],
 )
 
 # This is called “tst” and not “test” to keep Gazelle from thinking it’s a test
@@ -259,7 +243,7 @@ cc_library(
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
-    ],
+    ] + RUNFILES_LIBS,  # keep
     linkopts = LINKOPTS,
     linkstatic = True,
     local_defines = DEFINES + [
@@ -269,21 +253,10 @@ cc_library(
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
-        ":load",
-        ":manifest",
-        ":numeric",
         ":platform",
-        ":runfiles",
-        ":strings",
-        ":system",
-        "@abseil-cpp//absl/log",
-        "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:statusor",
-        "@abseil-cpp//absl/strings",
-        "@abseil-cpp//absl/strings:str_format",
-        "@abseil-cpp//absl/time",
         "@abseil-cpp//absl/types:span",
-    ] + RUNFILES_LIBS,  # keep
+    ],
 )
 
 # keep
