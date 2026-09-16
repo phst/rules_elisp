@@ -114,10 +114,4 @@ DEFINES = [
     ],
 })
 
-LINKOPTS = select({
-    "@rules_cc//cc/compiler:msvc-cl": [
-        # Work around https://github.com/bazelbuild/rules_cc/issues/558.
-        "/IGNORE:4315",
-    ],
-    "//conditions:default": [],
-})
+LINKOPTS = []
