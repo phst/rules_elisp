@@ -22,7 +22,7 @@ require (
 	github.com/bazelbuild/rules_go v0.63.0
 	github.com/goaux/decowriter v1.0.0
 	github.com/google/go-cmp v0.7.0
-	github.com/yuin/goldmark/v2 v2.1.1
+	github.com/yuin/goldmark/v2 v2.1.5
 	golang.org/x/text v0.42.0
 	google.golang.org/protobuf v1.36.12
 )
