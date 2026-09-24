@@ -45,26 +45,7 @@ func main() {
 	}
 	input := flag.Arg(0)
 	output := flag.Arg(1)
-	b, err := os.ReadFile(input)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var module spb.ModuleInfo
-	if err := proto.Unmarshal(b, &module); err != nil {
-		log.Fatal(err)
-	}
-	file, err := os.OpenFile(output, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0400)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	if err := stardoc.Org(&module, file); err != nil {
-		log.Fatal(err)
-	}
-	if err := file.Sync(); err != nil {
-		log.Fatal(err)
-	}
-	if err := file.Close(); err != nil {
+	if err := run(input, output); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -72,4 +53,27 @@ func main() {
 func usage() {
 	fmt.Fprintln(os.Stderr, "Usage: stardoc2org INPUT OUTPUT")
 	flag.PrintDefaults()
+}
+
+func run(in, out string) error {
+	b, err := os.ReadFile(in)
+	if err != nil {
+		return err
+	}
+	var module spb.ModuleInfo
+	if err := proto.Unmarshal(b, &module); err != nil {
+		return err
+	}
+	file, err := os.OpenFile(out, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0400)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if err := stardoc.Org(&module, file); err != nil {
+		return err
+	}
+	if err := file.Sync(); err != nil {
+		return err
+	}
+	return file.Close()
 }
