@@ -15,36 +15,17 @@
 package mdorg_test
 
 import (
-	"strings"
-	"testing"
+	"os"
 
-	_ "embed"
-
-	"github.com/google/go-cmp/cmp"
 	"github.com/yuin/goldmark/v2/parser"
 
 	"github.com/phst/rules_elisp/internal/mdorg"
 )
 
-func TestNewRenderer(t *testing.T) {
-	mdorg.NewRenderer()
+func ExampleRenderer_RenderStringSource() {
+	const source = "Hello `world`!"
+	doc := parser.New().ParseStringSource(source)
+	mdorg.NewRenderer().RenderStringSource(os.Stdout, source, doc)
+	// Output:
+	// Hello ~world~!
 }
-
-func TestRenderer_Render(t *testing.T) {
-	doc := parser.New().Parse(input)
-	t.Log("Document:")
-	doc.Dump(input).PrettyPrint(t.Output(), input)
-	var b strings.Builder
-	if err := mdorg.NewRenderer().Render(&b, input, doc); err != nil {
-		t.Fatal(err)
-	}
-	if diff := cmp.Diff(b.String(), output); diff != "" {
-		t.Errorf("-got +want:\n%s", diff)
-	}
-}
-
-//go:embed testdata/input.md
-var input []byte
-
-//go:embed testdata/output.org
-var output string

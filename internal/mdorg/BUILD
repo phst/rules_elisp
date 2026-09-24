@@ -41,7 +41,10 @@ go_library(
 go_test(
     name = "mdorg_test",
     size = "small",
-    srcs = ["renderer_test.go"],
+    srcs = [
+        "example_test.go",
+        "renderer_test.go",
+    ],
     data = [],
     embedsrcs = [
         "testdata/input.md",

@@ -46,7 +46,10 @@ go_library(
 go_test(
     name = "stardoc_test",
     timeout = "short",
-    srcs = ["org_test.go"],
+    srcs = [
+        "example_test.go",
+        "org_test.go",
+    ],
     embedsrcs = ["protos.tar"],
     # FIXME: Reenable layering check once
     # https://github.com/bazel-contrib/rules_go/issues/4715 is fixed.
