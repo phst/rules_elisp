@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2025 Google LLC
+;; Copyright 2020-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -41,13 +41,6 @@
 ;; Ensure filenames in the output are relative to the current directory.
 (setq byte-compile-root-dir
       (file-name-quote (expand-file-name default-directory)))
-
-;; Emacs 29 doesn’t yet support the ‘ftype’ declaration.  Ensure that
-;; compilation works without warnings.
-(dolist (var '(defun-declarations-alist macro-declarations-alist))
-  (let ((value (symbol-value var)))
-    (unless (assq 'ftype value)
-      (set var (cons '(ftype ignore) value)))))
 
 (cl-destructuring-bind (fatal-warn current-repo src out) command-line-args-left
   (let ((file-name-handler-alist ()))

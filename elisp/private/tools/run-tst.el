@@ -328,55 +328,52 @@ Return FORM."
     (@instrument-form seen nil form))
   form)
 
-;; Emacs 29 incorrectly warns about overly long docstrings in generated code.
-;; FIXME: Remove suppression once we drop support for Emacs 29.
-(with-suppressed-warnings ((docstrings nil))
-  (cl-defstruct (@coverage-data
-                 (:constructor @make-coverage-data)
-                 (:copier nil))
-    "Coverage data for a specific form.
+(cl-defstruct (@coverage-data
+               (:constructor @make-coverage-data)
+               (:copier nil))
+  "Coverage data for a specific form.
 The ‘edebug-after-instrumentation-function’ initializes the ‘@coverage’
 property of each instrumented symbol to a vector.  Some elements of the
 vector will be objects of this type."
-    (hits
-     0
-     :type natnum
-     :documentation "Number of times this form was hit.")
-    (branches
-     nil
-     :type (or null vector)
-     :documentation "Nil if the underlying form doesn’t have
+  (hits
+   0
+   :type natnum
+   :documentation "Number of times this form was hit.")
+  (branches
+   nil
+   :type (or null vector)
+   :documentation "Nil if the underlying form doesn’t have
 multiple branches.  Otherwise, a vector of per-branch hit counts.
 If a branch can’t be instrumented, the corresponding element is
 nil.")
-    (parent-branches
-     nil
-     :type (or null vector)
-     :documentation "Nil if the underlying form is neither a
+  (parent-branches
+   nil
+   :type (or null vector)
+   :documentation "Nil if the underlying form is neither a
 branching condition nor a child form of a branching form.
 Otherwise, a reference to the ‘branches’ property of the coverage
 data of the corresponding branching form.")
-    (branch-index
-     nil
-     :type (or null natnum)
-     :documentation "Index into the ‘parent-branches’ vector
+  (branch-index
+   nil
+   :type (or null natnum)
+   :documentation "Index into the ‘parent-branches’ vector
 specifying the element that should be incremented whenever the
 underlying form is hit.  Nil if no branch element should be
 incremented.")
-    (then-index
-     nil
-     :type (or null natnum)
-     :documentation "Index into the ‘parent-branches’ vector
+  (then-index
+   nil
+   :type (or null natnum)
+   :documentation "Index into the ‘parent-branches’ vector
 specifying the element that should be incremented whenever the
 underlying form finishes successfully with a non-nil value.  Nil
 if no branch element should be incremented.")
-    (else-index
-     nil
-     :type (or null natnum)
-     :documentation "Index into the ‘parent-branches’ vector
+  (else-index
+   nil
+   :type (or null natnum)
+   :documentation "Index into the ‘parent-branches’ vector
 specifying the element that should be incremented whenever the
 underlying form finishes successfully with a non-nil value.  Nil
-if no branch element should be incremented.")))
+if no branch element should be incremented."))
 
 (defun @instrument-form (seen vector form)
   "Instrument FORM to collect line coverage information.
@@ -1118,14 +1115,6 @@ exact copies as equal."
                                :test #'@file-equal-p))
              (push (@load-instrument fullname file) load-buffers)
              t))))
-      ;; Work around another Edebug specification issue fixed with Emacs commit
-      ;; c799ad42f705f64975771e181dee29e1d0ebe97a.
-      (when (eql emacs-major-version 29)
-        (with-eval-after-load 'cl-macs
-          (put #'cl-define-compiler-macro 'edebug-form-spec
-               '(&define [&name symbolp "@cl-compiler-macro"]
-                         cl-macro-list
-                         cl-declarations-or-string def-body))))
       (when reporter (progress-reporter-done reporter))))
 
   ;; Load test source files.  If coverage is enabled, check for a file with a
