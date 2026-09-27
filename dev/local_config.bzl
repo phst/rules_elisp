@@ -66,20 +66,6 @@ def _local_binary(ctx, program, var):
         ctx.watch(file)
         return str(file)
 
-    # On Windows, retry with MSYS2.
-    if windows:
-        bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
-        result = ctx.execute(
-            [bash, "-l", "-c", 'command -v -- "$1"', "-", program],
-            timeout = 10,
-        )
-        if result.return_code != 0:
-            fail("command -v %r failed, standard error:\n" % program, result.stderr)
-        file = result.stdout.rstrip()
-        if not file.startswith("/"):
-            fail("program %r was found as %r instead of absolute file" % (program, file))
-        return file
-
     fail("program %r not found" % program)
 
 local_config = repository_rule(
