@@ -52,7 +52,7 @@ runs:
         update: false
         release: false
         install: >
-          texinfo
+          mingw-w64-ucrt-x86_64-texinfo
           mingw-w64-ucrt-x86_64-emacs
     - name: Set up Ubuntu worker
       if: runner.os == 'Linux'
