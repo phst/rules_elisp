@@ -48,6 +48,7 @@ runs:
       if: runner.os == 'Windows'
       uses: msys2/setup-msys2@v2
       with:
+        msystem: UCRT64
         update: false
         release: false
         install: >
