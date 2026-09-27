@@ -86,7 +86,7 @@ runs:
     - name: Set up Windows worker
       if: runner.os == 'Windows'
       # Make Bazel find the right binaries on GitHub.  See
-      # https://bazel.build/install/windows#bazel_does_not_find_bash_or_bashexe.
+      # https://bazel.build/install/windows#bazel-does-not-find-bash-or-bash-exe.
       shell: pwsh
       run: >-
         Add-Content
