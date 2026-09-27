@@ -94,7 +94,8 @@ runs:
         -LiteralPath $Env:GITHUB_ENV
         -Value (
           'BAZEL_SH=${{steps.msys2.outputs.msys2-location}}\usr\bin\bash.exe',
-          'EMACS=${{steps.msys2.outputs.msys2-location}}\ucrt64\bin\emacs.exe'
+          'EMACS=${{steps.msys2.outputs.msys2-location}}\ucrt64\bin\emacs.exe',
+          'MAKEINFO=${{steps.msys2.outputs.msys2-location}}\usr\bin\makeinfo'
         )
     - name: Override C/C++ compiler
       if: runner.os != 'Windows'

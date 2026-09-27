@@ -18,8 +18,8 @@ visibility("private")
 
 def _local_config_impl(ctx):
     is_default_bazel_version = not ctx.getenv("USE_BAZEL_VERSION")
-    makeinfo = _local_binary(ctx, "makeinfo")
-    xmllint = _local_binary(ctx, "xmllint")
+    makeinfo = _local_binary(ctx, "makeinfo", "MAKEINFO")
+    xmllint = _local_binary(ctx, "xmllint", "XMLLINT")
     ctx.template(
         "BUILD.bazel",
         Label(":local_config.BUILD.template"),
@@ -40,13 +40,24 @@ def _local_config_impl(ctx):
         executable = False,
     )
 
-def _local_binary(ctx, program):
+def _local_binary(ctx, program, var):
     windows = ctx.os.name.startswith("windows")
     program = program or fail("missing program name")
     if "/" in program or "\\" in program or program.startswith("-"):
         fail("invalid program name %r" % program)
     suffix = ".exe" if windows else ""
-    file = ctx.which(program + suffix)
+
+    value = ctx.getenv(var or fail("missing environment variable for program %r" % program))
+    if value:
+        if "/" in value or "\\" in value:
+            file = ctx.path(value)
+        else:
+            if suffix and not value.lower().endswith(suffix):
+                value += suffix
+            file = ctx.which(value)
+    else:
+        file = ctx.which(program + suffix)
+
     if file:
         if not file.exists:
             fail("program file %r doesn’t exist" % str(file))
@@ -54,20 +65,6 @@ def _local_binary(ctx, program):
         file = file.realpath
         ctx.watch(file)
         return str(file)
-
-    # On Windows, retry with MSYS2.
-    if windows:
-        bash = ctx.getenv("BAZEL_SH") or fail("BAZEL_SH not set")
-        result = ctx.execute(
-            [bash, "-l", "-c", 'command -v -- "$1"', "-", program],
-            timeout = 10,
-        )
-        if result.return_code != 0:
-            fail("command -v %r failed, standard error:\n" % program, result.stderr)
-        file = result.stdout.rstrip()
-        if not file.startswith("/"):
-            fail("program %r was found as %r instead of absolute file" % (program, file))
-        return file
 
     fail("program %r not found" % program)
 
