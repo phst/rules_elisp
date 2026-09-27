@@ -79,8 +79,6 @@ runs:
         brew update && brew install texinfo emacs
         # Detect Xcode command-line tools on macOS to work around
         # https://github.com/bazelbuild/bazel/issues/14970.
-        cov="$(xcrun --find llvm-cov)"
-        echo "BAZEL_LLVM_COV=${cov:?}" >> "${GITHUB_ENV:?}"
         profdata="$(xcrun --find llvm-profdata)"
         echo "BAZEL_LLVM_PROFDATA=${profdata:?}" >> "${GITHUB_ENV:?}"
     - name: Set up Windows worker
