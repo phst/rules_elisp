@@ -29,6 +29,18 @@ inputs:
 runs:
   using: composite
   steps:
+    - id: xcrun
+      name: Find developer tools
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        # Detect Xcode command-line tools on macOS to work around
+        # https://github.com/bazelbuild/bazel/issues/10457.
+        set -Cefux
+        cov="$(xcrun --find llvm-cov)"
+        echo "llvm-cov=${cov:?}" >> "${GITHUB_OUTPUT:?}"
+        profdata="$(xcrun --find llvm-profdata)"
+        echo "llvm-profdata=${profdata:?}" >> "${GITHUB_OUTPUT:?}"
     - name: Set up Bazel
       uses: bazel-contrib/setup-bazel@0.19.0
       with:
@@ -39,6 +51,15 @@ runs:
           ${{
             case(runner.os == 'Windows' && inputs.cc == 'clang',
                  'build --config=clang-cl', '')
+          }}
+          # Pass location of LLVM coverage tools to coverage wrapper script to
+          # work around https://github.com/bazelbuild/bazel/issues/10457.
+          ${{
+            case(runner.os == 'macOS',
+                 format('coverage --test_env=''LLVM_COV={0}'' --test_env=''LLVM_PROFDATA={1}''',
+                        steps.xcrun.outputs.llvm-cov,
+                        steps.xcrun.outputs.llvm-profdata),
+                 '')
           }}
         # Use disk cache to speed up runs.
         disk-cache: ${{inputs.cc}}

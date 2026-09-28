@@ -32,6 +32,14 @@ build:ci --toolchain_resolution_debug=//elisp/runfiles:runfiles
 test:ci --test_output=errors
 coverage:ci --test_env='VERBOSE_COVERAGE=1'
 
+# Fix coverage on macOS.  See
+# https://github.com/bazelbuild/bazel/issues/10457#issuecomment-5871822715.
+coverage --enable_platform_specific_config
+coverage:macos --experimental_generate_llvm_lcov
+coverage:macos --experimental_use_llvm_covmap
+coverage:macos --test_env='LLVM_COV=/Library/Developer/CommandLineTools/usr/bin/llvm-cov'
+coverage:macos --test_env='LLVM_PROFDATA=/Library/Developer/CommandLineTools/usr/bin/llvm-profdata'
+
 # Local Variables:
 # mode: bazelrc
 # End:
