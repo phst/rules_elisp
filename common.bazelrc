@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Bazel configuration useful for continuous integration jobs.
+# Bazel configuration shared between main and example repositories.  This should
+# be as minimal as possible.
 
+# Bazel configuration useful for continuous integration jobs.
 common:ci --announce_rc
 common:ci --show_progress_rate_limit=10
 common:ci --remote_download_minimal
