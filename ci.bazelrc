@@ -28,6 +28,7 @@ build:ci --experimental_repository_cache_hardlinks
 build:ci --incompatible_strict_action_env
 build:ci --toolchain_resolution_debug=//elisp/runfiles:runfiles
 test:ci --test_output=errors
+coverage:ci --test_env='VERBOSE_COVERAGE=1'
 
 # Local Variables:
 # mode: bazelrc
