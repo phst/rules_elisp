@@ -1,6 +1,6 @@
 ;;; export-org.el --- export Org-mode file to Texinfo manual  -*- lexical-binding: t; -*-
 
-;; Copyright 2021-2025 Google LLC
+;; Copyright 2021-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -45,6 +45,7 @@
         (after-insert-file-functions nil)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil)
+        (inhibit-interaction t)
         (org-export-coding-system 'utf-8-unix)
         (org-export-time-stamp-file nil)
         (org-export-use-babel nil))

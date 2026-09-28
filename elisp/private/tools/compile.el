@@ -1,6 +1,6 @@
 ;;; compile.el --- byte-compile Emacs Lisp files     -*- lexical-binding: t; -*-
 
-;; Copyright 2020-2025 Google LLC
+;; Copyright 2020-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@
 ;; Leaving these enabled leads to undefined behavior and doesn’t make sense in
 ;; batch mode.
 (setq attempt-stack-overflow-recovery nil
-      attempt-orderly-shutdown-on-fatal-signal nil)
+      attempt-orderly-shutdown-on-fatal-signal nil
+      inhibit-interaction t)
 
 ;; Ensure filenames in the output are relative to the current directory.
 (setq byte-compile-root-dir
