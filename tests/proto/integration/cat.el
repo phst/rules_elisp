@@ -33,6 +33,7 @@
   (let ((file-name-handler-alist ())
         (coding-system-for-read 'no-conversion)
         (coding-system-for-write 'no-conversion)
+        (inhibit-interaction t)
         (inhibit-modification-hooks t)
         (write-region-annotate-functions nil)
         (write-region-post-annotation-function nil))

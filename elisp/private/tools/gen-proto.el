@@ -170,6 +170,7 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
 (set-binary-mode 'stdin :binary)
 (set-binary-mode 'stdout :binary)
 (let* ((standard-output #'external-debugging-output)
+       (inhibit-interaction t)
        (inhibit-modification-hooks t)
        (stdin (with-temp-buffer
                 (set-buffer-multibyte nil)

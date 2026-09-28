@@ -944,6 +944,7 @@ exact copies as equal."
 
 (setq attempt-stack-overflow-recovery nil
       attempt-orderly-shutdown-on-fatal-signal nil
+      inhibit-interaction t
       edebug-initial-mode 'Go-nonstop)  ; ‘step’ doesn’t work in batch mode
 
 ;; We perform our own coverage instrumentation.
