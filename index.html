@@ -64,12 +64,13 @@ ul.toc-numbered-mark {list-style: none}
   </ul></li>
   <li><a id="toc-Building-manuals" href="#Building-manuals">7 Building manuals</a></li>
   <li><a id="toc-Depending-on-external-libraries" href="#Depending-on-external-libraries">8 Depending on external libraries</a></li>
-  <li><a id="toc-Starlark-infrastructure" href="#Starlark-infrastructure">9 Starlark infrastructure</a></li>
-  <li><a id="toc-Indices" href="#Indices">10 Indices</a>
+  <li><a id="toc-Gazelle" href="#Gazelle">9 Gazelle</a></li>
+  <li><a id="toc-Starlark-infrastructure" href="#Starlark-infrastructure">10 Starlark infrastructure</a></li>
+  <li><a id="toc-Indices" href="#Indices">11 Indices</a>
   <ul class="toc-numbered-mark">
-    <li><a id="toc-Concept-index" href="#Concept-index" rel="index">10.1 Concept index</a></li>
-    <li><a id="toc-Symbol-index" href="#Symbol-index" rel="index">10.2 Symbol index</a></li>
-    <li><a id="toc-Type-index" href="#Type-index" rel="index">10.3 Type index</a></li>
+    <li><a id="toc-Concept-index" href="#Concept-index" rel="index">11.1 Concept index</a></li>
+    <li><a id="toc-Symbol-index" href="#Symbol-index" rel="index">11.2 Symbol index</a></li>
+    <li><a id="toc-Type-index" href="#Type-index" rel="index">11.3 Type index</a></li>
   </ul></li>
 </ul>
 </div>
@@ -1069,7 +1070,7 @@ file; see <a data-manual="texinfo" href="https://www.gnu.org/software/texinfo/ma
 </div>
 <div class="chapter-level-extent" id="Depending-on-external-libraries">
 <p class="nav-panel">
-<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Starlark-infrastructure" rel="next">Starlark infrastructure</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Building-manuals" rel="prev">Building manuals</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Gazelle" rel="next">Gazelle</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Building-manuals" rel="prev">Building manuals</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
 <h2 class="chapter" id="Depending-on-external-libraries-1"><span>8 Depending on external libraries<a class="copiable-link" href="#Depending-on-external-libraries-1"> &para;</a></span></h2>
 
 <p><code class="code">rules_elisp</code> provides a module extension to make it easier to depend on
@@ -1137,10 +1138,83 @@ the library.  List of strings; optional; default: <code class="code">[]</code>.
 
 <hr>
 </div>
+<div class="chapter-level-extent" id="Gazelle">
+<p class="nav-panel">
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Starlark-infrastructure" rel="next">Starlark infrastructure</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Depending-on-external-libraries" rel="prev">Depending on external libraries</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
+<h2 class="chapter" id="Gazelle-1"><span>9 Gazelle<a class="copiable-link" href="#Gazelle-1"> &para;</a></span></h2>
+
+<a class="index-entry-id" id="index-Gazelle"></a>
+
+<p>You can use the <a class="uref" href="https://github.com/bazel-contrib/bazel-gazelle">Gazelle BUILD
+file generator</a> to generate <code class="code">elisp_library</code>, <code class="code">elisp_proto_library</code>,
+<code class="code">elisp_binary</code>, <code class="code">elisp_test</code>, and <code class="code">elisp_manual</code> rule targets.  To do so, add a
+dependency on the <a class="uref" href="https://registry.bazel.build/modules/gazelle">&lsquo;<samp class="samp">gazelle</samp>&rsquo;
+module</a> to your MODULE.bazel file, and create a <code class="code">gazelle</code> target in some BUILD
+file:
+</p><div class="example">
+<pre class="example-preformatted">load(&quot;@gazelle//:def.bzl&quot;, &quot;DEFAULT_LANGUAGES&quot;, &quot;gazelle&quot;, &quot;gazelle_binary&quot;)
+
+gazelle(
+    name = &quot;gazelle&quot;,
+    gazelle = &quot;:gazelle_binary&quot;,
+)
+
+gazelle_binary(
+    name = &quot;gazelle_binary&quot;,
+    languages = DEFAULT_LANGUAGES + [&quot;@rules_elisp//gazelle/elisp&quot;],
+)
+</pre></div>
+<p>The <code class="code">DEFAULT_LANGUAGE</code> list adds support for some other languages like Go and
+Protocol Buffers.  You can leave it out if you want.
+</p>
+<p>If you want to run Gazelle as a Bazel test, use the <code class="code">gazelle_test</code> rule:
+</p><div class="example">
+<pre class="example-preformatted">load(&quot;@gazelle//:def.bzl&quot;, &quot;gazelle_test&quot;)
+
+gazelle_test(
+    name = &quot;gazelle_test&quot;,
+    gazelle = &quot;:gazelle_binary&quot;,
+    workspace = &quot;//:MODULE.bazel&quot;,
+)
+</pre></div>
+
+<p>Gazelle creates a rule target for each Emacs Lisp file it encounters.  It uses
+some heuristics to distinguish between libraries and test files; for example,
+the file &lsquo;<samp class="samp">foo-test.el</samp>&rsquo; likely denotes a test file, while &lsquo;<samp class="samp">foo.el</samp>&rsquo; is probably a
+library file.  If Gazelle guesses wrong, you can overwrite the heuristic by
+adding a library header <code class="code">Gazelle-Type</code>:
+</p><div class="example lisp">
+<pre class="lisp-preformatted">;; Gazelle-Type: library
+;; Gazelle-Type: binary
+;; Gazelle-Type: test
+</pre></div>
+<p>See <a data-manual="elisp" href="https://www.gnu.org/software/emacs/manual/html_mono/elisp.html#Library-Headers">(elisp)Library Headers</a>.
+</p>
+<p>Gazelle detects dependencies between libraries by scanning Emacs Lisp files for
+<code class="code">provide</code> and <code class="code">require</code> forms.  If a file provides a symbol and another one
+requires that symbol, then Gazelle will add an appropriate target to the <code class="code">deps</code>
+attribute of the target of the latter.
+</p>
+<p>The name of the Gazelle language is &lsquo;<samp class="samp">elisp</samp>&rsquo;.  You can use this name in Gazelle
+directives, for example, to restrict Gazelle to a specific set of languages, or
+to teach Gazelle how to resolve a feature to an <code class="code">elisp_cc_module</code> target:
+</p><div class="example">
+<pre class="example-preformatted"># gazelle:lang go,elisp
+# gazelle:resolve elisp my-module //:my_module
+</pre></div>
+
+<p>To suppress generation of <code class="code">elisp_proto_library</code> rules, add a Gazelle directive
+</p><div class="example">
+<pre class="example-preformatted"># gazelle:elisp_generate_proto false
+</pre></div>
+<p>to your BUILD file.
+</p>
+<hr>
+</div>
 <div class="chapter-level-extent" id="Starlark-infrastructure">
 <p class="nav-panel">
-<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Indices" rel="next">Indices</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Depending-on-external-libraries" rel="prev">Depending on external libraries</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
-<h2 class="chapter" id="Starlark-infrastructure-1"><span>9 Starlark infrastructure<a class="copiable-link" href="#Starlark-infrastructure-1"> &para;</a></span></h2>
+<span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Indices" rel="next">Indices</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Gazelle" rel="prev">Gazelle</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
+<h2 class="chapter" id="Starlark-infrastructure-1"><span>10 Starlark infrastructure<a class="copiable-link" href="#Starlark-infrastructure-1"> &para;</a></span></h2>
 
 <p>The <code class="code">emacs_library</code>, <code class="code">emacs_cc_module</code>, and <code class="code">emacs_proto_library</code> return the
 <code class="code">EmacsLispInfo</code> provider to transport information about Emacs Lisp libraries
@@ -1373,7 +1447,7 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
 <div class="chapter-level-extent" id="Indices">
 <p class="nav-panel">
 <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Starlark-infrastructure" rel="prev">Starlark infrastructure</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Top" rel="up">Bazel rules for Emacs Lisp</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
-<h2 class="chapter" id="Indices-1"><span>10 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
+<h2 class="chapter" id="Indices-1"><span>11 Indices<a class="copiable-link" href="#Indices-1"> &para;</a></span></h2>
 
 
 <ul class="mini-toc">
@@ -1385,10 +1459,12 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
 <div class="section-level-extent" id="Concept-index">
 <p class="nav-panel">
 <span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Symbol-index" rel="next">Symbol index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
-<h3 class="section" id="Concept-index-1"><span>10.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Concept-index-1"><span>11.1 Concept index<a class="copiable-link" href="#Concept-index-1"> &para;</a></span></h3>
 
 <div class="printindex cp-printindex">
-<table class="index-letters-header-printindex cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+<table class="index-letters-header-printindex cp-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-G"><b>G</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
  &nbsp; 
@@ -1396,6 +1472,9 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
  &nbsp; 
 </td></tr></table>
 <table class="index-entries-printindex cp-entries-printindex">
+<tr><td colspan="2"><hr></td></tr>
+<tr><th class="index-letter-header-printindex cp-letter-header-printindex" colspan="2" id="Concept-index_cp_letter-G">G</th></tr>
+<tr><td class="printindex-index-entry"><a href="#index-Gazelle">Gazelle</a></td><td class="printindex-index-section"><a href="#Gazelle">Gazelle</a></td></tr>
 <tr><td colspan="2"><hr></td></tr>
 <tr><th class="index-letter-header-printindex cp-letter-header-printindex" colspan="2" id="Concept-index_cp_letter-L">L</th></tr>
 <tr><td class="printindex-index-entry"><a href="#index-Load-path">Load path</a></td><td class="printindex-index-section"><a href="#Load-path-management">Load path management</a></td></tr>
@@ -1410,7 +1489,9 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
 <tr><td class="printindex-index-entry"><a href="#index-Runfiles">Runfiles</a></td><td class="printindex-index-section"><a href="#Runfiles">Runfiles</a></td></tr>
 <tr><td colspan="2"><hr></td></tr>
 </table>
-<table class="index-letters-footer-printindex cp-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
+<table class="index-letters-footer-printindex cp-letters-footer-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Concept-index_cp_letter-G"><b>G</b></a>
+ &nbsp; 
+<a class="summary-letter-printindex" href="#Concept-index_cp_letter-L"><b>L</b></a>
  &nbsp; 
 <a class="summary-letter-printindex" href="#Concept-index_cp_letter-P"><b>P</b></a>
  &nbsp; 
@@ -1424,7 +1505,7 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
 <div class="section-level-extent" id="Symbol-index">
 <p class="nav-panel">
 <span class="nav-button"><span class="nav-label">Next: </span><span class="nav-link"><a href="#Type-index" rel="next">Type index</a></span></span>, <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Concept-index" rel="prev">Concept index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
-<h3 class="section" id="Symbol-index-1"><span>10.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Symbol-index-1"><span>11.2 Symbol index<a class="copiable-link" href="#Symbol-index-1"> &para;</a></span></h3>
 
 <div class="printindex fn-printindex">
 <table class="index-letters-header-printindex fn-letters-header-printindex"><tr><th>Jump to: &nbsp; </th><td><a class="summary-letter-printindex" href="#Symbol-index_fn_letter-E"><b>E</b></a>
@@ -1513,7 +1594,7 @@ This is used by Gazelle.  Output file; optional; nonconfigurable; default: <code
 <div class="section-level-extent" id="Type-index">
 <p class="nav-panel">
 <span class="nav-button"><span class="nav-label">Previous: </span><span class="nav-link"><a href="#Symbol-index" rel="prev">Symbol index</a></span></span>, <span class="nav-button"><span class="nav-label">Up: </span><span class="nav-link"><a href="#Indices" rel="up">Indices</a></span></span><span class="nav-button"> &nbsp; </span><span class="nav-button">[<a href="#SEC_Contents" title="Table of contents" rel="contents">Contents</a>]</span><span class="nav-button">[<a href="#Indices" title="Index" rel="index">Index</a>]</span></p>
-<h3 class="section" id="Type-index-1"><span>10.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
+<h3 class="section" id="Type-index-1"><span>11.3 Type index<a class="copiable-link" href="#Type-index-1"> &para;</a></span></h3>
 
 <div class="printindex tp-printindex">
 <table class="index-entries-printindex tp-entries-printindex">

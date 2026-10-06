@@ -641,6 +641,73 @@ external Emacs Lisp libraries that don’t bring their own Bazel support.
 
 #+INCLUDE: elisp/extensions/elisp.org
 
+* Gazelle
+#+CINDEX: Gazelle
+
+You can use the [[https://github.com/bazel-contrib/bazel-gazelle][Gazelle BUILD
+file generator]] to generate ~elisp_library~, ~elisp_proto_library~,
+~elisp_binary~, ~elisp_test~, and ~elisp_manual~ rule targets.  To do so, add a
+dependency on the [[https://registry.bazel.build/modules/gazelle][=gazelle=
+module]] to your MODULE.bazel file, and create a ~gazelle~ target in some BUILD
+file:
+#+BEGIN_SRC bazel-build
+load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary")
+
+gazelle(
+    name = "gazelle",
+    gazelle = ":gazelle_binary",
+)
+
+gazelle_binary(
+    name = "gazelle_binary",
+    languages = DEFAULT_LANGUAGES + ["@rules_elisp//gazelle/elisp"],
+)
+#+END_SRC
+The ~DEFAULT_LANGUAGE~ list adds support for some other languages like Go and
+Protocol Buffers.  You can leave it out if you want.
+
+If you want to run Gazelle as a Bazel test, use the ~gazelle_test~ rule:
+#+BEGIN_SRC bazel-build
+load("@gazelle//:def.bzl", "gazelle_test")
+
+gazelle_test(
+    name = "gazelle_test",
+    gazelle = ":gazelle_binary",
+    workspace = "//:MODULE.bazel",
+)
+#+END_SRC
+
+Gazelle creates a rule target for each Emacs Lisp file it encounters.  It uses
+some heuristics to distinguish between libraries and test files; for example,
+the file =foo-test.el= likely denotes a test file, while =foo.el= is probably a
+library file.  If Gazelle guesses wrong, you can overwrite the heuristic by
+adding a library header ~Gazelle-Type~:
+#+BEGIN_SRC elisp
+;; Gazelle-Type: library
+;; Gazelle-Type: binary
+;; Gazelle-Type: test
+#+END_SRC
+See [[info:elisp#Library Headers]].
+
+Gazelle detects dependencies between libraries by scanning Emacs Lisp files for
+~provide~ and ~require~ forms.  If a file provides a symbol and another one
+requires that symbol, then Gazelle will add an appropriate target to the ~deps~
+attribute of the target of the latter.
+
+The name of the Gazelle language is =elisp=.  You can use this name in Gazelle
+directives, for example, to restrict Gazelle to a specific set of languages, or
+to teach Gazelle how to resolve a feature to an ~elisp_cc_module~ target:
+#+BEGIN_SRC bazel-build
+# gazelle:lang go,elisp
+# gazelle:resolve elisp my-module //:my_module
+#+END_SRC
+
+To suppress generation of ~elisp_proto_library~ rules, add a Gazelle directive
+#+BEGIN_SRC bazel-build
+# gazelle:elisp_generate_proto false
+#+END_SRC
+to your BUILD file.
+
 * Starlark infrastructure
 
 The ~emacs_library~, ~emacs_cc_module~, and ~emacs_proto_library~ return the
