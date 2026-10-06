@@ -16,12 +16,6 @@
 // maintains elisp_library, elisp_proto_library, elisp_binary, and elisp_test
 // rules from the rules_elisp repository.  See https://phst.eu/rules_elisp
 // and https://github.com/bazelbuild/bazel-gazelle/blob/master/extend.md.
-//
-// To suppress generation of elisp_proto_library rules, add a Gazelle directive
-//
-//	# gazelle:elisp_generate_proto false
-//
-// to your BUILD file.
 package elisp
 
 import (
