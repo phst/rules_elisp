@@ -663,7 +663,7 @@ gazelle_binary(
     languages = DEFAULT_LANGUAGES + ["@rules_elisp//gazelle/elisp"],
 )
 #+END_SRC
-The ~DEFAULT_LANGUAGE~ list adds support for some other languages like Go and
+The ~DEFAULT_LANGUAGES~ list adds support for some other languages like Go and
 Protocol Buffers.  You can leave it out if you want.
 
 If you want to run Gazelle as a Bazel test, use the ~gazelle_test~ rule:
