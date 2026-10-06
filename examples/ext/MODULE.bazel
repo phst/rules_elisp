@@ -38,3 +38,9 @@ bazel_dep(name = "rules_cc", version = "0.2.25", dev_dependency = True)
 
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension", dev_dependency = True)
 use_repo(cc_configure, "local_config_cc")
+
+# Temporary hack to deal with changed compatibility level in Abseil-C++.
+single_version_override(
+    module_name = "abseil-cpp",
+    version = "20260817.0",
+)
