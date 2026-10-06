@@ -46,6 +46,8 @@ emacs(
     strip_prefix = "emacs-30.2",
     type = "source",
     urls = [
+        "https://ftp.fau.de/gnu/emacs/emacs-30.2.tar.xz",
+        "https://mirrors.ocf.berkeley.edu/gnu/emacs/emacs-30.2.tar.xz",
         "https://ftpmirror.gnu.org/emacs/emacs-30.2.tar.xz",
         "https://ftp.gnu.org/gnu/emacs/emacs-30.2.tar.xz",
     ],
@@ -62,6 +64,8 @@ emacs(
     ],
     type = "release",
     urls = [
+        "https://ftp.fau.de/gnu/emacs/windows/emacs-30/emacs-30.2.zip",
+        "https://mirrors.ocf.berkeley.edu/gnu/emacs/windows/emacs-30/emacs-30.2.zip",
         "https://ftpmirror.gnu.org/emacs/windows/emacs-30/emacs-30.2.zip",
         "https://ftp.gnu.org/gnu/emacs/windows/emacs-30/emacs-30.2.zip",
     ],
@@ -74,6 +78,8 @@ emacs(
     strip_prefix = "emacs-31.1",
     type = "source",
     urls = [
+        "https://ftp.fau.de/gnu/emacs/emacs-31.1.tar.xz",
+        "https://mirrors.ocf.berkeley.edu/gnu/emacs/emacs-31.1.tar.xz",
         "https://ftpmirror.gnu.org/emacs/emacs-31.1.tar.xz",
         "https://ftp.gnu.org/gnu/emacs/emacs-31.1.tar.xz",
     ],
@@ -90,6 +96,8 @@ emacs(
     ],
     type = "release",
     urls = [
+        "https://ftp.fau.de/gnu/emacs/windows/emacs-31/emacs-31.1.zip",
+        "https://mirrors.ocf.berkeley.edu/gnu/emacs/windows/emacs-31/emacs-31.1.zip",
         "https://ftpmirror.gnu.org/emacs/windows/emacs-31/emacs-31.1.zip",
         "https://ftp.gnu.org/gnu/emacs/windows/emacs-31/emacs-31.1.zip",
     ],
