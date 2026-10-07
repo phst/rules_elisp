@@ -54,7 +54,8 @@ COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --features=-header_modules --host_features=-header_modules \
   --features=-module_maps --host_features=-module_maps \
   --features=-use_module_maps --host_features=-use_module_maps \
-  --features=-layering_check --host_features=-layering_check
+  --features=-layering_check --host_features=-layering_check \
+  --repo_env='BAZEL_USE_LEGACY_MACOS_TOOLCHAIN=1'
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 GENHTML ?= genhtml
 GENHTMLFLAGS = --branch-coverage \
