@@ -91,12 +91,14 @@
 #include "absl/memory/memory.h"
 #include "absl/random/random.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
+#include "absl/status/status_builder.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
 #include "absl/strings/str_split.h"
 #include "absl/time/clock.h"  // IWYU pragma: keep, only on Windows
 #include "absl/time/time.h"
+#include "absl/types/source_location.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/numeric.h"
@@ -107,23 +109,20 @@ namespace rules_elisp {
 
 namespace {
 
-static absl::Status MakeErrorStatus(const std::error_code& code,
-                                    const std::string_view function) {
+static absl::Status MakeErrorStatus(const std::error_code& code) {
   if (!code) return absl::OkStatus();
   const std::error_condition condition = code.default_error_condition();
-  const std::string message =
-      absl::StrCat(function, ": ", code.category().name(), "/", code.value(),
-                   ": ", code.message());
+  const std::string message = absl::StrCat(code.category().name(), "/",
+                                           code.value(), ": ", code.message());
   return condition.category() == std::generic_category()
              ? absl::ErrnoToStatus(condition.value(), message)
              : absl::UnknownError(message);
 }
 
-template <typename... Ts>
-static absl::Status ErrorStatus(const std::error_code& code,
-                                const absl::FormatSpec<Ts...>& format,
-                                const Ts&... args) {
-  return MakeErrorStatus(code, absl::StrFormat(format, args...));
+static absl::StatusBuilder ErrorStatus(
+    const std::error_code& code,
+    const absl::SourceLocation location = absl::SourceLocation::current()) {
+  return absl::StatusBuilder(MakeErrorStatus(code), location);
 }
 
 [[nodiscard]] static std::error_code ErrnoError() {
@@ -131,11 +130,10 @@ static absl::Status ErrorStatus(const std::error_code& code,
   return std::error_code(code, std::generic_category());
 }
 
-template <typename... Ts>
-static absl::Status ErrnoStatus(const absl::FormatSpec<Ts...>& format,
-                                const Ts&... args) {
+static absl::StatusBuilder ErrnoStatus(
+    const absl::SourceLocation location = absl::SourceLocation::current()) {
   const std::error_code code = ErrnoError();
-  return ErrorStatus(code, format, args...);
+  return ErrorStatus(code, location);
 }
 
 #ifdef _WIN32
@@ -146,11 +144,10 @@ static absl::Status ErrnoStatus(const absl::FormatSpec<Ts...>& format,
                        : std::make_error_code(std::errc::value_too_large);
 }
 
-template <typename... Ts>
-static absl::Status WindowsStatus(const absl::FormatSpec<Ts...>& format,
-                                  const Ts&... args) {
+static absl::StatusBuilder WindowsStatus(
+    const absl::SourceLocation location = absl::SourceLocation::current()) {
   const std::error_code code = WindowsError();
-  return ErrorStatus(code, format, args...);
+  return ErrorStatus(code, location);
 }
 
 class HResultCategory final : public std::error_category {
@@ -207,11 +204,10 @@ class HResultCategory final : public std::error_category {
   return std::error_code(hr, HResultCategory::Get());
 }
 
-template <typename... Ts>
-static absl::Status HResultStatus(const HRESULT hr,
-                                  const absl::FormatSpec<Ts...>& format,
-                                  const Ts&... args) {
-  return ErrorStatus(HResultError(hr), format, args...);
+static absl::StatusBuilder HResultStatus(
+    const HRESULT hr,
+    const absl::SourceLocation location = absl::SourceLocation::current()) {
+  return ErrorStatus(HResultError(hr), location);
 }
 #endif
 
@@ -299,8 +295,9 @@ absl::StatusOr<FileName> FileName::Parent() const {
     const HRESULT hr = PathCchCanonicalizeEx(buffer.data(), buffer.size(),
                                              Pointer(string), flags);
     if (FAILED(hr)) {
-      return HResultStatus(hr, "PathCchCanonializeEx(..., %#x, %#s, %#x)",
-                           buffer.size(), string, flags);
+      return HResultStatus(hr)
+             << absl::StreamFormat("PathCchCanonializeEx(..., %#x, %#s, %#x)",
+                                   buffer.size(), string, flags);
     }
   }
   {
@@ -308,8 +305,9 @@ absl::StatusOr<FileName> FileName::Parent() const {
     const HRESULT hr =
         PathCchRemoveBackslashEx(buffer.data(), buffer.size(), &end, nullptr);
     if (FAILED(hr)) {
-      return HResultStatus(hr, "PathCchRemoveBackslashEx(%#s, %#x)",
-                           buffer.data(), buffer.size());
+      return HResultStatus(hr)
+             << absl::StreamFormat("PathCchRemoveBackslashEx(%#s, %#x)",
+                                   buffer.data(), buffer.size());
     }
     if (*end != L'\0') {
       return absl::FailedPreconditionError(absl::StrFormat(
@@ -319,8 +317,9 @@ absl::StatusOr<FileName> FileName::Parent() const {
   {
     const HRESULT hr = PathCchRemoveFileSpec(buffer.data(), buffer.size());
     if (FAILED(hr)) {
-      return HResultStatus(hr, "PathCchRemoveFileSpec(%#s, %#x)", buffer.data(),
-                           buffer.size());
+      return HResultStatus(hr)
+             << absl::StreamFormat("PathCchRemoveFileSpec(%#s, %#x)",
+                                   buffer.data(), buffer.size());
     }
   }
   return FileName::FromString(buffer.data());
@@ -359,8 +358,9 @@ absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
       ::PathCchCombineEx(buffer.data(), buffer.size(), this->pointer(),
                          descendant.pointer(), flags);
   if (FAILED(hr)) {
-    return HResultStatus(hr, "PathCchCombineEx(..., %#x, %#s, %#s, %#x)",
-                         buffer.size(), *this, descendant, flags);
+    return HResultStatus(hr)
+           << absl::StreamFormat("PathCchCombineEx(..., %#x, %#s, %#s, %#x)",
+                                 buffer.size(), *this, descendant, flags);
   }
   return FileName::FromString(buffer.data());
 #else
@@ -533,7 +533,7 @@ absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
       ::WideCharToMultiByte(codepage, flags, string.data(), *wide_length,
                             buffer.data(), *narrow_length, nullptr, nullptr);
   if (result == 0) {
-    return WindowsStatus(
+    return WindowsStatus() << absl::StreamFormat(
         "WideCharToMultiByte(%u, %#x, ..., %d, ..., %d, nullptr, nullptr)",
         codepage, flags, *wide_length, *narrow_length);
   }
@@ -565,8 +565,9 @@ absl::StatusOr<NativeString> ToNative(
   const int result = ::MultiByteToWideChar(codepage, flags, string.data(),
                                            *length, buffer.data(), *length);
   if (result == 0) {
-    return WindowsStatus("MultiByteToWideChar(%u, %#x, ..., %d, ..., %d)",
-                         codepage, flags, *length, *length);
+    return WindowsStatus() << absl::StreamFormat(
+               "MultiByteToWideChar(%u, %#x, ..., %d, ..., %d)", codepage,
+               flags, *length, *length);
   }
   return buffer.substr(0, CastNumber<NativeString::size_type>(result).value());
 #else
@@ -579,7 +580,7 @@ static absl::StatusOr<FileName> WorkingDirectory() {
   // Assume that we always run on an OS that allocates a buffer when passed a
   // null pointer.
   char* const absl_nullable ptr = getcwd(nullptr, 0);
-  if (ptr == nullptr) return ErrnoStatus("getcwd(nullptr, 0)");
+  if (ptr == nullptr) return ErrnoStatus() << "getcwd(nullptr, 0)";
   const absl::Cleanup cleanup = [ptr] { std::free(ptr); };
   // See the Linux man page for getcwd(3) why this can happen.
   if (*ptr != '/') {
@@ -610,8 +611,8 @@ absl::StatusOr<FileName> FileName::MakeAbsolute() const {
   const DWORD result =
       ::GetFullPathNameW(this->pointer(), size, buffer, nullptr);
   if (result == 0) {
-    return WindowsStatus("GetFullPathNameW(%#s, %#x, ..., nullptr)", *this,
-                         size);
+    return WindowsStatus() << absl::StreamFormat(
+               "GetFullPathNameW(%#s, %#x, ..., nullptr)", *this, size);
   }
   if (result > size) {
     return absl::OutOfRangeError(
@@ -674,20 +675,21 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   const HANDLE handle = ::CreateFileW(this->pointer(), access, share, nullptr,
                                       disposition, open_flags, nullptr);
   if (handle == INVALID_HANDLE_VALUE) {
-    return WindowsStatus(
-        "CreateFileW(%#s, %#x, %#x, nullptr, %u, %#x, nullptr)", *this, access,
-        share, disposition, open_flags);
+    return WindowsStatus() << absl::StreamFormat(
+               "CreateFileW(%#s, %#x, %#x, nullptr, %u, %#x, nullptr)", *this,
+               access, share, disposition, open_flags);
   }
   const absl::Cleanup cleanup = [handle] {
-    if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus("CloseHandle");
+    if (!::CloseHandle(handle)) LOG(ERROR) << WindowsStatus() << "CloseHandle";
   };
   std::array<wchar_t, PATHCCH_MAX_CCH> buffer;
   constexpr DWORD name_flags = FILE_NAME_NORMALIZED | VOLUME_NAME_DOS;
   const DWORD length = ::GetFinalPathNameByHandleW(
       handle, buffer.data(), DWORD{buffer.size()}, name_flags);
   if (length == 0) {
-    return WindowsStatus("GetFinalPathNameByHandleW(..., ..., %#x, %#x)",
-                         buffer.size(), name_flags);
+    return WindowsStatus() << absl::StreamFormat(
+               "GetFinalPathNameByHandleW(..., ..., %#x, %#x)", buffer.size(),
+               name_flags);
   }
   if (length >= buffer.size()) {
     return absl::FailedPreconditionError(absl::StrFormat(
@@ -697,7 +699,9 @@ absl::StatusOr<FileName> FileName::Resolve() const {
   return FileName::FromString(result);
 #else
   char* const absl_nullable result = realpath(this->pointer(), nullptr);
-  if (result == nullptr) return ErrnoStatus("realpath(%#s, nullptr)", *this);
+  if (result == nullptr) {
+    return ErrnoStatus() << absl::StreamFormat("realpath(%#s, nullptr)", *this);
+  }
   const absl::Cleanup cleanup = [result] { std::free(result); };
   return FileName::FromString(result);
 #endif
@@ -760,7 +764,9 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
   const HANDLE handle = ::FindFirstFileW(Pointer(pattern), &data);
   if (handle == INVALID_HANDLE_VALUE) return false;
   const absl::Cleanup cleanup = [handle] {
-    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
+    if (!::FindClose(handle)) {
+      LOG(ERROR) << WindowsStatus() << "FindClose";
+    }
   };
   do {
     const std::wstring_view name = data.cFileName;
@@ -770,7 +776,7 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
   DIR* const absl_nullable handle = opendir(directory.pointer());
   if (handle == nullptr) return false;
   const absl::Cleanup cleanup = [handle] {
-    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
+    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus() << "closedir";
   };
   while (true) {
     const struct dirent* const absl_nullable entry = readdir(handle);
@@ -787,11 +793,15 @@ absl::Status WriteFile(const FileName& file, const std::string_view contents) {
 absl::Status CreateDirectory(const FileName& name) {
 #ifdef _WIN32
   const BOOL ok = ::CreateDirectoryW(name.pointer(), nullptr);
-  if (!ok) return WindowsStatus("CreateDirectoryW(%#s)", name);
+  if (!ok) {
+    return WindowsStatus() << absl::StreamFormat("CreateDirectoryW(%#s)", name);
+  }
 #else
   constexpr mode_t mode = S_IRWXU;
   const int result = mkdir(name.pointer(), mode);
-  if (result != 0) return ErrnoStatus("mkdir(%#s, %#04o)", name, mode);
+  if (result != 0) {
+    return ErrnoStatus() << absl::StreamFormat("mkdir(%#s, %#04o)", name, mode);
+  }
 #endif
   return absl::OkStatus();
 }
@@ -831,10 +841,14 @@ absl::Status CreateDirectories(const FileName& name) {
 absl::Status RemoveDirectory(const FileName& name) {
 #ifdef _WIN32
   const BOOL ok = ::RemoveDirectoryW(name.pointer());
-  if (!ok) return WindowsStatus("RemoveDirectoryW(%#s)", name);
+  if (!ok) {
+    return WindowsStatus() << absl::StreamFormat("RemoveDirectoryW(%#s)", name);
+  }
 #else
   const int result = rmdir(name.pointer());
-  if (result != 0) return ErrnoStatus("rmdir(%#s)", name);
+  if (result != 0) {
+    return ErrnoStatus() << absl::StreamFormat("rmdir(%#s)", name);
+  }
 #endif
   return absl::OkStatus();
 }
@@ -856,12 +870,12 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(
   const HANDLE handle = ::FindFirstFileW(Pointer(pat), &data);
   if (handle == INVALID_HANDLE_VALUE) {
     if (::GetLastError() != ERROR_FILE_NOT_FOUND) {
-      return WindowsStatus("FindFirstFileW(%#s)", pat);
+      return WindowsStatus() << absl::StreamFormat("FindFirstFileW(%#s)", pat);
     }
     return result;
   }
   const absl::Cleanup cleanup = [handle] {
-    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus("FindClose");
+    if (!::FindClose(handle)) LOG(ERROR) << WindowsStatus() << "FindClose";
   };
   do {
     const std::wstring_view name = data.cFileName;
@@ -871,20 +885,22 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(
     result.push_back(*std::move(file));
   } while (::FindNextFileW(handle, &data));
   if (::GetLastError() != ERROR_NO_MORE_FILES) {
-    return WindowsStatus("FindNextFileW");
+    return WindowsStatus() << "FindNextFileW";
   }
 #else
   DIR* const absl_nullable handle = opendir(dir.pointer());
-  if (handle == nullptr) return ErrnoStatus("opendir(%#s)", dir);
+  if (handle == nullptr) {
+    return ErrnoStatus() << absl::StreamFormat("opendir(%#s)", dir);
+  }
   const absl::Cleanup cleanup = [handle] {
-    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus("closedir");
+    if (closedir(handle) != 0) LOG(ERROR) << ErrnoStatus() << "closedir";
   };
   const std::string pat(pattern);
   while (true) {
     errno = 0;
     const struct dirent* const absl_nullable entry = readdir(handle);
     if (entry == nullptr) {
-      if (errno != 0) return ErrnoStatus("readdir");
+      if (errno != 0) return ErrnoStatus() << "readdir";
       break;
     }
     const char* const absl_nonnull ptr = entry->d_name;
@@ -913,11 +929,12 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(
 absl::Status Rename(const FileName& from, const FileName& to) {
 #ifdef _WIN32
   if (!::MoveFileW(from.pointer(), to.pointer())) {
-    return WindowsStatus("MoveFileW(%#s, %#s)", from, to);
+    return WindowsStatus() << absl::StreamFormat("MoveFileW(%#s, %#s)", from,
+                                                 to);
   }
 #else
   if (std::rename(from.pointer(), to.pointer()) != 0) {
-    return ErrnoStatus("rename(%#s, %#s)", from, to);
+    return ErrnoStatus() << absl::StreamFormat("rename(%#s, %#s)", from, to);
   }
 #endif
   return absl::OkStatus();
@@ -962,7 +979,8 @@ absl::Status RemoveTree(const FileName& directory) {
   constexpr int flags = FTW_DEPTH | FTW_MOUNT | FTW_PHYS;
   const int result = nftw(abs->pointer(), Remove, fd_limit, flags);
   if (result != 0) {
-    return ErrnoStatus("nftw(%#s, ..., %d, %#x)", *abs, fd_limit, flags);
+    return ErrnoStatus() << absl::StreamFormat("nftw(%#s, ..., %d, %#x)", *abs,
+                                               fd_limit, flags);
   }
 #endif
   return absl::OkStatus();
@@ -973,19 +991,27 @@ absl::Status RemoveTree(const FileName& directory) {
 absl::Status CopyFile(const FileName& from, const FileName& to) {
 #ifdef _WIN32
   if (!::CopyFileW(from.pointer(), to.pointer(), TRUE)) {
-    return WindowsStatus("CopyFileW(%#s, %#s, TRUE)", from, to);
+    return WindowsStatus() << absl::StreamFormat("CopyFileW(%#s, %#s, TRUE)",
+                                                 from, to);
   }
 #else
   constexpr int from_flags = O_RDONLY | O_CLOEXEC | O_NOCTTY;
   const int from_fd = open(from.pointer(), from_flags);
-  if (from_fd < 0) return ErrnoStatus("open(%#s, %#x)", from, from_flags);
+  if (from_fd < 0) {
+    return ErrnoStatus() << absl::StreamFormat("open(%#s, %#x)", from,
+                                               from_flags);
+  }
   const absl::Cleanup close_from = [from_fd] {
-    if (close(from_fd) != 0) LOG(ERROR) << ErrnoStatus("close(%d)", from_fd);
+    if (close(from_fd) != 0) {
+      LOG(ERROR) << ErrnoStatus() << absl::StreamFormat("close(%d)", from_fd);
+    }
   };
 
   // Don’t allow copying directories and other irregular files.
   struct stat from_stat;
-  if (fstat(from_fd, &from_stat) != 0) return ErrnoStatus("fstat(%d)", from_fd);
+  if (fstat(from_fd, &from_stat) != 0) {
+    return ErrnoStatus() << absl::StreamFormat("fstat(%d)", from_fd);
+  }
   if (!S_ISREG(from_stat.st_mode)) {
     return absl::FailedPreconditionError(absl::StrFormat(
         "Source file %s is irregular (mode %#04o)", from, from_stat.st_mode));
@@ -996,31 +1022,38 @@ absl::Status CopyFile(const FileName& from, const FileName& to) {
   const mode_t to_mode = from_stat.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
   const int to_fd = open(to.pointer(), to_flags, to_mode);
   if (to_fd < 0) {
-    return ErrnoStatus("open(%#s, %#x, %#04o)", to, to_flags, to_mode);
+    return ErrnoStatus() << absl::StreamFormat("open(%#s, %#x, %#04o)", to,
+                                               to_flags, to_mode);
   }
   const absl::Cleanup close_to = [to_fd] {
-    if (close(to_fd) != 0) LOG(ERROR) << ErrnoStatus("close(%d)", to_fd);
+    if (close(to_fd) != 0) {
+      LOG(ERROR) << ErrnoStatus() << absl::StreamFormat("close(%d)", to_fd);
+    }
   };
 #  ifdef __APPLE__
   constexpr copyfile_flags_t copy_flags =
       COPYFILE_ALL | COPYFILE_CLONE | COPYFILE_DATA_SPARSE;
   if (fcopyfile(from_fd, to_fd, nullptr, copy_flags) != 0) {
-    return ErrnoStatus("fcopyfile(%d, %d, nullptr, %#x)", from_fd, to_fd,
-                       copy_flags);
+    return ErrnoStatus() << absl::StreamFormat(
+               "fcopyfile(%d, %d, nullptr, %#x)", from_fd, to_fd, copy_flags);
   }
 #  else
   while (true) {
     std::array<char, 0x1000> buffer;
     const ssize_t r = read(from_fd, buffer.data(), buffer.size());
     if (r < 0) {
-      return ErrnoStatus("read(%d, ..., %#x)", from_fd, buffer.size());
+      return ErrnoStatus() << absl::StreamFormat("read(%d, ..., %#x)", from_fd,
+                                                 buffer.size());
     }
     if (r == 0) break;
     std::string_view view(buffer.data(),
                           static_cast<std::make_unsigned_t<ssize_t>>(r));
     while (!view.empty()) {
       const ssize_t w = write(to_fd, view.data(), view.size());
-      if (w < 0) return ErrnoStatus("write(%d, ..., %#x)", to_fd, view.size());
+      if (w < 0) {
+        return ErrnoStatus()
+               << absl::StreamFormat("write(%d, ..., %#x)", to_fd, view.size());
+      }
       if (w == 0) {
         // Avoid infinite loop.
         return absl::DataLossError(absl::StrFormat(
@@ -1031,9 +1064,12 @@ absl::Status CopyFile(const FileName& from, const FileName& to) {
   }
   const struct timespec times[2] = {{from_stat.st_atime, 0},
                                     {from_stat.st_mtime, 0}};
-  if (futimens(to_fd, times) != 0) return ErrnoStatus("futimens(%d)", to_fd);
+  if (futimens(to_fd, times) != 0) {
+    return ErrnoStatus() << absl::StreamFormat("futimens(%d)", to_fd);
+  }
 #  endif
-  if (fsync(to_fd) != 0) return ErrnoStatus("fsync(%d)", to_fd);
+  if (fsync(to_fd) != 0)
+    return ErrnoStatus() << absl::StreamFormat("fsync(%d)", to_fd);
 #endif
   return absl::OkStatus();
 }
@@ -1051,7 +1087,7 @@ class EnvironmentBlock final {
     void operator()(wchar_t* const absl_nonnull p) const noexcept {
       const BOOL ok = ::FreeEnvironmentStringsW(p);
       // If this fails, we can’t really do much except logging the error.
-      if (!ok) LOG(ERROR) << WindowsStatus("FreeEnvironmentStringsW");
+      if (!ok) LOG(ERROR) << WindowsStatus() << "FreeEnvironmentStringsW";
     }
   };
 #endif
@@ -1147,14 +1183,17 @@ static std::wstring CanonicalizeEnvironmentVariable(
   constexpr DWORD flags = LCMAP_UPPERCASE;
   const int length = CastNumber<int>(string.length()).value();
   int result = ::LCMapStringW(locale, flags, string.data(), length, nullptr, 0);
-  CHECK_GT(result, 0) << WindowsStatus(
-      "LCMapStringW(%u, %#x, ..., %d, nullptr, 0)", locale, flags, length);
+  CHECK_GT(result, 0) << WindowsStatus()
+                      << absl::StreamFormat(
+                             "LCMapStringW(%u, %#x, ..., %d, nullptr, 0)",
+                             locale, flags, length);
   std::wstring buffer(result, L'\0');
   result = ::LCMapStringW(locale, flags, string.data(), length, buffer.data(),
                           result);
-  CHECK_GT(result, 0) << WindowsStatus(
-      "LCMapStringW(%u, %#x, ..., %d, ..., %u)", locale, flags, length,
-      buffer.size());
+  CHECK_GT(result, 0) << WindowsStatus()
+                      << absl::StreamFormat(
+                             "LCMapStringW(%u, %#x, ..., %d, ..., %u)", locale,
+                             flags, length, buffer.size());
   return buffer.substr(0, result);
 }
 #else
@@ -1179,10 +1218,14 @@ bool Environment::Equal::operator()(const NativeStringView a,
 absl::Status Unlink(const FileName& file) {
 #ifdef _WIN32
   const BOOL result = ::DeleteFileW(file.pointer());
-  if (!result) return WindowsStatus("DeleteFileW(%#s)", file);
+  if (!result) {
+    return WindowsStatus() << absl::StreamFormat("DeleteFileW(%#s)", file);
+  }
 #else
   const int result = unlink(file.pointer());
-  if (result != 0) return ErrnoStatus("unlink(%#s)", file);
+  if (result != 0) {
+    return ErrnoStatus() << absl::StreamFormat("unlink(%#s)", file);
+  }
 #endif
   return absl::OkStatus();
 };
@@ -1209,10 +1252,14 @@ absl::StatusOr<FileName> CreateTemporaryDirectory() {
   std::string buffer = absl::StrCat(
       dir == nullptr || *dir == '\0' ? "/tmp" : dir, "/elisp.XXXXXX");
   char* const absl_nullable name = mkdtemp(Pointer(buffer));
-  if (name == nullptr) return ErrnoStatus("mkdtemp(%#s)", buffer);
+  if (name == nullptr) {
+    return ErrnoStatus() << absl::StreamFormat("mkdtemp(%#s)", buffer);
+  }
   const absl::StatusOr<FileName> result = FileName::FromString(name);
   if (!result.ok()) {
-    if (rmdir(name) != 0) LOG(ERROR) << ErrnoStatus("rmdir(%#s)", name);
+    if (rmdir(name) != 0) {
+      LOG(ERROR) << ErrnoStatus() << absl::StreamFormat("rmdir(%#s)", name);
+    }
     return result.status();
   }
   return *std::move(result);
@@ -1229,8 +1276,9 @@ absl::StatusOr<FileName> SearchPath(const FileName& program) {
       ::SearchPathW(nullptr, program.pointer(), extension, DWORD{buffer.size()},
                     buffer.data(), nullptr);
   if (length == 0) {
-    return WindowsStatus("SearchPathW(nullptr, %#s, %#s, %#x, ..., nullptr)",
-                         program, extension, buffer.size());
+    return WindowsStatus() << absl::StreamFormat(
+               "SearchPathW(nullptr, %#s, %#s, %#x, ..., nullptr)", program,
+               extension, buffer.size());
   }
   if (length >= buffer.size()) {
     return absl::FailedPreconditionError(
@@ -1262,7 +1310,9 @@ static void FlushEverything() {
   std::wcout.flush();
   std::cerr.flush();
   std::wcerr.flush();
-  if (std::fflush(nullptr) != 0) LOG(ERROR) << ErrnoStatus("fflush(nullptr)");
+  if (std::fflush(nullptr) != 0) {
+    LOG(ERROR) << ErrnoStatus() << "fflush(nullptr)";
+  }
 }
 
 absl::StatusOr<int> RunProcess(const FileName& program,
@@ -1316,7 +1366,8 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   if (options.output_file.has_value()) {
     startup_info.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     if (startup_info.hStdInput == INVALID_HANDLE_VALUE) {
-      return WindowsStatus("GetStdHandle(%u)", STD_INPUT_HANDLE);
+      return WindowsStatus()
+             << absl::StreamFormat("GetStdHandle(%u)", STD_INPUT_HANDLE);
     }
     constexpr DWORD access = GENERIC_WRITE;
     constexpr DWORD share = FILE_SHARE_READ;
@@ -1330,16 +1381,16 @@ absl::StatusOr<int> RunProcess(const FileName& program,
         ::CreateFileW(options.output_file->pointer(), access, share, &security,
                       disposition, attributes, nullptr);
     if (startup_info.hStdOutput == INVALID_HANDLE_VALUE) {
-      return WindowsStatus("CreateFileW(%#s, %#x, %#x, ..., %u, %#x, nullptr)",
-                           *options.output_file, access, share, disposition,
-                           attributes);
+      return WindowsStatus() << absl::StreamFormat(
+                 "CreateFileW(%#s, %#x, %#x, ..., %u, %#x, nullptr)",
+                 *options.output_file, access, share, disposition, attributes);
     }
     startup_info.hStdError = startup_info.hStdOutput;
   }
   const absl::Cleanup close_output = [&startup_info] {
     if (startup_info.dwFlags & STARTF_USESTDHANDLES) {
       if (!::CloseHandle(startup_info.hStdOutput)) {
-        LOG(ERROR) << WindowsStatus("CloseHandle");
+        LOG(ERROR) << WindowsStatus() << "CloseHandle";
       }
     }
   };
@@ -1347,16 +1398,16 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   if (!::CreateProcessW(abs_program->pointer(), Pointer(*command_line), nullptr,
                         nullptr, inherit_handles, flags, envp->data(), dirp,
                         &startup_info, &process_info)) {
-    return WindowsStatus(
-        "CreateProcessW(%#s, %#s, nullptr, nullptr, %d, %#x, ..., %#s)",
-        *abs_program, *command_line, inherit_handles, flags, dirp);
+    return WindowsStatus() << absl::StreamFormat(
+               "CreateProcessW(%#s, %#s, nullptr, nullptr, %d, %#x, ..., %#s)",
+               *abs_program, *command_line, inherit_handles, flags, dirp);
   }
   if (!::CloseHandle(process_info.hThread)) {
-    LOG(ERROR) << WindowsStatus("CloseHandle");
+    LOG(ERROR) << WindowsStatus() << "CloseHandle";
   }
   const absl::Cleanup close_handle = [&process_info] {
     if (!::CloseHandle(process_info.hProcess)) {
-      LOG(ERROR) << WindowsStatus("CloseHandle");
+      LOG(ERROR) << WindowsStatus() << "CloseHandle";
     }
   };
   const DWORD timeout_ms =
@@ -1372,18 +1423,21 @@ absl::StatusOr<int> RunProcess(const FileName& program,
       LOG(WARNING) << "Process timed out, sending CTRL + BREAK";
       if (!::GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,
                                       process_info.dwProcessId)) {
-        LOG(ERROR) << WindowsStatus("GenerateConsoleCtrlEvent(%u, %u)",
-                                    CTRL_BREAK_EVENT, process_info.dwProcessId);
+        LOG(ERROR) << WindowsStatus()
+                   << absl::StreamFormat("GenerateConsoleCtrlEvent(%u, %u)",
+                                         CTRL_BREAK_EVENT,
+                                         process_info.dwProcessId);
       }
       return absl::DeadlineExceededError(absl::StrFormat(
           "Deadline %v exceeded waiting for process (timeout %v)",
           options.deadline, absl::Milliseconds(timeout_ms)));
     default:
-      return WindowsStatus("WaitForSingleObject(..., %u)", timeout_ms);
+      return WindowsStatus()
+             << absl::StreamFormat("WaitForSingleObject(..., %u)", timeout_ms);
   }
   DWORD code;
   if (!::GetExitCodeProcess(process_info.hProcess, &code)) {
-    return WindowsStatus("GetExitCodeProcess");
+    return WindowsStatus() << absl::StreamFormat("GetExitCodeProcess");
   }
   // Emacs returns −1 on error, which the Windows C runtime will translate to
   // 0xFFFFFFFF.  Undo this cast, assuming that both DWORD and int use two’s
@@ -1411,11 +1465,11 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   }
   posix_spawn_file_actions_t actions;
   if (posix_spawn_file_actions_init(&actions) != 0) {
-    return ErrnoStatus("posix_spawn_file_actions_init");
+    return ErrnoStatus() << "posix_spawn_file_actions_init";
   }
   const absl::Cleanup cleanup = [&actions] {
     if (posix_spawn_file_actions_destroy(&actions) != 0) {
-      LOG(ERROR) << ErrnoStatus("posix_spawn_file_actions_destroy");
+      LOG(ERROR) << ErrnoStatus() << "posix_spawn_file_actions_destroy";
     }
   };
   if (options.output_file.has_value()) {
@@ -1424,14 +1478,15 @@ absl::StatusOr<int> RunProcess(const FileName& program,
     if (posix_spawn_file_actions_addopen(&actions, STDOUT_FILENO,
                                          options.output_file->pointer(), oflag,
                                          mode) != 0) {
-      return ErrnoStatus(
-          "posix_spawn_file_actions_addopen(..., %d, %#s, %#x, %#04o)",
-          STDOUT_FILENO, *options.output_file, oflag, mode);
+      return ErrnoStatus() << absl::StreamFormat(
+                 "posix_spawn_file_actions_addopen(..., %d, %#s, %#x, %#04o)",
+                 STDOUT_FILENO, *options.output_file, oflag, mode);
     }
     if (posix_spawn_file_actions_adddup2(&actions, STDOUT_FILENO,
                                          STDERR_FILENO) != 0) {
-      return ErrnoStatus("posix_spawn_file_actions_adddup2(..., %d, %d)",
-                         STDOUT_FILENO, STDERR_FILENO);
+      return ErrnoStatus() << absl::StreamFormat(
+                 "posix_spawn_file_actions_adddup2(..., %d, %d)", STDOUT_FILENO,
+                 STDERR_FILENO);
     }
   }
   if (options.directory.has_value()) {
@@ -1443,8 +1498,9 @@ absl::StatusOr<int> RunProcess(const FileName& program,
         &actions, options.directory->pointer());
 #  pragma GCC diagnostic pop
     if (result != 0) {
-      return ErrnoStatus("posix_spawn_file_actions_addchdir_np(..., %#s)",
-                         *options.directory);
+      return ErrnoStatus() << absl::StreamFormat(
+                 "posix_spawn_file_actions_addchdir_np(..., %#s)",
+                 *options.directory);
     }
   }
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
@@ -1453,15 +1509,17 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   const int error = posix_spawn(&pid, abs_program->pointer(), &actions, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
-    return ErrorStatus(std::error_code(error, std::system_category()),
-                       "posix_spawn(..., %#s)", *abs_program);
+    return ErrorStatus(std::error_code(error, std::system_category()))
+           << absl::StreamFormat("posix_spawn(..., %#s)", *abs_program);
   }
   pid_t status;
   int wstatus;
   do {
     status = waitpid(pid, &wstatus, 0);
   } while (status == -1 && errno == EINTR);
-  if (status != pid) return ErrnoStatus("waitpid(%d, ..., 0)", pid);
+  if (status != pid) {
+    return ErrnoStatus() << absl::StreamFormat("waitpid(%d, ..., 0)", pid);
+  }
   return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
 #endif
 }
@@ -1472,7 +1530,7 @@ class DosDevice::Impl final {
       [[maybe_unused]] const FileName& target) {
 #ifdef _WIN32
     const DWORD drives = ::GetLogicalDrives();
-    if (drives == 0) return WindowsStatus("GetLogicalDrives");
+    if (drives == 0) return WindowsStatus() << "GetLogicalDrives";
     constexpr wchar_t first = L'D';
     constexpr wchar_t last = L'Z';
     constexpr unsigned int count{last - first + 1};
@@ -1489,8 +1547,8 @@ class DosDevice::Impl final {
       constexpr DWORD flags = DDD_NO_BROADCAST_SYSTEM;
       const wchar_t name[] = {*it, L':', L'\0'};
       if (!::DefineDosDeviceW(flags, name, target.pointer())) {
-        return WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags, name,
-                             target);
+        return WindowsStatus() << absl::StreamFormat(
+                   "DefineDosDeviceW(%#x, %#s, %#s)", flags, name, target);
       }
       return absl::WrapUnique(new const Impl(name, target));
     }
@@ -1511,8 +1569,9 @@ class DosDevice::Impl final {
     constexpr DWORD flags = DDD_REMOVE_DEFINITION | DDD_EXACT_MATCH_ON_REMOVE |
                             DDD_NO_BROADCAST_SYSTEM;
     if (!::DefineDosDeviceW(flags, Pointer(name_), target_.pointer())) {
-      LOG(ERROR) << WindowsStatus("DefineDosDeviceW(%#x, %#s, %#s)", flags,
-                                  name_, target_);
+      LOG(ERROR) << WindowsStatus()
+                 << absl::StreamFormat("DefineDosDeviceW(%#x, %#s, %#s)", flags,
+                                       name_, target_);
     }
 #endif
   }
