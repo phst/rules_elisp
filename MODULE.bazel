@@ -177,7 +177,10 @@ local_path_override(
     path = "examples/ext",
 )
 
-# Temporary hack to deal with changed compatibility level in Abseil-C++.
+# Temporary hack to deal with changed compatibility level in Abseil-C++.  See
+# “Known Issues” in
+# https://github.com/abseil/abseil-cpp/releases/tag/20260526.0.
+# TODO: Remove the hack once we drop support for Bazel 8.5 and below.
 single_version_override(
     module_name = "abseil-cpp",
     version = "20260817.0",
