@@ -85,7 +85,6 @@ cc_binary(
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
-        "@abseil-cpp//absl/status:statusor",
     ],
 )
 
@@ -110,7 +109,6 @@ cc_binary(
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@protobuf//src/google/protobuf/io",
         "@protobuf//src/google/protobuf/json",
@@ -356,7 +354,6 @@ cc_library(
     implementation_deps = [
         ":platform",
         "@abseil-cpp//absl/status:status_macros",  # keep
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
     ],
     linkopts = LINKOPTS,
