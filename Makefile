@@ -16,6 +16,7 @@
 .PHONY: all generate check compdb coverage check-extra benchmark
 .PHONY: clean install uninstall
 .PHONY: MODULE.bazel.lock examples/ext/MODULE.bazel.lock
+.PHONY: compile_commands.json
 .SUFFIXES:
 
 SHELL = /bin/sh
@@ -60,7 +61,9 @@ GENHTMLFLAGS = --branch-coverage \
   --demangle-cpp='$(CPPFILT)' --demangle-cpp='--no-strip-underscore'
 CPPFILT ?= c++filt
 
-compdb:
+compdb: compile_commands.json
+
+compile_commands.json:
 	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands \
