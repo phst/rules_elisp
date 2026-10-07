@@ -23,6 +23,7 @@
 
 #include "absl/log/check.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/types/span.h"
@@ -38,9 +39,9 @@ static absl::StatusOr<int> RunEmacs(
     const std::string_view source_repository, const RepositoryType type,
     const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      ExecutableKind::kBinary, source_repository, original_args);
-  if (!runfiles.ok()) return runfiles.status();
+  ABSL_ASSIGN_OR_RETURN(const Runfiles runfiles,
+                        Runfiles::Create(ExecutableKind::kBinary,
+                                         source_repository, original_args));
   bool release;
   // We currently support pre-built Emacsen only on Windows because there are no
   // official binary release archives for Unix systems.
@@ -53,73 +54,61 @@ static absl::StatusOr<int> RunEmacs(
   std::optional<FileName> emacs;
   std::optional<DosDevice> dos_device;
   if (kWindows && release) {
-    const absl::StatusOr<FileName> root = runfiles->Resolve(install);
-    if (!root.ok()) return root.status();
+    ABSL_ASSIGN_OR_RETURN(const FileName root, runfiles.Resolve(install));
     // The filenames in the released Emacs archive are too long.  Create a
     // drive letter to shorten them.
-    absl::StatusOr<DosDevice> device = DosDevice::Create(*root);
-    if (!device.ok()) return device.status();
-    absl::StatusOr<FileName> program = FileName::FromString(
-        device->name() + RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe"));
-    if (!program.ok()) return program.status();
-    emacs = *std::move(program);
-    dos_device = *std::move(device);
+    ABSL_ASSIGN_OR_RETURN(DosDevice device, DosDevice::Create(root));
+    ABSL_ASSIGN_OR_RETURN(
+        FileName program,
+        FileName::FromString(device.name() +
+                             RULES_ELISP_NATIVE_LITERAL("\\bin\\emacs.exe")));
+    emacs = std::move(program);
+    dos_device = std::move(device);
   } else {
-    absl::StatusOr<FileName> binary = runfiles->Resolve(
-        absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe"));
-    if (!binary.ok()) return binary.status();
-    emacs = *std::move(binary);
+    ABSL_ASSIGN_OR_RETURN(
+        FileName binary,
+        runfiles.Resolve(
+            absl::StrCat(install, release ? "/bin/emacs.exe" : "/emacs.exe")));
+    emacs = std::move(binary);
   }
   CHECK(emacs.has_value());
   std::vector<NativeString> args;
   if (!release) {
-    const absl::StatusOr<FileName> dump =
-        runfiles->Resolve(absl::StrCat(install, "/emacs.pdmp"));
-    if (!dump.ok()) return dump.status();
-    args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + dump->string());
+    ABSL_ASSIGN_OR_RETURN(const FileName dump, runfiles.Resolve(absl::StrCat(
+                                                   install, "/emacs.pdmp")));
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--dump-file=") + dump.string());
   }
   if (!original_args.empty()) {
     args.insert(args.end(), std::next(original_args.begin()),
                 original_args.end());
   }
-  absl::StatusOr<Environment> env = runfiles->Environ();
-  if (!env.ok()) return env.status();
+  ABSL_ASSIGN_OR_RETURN(Environment env, runfiles.Environ());
   if (!release) {
-    const absl::StatusOr<FileName> etc =
-        runfiles->Resolve(absl::StrCat(install, "/etc"));
-    if (!etc.ok()) return etc.status();
-    const absl::StatusOr<FileName> lisp =
-        runfiles->Resolve(absl::StrCat(install, "/lisp"));
-    if (!lisp.ok()) return lisp.status();
-    const absl::StatusOr<FileName> libexec =
-        runfiles->Resolve(absl::StrCat(install, "/libexec"));
-    if (!libexec.ok()) return libexec.status();
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), etc->string());
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), etc->string());
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), lisp->string());
-    env->Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec->string());
+    ABSL_ASSIGN_OR_RETURN(const FileName etc,
+                          runfiles.Resolve(absl::StrCat(install, "/etc")));
+    ABSL_ASSIGN_OR_RETURN(const FileName lisp,
+                          runfiles.Resolve(absl::StrCat(install, "/lisp")));
+    ABSL_ASSIGN_OR_RETURN(const FileName libexec,
+                          runfiles.Resolve(absl::StrCat(install, "/libexec")));
+    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), etc.string());
+    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), etc.string());
+    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), lisp.string());
+    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec.string());
   }
-  absl::StatusOr<Environment> orig_env = Environment::Current();
-  if (!orig_env.ok()) return orig_env.status();
-  env->Merge(*orig_env);
+  ABSL_ASSIGN_OR_RETURN(Environment orig_env, Environment::Current());
+  env.Merge(orig_env);
   if constexpr (kWindows) {
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.
     for (const NativeString& arg : args) {
-      if (const absl::Status status = CheckAscii(arg); !status.ok()) {
-        return status;
-      }
+      ABSL_RETURN_IF_ERROR(CheckAscii(arg));
     }
-    for (const auto& [name, value] : *env) {
-      if (const absl::Status status = CheckAscii(name); !status.ok()) {
-        return status;
-      }
-      if (const absl::Status status = CheckAscii(value); !status.ok()) {
-        return status;
-      }
+    for (const auto& [name, value] : env) {
+      ABSL_RETURN_IF_ERROR(CheckAscii(name));
+      ABSL_RETURN_IF_ERROR(CheckAscii(value));
     }
   }
-  return RunProcess(*emacs, args, *env);
+  return RunProcess(*emacs, args, env);
 }
 
 absl::StatusOr<int> Main(

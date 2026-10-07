@@ -55,6 +55,7 @@ cc_binary(
         "@abseil-cpp//absl/log:globals",
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/types:span",
@@ -83,6 +84,7 @@ cc_binary(
         "@abseil-cpp//absl/log:globals",
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
     ],
 )
@@ -107,6 +109,7 @@ cc_binary(
         "@abseil-cpp//absl/log:globals",
         "@abseil-cpp//absl/log:initialize",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@protobuf//src/google/protobuf/io",
@@ -153,6 +156,7 @@ cc_library(
         ":system",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings",
         "@rules_cc//cc/runfiles",  # keep
     ],
@@ -177,6 +181,7 @@ cc_library(
         ":strings",
         ":system",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
     ],
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -206,6 +211,7 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings:str_format",
         "@rules_cc//cc/runfiles",  # keep
     ],
@@ -242,6 +248,7 @@ cc_library(
         ":system",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
@@ -288,6 +295,7 @@ cc_library(
         ":strings",
         ":system",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings:str_format",
     ],
     linkopts = LINKOPTS,
@@ -320,6 +328,7 @@ cc_library(
         "@abseil-cpp//absl/log:die_if_null",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings:str_format",
         "@protobuf//:protobuf_lite",
         "@protobuf//src/google/protobuf/io",
@@ -346,6 +355,7 @@ cc_library(
     features = FEATURES,
     implementation_deps = [
         ":platform",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
     ],
@@ -369,6 +379,7 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
     ],
@@ -405,6 +416,7 @@ cc_library(
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/random",
         "@abseil-cpp//absl/status:status_builder",  # keep
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/types:source_location",  # keep
     ],

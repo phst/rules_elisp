@@ -1,4 +1,4 @@
-// Copyright 2025 Philipp Stephani
+// Copyright 2025, 2026 Philipp Stephani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 
 #include "absl/cleanup/cleanup.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "gmock/gmock.h"
@@ -34,10 +35,9 @@ using absl_testing::IsOkAndHolds;
 using absl_testing::StatusIs;
 
 static absl::StatusOr<FileName> TempDir() {
-  const absl::StatusOr<NativeString> native =
-      ToNative(::testing::TempDir(), Encoding::kAscii);
-  if (!native.ok()) return native.status();
-  return FileName::FromString(*native);
+  ABSL_ASSIGN_OR_RETURN(const NativeString native,
+                        ToNative(::testing::TempDir(), Encoding::kAscii));
+  return FileName::FromString(native);
 }
 
 TEST(RunfilesTest, ResolvesRunfile) {

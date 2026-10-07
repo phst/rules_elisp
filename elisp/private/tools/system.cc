@@ -92,6 +92,7 @@
 #include "absl/random/random.h"  // IWYU pragma: keep, only on Windows
 #include "absl/status/status.h"
 #include "absl/status/status_builder.h"
+#include "absl/status/status_macros.h"
 #include "absl/strings/ascii.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -341,9 +342,8 @@ absl::StatusOr<FileName> FileName::Child(const FileName& child) const {
 }
 
 absl::StatusOr<FileName> FileName::Child(const NativeStringView child) const {
-  const absl::StatusOr<FileName> name = FileName::FromString(child);
-  if (!name.ok()) return name.status();
-  return this->Child(*name);
+  ABSL_ASSIGN_OR_RETURN(const FileName name, FileName::FromString(child));
+  return this->Child(name);
 }
 
 absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
@@ -371,9 +371,8 @@ absl::StatusOr<FileName> FileName::Join(const FileName& descendant) const {
 
 absl::StatusOr<FileName> FileName::Join(
     const NativeStringView descendant) const {
-  const absl::StatusOr<FileName> name = FileName::FromString(descendant);
-  if (!name.ok()) return name.status();
-  return this->Join(*name);
+  ABSL_ASSIGN_OR_RETURN(const FileName name, FileName::FromString(descendant));
+  return this->Join(name);
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::s> AbslFormatConvert(
@@ -506,8 +505,7 @@ absl::StatusOr<std::string> ToNarrow(const NativeStringView string,
     // Windows doesn’t support the ASCII codepage with WC_ERR_INVALID_CHARS.  So
     // we check for non-ASCII first and use UTF-8 (as superset of ASCII) in all
     // cases.
-    const absl::Status status = CheckAscii(string);
-    if (!status.ok()) return status;
+    ABSL_RETURN_IF_ERROR(CheckAscii(string));
   }
   constexpr UINT codepage = CP_UTF8;
   constexpr unsigned int max_bytes_per_wchar = 3;
@@ -551,8 +549,7 @@ absl::StatusOr<NativeString> ToNative(
     // Windows doesn’t support the ASCII codepage with MB_ERR_INVALID_CHARS.  So
     // we check for non-ASCII first and use UTF-8 (as superset of ASCII) in all
     // cases.
-    const absl::Status status = CheckAscii(string);
-    if (!status.ok()) return status;
+    ABSL_RETURN_IF_ERROR(CheckAscii(string));
   }
   constexpr UINT codepage = CP_UTF8;
   constexpr DWORD flags = MB_ERR_INVALID_CHARS;
@@ -622,9 +619,8 @@ absl::StatusOr<FileName> FileName::MakeAbsolute() const {
   return FileName::FromString(std::wstring_view(buffer, result));
 #else
   if (string_.front() == '/') return *this;
-  const absl::StatusOr<FileName> cwd = WorkingDirectory();
-  if (!cwd.ok()) return cwd.status();
-  return cwd->Join(*this);
+  ABSL_ASSIGN_OR_RETURN(const FileName cwd, WorkingDirectory());
+  return cwd.Join(*this);
 #endif
 }
 
@@ -823,17 +819,14 @@ static absl::Status DoCreateDirectories(const FileName& name, const int depth) {
   }
   CHECK(name.IsAbsolute());
   if (IsDirectory(name)) return absl::OkStatus();
-  const absl::StatusOr<FileName> parent = name.Parent();
-  if (!parent.ok()) return parent.status();
-  const absl::Status status = DoCreateDirectories(*parent, depth + 1);
-  if (!status.ok()) return status;
+  ABSL_ASSIGN_OR_RETURN(const FileName parent, name.Parent());
+  ABSL_RETURN_IF_ERROR(DoCreateDirectories(parent, depth + 1));
   return CreateDirectory(name);
 }
 
 absl::Status CreateDirectories(const FileName& name) {
-  const absl::StatusOr<FileName> abs = name.MakeAbsolute();
-  if (!abs.ok()) return abs.status();
-  return DoCreateDirectories(*abs, 0);
+  ABSL_ASSIGN_OR_RETURN(const FileName abs, name.MakeAbsolute());
+  return DoCreateDirectories(abs, 0);
 }
 
 #undef RemoveDirectory
@@ -880,9 +873,8 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(
   do {
     const std::wstring_view name = data.cFileName;
     if (name == L"." || name == L"..") continue;
-    absl::StatusOr<FileName> file = FileName::FromString(name);
-    if (!file.ok()) return file.status();
-    result.push_back(*std::move(file));
+    ABSL_ASSIGN_OR_RETURN(FileName file, FileName::FromString(name));
+    result.push_back(std::move(file));
   } while (::FindNextFileW(handle, &data));
   if (::GetLastError() != ERROR_NO_MORE_FILES) {
     return WindowsStatus() << "FindNextFileW";
@@ -909,9 +901,8 @@ absl::StatusOr<std::vector<FileName>> ListDirectory(
     constexpr int flags = FNM_PATHNAME | FNM_NOESCAPE | FNM_PERIOD;
     switch (const int error = fnmatch(Pointer(pat), ptr, flags); error) {
       case 0: {
-        absl::StatusOr<FileName> file = FileName::FromString(name);
-        if (!file.ok()) return file.status();
-        result.push_back(*std::move(file));
+        ABSL_ASSIGN_OR_RETURN(FileName file, FileName::FromString(name));
+        result.push_back(std::move(file));
         break;
       }
       case FNM_NOMATCH:
@@ -959,27 +950,26 @@ static int Remove(const char* const absl_nonnull name, const struct stat*,
 #endif
 
 absl::Status RemoveTree(const FileName& directory) {
-  const absl::StatusOr<FileName> abs = directory.MakeAbsolute();
-  if (!abs.ok()) return abs.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName abs, directory.MakeAbsolute());
 #ifdef _WIN32
   SHFILEOPSTRUCTW op;
   op.hwnd = nullptr;
   op.wFunc = FO_DELETE;
-  const std::wstring from = abs->string() + L'\0';
+  const std::wstring from = abs.string() + L'\0';
   op.pFrom = from.c_str();
   op.pTo = nullptr;
   op.fFlags = FOF_NO_UI;
   const int result = ::SHFileOperationW(&op);
   if (result != 0 || op.fAnyOperationsAborted) {
     return absl::AbortedError(
-        absl::StrFormat("Removal of directory tree %s was aborted", *abs));
+        absl::StrFormat("Removal of directory tree %s was aborted", abs));
   }
 #else
   constexpr int fd_limit = 100;
   constexpr int flags = FTW_DEPTH | FTW_MOUNT | FTW_PHYS;
-  const int result = nftw(abs->pointer(), Remove, fd_limit, flags);
+  const int result = nftw(abs.pointer(), Remove, fd_limit, flags);
   if (result != 0) {
-    return ErrnoStatus() << absl::StreamFormat("nftw(%#s, ..., %d, %#x)", *abs,
+    return ErrnoStatus() << absl::StreamFormat("nftw(%#s, ..., %d, %#x)", abs,
                                                fd_limit, flags);
   }
 #endif
@@ -1146,8 +1136,7 @@ class EnvironmentBlock final {
 }  // namespace
 
 absl::StatusOr<Environment> Environment::Current() {
-  absl::StatusOr<EnvironmentBlock> block = EnvironmentBlock::Current();
-  if (!block.ok()) return block.status();
+  ABSL_ASSIGN_OR_RETURN(EnvironmentBlock block, EnvironmentBlock::Current());
   Map map;
   // Skip over the first character to properly deal with the magic “per-drive
   // current directory” variables on Windows,
@@ -1155,7 +1144,7 @@ absl::StatusOr<Environment> Environment::Current() {
   // names start with an equals sign.
   constexpr std::size_t skip = kWindows ? 1 : 0;
   NativeStringView var;
-  while (block->Next(var)) {
+  while (block.Next(var)) {
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
           absl::StrFormat("Invalid environment block entry %s", var));
@@ -1239,10 +1228,9 @@ absl::StatusOr<FileName> CreateTemporaryDirectory() {
     if (name == nullptr) {
       return absl::UnavailableError("Cannot create temporary name");
     }
-    absl::StatusOr<FileName> result = FileName::FromString(name);
-    if (!result.ok()) return result.status();
-    status = CreateDirectory(*result);
-    if (status.ok()) return *std::move(result);
+    ABSL_ASSIGN_OR_RETURN(FileName result, FileName::FromString(name));
+    status = CreateDirectory(result);
+    if (status.ok()) return std::move(result);
     LOG(ERROR) << status;
   }
   CHECK(!status.ok());
@@ -1331,8 +1319,7 @@ absl::StatusOr<int> RunProcess(const FileName& program,
         "Program name %s doesn’t contain a directory separator character",
         program));
   }
-  const absl::StatusOr<FileName> abs_program = program.MakeAbsolute();
-  if (!abs_program.ok()) return abs_program.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName abs_program, program.MakeAbsolute());
   std::vector<NativeString> args_vec = {program.string()};
   args_vec.insert(args_vec.end(), args.cbegin(), args.cend());
   std::vector<NativeString> final_env;
@@ -1345,13 +1332,11 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   FlushEverything();
   const absl::Cleanup flush = FlushEverything;
 #ifdef _WIN32
-  absl::StatusOr<std::wstring> command_line = BuildCommandLine(args_vec);
-  if (!command_line.ok()) return command_line.status();
+  ABSL_ASSIGN_OR_RETURN(std::wstring command_line, BuildCommandLine(args_vec));
   const BOOL inherit_handles = options.output_file.has_value() ? TRUE : FALSE;
   const DWORD flags = CREATE_UNICODE_ENVIRONMENT |
                       (has_deadline ? CREATE_NEW_PROCESS_GROUP : 0);
-  absl::StatusOr<std::wstring> envp = BuildEnvironmentBlock(final_env);
-  if (!envp.ok()) return envp.status();
+  ABSL_ASSIGN_OR_RETURN(std::wstring envp, BuildEnvironmentBlock(final_env));
   const absl_nullable LPCWSTR dirp =
       options.directory.has_value() ? options.directory->pointer() : nullptr;
   STARTUPINFOW startup_info;
@@ -1395,12 +1380,12 @@ absl::StatusOr<int> RunProcess(const FileName& program,
     }
   };
   PROCESS_INFORMATION process_info;
-  if (!::CreateProcessW(abs_program->pointer(), Pointer(*command_line), nullptr,
-                        nullptr, inherit_handles, flags, envp->data(), dirp,
+  if (!::CreateProcessW(abs_program.pointer(), Pointer(command_line), nullptr,
+                        nullptr, inherit_handles, flags, envp.data(), dirp,
                         &startup_info, &process_info)) {
     return WindowsStatus() << absl::StreamFormat(
                "CreateProcessW(%#s, %#s, nullptr, nullptr, %d, %#x, ..., %#s)",
-               *abs_program, *command_line, inherit_handles, flags, dirp);
+               abs_program, command_line, inherit_handles, flags, dirp);
   }
   if (!::CloseHandle(process_info.hThread)) {
     LOG(ERROR) << WindowsStatus() << "CloseHandle";
@@ -1506,11 +1491,11 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   const std::vector<char* absl_nullable> argv = Pointers(args_vec);
   const std::vector<char* absl_nullable> envp = Pointers(final_env);
   pid_t pid;
-  const int error = posix_spawn(&pid, abs_program->pointer(), &actions, nullptr,
+  const int error = posix_spawn(&pid, abs_program.pointer(), &actions, nullptr,
                                 argv.data(), envp.data());
   if (error != 0) {
     return ErrorStatus(std::error_code(error, std::system_category()))
-           << absl::StreamFormat("posix_spawn(..., %#s)", *abs_program);
+           << absl::StreamFormat("posix_spawn(..., %#s)", abs_program);
   }
   pid_t status;
   int wstatus;
@@ -1592,10 +1577,9 @@ class DosDevice::Impl final {
 };
 
 absl::StatusOr<DosDevice> DosDevice::Create(const FileName& target) {
-  absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> impl =
-      Impl::Create(target);
-  if (!impl.ok()) return impl.status();
-  return DosDevice(*std::move(impl));
+  ABSL_ASSIGN_OR_RETURN(absl_nonnull std::unique_ptr<const Impl> impl,
+                        Impl::Create(target));
+  return DosDevice(std::move(impl));
 }
 
 DosDevice::DosDevice(absl_nonnull std::unique_ptr<const Impl> impl)

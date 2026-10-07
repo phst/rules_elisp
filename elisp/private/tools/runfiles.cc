@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_format.h"
@@ -46,22 +47,20 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return absl::InvalidArgumentError(absl::StrFormat(
         "Source repository %s contains null character", source_repository));
   }
-  if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
-    return status;
-  }
-  const absl::StatusOr<std::string> argv0 =
-      original_argv.empty() ? std::string()
-                            : ToNarrow(original_argv.front(), Encoding::kAscii);
-  if (!argv0.ok()) return argv0.status();
-  if (ContainsNull(*argv0)) {
+  ABSL_RETURN_IF_ERROR(CheckAscii(source_repository));
+  ABSL_ASSIGN_OR_RETURN(const std::string argv0,
+                        original_argv.empty() ? std::string()
+                                              : ToNarrow(original_argv.front(),
+                                                         Encoding::kAscii));
+  if (ContainsNull(argv0)) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("First argument %s contains null character", *argv0));
+        absl::StrFormat("First argument %s contains null character", argv0));
   }
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl;
   switch (kind) {
     case ExecutableKind::kBinary:
-      impl.reset(Impl::Create(*argv0, std::string(source_repository), &error));
+      impl.reset(Impl::Create(argv0, std::string(source_repository), &error));
       break;
     case ExecutableKind::kTest:
       impl.reset(Impl::CreateForTest(std::string(source_repository), &error));
@@ -87,34 +86,30 @@ absl::StatusOr<Runfiles> Runfiles::Create(
     return absl::InvalidArgumentError(absl::StrFormat(
         "Source repository %s contains null character", source_repository));
   }
-  if (const absl::Status status = CheckAscii(source_repository); !status.ok()) {
-    return status;
-  }
-  const absl::StatusOr<std::string> argv0 =
-      original_argv.empty() ? std::string()
-                            : ToNarrow(original_argv.front(), Encoding::kAscii);
-  if (!argv0.ok()) return argv0.status();
-  if (ContainsNull(*argv0)) {
+  ABSL_RETURN_IF_ERROR(CheckAscii(source_repository));
+  ABSL_ASSIGN_OR_RETURN(const std::string argv0,
+                        original_argv.empty() ? std::string()
+                                              : ToNarrow(original_argv.front(),
+                                                         Encoding::kAscii));
+  if (ContainsNull(argv0)) {
     return absl::InvalidArgumentError(
-        absl::StrFormat("First argument %s contains null character", *argv0));
+        absl::StrFormat("First argument %s contains null character", argv0));
   }
   std::string narrow_manifest;
   if (manifest.has_value()) {
-    absl::StatusOr<std::string> narrow =
-        ToNarrow(manifest->string(), Encoding::kAscii);
-    if (!narrow.ok()) return narrow.status();
-    narrow_manifest = *std::move(narrow);
+    ABSL_ASSIGN_OR_RETURN(std::string narrow,
+                          ToNarrow(manifest->string(), Encoding::kAscii));
+    narrow_manifest = std::move(narrow);
   }
   std::string narrow_directory;
   if (directory.has_value()) {
-    absl::StatusOr<std::string> narrow =
-        ToNarrow(directory->string(), Encoding::kAscii);
-    if (!narrow.ok()) return narrow.status();
-    narrow_directory = *std::move(narrow);
+    ABSL_ASSIGN_OR_RETURN(std::string narrow,
+                          ToNarrow(directory->string(), Encoding::kAscii));
+    narrow_directory = std::move(narrow);
   }
   std::string error;
   absl_nullable std::unique_ptr<Impl> impl(
-      Impl::Create(*argv0, narrow_manifest, narrow_directory,
+      Impl::Create(argv0, narrow_manifest, narrow_directory,
                    std::string(source_repository), &error));
   if (impl == nullptr) {
     return absl::FailedPreconditionError(
@@ -130,30 +125,26 @@ absl::StatusOr<FileName> Runfiles::Resolve(const std::string_view name) const {
     return absl::InvalidArgumentError(
         absl::StrFormat("Runfile name %s contains null character", name));
   }
-  if (const absl::Status status = CheckAscii(name); !status.ok()) return status;
+  ABSL_RETURN_IF_ERROR(CheckAscii(name));
   const std::string resolved = impl_->Rlocation(std::string(name));
   if (resolved.empty()) {
     return absl::NotFoundError(absl::StrCat("runfile not found: ", name));
   }
-  const absl::StatusOr<NativeString> native =
-      ToNative(resolved, Encoding::kAscii);
-  if (!native.ok()) return native.status();
-  const absl::StatusOr<FileName> result = FileName::FromString(*native);
-  if (!result.ok()) return result.status();
-  return result->MakeAbsolute();
+  ABSL_ASSIGN_OR_RETURN(const NativeString native,
+                        ToNative(resolved, Encoding::kAscii));
+  ABSL_ASSIGN_OR_RETURN(const FileName result, FileName::FromString(native));
+  return result.MakeAbsolute();
 }
 
 absl::StatusOr<Environment> Runfiles::Environ() const {
   CHECK_NE(impl_, nullptr);
   std::vector<std::pair<NativeString, NativeString>> pairs;
   for (const auto& [narrow_key, narrow_value] : impl_->EnvVars()) {
-    const absl::StatusOr<NativeString> key =
-        ToNative(narrow_key, Encoding::kAscii);
-    if (!key.ok()) return key.status();
-    const absl::StatusOr<NativeString> value =
-        ToNative(narrow_value, Encoding::kAscii);
-    if (!value.ok()) return value.status();
-    pairs.emplace_back(*key, *value);
+    ABSL_ASSIGN_OR_RETURN(const NativeString key,
+                          ToNative(narrow_key, Encoding::kAscii));
+    ABSL_ASSIGN_OR_RETURN(const NativeString value,
+                          ToNative(narrow_value, Encoding::kAscii));
+    pairs.emplace_back(key, value);
   }
   return Environment::Create(pairs.cbegin(), pairs.cend());
 }

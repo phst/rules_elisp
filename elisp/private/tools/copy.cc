@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include <string>
 
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 
@@ -30,11 +31,8 @@ namespace rules_elisp {
 
 absl::Status CopyFiles(const FileName& from, const FileName& to,
                        const FileName& list) {
-  const absl::StatusOr<FileName> from_abs = from.MakeAbsolute();
-  if (!from_abs.ok()) return from_abs.status();
-
-  const absl::StatusOr<FileName> to_abs = to.MakeAbsolute();
-  if (!to_abs.ok()) return to_abs.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName from_abs, from.MakeAbsolute());
+  ABSL_ASSIGN_OR_RETURN(const FileName to_abs, to.MakeAbsolute());
 
   std::ifstream stream(list.string(), std::ios::in | std::ios::binary);
   if (!stream.is_open() || !stream.good()) {
@@ -45,26 +43,16 @@ absl::Status CopyFiles(const FileName& from, const FileName& to,
 
   std::string line;
   while (std::getline(stream, line)) {
-    const absl::StatusOr<NativeString> native = ToNative(line, Encoding::kUtf8);
-    if (!native.ok()) return native.status();
-    absl::StatusOr<FileName> from_file = FileName::FromString(*native);
-    if (!from_file.ok()) return from_file.status();
-    from_file = from_file->MakeAbsolute();
-    if (!from_file.ok()) return from_file.status();
-    const absl::StatusOr<FileName> relative =
-        from_file->MakeRelative(*from_abs);
-    if (!relative.ok()) return relative.status();
-    const absl::StatusOr<FileName> to_file = to_abs->Join(*relative);
-    if (!to_file.ok()) return to_file.status();
-    const absl::StatusOr<FileName> parent = to_file->Parent();
-    if (!parent.ok()) return parent.status();
-    if (const absl::Status status = CreateDirectories(*parent); !status.ok()) {
-      return status;
-    }
-    if (const absl::Status status = CopyFile(*from_file, *to_file);
-        !status.ok()) {
-      return status;
-    }
+    ABSL_ASSIGN_OR_RETURN(const NativeString native,
+                          ToNative(line, Encoding::kUtf8));
+    ABSL_ASSIGN_OR_RETURN(FileName from_file, FileName::FromString(native));
+    ABSL_ASSIGN_OR_RETURN(from_file, from_file.MakeAbsolute());
+    ABSL_ASSIGN_OR_RETURN(const FileName relative,
+                          from_file.MakeRelative(from_abs));
+    ABSL_ASSIGN_OR_RETURN(const FileName to_file, to_abs.Join(relative));
+    ABSL_ASSIGN_OR_RETURN(const FileName parent, to_file.Parent());
+    ABSL_RETURN_IF_ERROR(CreateDirectories(parent));
+    ABSL_RETURN_IF_ERROR(CopyFile(from_file, to_file));
   }
 
   if (stream.bad() || !stream.eof()) {

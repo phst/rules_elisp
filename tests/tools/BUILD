@@ -72,6 +72,7 @@ cc_test(
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/cleanup",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
@@ -139,6 +140,7 @@ cc_test(
         "//elisp/private/tools:system",
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@googletest//:gtest",
@@ -176,6 +178,7 @@ cc_test(
         "@abseil-cpp//absl/cleanup",
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
+        "@abseil-cpp//absl/status:status_macros",  # keep
         "@abseil-cpp//absl/status:status_matchers",
         "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",

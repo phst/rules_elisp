@@ -28,6 +28,7 @@
 #include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "google/protobuf/io/zero_copy_stream_impl.h"
@@ -51,21 +52,19 @@ static absl::Status Extract(const NativeStringView param_file) {
 
   std::string param_line;
   std::getline(param_stream, param_line);
-  const absl::StatusOr<NativeString> output_file =
-      ToNative(param_line, Encoding::kUtf8);
-  if (!output_file.ok()) return output_file.status();
+  ABSL_ASSIGN_OR_RETURN(const NativeString output_file,
+                        ToNative(param_line, Encoding::kUtf8));
 
   RE2 regex = R"(\(provide '([-/\w]+)\).*)";
   CHECK(regex.ok()) << regex.error();
   std::vector<std::string> features_vector;
   while (std::getline(param_stream, param_line)) {
-    const absl::StatusOr<NativeString> lisp_file =
-        ToNative(param_line, Encoding::kUtf8);
-    if (!lisp_file.ok()) return lisp_file.status();
-    std::ifstream lisp_stream(*lisp_file, std::ios::in | std::ios::binary);
+    ABSL_ASSIGN_OR_RETURN(const NativeString lisp_file,
+                          ToNative(param_line, Encoding::kUtf8));
+    std::ifstream lisp_stream(lisp_file, std::ios::in | std::ios::binary);
     if (!lisp_stream.is_open() || !lisp_stream.good()) {
       return absl::FailedPreconditionError(
-          absl::StrFormat("Cannot open Lisp file %s", *lisp_file));
+          absl::StrFormat("Cannot open Lisp file %s", lisp_file));
     }
     lisp_stream.imbue(std::locale::classic());
     std::string lisp_line;
@@ -77,7 +76,7 @@ static absl::Status Extract(const NativeStringView param_file) {
     }
     if (lisp_stream.bad() || !lisp_stream.eof()) {
       return absl::FailedPreconditionError(
-          absl::StrFormat("Cannot read Lisp file %s", *lisp_file));
+          absl::StrFormat("Cannot read Lisp file %s", lisp_file));
     }
   }
 
@@ -97,7 +96,7 @@ static absl::Status Extract(const NativeStringView param_file) {
       std::unique(features_vector.begin(), features_vector.end()));
 
   std::ofstream output_stream(
-      *output_file, std::ios::out | std::ios::trunc | std::ios::binary);
+      output_file, std::ios::out | std::ios::trunc | std::ios::binary);
   if (!output_stream.is_open() || !output_stream.good()) {
     return absl::FailedPreconditionError(
         absl::StrFormat("Cannot open output file %s", param_file));
@@ -105,9 +104,8 @@ static absl::Status Extract(const NativeStringView param_file) {
   output_stream.imbue(std::locale::classic());
 
   google::protobuf::io::OstreamOutputStream adapter(&output_stream);
-  const absl::Status status =
-      google::protobuf::json::MessageToJsonStream(features_proto, &adapter);
-  if (!status.ok()) return status;
+  ABSL_RETURN_IF_ERROR(
+      google::protobuf::json::MessageToJsonStream(features_proto, &adapter));
 
   output_stream.flush();
   if (!output_stream.good()) {

@@ -29,6 +29,7 @@
 #include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
@@ -72,16 +73,15 @@ static NativeString AsPosix(const FileName& name) {
 static absl::Status Run(const FileName& temp, const FileName& build,
                         const FileName& bash, FileName program,
                         std::vector<NativeString> args) {
-  absl::StatusOr<Environment> env = Environment::Current();
-  if (!env.ok()) return env.status();
+  ABSL_ASSIGN_OR_RETURN(Environment env, Environment::Current());
   if constexpr (kWindows) {
     // Building Emacs requires MinGW, see nt/INSTALL.W64.  Therefore we
     // invoke commands through the MinGW shell, see
     // https://www.msys2.org/wiki/Launchers/#the-idea.
-    env->Add(RULES_ELISP_NATIVE_LITERAL("MSYSTEM"),
-             RULES_ELISP_NATIVE_LITERAL("MINGW64"));
-    env->Add(RULES_ELISP_NATIVE_LITERAL("CHERE_INVOKING"),
-             RULES_ELISP_NATIVE_LITERAL("1"));
+    env.Add(RULES_ELISP_NATIVE_LITERAL("MSYSTEM"),
+            RULES_ELISP_NATIVE_LITERAL("MINGW64"));
+    env.Add(RULES_ELISP_NATIVE_LITERAL("CHERE_INVOKING"),
+            RULES_ELISP_NATIVE_LITERAL("1"));
     args = {
         RULES_ELISP_NATIVE_LITERAL("-l"),
         RULES_ELISP_NATIVE_LITERAL("-c"),
@@ -94,9 +94,9 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   ProcessOptions options;
   options.directory = build;
   options.output_file = output;
-  const absl::StatusOr<int> code = RunProcess(program, args, *env, options);
-  if (!code.ok()) return code.status();
-  if (*code == 0) return absl::OkStatus();
+  ABSL_ASSIGN_OR_RETURN(const int code,
+                        RunProcess(program, args, env, options));
+  if (code == 0) return absl::OkStatus();
   {
     std::ifstream stream(output.string(), std::ios::in | std::ios::binary);
     std::cerr << absl::StreamFormat("command %s failed, output follows:",
@@ -108,40 +108,36 @@ static absl::Status Run(const FileName& temp, const FileName& build,
             << absl::StreamFormat("temporary build directory is %s", temp)
             << std::endl;
   return absl::UnavailableError(absl::StrFormat(
-      "Command %s failed with code %d", QuoteForBash(program, args), *code));
+      "Command %s failed with code %d", QuoteForBash(program, args), code));
 }
 
 static absl::StatusOr<FileName> Join(
     const FileName& dir, const absl::Span<const NativeStringView> elts) {
   FileName result = dir;
   for (const NativeStringView elt : elts) {
-    absl::StatusOr<FileName> child = result.Child(elt);
-    if (!child.ok()) return child.status();
-    result = *std::move(child);
+    ABSL_ASSIGN_OR_RETURN(FileName child, result.Child(elt));
+    result = std::move(child);
   }
   return result;
 }
 
 static absl::StatusOr<FileName> GlobUnique(
     const FileName& dir, const absl::Span<const NativeString> patterns) {
-  absl::StatusOr<FileName> abs = dir.MakeAbsolute();
-  if (!abs.ok()) return abs.status();
-  FileName result = *std::move(abs);
+  ABSL_ASSIGN_OR_RETURN(FileName abs, dir.MakeAbsolute());
+  FileName result = std::move(abs);
   for (const NativeString& pattern : patterns) {
-    const absl::StatusOr<std::vector<FileName>> entries =
-        ListDirectory(result, pattern);
-    if (!entries.ok()) return entries.status();
-    if (entries->empty()) {
+    ABSL_ASSIGN_OR_RETURN(const std::vector<FileName> entries,
+                          ListDirectory(result, pattern));
+    if (entries.empty()) {
       return absl::NotFoundError(absl::StrFormat(
           "No entry matching %s in directory %s found", pattern, result));
     }
-    if (const auto n = entries->size(); n > 1) {
+    if (const auto n = entries.size(); n > 1) {
       return absl::FailedPreconditionError(absl::StrFormat(
           "Found %d entries matching %s in directory %s", n, pattern, result));
     }
-    absl::StatusOr<FileName> child = result.Child(entries->front());
-    if (!child.ok()) return child.status();
-    result = *std::move(child);
+    ABSL_ASSIGN_OR_RETURN(FileName child, result.Child(entries.front()));
+    result = std::move(child);
   }
   return result;
 }
@@ -151,11 +147,8 @@ static absl::Status RenameResolved(const FileName& src, const FileName& dest) {
     return absl::AlreadyExistsError(
         absl::StrFormat("destination file %s already exists", dest));
   }
-  const absl::StatusOr<FileName> resolved = src.Resolve();
-  if (!resolved.ok()) return resolved.status();
-  if (const absl::Status status = Rename(*resolved, dest); !status.ok()) {
-    return status;
-  }
+  ABSL_ASSIGN_OR_RETURN(const FileName resolved, src.Resolve());
+  ABSL_RETURN_IF_ERROR(Rename(resolved, dest));
   if (const absl::Status status = Unlink(src);
       !status.ok() && !absl::IsNotFound(status)) {
     return status;
@@ -168,25 +161,19 @@ static absl::Status Build(const FileName& source, const FileName& install,
                           [[maybe_unused]] const FileName& bash,
                           const FileName& cc, const NativeStringView cflags,
                           const NativeStringView ldflags) {
-  absl::StatusOr<FileName> temp = CreateTemporaryDirectory();
-  if (!temp.ok()) return temp.status();
-
+  ABSL_ASSIGN_OR_RETURN(FileName temp, CreateTemporaryDirectory());
   const FileName build =
-      temp->Child(RULES_ELISP_NATIVE_LITERAL("build")).value();
+      temp.Child(RULES_ELISP_NATIVE_LITERAL("build")).value();
 
-  if (const absl::Status status = CopyFiles(source, build, srcs);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(CopyFiles(source, build, srcs));
 
   // On Windows, let Bash search the MinGW path for Make.  On POSIX, do the
   // search ourselves.
   FileName make =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("make")).value();
   if constexpr (!kWindows) {
-    absl::StatusOr<FileName> file = SearchPath(make);
-    if (!file.ok()) return file.status();
-    make = *std::move(file);
+    ABSL_ASSIGN_OR_RETURN(FileName file, SearchPath(make));
+    make = std::move(file);
   }
 
   // On Windows, let Bash search the MinGW path for GZip.  On POSIX, do the
@@ -194,15 +181,13 @@ static absl::Status Build(const FileName& source, const FileName& install,
   FileName gzip =
       FileName::FromString(RULES_ELISP_NATIVE_LITERAL("gzip")).value();
   if constexpr (!kWindows) {
-    absl::StatusOr<FileName> file = SearchPath(gzip);
-    if (!file.ok()) return file.status();
-    gzip = *std::move(file);
+    ABSL_ASSIGN_OR_RETURN(FileName file, SearchPath(gzip));
+    gzip = std::move(file);
   }
 
   const FileName configure =
       build.Child(RULES_ELISP_NATIVE_LITERAL("configure")).value();
-  const absl::StatusOr<FileName> cc_resolved = cc.Resolve();
-  if (!cc_resolved.ok()) return cc_resolved.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName cc_resolved, cc.Resolve());
   std::vector<NativeString> configure_args = {
       RULES_ELISP_NATIVE_LITERAL("--prefix=") + AsPosix(install),
       RULES_ELISP_NATIVE_LITERAL("--without-all"),
@@ -225,7 +210,7 @@ static absl::Status Build(const FileName& source, const FileName& install,
       RULES_ELISP_NATIVE_LITERAL("--with-compress-install"),
       RULES_ELISP_NATIVE_LITERAL("MAKE=") + AsPosix(make),
       RULES_ELISP_NATIVE_LITERAL("GZIP_PROG=") + AsPosix(gzip),
-      RULES_ELISP_NATIVE_LITERAL("CC=") + AsPosix(*cc_resolved),
+      RULES_ELISP_NATIVE_LITERAL("CC=") + AsPosix(cc_resolved),
       RULES_ELISP_NATIVE_LITERAL("CFLAGS=") + NativeString(cflags),
       RULES_ELISP_NATIVE_LITERAL("LDFLAGS=") + NativeString(ldflags),
       // Try to work around https://bugs.gnu.org/79489 in older Emacsen.
@@ -233,23 +218,14 @@ static absl::Status Build(const FileName& source, const FileName& install,
       RULES_ELISP_NATIVE_LITERAL(
           "ac_cv_func_posix_spawn_file_actions_addchdir=no"),
   };
-  if (const absl::Status status =
-          Run(*temp, build, bash, configure, std::move(configure_args));
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(
+      Run(temp, build, bash, configure, std::move(configure_args)));
 
   std::vector<NativeString> make_args = {RULES_ELISP_NATIVE_LITERAL("install")};
-  if (const absl::Status status =
-          Run(*temp, build, bash, make, std::move(make_args));
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(Run(temp, build, bash, make, std::move(make_args)));
 
   // Build directory no longer needed, delete it.
-  if (const absl::Status status = RemoveTree(*temp); !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(RemoveTree(temp));
 
   // Move files into hard-coded subdirectories so that emacs.cc has less work to
   // do.
@@ -261,47 +237,35 @@ static absl::Status Build(const FileName& source, const FileName& install,
           .value();
   const FileName emacs_to =
       install.Child(RULES_ELISP_NATIVE_LITERAL("emacs.exe")).value();
-  if (const absl::Status status = RenameResolved(emacs_from, emacs_to);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(RenameResolved(emacs_from, emacs_to));
 
-  const absl::StatusOr<FileName> shared =
+  ABSL_ASSIGN_OR_RETURN(
+      const FileName shared,
       GlobUnique(install, {RULES_ELISP_NATIVE_LITERAL("share"),
                            RULES_ELISP_NATIVE_LITERAL("emacs"),
-                           RULES_ELISP_NATIVE_LITERAL("?*.?*")});
-  if (!shared.ok()) return shared.status();
+                           RULES_ELISP_NATIVE_LITERAL("?*.?*")}));
   const FileName etc_from =
-      shared->Child(RULES_ELISP_NATIVE_LITERAL("etc")).value();
+      shared.Child(RULES_ELISP_NATIVE_LITERAL("etc")).value();
   const FileName etc_to =
       install.Child(RULES_ELISP_NATIVE_LITERAL("etc")).value();
-  if (const absl::Status status = RenameResolved(etc_from, etc_to);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(RenameResolved(etc_from, etc_to));
 
-  const absl::StatusOr<FileName> dump_from =
+  ABSL_ASSIGN_OR_RETURN(
+      const absl::StatusOr<FileName> dump_from,
       GlobUnique(install, {RULES_ELISP_NATIVE_LITERAL("libexec"),
                            RULES_ELISP_NATIVE_LITERAL("emacs"),
                            RULES_ELISP_NATIVE_LITERAL("*"),
                            RULES_ELISP_NATIVE_LITERAL("*"),
-                           RULES_ELISP_NATIVE_LITERAL("emacs*.pdmp")});
-  if (!dump_from.ok()) return dump_from.status();
+                           RULES_ELISP_NATIVE_LITERAL("emacs*.pdmp")}));
   const FileName dump_to =
       install.Child(RULES_ELISP_NATIVE_LITERAL("emacs.pdmp")).value();
-  if (const absl::Status status = RenameResolved(*dump_from, dump_to);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(RenameResolved(*dump_from, dump_to));
 
   const FileName lisp_from =
-      shared->Child(RULES_ELISP_NATIVE_LITERAL("lisp")).value();
+      shared.Child(RULES_ELISP_NATIVE_LITERAL("lisp")).value();
   const FileName lisp_to =
       install.Child(RULES_ELISP_NATIVE_LITERAL("lisp")).value();
-  if (const absl::Status status = RenameResolved(lisp_from, lisp_to);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(RenameResolved(lisp_from, lisp_to));
 
   return absl::OkStatus();
 }
@@ -313,43 +277,27 @@ static absl::Status Main(const NativeStringView readme,
                          const NativeStringView ldflags,
                          const NativeStringView module_header,
                          const NativeStringView srcs) {
-  const absl::StatusOr<FileName> readme_file = FileName::FromString(readme);
-  if (!readme_file.ok()) return readme_file.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName readme_file,
+                        FileName::FromString(readme));
+  ABSL_ASSIGN_OR_RETURN(const FileName source, readme_file.Parent());
+  ABSL_ASSIGN_OR_RETURN(FileName install_dir, FileName::FromString(install));
+  ABSL_ASSIGN_OR_RETURN(install_dir, install_dir.Resolve());
+  ABSL_ASSIGN_OR_RETURN(const FileName srcs_file, FileName::FromString(srcs));
+  ABSL_ASSIGN_OR_RETURN(const FileName bash_file, FileName::FromString(bash));
+  ABSL_ASSIGN_OR_RETURN(const FileName cc_file, FileName::FromString(cc));
 
-  const absl::StatusOr<FileName> source = readme_file->Parent();
-  if (!source.ok()) return source.status();
-
-  absl::StatusOr<FileName> install_dir = FileName::FromString(install);
-  if (!install_dir.ok()) return install_dir.status();
-  install_dir = install_dir->Resolve();
-  if (!install_dir.ok()) return install_dir.status();
-
-  const absl::StatusOr<FileName> srcs_file = FileName::FromString(srcs);
-  if (!srcs_file.ok()) return srcs_file.status();
-
-  const absl::StatusOr<FileName> bash_file = FileName::FromString(bash);
-  if (!bash_file.ok()) return bash_file.status();
-
-  const absl::StatusOr<FileName> cc_file = FileName::FromString(cc);
-  if (!cc_file.ok()) return cc_file.status();
-
-  if (const absl::Status status = Build(*source, *install_dir, *srcs_file,
-                                        *bash_file, *cc_file, cflags, ldflags);
-      !status.ok()) {
-    return status;
-  }
+  ABSL_RETURN_IF_ERROR(Build(source, install_dir, srcs_file, bash_file, cc_file,
+                             cflags, ldflags));
 
   if (!module_header.empty()) {
     // Copy emacs-module.h to the desired location.
     const FileName from =
-        Join(*install_dir, {RULES_ELISP_NATIVE_LITERAL("include"),
-                            RULES_ELISP_NATIVE_LITERAL("emacs-module.h")})
+        Join(install_dir, {RULES_ELISP_NATIVE_LITERAL("include"),
+                           RULES_ELISP_NATIVE_LITERAL("emacs-module.h")})
             .value();
-    const absl::StatusOr<FileName> to = FileName::FromString(module_header);
-    if (!to.ok()) return to.status();
-    if (const absl::Status status = CopyFile(from, *to); !status.ok()) {
-      return status;
-    }
+    ABSL_ASSIGN_OR_RETURN(const FileName to,
+                          FileName::FromString(module_header));
+    ABSL_RETURN_IF_ERROR(CopyFile(from, to));
   }
 
   return absl::OkStatus();

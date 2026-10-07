@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
@@ -54,10 +55,9 @@ absl::StatusOr<std::vector<NativeString>> LoadPathArgs(
                      resolved->string());
     } else {
       if (!runfiles_handler_installed) {
-        const absl::StatusOr<FileName> file =
-            runfiles.Resolve(RULES_ELISP_RUNFILES_ELC);
-        if (!file.ok()) return file.status();
-        args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + file->string());
+        ABSL_ASSIGN_OR_RETURN(const FileName file,
+                              runfiles.Resolve(RULES_ELISP_RUNFILES_ELC));
+        args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + file.string());
         args.push_back(RULES_ELISP_NATIVE_LITERAL(
             "--funcall=elisp/runfiles/install-handler"));
         runfiles_handler_installed = true;

@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@
 #include "absl/log/check.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
 #include "absl/types/span.h"
@@ -70,20 +71,18 @@ static absl::StatusOr<std::vector<FileName>> ArgFiles(
       // them as special filenames.  Unquote them first.
       const NativeStringView arg =
           RemovePrefix(argv[*j], RULES_ELISP_NATIVE_LITERAL("/:"));
-      absl::StatusOr<FileName> file = FileName::FromString(arg);
-      if (!file.ok()) return file.status();
-      file = file->MakeAbsolute();
-      if (!file.ok()) return file.status();
+      ABSL_ASSIGN_OR_RETURN(FileName file, FileName::FromString(arg));
+      ABSL_ASSIGN_OR_RETURN(file, file.MakeAbsolute());
       // Make filenames relative if possible.
       if (root.has_value()) {
-        absl::StatusOr<FileName> rel = file->MakeRelative(*root);
+        absl::StatusOr<FileName> rel = file.MakeRelative(*root);
         if (rel.ok()) {
-          file = std::move(rel);
+          file = *std::move(rel);
         } else {
           LOG(INFO) << rel.status();
         }
       }
-      result.push_back(std::move(file).value());
+      result.push_back(std::move(file));
     }
   }
   return result;
@@ -107,32 +106,29 @@ static std::optional<FileName> RunfilesDirectory(
 absl::StatusOr<int> Main(
     const Options& opts,
     const absl::Span<const NativeStringView> original_args) {
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY, original_args);
-  if (!runfiles.ok()) return runfiles.status();
+  ABSL_ASSIGN_OR_RETURN(
+      const Runfiles runfiles,
+      Runfiles::Create(ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY,
+                       original_args));
 
-  const absl::StatusOr<std::string> wrapper =
-      ToNarrow(opts.wrapper, Encoding::kAscii);
-  if (!wrapper.ok()) return wrapper.status();
-  const absl::StatusOr<FileName> emacs = runfiles->Resolve(*wrapper);
-  if (!emacs.ok()) return emacs.status();
+  ABSL_ASSIGN_OR_RETURN(const std::string wrapper,
+                        ToNarrow(opts.wrapper, Encoding::kAscii));
+  ABSL_ASSIGN_OR_RETURN(const FileName emacs, runfiles.Resolve(wrapper));
 
   std::vector<NativeString> args = {RULES_ELISP_NATIVE_LITERAL("--quick")};
   if (!opts.interactive) {
     args.push_back(RULES_ELISP_NATIVE_LITERAL("--batch"));
   }
 
-  const absl::StatusOr<std::vector<NativeString>> load_path_args =
-      LoadPathArgs(*runfiles, opts.load_path);
-  if (!load_path_args.ok()) return load_path_args.status();
-  args.insert(args.end(), load_path_args->cbegin(), load_path_args->cend());
+  ABSL_ASSIGN_OR_RETURN(const std::vector<NativeString> load_path_args,
+                        LoadPathArgs(runfiles, opts.load_path));
+  args.insert(args.end(), load_path_args.cbegin(), load_path_args.cend());
 
   for (const NativeString& file : opts.load_files) {
-    const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
-    if (!narrow.ok()) return narrow.status();
-    const absl::StatusOr<FileName> abs_name = runfiles->Resolve(*narrow);
-    if (!abs_name.ok()) return abs_name.status();
-    args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + abs_name->string());
+    ABSL_ASSIGN_OR_RETURN(const std::string narrow,
+                          ToNarrow(file, Encoding::kAscii));
+    ABSL_ASSIGN_OR_RETURN(const FileName abs_name, runfiles.Resolve(narrow));
+    args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") + abs_name.string());
   }
 
   if (!original_args.empty()) {
@@ -140,35 +136,30 @@ absl::StatusOr<int> Main(
                 original_args.cend());
   }
 
-  absl::StatusOr<Environment> env = runfiles->Environ();
-  if (!env.ok()) return env.status();
-  const absl::StatusOr<Environment> orig_env = Environment::Current();
-  if (!orig_env.ok()) return orig_env.status();
-  env->Merge(*orig_env);
+  ABSL_ASSIGN_OR_RETURN(Environment env, runfiles.Environ());
+  ABSL_ASSIGN_OR_RETURN(const Environment orig_env, Environment::Current());
+  env.Merge(orig_env);
 
   // FIXME: We need this, otherwise Emacs doesn’t correctly decode its
   // command-line arguments.  But we shouldn’t set it,
   // cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
-  env->Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
-           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
+  env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
+          RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
-  const std::optional<FileName> runfiles_dir = RunfilesDirectory(*env);
-  const absl::StatusOr<std::vector<FileName>> input_files =
-      ArgFiles(original_args, runfiles_dir, opts.input_args);
-  if (!input_files.ok()) return input_files.status();
-  const absl::StatusOr<std::vector<FileName>> output_files =
-      ArgFiles(original_args, runfiles_dir, opts.output_args);
-  if (!output_files.ok()) return output_files.status();
-
-  const absl::StatusOr<ManifestFile> manifest =
-      ManifestFile::Create(opts, *input_files, *output_files);
-  if (!manifest.ok()) return manifest.status();
+  const std::optional<FileName> runfiles_dir = RunfilesDirectory(env);
+  ABSL_ASSIGN_OR_RETURN(const std::vector<FileName> input_files,
+                        ArgFiles(original_args, runfiles_dir, opts.input_args));
+  ABSL_ASSIGN_OR_RETURN(
+      const std::vector<FileName> output_files,
+      ArgFiles(original_args, runfiles_dir, opts.output_args));
+  ABSL_ASSIGN_OR_RETURN(const ManifestFile manifest,
+                        ManifestFile::Create(opts, input_files, output_files));
 
   std::vector<NativeString> final_args;
-  manifest->AppendArgs(final_args);
+  manifest.AppendArgs(final_args);
   final_args.insert(final_args.end(), args.cbegin(), args.cend());
 
-  return RunProcess(*emacs, final_args, *env);
+  return RunProcess(emacs, final_args, env);
 }
 
 }  // namespace rules_elisp

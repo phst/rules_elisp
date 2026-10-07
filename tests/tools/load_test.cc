@@ -1,4 +1,4 @@
-// Copyright 2021-2025 Google LLC
+// Copyright 2021-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 
 #include "absl/algorithm/container.h"
 #include "absl/cleanup/cleanup.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/str_format.h"
@@ -38,11 +39,10 @@ using absl_testing::IsOkAndHolds;
 using ::testing::ElementsAre;
 
 static absl::StatusOr<FileName> TempDir() {
-  absl::StatusOr<NativeString> native =
-      ToNative(::testing::TempDir(), Encoding::kAscii);
-  if (!native.ok()) return native.status();
-  while (native->back() == kSeparator) native->pop_back();
-  return FileName::FromString(*native);
+  ABSL_ASSIGN_OR_RETURN(NativeString native,
+                        ToNative(::testing::TempDir(), Encoding::kAscii));
+  while (native.back() == kSeparator) native.pop_back();
+  return FileName::FromString(native);
 }
 
 TEST(LoadPathArgsTest, DirectoryAsciiOnly) {
