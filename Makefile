@@ -42,6 +42,12 @@ MODULE.bazel.lock:
 examples/ext/MODULE.bazel.lock:
 	cd examples/ext && $(BAZEL) mod graph > /dev/null
 
+.bcr/patches/strip.patch: MODULE.bazel
+	mkdir -p /tmp/a /tmp/b
+	cp -p $< /tmp/a/MODULE.bazel
+	sed '/^## Development dependencies$$/q' $< > /tmp/b/MODULE.bazel
+	(cd /tmp && ! diff -u a/MODULE.bazel b/MODULE.bazel) > $@
+
 generate: compdb coverage
 
 check: all check-extra
