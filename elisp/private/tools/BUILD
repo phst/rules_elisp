@@ -404,7 +404,9 @@ cc_library(
         "@abseil-cpp//absl/log:die_if_null",
         "@abseil-cpp//absl/memory",
         "@abseil-cpp//absl/random",
+        "@abseil-cpp//absl/status:status_builder",  # keep
         "@abseil-cpp//absl/strings",
+        "@abseil-cpp//absl/types:source_location",  # keep
     ],
     linkopts = LINKOPTS + select({
         "//private:msvc_or_clang_cl": [
