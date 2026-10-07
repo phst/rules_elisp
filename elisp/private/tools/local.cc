@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
@@ -32,33 +33,25 @@ static absl::StatusOr<int> RunEmacs(
     const NativeStringView program,
     const absl::Span<const NativeStringView> original_args) {
   if (program.empty()) return absl::NotFoundError("Emacs program not found");
-  const absl::StatusOr<FileName> emacs = FileName::FromString(program);
-  if (!emacs.ok()) return emacs.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName emacs, FileName::FromString(program));
   std::vector<NativeString> args;
   if (!original_args.empty()) {
     args.insert(args.end(), std::next(original_args.begin()),
                 original_args.end());
   }
-  absl::StatusOr<Environment> env = Environment::Current();
-  if (!env.ok()) return env.status();
+  ABSL_ASSIGN_OR_RETURN(Environment env, Environment::Current());
   if constexpr (kWindows) {
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.
     for (const NativeString& arg : args) {
-      if (const absl::Status status = CheckAscii(arg); !status.ok()) {
-        return status;
-      }
+      ABSL_RETURN_IF_ERROR(CheckAscii(arg));
     }
-    for (const auto& [name, value] : *env) {
-      if (const absl::Status status = CheckAscii(name); !status.ok()) {
-        return status;
-      }
-      if (const absl::Status status = CheckAscii(value); !status.ok()) {
-        return status;
-      }
+    for (const auto& [name, value] : env) {
+      ABSL_RETURN_IF_ERROR(CheckAscii(name));
+      ABSL_RETURN_IF_ERROR(CheckAscii(value));
     }
   }
-  return RunProcess(*emacs, args, *env);
+  return RunProcess(emacs, args, env);
 }
 
 absl::StatusOr<int> Main(const NativeStringView program,

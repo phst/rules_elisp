@@ -50,6 +50,7 @@ COPTS = select({
 }) + select({
     Label("@rules_cc//cc/compiler:clang"): [
         "-Wno-nullability-extension",
+        "-Wno-gnu-zero-variadic-macro-arguments",  # required for Abseil status macros
         # Work around https://github.com/llvm/llvm-project/issues/121984 and
         # https://github.com/bazelbuild/rules_cc/issues/729.
         "--system-header-prefix=absl/",

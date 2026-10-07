@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@
 #include "absl/log/initialize.h"
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 
 #include "elisp/private/tools/copy.h"
@@ -31,19 +32,12 @@ namespace rules_elisp {
 static absl::Status Main(const NativeStringView readme_file,
                          const NativeStringView install_dir,
                          const NativeStringView srcs_file) {
-  const absl::StatusOr<FileName> readme = FileName::FromString(readme_file);
-  if (!readme.ok()) return readme.status();
-
-  const absl::StatusOr<FileName> base = readme->Parent();
-  if (!base.ok()) return base.status();
-
-  absl::StatusOr<FileName> install = FileName::FromString(install_dir);
-  if (!install.ok()) return install.status();
-
-  const absl::StatusOr<FileName> srcs = FileName::FromString(srcs_file);
-  if (!srcs.ok()) return srcs.status();
-
-  return CopyFiles(*base, *install, *srcs);
+  ABSL_ASSIGN_OR_RETURN(const FileName readme,
+                        FileName::FromString(readme_file));
+  ABSL_ASSIGN_OR_RETURN(const FileName base, readme.Parent());
+  ABSL_ASSIGN_OR_RETURN(FileName install, FileName::FromString(install_dir));
+  ABSL_ASSIGN_OR_RETURN(const FileName srcs, FileName::FromString(srcs_file));
+  return CopyFiles(base, install, srcs);
 }
 
 }  // namespace rules_elisp

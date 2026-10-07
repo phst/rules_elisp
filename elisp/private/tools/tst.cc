@@ -25,6 +25,7 @@
 
 #include "absl/log/log.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
@@ -44,9 +45,8 @@ namespace rules_elisp {
 
 static absl::StatusOr<NativeString> QuoteArg(const NativeStringView arg) {
   if constexpr (!kWindows) return NativeString(arg);
-  const absl::StatusOr<std::string> utf8 = ToNarrow(arg, Encoding::kUtf8);
-  if (!utf8.ok()) return utf8.status();
-  return ToNative(PercentEncode(*utf8), Encoding::kAscii);
+  ABSL_ASSIGN_OR_RETURN(const std::string utf8, ToNarrow(arg, Encoding::kUtf8));
+  return ToNative(PercentEncode(utf8), Encoding::kAscii);
 }
 
 // Try to look up inaccessible files in the coverage manifest as runfiles.
@@ -114,15 +114,13 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
 
 absl::StatusOr<int> Main(const Options& opts,
                          absl::Span<const NativeStringView> original_args) {
-  const absl::StatusOr<Runfiles> runfiles = Runfiles::Create(
-      ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY, original_args);
-  if (!runfiles.ok()) return runfiles.status();
-
-  const absl::StatusOr<std::string> wrapper =
-      ToNarrow(opts.wrapper, Encoding::kAscii);
-  if (!wrapper.ok()) return wrapper.status();
-  const absl::StatusOr<FileName> emacs = runfiles->Resolve(*wrapper);
-  if (!emacs.ok()) return emacs.status();
+  ABSL_ASSIGN_OR_RETURN(
+      const Runfiles runfiles,
+      Runfiles::Create(ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY,
+                       original_args));
+  ABSL_ASSIGN_OR_RETURN(const std::string wrapper,
+                        ToNarrow(opts.wrapper, Encoding::kAscii));
+  ABSL_ASSIGN_OR_RETURN(const FileName emacs, runfiles.Resolve(wrapper));
 
   std::vector<NativeString> emacs_args = {
       RULES_ELISP_NATIVE_LITERAL("--quick"),
@@ -133,37 +131,31 @@ absl::StatusOr<int> Main(const Options& opts,
     emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--module-assertions"));
   }
 
-  const absl::StatusOr<std::vector<NativeString>> load_path_args =
-      LoadPathArgs(*runfiles, opts.load_path);
-  if (!load_path_args.ok()) return load_path_args.status();
-  emacs_args.insert(emacs_args.end(), load_path_args->cbegin(),
-                    load_path_args->cend());
+  ABSL_ASSIGN_OR_RETURN(const std::vector<NativeString> load_path_args,
+                        LoadPathArgs(runfiles, opts.load_path));
+  emacs_args.insert(emacs_args.end(), load_path_args.cbegin(),
+                    load_path_args.cend());
 
-  const absl::StatusOr<FileName> run_tst_elc =
-      runfiles->Resolve(RULES_ELISP_RUN_TST_ELC);
-  if (!run_tst_elc.ok()) return run_tst_elc.status();
+  ABSL_ASSIGN_OR_RETURN(const FileName run_tst_elc,
+                        runfiles.Resolve(RULES_ELISP_RUN_TST_ELC));
   emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--load=") +
-                       run_tst_elc->string());
+                       run_tst_elc.string());
 
   for (const NativeString& file : opts.load_files) {
-    const absl::StatusOr<std::string> narrow = ToNarrow(file, Encoding::kAscii);
-    if (!narrow.ok()) return narrow.status();
-    const absl::StatusOr<FileName> abs_name = runfiles->Resolve(*narrow);
-    if (!abs_name.ok()) return abs_name.status();
-    const absl::StatusOr<NativeString> quoted = QuoteArg(abs_name->string());
-    if (!quoted.ok()) return quoted.status();
-    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--test-source=") +
-                         *quoted);
+    ABSL_ASSIGN_OR_RETURN(const std::string narrow,
+                          ToNarrow(file, Encoding::kAscii));
+    ABSL_ASSIGN_OR_RETURN(const FileName abs_name, runfiles.Resolve(narrow));
+    ABSL_ASSIGN_OR_RETURN(const NativeString quoted,
+                          QuoteArg(abs_name.string()));
+    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--test-source=") + quoted);
   }
   for (const NativeString& test : opts.skip_tests) {
-    const absl::StatusOr<NativeString> quoted = QuoteArg(test);
-    if (!quoted.ok()) return quoted.status();
-    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-test=") + *quoted);
+    ABSL_ASSIGN_OR_RETURN(const NativeString quoted, QuoteArg(test));
+    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-test=") + quoted);
   }
   for (const NativeString& tag : opts.skip_tags) {
-    const absl::StatusOr<NativeString> quoted = QuoteArg(tag);
-    if (!quoted.ok()) return quoted.status();
-    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-tag=") + *quoted);
+    ABSL_ASSIGN_OR_RETURN(const NativeString quoted, QuoteArg(tag));
+    emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--skip-tag=") + quoted);
   }
 
   emacs_args.push_back(RULES_ELISP_NATIVE_LITERAL("--"));
@@ -171,53 +163,48 @@ absl::StatusOr<int> Main(const Options& opts,
   if (!original_args.empty()) {
     original_args.remove_prefix(1);
     for (const NativeStringView arg : original_args) {
-      const absl::StatusOr<NativeString> quoted = QuoteArg(arg);
-      if (!quoted.ok()) return quoted.status();
-      emacs_args.push_back(*quoted);
+      ABSL_ASSIGN_OR_RETURN(const NativeString quoted, QuoteArg(arg));
+      emacs_args.push_back(quoted);
     }
   }
 
-  absl::StatusOr<Environment> env = runfiles->Environ();
-  if (!env.ok()) return env.status();
-  const absl::StatusOr<Environment> orig_env = Environment::Current();
-  if (!orig_env.ok()) return orig_env.status();
-  env->Merge(*orig_env);
+  ABSL_ASSIGN_OR_RETURN(Environment env, runfiles.Environ());
+  ABSL_ASSIGN_OR_RETURN(const Environment orig_env, Environment::Current());
+  env.Merge(orig_env);
 
   // FIXME: We need this, otherwise Emacs doesn’t correctly decode its
   // command-line arguments.  But we shouldn’t set it,
   // cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
-  env->Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
-           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
+  env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
+          RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
   std::vector<FileName> inputs;
   std::vector<FileName> outputs;
   const NativeStringView report_file =
-      env->Get(RULES_ELISP_NATIVE_LITERAL("XML_OUTPUT_FILE"));
+      env.Get(RULES_ELISP_NATIVE_LITERAL("XML_OUTPUT_FILE"));
   if (!report_file.empty()) {
-    absl::StatusOr<FileName> file = FileName::FromString(report_file);
-    if (!file.ok()) return file.status();
-    outputs.push_back(*std::move(file));
+    ABSL_ASSIGN_OR_RETURN(FileName file, FileName::FromString(report_file));
+    outputs.push_back(std::move(file));
   }
-  if (env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE")) ==
+  if (env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE")) ==
       RULES_ELISP_NATIVE_LITERAL("1")) {
     const NativeStringView coverage_manifest =
-        env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_MANIFEST"));
+        env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_MANIFEST"));
     if (!coverage_manifest.empty()) {
-      absl::StatusOr<FileName> file = FileName::FromString(coverage_manifest);
-      if (!file.ok()) return file.status();
-      const absl::Status status = FixCoverageManifest(*file, *runfiles);
-      if (!status.ok()) return status;
-      inputs.push_back(*std::move(file));
+      ABSL_ASSIGN_OR_RETURN(FileName file,
+                            FileName::FromString(coverage_manifest));
+      ABSL_RETURN_IF_ERROR(FixCoverageManifest(file, runfiles));
+      inputs.push_back(std::move(file));
     }
     const NativeStringView coverage_dir =
-        env->Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
+        env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
     if (!coverage_dir.empty()) {
-      const absl::StatusOr<FileName> dir = FileName::FromString(coverage_dir);
-      if (!dir.ok()) return dir.status();
-      absl::StatusOr<FileName> file =
-          dir->Child(RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat"));
-      if (!file.ok()) return file.status();
-      outputs.push_back(*std::move(file));
+      ABSL_ASSIGN_OR_RETURN(const FileName dir,
+                            FileName::FromString(coverage_dir));
+      ABSL_ASSIGN_OR_RETURN(
+          FileName file,
+          dir.Child(RULES_ELISP_NATIVE_LITERAL("emacs-lisp.dat")));
+      outputs.push_back(std::move(file));
     }
   }
 
@@ -228,13 +215,12 @@ absl::StatusOr<int> Main(const Options& opts,
     // around this by creating a new process group and sending CTRL + BREAK
     // slightly before Bazel kills us.
     const NativeStringView timeout_str =
-        env->Get(RULES_ELISP_NATIVE_LITERAL("TEST_TIMEOUT"));
+        env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_TIMEOUT"));
     if (!timeout_str.empty()) {
-      const absl::StatusOr<std::string> narrow =
-          ToNarrow(timeout_str, Encoding::kAscii);
-      if (!narrow.ok()) return narrow.status();
+      ABSL_ASSIGN_OR_RETURN(const std::string narrow,
+                            ToNarrow(timeout_str, Encoding::kAscii));
       std::uint64_t seconds;
-      if (!absl::SimpleAtoi(*narrow, &seconds)) {
+      if (!absl::SimpleAtoi(narrow, &seconds)) {
         return absl::InvalidArgumentError(
             absl::StrFormat("Invalid TEST_TIMEOUT %s", timeout_str));
       }
@@ -244,16 +230,15 @@ absl::StatusOr<int> Main(const Options& opts,
     }
   }
 
-  const absl::StatusOr<ManifestFile> manifest =
-      ManifestFile::Create(opts, inputs, outputs);
-  if (!manifest.ok()) return manifest.status();
+  ABSL_ASSIGN_OR_RETURN(const ManifestFile manifest,
+                        ManifestFile::Create(opts, inputs, outputs));
 
   std::vector<NativeString> final_args;
-  manifest->AppendArgs(final_args);
+  manifest.AppendArgs(final_args);
   final_args.insert(final_args.end(), emacs_args.cbegin(), emacs_args.cend());
 
   const absl::StatusOr<int> result =
-      RunProcess(*emacs, final_args, *env, run_opts);
+      RunProcess(emacs, final_args, env, run_opts);
 
   if (absl::IsDeadlineExceeded(result.status())) {
     LOG(INFO) << "waiting for Bazel to kill this process";

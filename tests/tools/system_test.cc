@@ -26,6 +26,7 @@
 #include "absl/cleanup/cleanup.h"
 #include "absl/log/check.h"
 #include "absl/status/status.h"
+#include "absl/status/status_macros.h"
 #include "absl/status/status_matchers.h"
 #include "absl/status/statusor.h"
 #include "absl/strings/ascii.h"
@@ -62,10 +63,9 @@ using ::testing::TestWithParam;
 using ::testing::Values;
 
 static absl::StatusOr<FileName> TempDir() {
-  const absl::StatusOr<NativeString> native =
-      ToNative(::testing::TempDir(), Encoding::kAscii);
-  if (!native.ok()) return native.status();
-  return FileName::FromString(*native);
+  ABSL_ASSIGN_OR_RETURN(const NativeString native,
+                        ToNative(::testing::TempDir(), Encoding::kAscii));
+  return FileName::FromString(native);
 }
 
 TEST(FileNameTest, RejectsEmpty) {
