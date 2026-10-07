@@ -16,6 +16,7 @@ load("@bazel_skylib//:bzl_library.bzl", "bzl_library")
 load("@buildifier//:rules.bzl", "buildifier_test")
 load("@gazelle//:def.bzl", "DEFAULT_LANGUAGES", "gazelle", "gazelle_binary", "gazelle_test")
 load("@rules_go//go:def.bzl", "TOOLS_NOGO", "nogo")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
@@ -68,6 +69,22 @@ gazelle_binary(
         "@bazel_skylib_gazelle_plugin//bzl",
         "@gazelle_cc//language/cc",
     ],
+)
+
+sh_test(
+    name = "patch_test",
+    size = "medium",
+    timeout = "short",
+    srcs = ["patch_test.sh"],
+    data = [
+        "//:MODULE.bazel",
+        "//.bcr/patches",
+    ],
+    target_compatible_with = select({
+        "@platforms//os:linux": [],
+        "@platforms//os:macos": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
 )
 
 bzl_library(

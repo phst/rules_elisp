@@ -17,6 +17,7 @@
 visibility([
     # keep sorted
     "//",
+    "//.bcr/patches",
     "//dev",
     "//docs",
     "//elisp",
