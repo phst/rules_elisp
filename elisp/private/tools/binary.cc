@@ -93,12 +93,14 @@ static std::optional<FileName> RunfilesDirectory(
     const Environment& env ABSL_ATTRIBUTE_LIFETIME_BOUND) {
   if (absl::StatusOr<FileName> value = FileName::FromString(
           env.Get(RULES_ELISP_NATIVE_LITERAL("RUNFILES_DIR")));
-      value.ok())
+      value.ok()) {
     return std::move(*value);
+  }
   if (absl::StatusOr<FileName> value = FileName::FromString(
           env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_SRCDIR")));
-      value.ok())
+      value.ok()) {
     return std::move(*value);
+  }
   return std::nullopt;
 }
 
