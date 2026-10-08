@@ -19,7 +19,7 @@ go 1.26.7
 require (
 	github.com/bazelbuild/bazel-gazelle v0.54.0
 	github.com/bazelbuild/buildtools v0.0.0-20260904073137-eaa4d125b423
-	github.com/bazelbuild/rules_go v0.64.1
+	github.com/bazelbuild/rules_go v0.64.2
 	github.com/goaux/decowriter v1.0.0
 	github.com/google/go-cmp v0.7.0
 	github.com/yuin/goldmark/v2 v2.1.6
