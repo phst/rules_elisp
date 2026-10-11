@@ -68,6 +68,17 @@ jobs:
           ./check.ps1
           -Coverage:$${{runner.os != 'Windows'}}
           -BazelVersions '8.1.0', '8.x'
+      - name: Run Bazel tests in coverage mode
+        if: runner.os == 'Windows'
+        # Basic coverage support for Windows was added in Bazel 8.5, commit
+        # https://github.com/bazelbuild/bazel/commit/15093385ef4495d17aad963c4585581ee7d8c758.
+        # FIXME: Remove this extra step once we drop support for Bazel versions
+        # below 8.5.
+        shell: pwsh
+        run: >-
+          ./check.ps1
+          -Coverage:$true
+          -BazelVersions '8.5.0', '8.x'
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
         shell: bash
