@@ -21,7 +21,7 @@ inputs:
     required: false
     default: >-
       ${{
-      case(runner.os == 'Linux', 'gcc',
+      case(runner.os == 'Linux', 'gcc-14',
            runner.os == 'macOS', 'clang',
            'msvc')
       }}
