@@ -116,7 +116,10 @@ register_toolchains(
 )
 
 # C++-specific dependencies
-register_toolchains("@local_config_cc_toolchains//:all")
+register_toolchains(
+    "@local_config_cc_toolchains//:all",
+    dev_dependency = True,
+)
 
 ## Development dependencies
 
