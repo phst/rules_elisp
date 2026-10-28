@@ -35,6 +35,9 @@ jobs:
           - macos-latest
           - windows-latest
         cc:
+          # We can't use GCC 15 due to
+          # https://github.com/protocolbuffers/protobuf/issues/21333.
+          # FIXME: Switch back to default GCC once the bug is fixed.
           - gcc-14
           - clang
           - msvc

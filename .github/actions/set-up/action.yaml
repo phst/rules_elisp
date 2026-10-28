@@ -20,6 +20,9 @@ inputs:
     description: C/C++ compiler to use
     required: false
     default: >-
+      # We can't use GCC 15 due to
+      # https://github.com/protocolbuffers/protobuf/issues/21333.
+      # FIXME: Switch back to default GCC once the bug is fixed.
       ${{
       case(runner.os == 'Linux', 'gcc-14',
            runner.os == 'macOS', 'clang',
