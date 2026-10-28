@@ -89,7 +89,7 @@ runs:
         sudo apt-get remove \
           firefox google-chrome-stable microsoft-edge-stable \
           azure-cli google-cloud-cli \
-          llvm-{17..18}-dev
+          llvm-{20..22}-dev
         sudo apt-get install libxml2-utils libncurses-dev emacs-nox
         sudo apt-get autoremove
         sudo apt-get clean
