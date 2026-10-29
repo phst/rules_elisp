@@ -31,7 +31,7 @@ bazel_dep(name = "abseil-cpp", version = "20260817.0")
 bazel_dep(name = "re2", version = "2025-11-05.bcr.1")
 bazel_dep(name = "protobuf", version = "35.1")
 
-# Bring in the local_config_cc repository.  It’s needed for
+# Bring in the local_config_cc repository.  It's needed for
 # //emacs:windows_cc_toolchain.
 cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_extension")
 use_repo(cc_configure, "local_config_cc", "local_config_cc_toolchains")
@@ -181,7 +181,7 @@ local_path_override(
 )
 
 # Temporary hack to deal with changed compatibility level in Abseil-C++.  See
-# “Known Issues” in
+# "Known Issues" in
 # https://github.com/abseil/abseil-cpp/releases/tag/20260526.0.
 # TODO: Remove the hack once we drop support for Bazel 8.5 and below.
 single_version_override(
