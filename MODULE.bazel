@@ -115,12 +115,6 @@ register_toolchains(
     "//elisp:emacs_31_toolchain",
 )
 
-# C++-specific dependencies
-register_toolchains(
-    "@local_config_cc_toolchains//:all",
-    dev_dependency = True,
-)
-
 ## Development dependencies
 
 # Development-only module dependencies
@@ -141,6 +135,11 @@ junit_xsd(
 
 # C++-specific dependencies
 bazel_dep(name = "gazelle_cc", version = "0.6.0", dev_dependency = True)
+
+register_toolchains(
+    "@local_config_cc_toolchains//:all",
+    dev_dependency = True,
+)
 
 # Go-specific dependencies
 go_sdk = use_extension("@rules_go//go:extensions.bzl", "go_sdk", dev_dependency = True)
