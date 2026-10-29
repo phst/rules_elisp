@@ -1,5 +1,5 @@
---- a/MODULE.bazel	2026-10-29 01:43:14
-+++ b/MODULE.bazel	2026-10-29 01:44:29
+--- a/MODULE.bazel	2026-10-29 15:26:41
++++ b/MODULE.bazel	2026-10-29 15:28:12
 @@ -116,75 +116,3 @@
  )
  
@@ -69,7 +69,7 @@
 -)
 -
 -# Temporary hack to deal with changed compatibility level in Abseil-C++.  See
--# “Known Issues” in
+-# "Known Issues" in
 -# https://github.com/abseil/abseil-cpp/releases/tag/20260526.0.
 -# TODO: Remove the hack once we drop support for Bazel 8.5 and below.
 -single_version_override(
