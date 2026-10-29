@@ -40,7 +40,7 @@ cc_configure = use_extension("@rules_cc//cc:extensions.bzl", "cc_configure_exten
 use_repo(cc_configure, "local_config_cc")
 
 # Temporary hack to deal with changed compatibility level in Abseil-C++.  See
-# “Known Issues” in
+# "Known Issues" in
 # https://github.com/abseil/abseil-cpp/releases/tag/20260526.0.
 # TODO: Remove the hack once we drop support for Bazel 8.5 and below.
 single_version_override(
