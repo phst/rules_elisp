@@ -180,6 +180,14 @@ def _install(ctx, shell_toolchain, cc_toolchain, readme):
         variables = vars,
     ) + fragment.linkopts + defaults.linkopts
 
+    # Remove the toolchain’s “-target XXX” option to work around
+    # https://bugs.gnu.org/79489.
+    # FIXME: Remove once we drop support for Emacs 30 and below.
+    if "-target" in cflags:
+        i = cflags.index("-target")
+        cflags.pop(i)
+        cflags.pop(i)
+
     # The build process needs to find some common binaries like “make” or the
     # GNU coreutils.
     env = {"PATH": "/usr/bin:/bin"}
