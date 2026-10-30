@@ -167,6 +167,8 @@ cc_defaults(
         ],
         "//conditions:default": [],
     }) + select({
+        # Work around https://bugs.gnu.org/79489.
+        # FIXME: Remove once we drop support for Emacs 30 and below.
         "@platforms//os:macos": ["-mmacosx-version-min=11.0"],
         "//conditions:default": [],
     }),
@@ -182,10 +184,13 @@ cc_defaults(
         "-coverage",
         # Don’t link against the C++ standard library, as Emacs is pure C code.
         "-default_link_libs",
-        # This feature might cause build breakage on Buildkite.
+        # Work around https://bugs.gnu.org/79489.
+        # FIXME: Remove once we drop support for Emacs 30 and below.
         "-macos_minimum_os",
     ],
     linkopts = select({
+        # Work around https://bugs.gnu.org/79489.
+        # FIXME: Remove once we drop support for Emacs 30 and below.
         "@platforms//os:macos": ["-mmacosx-version-min=11.0"],
         "//conditions:default": [],
     }),
