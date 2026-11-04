@@ -40,6 +40,13 @@ coverage:macos --experimental_use_llvm_covmap
 coverage:macos --test_env='LLVM_COV=/Library/Developer/CommandLineTools/usr/bin/llvm-cov'
 coverage:macos --test_env='LLVM_PROFDATA=/Library/Developer/CommandLineTools/usr/bin/llvm-profdata'
 
+# Support building with Clang-CL on Windows.  See
+# https://bazel.build/configure/windows#clang.
+build:clang-cl --compiler=clang-cl --host_compiler=clang-cl
+build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-clang-cl'
+build:clang-cl --extra_execution_platforms='@rules_elisp//elisp/private:windows_clang_cl'
+build:clang-cl --repo_env='USE_CLANG_CL=1'
+
 # Local Variables:
 # mode: bazelrc
 # End:

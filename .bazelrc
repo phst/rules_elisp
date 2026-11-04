@@ -36,11 +36,6 @@ build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
 # Treat warnings as errors, but only for this repository.
 build --//private:treat_warnings_as_errors
 
-build:clang-cl --compiler=clang-cl --host_compiler=clang-cl
-build:clang-cl --extra_toolchains='@local_config_cc//:cc-toolchain-x64_windows-clang-cl'
-build:clang-cl --extra_execution_platforms='//elisp/private:windows_clang_cl'
-build:clang-cl --repo_env='USE_CLANG_CL=1'
-
 # Windows is incredibly slow; quadruple all test timeouts.
 # See https://bazel.build/reference/test-encyclopedia#role-test-runner.
 test:windows --test_timeout=240,1200,3600,14400
