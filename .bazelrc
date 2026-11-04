@@ -28,11 +28,6 @@ build --host_features=external_include_paths
 # See https://github.com/google/googletest/issues/4383.
 build --define=absl=1
 
-# Suppress unactionable warnings about duplicate libraries.
-# TODO: File bug against rules_cc about this.
-build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'
-build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
-
 # Treat warnings as errors, but only for this repository.
 build --//private:treat_warnings_as_errors
 
