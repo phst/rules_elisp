@@ -28,8 +28,10 @@ build --host_features=external_include_paths
 # See https://github.com/google/googletest/issues/4383.
 build --define=absl=1
 
-# Suppress unactionable warnings about duplicate libraries.
-# TODO: File bug against rules_cc about this.
+# Suppress unactionable warnings about duplicate libraries.  This is only needed
+# for Bazel 8; in Bazel 9, the toolchain from apple_support is used by default,
+# which already passes this flag by default.
+# FIXME: Remove once we drop support for Bazel 8.
 build:macos --linkopt='-Wl,-no_warn_duplicate_libraries'
 build:macos --host_linkopt='-Wl,-no_warn_duplicate_libraries'
 
