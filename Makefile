@@ -115,6 +115,11 @@ check-extra:
         # https://pkg.go.dev/ from updating.
 	$(GOMODZIP) v0.0.0 --output=mod.tmp.zip
 	rm mod.tmp.zip
+        # Check that MODULE.bazel files are ASCII-only.
+        # FIXME: Remove this check once
+        # https://github.com/bazelbuild/continuous-integration/pull/2981 is
+        # released on Bazel-CI.
+	! LC_ALL=C $(GIT) grep -E '[^ -~]' -- ':(glob)**/MODULE.bazel'
 
 BENCHMARK_BAZELFLAGS = $(BAZELFLAGS) --lockfile_mode=off --compilation_mode=opt
 
