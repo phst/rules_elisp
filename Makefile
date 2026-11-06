@@ -71,7 +71,6 @@ CPPFILT ?= c++filt
 compdb: compile_commands.json
 
 compile_commands.json:
-	$(BAZEL) build $(COMPDB_BAZELFLAGS) -- //...
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands \
 	  $(COMPDB_BAZELFLAGS:%=--extra_aquery_arg=%)
