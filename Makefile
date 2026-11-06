@@ -61,6 +61,8 @@ COMPDB_BAZELFLAGS = $(GENERATE_BAZELFLAGS) --norun_validations \
   --features=-module_maps --host_features=-module_maps \
   --features=-use_module_maps --host_features=-use_module_maps \
   --features=-layering_check --host_features=-layering_check
+COMPDB_EXCLUDE_ARGS = -isysroot __BAZEL_XCODE_SDKROOT__ \
+  -F__BAZEL_ -fdebug-prefix-map=__BAZEL_
 COVERAGE_BAZELFLAGS = $(GENERATE_BAZELFLAGS)
 GENHTML ?= genhtml
 GENHTMLFLAGS = --branch-coverage \
@@ -72,7 +74,8 @@ compdb: compile_commands.json
 compile_commands.json:
 	$(BAZEL) run $(COMPDB_BAZELFLAGS) \
 	  -- @wolfd_bazel_compile_commands//:generate_compile_commands \
-	  $(COMPDB_BAZELFLAGS:%=--extra_aquery_arg=%)
+	  $(COMPDB_BAZELFLAGS:%=--extra_aquery_arg=%) \
+	  $(COMPDB_EXCLUDE_ARGS:%=--exclude_compile_arg=%)
 
 coverage:
 	$(BAZEL) coverage --combined_report=lcov $(COVERAGE_BAZELFLAGS) -- //...
