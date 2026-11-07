@@ -59,6 +59,8 @@ PACKAGE_FEATURES = [
     "external_include_paths",
     # On Windows, Bazel generates incorrectly-escaped parameter files.  See
     # https://github.com/bazelbuild/bazel/issues/21029.
+    # FIXME: Remove once we update rules_cc to 0.2.28 and drop support for
+    # Bazel 9 and below.
     "-compiler_param_file",
     "-macos_default_link_flags",
 ]
