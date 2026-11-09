@@ -45,7 +45,7 @@ runs:
         profdata="$(xcrun --find llvm-profdata)"
         echo "llvm-profdata=${profdata:?}" >> "${GITHUB_OUTPUT:?}"
     - name: Set up Bazel
-      uses: bazel-contrib/setup-bazel@0.19.1
+      uses: bazel-contrib/setup-bazel@0.19.2
       with:
         bazelrc: |
           common --config=ci
