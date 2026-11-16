@@ -44,7 +44,7 @@ cc_binary(
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
         shell.quote("RULES_ELISP_BINARY=1"),
-        rlocation('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL(R"*(%s)*")', ":wrap"),
+        rlocation('RULES_ELISP_WRAPPER=RULES_ELISP_NATIVE_LITERAL(R"*(^)*")', ":wrap"),
         shell.quote("RULES_ELISP_MODE=rules_elisp::ToolchainMode::kWrap"),
         shell.quote('RULES_ELISP_TAGS=RULES_ELISP_NATIVE_LITERAL("local"), RULES_ELISP_NATIVE_LITERAL("mytag")'),
         shell.quote('RULES_ELISP_LOAD_PATH=RULES_ELISP_NATIVE_LITERAL("rules_elisp")'),

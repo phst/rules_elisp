@@ -257,7 +257,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        rlocation('RULES_ELISP_RUN_TST_ELC=R"*(%s)*"', ":run-tst.elc"),
+        rlocation('RULES_ELISP_RUN_TST_ELC=R"*(^)*"', ":run-tst.elc"),
     ],
     visibility = ["//elisp:__pkg__"],
     deps = [
@@ -301,7 +301,7 @@ cc_library(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(%s)*"', "//elisp/runfiles:runfiles.elc"),
+        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(^)*"', "//elisp/runfiles:runfiles.elc"),
     ],
     visibility = ["//tests/tools:__pkg__"],
     deps = [

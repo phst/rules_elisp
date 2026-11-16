@@ -63,7 +63,7 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(%s)*"', "//elisp/runfiles:runfiles.elc"),
+        rlocation('RULES_ELISP_RUNFILES_ELC=R"*(^)*"', "//elisp/runfiles:runfiles.elc"),
     ],
     deps = [
         "//elisp/private/tools:load",
@@ -132,7 +132,7 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        rlocation('RULES_ELISP_PROGRAM=R"*(%s)*"', "//tests:empty"),
+        rlocation('RULES_ELISP_PROGRAM=R"*(^)*"', "//tests:empty"),
     ],
     deps = [
         "//elisp/private/tools:platform",
@@ -165,8 +165,8 @@ cc_test(
     local_defines = DEFINES + [
         # See https://github.com/bazelbuild/bazel/issues/10859 why we need to
         # add additional quoting.
-        rlocation('RULES_ELISP_DATA=R"*(%s)*"', ":BUILD"),
-        rlocation('RULES_ELISP_HELPER=R"*(%s)*"', "//internal/testhelper"),
+        rlocation('RULES_ELISP_DATA=R"*(^)*"', ":BUILD"),
+        rlocation('RULES_ELISP_HELPER=R"*(^)*"', "//internal/testhelper"),
     ],
     deps = [
         "//elisp/private/tools:numeric",
