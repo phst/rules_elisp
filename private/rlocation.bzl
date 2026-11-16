@@ -30,7 +30,7 @@ visibility([
 def rlocation(format, label):
     """Splices a runfile location into the format.
 
-    <var>format</var> must contain exactly one %s sequence, which is replaced by
+    <var>format</var> must contain exactly one ^ character, which is replaced by
     $(rlocationpath <var>label</var>).  The output is properly quoted so it can
     be used in `args` or `defines` attributes.
 
@@ -41,9 +41,10 @@ def rlocation(format, label):
     Returns:
       a quoted version of
       <code><var>format % "$(rlocationpath <var>label</var>)"</code>
+
     """
-    before, sep, after = format.partition("%s")
-    if not sep or "%" in before or "%" in after:
+    before, sep, after = format.partition("^")
+    if not sep or "^" in before or "^" in after:
         fail("Invalid format string %r" % format)
 
     # Note that rlocationpath already quotes its result (see
@@ -61,4 +62,4 @@ def runfileflag(label):
       a quoted string of the form
       <code>--<var>label</var>=$(rlocationpath <var>label</var>)</code>
     """
-    return rlocation("--%s=%%s" % label, label)
+    return rlocation("--%s=^" % label, label)
