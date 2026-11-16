@@ -46,7 +46,7 @@ def rlocation(format, label):
     if not sep or "%" in before or "%" in after:
         fail("Invalid format string %r" % format)
 
-    # Note that rlocation already quotes its result (see
+    # Note that rlocationpath already quotes its result (see
     # https://github.com/bazelbuild/bazel/issues/6531), so we must not quote it
     # again.
     return shell.quote(before) + "$(rlocationpath %s)" % label + shell.quote(after)
