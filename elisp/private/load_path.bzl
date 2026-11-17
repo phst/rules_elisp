@@ -46,10 +46,9 @@ def resolve_load_path(ctx, dir):
         # top-level directories in the runfiles root are always the repository
         # names, and the load directories are relative to those.  The repository
         # name is the repository part of the lexical label, see
-        # https://bazel.build/rules/lib/builtins/Label#workspace_name.
-        # Therefore, it can be empty, in which case we need to use the current
-        # repository.
+        # https://bazel.build/rules/lib/builtins/Label#repo_name.  Therefore, it
+        # can be empty, in which case we need to use the current repository.
         for_runfiles = check_relative_filename(
-            paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
+            paths.join(ctx.label.repo_name or ctx.workspace_name, dir),
         ),
     )

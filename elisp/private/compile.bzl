@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,7 +73,7 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
     # files adjacent to the source files.  See
     # https://bazel.build/rules/lib/actions#declare_file.
     relocate_output = any([
-        src.owner.workspace_name != ctx.label.workspace_name or
+        src.owner.repo_name != ctx.label.repo_name or
         src.owner.package != ctx.label.package
         for src in lisp
     ])
@@ -203,7 +203,7 @@ def compile(ctx, *, srcs, deps, load_path, data, tags, fatal_warnings):
         )
         args.add(ctx.file._compile, format = "--load=%s")
         args.add("1" if fatal_warnings else "")
-        args.add(src.owner.workspace_name)
+        args.add(src.owner.repo_name)
         args.add(src)
         args.add(out)
         run_emacs(
