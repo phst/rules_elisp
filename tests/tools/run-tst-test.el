@@ -29,7 +29,7 @@ See URL
   (should-not (getenv "LANGUAGE"))
   (should-not (getenv "LC_ALL"))
   (should-not (getenv "LC_COLLATE"))
-  (should-not (getenv "LC_CTYPE"))
+  (should (equal (getenv "LC_CTYPE") "C.UTF-8"))
   (should-not (getenv "LC_MESSAGES"))
   (should-not (getenv "LC_MONETARY"))
   (should-not (getenv "LC_NUMERIC"))
