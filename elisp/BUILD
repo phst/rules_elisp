@@ -149,6 +149,7 @@ bzl_library(
         "//elisp/private:load_path",
         "//elisp/private:module_config_info",
         "@rules_cc//cc:find_cc_toolchain",
+        "@rules_cc//cc:use_cc_toolchain",
         "@rules_cc//cc/common:cc_common",
         "@rules_cc//cc/common:cc_helper",
         "@rules_cc//cc/common:cc_info",

@@ -298,7 +298,7 @@ bzl_library(
     ],
     deps = [
         ":cc_launcher_config",
-        "@rules_cc//cc:find_cc_toolchain",
+        "@rules_cc//cc:use_cc_toolchain",
         "@rules_cc//cc/common:cc_info",
     ],
 )
