@@ -222,8 +222,8 @@ class Environment final {
     map_.insert_or_assign(key, value);
   }
 
-  void Merge(const Environment& other) {
-    map_.insert(other.begin(), other.end());
+  void Merge(Environment&& other) {
+    map_.merge(std::move(other.map_));
   }
 
  private:
