@@ -360,12 +360,13 @@ See Info node ‘(elisp) Buffer File Name’ for the meaning of FILENAME."
   "Implementation of ‘process-file’ for Bazel runfiles.
 See Info node ‘(elisp) Synchronous Processes’ for the meaning of
 PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
-  (declare (ftype (function (string string t t &rest string) t)))
+  (declare (ftype (function (string (or null string) t t &rest string) t)))
   (cl-check-type program string)
+  (cl-check-type infile (or null string))
   (let ((default-directory (@transform-name default-directory)))
     (apply #'process-file
            (@transform-name program)
-           (@transform-name infile)
+           (and infile (@transform-name infile))
            (pcase-exhaustive buffer
              (`(:file ,stdout)
               `(:file ,(@transform-name stdout)))
