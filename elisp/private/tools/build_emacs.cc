@@ -78,9 +78,9 @@ static absl::Status Run(const FileName& temp, const FileName& build,
     // Building Emacs requires MinGW, see nt/INSTALL.W64.  Therefore we
     // invoke commands through the MinGW shell, see
     // https://www.msys2.org/wiki/Launchers/#the-idea.
-    env.Add(RULES_ELISP_NATIVE_LITERAL("MSYSTEM"),
+    env.Put(RULES_ELISP_NATIVE_LITERAL("MSYSTEM"),
             RULES_ELISP_NATIVE_LITERAL("MINGW64"));
-    env.Add(RULES_ELISP_NATIVE_LITERAL("CHERE_INVOKING"),
+    env.Put(RULES_ELISP_NATIVE_LITERAL("CHERE_INVOKING"),
             RULES_ELISP_NATIVE_LITERAL("1"));
     args = {
         RULES_ELISP_NATIVE_LITERAL("-l"),

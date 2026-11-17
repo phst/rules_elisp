@@ -90,10 +90,10 @@ static absl::StatusOr<int> RunEmacs(
                           runfiles.Resolve(absl::StrCat(install, "/lisp")));
     ABSL_ASSIGN_OR_RETURN(const FileName libexec,
                           runfiles.Resolve(absl::StrCat(install, "/libexec")));
-    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), etc.string());
-    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), etc.string());
-    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), lisp.string());
-    env.Add(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec.string());
+    env.Put(RULES_ELISP_NATIVE_LITERAL("EMACSDATA"), etc.string());
+    env.Put(RULES_ELISP_NATIVE_LITERAL("EMACSDOC"), etc.string());
+    env.Put(RULES_ELISP_NATIVE_LITERAL("EMACSLOADPATH"), lisp.string());
+    env.Put(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec.string());
   }
   ABSL_ASSIGN_OR_RETURN(Environment orig_env, Environment::Current());
   env.Merge(orig_env);

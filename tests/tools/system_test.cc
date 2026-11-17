@@ -808,6 +808,18 @@ TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
   EXPECT_THAT(*env, SizeIs(pairs.size() + (kWindows ? 0 : 1)));
 }
 
+TEST(EnvironmentTest, PutIsCaseSensitiveOnlyOnUnix) {
+  const std::vector<std::pair<NativeString, NativeString>> pairs = {
+      {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
+  };
+  absl::StatusOr<Environment> env =
+      Environment::Create(pairs.cbegin(), pairs.cend());
+  ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
+  env->Put(RULES_ELISP_NATIVE_LITERAL("Foo"),
+           RULES_ELISP_NATIVE_LITERAL("baz"));
+  EXPECT_THAT(*env, SizeIs(pairs.size() + (kWindows ? 0 : 1)));
+}
+
 TEST(CreateTemporaryDirectoryTest, Works) {
   absl::StatusOr<FileName> dir = CreateTemporaryDirectory();
   ASSERT_THAT(dir, IsOk());
