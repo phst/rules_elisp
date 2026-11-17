@@ -96,7 +96,7 @@ static absl::StatusOr<int> RunEmacs(
     env.Put(RULES_ELISP_NATIVE_LITERAL("EMACSPATH"), libexec.string());
   }
   ABSL_ASSIGN_OR_RETURN(Environment orig_env, Environment::Current());
-  env.Merge(orig_env);
+  env.Merge(std::move(orig_env));
   if constexpr (kWindows) {
     // On Windows, Emacs doesn’t support Unicode arguments or environment
     // variables.  Check here rather than sending over garbage.

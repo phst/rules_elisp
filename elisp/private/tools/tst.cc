@@ -169,8 +169,8 @@ absl::StatusOr<int> Main(const Options& opts,
   }
 
   ABSL_ASSIGN_OR_RETURN(Environment env, runfiles.Environ());
-  ABSL_ASSIGN_OR_RETURN(const Environment orig_env, Environment::Current());
-  env.Merge(orig_env);
+  ABSL_ASSIGN_OR_RETURN(Environment orig_env, Environment::Current());
+  env.Merge(std::move(orig_env));
 
   // We need this, otherwise Emacs doesn’t correctly decode its command-line
   // arguments.  Bazel starting with version 10 will set it,
