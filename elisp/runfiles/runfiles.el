@@ -183,7 +183,7 @@ signal an error of type ‘elisp/runfiles/remote’."
 
 (defun elisp/runfiles/filename-p (string)
   "Return whether STRING is a possible argument for ‘elisp/runfiles/rlocation’."
-  (declare (ftype (function (string) t)))
+  (declare (ftype (function (t) t)))
   (let ((case-fold-search nil))
     ;; This uses similar criteria as
     ;; https://github.com/bazelbuild/rules_cc/blob/0.2.28/cc/runfiles/runfiles.cc#L201-L203.
