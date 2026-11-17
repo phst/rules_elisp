@@ -15,7 +15,7 @@
 """The rules_elisp repository."""
 
 repo(
-    default_package_metadata = [":license"],
+    default_package_metadata = [":package_metadata"],
     default_visibility = ["//visibility:private"],
     features = [
         "no_copts_tokenization",

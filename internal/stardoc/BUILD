@@ -18,7 +18,7 @@ load("@rules_go//go:go_test.bzl", "go_test")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_package_metadata = ["//:license"],
+    default_package_metadata = ["//:package_metadata"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )

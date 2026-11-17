@@ -22,7 +22,7 @@ load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load("//private:rlocation.bzl", "rlocation")
 
 package(
-    default_package_metadata = ["//:license"],
+    default_package_metadata = ["//:package_metadata"],
     default_testonly = True,
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,

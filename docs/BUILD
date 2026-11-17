@@ -23,7 +23,7 @@ load(":makeinfo.bzl", "makeinfo")
 load(":merged_manual.bzl", "merged_manual")
 
 package(
-    default_package_metadata = ["//:license"],
+    default_package_metadata = ["//:package_metadata"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )

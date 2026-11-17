@@ -20,7 +20,7 @@ load(":cc_defaults.bzl", "cc_defaults")
 load(":cc_launcher_config.bzl", "LAUNCHER_COPTS", "LAUNCHER_DEFINES", "LAUNCHER_FEATURES", "LAUNCHER_LINKOPTS")
 
 package(
-    default_package_metadata = ["//:license"],
+    default_package_metadata = ["//:package_metadata"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
