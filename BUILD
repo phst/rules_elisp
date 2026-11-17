@@ -12,11 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@rules_license//rules:license.bzl", "license")
+load("@package_metadata//licenses/rules:license.bzl", "license")
+load("@package_metadata//purl:purl.bzl", "purl")
+load("@package_metadata//rules:package_metadata.bzl", "package_metadata")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 
 package(
-    default_package_metadata = [":license"],
+    default_package_metadata = [":package_metadata"],
     default_visibility = ["//visibility:private"],
     features = PACKAGE_FEATURES,
 )
@@ -25,9 +27,20 @@ licenses(["notice"])
 
 exports_files(["LICENSE"])
 
+package_metadata(
+    name = "package_metadata",
+    attributes = [":license"],
+    purl = purl.bazel(
+        module_name(),
+        module_version(),
+    ),
+    visibility = ["//visibility:public"],
+)
+
 license(
     name = "license",
-    license_kind = "@rules_license//licenses/spdx:Apache-2.0",
+    kind = "@package_metadata//licenses/spdx:Apache-2.0",
+    text = "LICENSE",
 )
 
 exports_files(
