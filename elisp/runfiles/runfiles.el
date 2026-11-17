@@ -383,8 +383,10 @@ PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
   "Implementation of ‘start-file-process’ for Bazel runfiles.
 See Info node ‘(elisp) Asynchronous Processes’ for the meaning of NAME,
 BUFFER-OR-NAME, PROGRAM, and ARGS."
-  (declare (ftype (function (string t string &rest string) process)))
+  (declare (ftype (function (string (or null buffer string) string &rest string)
+                            process)))
   (cl-check-type name string)
+  (cl-check-type buffer-or-name (or null buffer string))
   (cl-check-type program string)
   (let ((default-directory (@transform-name default-directory)))
     (apply #'start-file-process
