@@ -157,30 +157,30 @@ See the [corresponding attribute for
         ),
         "deps": attr.label_list(
             doc = """`cc_library` targets that the module depends on.
-See the [corresponding attribute for
-`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.deps).""",
+See the corresponding attribute for
+[`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library).""",
             providers = [CcInfo],
         ),
         "data": attr.label_list(
             doc = """Data dependencies to make available at runtime.
-See the [corresponding attribute for
-`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.data).""",
+See the corresponding attribute for
+[`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library).""",
             allow_files = True,
         ),
         "copts": attr.string_list(
             doc = """Additional options to pass to the C/C++ compiler.
-See the [corresponding attribute for
-`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.copts).""",
+See the corresponding attribute for
+[`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library).""",
         ),
         "linkopts": attr.string_list(
             doc = """Additional options to pass to the C/C++ linker.
-See the [corresponding attribute for
-`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.linkopts).""",
+See the corresponding attribute for
+[`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library).""",
         ),
         "local_defines": attr.string_list(
             doc = """Additional preprocessor definitions to pass to the
-C/C++ compiler.  See the [corresponding attribute for
-`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library.local_defines).""",
+C/C++ compiler.  See the corresponding attribute for
+[`cc_library`](https://bazel.build/reference/be/c-cpp#cc_library).""",
         ),
         "_module_header": attr.label(
             default = Label("//emacs:module_header"),
