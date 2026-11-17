@@ -1,6 +1,6 @@
 ;;; generate-bundle.el --- generate protocol buffer bundle -*- lexical-binding: t; -*-
 
-;; Copyright 2021-2025 Google LLC
+;; Copyright 2021-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -28,24 +28,27 @@
 
 (eval-when-compile (require 'cl-lib))
 
-(cl-deftype @simple-string ()
-  '(and string
-        (satisfies (lambda (string)
-                     (string-match-p
-                      (rx bos (+ (any blank alnum ?- "_+./:@~")) eos)
-                      string)))))
+(defun @simple-string-p (string)
+  "Return non-nil if STRING is safe to put into the generated file."
+  (declare (ftype (function (string) t)))
+  (cl-check-type string string)
+  (string-match-p (rx bos (+ (any blank alnum ?- "_+./:@~")) eos) string))
 
 (cl-destructuring-bind
     (output-file target feature . dependencies)
     command-line-args-left
   (setq command-line-args-left nil)
-  (cl-check-type target @simple-string)
-  (cl-check-type feature @simple-string)
+  (cl-check-type target string)
+  (cl-check-type feature string)
+  (cl-check-type dependencies list)
+  (unless (@simple-string-p target)
+    (error "Invalid Bazel target label %s" target))
   (let ((file-name-handler-alist ())
         (coding-system-for-read 'utf-8-unix)
         (coding-system-for-write 'utf-8-unix)
         (output-name (file-name-nondirectory output-file)))
-    (cl-check-type output-name @simple-string)
+    (unless (@simple-string-p output-name)
+      (error "Invalid output file name %s" output-name))
     (with-temp-file output-file
       (let ((standard-output (current-buffer))
             (print-level nil)
@@ -64,7 +67,8 @@
                 ";;   " target "\n\n"
                 ";;; Code:\n\n")
         (dolist (dep dependencies)
-          (cl-check-type dep @simple-string)
+          (unless (@simple-string-p dep)
+            (error "Invalid Emacs Lisp feature name %s" dep))
           (prin1 `(require ',(intern dep))) (terpri))
         (when dependencies (terpri))
         (prin1 `(provide ',(intern feature))) (terpri) (terpri)

@@ -29,12 +29,11 @@
 
 (require 'elisp/proto/proto)
 
-(cl-deftype @simple-string ()
-  '(and string
-        (satisfies (lambda (string)
-                     (string-match-p
-                      (rx bos (+ (any blank alnum ?- "_+./:@~")) eos)
-                      string)))))
+(defun @simple-string-p (string)
+  "Return non-nil if STRING is safe to put into the generated file."
+  (declare (ftype (function (string) t)))
+  (cl-check-type string string)
+  (string-match-p (rx bos (+ (any blank alnum ?- "_+./:@~")) eos) string))
 
 (defun @generate-message (full-name fields)
   "Generate code for the protocol buffer message type FULL-NAME.
@@ -118,11 +117,13 @@ of its field names.  ENUMS is a list of (FULL-NAME . VALUES) pairs,
 where FULL-NAME specifies the qualified name of a protocol buffer
 enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
   (declare (ftype (function (&rest t) t)))
-  (cl-check-type proto-file @simple-string)
+  (cl-check-type proto-file string)
   (cl-check-type descriptor string)
   (cl-check-type deps list)
   (cl-check-type messages list)
   (cl-check-type enums list)
+  (unless (@simple-string-p proto-file)
+    (error "Invalid Protocol Buffer definition file name %s" proto-file))
   (with-temp-buffer
     (let* ((feature proto-file)
            (output-file (concat proto-file ".el"))
@@ -136,7 +137,8 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
            (print-escape-newlines t)
            (print-escape-nonascii t)
            (pp-escape-newlines t))
-      (cl-check-type output-name @simple-string)
+      (unless (@simple-string-p output-name)
+        (error "Invalid output file name %s" output-name))
       (insert ";;; " output-name " --- protocol buffer library " proto-file
               " -*- lexical-binding: t; -*-\n\n"
               ";;; Commentary:\n\n"
@@ -147,7 +149,8 @@ enumeration type, and VALUES is a list of (NAME NUMBER) pairs."
       (prin1 '(require 'cl-lib)) (terpri) (terpri)
       (prin1 '(require 'elisp/proto/proto)) (terpri) (terpri)
       (dolist (dep deps)
-        (cl-check-type dep @simple-string)
+        (unless (@simple-string-p dep)
+          (error "Invalid Emacs Lisp feature name %s" dep))
         (prin1 `(require ',(intern dep))) (terpri))
       (when deps (terpri))
       (prin1 `(elisp/proto/register-file-descriptor ,descriptor))

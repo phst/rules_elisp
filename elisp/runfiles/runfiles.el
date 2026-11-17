@@ -92,9 +92,6 @@ global instance is initialized."
   (declare (ftype (function () elisp/runfiles/runfiles)))
   (or @global-cache (setq @global-cache (elisp/runfiles/make))))
 
-(cl-deftype elisp/runfiles/filename ()
-  '(and string (satisfies elisp/runfiles/filename-p)))
-
 (cl-defun elisp/runfiles/rlocation
     (filename &optional runfiles &key caller-repo)
   "Return a filename corresponding to the runfile FILENAME.
@@ -113,9 +110,11 @@ in its place."
                              &optional (or null elisp/runfiles/runfiles)
                              &rest t)
                             string)))
-  (cl-check-type filename elisp/runfiles/filename)
+  (cl-check-type filename string)
   (cl-check-type runfiles (or null elisp/runfiles/runfiles))
   (cl-check-type caller-repo (or null string))
+  (unless (elisp/runfiles/filename-p filename)
+    (signal 'elisp/runfiles/invalid-name (list filename)))
   (unless runfiles (setq runfiles (elisp/runfiles/get)))
   (when-let* ((repo-mapping (@runfiles-repo-mapping runfiles))
               (canonical caller-repo))
@@ -211,6 +210,7 @@ signal an error of type ‘elisp/runfiles/remote’."
 (define-error 'elisp/runfiles/syntax-error "Syntax error in runfiles manifest")
 (define-error 'elisp/runfiles/empty "Empty runfile")
 (define-error 'elisp/runfiles/remote "Remote runfiles manifest or directory")
+(define-error 'elisp/runfiles/invalid-name "Invalid runfile name")
 
 
 ;;;; File name handler:
