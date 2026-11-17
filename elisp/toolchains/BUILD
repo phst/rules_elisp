@@ -44,8 +44,8 @@ bzl_library(
         "//elisp/private:filenames",
         "@bazel_skylib//lib:new_sets",
         "@bazel_skylib//lib:paths",
-        "@rules_cc//cc:action_names_bzl",
-        "@rules_cc//cc/common",
+        "@rules_cc//cc:action_names",
+        "@rules_cc//cc/common:cc_common",
     ],
 )
 
