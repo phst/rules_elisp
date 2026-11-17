@@ -333,7 +333,7 @@
     },
     "@@rules_elisp+//elisp/extensions:elisp.bzl%elisp": {
       "general": {
-        "bzlTransitiveDigest": "0EbFJ6+8AV6eao9YuFK6+e1iOXtKxNljDQ4LI8vkTdk=",
+        "bzlTransitiveDigest": "dlcOP4/XrEWn0/ltsuTPBtZz+P3beiqJYVZUH9NuMq8=",
         "usagesDigest": "wP8wtjtd1AcGuOL7tcjFr4Ce3sosBwTBzwY/lAc6Yjc=",
         "recordedInputs": [
           "REPO_MAPPING:rules_elisp+,bazel_skylib bazel_skylib+"

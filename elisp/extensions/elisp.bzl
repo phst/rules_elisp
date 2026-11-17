@@ -36,22 +36,22 @@ by the `target_name` attribute.""",
         ),
         "urls": attr.string_list(
             doc = """List of archive URLs to try.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-urls).""",
+See the corresponding attribute for
+[`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive).""",
             mandatory = True,
             allow_empty = False,
         ),
         "integrity": attr.string(
             doc = """Expected checksum of the archive file in [Subresource
 Integrity](https://www.w3.org/TR/SRI/) format.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-integrity).""",
+See the corresponding attribute for
+[`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive).""",
             mandatory = True,
         ),
         "strip_prefix": attr.string(
             doc = """Directory prefix to strip from the archive contents.
-See the [corresponding attribute for
-`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive-strip_prefix).""",
+See the corresponding attribute for
+[`http_archive`](https://bazel.build/rules/lib/repo/http#http_archive).""",
         ),
         "target_name": attr.string(
             doc = """Name of the `elisp_library` target to generate.""",
