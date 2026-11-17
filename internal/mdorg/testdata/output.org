@@ -6,5 +6,5 @@ Text paragraph with ~code span~ and some special characters: [​]​`_​~​\.
 - List item, single paragraph.
 - List item, first paragraph.
 
-  List item, second paragraph.
+  List item, /second/ paragraph.
 [[info:emacs#User input][Link to Info node]].
