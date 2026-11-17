@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,11 +33,11 @@ def resolve_load_path(ctx, dir):
     return struct(
         # Actions should load byte-compiled files.  Since we place them into the
         # bin directory, we need to start from there, append the repository root
-        # (see https://bazel.build/rules/lib/Label#workspace_root), and then the
-        # directory name relative to the repository root.  The repository root
-        # will only be nonempty if the current rule lives in a different
-        # repository than the one that Bazel is run from.  This approach also
-        # works for dynamic modules placed in the bin directory.
+        # (see https://bazel.build/rules/lib/builtins/Label#workspace_root), and
+        # then the directory name relative to the repository root.  The
+        # repository root will only be nonempty if the current rule lives in a
+        # different repository than the one that Bazel is run from.  This
+        # approach also works for dynamic modules placed in the bin directory.
         for_actions = check_relative_filename(
             paths.join(ctx.bin_dir.path, ctx.label.workspace_root, dir),
         ),
@@ -46,8 +46,9 @@ def resolve_load_path(ctx, dir):
         # top-level directories in the runfiles root are always the repository
         # names, and the load directories are relative to those.  The repository
         # name is the repository part of the lexical label, see
-        # https://bazel.build/rules/lib/Label#workspace_name.  Therefore, it can
-        # be empty, in which case we need to use the current repository.
+        # https://bazel.build/rules/lib/builtins/Label#workspace_name.
+        # Therefore, it can be empty, in which case we need to use the current
+        # repository.
         for_runfiles = check_relative_filename(
             paths.join(ctx.label.workspace_name or ctx.workspace_name, dir),
         ),
