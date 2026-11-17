@@ -39,6 +39,7 @@ func NewRenderer() *Renderer {
 		withChildlessNodeRenderer(s.doText),
 		withNodeRenderer(doNothing, s.endParagraph),
 		withNodeRenderer(s.beginListItem, s.endListItem),
+		withNodeRenderer(s.wrapEmph, s.wrapEmph),
 		withChildlessNodeRenderer(s.doCodeSpan),
 		withChildlessNodeRenderer(s.doCodeBlock),
 		withNodeRenderer(s.beginLink, s.endLink),
@@ -46,7 +47,6 @@ func NewRenderer() *Renderer {
 
 		withUnsupported(ast.KindAutoLink),
 		withUnsupported(ast.KindBlockquote),
-		withUnsupported(ast.KindEmphasis),
 		withUnsupported(ast.KindHTMLBlock),
 		withUnsupported(ast.KindHeading),
 		withUnsupported(ast.KindImage),
@@ -173,6 +173,11 @@ func (r *renderState) endListItem(writer io.Writer, source []byte, n *ast.ListIt
 	}
 	r.inItem = false
 	return nil
+}
+
+func (r *renderState) wrapEmph(writer io.Writer, source []byte, n *ast.Emphasis) error {
+	_, err := io.WriteString(writer, "/")
+	return err
 }
 
 func (r *renderState) doCodeSpan(writer io.Writer, source []byte, n *ast.CodeSpan) error {
