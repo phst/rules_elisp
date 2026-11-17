@@ -504,9 +504,7 @@ by the constant ‘@generic-handlers’, which see."
                                arg))
                             (arg arg)))))))
       (if (memq 'noerror (cdr match))
-          (condition-case nil
-              (invoke)
-            (elisp/runfiles/not-found nil))
+          (ignore-error elisp/runfiles/not-found (invoke))
         (invoke)))))
 
 (defun @transform-name (filename)
