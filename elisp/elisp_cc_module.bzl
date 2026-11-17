@@ -152,7 +152,7 @@ See the [corresponding attribute for
             allow_files = [".cc", ".c"],
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
-            # https://github.com/bazelbuild/bazel/blob/7.4.1/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L74.
+            # https://github.com/bazelbuild/bazel/blob/9.3.2/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         "deps": attr.label_list(
