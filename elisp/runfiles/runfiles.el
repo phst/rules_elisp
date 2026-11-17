@@ -370,10 +370,12 @@ PROGRAM, INFILE, BUFFER, DISPLAY, and ARGS."
            (pcase-exhaustive buffer
              (`(:file ,stdout)
               `(:file ,(@transform-name stdout)))
-             (`((:file ,stdout) ,stderr)
+             (`((:file ,stdout) ,(and (pred stringp) stderr))
               `((:file ,(@transform-name stdout))
                 ,(@transform-name stderr)))
-             (`(,stdout ,stderr)
+             (`((:file ,stdout) ,stderr)
+              `((:file ,(@transform-name stdout)) ,stderr))
+             (`(,stdout ,(and (pred stringp) stderr))
               `(,stdout ,(@transform-name stderr)))
              (buffer buffer))
            display
