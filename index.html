@@ -213,6 +213,11 @@ The file name of the dynamic library will be
 is the rule name as specified in the <code class="code">name</code> attribute, and <var class="var">extension</var>
 is the correct extension for dynamic libraries for the target operating system.
 The file name will not be prefixed with <code class="code">lib</code>.
+Unlike <code class="code">cc_library</code>, the attributes <code class="code">copts</code>, <code class="code">linkopts</code>, and <code class="code">local_defines</code> are
+<em class="emph">not</em> subject to <a class="uref" href="https://bazel.build/reference/be/make-variables">Make
+variable</a> substitution or
+<a class="uref" href="https://bazel.build/reference/be/common-definitions#sh-tokenization">Bourne shell
+tokenization</a>.
 </p>
 <p>The library code in <code class="code">srcs</code> can include a recent version of <code class="code">emacs-module.h</code>
 using

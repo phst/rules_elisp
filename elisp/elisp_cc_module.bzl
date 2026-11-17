@@ -132,6 +132,11 @@ The file name of the dynamic library will be
 is the rule name as specified in the `name` attribute, and <var>extension</var>
 is the correct extension for dynamic libraries for the target operating system.
 The file name will not be prefixed with `lib`.
+Unlike `cc_library`, the attributes `copts`, `linkopts`, and `local_defines` are
+*not* subject to [Make
+variable](https://bazel.build/reference/be/make-variables) substitution or
+[Bourne shell
+tokenization](https://bazel.build/reference/be/common-definitions#sh-tokenization).
 
 The library code in `srcs` can include a recent version of `emacs-module.h`
 using
