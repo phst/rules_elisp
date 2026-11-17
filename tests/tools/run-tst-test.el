@@ -1,6 +1,6 @@
 ;;; run-tst-test.el --- unit tests for run-tst.el -*- lexical-binding: t; -*-
 
-;; Copyright 2023, 2025 Philipp Stephani
+;; Copyright 2023, 2025, 2026 Philipp Stephani
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -36,6 +36,12 @@ See URL
   (should-not (getenv "LC_TIME"))
   (should (equal (getenv "LOGNAME") (getenv "USER")))
   (should (equal (getenv "PATH") "/usr/bin:/usr/sbin:/bin:/sbin"))
+  (should (equal (mapcar #'file-name-as-directory exec-path)
+                 (list "/usr/bin/" "/usr/sbin/" "/bin/" "/sbin/"
+                       (file-name-as-directory exec-directory))))
+  (should (equal (mapcar #'file-name-as-directory (exec-path))
+                 (list "/usr/bin/" "/usr/sbin/" "/bin/" "/sbin/"
+                       (file-name-as-directory exec-directory))))
   (should (equal (getenv "PWD") (expand-file-name (getenv "TEST_WORKSPACE")
                                                   (getenv "TEST_SRCDIR"))))
   (should (equal (getenv "SHLVL") "2"))
