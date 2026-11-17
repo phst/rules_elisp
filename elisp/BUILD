@@ -150,6 +150,7 @@ bzl_library(
         "//elisp/private:module_config_info",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
+        "@rules_cc//cc/common:cc_helper_bzl",
     ],
 )
 

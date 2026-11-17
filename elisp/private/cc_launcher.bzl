@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
-load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
+load("@rules_cc//cc/common:cc_helper.bzl", "cc_helper")
 load(":cc_default_info.bzl", "CcDefaultInfo")
 
 visibility(["//elisp", "//elisp/toolchains"])
@@ -41,7 +41,6 @@ def cc_launcher(ctx, *, defines):
     """
     cc_toolchain = find_cc_toolchain(ctx)
     deps = ctx.attr._launcher_deps
-    infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._launcher_defaults[CcDefaultInfo]
     feature_configuration = cc_common.configure_features(
         ctx = ctx,
@@ -55,7 +54,7 @@ def cc_launcher(ctx, *, defines):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         srcs = ctx.files._launcher_srcs,
-        compilation_contexts = [info.compilation_context for info in infos],
+        compilation_contexts = cc_helper.get_compilation_contexts_from_deps(deps),
         local_defines = defaults.defines + defines,
         user_compile_flags = defaults.copts,
     )
@@ -65,7 +64,7 @@ def cc_launcher(ctx, *, defines):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
-        linking_contexts = [info.linking_context for info in infos],
+        linking_contexts = cc_helper.get_linking_contexts_from_deps(deps),
         user_link_flags = defaults.linkopts,
     )
     runfiles = ctx.runfiles().merge_all([dep[DefaultInfo].default_runfiles for dep in deps])

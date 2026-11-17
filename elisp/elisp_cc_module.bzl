@@ -17,6 +17,7 @@
 load("@rules_cc//cc:find_cc_toolchain.bzl", "find_cc_toolchain")
 load("@rules_cc//cc:use_cc_toolchain.bzl", "CC_TOOLCHAIN_ATTRS", "use_cc_toolchain")
 load("@rules_cc//cc/common:cc_common.bzl", "cc_common")
+load("@rules_cc//cc/common:cc_helper.bzl", "cc_helper")
 load("@rules_cc//cc/common:cc_info.bzl", "CcInfo")
 load("//elisp/common:elisp_info.bzl", "EmacsLispInfo")
 load("//elisp/private:cc_default_info.bzl", "CcDefaultInfo")
@@ -29,7 +30,6 @@ def _elisp_cc_module_impl(ctx):
     """Implementation of the `elisp_cc_module` rule."""
     cc_toolchain = find_cc_toolchain(ctx)
     deps = ctx.attr.deps + [ctx.attr._module_header]
-    infos = [dep[CcInfo] for dep in deps]
     defaults = ctx.attr._module_config[CcDefaultInfo]
     config = ctx.attr._module_config[ModuleConfigInfo]
     feature_configuration = cc_common.configure_features(
@@ -44,7 +44,7 @@ def _elisp_cc_module_impl(ctx):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         srcs = ctx.files.srcs,
-        compilation_contexts = [info.compilation_context for info in infos],
+        compilation_contexts = cc_helper.get_compilation_contexts_from_deps(deps),
         local_defines = defaults.defines + ctx.attr.local_defines,
         user_compile_flags = defaults.copts + ctx.attr.copts,
     )
@@ -54,7 +54,7 @@ def _elisp_cc_module_impl(ctx):
         feature_configuration = feature_configuration,
         cc_toolchain = cc_toolchain,
         compilation_outputs = objs,
-        linking_contexts = [info.linking_context for info in infos],
+        linking_contexts = cc_helper.get_linking_contexts_from_deps(deps),
         output_type = "dynamic_library",
         user_link_flags = defaults.linkopts + ctx.attr.linkopts,
         additional_inputs = config.additional_linker_inputs,

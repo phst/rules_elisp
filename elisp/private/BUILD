@@ -80,6 +80,7 @@ bzl_library(
         ":cc_default_info",
         "@rules_cc//cc:find_cc_toolchain_bzl",
         "@rules_cc//cc/common",
+        "@rules_cc//cc/common:cc_helper_bzl",
     ],
 )
 
