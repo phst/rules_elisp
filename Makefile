@@ -16,6 +16,7 @@
 .PHONY: all generate check compdb coverage check-extra benchmark
 .PHONY: clean install uninstall
 .PHONY: MODULE.bazel.lock examples/ext/MODULE.bazel.lock
+.PHONY: index.html elisp/private/generated.bzl
 .PHONY: compile_commands.json
 .SUFFIXES:
 
@@ -48,6 +49,14 @@ examples/ext/MODULE.bazel.lock:
 	cp -p $< /tmp/a/MODULE.bazel
 	sed '/^## Development dependencies$$/q' $< > /tmp/b/MODULE.bazel
 	(cd /tmp && ! diff -u a/MODULE.bazel b/MODULE.bazel) > $@
+
+index.html:
+	$(BAZEL) build $(BAZELFLAGS) //docs:manual.html
+	cp bazel-bin/docs/manual.html $@
+
+elisp/private/generated.bzl:
+	$(BAZEL) build $(BAZELFLAGS) //elisp/private:generated.expanded.bzl
+	cp bazel-bin/elisp/private/generated.expanded.bzl $@
 
 generate: compdb coverage
 

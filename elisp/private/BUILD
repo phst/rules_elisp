@@ -126,11 +126,7 @@ diff_test(
     name = "generated_test",
     size = "medium",
     timeout = "short",
-    failure_message = """Please run
-
-    bazel build //elisp/private:generated.expanded.bzl
-
-and copy the generated file to //elisp/private:generated.bzl.""",
+    failure_message = "Run “make elisp/private/generated.bzl” to fix",
     file1 = "generated.bzl",
     file2 = "generated.expanded.bzl",
 )

@@ -53,10 +53,7 @@ diff_test(
     name = "html_test",
     size = "medium",
     timeout = "short",
-    failure_message = "\n".join([
-        "Run the following command to fix:",
-        "bazel build //docs:manual.html && cp bazel-bin/docs/manual.html index.html",
-    ]),
+    failure_message = "Run “make index.html” to fix",
     file1 = "manual.html",
     file2 = "//:index.html",
     # On the GitHub runners, the installed version of Texinfo depends on the
