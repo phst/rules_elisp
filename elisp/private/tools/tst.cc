@@ -179,6 +179,11 @@ absl::StatusOr<int> Main(const Options& opts,
   env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
+  // Don’t use unsafe default from
+  // https://bazel.build/reference/test-encyclopedia#initial-conditions.
+  env.Put(RULES_ELISP_NATIVE_LITERAL("PATH"),
+          RULES_ELISP_NATIVE_LITERAL("/usr/bin:/usr/sbin:/bin:/sbin"));
+
   std::vector<FileName> inputs;
   std::vector<FileName> outputs;
   const NativeString report_file =
