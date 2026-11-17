@@ -511,8 +511,9 @@ by the constant ‘@generic-handlers’, which see."
   "Return the filename in the filesystem corresponding to the runfile FILENAME.
 If FILENAME doesn’t start with \"/bazel-runfile:\", return it unchanged."
   (declare (ftype (function (string) string)))
+  (cl-check-type filename string)
   (pcase-exhaustive filename
-    ((and (pred stringp) (rx bos "/bazel-runfile:" (let name (* anything)) eos))
+    ((rx bos "/bazel-runfile:" (let name (* anything)) eos)
      (elisp/runfiles/rlocation name))
     (other other)))
 
