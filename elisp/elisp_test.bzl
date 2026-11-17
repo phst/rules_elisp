@@ -47,7 +47,7 @@ def _elisp_test_impl(ctx):
     test_env = {}
     if ctx.configuration.coverage_enabled:
         # Bazel’s coverage runner
-        # (https://github.com/bazelbuild/bazel/blob/7.4.1/tools/test/collect_coverage.sh)
+        # (https://github.com/bazelbuild/bazel/blob/9.3.2/tools/test/collect_coverage.sh)
         # needs a binary called “lcov_merge.”  Its location is passed in the
         # LCOV_MERGER environmental variable.  For builtin rules, this variable
         # is set automatically based on a magic “$lcov_merger” or
@@ -62,10 +62,10 @@ def _elisp_test_impl(ctx):
 
         # C/C++ coverage instrumentation needs another binary that wraps gcov;
         # see
-        # https://github.com/bazelbuild/bazel/blob/7.4.1/tools/test/collect_coverage.sh#L183.
+        # https://github.com/bazelbuild/bazel/blob/9.3.2/tools/test/collect_coverage.sh#L196.
         # This is normally set from a hidden “$collect_cc_coverage” attribute;
         # see
-        # https://github.com/bazelbuild/bazel/blob/7.4.1/src/main/java/com/google/devtools/build/lib/analysis/test/TestActionBuilder.java#L259-L263.
+        # https://github.com/bazelbuild/bazel/blob/9.3.2/src/main/java/com/google/devtools/build/lib/analysis/test/TestActionBuilder.java#L312-L316.
         # We also need to inject its location here, like above.
         runfiles = runfiles.merge(
             ctx.attr._collect_cc_coverage[DefaultInfo].default_runfiles,
@@ -98,7 +98,7 @@ elisp_test = cc_launcher_rule(
             mandatory = True,
             # Undocumented flag to make these rules work with
             # “bazel build --compile_one_dependency”.  See
-            # https://github.com/bazelbuild/bazel/blob/7.4.1/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L74.
+            # https://github.com/bazelbuild/bazel/blob/9.3.2/src/test/java/com/google/devtools/build/lib/pkgcache/CompileOneDependencyTransformerTest.java#L75.
             flags = ["DIRECT_COMPILE_TIME_INPUT"],
         ),
         # Magic coverage attributes,

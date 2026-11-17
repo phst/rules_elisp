@@ -146,7 +146,7 @@ determined."
           ;; https://bazel.build/remote/output-directories#layout-diagram.  If
           ;; --incompatible_sandbox_hermetic_tmp is enabled, the execution root
           ;; is /tmp/bazel-working-directory or /tmp/bazel-execroot instead;
-          ;; cf. https://github.com/bazelbuild/bazel/blob/master/src/main/java/com/google/devtools/build/lib/sandbox/LinuxSandboxedSpawnRunner.java.
+          ;; cf. https://github.com/bazelbuild/bazel/blob/9.3.2/src/main/java/com/google/devtools/build/lib/sandbox/LinuxSandboxedSpawnRunner.java.
           ((rx ?/ (or "execroot" "bazel-working-directory" "bazel-execroot") ?/
                (let name (+ (not (any ?/)))) ?/)
            ;; The canonical name of the main repository is the empty string.
@@ -187,7 +187,7 @@ signal an error of type ‘elisp/runfiles/remote’."
   (declare (ftype (function (string) t)))
   (let ((case-fold-search nil))
     ;; This uses similar criteria as
-    ;; https://github.com/bazelbuild/bazel/blob/7.4.1/tools/cpp/runfiles/runfiles_src.cc#L221-L223.
+    ;; https://github.com/bazelbuild/rules_cc/blob/0.2.28/cc/runfiles/runfiles.cc#L201-L203.
     ;; We also ban absolute filenames as well as some forms that only exist in
     ;; Emacs.
     (and (stringp string)

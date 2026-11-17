@@ -1,4 +1,4 @@
-# Copyright 2020-2025 Google LLC
+# Copyright 2020-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,7 +65,7 @@ def binary(ctx, *, srcs, tags, defines):
     # isn’t really documented; some information is available at
     # https://bazel.build/contribute/codebase#coverage-collection and in the
     # source code comments of the file
-    # https://github.com/bazelbuild/bazel/blob/7.4.1/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
+    # https://github.com/bazelbuild/bazel/blob/9.3.2/src/main/java/com/google/devtools/build/lib/bazel/coverage/CoverageReportActionBuilder.java.
     # When runtime coverage support is enabled, Bazel writes a list of filenames
     # that are covered by --instrumentation_filter to a text file whose filename
     # is in COVERAGE_MANIFEST.  The test runner then parses that file and only
