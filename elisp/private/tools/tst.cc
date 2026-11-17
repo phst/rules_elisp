@@ -172,9 +172,10 @@ absl::StatusOr<int> Main(const Options& opts,
   ABSL_ASSIGN_OR_RETURN(const Environment orig_env, Environment::Current());
   env.Merge(orig_env);
 
-  // FIXME: We need this, otherwise Emacs doesn’t correctly decode its
-  // command-line arguments.  But we shouldn’t set it,
-  // cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
+  // We need this, otherwise Emacs doesn’t correctly decode its command-line
+  // arguments.  Bazel starting with version 10 will set it,
+  // cf. https://github.com/bazelbuild/bazel/pull/25801.
+  // TODO: Remove once we drop support for Bazel 9 and below.
   env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
