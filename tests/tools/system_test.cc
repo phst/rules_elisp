@@ -60,6 +60,7 @@ using ::testing::PrintToString;
 using ::testing::SizeIs;
 using ::testing::StartsWith;
 using ::testing::TestWithParam;
+using ::testing::UnorderedElementsAre;
 using ::testing::Values;
 
 static absl::StatusOr<FileName> TempDir() {
@@ -792,6 +793,20 @@ TEST(EnvironmentTest, GetIsCaseSensitiveOnlyOnUnix) {
   EXPECT_EQ(env->Get(RULES_ELISP_NATIVE_LITERAL("Foo")),
             kWindows ? RULES_ELISP_NATIVE_LITERAL("bar")
                      : RULES_ELISP_NATIVE_LITERAL(""));
+}
+
+TEST(EnvironmentTest, AddSupportsNullValue) {
+  const std::vector<std::pair<NativeString, NativeString>> pairs = {
+      {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
+  };
+  absl::StatusOr<Environment> env = Environment::Create(pairs);
+  ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
+  env->Add(RULES_ELISP_NATIVE_LITERAL("baz"), NativeStringView());
+  EXPECT_THAT(*env,
+              UnorderedElementsAre(Pair(RULES_ELISP_NATIVE_LITERAL("foo"),
+                                        RULES_ELISP_NATIVE_LITERAL("bar")),
+                                   Pair(RULES_ELISP_NATIVE_LITERAL("baz"),
+                                        RULES_ELISP_NATIVE_LITERAL(""))));
 }
 
 TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
