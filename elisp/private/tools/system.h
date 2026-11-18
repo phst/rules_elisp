@@ -225,6 +225,12 @@ class Environment final {
     map_.insert_or_assign(key, value);
   }
 
+  void Remove(const NativeStringView key) {
+    ABSL_CHECK(!key.empty()) << "empty environment variable";
+    ABSL_CHECK(!ContainsNull(key));
+    map_.erase(key);
+  }
+
   void Merge(const Environment& other) {
     map_.insert(other.begin(), other.end());
   }

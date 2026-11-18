@@ -172,17 +172,28 @@ absl::StatusOr<int> Main(const Options& opts,
   ABSL_ASSIGN_OR_RETURN(const Environment orig_env, Environment::Current());
   env.Merge(orig_env);
 
+  // Set a few environment variables as required or recommended in
+  // https://bazel.build/reference/test-encyclopedia#initial-conditions.
+  // FIXME: Check whether these are actually needed; in theory Bazel should set
+  // them.
+  env.Add(RULES_ELISP_NATIVE_LITERAL("HOME"),
+          env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_TMPDIR")));
+  env.Remove(RULES_ELISP_NATIVE_LITERAL("LANG"));
   // We need this, otherwise Emacs doesn’t correctly decode its command-line
   // arguments.  Bazel starting with version 10 will set it,
   // cf. https://github.com/bazelbuild/bazel/pull/25801.
   // TODO: Remove once we drop support for Bazel 9 and below.
   env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
-
+  env.Add(RULES_ELISP_NATIVE_LITERAL("LOGNAME"),
+          env.Get(RULES_ELISP_NATIVE_LITERAL("USER")));
   // Don’t use unsafe default from
   // https://bazel.build/reference/test-encyclopedia#initial-conditions.
   env.Put(RULES_ELISP_NATIVE_LITERAL("PATH"),
           RULES_ELISP_NATIVE_LITERAL("/usr/bin:/usr/sbin:/bin:/sbin"));
+  env.Put(RULES_ELISP_NATIVE_LITERAL("SHLVL"), RULES_ELISP_NATIVE_LITERAL("2"));
+  env.Add(RULES_ELISP_NATIVE_LITERAL("BAZEL_TEST"),
+          RULES_ELISP_NATIVE_LITERAL("1"));
 
   std::vector<FileName> inputs;
   std::vector<FileName> outputs;
