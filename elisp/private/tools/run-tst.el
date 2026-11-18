@@ -958,10 +958,6 @@ exact copies as equal."
     (error "TEST_TMPDIR not set"))
   (setq temporary-file-directory (file-name-as-directory temp-dir)))
 
-;; Expand the working directory.  It shouldn’t contain any ~ prefix because we
-;; change HOME below.
-(cl-callf expand-file-name default-directory)
-
 (declare-function elisp/runfiles/file-handler "elisp/runfiles/runfiles"
                   (operation &rest args))
 
@@ -1000,18 +996,11 @@ exact copies as equal."
         (write-region-post-annotation-function nil))
     (write-region "" nil shard-status-file :append)))
 
-;; Set a few environment variables as required or recommended in
+;; Emacs unconditionally sets LANG on Windows and Darwin, see the logic in
+;; w32.c:init_environment and nsterm.m:ns_init_locale.  Override that here to
+;; match the requirement in
 ;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
-(unless (@getenv "HOME") (setenv "HOME" (getenv "TEST_TMPDIR")))
-(setenv "LANG")
-(unless (@getenv "LOGNAME") (setenv "LOGNAME" user-login-name))
-;; Don’t use unsafe default from
-;; https://bazel.build/reference/test-encyclopedia#initial-conditions.
-(setenv "PATH" "/usr/bin:/usr/sbin:/bin:/sbin")
-(unless (@getenv "PWD")
-  (setenv "PWD" (file-name-unquote (directory-file-name default-directory))))
-(setenv "SHLVL" "2")
-(unless (@getenv "BAZEL_TEST") (setenv "BAZEL_TEST" "1"))
+(when (memq system-type '(darwin windows-nt)) (setenv "LANG"))
 
 (let ((fail-fast (equal (getenv "TESTBRIDGE_TEST_RUNNER_FAIL_FAST") "1"))
       (coverage-enabled (equal (getenv "COVERAGE") "1"))
