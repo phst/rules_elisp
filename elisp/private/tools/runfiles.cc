@@ -146,7 +146,7 @@ absl::StatusOr<Environment> Runfiles::Environ() const {
                           ToNative(narrow_value, Encoding::kAscii));
     pairs.emplace_back(key, value);
   }
-  return Environment::Create(pairs.cbegin(), pairs.cend());
+  return Environment::Create(pairs);
 }
 
 }  // namespace rules_elisp

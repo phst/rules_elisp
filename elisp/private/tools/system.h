@@ -170,32 +170,8 @@ class Environment final {
 
  public:
   static absl::StatusOr<Environment> Current();
-
-  template <typename I>
-  static absl::StatusOr<Environment> Create(I begin, const I end) {
-    Map map;
-    for (; begin != end; ++begin) {
-      const auto& [key, value] = *begin;
-      if (key.empty()) {
-        return absl::InvalidArgumentError("Empty environment variable name");
-      }
-      if (ContainsNull(key)) {
-        return absl::InvalidArgumentError(absl::StrFormat(
-            "Environment variable name %s contains null character", key));
-      }
-      if (ContainsNull(value)) {
-        return absl::InvalidArgumentError(absl::StrFormat(
-            "Value %s for environment variable %s contains null character",
-            value, key));
-      }
-      const auto [it, ok] = map.emplace(key, value);
-      if (!ok) {
-        return absl::AlreadyExistsError(
-            absl::StrFormat("Duplicate environment variable %s", key));
-      }
-    }
-    return Environment(std::move(map));
-  }
+  static absl::StatusOr<Environment> Create(
+      const std::vector<std::pair<NativeString, NativeString>>& pairs);
 
   using value_type = Map::value_type;
   using reference = Map::reference;
@@ -228,17 +204,15 @@ class Environment final {
   size_type max_size() const { return map_.max_size(); }
   bool empty() const { return map_.empty(); }
 
-  template <std::size_t N>
-  NativeStringView Get(const NativeChar (&key)[N]) const
+  NativeStringView Get(const NativeStringView key) const
       ABSL_ATTRIBUTE_LIFETIME_BOUND {
-    static_assert(N > 1, "empty environment variable");
+    ABSL_CHECK(!key.empty()) << "empty environment variable";
     const auto it = map_.find(key);
     return it == map_.end() ? NativeStringView() : it->second;
   }
 
-  template <std::size_t N>
-  void Add(const NativeChar (&key)[N], NativeStringView value) {
-    static_assert(N > 1, "empty environment variable");
+  void Add(const NativeStringView key, NativeStringView value) {
+    ABSL_CHECK(!key.empty()) << "empty environment variable";
     map_.emplace(key, value);
   }
 

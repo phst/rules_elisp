@@ -749,7 +749,7 @@ TEST(EnvironmentTest, CreateRejectsEmpty) {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
       {RULES_ELISP_NATIVE_LITERAL(""), RULES_ELISP_NATIVE_LITERAL("baz")},
   };
-  EXPECT_THAT(Environment::Create(pairs.cbegin(), pairs.cend()),
+  EXPECT_THAT(Environment::Create(pairs),
               StatusIs(absl::StatusCode::kInvalidArgument));
 }
 
@@ -758,12 +758,12 @@ TEST(EnvironmentTest, CreateRejectsDuplicates) {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("baz")},
   };
-  EXPECT_THAT(Environment::Create(pairs.cbegin(), pairs.cend()),
+  EXPECT_THAT(Environment::Create(pairs),
               StatusIs(absl::StatusCode::kAlreadyExists));
   if constexpr (kWindows) {
     pairs.emplace_back(RULES_ELISP_NATIVE_LITERAL("Foo"),
                        RULES_ELISP_NATIVE_LITERAL("Bar"));
-    EXPECT_THAT(Environment::Create(pairs.cbegin(), pairs.cend()),
+    EXPECT_THAT(Environment::Create(pairs),
                 StatusIs(absl::StatusCode::kAlreadyExists));
   }
 }
@@ -773,8 +773,7 @@ TEST(EnvironmentTest, CreateIsCaseSensitiveOnlyOnUnix) {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
       {RULES_ELISP_NATIVE_LITERAL("Foo"), RULES_ELISP_NATIVE_LITERAL("baz")},
   };
-  const absl::StatusOr<Environment> env =
-      Environment::Create(pairs.cbegin(), pairs.cend());
+  const absl::StatusOr<Environment> env = Environment::Create(pairs);
   if constexpr (kWindows) {
     EXPECT_THAT(env, StatusIs(absl::StatusCode::kAlreadyExists));
   } else {
@@ -786,8 +785,7 @@ TEST(EnvironmentTest, GetIsCaseSensitiveOnlyOnUnix) {
   const std::vector<std::pair<NativeString, NativeString>> pairs = {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
   };
-  absl::StatusOr<Environment> env =
-      Environment::Create(pairs.cbegin(), pairs.cend());
+  absl::StatusOr<Environment> env = Environment::Create(pairs);
   ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
   EXPECT_EQ(env->Get(RULES_ELISP_NATIVE_LITERAL("foo")),
             RULES_ELISP_NATIVE_LITERAL("bar"));
@@ -800,8 +798,7 @@ TEST(EnvironmentTest, AddIsCaseSensitiveOnlyOnUnix) {
   const std::vector<std::pair<NativeString, NativeString>> pairs = {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
   };
-  absl::StatusOr<Environment> env =
-      Environment::Create(pairs.cbegin(), pairs.cend());
+  absl::StatusOr<Environment> env = Environment::Create(pairs);
   ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
   env->Add(RULES_ELISP_NATIVE_LITERAL("Foo"),
            RULES_ELISP_NATIVE_LITERAL("baz"));
@@ -812,8 +809,7 @@ TEST(EnvironmentTest, PutIsCaseSensitiveOnlyOnUnix) {
   const std::vector<std::pair<NativeString, NativeString>> pairs = {
       {RULES_ELISP_NATIVE_LITERAL("foo"), RULES_ELISP_NATIVE_LITERAL("bar")},
   };
-  absl::StatusOr<Environment> env =
-      Environment::Create(pairs.cbegin(), pairs.cend());
+  absl::StatusOr<Environment> env = Environment::Create(pairs);
   ASSERT_THAT(env, IsOkAndHolds(SizeIs(pairs.size())));
   env->Put(RULES_ELISP_NATIVE_LITERAL("Foo"),
            RULES_ELISP_NATIVE_LITERAL("baz"));
@@ -912,13 +908,12 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   const FileName output_file =
       dir->Child(RULES_ELISP_NATIVE_LITERAL("output.log")).value();
 
-  const std::pair<NativeString, NativeString> env_vars[] = {
+  const std::vector<std::pair<NativeString, NativeString>> env_vars = {
       // Avoid misleading warnings about unset COVERAGE_DIR and GOCOVERDIR.
       {RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"), dir->string()},
       {RULES_ELISP_NATIVE_LITERAL("GOCOVERDIR"), dir->string()},
   };
-  const absl::StatusOr<Environment> env =
-      Environment::Create(std::cbegin(env_vars), std::cend(env_vars));
+  const absl::StatusOr<Environment> env = Environment::Create(env_vars);
   ASSERT_THAT(env, IsOk());
   ProcessOptions options;
   options.directory = *dir;

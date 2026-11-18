@@ -1164,6 +1164,31 @@ absl::StatusOr<Environment> Environment::Current() {
   return Environment(std::move(map));
 }
 
+absl::StatusOr<Environment> Environment::Create(
+    const std::vector<std::pair<NativeString, NativeString>>& pairs) {
+  Map map;
+  for (const auto& [key, value] : pairs) {
+    if (key.empty()) {
+      return absl::InvalidArgumentError("Empty environment variable name");
+    }
+    if (ContainsNull(key)) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "Environment variable name %s contains null character", key));
+    }
+    if (ContainsNull(value)) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "Value %s for environment variable %s contains null character", value,
+          key));
+    }
+    const auto [it, ok] = map.emplace(key, value);
+    if (!ok) {
+      return absl::AlreadyExistsError(
+          absl::StrFormat("Duplicate environment variable %s", key));
+    }
+  }
+  return Environment(std::move(map));
+}
+
 #ifdef _WIN32
 static std::wstring CanonicalizeEnvironmentVariable(
     const std::wstring_view string) {
