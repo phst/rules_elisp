@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -157,10 +157,12 @@ absl::Status CopyFile(const FileName& from, const FileName& to);
 class Environment final {
  private:
   struct Hash {
+    using is_transparent = void;
     std::size_t operator()(NativeStringView string) const;
   };
 
   struct Equal {
+    using is_transparent = void;
     bool operator()(NativeStringView a, NativeStringView b) const;
   };
 
