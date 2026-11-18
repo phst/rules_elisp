@@ -1145,6 +1145,7 @@ absl::StatusOr<Environment> Environment::Current() {
   constexpr std::size_t skip = kWindows ? 1 : 0;
   NativeStringView var;
   while (block.Next(var)) {
+    CHECK(!ContainsNull(var));
     if (var.length() < 2) {
       return absl::FailedPreconditionError(
           absl::StrFormat("Invalid environment block entry %s", var));
