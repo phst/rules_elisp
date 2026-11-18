@@ -211,12 +211,12 @@ class Environment final {
     return it == map_.end() ? NativeStringView() : it->second;
   }
 
-  void Add(const NativeStringView key, NativeStringView value) {
+  void Add(const NativeStringView key, const NativeStringView value) {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
     map_.try_emplace(key, value);
   }
 
-  void Put(const NativeStringView key, NativeStringView value) {
+  void Put(const NativeStringView key, const NativeStringView value) {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
     map_.insert_or_assign(key, value);
   }
