@@ -213,7 +213,7 @@ class Environment final {
 
   void Add(const NativeStringView key, NativeStringView value) {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
-    map_.emplace(key, value);
+    map_.try_emplace(key, value);
   }
 
   void Put(const NativeStringView key, NativeStringView value) {

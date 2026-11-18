@@ -1155,7 +1155,7 @@ absl::StatusOr<Environment> Environment::Current() {
           absl::StrFormat("Invalid environment block entry %s", var));
     }
     const NativeStringView key = var.substr(0, i);
-    const auto [it, ok] = map.emplace(key, var.substr(i + 1));
+    const auto [it, ok] = map.try_emplace(key, var.substr(i + 1));
     if (!ok) {
       return absl::AlreadyExistsError(
           absl::StrFormat("Duplicate environment variable %s", key));
@@ -1180,7 +1180,7 @@ absl::StatusOr<Environment> Environment::Create(
           "Value %s for environment variable %s contains null character", value,
           key));
     }
-    const auto [it, ok] = map.emplace(key, value);
+    const auto [it, ok] = map.try_emplace(key, value);
     if (!ok) {
       return absl::AlreadyExistsError(
           absl::StrFormat("Duplicate environment variable %s", key));
