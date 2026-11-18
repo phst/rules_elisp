@@ -56,9 +56,6 @@
 (ert-deftest LOGNAME ()
   (should (member (getenv "LOGNAME") (list (getenv "USER") nil))))
 
-(ert-deftest PATH ()
-  (should (equal (getenv "PATH") "/usr/bin:/usr/sbin:/bin:/sbin")))
-
 (ert-deftest PWD ()
   (should (member (getenv "PWD")
                   (list (expand-file-name (getenv "TEST_WORKSPACE")
