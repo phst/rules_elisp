@@ -141,8 +141,7 @@ absl::StatusOr<int> Main(
   env.Merge(orig_env);
 
   // FIXME: We need this, otherwise Emacs doesn’t correctly decode its
-  // command-line arguments.  But we shouldn’t set it,
-  // cf. https://bazel.build/reference/test-encyclopedia#initial-conditions.
+  // command-line arguments.
   env.Add(RULES_ELISP_NATIVE_LITERAL("LC_CTYPE"),
           RULES_ELISP_NATIVE_LITERAL("C.UTF-8"));
 
