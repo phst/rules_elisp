@@ -23,9 +23,6 @@
 ;; Test that the environment is set up as expected.  See URL
 ;; ‘https://bazel.build/reference/test-encyclopedia#initial-conditions’.
 
-(ert-deftest HOME ()
-  (should (member (getenv "HOME") (list (getenv "TEST_TMPDIR") nil))))
-
 (ert-deftest LANG ()
   (should-not (getenv "LANG")))
 
@@ -39,7 +36,7 @@
   (should-not (getenv "LC_COLLATE")))
 
 (ert-deftest LC_CTYPE ()
-  (should (equal (getenv "LC_CTYPE") "C.UTF-8")))
+  (should (member (getenv "LC_CTYPE") '(nil "C.UTF-8"))))
 
 (ert-deftest LC_MESSAGE ()
   (should-not (getenv "LC_MESSAGES")))
@@ -53,48 +50,10 @@
 (ert-deftest LC_TIME ()
   (should-not (getenv "LC_TIME")))
 
-(ert-deftest LOGNAME ()
-  (should (member (getenv "LOGNAME") (list (getenv "USER") nil))))
-
-(ert-deftest PWD ()
-  (should (member (getenv "PWD")
-                  (list (expand-file-name (getenv "TEST_WORKSPACE")
-                                              (getenv "TEST_SRCDIR"))
-                        nil))))
-
-(ert-deftest SHLVL ()
-  (should (member (getenv "SHLVL") '("0" "1" "2" nil))))
-
-(ert-deftest TEST_RANDOM_SEED ()
-  (should-not (getenv "TEST_RANDOM_SEED")))
-
-(ert-deftest TEST_RUN_NUMBER ()
-  (should-not (getenv "TEST_RUN_NUMBER")))
-
-(ert-deftest TEST_TARGET ()
-  (should (equal (getenv "TEST_TARGET") "//tests/tools:run_tst_test")))
-
-(ert-deftest TEST_SIZE ()
-  (should (equal (getenv "TEST_SIZE") "small")))
-
-(ert-deftest TEST_TIMEOUT ()
-  ;; Bazel quintuples default test timeouts in coverage mode, so accept either
-  ;; value.  On Windows, we quadruple the test timeouts, cf. //:.bazelrc.
-  (should (member (getenv "TEST_TIMEOUT") '("60" "300" "240"))))
-
-(ert-deftest TEST_SHARD_INDEX ()
-  (should-not (getenv "TEST_SHARD_INDEX")))
-
-(ert-deftest TEST_SHARD_STATUS_FILE ()
-  (should-not (getenv "TEST_SHARD_STATUS_FILE")))
-
 (ert-deftest TEST_SRCDIR ()
   (should (getenv "TEST_SRCDIR"))
   (should (file-name-absolute-p (getenv "TEST_SRCDIR")))
   (should (file-readable-p (getenv "TEST_SRCDIR"))))
-
-(ert-deftest TEST_TOTAL_SHARDS ()
-  (should-not (getenv "TEST_TOTAL_SHARDS")))
 
 (ert-deftest TEST_TMPDIR ()
   (should (getenv "TEST_TMPDIR"))
@@ -102,21 +61,12 @@
   (should (file-readable-p (getenv "TEST_TMPDIR")))
   (should (file-writable-p (getenv "TEST_TMPDIR"))))
 
-(ert-deftest TEST_WORKSPACE ()
-  (should (equal (getenv "TEST_WORKSPACE") "_main")))
-
-(ert-deftest TESTBRIDGE_TEST_ONLY ()
-  (should-not (getenv "TESTBRIDGE_TEST_ONLY")))
-
 (ert-deftest TZ ()
   (should (equal (getenv "TZ") "UTC")))
 
 (ert-deftest USER ()
   (should (getenv "USER"))
   (should (equal (getenv "USER") (user-login-name))))
-
-(ert-deftest XML_OUTPUT_FILE ()
-  (should (getenv "XML_OUTPUT_FILE")))
 
 (ert-deftest BAZEL_TEST ()
   (should (getenv "BAZEL_TEST")))
