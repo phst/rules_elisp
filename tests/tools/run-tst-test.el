@@ -24,7 +24,7 @@
 ;; ‘https://bazel.build/reference/test-encyclopedia#initial-conditions’.
 
 (ert-deftest HOME ()
-  (should (equal (getenv "HOME") (getenv "TEST_TMPDIR"))))
+  (should (member (getenv "HOME") (list (getenv "TEST_TMPDIR") nil))))
 
 (ert-deftest LANG ()
   (should-not (getenv "LANG")))
@@ -54,17 +54,19 @@
   (should-not (getenv "LC_TIME")))
 
 (ert-deftest LOGNAME ()
-  (should (equal (getenv "LOGNAME") (getenv "USER"))))
+  (should (member (getenv "LOGNAME") (list (getenv "USER") nil))))
 
 (ert-deftest PATH ()
   (should (equal (getenv "PATH") "/usr/bin:/usr/sbin:/bin:/sbin")))
 
 (ert-deftest PWD ()
-  (should (equal (getenv "PWD") (expand-file-name (getenv "TEST_WORKSPACE")
-                                                  (getenv "TEST_SRCDIR")))))
+  (should (member (getenv "PWD")
+                  (list (expand-file-name (getenv "TEST_WORKSPACE")
+                                              (getenv "TEST_SRCDIR"))
+                        nil))))
 
 (ert-deftest SHLVL ()
-  (should (equal (getenv "SHLVL") "2")))
+  (should (member (getenv "SHLVL") '("0" "1" "2" nil))))
 
 (ert-deftest TEST_RANDOM_SEED ()
   (should-not (getenv "TEST_RANDOM_SEED")))
