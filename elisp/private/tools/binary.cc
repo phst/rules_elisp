@@ -88,8 +88,7 @@ static absl::StatusOr<std::vector<FileName>> ArgFiles(
   return result;
 }
 
-static std::optional<FileName> RunfilesDirectory(
-    const Environment& env ABSL_ATTRIBUTE_LIFETIME_BOUND) {
+static std::optional<FileName> RunfilesDirectory(const Environment& env) {
   if (absl::StatusOr<FileName> value = FileName::FromString(
           env.Get(RULES_ELISP_NATIVE_LITERAL("RUNFILES_DIR")));
       value.ok()) {
