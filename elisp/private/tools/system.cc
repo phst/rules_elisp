@@ -1175,6 +1175,10 @@ absl::StatusOr<Environment> Environment::Create(
       return absl::InvalidArgumentError(absl::StrFormat(
           "Environment variable name %s contains null character", key));
     }
+    if (key.find(RULES_ELISP_NATIVE_LITERAL('=')) != key.npos) {
+      return absl::InvalidArgumentError(absl::StrFormat(
+          "Environment variable name %s contains equals sign", key));
+    }
     if (ContainsNull(value)) {
       return absl::InvalidArgumentError(absl::StrFormat(
           "Value %s for environment variable %s contains null character", value,

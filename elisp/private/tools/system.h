@@ -206,17 +206,22 @@ class Environment final {
 
   NativeString Get(const NativeStringView key) const {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
+    ABSL_CHECK(!ContainsNull(key));
     const auto it = map_.find(key);
     return it == map_.end() ? NativeString() : it->second;
   }
 
   void Add(const NativeStringView key, const NativeStringView value) {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
+    ABSL_CHECK(!ContainsNull(key));
+    ABSL_CHECK(!ContainsNull(value));
     map_.try_emplace(key, value);
   }
 
   void Put(const NativeStringView key, const NativeStringView value) {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
+    ABSL_CHECK(!ContainsNull(key));
+    ABSL_CHECK(!ContainsNull(value));
     map_.insert_or_assign(key, value);
   }
 
