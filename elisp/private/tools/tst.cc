@@ -181,7 +181,7 @@ absl::StatusOr<int> Main(const Options& opts,
 
   std::vector<FileName> inputs;
   std::vector<FileName> outputs;
-  const NativeStringView report_file =
+  const NativeString report_file =
       env.Get(RULES_ELISP_NATIVE_LITERAL("XML_OUTPUT_FILE"));
   if (!report_file.empty()) {
     ABSL_ASSIGN_OR_RETURN(FileName file, FileName::FromString(report_file));
@@ -189,7 +189,7 @@ absl::StatusOr<int> Main(const Options& opts,
   }
   if (env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE")) ==
       RULES_ELISP_NATIVE_LITERAL("1")) {
-    const NativeStringView coverage_manifest =
+    const NativeString coverage_manifest =
         env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_MANIFEST"));
     if (!coverage_manifest.empty()) {
       ABSL_ASSIGN_OR_RETURN(FileName file,
@@ -197,7 +197,7 @@ absl::StatusOr<int> Main(const Options& opts,
       ABSL_RETURN_IF_ERROR(FixCoverageManifest(file, runfiles));
       inputs.push_back(std::move(file));
     }
-    const NativeStringView coverage_dir =
+    const NativeString coverage_dir =
         env.Get(RULES_ELISP_NATIVE_LITERAL("COVERAGE_DIR"));
     if (!coverage_dir.empty()) {
       ABSL_ASSIGN_OR_RETURN(const FileName dir,
@@ -215,7 +215,7 @@ absl::StatusOr<int> Main(const Options& opts,
     // process, see https://github.com/bazelbuild/bazel/issues/12684.  We work
     // around this by creating a new process group and sending CTRL + BREAK
     // slightly before Bazel kills us.
-    const NativeStringView timeout_str =
+    const NativeString timeout_str =
         env.Get(RULES_ELISP_NATIVE_LITERAL("TEST_TIMEOUT"));
     if (!timeout_str.empty()) {
       ABSL_ASSIGN_OR_RETURN(const std::string narrow,

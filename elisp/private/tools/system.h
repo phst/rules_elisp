@@ -204,11 +204,10 @@ class Environment final {
   size_type max_size() const { return map_.max_size(); }
   bool empty() const { return map_.empty(); }
 
-  NativeStringView Get(const NativeStringView key) const
-      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  NativeString Get(const NativeStringView key) const {
     ABSL_CHECK(!key.empty()) << "empty environment variable";
     const auto it = map_.find(key);
-    return it == map_.end() ? NativeStringView() : it->second;
+    return it == map_.end() ? NativeString() : it->second;
   }
 
   void Add(const NativeStringView key, const NativeStringView value) {
