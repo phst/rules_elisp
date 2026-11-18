@@ -216,9 +216,8 @@ class Environment final {
     map_.emplace(key, value);
   }
 
-  template <std::size_t N>
-  void Put(const NativeChar (&key)[N], NativeStringView value) {
-    static_assert(N > 1, "empty environment variable");
+  void Put(const NativeStringView key, NativeStringView value) {
+    ABSL_CHECK(!key.empty()) << "empty environment variable";
     map_.insert_or_assign(key, value);
   }
 
