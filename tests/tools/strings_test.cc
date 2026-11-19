@@ -1,4 +1,4 @@
-// Copyright 2025 Philipp Stephani
+// Copyright 2025, 2026 Philipp Stephani
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -67,11 +67,6 @@ TEST(ContainsNullTest, AcceptsStringsWithoutEmbeddedNull) {
 TEST(ContainsNullTest, RejectsStringsWithEmbeddedNull) {
   EXPECT_TRUE(ContainsNull(View("\0")));
   EXPECT_TRUE(ContainsNull(View(L"\0")));
-}
-
-TEST(PercentEncode, EncodesToAscii) {
-  EXPECT_EQ(PercentEncode(""), "");
-  EXPECT_EQ(PercentEncode(View("Foó % \0\1\xFF")), "Fo%c3%b3 %25 %00%01%ff");
 }
 
 }  // namespace

@@ -478,7 +478,6 @@ cc_library(
     copts = COPTS + CXXOPTS,
     features = FEATURES,
     implementation_deps = [
-        ":numeric",
         "@abseil-cpp//absl/algorithm:container",
         "@abseil-cpp//absl/strings:str_format",
     ],
