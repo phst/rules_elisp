@@ -242,7 +242,6 @@ cc_library(
         ":manifest",
         ":numeric",
         ":runfiles",
-        ":strings",
         ":system",
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",

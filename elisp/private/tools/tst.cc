@@ -27,6 +27,7 @@
 #include "absl/status/status.h"
 #include "absl/status/status_macros.h"
 #include "absl/status/statusor.h"
+#include "absl/strings/escaping.h"
 #include "absl/strings/numbers.h"
 #include "absl/strings/str_format.h"
 #include "absl/time/clock.h"
@@ -38,7 +39,6 @@
 #include "elisp/private/tools/numeric.h"
 #include "elisp/private/tools/platform.h"
 #include "elisp/private/tools/runfiles.h"
-#include "elisp/private/tools/strings.h"
 #include "elisp/private/tools/system.h"
 
 namespace rules_elisp {
@@ -46,7 +46,7 @@ namespace rules_elisp {
 static absl::StatusOr<NativeString> QuoteArg(const NativeStringView arg) {
   if constexpr (!kWindows) return NativeString(arg);
   ABSL_ASSIGN_OR_RETURN(const std::string utf8, ToNarrow(arg, Encoding::kUtf8));
-  return ToNative(PercentEncode(utf8), Encoding::kAscii);
+  return ToNative(absl::UrlEscape(utf8), Encoding::kAscii);
 }
 
 // Try to look up inaccessible files in the coverage manifest as runfiles.
