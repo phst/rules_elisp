@@ -1,4 +1,4 @@
-# Copyright 2021-2025 Google LLC
+# Copyright 2021-2026 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ def check_relative_filename(filename):
             fail("invalid character {} in filename {}".format(char, filename))
     return filename
 
+# TODO: Replace this with file.rlocationpath once we drop support for Bazel 9
+# and below.
 def runfile_location(ctx, file):
     """Return the filename of the given file relative to the runfiles root.
 
