@@ -126,4 +126,4 @@ runs:
       if: runner.os != 'Windows'
       shell: bash
       run: |
-        echo 'CC=${{matrix.cc}}' >> "${GITHUB_ENV:?}"
+        echo 'CC=${{inputs.cc}}' >> "${GITHUB_ENV:?}"
