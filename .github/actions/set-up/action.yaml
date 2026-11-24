@@ -78,6 +78,12 @@ runs:
         install: >
           mingw-w64-ucrt-x86_64-texinfo
           mingw-w64-ucrt-x86_64-emacs
+    - name: Install Clang
+      if: runner.os == 'Windows' && inputs.cc == 'clang'
+      uses: egor-tensin/setup-clang@v2
+      # FIXME: Remove this step once
+      # https://github.com/actions/runner-images/issues/15367 and
+      # https://github.com/actions/runner-images/issues/15368 are fixed.
     - name: Set up Ubuntu worker
       if: runner.os == 'Linux'
       shell: bash
