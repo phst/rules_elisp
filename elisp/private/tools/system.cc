@@ -1539,6 +1539,14 @@ absl::StatusOr<int> RunProcess(const FileName& program,
 #endif
 }
 
+[[noreturn]] void Exit(const absl::StatusOr<int>& code) {
+  if (!code.ok()) {
+    LOG(ERROR) << code.status();
+    std::exit(EXIT_FAILURE);
+  }
+  std::exit(*code);
+}
+
 class DosDevice::Impl final {
  public:
   static absl::StatusOr<absl_nonnull std::unique_ptr<const Impl>> Create(

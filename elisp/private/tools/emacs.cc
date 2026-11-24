@@ -111,10 +111,10 @@ static absl::StatusOr<int> RunEmacs(
   return RunProcess(*emacs, args, env);
 }
 
-absl::StatusOr<int> Main(
-    const RepositoryType type, const std::string_view install,
-    const absl::Span<const NativeStringView> original_args) {
-  return RunEmacs(BAZEL_CURRENT_REPOSITORY, type, install, original_args);
+[[noreturn]] void Main(const RepositoryType type,
+                       const std::string_view install,
+                       const absl::Span<const NativeStringView> original_args) {
+  Exit(RunEmacs(BAZEL_CURRENT_REPOSITORY, type, install, original_args));
 }
 
 }  // namespace rules_elisp

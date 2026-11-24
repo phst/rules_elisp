@@ -155,6 +155,7 @@ cc_library(
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",  # keep
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@rules_cc//cc/runfiles",  # keep
     ],
@@ -164,7 +165,6 @@ cc_library(
     visibility = ["//elisp/toolchains:__pkg__"],
     deps = [
         ":platform",
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -180,6 +180,7 @@ cc_library(
         ":system",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",  # keep
+        "@abseil-cpp//absl/status:statusor",
     ],
     linkopts = LINKOPTS,
     linkstatic = True,
@@ -187,7 +188,6 @@ cc_library(
     visibility = ["//elisp/private:__pkg__"],
     deps = [
         ":platform",
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -210,6 +210,7 @@ cc_library(
         "@abseil-cpp//absl/log:check",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",  # keep
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings:str_format",
         "@rules_cc//cc/runfiles",  # keep
     ],
@@ -222,7 +223,6 @@ cc_library(
     ],
     deps = [
         ":platform",
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
 )
@@ -246,6 +246,7 @@ cc_library(
         "@abseil-cpp//absl/log",
         "@abseil-cpp//absl/status",
         "@abseil-cpp//absl/status:status_macros",  # keep
+        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/strings",
         "@abseil-cpp//absl/strings:str_format",
         "@abseil-cpp//absl/time",
@@ -261,7 +262,6 @@ cc_library(
     visibility = ["//elisp:__pkg__"],
     deps = [
         ":platform",
-        "@abseil-cpp//absl/status:statusor",
         "@abseil-cpp//absl/types:span",
     ],
 )

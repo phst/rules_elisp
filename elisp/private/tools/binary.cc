@@ -102,7 +102,7 @@ static std::optional<FileName> RunfilesDirectory(const Environment& env) {
   return std::nullopt;
 }
 
-absl::StatusOr<int> Main(
+static absl::StatusOr<int> RunBinary(
     const Options& opts,
     const absl::Span<const NativeStringView> original_args) {
   ABSL_ASSIGN_OR_RETURN(
@@ -158,6 +158,11 @@ absl::StatusOr<int> Main(
   final_args.insert(final_args.end(), args.cbegin(), args.cend());
 
   return RunProcess(emacs, final_args, env);
+}
+
+[[noreturn]] void Main(const Options& opts,
+                       const absl::Span<const NativeStringView> original_args) {
+  Exit(RunBinary(opts, original_args));
 }
 
 }  // namespace rules_elisp

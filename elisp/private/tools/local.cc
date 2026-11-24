@@ -54,9 +54,9 @@ static absl::StatusOr<int> RunEmacs(
   return RunProcess(emacs, args, env);
 }
 
-absl::StatusOr<int> Main(const NativeStringView program,
-                         const absl::Span<const NativeStringView> args) {
-  return RunEmacs(program, args);
+[[noreturn]] void Main(const NativeStringView program,
+                       const absl::Span<const NativeStringView> args) {
+  Exit(RunEmacs(program, args));
 }
 
 }  // namespace rules_elisp

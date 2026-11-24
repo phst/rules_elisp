@@ -19,15 +19,14 @@
 #  error this file requires at least C++17
 #endif
 
-#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(NativeStringView program,
-                         absl::Span<const NativeStringView> args);
+[[noreturn]] void Main(NativeStringView program,
+                       absl::Span<const NativeStringView> args);
 
 }  // namespace rules_elisp
 
