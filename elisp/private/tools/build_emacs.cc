@@ -94,9 +94,9 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   ProcessOptions options;
   options.directory = build;
   options.output_file = output;
-  ABSL_ASSIGN_OR_RETURN(const int code,
+  ABSL_ASSIGN_OR_RETURN(const ProcessStatus status,
                         RunProcess(program, args, env, options));
-  if (code == 0) return absl::OkStatus();
+  if (status == kSuccessfulExit) return absl::OkStatus();
   {
     std::ifstream stream(output.string(), std::ios::in | std::ios::binary);
     std::cerr << absl::StreamFormat("command %s failed, output follows:",
@@ -107,8 +107,9 @@ static absl::Status Run(const FileName& temp, const FileName& build,
   std::cerr << std::endl
             << absl::StreamFormat("temporary build directory is %s", temp)
             << std::endl;
-  return absl::UnavailableError(absl::StrFormat(
-      "Command %s failed with code %d", QuoteForBash(program, args), code));
+  return absl::UnavailableError(absl::StrFormat("Command %s failed with %s",
+                                                QuoteForBash(program, args),
+                                                FormatProcessStatus(status)));
 }
 
 static absl::StatusOr<FileName> Join(

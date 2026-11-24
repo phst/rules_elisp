@@ -19,10 +19,12 @@
 load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@local_config//:config.bzl", "XMLLINT")
+load("@rules_cc//cc:cc_binary.bzl", "cc_binary")
 load("@rules_go//go:go_test.bzl", "go_test")
 load("//elisp:elisp_binary.bzl", "elisp_binary")
 load("//elisp:elisp_library.bzl", "elisp_library")
 load("//elisp:elisp_test.bzl", "elisp_test")
+load("//private:cc_config.bzl", "CONLYOPTS", "COPTS", "DEFINES", "FEATURES", "LINKOPTS")
 load("//private:package_features.bzl", "PACKAGE_FEATURES")
 load("//private:rlocation.bzl", "runfileflag")
 
@@ -44,6 +46,7 @@ TEST_DATA = [
     "//internal/wrap:launcher",
     "//tests:empty",
     "//tests/integration:exit",
+    "//tests/integration:kill",
     "//tests/integration:signal",
     "//tests/integration:test",
     "//tests/integration:test.el",
@@ -64,8 +67,14 @@ go_test(
         # See https://github.com/bazelbuild/bazel/issues/12313 why we need to
         # add additional quoting.
         shell.quote("--xmllint=" + XMLLINT),
-    ] + [runfileflag(t) for t in TEST_DATA],
-    data = TEST_DATA,
+    ] + select({
+        "@platforms//os:macos": [runfileflag("//tests/integration:disable_crash_reporter")],
+        "//conditions:default": [],
+    }) + [runfileflag(t) for t in TEST_DATA],
+    data = select({
+        "@platforms//os:macos": [":disable_crash_reporter"],
+        "//conditions:default": [],
+    }) + TEST_DATA,
     embedsrcs = [
         "coverage.dat",
         "version.txt",
@@ -142,7 +151,24 @@ elisp_binary(
     src = "exit.el",
 )
 
+elisp_binary(
+    name = "kill",
+    src = "kill.el",
+)
+
 elisp_library(
     name = "test_lib",
     srcs = ["test-lib.el"],
 )
+
+cc_binary(
+    name = "disable_crash_reporter",
+    srcs = ["disable_crash_reporter.c"],
+    copts = COPTS + CONLYOPTS,
+    features = FEATURES,
+    linkopts = LINKOPTS,
+    local_defines = DEFINES,
+    target_compatible_with = ["@platforms//os:macos"],
+)
+
+# gazelle:cc_generate false

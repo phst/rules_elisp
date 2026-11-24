@@ -29,7 +29,7 @@
 
 namespace rules_elisp {
 
-static absl::StatusOr<int> RunEmacs(
+static absl::StatusOr<ProcessStatus> RunEmacs(
     const NativeStringView program,
     const absl::Span<const NativeStringView> original_args) {
   if (program.empty()) return absl::NotFoundError("Emacs program not found");

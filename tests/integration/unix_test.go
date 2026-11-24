@@ -16,7 +16,10 @@
 
 package integration_test
 
-import "math"
+import (
+	"math"
+	"syscall"
+)
 
 const outputFile = "/tmp/output.dat"
 
@@ -26,3 +29,5 @@ const signalCode = math.MaxUint8
 
 // FIXME: This should support the full 32-bit exit status range.
 type exitStatus uint8
+
+func killProcAttr() *syscall.SysProcAttr { return nil }
