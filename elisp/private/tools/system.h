@@ -254,6 +254,8 @@ absl::StatusOr<int> RunProcess(const FileName& program,
                                const Environment& env,
                                const ProcessOptions& options = {});
 
+[[noreturn]] void Exit(const absl::StatusOr<int>& code);
+
 class DosDevice final {
  public:
   static absl::StatusOr<DosDevice> Create(const FileName& target);

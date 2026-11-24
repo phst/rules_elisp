@@ -12,14 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <cstdlib>
-
 #include "absl/base/log_severity.h"
 #include "absl/container/fixed_array.h"
 #include "absl/log/globals.h"
 #include "absl/log/initialize.h"
-#include "absl/log/log.h"
-#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
@@ -77,7 +73,7 @@ int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
   opts.skip_tags = {RULES_ELISP_SKIP_TAGS};
   opts.module_assertions = RULES_ELISP_MODULE_ASSERTIONS;
 #endif
-  const absl::StatusOr<int> code = rules_elisp::Main(
+  rules_elisp::Main(
 #if defined RULES_ELISP_EMACS
       RULES_ELISP_TYPE, RULES_ELISP_INSTALL,
 #elif defined RULES_ELISP_LOCAL
@@ -86,9 +82,4 @@ int RULES_ELISP_MAIN(int argc, rules_elisp::NativeChar** argv) {
       opts,
 #endif
       original_args);
-  if (!code.ok()) {
-    LOG(ERROR) << code.status();
-    return EXIT_FAILURE;
-  }
-  return *code;
 }

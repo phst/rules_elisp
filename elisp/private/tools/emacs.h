@@ -1,4 +1,4 @@
-// Copyright 2020-2025 Google LLC
+// Copyright 2020-2026 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,15 +21,14 @@
 
 #include <string_view>
 
-#include "absl/status/statusor.h"
 #include "absl/types/span.h"
 
 #include "elisp/private/tools/platform.h"
 
 namespace rules_elisp {
 
-absl::StatusOr<int> Main(RepositoryType type, std::string_view install,
-                         absl::Span<const NativeStringView> original_args);
+[[noreturn]] void Main(RepositoryType type, std::string_view install,
+                       absl::Span<const NativeStringView> original_args);
 
 }  // namespace rules_elisp
 

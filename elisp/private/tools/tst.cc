@@ -112,8 +112,8 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
   return absl::OkStatus();
 }
 
-absl::StatusOr<int> Main(const Options& opts,
-                         absl::Span<const NativeStringView> original_args) {
+static absl::StatusOr<int> RunTest(
+    const Options& opts, absl::Span<const NativeStringView> original_args) {
   ABSL_ASSIGN_OR_RETURN(
       const Runfiles runfiles,
       Runfiles::Create(ExecutableKind::kBinary, BAZEL_CURRENT_REPOSITORY,
@@ -251,6 +251,11 @@ absl::StatusOr<int> Main(const Options& opts,
     return 0xFF;
   }
   return result;
+}
+
+[[noreturn]] void Main(const Options& opts,
+                       absl::Span<const NativeStringView> original_args) {
+  Exit(RunTest(opts, original_args));
 }
 
 }  // namespace rules_elisp
