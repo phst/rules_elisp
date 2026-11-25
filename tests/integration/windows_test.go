@@ -16,7 +16,10 @@
 
 package integration_test
 
-import "math"
+import (
+	"math"
+	"syscall"
+)
 
 const outputFile = `C:\Temp\output.dat`
 
@@ -25,3 +28,10 @@ const outputFile = `C:\Temp\output.dat`
 const signalCode = math.MaxUint32
 
 type exitStatus uint32
+
+func killProcAttr() *syscall.SysProcAttr {
+	const DETACHED_PROCESS uint32 = 0x00000008
+	return &syscall.SysProcAttr{
+		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS,
+	}
+}

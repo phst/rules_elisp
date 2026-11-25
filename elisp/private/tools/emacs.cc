@@ -35,7 +35,7 @@
 
 namespace rules_elisp {
 
-static absl::StatusOr<int> RunEmacs(
+static absl::StatusOr<ProcessStatus> RunEmacs(
     const std::string_view source_repository, const RepositoryType type,
     const std::string_view install,
     const absl::Span<const NativeStringView> original_args) {

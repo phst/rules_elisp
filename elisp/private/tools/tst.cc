@@ -112,7 +112,7 @@ static absl::Status FixCoverageManifest(const FileName& manifest_file,
   return absl::OkStatus();
 }
 
-static absl::StatusOr<int> RunTest(
+static absl::StatusOr<ProcessStatus> RunTest(
     const Options& opts, absl::Span<const NativeStringView> original_args) {
   ABSL_ASSIGN_OR_RETURN(
       const Runfiles runfiles,
@@ -238,7 +238,7 @@ static absl::StatusOr<int> RunTest(
   manifest.AppendArgs(final_args);
   final_args.insert(final_args.end(), emacs_args.cbegin(), emacs_args.cend());
 
-  const absl::StatusOr<int> result =
+  const absl::StatusOr<ProcessStatus> result =
       RunProcess(emacs, final_args, env, run_opts);
 
   if (absl::IsDeadlineExceeded(result.status())) {
@@ -248,7 +248,7 @@ static absl::StatusOr<int> RunTest(
     absl::SleepFor(absl::Seconds(20));
     // If Bazel hasn’t killed us, exit anyway.
     LOG(WARNING) << "Bazel failed to kill this process";
-    return 0xFF;
+    return ProcessExit{0xFF};
   }
   return result;
 }

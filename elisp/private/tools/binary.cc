@@ -102,7 +102,7 @@ static std::optional<FileName> RunfilesDirectory(const Environment& env) {
   return std::nullopt;
 }
 
-static absl::StatusOr<int> RunBinary(
+static absl::StatusOr<ProcessStatus> RunBinary(
     const Options& opts,
     const absl::Span<const NativeStringView> original_args) {
   ABSL_ASSIGN_OR_RETURN(

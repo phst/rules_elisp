@@ -22,6 +22,7 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "absl/base/attributes.h"
@@ -249,12 +250,46 @@ struct ProcessOptions final {
 
 absl::StatusOr<FileName> SearchPath(const FileName& program);
 
-absl::StatusOr<int> RunProcess(const FileName& program,
-                               absl::Span<const NativeString> args,
-                               const Environment& env,
-                               const ProcessOptions& options = {});
+struct ProcessExit final {
+  int status;
 
-[[noreturn]] void Exit(const absl::StatusOr<int>& code);
+  friend constexpr bool operator==(const ProcessExit a,
+                                   const ProcessExit b) noexcept {
+    return a.status == b.status;
+  }
+
+  friend constexpr bool operator!=(const ProcessExit a,
+                                   const ProcessExit b) noexcept {
+    return a.status != b.status;
+  }
+};
+
+struct ProcessSignal final {
+  int number;
+
+  friend constexpr bool operator==(const ProcessSignal a,
+                                   const ProcessSignal b) noexcept {
+    return a.number == b.number;
+  }
+
+  friend constexpr bool operator!=(const ProcessSignal a,
+                                   const ProcessSignal b) noexcept {
+    return a.number != b.number;
+  }
+};
+
+using ProcessStatus = std::variant<ProcessExit, ProcessSignal>;
+
+inline constexpr ProcessStatus kSuccessfulExit = ProcessExit{0};
+
+[[nodiscard]] std::string FormatProcessStatus(const ProcessStatus& status);
+
+absl::StatusOr<ProcessStatus> RunProcess(const FileName& program,
+                                         absl::Span<const NativeString> args,
+                                         const Environment& env,
+                                         const ProcessOptions& options = {});
+
+[[noreturn]] void Exit(const absl::StatusOr<ProcessStatus>& status);
 
 class DosDevice final {
  public:

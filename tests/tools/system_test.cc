@@ -871,10 +871,10 @@ TEST(RunTest, ReturnsExitCode) {
   ASSERT_THAT(helper, IsOk());
 
   EXPECT_THAT(RunProcess(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=0")}, {}),
-              IsOkAndHolds(0));
+              IsOkAndHolds(ProcessExit{0}));
   EXPECT_THAT(
       RunProcess(*helper, {RULES_ELISP_NATIVE_LITERAL("--exit=23")}, {}),
-      IsOkAndHolds(23));
+      IsOkAndHolds(ProcessExit{23}));
 }
 
 TEST(RunTest, SupportsDeadlineOnWindows) {
@@ -906,7 +906,8 @@ TEST(RunTest, AllowsChangingDirectory) {
   ProcessOptions options;
   options.directory = *temp;
 
-  EXPECT_THAT(RunProcess(*helper, {}, {}, options), IsOkAndHolds(0));
+  EXPECT_THAT(RunProcess(*helper, {}, {}, options),
+              IsOkAndHolds(kSuccessfulExit));
 }
 
 TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
@@ -933,7 +934,8 @@ TEST(RunTest, ChangesWorkingDirectoryAndRedirectsOutput) {
   ProcessOptions options;
   options.directory = *dir;
   options.output_file = output_file;
-  EXPECT_THAT(RunProcess(*helper, {}, *env, options), IsOkAndHolds(0));
+  EXPECT_THAT(RunProcess(*helper, {}, *env, options),
+              IsOkAndHolds(kSuccessfulExit));
 
   absl::StatusOr<std::string> narrow = ToNarrow(dir->string(), Encoding::kUtf8);
   ASSERT_THAT(narrow, IsOk());

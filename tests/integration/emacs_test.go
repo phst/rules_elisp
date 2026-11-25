@@ -26,12 +26,15 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
 	"slices"
 	"strconv"
+	"syscall"
 	"testing"
 	"testing/quick"
 
 	"github.com/bazelbuild/rules_go/go/runfiles"
+	"github.com/goaux/decowriter"
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/phst/rules_elisp/internal/testutil"
@@ -130,6 +133,94 @@ func TestRunExitCode(t *testing.T) {
 	// Test random exit codes.
 	if err := quick.CheckEqual(run, cast, nil); err != nil {
 		t.Error(err)
+	}
+}
+
+var (
+	kill                 = testutil.RunfileFlag("//tests/integration:kill")
+	disableCrashReporter = testutil.RunfileFlag("//tests/integration:disable_crash_reporter")
+)
+
+func TestRunKill(t *testing.T) {
+	var command []string
+	if s := *disableCrashReporter; s != "" {
+		command = append(command, s)
+	}
+	command = append(command, *kill)
+	program := command[0]
+	args := command[1:]
+	env, err := runfiles.Env()
+	if err != nil {
+		t.Fatal(err)
+	}
+	const windows = runtime.GOOS == "windows"
+	const unix = !windows
+	const STATUS_CONTROL_C_EXIT = 0xC000013A
+	for _, tc := range []struct {
+		arg          string
+		wantSignal   syscall.Signal // Unix
+		wantExitCode int            // Windows
+	}{
+		{"SIGABRT", syscall.SIGABRT, 0},
+		{"SIGBUS", syscall.SIGBUS, 0},
+		{"SIGFPE", syscall.SIGFPE, 0},
+		{"SIGHUP", syscall.SIGHUP, 0xFF},
+		{"SIGILL", syscall.SIGILL, 0},
+		{"SIGKILL", syscall.SIGKILL, 0xFF},
+		{"SIGQUIT", syscall.SIGQUIT, STATUS_CONTROL_C_EXIT},
+		{"SIGSEGV", syscall.SIGSEGV, 0},
+		{"SIGTERM", syscall.SIGTERM, 0},
+		{"SIGTRAP", syscall.SIGTRAP, 0},
+	} {
+		t.Run(tc.arg, func(t *testing.T) {
+			cmd := exec.Command(program, append(args, tc.arg)...)
+			cmd.Env = env
+			cmd.Stdout = decowriter.New(t.Output(), []byte("[emacs] "), nil)
+			cmd.Stderr = cmd.Stdout
+			cmd.SysProcAttr = killProcAttr()
+			err := cmd.Run()
+			if windows && tc.wantExitCode == 0 {
+				// not implemented
+				return
+			}
+			if err == nil {
+				t.Fatal("process succeeded unexpectedly")
+			}
+			t.Logf("error: %s", err)
+			var exit *exec.ExitError
+			if !errors.As(err, &exit) {
+				t.Fatalf("error has wrong type %T: %s", err, err)
+			}
+			if unix && exit.Exited() {
+				t.Errorf("process exited with status %#10x", exit.ExitCode())
+			}
+			status, ok := exit.Sys().(syscall.WaitStatus)
+			if !ok {
+				t.Fatalf("system information has wrong type %T", exit.Sys())
+			}
+			if unix && status.Exited() {
+				t.Error("process exited")
+			}
+			if unix && !status.Signaled() {
+				t.Error("process didn’t signal")
+			}
+			if status.Stopped() {
+				t.Error("process stopped")
+			}
+			if status.Continued() {
+				t.Error("process continued")
+			}
+			switch {
+			case unix:
+				if got := status.Signal(); got != tc.wantSignal {
+					t.Errorf("incorrect signal number: got %q (%d), want %q (%d)", got, got, tc.wantSignal, tc.wantSignal)
+				}
+			case windows:
+				if got := exit.ExitCode(); got != tc.wantExitCode {
+					t.Errorf("incorrect exit code: got %#10xd, %#10x", got, tc.wantExitCode)
+				}
+			}
+		})
 	}
 }
 

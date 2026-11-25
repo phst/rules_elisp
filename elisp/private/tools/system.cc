@@ -40,9 +40,11 @@
 #  include <fnmatch.h>
 #  include <ftw.h>
 #  include <limits.h>
+#  include <signal.h>
 #  include <spawn.h>
 #  include <stdio.h>
 #  include <stdlib.h>
+#  include <string.h>  // IWYU pragma: keep, for strsignal
 #  include <sys/stat.h>
 #  include <sys/types.h>
 #  include <sys/wait.h>
@@ -65,6 +67,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <fstream>
+#include <iomanip>
 #include <ios>
 #include <iostream>
 #include <locale>
@@ -77,6 +80,7 @@
 #include <system_error>
 #include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "absl/algorithm/container.h"
@@ -1323,6 +1327,23 @@ absl::StatusOr<FileName> SearchPath(const FileName& program) {
 #endif
 }
 
+[[nodiscard]] std::string FormatProcessStatus(const ProcessStatus& status) {
+  const struct {
+    std::string operator()(const ProcessExit exit) const {
+      return absl::StrCat("exit status ", exit.status);
+    }
+    std::string operator()(const ProcessSignal signal) const {
+      const int num = signal.number;
+#ifdef _WIN32
+      return absl::StrCat("signal ", num);
+#else
+      return absl::StrFormat("signal %s (%d)", strsignal(num), num);
+#endif
+    }
+  } visitor;
+  return std::visit(visitor, status);
+}
+
 static void FlushEverything() {
   std::cout.flush();
   std::wcout.flush();
@@ -1333,10 +1354,9 @@ static void FlushEverything() {
   }
 }
 
-absl::StatusOr<int> RunProcess(const FileName& program,
-                               const absl::Span<const NativeString> args,
-                               const Environment& env,
-                               const ProcessOptions& options) {
+absl::StatusOr<ProcessStatus> RunProcess(
+    const FileName& program, const absl::Span<const NativeString> args,
+    const Environment& env, const ProcessOptions& options) {
   for (const NativeString& arg : args) {
     if (ContainsNull(arg)) {
       return absl::InvalidArgumentError(
@@ -1472,7 +1492,7 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   const int code_int = static_cast<int>(code);
   // Ensure we don’t accidentally return success on failure.
   CHECK((code == 0) == (code_int == 0));
-  return code_int;
+  return ProcessExit{code_int};
 #else
   if (has_deadline) {
     return absl::UnimplementedError(
@@ -1535,16 +1555,34 @@ absl::StatusOr<int> RunProcess(const FileName& program,
   if (status != pid) {
     return ErrnoStatus() << absl::StreamFormat("waitpid(%d, ..., 0)", pid);
   }
-  return WIFEXITED(wstatus) ? WEXITSTATUS(wstatus) : 0xFF;
+  if (WIFEXITED(wstatus)) return ProcessExit{WEXITSTATUS(wstatus)};
+  CHECK(WIFSIGNALED(wstatus)) << "invalid process status " << std::showbase
+                              << std::hex << std::setw(10) << wstatus;
+  return ProcessSignal{WTERMSIG(wstatus)};
 #endif
 }
 
-[[noreturn]] void Exit(const absl::StatusOr<int>& code) {
-  if (!code.ok()) {
-    LOG(ERROR) << code.status();
+[[noreturn]] void Exit(const absl::StatusOr<ProcessStatus>& status) {
+  if (!status.ok()) {
+    LOG(ERROR) << status.status();
     std::exit(EXIT_FAILURE);
   }
-  std::exit(*code);
+  const struct {
+    [[noreturn]] void operator()(const ProcessExit exit) const {
+      std::exit(exit.status);
+    }
+    [[noreturn]] void operator()(const ProcessSignal signal) const {
+      const int num = signal.number;
+#ifdef _WIN32
+      LOG(FATAL) << "Impossible situation: received signal " << num;
+#else
+      kill(getpid(), num);
+      std::exit(0xFF);
+#endif
+    }
+  } visitor;
+  std::visit(visitor, *status);
+  LOG(FATAL) << "Unreachable code";
 }
 
 class DosDevice::Impl final {
