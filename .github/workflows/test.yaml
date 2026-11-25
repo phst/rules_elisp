@@ -70,7 +70,7 @@ jobs:
         run: >-
           ./check.ps1
           -Coverage:$${{runner.os != 'Windows'}}
-          -BazelVersions '8.1.0', '8.x'
+          -BazelVersions @('8.1.0', '8.x')
       - name: Run OS-independent checks
         if: runner.os == 'Linux'
         shell: bash
