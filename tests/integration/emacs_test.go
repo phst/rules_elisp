@@ -43,7 +43,7 @@ var (
 	signalBin = testutil.RunfileFlag("//tests/integration:signal")
 )
 
-func TestRun(t *testing.T) {
+func TestBinaryOutput(t *testing.T) {
 	rfEnv, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
@@ -99,7 +99,7 @@ $`, `(?m)^Foo\r?\n\z`},
 
 var exitBin = testutil.RunfileFlag("//tests/integration:exit")
 
-func TestRunExitCode(t *testing.T) {
+func TestBinaryExitCode(t *testing.T) {
 	env, err := runfiles.Env()
 	if err != nil {
 		t.Fatal(err)
@@ -153,7 +153,7 @@ var (
 )
 
 // Test that running a binary with a wrapper works.
-func TestRunWrapped(t *testing.T) {
+func TestWrapper(t *testing.T) {
 	cmd := exec.Command(
 		*launcher,
 		"--option",

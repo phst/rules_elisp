@@ -38,7 +38,7 @@ import (
 	"github.com/phst/rules_elisp/internal/testutil"
 )
 
-func TestExitCode(t *testing.T) {
+func TestTestExitCode(t *testing.T) {
 	// See
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
 	err := runTest(t,
@@ -142,7 +142,7 @@ func TestReportSharded(t *testing.T) {
 	}
 }
 
-func TestReportSkipTag(t *testing.T) {
+func TestSkipTag(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "report.xml")
 
@@ -163,7 +163,7 @@ func TestReportSkipTag(t *testing.T) {
 	}
 }
 
-func TestReportFailFast(t *testing.T) {
+func TestFailFast(t *testing.T) {
 	dir := t.TempDir()
 	file := filepath.Join(dir, "report.xml")
 
