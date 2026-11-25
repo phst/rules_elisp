@@ -1,6 +1,6 @@
 ;;; test.el --- test to check the test runner        -*- lexical-binding: t; -*-
 
-;; Copyright 2020, 2021, 2025 Google LLC
+;; Copyright 2020, 2021, 2025, 2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@
 
 (ert-deftest abort ()
   ;; https://bugs.gnu.org/76447
-  (skip-unless (not (eql emacs-major-version 30)))
+  (skip-when (eql emacs-major-version 30))
   (signal 'undefined-error-symbol '("Boo")))
 
 (ert-deftest throw ()

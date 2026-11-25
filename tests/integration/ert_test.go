@@ -405,7 +405,7 @@ func reportTemplate() report {
 		} else {
 			abort.Error = message{}
 			abort.Skipped = message{
-				Message:     `Test skipped: ((skip-unless (not (eql emacs-major-version 30))) :form (not t) :value nil)`,
+				Message:     `Test skipped: ((skip-when (eql emacs-major-version 30)) :form (eql 30 30) :value t)`,
 				Description: nonEmptyDesc,
 			}
 			r.Errors--

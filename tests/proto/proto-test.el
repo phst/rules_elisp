@@ -1,6 +1,6 @@
 ;;; proto-test.el --- unit tests for protocol buffer support  -*- lexical-binding: t; -*-
 
-;; Copyright 2022-2025 Google LLC
+;; Copyright 2022-2026 Google LLC
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -773,7 +773,7 @@
   ;; For unknown reasons ‘ert-with-message-capture’ doesn’t work with the
   ;; pre-built Emacsen on Windows.
   ;; TODO: Investigate and fix.
-  (skip-unless (not (eq system-type 'windows-nt)))
+  (skip-when (eq system-type 'windows-nt))
   (ert-with-message-capture messages
     (let ((debug-on-error nil)
           (text-quoting-style 'curve))
@@ -789,7 +789,7 @@
   ;; For unknown reasons ‘ert-with-message-capture’ doesn’t work with the
   ;; pre-built Emacsen on Windows.
   ;; TODO: Investigate and fix.
-  (skip-unless (not (eq system-type 'windows-nt)))
+  (skip-when (eq system-type 'windows-nt))
   (ert-with-message-capture messages
     (let ((debug-on-error nil)
           (text-quoting-style 'curve))
@@ -813,7 +813,7 @@
   ;; For unknown reasons ‘ert-with-message-capture’ doesn’t work with the
   ;; pre-built Emacsen on Windows.
   ;; TODO: Investigate and fix.
-  (skip-unless (not (eq system-type 'windows-nt)))
+  (skip-when (eq system-type 'windows-nt))
   (ert-with-message-capture messages
     (let ((debug-on-error nil)
           (text-quoting-style 'curve))
