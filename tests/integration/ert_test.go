@@ -526,7 +526,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	env = append(env, testEnv...)
 	cmd.Env = env
 	cmd.Dir = workspace
-	cmd.Stdout = decowriter.New(t.Output(), []byte("[Emacs]"), nil)
+	cmd.Stdout = decowriter.New(t.Output(), []byte("[Emacs] "), nil)
 	cmd.Stderr = cmd.Stdout
 	err = cmd.Run()
 	t.Log("test process exited, error:", err)
