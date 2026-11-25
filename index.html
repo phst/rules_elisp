@@ -388,10 +388,11 @@ compile cleanly and that you don’t control.  Boolean; optional; default: <code
 <dd><p>List of tests to skip.  This attribute contains a list of
 ERT test symbols; when running the test rule, these tests are skipped.
 </p>
-<p>Most of the time, you should use the <code class="code">skip-unless</code> macro instead; see
-<a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>.
-The <code class="code">skip_tests</code> attribute is mainly useful for third-party code that
-you don’t control.  List of strings; optional; default: <code class="code">[]</code>.
+<p>Most of the time, you should use the <code class="code">skip-when</code> and <code class="code">skip-unless</code> macros
+instead;
+see <a data-manual="ert" href="https://www.gnu.org/software/emacs/manual/html_mono/ert.html#Tests-and-Their-Environment">Tests and Their Environment</a>.
+The <code class="code">skip_tests</code> attribute is mainly useful for third-party code that you don’t
+control.  List of strings; optional; default: <code class="code">[]</code>.
 </p></dd>
 <dt><code class="code">skip_tags</code></dt>
 <dd><p>List of test tags to skip.  This attribute contains a list

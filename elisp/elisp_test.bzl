@@ -125,10 +125,11 @@ elisp_test = cc_launcher_rule(
             doc = """List of tests to skip.  This attribute contains a list of
 ERT test symbols; when running the test rule, these tests are skipped.
 
-Most of the time, you should use the `skip-unless` macro instead; see
-[Tests and Their Environment](<info:ert#Tests and Their Environment>).
-The `skip_tests` attribute is mainly useful for third-party code that
-you don’t control.""",
+Most of the time, you should use the `skip-when` and `skip-unless` macros
+instead;
+see [Tests and Their Environment](<info:ert#Tests and Their Environment>).
+The `skip_tests` attribute is mainly useful for third-party code that you don’t
+control.""",
         ),
         "skip_tags": attr.string_list(
             doc = """List of test tags to skip.  This attribute contains a list
