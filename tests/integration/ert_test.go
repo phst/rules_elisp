@@ -38,14 +38,6 @@ import (
 	"github.com/phst/rules_elisp/internal/testutil"
 )
 
-var (
-	testBin               = testutil.RunfileFlag("//tests/integration:test")
-	testEl                = testutil.RunfileFlag("//tests/integration:test.el")
-	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
-	jUnitXsd              = testutil.RunfileFlag("@junit_xsd//:JUnit.xsd")
-	regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests/integration:coverage.dat")
-)
-
 func TestExitCode(t *testing.T) {
 	// See
 	// https://bazel.build/reference/test-encyclopedia#initial-conditions.
@@ -66,6 +58,11 @@ func TestExitCode(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+var (
+	xmllint  = flag.String("xmllint", "", "location of the xmllint program")
+	jUnitXsd = testutil.RunfileFlag("@junit_xsd//:JUnit.xsd")
+)
 
 func TestReportValid(t *testing.T) {
 	dir := t.TempDir()
@@ -432,6 +429,8 @@ var reportOpts = cmp.Options{
 	cmpopts.EquateApproxTime(margin),
 }
 
+var regenerateCoverageDat = flag.Bool("regenerate-coverage-dat", false, "regenerate //tests/integration:coverage.dat")
+
 func TestCoverage(t *testing.T) {
 	tempDir := t.TempDir()
 	manifest := filepath.Join(tempDir, "coverage-manifest.txt")
@@ -482,6 +481,11 @@ func TestCoverage(t *testing.T) {
 		}
 	}
 }
+
+var (
+	testBin = testutil.RunfileFlag("//tests/integration:test")
+	testEl  = testutil.RunfileFlag("//tests/integration:test.el")
+)
 
 func runTest(t *testing.T, testEnv ...string) error {
 	t.Helper()

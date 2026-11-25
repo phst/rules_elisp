@@ -38,14 +38,9 @@ import (
 )
 
 var (
-	emacsBin    = testutil.RunfileFlag("//emacs")
-	emptyBin    = testutil.RunfileFlag("//tests:empty")
-	exitBin     = testutil.RunfileFlag("//tests/integration:exit")
-	signalBin   = testutil.RunfileFlag("//tests/integration:signal")
-	launcher    = testutil.RunfileFlag("//internal/wrap:launcher")
-	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
-	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
-	runfilesElc = testutil.RunfileFlag("//elisp/runfiles:runfiles.elc")
+	emacsBin  = testutil.RunfileFlag("//emacs")
+	emptyBin  = testutil.RunfileFlag("//tests:empty")
+	signalBin = testutil.RunfileFlag("//tests/integration:signal")
 )
 
 func TestRun(t *testing.T) {
@@ -102,6 +97,8 @@ $`, `(?m)^Foo\r?\n\z`},
 	}
 }
 
+var exitBin = testutil.RunfileFlag("//tests/integration:exit")
+
 func TestRunExitCode(t *testing.T) {
 	env, err := runfiles.Env()
 	if err != nil {
@@ -147,6 +144,13 @@ func TestRunExitCode(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+var (
+	launcher    = testutil.RunfileFlag("//internal/wrap:launcher")
+	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
+	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
+	runfilesElc = testutil.RunfileFlag("//elisp/runfiles:runfiles.elc")
+)
 
 // Test that running a binary with a wrapper works.
 func TestRunWrapped(t *testing.T) {
