@@ -399,18 +399,13 @@ func reportTemplate() report {
 	if emacsMajor < 31 {
 		// https://bugs.gnu.org/76447
 		abort := &r.TestCases[0]
-		if emacsMajor < 30 {
-			abort.Error.Message = `peculiar error: "Boo"`
-			abort.Error.Type = `undefined-error-symbol`
-		} else {
-			abort.Error = message{}
-			abort.Skipped = message{
-				Message:     `Test skipped: ((skip-when (eql emacs-major-version 30)) :form (eql 30 30) :value t)`,
-				Description: nonEmptyDesc,
-			}
-			r.Errors--
-			r.Skipped++
+		abort.Error = message{}
+		abort.Skipped = message{
+			Message:     `Test skipped: ((skip-when (eql emacs-major-version 30)) :form (eql 30 30) :value t)`,
+			Description: nonEmptyDesc,
 		}
+		r.Errors--
+		r.Skipped++
 	}
 	return r
 }
