@@ -19,7 +19,6 @@ import (
 	"encoding/xml"
 	"flag"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -82,7 +81,9 @@ func TestReportValid(t *testing.T) {
 	schema := *jUnitXsd
 	t.Logf("validing XML report %s against schema %s", file, schema)
 	cmd := exec.Command(*xmllint, "--nonet", "--noout", "--schema", schema, file)
-	if err := run(t, "xmllint", cmd); err != nil {
+	cmd.Stdout = decowriter.New(t.Output(), []byte("[xmllint] "), nil)
+	cmd.Stderr = cmd.Stdout
+	if err := cmd.Run(); err != nil {
 		t.Errorf("error validating XML report file: %s", err)
 	}
 	t.Log("XML validation complete")
@@ -521,27 +522,11 @@ func runTest(t *testing.T, testEnv ...string) error {
 	env = append(env, testEnv...)
 	cmd.Env = env
 	cmd.Dir = workspace
-	err = run(t, "Emacs", cmd)
+	cmd.Stdout = decowriter.New(t.Output(), []byte("[Emacs]"), nil)
+	cmd.Stderr = cmd.Stdout
+	err = cmd.Run()
 	t.Log("test process exited, error:", err)
 	return err
-}
-
-func run(t *testing.T, p string, c *exec.Cmd) error {
-	t.Helper()
-	w := decowriter.New(t.Output(), fmt.Appendf(nil, "[%s] ", p), nil)
-	c.Stdout = tee(c.Stdout, w)
-	c.Stderr = tee(c.Stderr, w)
-	return c.Run()
-}
-
-func tee(a, b io.Writer) io.Writer {
-	if a == nil {
-		return b
-	}
-	if b == nil {
-		return a
-	}
-	return io.MultiWriter(a, b)
 }
 
 type timestamp time.Time

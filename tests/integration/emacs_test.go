@@ -76,8 +76,16 @@ $`, `(?m)^Foo\r?\n\z`},
 			errBuf := new(bytes.Buffer)
 			cmd.Stdout = outBuf
 			cmd.Stderr = errBuf
-			err := cmd.Run()
-			if gotCode := exitCode(t, err); gotCode != tc.wantCode {
+			gotCode := 0
+			if err := cmd.Run(); err != nil {
+				var exitErr *exec.ExitError
+				if errors.As(err, &exitErr) {
+					gotCode = exitErr.ExitCode()
+				} else {
+					t.Errorf("error has unexpected type %T: %s", err, err)
+				}
+			}
+			if gotCode != tc.wantCode {
 				t.Errorf("exit code: got %#x, want %#x", gotCode, tc.wantCode)
 			}
 			gotOut := outBuf.Bytes()
@@ -111,7 +119,14 @@ func TestRunExitCode(t *testing.T) {
 		cmd := exec.Command(*exit, strconv.Itoa(int(int32(i))))
 		cmd.Env = env
 		err := cmd.Run()
-		return exitCode(t, err)
+		if err == nil {
+			return 0
+		}
+		var exitErr *exec.ExitError
+		if !errors.As(err, &exitErr) {
+			t.Fatalf("error has unexpected type %T: %s", err, err)
+		}
+		return exitErr.ExitCode()
 	}
 	cast := func(i exitStatus) int { return int(i) }
 	// Test some special magic exit codes.
@@ -235,15 +250,4 @@ func resolveRunfile(s string) string {
 		log.Fatalf("error resolving runfile for comparison: %s", err)
 	}
 	return r
-}
-
-func exitCode(t *testing.T, err error) int {
-	if err == nil {
-		return 0
-	}
-	var exitErr *exec.ExitError
-	if !errors.As(err, &exitErr) {
-		t.Fatalf("error has unexpected type %T: %s", err, err)
-	}
-	return exitErr.ExitCode()
 }
