@@ -39,7 +39,7 @@ import (
 )
 
 var (
-	test                  = testutil.RunfileFlag("//tests/integration:test")
+	testBin               = testutil.RunfileFlag("//tests/integration:test")
 	testEl                = testutil.RunfileFlag("//tests/integration:test.el")
 	xmllint               = flag.String("xmllint", "", "location of the xmllint program")
 	jUnitXsd              = testutil.RunfileFlag("@junit_xsd//:JUnit.xsd")
@@ -500,7 +500,7 @@ func runTest(t *testing.T, testEnv ...string) error {
 	// filenames in the coverage report are correct.
 	workspace := filepath.Dir(filepath.Dir(filepath.Dir(source)))
 	t.Logf("running test in workspace directory %s", workspace)
-	bin := *test
+	bin := *testBin
 	t.Logf("using test binary %s", bin)
 
 	cmd := exec.CommandContext(ctx, bin, "arg 1", "arg\n2 äα𝐴🐈'")

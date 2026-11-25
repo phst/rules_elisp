@@ -38,10 +38,10 @@ import (
 )
 
 var (
-	emacs       = testutil.RunfileFlag("//emacs")
-	empty       = testutil.RunfileFlag("//tests:empty")
-	exit        = testutil.RunfileFlag("//tests/integration:exit")
-	signal      = testutil.RunfileFlag("//tests/integration:signal")
+	emacsBin    = testutil.RunfileFlag("//emacs")
+	emptyBin    = testutil.RunfileFlag("//tests:empty")
+	exitBin     = testutil.RunfileFlag("//tests/integration:exit")
+	signalBin   = testutil.RunfileFlag("//tests/integration:signal")
 	launcher    = testutil.RunfileFlag("//internal/wrap:launcher")
 	binaryH     = testutil.RunfileFlag("//elisp/private/tools:binary.h")
 	binaryCc    = testutil.RunfileFlag("//elisp/private/tools:binary.cc")
@@ -61,9 +61,9 @@ func TestRun(t *testing.T) {
 		wantCode         int
 		wantOut, wantErr string
 	}{
-		{"emacs --version", *emacs, []string{"--version"}, 0, `^GNU Emacs \d+`, `^$`},
-		{"empty binary", *empty, nil, 0, `^$`, `^$`},
-		{"signal", *signal, nil, signalCode, `(?s)^\r?
+		{"emacs --version", *emacsBin, []string{"--version"}, 0, `^GNU Emacs \d+`, `^$`},
+		{"empty binary", *emptyBin, nil, 0, `^$`, `^$`},
+		{"signal", *signalBin, nil, signalCode, `(?s)^\r?
 Error: error \("Foo"\).*
   error\("Foo"\).*
   normal-top-level\(\)\r?
@@ -116,7 +116,7 @@ func TestRunExitCode(t *testing.T) {
 	// ExitProcess.  We need to perform the inverse of that cast here to get
 	// the right results.
 	run := func(i exitStatus) int {
-		cmd := exec.Command(*exit, strconv.Itoa(int(int32(i))))
+		cmd := exec.Command(*exitBin, strconv.Itoa(int(int32(i))))
 		cmd.Env = env
 		err := cmd.Run()
 		if err == nil {
